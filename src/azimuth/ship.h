@@ -1,0 +1,45 @@
+/*=============================================================================
+| Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>                    |
+|                                                                             |
+| This file is part of Azimuth.                                               |
+|                                                                             |
+| Azimuth is free software: you can redistribute it and/or modify it under    |
+| the terms of the GNU General Public License as published by the Free        |
+| Software Foundation, either version 3 of the License, or (at your option)   |
+| any later version.                                                          |
+|                                                                             |
+| Azimuth is distributed in the hope that it will be useful, but WITHOUT      |
+| ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       |
+| FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   |
+| more details.                                                               |
+|                                                                             |
+| You should have received a copy of the GNU General Public License along     |
+| with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
+=============================================================================*/
+
+#pragma once
+#ifndef AZIMUTH_SHIP_H_
+#define AZIMUTH_SHIP_H_
+
+#include <stdbool.h>
+
+#include "azimuth/player.h"
+#include "azimuth/vector.h"
+
+/*===========================================================================*/
+
+typedef struct {
+  bool left, right, up, down;
+  bool fire1, fire2, util, burn;
+} az_controls_t;
+
+typedef struct {
+  az_vector_t position; // pixels
+  az_vector_t velocity; // pixels/second
+  double angle; // radians
+  az_player_t* player;
+} az_ship_t;
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_SHIP_H_
