@@ -197,9 +197,8 @@ static void draw_hud_ordnance(int left, int top, bool is_rockets,
   // Draw quantity string.
   if (cur >= max) glColor3f(1, 1, 0);
   else glColor3f(1, 1, 1);
-  if (cur > 999) cur = 999; // prevent buffer overflow
   char buffer[4];
-  const int len = sprintf(buffer, "%d", cur);
+  const int len = sprintf(buffer, "%d", az_imin(999, cur));
   az_draw_chars((az_vector_t){left + 32 - 8 * len, top + 2}, 8, buffer, len);
 
   // Draw icon.
@@ -237,10 +236,50 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   } glPopMatrix();
 }
 
+static void draw_hud_timer(const az_timer_t *timer, unsigned long clock) {
+  if (timer->active_for < 0) return;
+  glPushMatrix(); {
+    const int width = 2 * HUD_PADDING + 7 * 24;
+    const int height = 2 * HUD_PADDING + 24;
+
+    const int xstart = SCREEN_WIDTH/2 - width/2;
+    const int ystart = SCREEN_HEIGHT/2 + 75 - height/2;
+    const int xend = SCREEN_WIDTH - HUD_MARGIN - width;
+    const int yend = SCREEN_HEIGHT - HUD_MARGIN - height;
+    const double speed = 150.0; // pixels per second
+    const double offset = az_dmax(0.0, timer->active_for - 2.5) * speed;
+    glTranslated(az_imin(xend, xstart + offset),
+                 az_imin(yend, ystart + offset), 0);
+
+    glColor4f(0, 0, 0, 0.75); // tinted-black
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0, height);
+    glVertex2i(width, height);
+    glVertex2i(width, 0);
+    glEnd();
+
+    assert(timer->time_remaining >= 0.0);
+    if (timer->time_remaining >= 10.0) {
+      glColor3f(1, 1, 1); // white
+    } else {
+      if (clock % 6 < 3) glColor3f(1, 1, 0); // yellow
+      else glColor3f(1, 0, 0); // red
+    }
+    char buffer[8];
+    const int minutes = az_imin(9, ((int)timer->time_remaining) / 60);
+    const int seconds = ((int)timer->time_remaining) % 60;
+    const int jiffies = ((int)(timer->time_remaining * 100)) % 100;
+    const int len = sprintf(buffer, "%d:%02d:%02d", minutes, seconds, jiffies);
+    az_draw_chars((az_vector_t){HUD_PADDING, HUD_PADDING}, 24, buffer, len);
+  } glPopMatrix();
+}
+
 static void draw_hud(const az_space_state_t *state) {
   const az_player_t *player = state->ship.player;
   draw_hud_shields_energy(player);
   draw_hud_weapons_selection(player);
+  draw_hud_timer(&state->timer, state->clock);
 }
 
 void az_space_draw_screen(const az_space_state_t *state) {

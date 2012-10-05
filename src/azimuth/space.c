@@ -72,11 +72,19 @@ static void az_tick_ship(az_ship_t *ship,
   }
 }
 
+static void az_tick_timer(az_timer_t *timer, double time_seconds) {
+  if (timer->active_for < 0.0) return;
+  if (timer->active_for < 10.0) timer->active_for += time_seconds;
+  timer->time_remaining = az_dmax(0.0, timer->time_remaining - time_seconds);
+}
+
 void az_tick_space_state(az_space_state_t *state,
                          const az_controls_t *controls,
                          double time_seconds) {
+  ++state->clock;
   az_tick_ship(&state->ship, controls, time_seconds);
   state->camera = state->ship.position;
+  az_tick_timer(&state->timer, time_seconds);
 }
 
 /*===========================================================================*/

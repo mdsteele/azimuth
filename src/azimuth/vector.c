@@ -51,3 +51,21 @@ double az_vnorm(az_vector_t v) {
 double az_vtheta(az_vector_t v) {
   return atan2(v.y, v.x);
 }
+
+int az_imin(int a, int b) {
+  return a <= b ? a : b;
+}
+
+int az_imax(int a, int b) {
+  return a > b ? a : b;
+}
+
+double az_dmin(double a, double b) {
+  return a <= b ? a : b;
+}
+
+double az_dmax(double a, double b) {
+  return a > b ? a : b;
+}
+
+/*===========================================================================*/

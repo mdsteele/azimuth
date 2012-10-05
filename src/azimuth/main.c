@@ -47,6 +47,8 @@ static void event_loop(void) {
   state.ship.angle = 2.9;
   state.ship.player = &player;
   state.camera = AZ_VZERO;
+  state.timer.active_for = 0;
+  state.timer.time_remaining = 300;
 
   while (true) {
     // Tick the state:

@@ -21,15 +21,27 @@
 #ifndef AZIMUTH_SPACE_H_
 #define AZIMUTH_SPACE_H_
 
+#include "azimuth/player.h"
 #include "azimuth/ship.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
 
-typedef struct az_space_state_s {
+typedef struct {
+  az_room_key_t key;
+  // TODO
+} az_room_t;
+
+typedef struct {
+  double active_for; // negative if timer is inactive
+  double time_remaining; // seconds
+} az_timer_t;
+
+typedef struct {
   unsigned long clock;
   az_vector_t camera;
   az_ship_t ship;
+  az_timer_t timer;
 } az_space_state_t;
 
 void az_tick_space_state(az_space_state_t *state,
