@@ -30,6 +30,9 @@
 #define AZ_BOMBS_PER_AMMO_UPGRADE 3
 #define AZ_ROCKETS_PER_PICKUP 2
 #define AZ_BOMBS_PER_PICKUP 1
+#define AZ_SHIELDS_PER_SMALL_PICKUP 5
+#define AZ_SHIELDS_PER_MEDIUM_PICKUP 10
+#define AZ_SHIELDS_PER_LARGE_PICKUP 20
 
 typedef enum {
   AZ_UPG_GUN_CHARGE = 0,
@@ -63,6 +66,7 @@ typedef enum {
   // TODO: add more here
 } az_upgrade_t;
 
+// Which primary weapon module does the player have equipped?
 typedef enum {
   AZ_GUN_CHARGE,
   AZ_GUN_FREEZE,
@@ -75,32 +79,50 @@ typedef enum {
   AZ_GUN_NONE
 } az_gun_t;
 
+// Which secondary (ordnance) weapon does the player have equipped?
 typedef enum {
   AZ_ORDN_ROCKETS,
   AZ_ORDN_BOMBS,
   AZ_ORDN_NONE
 } az_ordnance_t;
 
+typedef int az_room_key_t;
+typedef int az_flag_t;
+
+// This structure stores any and all information needed to store a saved game.
 typedef struct {
+  // Bitmasks storing game progress:
   uint64_t upgrades1, upgrades2;
   uint64_t rooms1, rooms2, rooms3;
   uint64_t flags;
+  // The room in which we last saved the game:
+  az_room_key_t save_room;
+  // Current ship supplies:
   int shields, max_shields;
   int energy, max_energy;
   int rockets, max_rockets;
   int bombs, max_bombs;
+  // Current weapon selections:
   az_gun_t gun1, gun2;
   az_ordnance_t ordnance;
 } az_player_t;
 
+// Check whether the player has a particular upgrade yet.
 bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade);
+// Give an upgrade to the player.
 void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade);
 
-bool az_test_room(const az_player_t *player, int room);
-void az_set_room(const az_player_t *player, int room);
+// Check whether the player has visited a particular room yet.
+bool az_test_room(const az_player_t *player, az_room_key_t room);
+// Set the player as having visited the given room.
+void az_set_room(const az_player_t *player, az_room_key_t room);
 
-bool az_test_flag(const az_player_t *player, int flag);
-void az_set_flag(const az_player_t *player, int flag);
+// Check whether a given game flag is set for the player.
+bool az_test_flag(const az_player_t *player, az_flag_t flag);
+// Set the given game flag for the player.
+void az_set_flag(const az_player_t *player, az_flag_t flag);
+// Clear the given game flag for the player.
+void az_clear_flag(const az_player_t *player, az_flag_t flag);
 
 /*===========================================================================*/
 

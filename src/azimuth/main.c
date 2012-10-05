@@ -23,6 +23,7 @@
 #include <OpenGL/gl.h>
 #include <SDL/SDL.h>
 
+#include "azimuth/player.h"
 #include "azimuth/screen.h"
 #include "azimuth/space.h"
 #include "azimuth/vector.h"
@@ -34,10 +35,17 @@
 static void event_loop(void) {
   az_controls_t controls = {false};
   az_space_state_t state;
+  az_player_t player = {.shields = 55, .max_shields = 400, .energy = 98,
+                        .max_energy = 100, .gun1 = AZ_GUN_HOMING,
+                        .gun2 = AZ_GUN_BURST,
+                        .rockets = 63, .max_rockets = 75,
+                        .bombs = 15, .max_bombs = 15,
+                        .ordnance = AZ_ORDN_BOMBS};
   state.clock = 0;
   state.ship.position = (az_vector_t){50, 150};
   state.ship.velocity = (az_vector_t){-20, 10};
   state.ship.angle = 2.9;
+  state.ship.player = &player;
   state.camera = AZ_VZERO;
 
   while (true) {

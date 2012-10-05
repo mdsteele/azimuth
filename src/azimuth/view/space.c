@@ -19,6 +19,10 @@
 
 #include "azimuth/view/space.h"
 
+#include <assert.h>
+#include <stdio.h> // for sprintf
+#include <string.h> // for strlen
+
 #include <OpenGL/gl.h>
 
 #include "azimuth/screen.h"
@@ -28,7 +32,7 @@
 
 /*===========================================================================*/
 
-static void draw_camera_view(az_space_state_t* state) {
+static void draw_camera_view(const az_space_state_t *state) {
   // center:
   glPushMatrix(); {
     glColor4f(1, 0, 0, 1); // red
@@ -63,44 +67,183 @@ static void draw_camera_view(az_space_state_t* state) {
   } glPopMatrix();
 }
 
-static void draw_hud(az_space_state_t* state) {
-  const double speed = az_vnorm(state->ship.velocity);
+#define HUD_MARGIN 5
+#define HUD_PADDING 5
+#define HUD_BAR_HEIGHT 9
 
-  glColor4ub(0, 0, 0, 128); // tinted-black
+static void draw_hud_bar(int left, int top, int cur, int max) {
+  // Draw bar:
   glBegin(GL_QUADS);
-  glVertex2i(5, 5);
-  glVertex2i(5, 35);
-  glVertex2i(415, 35);
-  glVertex2i(415, 5);
+  glVertex2i(left, top);
+  glVertex2i(left, top + HUD_BAR_HEIGHT);
+  glVertex2i(left + cur, top + HUD_BAR_HEIGHT);
+  glVertex2i(left + cur, top);
   glEnd();
-
-  glColor4f(1, 1, 1, 1); // white
-  glBegin(GL_LINE_STRIP);
-  glVertex2d(14.5, 8.5);
-  glVertex2d(8.5, 8.5);
-  glVertex2d(8.5, 21.5);
-  glVertex2d(14.5, 21.5);
+  // Draw outline:
+  glColor3f(1, 1, 1); // white
+  glBegin(GL_LINE_LOOP);
+  glVertex2f(left + 0.5, top + 0.5);
+  glVertex2f(left + 0.5, top + HUD_BAR_HEIGHT + 0.5);
+  glVertex2f(left + max + 0.5, top + HUD_BAR_HEIGHT + 0.5);
+  glVertex2f(left + max + 0.5, top + 0.5);
   glEnd();
-  glBegin(GL_LINE_STRIP);
-  glVertex2d(407.5, 8.5);
-  glVertex2d(411.5, 8.5);
-  glVertex2d(411.5, 21.5);
-  glVertex2d(407.5, 21.5);
-  glEnd();
-
-  glColor4ub(0, 128, 0, 255); // green
-  glBegin(GL_QUADS);
-  glVertex2d(10, 10);
-  glVertex2d(10 + speed, 10);
-  glVertex2d(10 + speed, 20);
-  glVertex2d(10, 20);
-  glEnd();
-
-  glColor4f(1, 1, 1, 1); // white
-  az_draw_string((az_vector_t){10, 25}, 8, "HELLO: WORLD! 0123456789");
 }
 
-void az_space_draw_screen(az_space_state_t* state) {
+static void draw_hud_shields_energy(const az_player_t *player) {
+  const int max_power = (player->max_shields > player->max_energy ?
+                         player->max_shields : player->max_energy);
+  const int height = 25 + 2 * HUD_PADDING;
+  const int width = 50 + 2 * HUD_PADDING + max_power;
+
+  glPushMatrix(); {
+    glTranslated(HUD_MARGIN, HUD_MARGIN, 0);
+
+    glColor4f(0, 0, 0, 0.75); // tinted-black
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0, height);
+    glVertex2i(width, height);
+    glVertex2i(width, 0);
+    glEnd();
+
+    glTranslated(HUD_PADDING, HUD_PADDING, 0);
+
+    glColor3f(1, 1, 1); // white
+    az_draw_string((az_vector_t){0,1}, 8, "SHIELD");
+    az_draw_string((az_vector_t){0,16}, 8, "ENERGY");
+
+    glColor3f(0, 0.75, 0.75); // cyan
+    draw_hud_bar(50, 0, player->shields, player->max_shields);
+    glColor3f(0.75, 0, 0.75); // magenta
+    draw_hud_bar(50, 15, player->energy, player->max_energy);
+  } glPopMatrix();
+}
+
+static const char *gun_name(az_gun_t gun) {
+  switch (gun) {
+  case AZ_GUN_CHARGE: return "CHARGE";
+  case AZ_GUN_FREEZE: return "FREEZE";
+  case AZ_GUN_TRIPLE: return "TRIPLE";
+  case AZ_GUN_HOMING: return "HOMING";
+  case AZ_GUN_BEAM:   return "BEAM";
+  case AZ_GUN_WAVE:   return "WAVE";
+  case AZ_GUN_BURST:  return "BURST";
+  case AZ_GUN_PIERCE: return "PIERCE";
+  default: assert(false);
+  }
+  return "XXXXXX";
+}
+
+static void set_gun_color(az_gun_t gun) {
+  switch (gun) {
+  case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
+  case AZ_GUN_FREEZE: glColor3f(0, 1, 1); break;
+  case AZ_GUN_TRIPLE: glColor3f(0, 1, 0); break;
+  case AZ_GUN_HOMING: glColor3f(0, 0, 1); break;
+  case AZ_GUN_BEAM:   glColor3f(1, 0, 0); break;
+  case AZ_GUN_WAVE:   glColor3f(1, 1, 0); break;
+  case AZ_GUN_BURST:  glColor3f(0.5, 0.5, 0.5); break;
+  case AZ_GUN_PIERCE: glColor3f(1, 0, 1); break;
+  default: assert(false);
+  }
+}
+
+static void draw_hud_gun_name(int left, int top, az_gun_t gun) {
+  if (gun != AZ_GUN_NONE) {
+    glColor3f(1, 1, 1);
+    glBegin(GL_LINE_STRIP);
+    glVertex2d(left + 3.5, top + 0.5);
+    glVertex2d(left + 0.5, top + 0.5);
+    glVertex2d(left + 0.5, top + 10.5);
+    glVertex2d(left + 3.5, top + 10.5);
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+    glVertex2d(left + 51.5, top + 0.5);
+    glVertex2d(left + 54.5, top + 0.5);
+    glVertex2d(left + 54.5, top + 10.5);
+    glVertex2d(left + 51.5, top + 10.5);
+    glEnd();
+
+    set_gun_color(gun);
+    const char *name = gun_name(gun);
+    az_draw_string((az_vector_t){left + 28 - strlen(name) * 4, top + 2},
+                   8, name);
+  }
+}
+
+static void draw_hud_ordnance(int left, int top, bool is_rockets,
+                              int cur, int max, az_ordnance_t selected) {
+  // Draw nothing if the player doesn't have this kind of ordnance yet.
+  if (max <= 0) return;
+
+  // Draw the selection indicator.
+  if ((is_rockets && selected == AZ_ORDN_ROCKETS) ||
+      (!is_rockets && selected == AZ_ORDN_BOMBS)) {
+    glColor3f(1, 1, 1);
+    glBegin(GL_LINE_STRIP);
+    glVertex2d(left + 3.5, top + 0.5);
+    glVertex2d(left + 0.5, top + 0.5);
+    glVertex2d(left + 0.5, top + 10.5);
+    glVertex2d(left + 3.5, top + 10.5);
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+    glVertex2d(left + 51.5, top + 0.5);
+    glVertex2d(left + 54.5, top + 0.5);
+    glVertex2d(left + 54.5, top + 10.5);
+    glVertex2d(left + 51.5, top + 10.5);
+    glEnd();
+  }
+
+  // Draw quantity string.
+  if (cur >= max) glColor3f(1, 1, 0);
+  else glColor3f(1, 1, 1);
+  if (cur > 999) cur = 999; // prevent buffer overflow
+  char buffer[4];
+  const int len = sprintf(buffer, "%d", cur);
+  az_draw_chars((az_vector_t){left + 32 - 8 * len, top + 2}, 8, buffer, len);
+
+  // Draw icon.
+  if (is_rockets) {
+    glColor3f(1, 1, 1);
+    az_draw_string((az_vector_t){left + 36, top + 2}, 8, "R");
+  } else {
+    glColor3f(1, 1, 1);
+    az_draw_string((az_vector_t){left + 36, top + 2}, 8, "B");
+  }
+}
+
+static void draw_hud_weapons_selection(const az_player_t *player) {
+  const int height = 25 + 2 * HUD_PADDING;
+  const int width = 115 + 2 * HUD_PADDING;
+  glPushMatrix(); {
+    glTranslated(SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
+
+    glColor4f(0, 0, 0, 0.75); // tinted-black
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0, height);
+    glVertex2i(width, height);
+    glVertex2i(width, 0);
+    glEnd();
+
+    glTranslated(HUD_PADDING, HUD_PADDING, 0);
+
+    draw_hud_gun_name(0, 0, player->gun1);
+    draw_hud_gun_name(0, 15, player->gun2);
+    draw_hud_ordnance(60, 0, true, player->rockets, player->max_rockets,
+                      player->ordnance);
+    draw_hud_ordnance(60, 15, false, player->bombs, player->max_bombs,
+                      player->ordnance);
+  } glPopMatrix();
+}
+
+static void draw_hud(const az_space_state_t *state) {
+  const az_player_t *player = state->ship.player;
+  draw_hud_shields_energy(player);
+  draw_hud_weapons_selection(player);
+}
+
+void az_space_draw_screen(const az_space_state_t *state) {
   glPushMatrix(); {
     // Make positive Y be up instead of down.
     glScaled(1, -1, 1);
