@@ -45,7 +45,7 @@ static void event_loop(void) {
   state.ship.velocity = (az_vector_t){-20, 10};
   state.ship.angle = 2.9;
   state.ship.player = &player;
-  state.camera = AZ_VZERO;
+  state.camera = state.ship.position;
   state.timer.active_for = 0;
   state.timer.time_remaining = 300;
 

@@ -90,6 +90,15 @@ static void tick_timer(az_timer_t *timer, double time_seconds) {
   timer->time_remaining = az_dmax(0.0, timer->time_remaining - time_seconds);
 }
 
+static void tick_camera(az_vector_t *camera, az_vector_t towards,
+                        double time_seconds) {
+  const double tracking_base = 0.00003; // smaller = faster tracking
+  const az_vector_t difference = az_vsub(towards, *camera);
+  const az_vector_t change =
+    az_vmul(difference, 1.0 - pow(tracking_base, time_seconds));
+  *camera = az_vadd(*camera, change);
+}
+
 void az_tick_space_state(az_space_state_t *state,
                          const az_controls_t *controls,
                          double time_seconds) {
@@ -109,7 +118,7 @@ void az_tick_space_state(az_space_state_t *state,
   }
 
   tick_ship(&state->ship, controls, time_seconds);
-  state->camera = state->ship.position;
+  tick_camera(&state->camera, state->ship.position, time_seconds);
   tick_timer(&state->timer, time_seconds);
 
   const double fire_cost = 5.0;
