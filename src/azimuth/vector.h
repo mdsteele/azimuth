@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_VECTOR_H_
 #define AZIMUTH_VECTOR_H_
 
+#include <stdbool.h>
+
 /*===========================================================================*/
 
 // Constants:
@@ -45,13 +47,10 @@ az_vector_t az_vpolar(double magnitude, double theta);
 
 // Add two vectors.
 az_vector_t az_vadd(az_vector_t v1, az_vector_t v2);
-
 // Subtract the second vector from the first.
 az_vector_t az_vsub(az_vector_t v1, az_vector_t v2);
-
 // Multiply a vector by a scalar.
 az_vector_t az_vmul(az_vector_t v, double f);
-
 // Divide a vector by a scalar.
 az_vector_t az_vdiv(az_vector_t v, double f);
 
@@ -60,6 +59,9 @@ double az_vnorm(az_vector_t v);
 
 // Get the polar theta angle of the vector.
 double az_vtheta(az_vector_t v);
+
+// Determine if two points are within the given distance of each other.
+bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist);
 
 // Add or subtract a multiple of 2pi from the given number so that the result
 // is between -pi and pi.

@@ -18,51 +18,27 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#ifndef AZIMUTH_STATE_BADDIE_H_
+#define AZIMUTH_STATE_BADDIE_H_
 
-#include <stdbool.h>
-
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
 
-#define AZ_MAX_BADDIES 128
-#define AZ_MAX_PROJECTILES 256
+typedef enum {
+  AZ_BAD_NOTHING = 0,
+  AZ_BAD_LUMP,
+  AZ_BAD_TURRET
+} az_baddie_kind_t;
 
 typedef struct {
-  az_room_key_t key;
-  // TODO
-} az_room_t;
-
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
-
-typedef struct {
-  az_baddie_t baddies[AZ_MAX_BADDIES];
-  unsigned long clock;
-  az_vector_t camera;
-  az_projectile_t projectiles[AZ_MAX_PROJECTILES];
-  az_ship_t ship;
-  az_timer_t timer;
-} az_space_state_t;
-
-void az_tick_space_state(az_space_state_t *state,
-                         const az_controls_t *controls,
-                         double time_seconds);
-
-bool az_insert_baddie(az_space_state_t *state,
-                      az_baddie_t **baddie_out);
-
-bool az_insert_projectile(az_space_state_t *state,
-                          az_projectile_t **projectile_out);
+  az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
+  az_vector_t position;
+  az_vector_t velocity;
+  double angle;
+  double health;
+} az_baddie_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_SPACE_H_
+#endif // AZIMUTH_STATE_BADDIE_H_

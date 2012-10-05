@@ -121,13 +121,24 @@ void az_tick_space_state(az_space_state_t *state,
   ++state->clock;
 
   AZ_ARRAY_LOOP(proj, state->projectiles) {
-    if (proj->kind != AZ_PROJ_NOTHING) {
-      proj->age += time_seconds;
-      if (proj->age > 1.0) {
+    if (proj->kind == AZ_PROJ_NOTHING) continue;
+    proj->age += time_seconds;
+    if (proj->age > 1.0) {
+      proj->kind = AZ_PROJ_NOTHING;
+      continue;
+    }
+
+    proj->position = az_vadd(proj->position,
+                             az_vmul(proj->velocity, time_seconds));
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (az_vwithin(baddie->position, proj->position, 20.0)) {
+        baddie->health -= 1.0;
+        if (baddie->health <= 0.0) {
+          baddie->kind = AZ_BAD_NOTHING;
+        }
         proj->kind = AZ_PROJ_NOTHING;
-      } else {
-        proj->position = az_vadd(proj->position,
-                                 az_vmul(proj->velocity, time_seconds));
+        break;
       }
     }
   }
@@ -147,6 +158,17 @@ void az_tick_space_state(az_space_state_t *state,
     }
   }
 
+}
+
+bool az_insert_baddie(az_space_state_t *state,
+                          az_baddie_t **baddie_out) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING) {
+      *baddie_out = baddie;
+      return true;
+    }
+  }
+  return false;
 }
 
 bool az_insert_projectile(az_space_state_t *state,

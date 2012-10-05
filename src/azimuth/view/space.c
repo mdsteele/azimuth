@@ -26,7 +26,10 @@
 #include <OpenGL/gl.h>
 
 #include "azimuth/screen.h"
+#include "azimuth/state/baddie.h"
+#include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util.h"
 #include "azimuth/vector.h"
 #include "azimuth/view/string.h"
 
@@ -54,6 +57,24 @@ static void draw_camera_view(const az_space_state_t *state) {
     glEnd();
   } glPopMatrix();
 
+  // Draw baddies:
+  // TODO: draw different kinds of baddies differently
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING) continue;
+    glPushMatrix(); {
+      glTranslated(baddie->position.x, baddie->position.y, 0);
+      glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);
+      glColor3f(1, 0, 1); // magenta
+      glBegin(GL_LINE_LOOP);
+      glVertex2d(20, 0);
+      glVertex2d(15, 15);
+      glVertex2d(-15, 15);
+      glVertex2d(-15, -15);
+      glVertex2d(15, -15);
+      glEnd();
+    } glPopMatrix();
+  }
+
   // ship:
   glPushMatrix(); {
     glTranslated(state->ship.position.x, state->ship.position.y, 0);
@@ -68,8 +89,7 @@ static void draw_camera_view(const az_space_state_t *state) {
 
   // Draw projectiles:
   // TODO: draw different kinds of projectiles differently
-  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
-    const az_projectile_t *proj = &state->projectiles[i];
+  AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind != AZ_PROJ_NOTHING) {
       glColor3f(0, 1, 0); // green
       glBegin(GL_POINTS);

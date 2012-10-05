@@ -20,6 +20,7 @@
 #include "azimuth/vector.h"
 
 #include <math.h>
+#include <stdbool.h>
 
 const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
 
@@ -50,6 +51,11 @@ double az_vnorm(az_vector_t v) {
 
 double az_vtheta(az_vector_t v) {
   return atan2(v.y, v.x);
+}
+
+bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist) {
+  return ((v1.x - v2.x) * (v1.x - v2.x) +
+          (v1.y - v2.y) * (v1.y - v2.y) <= dist * dist);
 }
 
 double az_mod2pi(double theta) {

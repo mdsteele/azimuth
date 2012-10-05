@@ -50,6 +50,16 @@ static void event_loop(void) {
   az_give_upgrade(&player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&player, AZ_UPG_ROCKET_AMMO_00);
+  {
+    az_baddie_t *baddie;
+    if (az_insert_baddie(&state, &baddie)) {
+      baddie->kind = AZ_BAD_LUMP;
+      baddie->position = (az_vector_t){-150, -150};
+      baddie->velocity = AZ_VZERO;
+      baddie->angle = 0.5;
+      baddie->health = 10.0;
+    }
+  }
 
   while (true) {
     // Tick the state:
