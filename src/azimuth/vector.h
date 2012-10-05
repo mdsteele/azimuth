@@ -61,6 +61,10 @@ double az_vnorm(az_vector_t v);
 // Get the polar theta angle of the vector.
 double az_vtheta(az_vector_t v);
 
+// Add or subtract a multiple of 2pi from the given number so that the result
+// is between -pi and pi.
+double az_mod2pi(double theta);
+
 // Min and max functions for ints and doubles:
 int az_imin(int a, int b);
 int az_imax(int a, int b);

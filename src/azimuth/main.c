@@ -29,6 +29,8 @@
 #include "azimuth/vector.h"
 #include "azimuth/view/space.h"
 
+/*===========================================================================*/
+
 #define VIDEO_DEPTH 32
 #define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
@@ -152,3 +154,5 @@ int main(int argc, char **argv) {
   SDL_Quit();
   return 0;
 }
+
+/*===========================================================================*/

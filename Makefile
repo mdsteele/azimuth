@@ -25,17 +25,29 @@ BINDIR = $(OUTDIR)/bin
 CFLAGS = -Wall -O1
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
-C99FILES := $(shell find $(SRCDIR) -name '*.c')
 HEADERS := $(shell find $(SRCDIR) -name '*.h')
-OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(C99FILES))
+MAIN_C99FILES := $(shell find $(SRCDIR)/azimuth -name '*.c')
+TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
+	         $(SRCDIR)/azimuth/vector.c
+MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
+TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 
 #=============================================================================#
 
-$(BINDIR)/azimuth: $(OBJFILES) $(OBJDIR)/SDLMain.o
+.PHONY: all
+all: $(BINDIR)/azimuth $(BINDIR)/unit_tests
+
+$(BINDIR)/azimuth: $(MAIN_OBJFILES) $(OBJDIR)/SDLMain.o
 	@echo "Linking $@"
 	@mkdir -p $(@D)
 	@gcc -o $@ $^ $(CFLAGS) \
 	     -framework Cocoa -framework OpenGL -framework SDL
+
+$(BINDIR)/unit_tests: $(TEST_OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ $^ $(CFLAGS)
 
 $(OBJDIR)/SDLMain.o: $(SRCDIR)/SDLMain.m $(SRCDIR)/SDLMain.h
 	@echo "Compiling $@"
@@ -52,6 +64,10 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
 .PHONY: run
 run: $(BINDIR)/azimuth
 	$(BINDIR)/azimuth
+
+.PHONY: test
+test: $(BINDIR)/unit_tests
+	$(BINDIR)/unit_tests
 
 .PHONY: clean
 clean:

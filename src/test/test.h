@@ -17,59 +17,45 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/vector.h"
+#pragma once
+#ifndef TEST_TEST_H_
+#define TEST_TEST_H_
 
-#include <math.h>
-
-const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
-
-az_vector_t az_vpolar(double magnitude, double theta) {
-  return (az_vector_t){.x = magnitude * cos(theta),
-                       .y = magnitude * sin(theta)};
-}
-
-az_vector_t az_vadd(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x + v2.x, .y = v1.y + v2.y};
-}
-
-az_vector_t az_vsub(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x - v2.x, .y = v1.y - v2.y};
-}
-
-az_vector_t az_vmul(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x * f, .y = v.y * f};
-}
-
-az_vector_t az_vdiv(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x / f, .y = v.y / f};
-}
-
-double az_vnorm(az_vector_t v) {
-  return hypot(v.x, v.y);
-}
-
-double az_vtheta(az_vector_t v) {
-  return atan2(v.y, v.x);
-}
-
-double az_mod2pi(double theta) {
-  return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
-}
-
-int az_imin(int a, int b) {
-  return a <= b ? a : b;
-}
-
-int az_imax(int a, int b) {
-  return a > b ? a : b;
-}
-
-double az_dmin(double a, double b) {
-  return a <= b ? a : b;
-}
-
-double az_dmax(double a, double b) {
-  return a > b ? a : b;
-}
+#include <stdbool.h>
 
 /*===========================================================================*/
+
+#define RUN_TEST(fn) _run_test(#fn, fn)
+
+#define EXPECT_TRUE(condition) do {             \
+    _expect_true(!!(condition), #condition);    \
+  } while (false)
+
+#define EXPECT_FALSE(condition) EXPECT_TRUE(!(condition))
+
+#define EXPECT_APPROX(expected, actual) do {                    \
+    _expect_approx(expected, actual, #expected " == " #actual); \
+  } while (false)
+
+#define ASSERT_TRUE(condition) do {                             \
+    if (!_expect_true(!!(condition), #condition)) return;       \
+  } while (false)
+
+#define ASSERT_FALSE(condition) ASSERT_TRUE(!(condition))
+
+#define TESTS_EXIT_CODE() (_any_test_failed ? 1 : 0)
+
+/*===========================================================================*/
+
+extern bool _current_test_failed;
+extern bool _any_test_failed;
+
+void _run_test(const char *name, void (*function)(void));
+
+bool _expect_true(bool condition, const char *message);
+
+bool _expect_approx(double expected, double actual, const char *message);
+
+/*===========================================================================*/
+
+#endif // TEST_TEST_H_

@@ -17,59 +17,31 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/vector.h"
+#include "test/vector.h"
 
 #include <math.h>
 
-const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
+#include "azimuth/vector.h"
+#include "test/test.h"
 
-az_vector_t az_vpolar(double magnitude, double theta) {
-  return (az_vector_t){.x = magnitude * cos(theta),
-                       .y = magnitude * sin(theta)};
+/*===========================================================================*/
+
+void test_mod2pi(void) {
+  for (double t = -20.0; t < 20.0; t += 0.1) {
+    const double t2 = az_mod2pi(t);
+    EXPECT_TRUE(t2 >= -AZ_PI);
+    EXPECT_TRUE(t2 <= AZ_PI);
+    EXPECT_APPROX(sin(t), sin(t2));
+    EXPECT_APPROX(cos(t), cos(t2));
+  }
 }
 
-az_vector_t az_vadd(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x + v2.x, .y = v1.y + v2.y};
-}
-
-az_vector_t az_vsub(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x - v2.x, .y = v1.y - v2.y};
-}
-
-az_vector_t az_vmul(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x * f, .y = v.y * f};
-}
-
-az_vector_t az_vdiv(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x / f, .y = v.y / f};
-}
-
-double az_vnorm(az_vector_t v) {
-  return hypot(v.x, v.y);
-}
-
-double az_vtheta(az_vector_t v) {
-  return atan2(v.y, v.x);
-}
-
-double az_mod2pi(double theta) {
-  return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
-}
-
-int az_imin(int a, int b) {
-  return a <= b ? a : b;
-}
-
-int az_imax(int a, int b) {
-  return a > b ? a : b;
-}
-
-double az_dmin(double a, double b) {
-  return a <= b ? a : b;
-}
-
-double az_dmax(double a, double b) {
-  return a > b ? a : b;
+void test_vector_polar(void) {
+  const double m = 2342.2908;
+  const double t = 4.3901;
+  const az_vector_t v = az_vpolar(m, t);
+  EXPECT_APPROX(m, az_vnorm(v));
+  EXPECT_APPROX(az_mod2pi(t), az_vtheta(v));
 }
 
 /*===========================================================================*/

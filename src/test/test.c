@@ -17,59 +17,47 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/vector.h"
+#include "test/test.h"
 
-#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
+/*===========================================================================*/
 
-az_vector_t az_vpolar(double magnitude, double theta) {
-  return (az_vector_t){.x = magnitude * cos(theta),
-                       .y = magnitude * sin(theta)};
+#define EPSILON 0.00000001
+
+bool _current_test_failed = false;
+bool _any_test_failed = false;
+
+void _run_test(const char *name, void (*function)(void)) {
+  _current_test_failed = false;
+  printf("Running %s...\n", name);
+  function();
+  if (_current_test_failed) {
+    _any_test_failed = true;
+  } else {
+    printf("    \x1b[32mOK\x1b[m\n");
+  }
 }
 
-az_vector_t az_vadd(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x + v2.x, .y = v1.y + v2.y};
+static bool dapprox(double a, double b) {
+  double d = a - b;
+  return (d < EPSILON && d > -EPSILON);
 }
 
-az_vector_t az_vsub(az_vector_t v1, az_vector_t v2) {
-  return (az_vector_t){.x = v1.x - v2.x, .y = v1.y - v2.y};
+bool _expect_true(bool condition, const char *message) {
+  if (condition) return true;
+  _current_test_failed = true;
+  printf("    \x1b[1;31mFAILED:\x1b[m %s\n", message);
+  return false;
 }
 
-az_vector_t az_vmul(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x * f, .y = v.y * f};
-}
-
-az_vector_t az_vdiv(az_vector_t v, double f) {
-  return (az_vector_t){.x = v.x / f, .y = v.y / f};
-}
-
-double az_vnorm(az_vector_t v) {
-  return hypot(v.x, v.y);
-}
-
-double az_vtheta(az_vector_t v) {
-  return atan2(v.y, v.x);
-}
-
-double az_mod2pi(double theta) {
-  return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
-}
-
-int az_imin(int a, int b) {
-  return a <= b ? a : b;
-}
-
-int az_imax(int a, int b) {
-  return a > b ? a : b;
-}
-
-double az_dmin(double a, double b) {
-  return a <= b ? a : b;
-}
-
-double az_dmax(double a, double b) {
-  return a > b ? a : b;
+bool _expect_approx(double expected, double actual, const char *message) {
+  if (dapprox(expected, actual)) return true;
+  _current_test_failed = true;
+  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %g vs. %g\n",
+         message, expected, actual);
+  return false;
 }
 
 /*===========================================================================*/
