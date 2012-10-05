@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/pickup.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
@@ -32,6 +33,7 @@
 /*===========================================================================*/
 
 #define AZ_MAX_BADDIES 128
+#define AZ_MAX_PICKUPS 128
 #define AZ_MAX_PROJECTILES 256
 
 typedef struct {
@@ -48,6 +50,7 @@ typedef struct {
   az_baddie_t baddies[AZ_MAX_BADDIES];
   unsigned long clock;
   az_vector_t camera;
+  az_pickup_t pickups[AZ_MAX_PICKUPS];
   az_projectile_t projectiles[AZ_MAX_PROJECTILES];
   az_ship_t ship;
   az_timer_t timer;
@@ -62,6 +65,9 @@ bool az_insert_baddie(az_space_state_t *state,
 
 bool az_insert_projectile(az_space_state_t *state,
                           az_projectile_t **projectile_out);
+
+void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
+                       az_vector_t position);
 
 /*===========================================================================*/
 

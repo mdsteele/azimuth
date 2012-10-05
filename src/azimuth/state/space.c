@@ -19,6 +19,7 @@
 
 #include "azimuth/state/space.h"
 
+#include <assert.h>
 #include <math.h>
 
 #include "azimuth/util.h"
@@ -26,8 +27,48 @@
 
 /*===========================================================================*/
 
+#define PICKUP_MAX_AGE 10.0
+#define PICKUP_COLLECTION_RANGE 20.0
 #define TURN_RATE 5.0
 #define THRUST_ACCEL 500.0
+
+static void tick_pickups(az_space_state_t *state,
+                         double time_seconds) {
+  az_player_t *player = state->ship.player;
+  AZ_ARRAY_LOOP(pickup, state->pickups) {
+    if (pickup->kind == AZ_PUP_NOTHING) continue;
+    pickup->age += time_seconds;
+    if (az_vwithin(pickup->position, state->ship.position,
+                   PICKUP_COLLECTION_RANGE)) {
+      switch (pickup->kind) {
+      case AZ_PUP_ROCKETS:
+        player->rockets = az_imin(player->max_rockets, player->rockets +
+                                  AZ_ROCKETS_PER_PICKUP);
+        break;
+      case AZ_PUP_BOMBS:
+        player->bombs = az_imin(player->max_bombs, player->bombs +
+                                AZ_BOMBS_PER_PICKUP);
+        break;
+      case AZ_PUP_SMALL_SHIELDS:
+        player->shields = az_imin(player->max_shields, player->shields +
+                                  AZ_SHIELDS_PER_SMALL_PICKUP);
+        break;
+      case AZ_PUP_MEDIUM_SHIELDS:
+        player->shields = az_imin(player->max_shields, player->shields +
+                                  AZ_SHIELDS_PER_MEDIUM_PICKUP);
+        break;
+      case AZ_PUP_LARGE_SHIELDS:
+        player->shields = az_imin(player->max_shields, player->shields +
+                                  AZ_SHIELDS_PER_LARGE_PICKUP);
+        break;
+      default: assert(false);
+      }
+      pickup->kind = AZ_PUP_NOTHING;
+    } else if (pickup->age >= PICKUP_MAX_AGE) {
+      pickup->kind = AZ_PUP_NOTHING;
+    }
+  }
+}
 
 static void tick_ship(az_ship_t *ship,
                       const az_controls_t *controls,
@@ -120,6 +161,8 @@ void az_tick_space_state(az_space_state_t *state,
                          double time_seconds) {
   ++state->clock;
 
+  tick_pickups(state, time_seconds);
+
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) continue;
     proj->age += time_seconds;
@@ -136,6 +179,7 @@ void az_tick_space_state(az_space_state_t *state,
         baddie->health -= 1.0;
         if (baddie->health <= 0.0) {
           baddie->kind = AZ_BAD_NOTHING;
+          az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, baddie->position);
         }
         proj->kind = AZ_PROJ_NOTHING;
         break;
@@ -161,7 +205,7 @@ void az_tick_space_state(az_space_state_t *state,
 }
 
 bool az_insert_baddie(az_space_state_t *state,
-                          az_baddie_t **baddie_out) {
+                      az_baddie_t **baddie_out) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
       *baddie_out = baddie;
@@ -181,6 +225,19 @@ bool az_insert_projectile(az_space_state_t *state,
     }
   }
   return false;
+}
+
+void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
+                       az_vector_t position) {
+  if (kind == AZ_PUP_NOTHING) return;
+  AZ_ARRAY_LOOP(pickup, state->pickups) {
+    if (pickup->kind == AZ_PUP_NOTHING) {
+      pickup->kind = kind;
+      pickup->position = position;
+      pickup->age = 0.0;
+      return;
+    }
+  }
 }
 
 /*===========================================================================*/

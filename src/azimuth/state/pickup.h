@@ -18,35 +18,34 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_PROJECTILE_H_
-#define AZIMUTH_STATE_PROJECTILE_H_
+#ifndef AZIMUTH_STATE_PICKUP_H_
+#define AZIMUTH_STATE_PICKUP_H_
 
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
 
+#define AZ_ROCKETS_PER_PICKUP 3
+#define AZ_BOMBS_PER_PICKUP 1
+#define AZ_SHIELDS_PER_SMALL_PICKUP 5
+#define AZ_SHIELDS_PER_MEDIUM_PICKUP 15
+#define AZ_SHIELDS_PER_LARGE_PICKUP 50
+
 typedef enum {
-  AZ_PROJ_NOTHING = 0,
-  AZ_PROJ_GUN_NORMAL,
-  AZ_PROJ_GUN_CHARGED_NORMAL,
-  AZ_PROJ_GUN_ICE,
-  AZ_PROJ_GUN_CHARGED_ICE,
-  AZ_PROJ_GUN_HOMING,
-  AZ_PROJ_GUN_CHARGED_HOMING,
-  // TODO add more gun projectiles
-  AZ_PROJ_ROCKET,
-  AZ_PROJ_HYPER_ROCKET,
-  AZ_PROJ_BOMB,
-  AZ_PROJ_HYPER_BOMB
-} az_proj_kind_t;
+  AZ_PUP_NOTHING = 0,
+  AZ_PUP_ROCKETS,
+  AZ_PUP_BOMBS,
+  AZ_PUP_SMALL_SHIELDS,
+  AZ_PUP_MEDIUM_SHIELDS,
+  AZ_PUP_LARGE_SHIELDS
+} az_pickup_kind_t;
 
 typedef struct {
-  az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
+  az_pickup_kind_t kind; // if AZ_PUP_NOTHING, this pickup is not present
   az_vector_t position;
-  az_vector_t velocity;
   double age; // seconds
-} az_projectile_t;
+} az_pickup_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PROJECTILE_H_
+#endif // AZIMUTH_STATE_PICKUP_H_

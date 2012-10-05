@@ -57,6 +57,22 @@ static void draw_camera_view(const az_space_state_t *state) {
     glEnd();
   } glPopMatrix();
 
+  // Draw pickups:
+  // TODO: draw different kinds of pickups differently
+  AZ_ARRAY_LOOP(pickup, state->pickups) {
+    if (pickup->kind == AZ_PUP_NOTHING) continue;
+    glPushMatrix(); {
+      glTranslated(pickup->position.x, pickup->position.y, 0);
+      glColor3f(0, 0, 1); // blue
+      glBegin(GL_LINE_LOOP);
+      glVertex2d(5, 0);
+      glVertex2d(0, 5);
+      glVertex2d(-5, 0);
+      glVertex2d(0, -5);
+      glEnd();
+    } glPopMatrix();
+  }
+
   // Draw baddies:
   // TODO: draw different kinds of baddies differently
   AZ_ARRAY_LOOP(baddie, state->baddies) {
