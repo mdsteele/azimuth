@@ -17,25 +17,46 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
+#include "test/random.h"
 
 #include "azimuth/random.h"
-#include "test/player.h"
-#include "test/random.h"
-#include "test/vector.h"
+#include "azimuth/util.h"
+#include "test/test.h"
 
 /*===========================================================================*/
 
-int main(int argc, char **argv) {
-  az_init_random();
+void test_random(void) {
+  int counts[10] = {0};
+  for (int i = 0; i < 10000; ++i) {
+    double r = az_random();
+    ASSERT_TRUE(r >= 0.0);
+    ASSERT_TRUE(r < 1.0);
+    int index = (int)(r * 10);
+    ASSERT_TRUE(0 <= index && index < AZ_ARRAY_SIZE(counts));
+    ++counts[index];
+  }
+  AZ_ARRAY_LOOP(count, counts) {
+    // These could fail even for correct code, of course, but it's somewhat
+    // unlikely.
+    EXPECT_TRUE(*count >= 200);
+    EXPECT_TRUE(*count <= 5000);
+  }
+}
 
-  RUN_TEST(test_mod2pi);
-  RUN_TEST(test_player_give_upgrade);
-  RUN_TEST(test_randint);
-  RUN_TEST(test_random);
-  RUN_TEST(test_vector_polar);
-
-  return TESTS_EXIT_CODE();
+void test_randint(void) {
+  int counts[13] = {0};
+  for (int i = 0; i < 13000; ++i) {
+    int r = az_randint(-7, 5);
+    ASSERT_TRUE(r >= -7);
+    ASSERT_TRUE(r <= 5);
+    ++counts[r + 7];
+  }
+  AZ_ARRAY_LOOP(count, counts) {
+    // These could fail even for correct code, of course, but it's somewhat
+    // unlikely.
+    EXPECT_TRUE(*count >= 200);
+    EXPECT_TRUE(*count <= 5000);
+  }
 }
 
 /*===========================================================================*/

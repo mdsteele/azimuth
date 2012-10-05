@@ -17,25 +17,31 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
-
 #include "azimuth/random.h"
-#include "test/player.h"
-#include "test/random.h"
-#include "test/vector.h"
+
+#include <assert.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*===========================================================================*/
 
-int main(int argc, char **argv) {
-  az_init_random();
+void az_init_random(void) {
+  srand(time(NULL));
+}
 
-  RUN_TEST(test_mod2pi);
-  RUN_TEST(test_player_give_upgrade);
-  RUN_TEST(test_randint);
-  RUN_TEST(test_random);
-  RUN_TEST(test_vector_polar);
+double az_random(void) {
+  // This is a terrible, terrible implementation of random numbers.
+  // TODO: Replace this with something better.
+  return ((double)rand()) / (1.0 + (double)RAND_MAX);
+}
 
-  return TESTS_EXIT_CODE();
+int az_randint(int min, int max) {
+  assert(min <= max);
+  if (min == max) return min;
+  // This is a terrible, terrible implementation of random numbers (just for
+  // starters, it's non-uniform), but it's good enough for us for now.
+  // TODO: Replace this with something better.
+  return min + rand() % (1 + max - min);
 }
 
 /*===========================================================================*/

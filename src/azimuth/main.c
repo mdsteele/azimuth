@@ -23,6 +23,7 @@
 #include <OpenGL/gl.h>
 #include <SDL/SDL.h>
 
+#include "azimuth/random.h" // for az_init_random
 #include "azimuth/screen.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
@@ -111,6 +112,9 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
+  // Initialize our own code:
+  az_init_random();
+
   // Start up SDL (quit if we fail):
   if (SDL_Init(SDL_INIT_VIDEO) < 0) return 1;
 

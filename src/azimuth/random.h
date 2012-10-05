@@ -17,25 +17,22 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
-
-#include "azimuth/random.h"
-#include "test/player.h"
-#include "test/random.h"
-#include "test/vector.h"
+#pragma once
+#ifndef AZIMUTH_RANDOM_H_
+#define AZIMUTH_RANDOM_H_
 
 /*===========================================================================*/
 
-int main(int argc, char **argv) {
-  az_init_random();
+// Call this once, at startup, to initialize the random number generator.
+void az_init_random(void);
 
-  RUN_TEST(test_mod2pi);
-  RUN_TEST(test_player_give_upgrade);
-  RUN_TEST(test_randint);
-  RUN_TEST(test_random);
-  RUN_TEST(test_vector_polar);
+// Return a random double from 0.0 (inclusive) to 1.0 (exclusive).
+double az_random(void);
 
-  return TESTS_EXIT_CODE();
-}
+// Return a random integer in the (inclusive) range [min, max].  min must not
+// be greater than max.
+int az_randint(int min, int max);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_RANDOM_H_

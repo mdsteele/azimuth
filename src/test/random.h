@@ -17,25 +17,15 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
-
-#include "azimuth/random.h"
-#include "test/player.h"
-#include "test/random.h"
-#include "test/vector.h"
+#pragma once
+#ifndef TEST_RANDOM_H_
+#define TEST_RANDOM_H_
 
 /*===========================================================================*/
 
-int main(int argc, char **argv) {
-  az_init_random();
-
-  RUN_TEST(test_mod2pi);
-  RUN_TEST(test_player_give_upgrade);
-  RUN_TEST(test_randint);
-  RUN_TEST(test_random);
-  RUN_TEST(test_vector_polar);
-
-  return TESTS_EXIT_CODE();
-}
+void test_random(void);
+void test_randint(void);
 
 /*===========================================================================*/
+
+#endif // TEST_RANDOM_H_
