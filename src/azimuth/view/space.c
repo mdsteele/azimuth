@@ -26,7 +26,7 @@
 #include <OpenGL/gl.h>
 
 #include "azimuth/screen.h"
-#include "azimuth/space.h"
+#include "azimuth/state/space.h"
 #include "azimuth/vector.h"
 #include "azimuth/view/string.h"
 

@@ -21,7 +21,7 @@
 #ifndef AZIMUTH_VIEW_SPACE_H_
 #define AZIMUTH_VIEW_SPACE_H_
 
-#include "azimuth/space.h"
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
 

@@ -23,9 +23,9 @@
 #include <OpenGL/gl.h>
 #include <SDL/SDL.h>
 
-#include "azimuth/player.h"
 #include "azimuth/screen.h"
-#include "azimuth/space.h"
+#include "azimuth/state/player.h"
+#include "azimuth/state/space.h"
 #include "azimuth/vector.h"
 #include "azimuth/view/space.h"
 

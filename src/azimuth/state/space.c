@@ -17,7 +17,7 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/space.h"
+#include "azimuth/state/space.h"
 
 #include <math.h>
 

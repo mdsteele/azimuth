@@ -18,8 +18,8 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_PLAYER_H_
-#define AZIMUTH_PLAYER_H_
+#ifndef AZIMUTH_STATE_PLAYER_H_
+#define AZIMUTH_STATE_PLAYER_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -126,4 +126,4 @@ void az_clear_flag(const az_player_t *player, az_flag_t flag);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_PLAYER_H_
+#endif // AZIMUTH_STATE_PLAYER_H_

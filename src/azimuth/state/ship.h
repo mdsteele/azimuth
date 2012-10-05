@@ -18,36 +18,28 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_SPACE_H_
-#define AZIMUTH_SPACE_H_
+#ifndef AZIMUTH_STATE_SHIP_H_
+#define AZIMUTH_STATE_SHIP_H_
 
-#include "azimuth/player.h"
-#include "azimuth/ship.h"
+#include <stdbool.h>
+
+#include "azimuth/state/player.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
 
 typedef struct {
-  az_room_key_t key;
-  // TODO
-} az_room_t;
+  bool left, right, up, down;
+  bool fire1, fire2, util, burn;
+} az_controls_t;
 
 typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
-
-typedef struct {
-  unsigned long clock;
-  az_vector_t camera;
-  az_ship_t ship;
-  az_timer_t timer;
-} az_space_state_t;
-
-void az_tick_space_state(az_space_state_t *state,
-                         const az_controls_t *controls,
-                         double time_seconds);
+  az_vector_t position; // pixels
+  az_vector_t velocity; // pixels/second
+  double angle; // radians
+  az_player_t* player;
+} az_ship_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_SPACE_H_
+#endif // AZIMUTH_STATE_SHIP_H_
