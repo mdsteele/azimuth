@@ -18,28 +18,35 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_SHIP_H_
-#define AZIMUTH_STATE_SHIP_H_
+#ifndef AZIMUTH_STATE_PROJECTILE_H_
+#define AZIMUTH_STATE_PROJECTILE_H_
 
-#include <stdbool.h>
-
-#include "azimuth/state/player.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
 
-typedef struct {
-  bool left, right, up, down;
-  bool fire1, fire2, util, burn;
-} az_controls_t;
+typedef enum {
+  AZ_PROJ_NOTHING = 0,
+  AZ_PROJ_GUN_NORMAL,
+  AZ_PROJ_GUN_CHARGED_NORMAL,
+  AZ_PROJ_GUN_ICE,
+  AZ_PROJ_GUN_CHARGED_ICE,
+  AZ_PROJ_GUN_HOMING,
+  AZ_PROJ_GUN_CHARGED_HOMING,
+  // TODO add more gun projectiles
+  AZ_PROJ_ROCKET,
+  AZ_PROJ_HYPER_ROCKET,
+  AZ_PROJ_BOMB,
+  AZ_PROJ_HYPER_BOMB
+} az_proj_kind_t;
 
 typedef struct {
-  az_player_t* player;
-  az_vector_t position; // pixels
-  az_vector_t velocity; // pixels/second
-  double angle; // radians
-} az_ship_t;
+  az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
+  az_vector_t position;
+  az_vector_t velocity;
+  double age;
+} az_projectile_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_SHIP_H_
+#endif // AZIMUTH_STATE_PROJECTILE_H_

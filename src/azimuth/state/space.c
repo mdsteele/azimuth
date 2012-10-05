@@ -29,11 +29,14 @@
 #define THRUST_ACCEL 500.0
 #define MAX_SPEED 400.0
 
-static void az_tick_ship(az_ship_t *ship,
-                         const az_controls_t *controls,
-                         double time_seconds) {
+static void tick_ship(az_ship_t *ship,
+                      const az_controls_t *controls,
+                      double time_seconds) {
+  // Apply velocity:
   ship->position = az_vadd(ship->position,
                            az_vmul(ship->velocity, time_seconds));
+
+  // Apply turning/thrusting:
   const double impulse = THRUST_ACCEL * time_seconds;
   if (controls->left && !controls->right) {
     if (controls->util) {
@@ -66,13 +69,22 @@ static void az_tick_ship(az_ship_t *ship,
       ship->velocity = az_vmul(ship->velocity, (speed - impulse) / speed);
     }
   }
+
+  // Apply drag:
+  // TODO use real drag calculation, not just a speed cap
   const double speed = az_vnorm(ship->velocity);
   if (speed > MAX_SPEED) {
     ship->velocity = az_vmul(ship->velocity, MAX_SPEED / speed);
   }
+
+  // Recharge energy:
+  const double charge_rate = 75.0; // TODO take upgrades into account
+  ship->player->energy =
+    az_dmin(ship->player->max_energy,
+            ship->player->energy + charge_rate * time_seconds);
 }
 
-static void az_tick_timer(az_timer_t *timer, double time_seconds) {
+static void tick_timer(az_timer_t *timer, double time_seconds) {
   if (timer->active_for < 0.0) return;
   if (timer->active_for < 10.0) timer->active_for += time_seconds;
   timer->time_remaining = az_dmax(0.0, timer->time_remaining - time_seconds);
@@ -82,9 +94,48 @@ void az_tick_space_state(az_space_state_t *state,
                          const az_controls_t *controls,
                          double time_seconds) {
   ++state->clock;
-  az_tick_ship(&state->ship, controls, time_seconds);
+
+  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
+    az_projectile_t *proj = &state->projectiles[i];
+    if (proj->kind != AZ_PROJ_NOTHING) {
+      proj->age += time_seconds;
+      if (proj->age > 1.0) {
+        proj->kind = AZ_PROJ_NOTHING;
+      } else {
+        proj->position = az_vadd(proj->position,
+                                 az_vmul(proj->velocity, time_seconds));
+      }
+    }
+  }
+
+  tick_ship(&state->ship, controls, time_seconds);
   state->camera = state->ship.position;
-  az_tick_timer(&state->timer, time_seconds);
+  tick_timer(&state->timer, time_seconds);
+
+  const double fire_cost = 5.0;
+  if (controls->fire1 && state->ship.player->energy >= fire_cost) {
+    az_projectile_t *projectile;
+    if (az_insert_projectile(state, &projectile)) {
+      state->ship.player->energy -= fire_cost;
+      projectile->kind = AZ_PROJ_GUN_NORMAL;
+      projectile->position = state->ship.position;
+      projectile->velocity = az_vpolar(1000.0, state->ship.angle);
+    }
+  }
+
+}
+
+bool az_insert_projectile(az_space_state_t *state,
+                          az_projectile_t **projectile_out) {
+  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
+    az_projectile_t *proj = &state->projectiles[i];
+    if (proj->kind == AZ_PROJ_NOTHING) {
+      proj->age = 0.0;
+      *projectile_out = proj;
+      return true;
+    }
+  }
+  return false;
 }
 
 /*===========================================================================*/

@@ -98,8 +98,8 @@ typedef struct {
   // The room in which we last saved the game:
   az_room_key_t save_room;
   // Current ship supplies:
-  int shields, max_shields;
-  int energy, max_energy;
+  double shields, max_shields;
+  double energy, max_energy;
   int rockets, max_rockets;
   int bombs, max_bombs;
   // Current weapon selections:

@@ -21,11 +21,16 @@
 #ifndef AZIMUTH_STATE_SPACE_H_
 #define AZIMUTH_STATE_SPACE_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/player.h"
+#include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
+
+#define AZ_MAX_PROJECTILES 256
 
 typedef struct {
   az_room_key_t key;
@@ -40,6 +45,7 @@ typedef struct {
 typedef struct {
   unsigned long clock;
   az_vector_t camera;
+  az_projectile_t projectiles[AZ_MAX_PROJECTILES];
   az_ship_t ship;
   az_timer_t timer;
 } az_space_state_t;
@@ -47,6 +53,9 @@ typedef struct {
 void az_tick_space_state(az_space_state_t *state,
                          const az_controls_t *controls,
                          double time_seconds);
+
+bool az_insert_projectile(az_space_state_t *state,
+                          az_projectile_t **projectile_out);
 
 /*===========================================================================*/
 

@@ -34,14 +34,13 @@
 
 static void event_loop(void) {
   az_controls_t controls = {false};
-  az_space_state_t state;
+  az_space_state_t state = {.clock = 0};
   az_player_t player = {.shields = 55, .max_shields = 400, .energy = 98,
-                        .max_energy = 100, .gun1 = AZ_GUN_HOMING,
+                        .max_energy = 400, .gun1 = AZ_GUN_HOMING,
                         .gun2 = AZ_GUN_BURST,
                         .rockets = 63, .max_rockets = 75,
                         .bombs = 15, .max_bombs = 15,
                         .ordnance = AZ_ORDN_BOMBS};
-  state.clock = 0;
   state.ship.position = (az_vector_t){50, 150};
   state.ship.velocity = (az_vector_t){-20, 10};
   state.ship.angle = 2.9;
@@ -77,6 +76,7 @@ static void event_loop(void) {
         case SDLK_DOWN: controls.down = true; break;
         case SDLK_LEFT: controls.left = true; break;
         case SDLK_RIGHT: controls.right = true; break;
+        case SDLK_v: controls.fire1 = true; break;
         case SDLK_x: controls.util = true; break;
         default: break;
         }
@@ -87,6 +87,7 @@ static void event_loop(void) {
         case SDLK_DOWN: controls.down = false; break;
         case SDLK_LEFT: controls.left = false; break;
         case SDLK_RIGHT: controls.right = false; break;
+        case SDLK_v: controls.fire1 = false; break;
         case SDLK_x: controls.util = false; break;
         default: break;
         }

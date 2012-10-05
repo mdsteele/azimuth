@@ -65,19 +65,31 @@ static void draw_camera_view(const az_space_state_t *state) {
     glVertex2d(-20, -10);
     glEnd();
   } glPopMatrix();
+
+  // Draw projectiles:
+  // TODO: draw different kinds of projectiles differently
+  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
+    const az_projectile_t *proj = &state->projectiles[i];
+    if (proj->kind != AZ_PROJ_NOTHING) {
+      glColor3f(0, 1, 0); // green
+      glBegin(GL_POINTS);
+      glVertex2d(proj->position.x, proj->position.y);
+      glEnd();
+    }
+  }
 }
 
 #define HUD_MARGIN 5
 #define HUD_PADDING 5
 #define HUD_BAR_HEIGHT 9
 
-static void draw_hud_bar(int left, int top, int cur, int max) {
+static void draw_hud_bar(int left, int top, double cur, double max) {
   // Draw bar:
   glBegin(GL_QUADS);
-  glVertex2i(left, top);
-  glVertex2i(left, top + HUD_BAR_HEIGHT);
-  glVertex2i(left + cur, top + HUD_BAR_HEIGHT);
-  glVertex2i(left + cur, top);
+  glVertex2d(left, top);
+  glVertex2d(left, top + HUD_BAR_HEIGHT);
+  glVertex2d(left + cur, top + HUD_BAR_HEIGHT);
+  glVertex2d(left + cur, top);
   glEnd();
   // Draw outline:
   glColor3f(1, 1, 1); // white
