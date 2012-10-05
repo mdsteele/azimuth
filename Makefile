@@ -22,7 +22,7 @@ OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
-CFLAGS = -Wall -O1
+CFLAGS = -Wall -Werror -O1
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
 HEADERS := $(shell find $(SRCDIR) -name '*.h')

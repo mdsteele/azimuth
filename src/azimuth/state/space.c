@@ -21,6 +21,7 @@
 
 #include <math.h>
 
+#include "azimuth/util.h"
 #include "azimuth/vector.h"
 
 /*===========================================================================*/
@@ -119,8 +120,7 @@ void az_tick_space_state(az_space_state_t *state,
                          double time_seconds) {
   ++state->clock;
 
-  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
-    az_projectile_t *proj = &state->projectiles[i];
+  AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind != AZ_PROJ_NOTHING) {
       proj->age += time_seconds;
       if (proj->age > 1.0) {
@@ -151,8 +151,7 @@ void az_tick_space_state(az_space_state_t *state,
 
 bool az_insert_projectile(az_space_state_t *state,
                           az_projectile_t **projectile_out) {
-  for (int i = 0; i < AZ_MAX_PROJECTILES; ++i) {
-    az_projectile_t *proj = &state->projectiles[i];
+  AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) {
       proj->age = 0.0;
       *projectile_out = proj;
