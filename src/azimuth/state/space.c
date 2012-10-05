@@ -27,41 +27,54 @@
 
 #define TURN_RATE 5.0
 #define THRUST_ACCEL 500.0
-#define MAX_SPEED 400.0
 
 static void tick_ship(az_ship_t *ship,
                       const az_controls_t *controls,
                       double time_seconds) {
+  az_player_t *player = ship->player;
+  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
+  const double impulse = THRUST_ACCEL * time_seconds;
+
   // Apply velocity:
   ship->position = az_vadd(ship->position,
                            az_vmul(ship->velocity, time_seconds));
 
-  // Apply turning/thrusting:
-  const double impulse = THRUST_ACCEL * time_seconds;
+  // Turning left:
   if (controls->left && !controls->right) {
-    if (controls->util) {
-      ship->velocity = az_vadd(ship->velocity,
-                             az_vpolar(impulse / 2,
-                                       ship->angle - AZ_HALF_PI));
-    } else {
+    if (!controls->util) {
       ship->angle = fmod(ship->angle + TURN_RATE * time_seconds, AZ_TWO_PI);
-    }
-  }
-  if (controls->right && !controls->left) {
-    if (controls->util) {
+    } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
-                             az_vpolar(impulse / 2,
-                                       ship->angle + AZ_HALF_PI));
-    } else {
-      ship->angle = fmod(ship->angle - TURN_RATE * time_seconds, AZ_TWO_PI);
+                               az_vpolar(impulse / 2,
+                                         ship->angle - AZ_HALF_PI));
     }
   }
-  if (controls->up && !controls->down) {
-    ship->velocity = az_vadd(ship->velocity,
-                             az_vpolar((controls->util ? -impulse/2 : impulse),
-                                       ship->angle));
+
+  // Turning right:
+  if (controls->right && !controls->left) {
+    if (!controls->util) {
+      ship->angle = fmod(ship->angle - TURN_RATE * time_seconds, AZ_TWO_PI);
+    } else if (has_lateral) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(impulse / 2,
+                                         ship->angle + AZ_HALF_PI));
+    }
   }
-  if (controls->down && !controls->up) {
+
+  // Forward thrust:
+  if (controls->up && !controls->down) {
+    if (!controls->util) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(impulse, ship->angle));
+    } else if (has_lateral) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(-impulse/2, ship->angle));
+    }
+  }
+
+  // Retro thrusters:
+  if (controls->down && !controls->up &&
+      az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
     const double speed = az_vnorm(ship->velocity);
     if (speed <= impulse) {
       ship->velocity = AZ_VZERO;
@@ -71,17 +84,19 @@ static void tick_ship(az_ship_t *ship,
   }
 
   // Apply drag:
-  // TODO use real drag calculation, not just a speed cap
-  const double speed = az_vnorm(ship->velocity);
-  if (speed > MAX_SPEED) {
-    ship->velocity = az_vmul(ship->velocity, MAX_SPEED / speed);
-  }
+  const double base_max_speed =
+    400.0 * (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR) ? 1.5 : 1.0);
+  const double drag_coeff = THRUST_ACCEL / (base_max_speed * base_max_speed);
+  const az_vector_t drag_force =
+    az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
+  ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time_seconds));
 
   // Recharge energy:
-  const double charge_rate = 75.0; // TODO take upgrades into account
-  ship->player->energy =
-    az_dmin(ship->player->max_energy,
-            ship->player->energy + charge_rate * time_seconds);
+  const double charge_rate = 75.0 +
+    (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ? 75.0 : 0.0) +
+    (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ? 125.0 : 0.0);
+  player->energy = az_dmin(player->max_energy,
+                           player->energy + charge_rate * time_seconds);
 }
 
 static void tick_timer(az_timer_t *timer, double time_seconds) {

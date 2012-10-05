@@ -28,6 +28,9 @@
 
 #define AZ_ROCKETS_PER_AMMO_UPGRADE 5
 #define AZ_BOMBS_PER_AMMO_UPGRADE 3
+#define AZ_ENERGY_PER_CAPACITOR 50
+#define AZ_SHILEDS_PER_BATTERY 25
+
 #define AZ_ROCKETS_PER_PICKUP 2
 #define AZ_BOMBS_PER_PICKUP 1
 #define AZ_SHIELDS_PER_SMALL_PICKUP 5
@@ -35,6 +38,7 @@
 #define AZ_SHIELDS_PER_LARGE_PICKUP 20
 
 typedef enum {
+  // Primary weapon:
   AZ_UPG_GUN_CHARGE = 0,
   AZ_UPG_GUN_FREEZE,
   AZ_UPG_GUN_TRIPLE,
@@ -43,6 +47,7 @@ typedef enum {
   AZ_UPG_GUN_WAVE,
   AZ_UPG_GUN_BURST,
   AZ_UPG_GUN_PIERCE,
+  // Rockets:
   AZ_UPG_ROCKET_AMMO_00,
   AZ_UPG_ROCKET_AMMO_01,
   AZ_UPG_ROCKET_AMMO_02,
@@ -62,8 +67,57 @@ typedef enum {
   AZ_UPG_ROCKET_AMMO_16,
   AZ_UPG_ROCKET_AMMO_17,
   AZ_UPG_ROCKET_AMMO_18,
-  AZ_UPG_ROCKET_AMMO_19
-  // TODO: add more here
+  AZ_UPG_ROCKET_AMMO_19,
+  AZ_UPG_HYPER_ROCKETS,
+  AZ_UPG_HIGH_EXPLOSIVES,
+  // Bombs:
+  AZ_UPG_BOMB_AMMO_00,
+  AZ_UPG_BOMB_AMMO_01,
+  AZ_UPG_BOMB_AMMO_02,
+  AZ_UPG_BOMB_AMMO_03,
+  AZ_UPG_BOMB_AMMO_04,
+  AZ_UPG_BOMB_AMMO_05,
+  AZ_UPG_BOMB_AMMO_06,
+  AZ_UPG_BOMB_AMMO_07,
+  AZ_UPG_BOMB_AMMO_08,
+  AZ_UPG_BOMB_AMMO_09,
+  AZ_UPG_MEGA_BOMBS,
+  AZ_UPG_ATTUNED_EXPLOSIVES,
+  // Engines:
+  AZ_UPG_TRACTOR_BEAM,
+  AZ_UPG_RETRO_THRUSTERS,
+  AZ_UPG_LATERAL_THRUSTERS,
+  AZ_UPG_AFTERBURNER,
+  AZ_UPG_BLAZER,
+  AZ_UPG_SPRINT_THRUSTERS,
+  // Armor:
+  AZ_UPG_HARDENED_ARMOR,
+  AZ_UPG_THERMAL_ARMOR,
+  AZ_UPG_GRAVITIC_ARMOR,
+  AZ_UPG_DYNAMIC_ARMOR,
+  AZ_UPG_REACTIVE_ARMOR,
+  // Energy:
+  AZ_UPG_CAPACITOR_00,
+  AZ_UPG_CAPACITOR_01,
+  AZ_UPG_CAPACITOR_02,
+  AZ_UPG_CAPACITOR_03,
+  AZ_UPG_CAPACITOR_04,
+  AZ_UPG_CAPACITOR_05,
+  AZ_UPG_FUSION_REACTOR,
+  AZ_UPG_QUANTUM_REACTOR,
+  // Shields:
+  AZ_UPG_SHIELD_BATTERY_00,
+  AZ_UPG_SHIELD_BATTERY_01,
+  AZ_UPG_SHIELD_BATTERY_02,
+  AZ_UPG_SHIELD_BATTERY_03,
+  AZ_UPG_SHIELD_BATTERY_04,
+  AZ_UPG_SHIELD_BATTERY_05,
+  AZ_UPG_SHIELD_BATTERY_06,
+  AZ_UPG_SHIELD_BATTERY_07,
+  AZ_UPG_SHIELD_BATTERY_08,
+  AZ_UPG_SHIELD_BATTERY_09,
+  AZ_UPG_SHIELD_BATTERY_10,
+  AZ_UPG_SHIELD_BATTERY_11
 } az_upgrade_t;
 
 // Which primary weapon module does the player have equipped?
@@ -115,14 +169,14 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade);
 // Check whether the player has visited a particular room yet.
 bool az_test_room(const az_player_t *player, az_room_key_t room);
 // Set the player as having visited the given room.
-void az_set_room(const az_player_t *player, az_room_key_t room);
+void az_set_room(az_player_t *player, az_room_key_t room);
 
 // Check whether a given game flag is set for the player.
 bool az_test_flag(const az_player_t *player, az_flag_t flag);
 // Set the given game flag for the player.
-void az_set_flag(const az_player_t *player, az_flag_t flag);
+void az_set_flag(az_player_t *player, az_flag_t flag);
 // Clear the given game flag for the player.
-void az_clear_flag(const az_player_t *player, az_flag_t flag);
+void az_clear_flag(az_player_t *player, az_flag_t flag);
 
 /*===========================================================================*/
 

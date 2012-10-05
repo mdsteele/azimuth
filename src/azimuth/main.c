@@ -37,10 +37,7 @@ static void event_loop(void) {
   az_space_state_t state = {.clock = 0};
   az_player_t player = {.shields = 55, .max_shields = 400, .energy = 98,
                         .max_energy = 400, .gun1 = AZ_GUN_HOMING,
-                        .gun2 = AZ_GUN_BURST,
-                        .rockets = 63, .max_rockets = 75,
-                        .bombs = 15, .max_bombs = 15,
-                        .ordnance = AZ_ORDN_BOMBS};
+                        .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE};
   state.ship.position = (az_vector_t){50, 150};
   state.ship.velocity = (az_vector_t){-20, 10};
   state.ship.angle = 2.9;
@@ -48,6 +45,9 @@ static void event_loop(void) {
   state.camera = state.ship.position;
   state.timer.active_for = 0;
   state.timer.time_remaining = 300;
+  az_give_upgrade(&player, AZ_UPG_LATERAL_THRUSTERS);
+  az_give_upgrade(&player, AZ_UPG_RETRO_THRUSTERS);
+  az_give_upgrade(&player, AZ_UPG_ROCKET_AMMO_00);
 
   while (true) {
     // Tick the state:
