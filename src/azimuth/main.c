@@ -37,7 +37,7 @@
 
 static void event_loop(void) {
   az_controls_t controls = {false};
-  az_space_state_t state = {.clock = 0};
+  az_space_state_t state = {.clock = 0, .timer.active_for = -1 };
   az_player_t player = {.shields = 55, .max_shields = 400, .energy = 98,
                         .max_energy = 400, .gun1 = AZ_GUN_HOMING,
                         .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE};
@@ -46,8 +46,6 @@ static void event_loop(void) {
   state.ship.angle = 2.9;
   state.ship.player = &player;
   state.camera = state.ship.position;
-  state.timer.active_for = 0;
-  state.timer.time_remaining = 300;
   az_give_upgrade(&player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&player, AZ_UPG_ROCKET_AMMO_00);
