@@ -32,6 +32,17 @@
 #define TURN_RATE 5.0
 #define THRUST_ACCEL 500.0
 
+static void tick_particles(az_space_state_t *state,
+                           double time_seconds) {
+  AZ_ARRAY_LOOP(particle, state->particles) {
+    if (particle->kind == AZ_PAR_NOTHING) continue;
+    particle->age += time_seconds;
+    if (particle->age >= particle->lifetime) {
+      particle->kind = AZ_PAR_NOTHING;
+    }
+  }
+}
+
 static void tick_pickups(az_space_state_t *state,
                          double time_seconds) {
   az_player_t *player = &state->ship.player;
@@ -158,6 +169,7 @@ static void tick_camera(az_vector_t *camera, az_vector_t towards,
 void az_tick_space_state(az_space_state_t *state, double time_seconds) {
   ++state->clock;
 
+  tick_particles(state, time_seconds);
   tick_pickups(state, time_seconds);
 
   AZ_ARRAY_LOOP(proj, state->projectiles) {
@@ -173,6 +185,15 @@ void az_tick_space_state(az_space_state_t *state, double time_seconds) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_vwithin(baddie->position, proj->position, 20.0)) {
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_BOOM;
+          particle->color = (az_color_t){255, 255, 255, 255};
+          particle->position = proj->position;
+          particle->velocity = AZ_VZERO;
+          particle->lifetime = 0.3;
+          particle->param1 = 10;
+        }
         baddie->health -= 1.0;
         if (baddie->health <= 0.0) {
           baddie->kind = AZ_BAD_NOTHING;
@@ -214,12 +235,24 @@ bool az_insert_baddie(az_space_state_t *state,
   return false;
 }
 
+bool az_insert_particle(az_space_state_t *state,
+                        az_particle_t **particle_out) {
+  AZ_ARRAY_LOOP(particle, state->particles) {
+    if (particle->kind == AZ_PAR_NOTHING) {
+      particle->age = 0.0;
+      *particle_out = particle;
+      return true;
+    }
+  }
+  return false;
+}
+
 bool az_insert_projectile(az_space_state_t *state,
-                          az_projectile_t **projectile_out) {
+                          az_projectile_t **proj_out) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) {
       proj->age = 0.0;
-      *projectile_out = proj;
+      *proj_out = proj;
       return true;
     }
   }

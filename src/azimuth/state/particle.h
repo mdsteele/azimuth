@@ -18,58 +18,33 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#ifndef AZIMUTH_STATE_PARTICLE_H_
+#define AZIMUTH_STATE_PARTICLE_H_
 
-#include <stdbool.h>
-
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/particle.h"
-#include "azimuth/state/pickup.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
+#include "azimuth/color.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#define AZ_MAX_BADDIES 128
-#define AZ_MAX_PARTICLES 512
-#define AZ_MAX_PICKUPS 128
-#define AZ_MAX_PROJECTILES 256
+typedef enum {
+  AZ_PAR_NOTHING = 0,
+  // SPECK: A single point.
+  AZ_PAR_SPECK,
+  // SEGMENT: A spinning line segment.  param1=radius, param2=turnrate
+  AZ_PAR_SEGMENT,
+  // BOOM: An explosion.  param1=radius
+  AZ_PAR_BOOM
+} az_particle_kind_t;
 
 typedef struct {
-  az_room_key_t key;
-  // TODO
-} az_room_t;
-
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
-
-typedef struct {
-  az_baddie_t baddies[AZ_MAX_BADDIES];
-  unsigned long clock;
-  az_vector_t camera;
-  az_particle_t particles[AZ_MAX_PARTICLES];
-  az_pickup_t pickups[AZ_MAX_PICKUPS];
-  az_projectile_t projectiles[AZ_MAX_PROJECTILES];
-  az_ship_t ship;
-  az_timer_t timer;
-} az_space_state_t;
-
-void az_tick_space_state(az_space_state_t *state, double time_seconds);
-
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
-
-bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
-
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
-
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
+  az_particle_kind_t kind; // if AZ_PAR_NOTHING, this particle is not present
+  az_color_t color;
+  az_vector_t position;
+  az_vector_t velocity;
+  double age, lifetime; // seconds
+  double param1, param2; // meaning depends on kind
+} az_particle_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_SPACE_H_
+#endif // AZIMUTH_STATE_PARTICLE_H_

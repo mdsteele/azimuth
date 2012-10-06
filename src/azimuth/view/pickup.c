@@ -33,7 +33,6 @@
 /*===========================================================================*/
 
 static void draw_pickup(az_pickup_kind_t kind, unsigned long clock) {
-  // TODO: draw different kinds of pickups differently
   double radius = 0.5 * (double)(clock % 16);
   switch (kind) {
     case AZ_PUP_ROCKETS:

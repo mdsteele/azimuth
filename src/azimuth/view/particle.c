@@ -17,59 +17,62 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#include "azimuth/view/particle.h"
 
+#include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
-#include "azimuth/state/baddie.h"
+#include <OpenGL/gl.h>
+
 #include "azimuth/state/particle.h"
-#include "azimuth/state/pickup.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
+#include "azimuth/state/space.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#define AZ_MAX_BADDIES 128
-#define AZ_MAX_PARTICLES 512
-#define AZ_MAX_PICKUPS 128
-#define AZ_MAX_PROJECTILES 256
+static void with_color_alpha(az_color_t color, double alpha_factor) {
+  glColor4ub(color.r, color.g, color.b, color.a * alpha_factor);
+}
 
-typedef struct {
-  az_room_key_t key;
-  // TODO
-} az_room_t;
+static void draw_particle(const az_particle_t *particle) {
+  switch (particle->kind) {
+    case AZ_PAR_SPECK:
+      glBegin(GL_POINTS); {
+        const double ratio = particle->age / particle->lifetime;
+        with_color_alpha(particle->color, 1 - ratio);
+        glVertex2d(0, 0);
+      } glEnd();
+      break;
+    case AZ_PAR_SEGMENT:
+      // TODO
+      break;
+    case AZ_PAR_BOOM:
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, 0);
+        glVertex2d(0, 0);
+        const double ratio = particle->age / particle->lifetime;
+        with_color_alpha(particle->color, 1 - ratio * ratio);
+        const double radius = particle->param1 * ratio;
+        for (int i = 0; i <= 16; ++i) {
+          glVertex2d(radius * cos(i * AZ_PI_EIGHTHS),
+                     radius * sin(i * AZ_PI_EIGHTHS));
+        }
+      } glEnd();
+      break;
+    default: assert(false);
+  }
+}
 
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
-
-typedef struct {
-  az_baddie_t baddies[AZ_MAX_BADDIES];
-  unsigned long clock;
-  az_vector_t camera;
-  az_particle_t particles[AZ_MAX_PARTICLES];
-  az_pickup_t pickups[AZ_MAX_PICKUPS];
-  az_projectile_t projectiles[AZ_MAX_PROJECTILES];
-  az_ship_t ship;
-  az_timer_t timer;
-} az_space_state_t;
-
-void az_tick_space_state(az_space_state_t *state, double time_seconds);
-
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
-
-bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
-
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
-
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
+void az_draw_particles(const az_space_state_t* state) {
+  AZ_ARRAY_LOOP(particle, state->particles) {
+    if (particle->kind == AZ_PAR_NOTHING) continue;
+    glPushMatrix(); {
+      glTranslated(particle->position.x, particle->position.y, 0);
+      draw_particle(particle);
+    } glPopMatrix();
+  }
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_STATE_SPACE_H_

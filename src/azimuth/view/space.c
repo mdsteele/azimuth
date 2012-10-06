@@ -27,6 +27,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/hud.h"
+#include "azimuth/view/particle.h"
 #include "azimuth/view/pickup.h"
 #include "azimuth/view/projectile.h"
 #include "azimuth/view/ship.h"
@@ -77,6 +78,7 @@ static void draw_camera_view(const az_space_state_t *state) {
 
   az_draw_projectiles(state);
   az_draw_ship(state);
+  az_draw_particles(state);
 }
 
 void az_space_draw_screen(const az_space_state_t *state) {

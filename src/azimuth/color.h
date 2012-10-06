@@ -23,14 +23,12 @@
 
 #include <stdint.h>
 
+/*===========================================================================*/
+
 typedef struct {
   uint8_t r, g, b, a;
 } az_color_t;
 
-/*
-void az_gl_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
-*/
+/*===========================================================================*/
 
 #endif // AZIMUTH_COLOR_H_
