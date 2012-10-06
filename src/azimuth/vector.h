@@ -29,6 +29,7 @@
 #define AZ_PI 3.1415926535897931
 #define AZ_TWO_PI 6.2831853071795862
 #define AZ_HALF_PI 1.5707963267948966
+#define AZ_PI_EIGHTHS 0.39269908169872414
 
 // Convert between radians and degrees:
 #define AZ_RAD2DEG(radians) ((double)(radians) * 57.295779513082323)
