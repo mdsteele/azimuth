@@ -23,7 +23,7 @@
 
 #include <stdlib.h> // for size_t
 
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 

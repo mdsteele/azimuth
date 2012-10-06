@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 #include "test/test.h"
 
 /*===========================================================================*/

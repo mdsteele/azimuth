@@ -21,7 +21,7 @@
 #ifndef AZIMUTH_STATE_PROJECTILE_H_
 #define AZIMUTH_STATE_PROJECTILE_H_
 
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 

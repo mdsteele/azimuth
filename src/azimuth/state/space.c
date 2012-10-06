@@ -22,8 +22,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "azimuth/util.h"
-#include "azimuth/vector.h"
+#include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 

@@ -17,10 +17,12 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 
 #include <math.h>
 #include <stdbool.h>
+
+/*===========================================================================*/
 
 const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
 

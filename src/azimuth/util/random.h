@@ -18,8 +18,8 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_RANDOM_H_
-#define AZIMUTH_RANDOM_H_
+#ifndef AZIMUTH_UTIL_RANDOM_H_
+#define AZIMUTH_UTIL_RANDOM_H_
 
 /*===========================================================================*/
 
@@ -35,4 +35,4 @@ int az_randint(int min, int max);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_RANDOM_H_
+#endif // AZIMUTH_UTIL_RANDOM_H_

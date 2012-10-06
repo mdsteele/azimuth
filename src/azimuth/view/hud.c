@@ -27,7 +27,7 @@
 
 #include "azimuth/screen.h"
 #include "azimuth/state/space.h"
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/

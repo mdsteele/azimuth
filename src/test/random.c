@@ -19,8 +19,8 @@
 
 #include "test/random.h"
 
-#include "azimuth/random.h"
-#include "azimuth/util.h"
+#include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "test/test.h"
 
 /*===========================================================================*/

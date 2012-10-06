@@ -17,15 +17,20 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef TEST_UTIL_H_
-#define TEST_UTIL_H_
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-void test_clock_mod(void);
-void test_clock_zigzag(void);
+unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
+                           unsigned long clock) {
+  return (clock % (modulus * slowdown)) / slowdown;
+}
+
+unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
+                              unsigned long clock) {
+  const unsigned int m = modulus - 1;
+  const unsigned long d = az_clock_mod(2 * m, slowdown, clock);
+  return (d <= m ? d : 2 * m - d);
+}
 
 /*===========================================================================*/
-
-#endif // TEST_UTIL_H_

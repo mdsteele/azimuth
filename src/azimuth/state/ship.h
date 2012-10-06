@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/player.h"
-#include "azimuth/vector.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 

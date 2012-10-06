@@ -23,11 +23,11 @@
 #include <OpenGL/gl.h>
 #include <SDL/SDL.h>
 
-#include "azimuth/random.h" // for az_init_random
 #include "azimuth/screen.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
-#include "azimuth/vector.h"
+#include "azimuth/util/random.h" // for az_init_random
+#include "azimuth/util/vector.h"
 #include "azimuth/view/space.h"
 
 /*===========================================================================*/

@@ -19,10 +19,10 @@
 
 #include "test/test.h"
 
-#include "azimuth/random.h"
+#include "azimuth/util/random.h" // for az_init_random
+#include "test/misc.h"
 #include "test/player.h"
 #include "test/random.h"
-#include "test/util.h"
 #include "test/vector.h"
 
 /*===========================================================================*/

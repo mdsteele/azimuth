@@ -23,8 +23,8 @@
 
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
-#include "azimuth/util.h"
-#include "azimuth/vector.h"
+#include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
