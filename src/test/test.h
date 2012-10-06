@@ -43,12 +43,12 @@
 
 #define ASSERT_FALSE(condition) ASSERT_TRUE(!(condition))
 
-#define TESTS_EXIT_CODE() (_any_test_failed ? 1 : 0)
+int final_test_summary(void);
 
 /*===========================================================================*/
 
 extern bool _current_test_failed;
-extern bool _any_test_failed;
+extern unsigned int _num_tests_failed;
 
 void _run_test(const char *name, void (*function)(void));
 

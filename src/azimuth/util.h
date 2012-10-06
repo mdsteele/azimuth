@@ -32,6 +32,16 @@
   for (__typeof__(&*(array)) var_name = (array); \
        var_name != (array) + AZ_ARRAY_SIZE(array); ++var_name)
 
+// Return a number that cycles from zero up to (modulus - 1), with the number
+// advancing by one for every `slowdown` ticks of the clock.
+unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
+                           unsigned long clock);
+
+// Return a number that cycles from zero up to (modulus - 1) and back down
+// again, with the number advancing by one every `slowdown` ticks of the clock.
+unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
+                              unsigned long clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_H_

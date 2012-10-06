@@ -30,6 +30,7 @@ MAIN_C99FILES := $(shell find $(SRCDIR)/azimuth -name '*.c')
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
 	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
 	         $(SRCDIR)/azimuth/random.c \
+	         $(SRCDIR)/azimuth/util.c \
 	         $(SRCDIR)/azimuth/vector.c
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))

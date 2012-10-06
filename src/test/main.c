@@ -22,6 +22,7 @@
 #include "azimuth/random.h"
 #include "test/player.h"
 #include "test/random.h"
+#include "test/util.h"
 #include "test/vector.h"
 
 /*===========================================================================*/
@@ -29,13 +30,15 @@
 int main(int argc, char **argv) {
   az_init_random();
 
+  RUN_TEST(test_clock_mod);
+  RUN_TEST(test_clock_zigzag);
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_player_give_upgrade);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
   RUN_TEST(test_vector_polar);
 
-  return TESTS_EXIT_CODE();
+  return final_test_summary();
 }
 
 /*===========================================================================*/

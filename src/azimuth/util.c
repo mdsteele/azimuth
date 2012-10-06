@@ -17,59 +17,20 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h> // for EXIT_FAILURE and EXIT_SUCCESS
+#include "azimuth/util.h"
 
 /*===========================================================================*/
 
-#define EPSILON 0.00000001
-
-bool _current_test_failed = false;
-unsigned int _num_tests_failed = 0u;
-
-int final_test_summary(void) {
-  if (_num_tests_failed == 0u) {
-    printf("\x1b[32;1mAll tests passed.\x1b[m\n");
-    return EXIT_SUCCESS;
-  } else {
-    printf("\x1b[31;1mSorry, %u test%s failed.\x1b[m\n",
-           _num_tests_failed, (_num_tests_failed == 1u ? "" : "s"));
-    return EXIT_FAILURE;
-  }
+unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
+                           unsigned long clock) {
+  return (clock % (modulus * slowdown)) / slowdown;
 }
 
-void _run_test(const char *name, void (*function)(void)) {
-  _current_test_failed = false;
-  printf("Running %s...\n", name);
-  function();
-  if (_current_test_failed) {
-    ++_num_tests_failed;
-  } else {
-    printf("    \x1b[32mOK\x1b[m\n");
-  }
-}
-
-static bool dapprox(double a, double b) {
-  double d = a - b;
-  return (d < EPSILON && d > -EPSILON);
-}
-
-bool _expect_true(bool condition, const char *message) {
-  if (condition) return true;
-  _current_test_failed = true;
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n", message);
-  return false;
-}
-
-bool _expect_approx(double expected, double actual, const char *message) {
-  if (dapprox(expected, actual)) return true;
-  _current_test_failed = true;
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %g vs. %g\n",
-         message, expected, actual);
-  return false;
+unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
+                              unsigned long clock) {
+  const unsigned int m = modulus - 1;
+  const unsigned long d = az_clock_mod(2 * m, slowdown, clock);
+  return (d <= m ? d : 2 * m - d);
 }
 
 /*===========================================================================*/
