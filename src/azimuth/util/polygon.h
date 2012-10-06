@@ -17,67 +17,34 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
+#pragma once
+#ifndef AZIMUTH_UTIL_POLYGON_H_
+#define AZIMUTH_UTIL_POLYGON_H_
 
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h> // for EXIT_FAILURE and EXIT_SUCCESS
+
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#define EPSILON 0.00000001
+// Represents a closed 2D polygon.  It is usually expected that the polygon is
+// non-self-intersecting, and that the vertices come in counter-clockwise
+// order.  The `vertices` field is generally not considered to own the array
+// that it points to.
+typedef struct {
+  int num_vertices;
+  az_vector_t *vertices;
+} az_polygon_t;
 
-bool _current_test_failed = false;
-unsigned int _num_tests_failed = 0u;
+// Test if the point is in the polygon.  The polygon must be
+// non-self-intersecting, but it need not be convex.
+bool az_polygon_contains(const az_polygon_t polygon, az_vector_t point);
 
-int final_test_summary(void) {
-  if (_num_tests_failed == 0u) {
-    printf("\x1b[32;1mAll tests passed.\x1b[m\n");
-    return EXIT_SUCCESS;
-  } else {
-    printf("\x1b[31;1mSorry, %u test%s failed.\x1b[m\n",
-           _num_tests_failed, (_num_tests_failed == 1u ? "" : "s"));
-    return EXIT_FAILURE;
-  }
-}
-
-void _run_test(const char *name, void (*function)(void)) {
-  _current_test_failed = false;
-  printf("Running %s...", name);
-  fflush(stdout);
-  function();
-  if (_current_test_failed) {
-    ++_num_tests_failed;
-  } else {
-    printf(" OK.\n");
-  }
-}
-
-static void test_failure(void) {
-  if (!_current_test_failed) {
-    printf("\n");
-    _current_test_failed = true;
-  }
-}
-
-static bool dapprox(double a, double b) {
-  double d = a - b;
-  return (d < EPSILON && d > -EPSILON);
-}
-
-bool _expect_true(bool condition, const char *message) {
-  if (condition) return true;
-  test_failure();
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n", message);
-  return false;
-}
-
-bool _expect_approx(double expected, double actual, const char *message) {
-  if (dapprox(expected, actual)) return true;
-  test_failure();
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %g vs. %g\n",
-         message, expected, actual);
-  return false;
-}
+// Test if the point is in the polygon.  The polygon must be convex, the
+// vertices must come in counter-clockwise order.  This function is more
+// efficient, but less general, than az_polygon_contains().
+bool az_convex_polygon_contains(const az_polygon_t polygon, az_vector_t point);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_UTIL_POLYGON_H_

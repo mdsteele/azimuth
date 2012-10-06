@@ -22,6 +22,7 @@
 #include "azimuth/util/random.h" // for az_init_random
 #include "test/misc.h"
 #include "test/player.h"
+#include "test/polygon.h"
 #include "test/random.h"
 #include "test/vector.h"
 
@@ -32,8 +33,10 @@ int main(int argc, char **argv) {
 
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
+  RUN_TEST(test_convex_polygon_contains);
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_player_give_upgrade);
+  RUN_TEST(test_polygon_contains);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
   RUN_TEST(test_vector_polar);
