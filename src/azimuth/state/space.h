@@ -56,12 +56,9 @@ typedef struct {
   az_timer_t timer;
 } az_space_state_t;
 
-void az_tick_space_state(az_space_state_t *state,
-                         const az_controls_t *controls,
-                         double time_seconds);
+void az_tick_space_state(az_space_state_t *state, double time_seconds);
 
-bool az_insert_baddie(az_space_state_t *state,
-                      az_baddie_t **baddie_out);
+bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
 
 bool az_insert_projectile(az_space_state_t *state,
                           az_projectile_t **projectile_out);

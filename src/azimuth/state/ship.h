@@ -34,7 +34,8 @@ typedef struct {
 } az_controls_t;
 
 typedef struct {
-  az_player_t* player;
+  az_controls_t controls;
+  az_player_t player;
   az_vector_t position; // pixels
   az_vector_t velocity; // pixels/second
   double angle; // radians

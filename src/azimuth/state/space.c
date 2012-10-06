@@ -34,7 +34,7 @@
 
 static void tick_pickups(az_space_state_t *state,
                          double time_seconds) {
-  az_player_t *player = state->ship.player;
+  az_player_t *player = &state->ship.player;
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) continue;
     pickup->age += time_seconds;
@@ -70,10 +70,9 @@ static void tick_pickups(az_space_state_t *state,
   }
 }
 
-static void tick_ship(az_ship_t *ship,
-                      const az_controls_t *controls,
-                      double time_seconds) {
-  az_player_t *player = ship->player;
+static void tick_ship(az_ship_t *ship, double time_seconds) {
+  az_player_t *player = &ship->player;
+  const az_controls_t *controls = &ship->controls;
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
   const double impulse = THRUST_ACCEL * time_seconds;
 
@@ -156,9 +155,7 @@ static void tick_camera(az_vector_t *camera, az_vector_t towards,
   *camera = az_vadd(*camera, change);
 }
 
-void az_tick_space_state(az_space_state_t *state,
-                         const az_controls_t *controls,
-                         double time_seconds) {
+void az_tick_space_state(az_space_state_t *state, double time_seconds) {
   ++state->clock;
 
   tick_pickups(state, time_seconds);
@@ -187,15 +184,15 @@ void az_tick_space_state(az_space_state_t *state,
     }
   }
 
-  tick_ship(&state->ship, controls, time_seconds);
+  tick_ship(&state->ship, time_seconds);
   tick_camera(&state->camera, state->ship.position, time_seconds);
   tick_timer(&state->timer, time_seconds);
 
   const double fire_cost = 5.0;
-  if (controls->fire1 && state->ship.player->energy >= fire_cost) {
+  if (state->ship.controls.fire1 && state->ship.player.energy >= fire_cost) {
     az_projectile_t *projectile;
     if (az_insert_projectile(state, &projectile)) {
-      state->ship.player->energy -= fire_cost;
+      state->ship.player.energy -= fire_cost;
       projectile->kind = AZ_PROJ_GUN_NORMAL;
       projectile->position = state->ship.position;
       projectile->velocity = az_vpolar(1000.0, state->ship.angle);

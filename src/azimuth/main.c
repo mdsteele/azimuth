@@ -36,19 +36,20 @@
 #define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
 static void event_loop(void) {
-  az_controls_t controls = {false};
-  az_space_state_t state = {.clock = 0, .timer.active_for = -1 };
-  az_player_t player = {.shields = 55, .max_shields = 400, .energy = 98,
-                        .max_energy = 400, .gun1 = AZ_GUN_HOMING,
-                        .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE};
-  state.ship.position = (az_vector_t){50, 150};
-  state.ship.velocity = (az_vector_t){-20, 10};
-  state.ship.angle = 2.9;
-  state.ship.player = &player;
+  az_space_state_t state = {
+    .clock = 0, .timer.active_for = -1,
+    .ship = {
+      .player = {
+        .shields = 55, .max_shields = 400, .energy = 98, .max_energy = 400,
+        .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
+      },
+      .position = {50, 150}
+    }
+  };
   state.camera = state.ship.position;
-  az_give_upgrade(&player, AZ_UPG_LATERAL_THRUSTERS);
-  az_give_upgrade(&player, AZ_UPG_RETRO_THRUSTERS);
-  az_give_upgrade(&player, AZ_UPG_ROCKET_AMMO_00);
+  az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
+  az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
+  az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_00);
   {
     az_baddie_t *baddie;
     if (az_insert_baddie(&state, &baddie)) {
@@ -62,7 +63,7 @@ static void event_loop(void) {
 
   while (true) {
     // Tick the state:
-    az_tick_space_state(&state, &controls, 1.0/60.0);
+    az_tick_space_state(&state, 1.0/60.0);
     // Draw the screen:
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
@@ -83,23 +84,23 @@ static void event_loop(void) {
             return;
           }
           break;
-        case SDLK_UP: controls.up = true; break;
-        case SDLK_DOWN: controls.down = true; break;
-        case SDLK_LEFT: controls.left = true; break;
-        case SDLK_RIGHT: controls.right = true; break;
-        case SDLK_v: controls.fire1 = true; break;
-        case SDLK_x: controls.util = true; break;
+        case SDLK_UP: state.ship.controls.up = true; break;
+        case SDLK_DOWN: state.ship.controls.down = true; break;
+        case SDLK_LEFT: state.ship.controls.left = true; break;
+        case SDLK_RIGHT: state.ship.controls.right = true; break;
+        case SDLK_v: state.ship.controls.fire1 = true; break;
+        case SDLK_x: state.ship.controls.util = true; break;
         default: break;
         }
         break;
       case SDL_KEYUP:
         switch (event.key.keysym.sym) {
-        case SDLK_UP: controls.up = false; break;
-        case SDLK_DOWN: controls.down = false; break;
-        case SDLK_LEFT: controls.left = false; break;
-        case SDLK_RIGHT: controls.right = false; break;
-        case SDLK_v: controls.fire1 = false; break;
-        case SDLK_x: controls.util = false; break;
+        case SDLK_UP: state.ship.controls.up = false; break;
+        case SDLK_DOWN: state.ship.controls.down = false; break;
+        case SDLK_LEFT: state.ship.controls.left = false; break;
+        case SDLK_RIGHT: state.ship.controls.right = false; break;
+        case SDLK_v: state.ship.controls.fire1 = false; break;
+        case SDLK_x: state.ship.controls.util = false; break;
         default: break;
         }
         break;

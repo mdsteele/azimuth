@@ -241,9 +241,10 @@ static void draw_hud_timer(const az_timer_t *timer, unsigned long clock) {
 }
 
 void az_draw_hud(const az_space_state_t *state) {
-  const az_player_t *player = state->ship.player;
+  const az_player_t *player = &state->ship.player;
   draw_hud_shields_energy(player);
   draw_hud_weapons_selection(player);
+  // TODO: draw boss health bar, when relevant
   draw_hud_timer(&state->timer, state->clock);
 }
 
