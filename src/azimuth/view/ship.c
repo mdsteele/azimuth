@@ -28,12 +28,14 @@
 /*===========================================================================*/
 
 void az_draw_ship(const az_space_state_t* state) {
+  const az_ship_t *ship = &state->ship;
+  const az_controls_t *controls = &ship->controls;
   glPushMatrix(); {
-    glTranslated(state->ship.position.x, state->ship.position.y, 0);
-    glRotated(AZ_RAD2DEG(state->ship.angle), 0, 0, 1);
+    glTranslated(ship->position.x, ship->position.y, 0);
+    glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
     // TODO: tractor beam, if active
     // Exhaust:
-    if (1 /*FIXME: only when using engines*/) {
+    if (controls->up && !controls->down) {
       double zig = az_clock_zigzag(10, 1, state->clock);
       // From port engine:
       glBegin(GL_TRIANGLE_STRIP); {

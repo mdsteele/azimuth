@@ -75,36 +75,36 @@ static void event_loop(void) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
-      case SDL_QUIT:
-        return;
-      case SDL_KEYDOWN:
-        switch (event.key.keysym.sym) {
-        case SDLK_q:
-          if (event.key.keysym.mod & (KMOD_CTRL | KMOD_META)) {
-            return;
+        case SDL_QUIT:
+          return;
+        case SDL_KEYDOWN:
+          switch (event.key.keysym.sym) {
+            case SDLK_q:
+              if (event.key.keysym.mod & (KMOD_CTRL | KMOD_META)) {
+                return;
+              }
+              break;
+            case SDLK_UP: state.ship.controls.up = true; break;
+            case SDLK_DOWN: state.ship.controls.down = true; break;
+            case SDLK_LEFT: state.ship.controls.left = true; break;
+            case SDLK_RIGHT: state.ship.controls.right = true; break;
+            case SDLK_v: state.ship.controls.fire1 = true; break;
+            case SDLK_x: state.ship.controls.util = true; break;
+            default: break;
           }
           break;
-        case SDLK_UP: state.ship.controls.up = true; break;
-        case SDLK_DOWN: state.ship.controls.down = true; break;
-        case SDLK_LEFT: state.ship.controls.left = true; break;
-        case SDLK_RIGHT: state.ship.controls.right = true; break;
-        case SDLK_v: state.ship.controls.fire1 = true; break;
-        case SDLK_x: state.ship.controls.util = true; break;
+        case SDL_KEYUP:
+          switch (event.key.keysym.sym) {
+            case SDLK_UP: state.ship.controls.up = false; break;
+            case SDLK_DOWN: state.ship.controls.down = false; break;
+            case SDLK_LEFT: state.ship.controls.left = false; break;
+            case SDLK_RIGHT: state.ship.controls.right = false; break;
+            case SDLK_v: state.ship.controls.fire1 = false; break;
+            case SDLK_x: state.ship.controls.util = false; break;
+            default: break;
+          }
+          break;
         default: break;
-        }
-        break;
-      case SDL_KEYUP:
-        switch (event.key.keysym.sym) {
-        case SDLK_UP: state.ship.controls.up = false; break;
-        case SDLK_DOWN: state.ship.controls.down = false; break;
-        case SDLK_LEFT: state.ship.controls.left = false; break;
-        case SDLK_RIGHT: state.ship.controls.right = false; break;
-        case SDLK_v: state.ship.controls.fire1 = false; break;
-        case SDLK_x: state.ship.controls.util = false; break;
-        default: break;
-        }
-        break;
-      default: break;
       }
     }
   }

@@ -86,30 +86,30 @@ static void draw_hud_shields_energy(const az_player_t *player) {
 
 static const char *gun_name(az_gun_t gun) {
   switch (gun) {
-  case AZ_GUN_CHARGE: return "CHARGE";
-  case AZ_GUN_FREEZE: return "FREEZE";
-  case AZ_GUN_TRIPLE: return "TRIPLE";
-  case AZ_GUN_HOMING: return "HOMING";
-  case AZ_GUN_BEAM:   return "BEAM";
-  case AZ_GUN_WAVE:   return "WAVE";
-  case AZ_GUN_BURST:  return "BURST";
-  case AZ_GUN_PIERCE: return "PIERCE";
-  default: assert(false);
+    case AZ_GUN_CHARGE: return "CHARGE";
+    case AZ_GUN_FREEZE: return "FREEZE";
+    case AZ_GUN_TRIPLE: return "TRIPLE";
+    case AZ_GUN_HOMING: return "HOMING";
+    case AZ_GUN_BEAM:   return "BEAM";
+    case AZ_GUN_PHASE:  return "PHASE";
+    case AZ_GUN_BURST:  return "BURST";
+    case AZ_GUN_PIERCE: return "PIERCE";
+    default: assert(false);
   }
   return "XXXXXX";
 }
 
 static void set_gun_color(az_gun_t gun) {
   switch (gun) {
-  case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
-  case AZ_GUN_FREEZE: glColor3f(0, 1, 1); break;
-  case AZ_GUN_TRIPLE: glColor3f(0, 1, 0); break;
-  case AZ_GUN_HOMING: glColor3f(0, 0, 1); break;
-  case AZ_GUN_BEAM:   glColor3f(1, 0, 0); break;
-  case AZ_GUN_WAVE:   glColor3f(1, 1, 0); break;
-  case AZ_GUN_BURST:  glColor3f(0.5, 0.5, 0.5); break;
-  case AZ_GUN_PIERCE: glColor3f(1, 0, 1); break;
-  default: assert(false);
+    case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
+    case AZ_GUN_FREEZE: glColor3f(0, 1, 1); break;
+    case AZ_GUN_TRIPLE: glColor3f(0, 1, 0); break;
+    case AZ_GUN_HOMING: glColor3f(0, 0, 1); break;
+    case AZ_GUN_BEAM:   glColor3f(1, 0, 0); break;
+    case AZ_GUN_PHASE:  glColor3f(1, 1, 0); break;
+    case AZ_GUN_BURST:  glColor3f(0.5, 0.5, 0.5); break;
+    case AZ_GUN_PIERCE: glColor3f(1, 0, 1); break;
+    default: assert(false);
   }
 }
 

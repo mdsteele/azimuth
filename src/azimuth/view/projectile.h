@@ -18,39 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_PROJECTILE_H_
-#define AZIMUTH_STATE_PROJECTILE_H_
+#ifndef AZIMUTH_VIEW_PROJECTILE_H_
+#define AZIMUTH_VIEW_PROJECTILE_H_
 
-#include "azimuth/vector.h"
-
-/*===========================================================================*/
-
-typedef enum {
-  AZ_PROJ_NOTHING = 0,
-  AZ_PROJ_GUN_NORMAL,
-  AZ_PROJ_GUN_CHARGED_NORMAL,
-  AZ_PROJ_GUN_ICE,
-  AZ_PROJ_GUN_CHARGED_ICE,
-  AZ_PROJ_GUN_HOMING,
-  AZ_PROJ_GUN_CHARGED_HOMING,
-  AZ_PROJ_GUN_PHASE,
-  AZ_PROJ_GUN_CHARGED_PHASE,
-  AZ_PROJ_GUN_PIERCE,
-  AZ_PROJ_GUN_CHARGED_PIERCE,
-  // TODO add more gun projectiles
-  AZ_PROJ_ROCKET,
-  AZ_PROJ_HYPER_ROCKET,
-  AZ_PROJ_BOMB,
-  AZ_PROJ_HYPER_BOMB
-} az_proj_kind_t;
-
-typedef struct {
-  az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
-  az_vector_t position;
-  az_vector_t velocity;
-  double age; // seconds
-} az_projectile_t;
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PROJECTILE_H_
+void az_draw_projectiles(const az_space_state_t* state);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_VIEW_PROJECTILE_H_

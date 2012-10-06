@@ -41,27 +41,27 @@ static void tick_pickups(az_space_state_t *state,
     if (az_vwithin(pickup->position, state->ship.position,
                    PICKUP_COLLECTION_RANGE)) {
       switch (pickup->kind) {
-      case AZ_PUP_ROCKETS:
-        player->rockets = az_imin(player->max_rockets, player->rockets +
-                                  AZ_ROCKETS_PER_PICKUP);
-        break;
-      case AZ_PUP_BOMBS:
-        player->bombs = az_imin(player->max_bombs, player->bombs +
-                                AZ_BOMBS_PER_PICKUP);
-        break;
-      case AZ_PUP_SMALL_SHIELDS:
-        player->shields = az_imin(player->max_shields, player->shields +
-                                  AZ_SHIELDS_PER_SMALL_PICKUP);
-        break;
-      case AZ_PUP_MEDIUM_SHIELDS:
-        player->shields = az_imin(player->max_shields, player->shields +
-                                  AZ_SHIELDS_PER_MEDIUM_PICKUP);
-        break;
-      case AZ_PUP_LARGE_SHIELDS:
-        player->shields = az_imin(player->max_shields, player->shields +
-                                  AZ_SHIELDS_PER_LARGE_PICKUP);
-        break;
-      default: assert(false);
+        case AZ_PUP_ROCKETS:
+          player->rockets = az_imin(player->max_rockets, player->rockets +
+                                    AZ_ROCKETS_PER_PICKUP);
+          break;
+        case AZ_PUP_BOMBS:
+          player->bombs = az_imin(player->max_bombs, player->bombs +
+                                  AZ_BOMBS_PER_PICKUP);
+          break;
+        case AZ_PUP_SMALL_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_SMALL_PICKUP);
+          break;
+        case AZ_PUP_MEDIUM_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_MEDIUM_PICKUP);
+          break;
+        case AZ_PUP_LARGE_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_LARGE_PICKUP);
+          break;
+        default: assert(false);
       }
       pickup->kind = AZ_PUP_NOTHING;
     } else if (pickup->age >= PICKUP_MAX_AGE) {
@@ -188,14 +188,16 @@ void az_tick_space_state(az_space_state_t *state, double time_seconds) {
   tick_camera(&state->camera, state->ship.position, time_seconds);
   tick_timer(&state->timer, time_seconds);
 
-  const double fire_cost = 5.0;
+  const double fire_cost = 20.0;
   if (state->ship.controls.fire1 && state->ship.player.energy >= fire_cost) {
     az_projectile_t *projectile;
     if (az_insert_projectile(state, &projectile)) {
       state->ship.player.energy -= fire_cost;
       projectile->kind = AZ_PROJ_GUN_NORMAL;
-      projectile->position = state->ship.position;
-      projectile->velocity = az_vpolar(1000.0, state->ship.angle);
+      projectile->position = az_vadd(state->ship.position,
+                                     az_vpolar(18, state->ship.angle));
+      projectile->velocity = az_vpolar(600.0, state->ship.angle);
+      state->ship.controls.fire1 = false;
     }
   }
 

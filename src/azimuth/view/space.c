@@ -19,109 +19,19 @@
 
 #include "azimuth/view/space.h"
 
-#include <assert.h>
-#include <math.h>
-
 #include <OpenGL/gl.h>
 
 #include "azimuth/screen.h"
 #include "azimuth/state/baddie.h"
-#include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util.h"
 #include "azimuth/vector.h"
 #include "azimuth/view/hud.h"
+#include "azimuth/view/pickup.h"
+#include "azimuth/view/projectile.h"
 #include "azimuth/view/ship.h"
 
 /*===========================================================================*/
-
-static void draw_pickup(az_pickup_kind_t kind, unsigned long clock) {
-  // TODO: draw different kinds of pickups differently
-  double radius = 0.5 * (double)(clock % 16);
-  switch (kind) {
-  case AZ_PUP_ROCKETS:
-    glColor3f(1, 0, 0);
-    glBegin(GL_LINES); {
-      glVertex2d(-2.5,  2.5);
-      glVertex2d( 2.5,  2.5);
-      glVertex2d(-2.5, -0.5);
-      glVertex2d( 2.5, -0.5);
-    } glEnd();
-    glBegin(GL_LINE_STRIP); {
-      glVertex2d(-2.5, -1.5);
-      glVertex2d(-4.5, -4.5);
-      glVertex2d(-1.5, -3.5);
-    } glEnd();
-    glBegin(GL_LINE_STRIP); {
-      glVertex2d( 2.5, -1.5);
-      glVertex2d( 4.5, -4.5);
-      glVertex2d( 1.5, -3.5);
-    } glEnd();
-    glColor3f(0, (clock % 8 < 4 ? 0 : 1), 1);
-    glBegin(GL_LINE_LOOP); {
-      glVertex2d( 1.5,  4.5);
-      glVertex2d( 2.5,  2.5);
-      glVertex2d( 2.5, -1.5);
-      glVertex2d( 1.5, -3.5);
-      glVertex2d(-1.5, -3.5);
-      glVertex2d(-2.5, -1.5);
-      glVertex2d(-2.5,  2.5);
-      glVertex2d(-1.5,  4.5);
-    } glEnd();
-    break;
-  case AZ_PUP_BOMBS:
-    glColor3f(1, (clock % 8 < 4 ? 0 : 1), 0);
-    glBegin(GL_POLYGON); {
-      glVertex2d( 1.5,  2.5);
-      glVertex2d( 2.5,  1.5);
-      glVertex2d( 2.5, -1.5);
-      glVertex2d( 1.5, -2.5);
-      glVertex2d(-1.5, -2.5);
-      glVertex2d(-2.5, -1.5);
-      glVertex2d(-2.5,  1.5);
-      glVertex2d(-1.5,  2.5);
-    } glEnd();
-    glColor3f(0, 0, 1);
-    glBegin(GL_LINE_LOOP); {
-      glVertex2d( 2.5,  4.5);
-      glVertex2d( 4.5,  2.5);
-      glVertex2d( 4.5, -2.5);
-      glVertex2d( 2.5, -4.5);
-      glVertex2d(-2.5, -4.5);
-      glVertex2d(-4.5, -2.5);
-      glVertex2d(-4.5,  2.5);
-      glVertex2d(-2.5,  4.5);
-    } glEnd();
-    break;
-  case AZ_PUP_LARGE_SHIELDS:
-    radius *= 1.3; // fallthrough
-  case AZ_PUP_MEDIUM_SHIELDS:
-    radius *= 1.3; // fallthrough
-  case AZ_PUP_SMALL_SHIELDS:
-    glBegin(GL_TRIANGLE_FAN); {
-      glColor4f(0, 1, 1, 0);
-      glVertex2d(0, 0);
-      glColor4f(0, 1, 1, 1);
-      for (int i = 0; i <= 16; ++i) {
-        glVertex2d(radius * cos(i * AZ_PI_EIGHTHS),
-                   radius * sin(i * AZ_PI_EIGHTHS));
-      }
-    } glEnd();
-    break;
-  default: assert(false);
-  }
-}
-
-static void draw_pickups(const az_space_state_t *state) {
-  AZ_ARRAY_LOOP(pickup, state->pickups) {
-    if (pickup->kind == AZ_PUP_NOTHING) continue;
-    glPushMatrix(); {
-      glTranslated(pickup->position.x, pickup->position.y, 0);
-      glRotated(AZ_RAD2DEG(-az_vtheta(pickup->position)), 0, 0, 1);
-      draw_pickup(pickup->kind, state->clock);
-    } glPopMatrix();
-  }
-}
 
 static void draw_camera_view(const az_space_state_t *state) {
   // center:
@@ -145,7 +55,7 @@ static void draw_camera_view(const az_space_state_t *state) {
     } glEnd();
   } glPopMatrix();
 
-  draw_pickups(state);
+  az_draw_pickups(state);
 
   // Draw baddies:
   // TODO: draw different kinds of baddies differently
@@ -165,18 +75,8 @@ static void draw_camera_view(const az_space_state_t *state) {
     } glPopMatrix();
   }
 
+  az_draw_projectiles(state);
   az_draw_ship(state);
-
-  // Draw projectiles:
-  // TODO: draw different kinds of projectiles differently
-  AZ_ARRAY_LOOP(proj, state->projectiles) {
-    if (proj->kind != AZ_PROJ_NOTHING) {
-      glColor3f(0, 1, 0); // green
-      glBegin(GL_POINTS); {
-        glVertex2d(proj->position.x, proj->position.y);
-      } glEnd();
-    }
-  }
 }
 
 void az_space_draw_screen(const az_space_state_t *state) {
