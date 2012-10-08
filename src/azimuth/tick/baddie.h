@@ -18,22 +18,18 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_SCREEN_H_
-#define AZIMUTH_SCREEN_H_
+#ifndef AZIMUTH_TICK_BADDIE_H_
+#define AZIMUTH_TICK_BADDIE_H_
+
+#include <stdbool.h>
+
+#include "azimuth/state/baddie.h"
+#include "azimuth/state/projectile.h"
 
 /*===========================================================================*/
 
-// The dimensions of the screen:
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
-
-// The distance from the center of the screen to the corner:
-#define SCREEN_RADIUS 400
-#if (SCREEN_WIDTH/2)*(SCREEN_WIDTH/2)+(SCREEN_HEIGHT/2)*(SCREEN_HEIGHT/2) != \
-    SCREEN_RADIUS*SCREEN_RADIUS
-#error Incorrect SCREEN_RADIUS value.
-#endif
+bool az_proj_hits_baddie(az_projectile_t *proj, az_baddie_t *baddie);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_SCREEN_H_
+#endif // AZIMUTH_TICK_BADDIE_H_

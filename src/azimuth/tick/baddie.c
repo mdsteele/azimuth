@@ -17,23 +17,30 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_SCREEN_H_
-#define AZIMUTH_SCREEN_H_
+#include "azimuth/tick/baddie.h"
+
+#include <assert.h>
+#include <stdbool.h>
+
+#include "azimuth/state/baddie.h"
+#include "azimuth/state/projectile.h"
 
 /*===========================================================================*/
 
-// The dimensions of the screen:
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
+bool az_proj_hits_baddie(az_projectile_t *proj, az_baddie_t *baddie) {
+  if (!az_vwithin(proj->position, baddie->position,
+                  baddie->data->bounding_radius)) {
+    return false;
+  }
 
-// The distance from the center of the screen to the corner:
-#define SCREEN_RADIUS 400
-#if (SCREEN_WIDTH/2)*(SCREEN_WIDTH/2)+(SCREEN_HEIGHT/2)*(SCREEN_HEIGHT/2) != \
-    SCREEN_RADIUS*SCREEN_RADIUS
-#error Incorrect SCREEN_RADIUS value.
-#endif
+  switch (baddie->kind) {
+    case AZ_BAD_LUMP:
+      return true; // FIXME
+    case AZ_BAD_TURRET:
+      return true; // FIXME
+    default: assert(false);
+  }
+  return false;
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_SCREEN_H_

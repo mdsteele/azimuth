@@ -26,6 +26,7 @@
 #include "azimuth/screen.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/space.h" // for az_tick_space_state
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/util/vector.h"
 #include "azimuth/view/space.h"
@@ -35,17 +36,18 @@
 #define VIDEO_DEPTH 32
 #define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
+static az_space_state_t state = {
+  .clock = 0, .timer.active_for = -1,
+  .ship = {
+    .player = {
+      .shields = 55, .max_shields = 400, .energy = 98, .max_energy = 400,
+      .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
+    },
+    .position = {50, 150}
+  }
+};
+
 static void event_loop(void) {
-  az_space_state_t state = {
-    .clock = 0, .timer.active_for = -1,
-    .ship = {
-      .player = {
-        .shields = 55, .max_shields = 400, .energy = 98, .max_energy = 400,
-        .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
-      },
-      .position = {50, 150}
-    }
-  };
   state.camera = state.ship.position;
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
@@ -53,11 +55,7 @@ static void event_loop(void) {
   {
     az_baddie_t *baddie;
     if (az_insert_baddie(&state, &baddie)) {
-      baddie->kind = AZ_BAD_LUMP;
-      baddie->position = (az_vector_t){-150, -150};
-      baddie->velocity = AZ_VZERO;
-      baddie->angle = 0.5;
-      baddie->health = 10.0;
+      az_init_baddie(baddie, AZ_BAD_TURRET, (az_vector_t){-150, -150}, 0.5);
     }
   }
 

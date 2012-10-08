@@ -33,33 +33,21 @@
 
 /*===========================================================================*/
 
-#define AZ_MAX_BADDIES 128
-#define AZ_MAX_PARTICLES 512
-#define AZ_MAX_PICKUPS 128
-#define AZ_MAX_PROJECTILES 256
-
-typedef struct {
-  az_room_key_t key;
-  // TODO
-} az_room_t;
-
 typedef struct {
   double active_for; // negative if timer is inactive
   double time_remaining; // seconds
 } az_timer_t;
 
 typedef struct {
-  az_baddie_t baddies[AZ_MAX_BADDIES];
   unsigned long clock;
   az_vector_t camera;
-  az_particle_t particles[AZ_MAX_PARTICLES];
-  az_pickup_t pickups[AZ_MAX_PICKUPS];
-  az_projectile_t projectiles[AZ_MAX_PROJECTILES];
   az_ship_t ship;
   az_timer_t timer;
+  az_baddie_t baddies[100];
+  az_particle_t particles[500];
+  az_pickup_t pickups[100];
+  az_projectile_t projectiles[250];
 } az_space_state_t;
-
-void az_tick_space_state(az_space_state_t *state, double time_seconds);
 
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
 

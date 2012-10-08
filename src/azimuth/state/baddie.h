@@ -32,12 +32,29 @@ typedef enum {
 } az_baddie_kind_t;
 
 typedef struct {
+  double bounding_radius;
+  double max_health;
+} az_baddie_data_t;
+
+typedef struct {
   az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
+  const az_baddie_data_t *data;
   az_vector_t position;
   az_vector_t velocity;
   double angle;
   double health;
+  // The baddie's "components" describe the positions of its subparts.  The
+  // meanings of these are specific to the baddie kind.
+  struct {
+    az_vector_t position;
+    double angle;
+  } components[4];
 } az_baddie_t;
+
+// Set reasonable initial field values for a baddie of the given kind, at the
+// given position.
+void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
+                    az_vector_t position, double angle);
 
 /*===========================================================================*/
 
