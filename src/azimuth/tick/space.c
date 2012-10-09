@@ -28,6 +28,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
+#include "azimuth/tick/projectile.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
@@ -166,55 +167,23 @@ void az_tick_space_state(az_space_state_t *state, double time_seconds) {
 
   az_tick_particles(state, time_seconds);
   az_tick_pickups(state, time_seconds);
-
-  AZ_ARRAY_LOOP(proj, state->projectiles) {
-    if (proj->kind == AZ_PROJ_NOTHING) continue;
-    proj->age += time_seconds;
-    if (proj->age > 1.0) {
-      proj->kind = AZ_PROJ_NOTHING;
-      continue;
-    }
-
-    proj->position = az_vadd(proj->position,
-                             az_vmul(proj->velocity, time_seconds));
-    // TODO: don't do this loop if the proj was fired by a baddie
-    AZ_ARRAY_LOOP(baddie, state->baddies) {
-      if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (az_vwithin(baddie->position, proj->position, 20.0)) {
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_BOOM;
-          particle->color = (az_color_t){255, 255, 255, 255};
-          particle->position = proj->position;
-          particle->velocity = AZ_VZERO;
-          particle->lifetime = 0.3;
-          particle->param1 = 10;
-        }
-        baddie->health -= 1.0;
-        if (baddie->health <= 0.0) {
-          baddie->kind = AZ_BAD_NOTHING;
-          az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, baddie->position);
-        }
-        proj->kind = AZ_PROJ_NOTHING;
-        break;
-      }
-    }
-    // TODO: if proj is baddie-fired, check if hits ship
-  }
-
+  az_tick_projectiles(state, time_seconds);
   tick_ship(state, time_seconds);
   tick_camera(&state->camera, state->ship.position, time_seconds);
   tick_timer(&state->timer, time_seconds);
 
+  // TODO: Put this stuff into tick_ship:
   const double fire_cost = 20.0;
   if (state->ship.controls.fire1 && state->ship.player.energy >= fire_cost) {
     az_projectile_t *projectile;
     if (az_insert_projectile(state, &projectile)) {
       state->ship.player.energy -= fire_cost;
       projectile->kind = AZ_PROJ_GUN_NORMAL;
+      projectile->fired_by_enemy = false;
       projectile->position = az_vadd(state->ship.position,
                                      az_vpolar(18, state->ship.angle));
       projectile->velocity = az_vpolar(600.0, state->ship.angle);
+      projectile->lifetime = 1.0;
       state->ship.controls.fire1 = false;
     }
   }

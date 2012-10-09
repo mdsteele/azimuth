@@ -18,46 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_PROJECTILE_H_
-#define AZIMUTH_STATE_PROJECTILE_H_
+#ifndef AZIMUTH_TICK_PROJECTILE_H_
+#define AZIMUTH_TICK_PROJECTILE_H_
 
-#include <stdbool.h>
-
-#include "azimuth/util/vector.h"
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_PROJ_NOTHING = 0,
-  AZ_PROJ_GUN_NORMAL,
-  AZ_PROJ_GUN_CHARGED_NORMAL,
-  AZ_PROJ_GUN_ICE,
-  AZ_PROJ_GUN_CHARGED_ICE,
-  AZ_PROJ_GUN_HOMING,
-  AZ_PROJ_GUN_CHARGED_HOMING,
-  AZ_PROJ_GUN_PHASE,
-  AZ_PROJ_GUN_CHARGED_PHASE,
-  AZ_PROJ_GUN_PIERCE,
-  AZ_PROJ_GUN_CHARGED_PIERCE,
-  // TODO add more gun projectiles
-  AZ_PROJ_ROCKET,
-  AZ_PROJ_HYPER_ROCKET,
-  AZ_PROJ_BOMB,
-  AZ_PROJ_HYPER_BOMB
-} az_proj_kind_t;
-
-typedef struct {
-  az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
-  bool fired_by_enemy; // if true, this projectile can hit the ship
-  az_vector_t position;
-  az_vector_t velocity;
-  double age, lifetime; // seconds
-} az_projectile_t;
-
-// Return true if this kind of projectile passes through walls instead of
-// hitting them (e.g. if it came from the PHASE gun).
-bool az_proj_kind_passes_through_walls(az_proj_kind_t kind);
+void az_tick_projectiles(az_space_state_t *state, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PROJECTILE_H_
+#endif // AZIMUTH_TICK_PROJECTILE_H_
