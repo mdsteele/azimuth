@@ -19,6 +19,10 @@
 
 #include "azimuth/state/space.h"
 
+#include <assert.h>
+#include <stdbool.h>
+
+#include "azimuth/state/uid.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
@@ -29,6 +33,30 @@ bool az_insert_baddie(az_space_state_t *state,
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
       *baddie_out = baddie;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
+                    az_node_t **node_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->nodes));
+  az_node_t *node = &state->nodes[index];
+  if (node->uid == uid) {
+    *node_out = node;
+    return true;
+  }
+  return false;
+}
+
+bool az_insert_node(az_space_state_t *state,
+                    az_node_t **node_out) {
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind == AZ_NODE_NOTHING) {
+      az_assign_uid(node - state->nodes, &node->uid);
+      *node_out = node;
       return true;
     }
   }

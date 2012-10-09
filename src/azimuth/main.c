@@ -58,6 +58,14 @@ static void event_loop(void) {
       az_init_baddie(baddie, AZ_BAD_TURRET, (az_vector_t){-150, -150}, 0.5);
     }
   }
+  {
+    az_node_t *node;
+    if (az_insert_node(&state, &node)) {
+      node->kind = AZ_NODE_TRACTOR;
+      node->position = (az_vector_t){150, -150};
+      node->angle = 0;
+    }
+  }
 
   while (true) {
     // Tick the state:

@@ -17,16 +17,22 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_VIEW_SPACE_H_
-#define AZIMUTH_VIEW_SPACE_H_
+#include "azimuth/state/uid.h"
 
-#include "azimuth/state/space.h"
+#include <assert.h>
 
 /*===========================================================================*/
 
-void az_space_draw_screen(az_space_state_t* state);
+#define AZ_UID_INDEX_MASK 0xFFFFu
+#define AZ_UID_COUNT_STEP 0x10000u
+
+void az_assign_uid(int index, az_uid_t *uid) {
+  assert(index == (index & AZ_UID_INDEX_MASK));
+  *uid = ((*uid + AZ_UID_COUNT_STEP) & ~AZ_UID_INDEX_MASK) | index;
+}
+
+int az_uid_index(az_uid_t uid) {
+  return (int)(uid & AZ_UID_INDEX_MASK);
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_VIEW_SPACE_H_

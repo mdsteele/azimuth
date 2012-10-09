@@ -18,15 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_SPACE_H_
-#define AZIMUTH_VIEW_SPACE_H_
+#ifndef AZIMUTH_VIEW_NODE_H_
+#define AZIMUTH_VIEW_NODE_H_
 
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_space_draw_screen(az_space_state_t* state);
+void az_draw_nodes(const az_space_state_t* state);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_SPACE_H_
+#endif // AZIMUTH_VIEW_NODE_H_

@@ -25,6 +25,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
+#include "azimuth/view/node.h"
 #include "azimuth/view/hud.h"
 #include "azimuth/view/particle.h"
 #include "azimuth/view/pickup.h"
@@ -33,7 +34,7 @@
 
 /*===========================================================================*/
 
-static void draw_camera_view(const az_space_state_t *state) {
+static void draw_camera_view(az_space_state_t *state) {
   // center:
   glPushMatrix(); {
     glColor4f(1, 0, 0, 1); // red
@@ -55,6 +56,7 @@ static void draw_camera_view(const az_space_state_t *state) {
     } glEnd();
   } glPopMatrix();
   //az_draw_walls(state);
+  az_draw_nodes(state);
   az_draw_pickups(state);
   az_draw_baddies(state);
   az_draw_projectiles(state);
@@ -62,7 +64,7 @@ static void draw_camera_view(const az_space_state_t *state) {
   az_draw_particles(state);
 }
 
-void az_space_draw_screen(const az_space_state_t *state) {
+void az_space_draw_screen(az_space_state_t *state) {
   glPushMatrix(); {
     // Make positive Y be up instead of down.
     glScaled(1, -1, 1);

@@ -18,15 +18,28 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_SPACE_H_
-#define AZIMUTH_VIEW_SPACE_H_
+#ifndef AZIMUTH_STATE_UID_H_
+#define AZIMUTH_STATE_UID_H_
 
-#include "azimuth/state/space.h"
-
-/*===========================================================================*/
-
-void az_space_draw_screen(az_space_state_t* state);
+#include <stdint.h> // for uint64_t
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_SPACE_H_
+// A UID uniquely identifies a game object (of a particular type) stored in one
+// of the arrays in az_space_state_t.  Each time we insert an object into one
+// of those arrays, we call az_assign_uid to give it a UID.  Given only the
+// UID, we can quickly find the object in the array and check if its still the
+// same object (as opposed to a new object that was placed there after the old
+// one was removed).
+typedef uint64_t az_uid_t;
+
+// Reinitialize a UID with a new value.  The index should be the array index at
+// which the object that this UID is for is stored.
+void az_assign_uid(int index, az_uid_t *uid);
+
+// Return the index that was passed to az_assign_uid when the UID was assigned.
+int az_uid_index(az_uid_t uid);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_STATE_UID_H_

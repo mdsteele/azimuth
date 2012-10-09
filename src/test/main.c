@@ -24,6 +24,7 @@
 #include "test/player.h"
 #include "test/polygon.h"
 #include "test/random.h"
+#include "test/uid.h"
 #include "test/vector.h"
 
 /*===========================================================================*/
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_polygon_contains);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
+  RUN_TEST(test_uids);
   RUN_TEST(test_vector_polar);
 
   return final_test_summary();

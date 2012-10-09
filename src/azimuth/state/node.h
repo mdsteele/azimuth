@@ -18,15 +18,30 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_SPACE_H_
-#define AZIMUTH_VIEW_SPACE_H_
+#ifndef AZIMUTH_STATE_NODE_H_
+#define AZIMUTH_STATE_NODE_H_
 
-#include "azimuth/state/space.h"
-
-/*===========================================================================*/
-
-void az_space_draw_screen(az_space_state_t* state);
+#include "azimuth/state/uid.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_SPACE_H_
+typedef enum {
+  AZ_NODE_NOTHING = 0,
+  AZ_NODE_TRACTOR,
+  AZ_NODE_REFILL_SHIELD,
+  AZ_NODE_REFILL_AMMO,
+  AZ_NODE_REFILL_ALL,
+  AZ_NODE_COMM
+} az_node_kind_t;
+
+typedef struct {
+  az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
+  az_uid_t uid;
+  az_vector_t position;
+  double angle;
+} az_node_t;
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_STATE_NODE_H_

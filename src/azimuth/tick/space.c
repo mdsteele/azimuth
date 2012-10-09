@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h> // for pow
 #include <stdbool.h>
+#include <stdlib.h> // for NULL
 
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
@@ -83,15 +84,37 @@ static void tick_pickups(az_space_state_t *state,
   }
 }
 
-static void tick_ship(az_ship_t *ship, double time_seconds) {
+static void tick_ship(az_space_state_t *state, double time_seconds) {
+  az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
   const double impulse = THRUST_ACCEL * time_seconds;
 
+  // Recharge energy:
+  const double charge_rate = 75.0 +
+    (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ? 75.0 : 0.0) +
+    (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ? 125.0 : 0.0);
+  player->energy = az_dmin(player->max_energy,
+                           player->energy + charge_rate * time_seconds);
+
   // Apply velocity:
   ship->position = az_vadd(ship->position,
                            az_vmul(ship->velocity, time_seconds));
+
+  // Apply gravity:
+  const double planetoid_radius = 100000.0; // pixels
+  const double surface_gravity = 1.6; // pixels per second^2
+  // Gravity works as follows.  By the spherical shell theorem, the force of
+  // gravity on the ship (while inside the planetoid) varies linearly with the
+  // distance from the planetoid's center, so the change in velocity is
+  // time_seconds * surface_gravity * vnorm(position) / planetoid_radius.
+  // However, we should then multiply this scalar by the unit vector pointing
+  // from the ship towards the core, which is -position/vnorm(position).  The
+  // vnorm(position) factors cancel and we end up with what we have here.
+  ship->velocity = az_vadd(ship->velocity,
+                           az_vmul(ship->position, -time_seconds *
+                                   (surface_gravity / planetoid_radius)));
 
   // Turning left:
   if (controls->left && !controls->right) {
@@ -145,12 +168,30 @@ static void tick_ship(az_ship_t *ship, double time_seconds) {
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time_seconds));
 
-  // Recharge energy:
-  const double charge_rate = 75.0 +
-    (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ? 75.0 : 0.0) +
-    (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ? 125.0 : 0.0);
-  player->energy = az_dmin(player->max_energy,
-                           player->energy + charge_rate * time_seconds);
+  // Deactivate tractor beam:
+  if (!controls->util) {
+    ship->tractor_beam.active = false;
+  }
+  // Activate tractor beam:
+  if (controls->util && controls->fire1 && !ship->tractor_beam.active) {
+    az_node_t *closest_node = NULL;
+    double best_distance = 300.0;
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind != AZ_NODE_NOTHING) {
+        const double dist = az_vnorm(az_vsub(node->position, ship->position));
+        if (dist <= best_distance) {
+          closest_node = node;
+          best_distance = dist;
+        }
+      }
+    }
+    if (closest_node != NULL) {
+      ship->tractor_beam.active = true;
+      ship->tractor_beam.node_uid = closest_node->uid;
+      ship->tractor_beam.distance = best_distance;
+    }
+  }
+  // TODO: Apply tractor beam's velocity changes
 }
 
 static void tick_timer(az_timer_t *timer, double time_seconds) {
@@ -209,7 +250,7 @@ void az_tick_space_state(az_space_state_t *state, double time_seconds) {
     // TODO: if proj is baddie-fired, check if hits ship
   }
 
-  tick_ship(&state->ship, time_seconds);
+  tick_ship(state, time_seconds);
   tick_camera(&state->camera, state->ship.position, time_seconds);
   tick_timer(&state->timer, time_seconds);
 

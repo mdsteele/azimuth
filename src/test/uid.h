@@ -18,15 +18,13 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_SPACE_H_
-#define AZIMUTH_VIEW_SPACE_H_
-
-#include "azimuth/state/space.h"
+#ifndef TEST_UID_H_
+#define TEST_UID_H_
 
 /*===========================================================================*/
 
-void az_space_draw_screen(az_space_state_t* state);
+void test_uids(void);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_SPACE_H_
+#endif // TEST_UID_H_

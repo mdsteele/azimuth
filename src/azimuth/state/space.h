@@ -24,11 +24,13 @@
 #include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/node.h"
 #include "azimuth/state/particle.h"
 #include "azimuth/state/pickup.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -44,12 +46,17 @@ typedef struct {
   az_ship_t ship;
   az_timer_t timer;
   az_baddie_t baddies[100];
+  az_node_t nodes[50];
   az_particle_t particles[500];
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
 } az_space_state_t;
 
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
+
+bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
+                    az_node_t **node_out);
+bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
 
 bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
 

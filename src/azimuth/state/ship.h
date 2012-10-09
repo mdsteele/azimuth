@@ -39,6 +39,11 @@ typedef struct {
   az_vector_t position; // pixels
   az_vector_t velocity; // pixels/second
   double angle; // radians
+  struct {
+    bool active;
+    az_uid_t node_uid;
+    double distance;
+  } tractor_beam;
 } az_ship_t;
 
 /*===========================================================================*/
