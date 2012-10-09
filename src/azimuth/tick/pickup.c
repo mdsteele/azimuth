@@ -17,62 +17,53 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/particle.h"
+#include "azimuth/tick/pickup.h"
 
 #include <assert.h>
-#include <math.h>
 #include <stdbool.h>
 
-#include <OpenGL/gl.h>
-
-#include "azimuth/state/particle.h"
+#include "azimuth/constants.h"
+#include "azimuth/state/pickup.h"
+#include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
-#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void with_color_alpha(az_color_t color, double alpha_factor) {
-  glColor4ub(color.r, color.g, color.b, color.a * alpha_factor);
-}
-
-static void draw_particle(const az_particle_t *particle) {
-  assert(particle->age <= particle->lifetime);
-  switch (particle->kind) {
-    case AZ_PAR_SPECK:
-      glBegin(GL_POINTS); {
-        const double ratio = particle->age / particle->lifetime;
-        with_color_alpha(particle->color, 1 - ratio);
-        glVertex2d(0, 0);
-      } glEnd();
-      break;
-    case AZ_PAR_SEGMENT:
-      // TODO
-      break;
-    case AZ_PAR_BOOM:
-      glBegin(GL_TRIANGLE_FAN); {
-        with_color_alpha(particle->color, 0);
-        glVertex2d(0, 0);
-        const double ratio = particle->age / particle->lifetime;
-        with_color_alpha(particle->color, 1 - ratio * ratio);
-        const double radius = particle->param1 * ratio;
-        for (int i = 0; i <= 16; ++i) {
-          glVertex2d(radius * cos(i * AZ_PI_EIGHTHS),
-                     radius * sin(i * AZ_PI_EIGHTHS));
-        }
-      } glEnd();
-      break;
-    default: assert(false);
-  }
-}
-
-void az_draw_particles(const az_space_state_t* state) {
-  AZ_ARRAY_LOOP(particle, state->particles) {
-    if (particle->kind == AZ_PAR_NOTHING) continue;
-    glPushMatrix(); {
-      glTranslated(particle->position.x, particle->position.y, 0);
-      draw_particle(particle);
-    } glPopMatrix();
+void az_tick_pickups(az_space_state_t *state, double time) {
+  az_player_t *player = &state->ship.player;
+  AZ_ARRAY_LOOP(pickup, state->pickups) {
+    if (pickup->kind == AZ_PUP_NOTHING) continue;
+    pickup->age += time;
+    if (az_vwithin(pickup->position, state->ship.position,
+                   AZ_PICKUP_COLLECTION_RANGE)) {
+      switch (pickup->kind) {
+        case AZ_PUP_ROCKETS:
+          player->rockets = az_imin(player->max_rockets, player->rockets +
+                                    AZ_ROCKETS_PER_PICKUP);
+          break;
+        case AZ_PUP_BOMBS:
+          player->bombs = az_imin(player->max_bombs, player->bombs +
+                                  AZ_BOMBS_PER_PICKUP);
+          break;
+        case AZ_PUP_SMALL_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_SMALL_PICKUP);
+          break;
+        case AZ_PUP_MEDIUM_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_MEDIUM_PICKUP);
+          break;
+        case AZ_PUP_LARGE_SHIELDS:
+          player->shields = az_imin(player->max_shields, player->shields +
+                                    AZ_SHIELDS_PER_LARGE_PICKUP);
+          break;
+        default: assert(false);
+      }
+      pickup->kind = AZ_PUP_NOTHING;
+    } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
+      pickup->kind = AZ_PUP_NOTHING;
+    }
   }
 }
 
