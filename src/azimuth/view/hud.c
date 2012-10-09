@@ -25,7 +25,7 @@
 
 #include <OpenGL/gl.h>
 
-#include "azimuth/screen.h"
+#include "azimuth/constants.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/string.h"
@@ -180,7 +180,7 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   const int height = 25 + 2 * HUD_PADDING;
   const int width = 115 + 2 * HUD_PADDING;
   glPushMatrix(); {
-    glTranslated(SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
+    glTranslated(AZ_SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
     glBegin(GL_QUADS);
@@ -207,10 +207,10 @@ static void draw_hud_timer(const az_timer_t *timer, unsigned long clock) {
     const int width = 2 * HUD_PADDING + 7 * 24;
     const int height = 2 * HUD_PADDING + 24;
 
-    const int xstart = SCREEN_WIDTH/2 - width/2;
-    const int ystart = SCREEN_HEIGHT/2 + 75 - height/2;
-    const int xend = SCREEN_WIDTH - HUD_MARGIN - width;
-    const int yend = SCREEN_HEIGHT - HUD_MARGIN - height;
+    const int xstart = AZ_SCREEN_WIDTH/2 - width/2;
+    const int ystart = AZ_SCREEN_HEIGHT/2 + 75 - height/2;
+    const int xend = AZ_SCREEN_WIDTH - HUD_MARGIN - width;
+    const int yend = AZ_SCREEN_HEIGHT - HUD_MARGIN - height;
     const double speed = 150.0; // pixels per second
     const double offset = az_dmax(0.0, timer->active_for - 2.5) * speed;
     glTranslated(az_imin(xend, xstart + offset),

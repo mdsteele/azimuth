@@ -21,7 +21,7 @@
 
 #include <OpenGL/gl.h>
 
-#include "azimuth/screen.h"
+#include "azimuth/constants.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
@@ -69,7 +69,7 @@ void az_space_draw_screen(az_space_state_t *state) {
     // Make positive Y be up instead of down.
     glScaled(1, -1, 1);
     // Center the screen on position (0, 0).
-    glTranslated(SCREEN_WIDTH/2, -SCREEN_HEIGHT/2, 0);
+    glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
     // Move the screen to the camera pose.
     glTranslated(0, -az_vnorm(state->camera), 0);
     glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);

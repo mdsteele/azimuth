@@ -24,16 +24,12 @@
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
+#include "azimuth/constants.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
-
-#define PICKUP_MAX_AGE 10.0
-#define PICKUP_COLLECTION_RANGE 20.0
-#define TURN_RATE 5.0
-#define THRUST_ACCEL 500.0
 
 static void tick_particles(az_space_state_t *state,
                            double time_seconds) {
@@ -53,7 +49,7 @@ static void tick_pickups(az_space_state_t *state,
     if (pickup->kind == AZ_PUP_NOTHING) continue;
     pickup->age += time_seconds;
     if (az_vwithin(pickup->position, state->ship.position,
-                   PICKUP_COLLECTION_RANGE)) {
+                   AZ_PICKUP_COLLECTION_RANGE)) {
       switch (pickup->kind) {
         case AZ_PUP_ROCKETS:
           player->rockets = az_imin(player->max_rockets, player->rockets +
@@ -78,7 +74,7 @@ static void tick_pickups(az_space_state_t *state,
         default: assert(false);
       }
       pickup->kind = AZ_PUP_NOTHING;
-    } else if (pickup->age >= PICKUP_MAX_AGE) {
+    } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
       pickup->kind = AZ_PUP_NOTHING;
     }
   }
@@ -89,22 +85,22 @@ static void tick_ship(az_space_state_t *state, double time_seconds) {
   az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
-  const double impulse = THRUST_ACCEL * time_seconds;
+  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time_seconds;
 
   // Recharge energy:
-  const double charge_rate = 75.0 +
-    (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ? 75.0 : 0.0) +
-    (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ? 125.0 : 0.0);
+  const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
+    (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ?
+     AZ_FUSION_REACTOR_RECHARGE_RATE : 0.0) +
+    (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ?
+     AZ_QUANTUM_REACTOR_RECHARGE_RATE : 0.0);
   player->energy = az_dmin(player->max_energy,
-                           player->energy + charge_rate * time_seconds);
+                           player->energy + recharge_rate * time_seconds);
 
   // Apply velocity:
   ship->position = az_vadd(ship->position,
                            az_vmul(ship->velocity, time_seconds));
 
   // Apply gravity:
-  const double planetoid_radius = 100000.0; // pixels
-  const double surface_gravity = 1.6; // pixels per second^2
   // Gravity works as follows.  By the spherical shell theorem, the force of
   // gravity on the ship (while inside the planetoid) varies linearly with the
   // distance from the planetoid's center, so the change in velocity is
@@ -113,13 +109,13 @@ static void tick_ship(az_space_state_t *state, double time_seconds) {
   // from the ship towards the core, which is -position/vnorm(position).  The
   // vnorm(position) factors cancel and we end up with what we have here.
   ship->velocity = az_vadd(ship->velocity,
-                           az_vmul(ship->position, -time_seconds *
-                                   (surface_gravity / planetoid_radius)));
+      az_vmul(ship->position, -time_seconds *
+              (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
 
   // Turning left:
   if (controls->left && !controls->right) {
     if (!controls->util) {
-      ship->angle = az_mod2pi(ship->angle + TURN_RATE * time_seconds);
+      ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time_seconds);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse / 2,
@@ -130,7 +126,7 @@ static void tick_ship(az_space_state_t *state, double time_seconds) {
   // Turning right:
   if (controls->right && !controls->left) {
     if (!controls->util) {
-      ship->angle = az_mod2pi(ship->angle - TURN_RATE * time_seconds);
+      ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time_seconds);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse / 2,
@@ -162,8 +158,11 @@ static void tick_ship(az_space_state_t *state, double time_seconds) {
 
   // Apply drag:
   const double base_max_speed =
-    400.0 * (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR) ? 1.5 : 1.0);
-  const double drag_coeff = THRUST_ACCEL / (base_max_speed * base_max_speed);
+    AZ_SHIP_BASE_MAX_SPEED *
+    (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR) ?
+     AZ_DYNAMIC_ARMOR_SPEED_MULT : 1.0);
+  const double drag_coeff =
+    AZ_SHIP_BASE_THRUST_ACCEL / (base_max_speed * base_max_speed);
   const az_vector_t drag_force =
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time_seconds));
@@ -175,7 +174,7 @@ static void tick_ship(az_space_state_t *state, double time_seconds) {
   // Activate tractor beam:
   if (controls->util && controls->fire1 && !ship->tractor_beam.active) {
     az_node_t *closest_node = NULL;
-    double best_distance = 300.0;
+    double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
       if (node->kind != AZ_NODE_NOTHING) {
         const double dist = az_vnorm(az_vsub(node->position, ship->position));

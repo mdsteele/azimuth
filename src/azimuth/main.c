@@ -23,7 +23,7 @@
 #include <OpenGL/gl.h>
 #include <SDL/SDL.h>
 
-#include "azimuth/screen.h"
+#include "azimuth/constants.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/space.h" // for az_tick_space_state
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
   // Init the display (quit if we fail):
-  if (!SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT,
+  if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT,
                         VIDEO_DEPTH, VIDEO_FLAGS)) {
     SDL_Quit();
     return 1;
@@ -159,10 +159,10 @@ int main(int argc, char **argv) {
   // Set the view:
   glClearColor(0, 0, 0, 0);
   glClearDepth(1.0f);
-  glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glViewport(0, 0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1, -1);
+  glOrtho(0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, 0, 1, -1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
