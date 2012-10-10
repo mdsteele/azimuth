@@ -76,74 +76,99 @@ void az_draw_ship(az_space_state_t* state) {
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
-    // TODO: tractor beam, if active
     // Exhaust:
     if (controls->up && !controls->down) {
       double zig = az_clock_zigzag(10, 1, state->clock);
-      // From port engine:
-      glBegin(GL_TRIANGLE_STRIP); {
-        glColor4f(1, 0.5, 0, 0); // transparent orange
-        glVertex2d(-13, 12);
-        glColor4f(1, 0.75, 0, 0.9); // orange
-        glVertex2d(-13, 9);
-        glColor4f(1, 0.5, 0, 0); // transparent orange
-        glVertex2d(-23 - zig, 9);
-        glVertex2d(-13, 7);
-      } glEnd();
-      // From starboard engine:
-      glBegin(GL_TRIANGLE_STRIP); {
-        glColor4f(1, 0.5, 0, 0); // transparent orange
-        glVertex2d(-13, -12);
-        glColor4f(1, 0.75, 0, 0.9); // orange
-        glVertex2d(-13, -9);
-        glColor4f(1, 0.5, 0, 0); // transparent orange
-        glVertex2d(-23 - zig, -9);
-        glVertex2d(-13, -7);
-      } glEnd();
+      // For forward thrusters:
+      if (!controls->burn) {
+        // From port engine:
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(-10, 12);
+          glColor4f(1, 0.75, 0, 0.9); // orange
+          glVertex2d(-10, 9);
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(-20 - zig, 9);
+          glVertex2d(-10, 7);
+        } glEnd();
+        // From starboard engine:
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(-10, -12);
+          glColor4f(1, 0.75, 0, 0.9); // orange
+          glVertex2d(-10, -9);
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(-20 - zig, -9);
+          glVertex2d(-10, -7);
+        } glEnd();
+      }
+      // For reverse thrusters:
+      else {
+        // From port engine:
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(6, 12);
+          glColor4f(1, 0.75, 0, 0.9); // orange
+          glVertex2d(6, 9);
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(16 + zig, 9);
+          glVertex2d(6, 7);
+        } glEnd();
+        // From starboard engine:
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(6, -12);
+          glColor4f(1, 0.75, 0, 0.9); // orange
+          glVertex2d(6, -9);
+          glColor4f(1, 0.5, 0, 0); // transparent orange
+          glVertex2d(16 + zig, -9);
+          glVertex2d(6, -7);
+        } glEnd();
+      }
     }
     // TODO: exhaust for lateral thrusters and afterburner, if active
     // Engines:
     glBegin(GL_QUADS); {
       // Struts:
       glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( -2,  9);
-      glVertex2d(-10,  9);
-      glVertex2d(-10, -9);
-      glVertex2d( -2, -9);
+      glVertex2d( 1,  9);
+      glVertex2d(-7,  9);
+      glVertex2d(-7, -9);
+      glVertex2d( 1, -9);
       // Port engine:
-      glVertex2d(-13,  12);
-      glVertex2d(  3,  12);
+      glVertex2d(-10,  12);
+      glVertex2d(  6,  12);
       glColor3f(0.75, 0.75, 0.75); // light gray
-      glVertex2d(  5,   7);
-      glVertex2d(-14,   7);
+      glVertex2d(  8,   7);
+      glVertex2d(-11,   7);
       // Starboard engine:
-      glVertex2d(  5,  -7);
-      glVertex2d(-14,  -7);
+      glVertex2d(  8,  -7);
+      glVertex2d(-11,  -7);
       glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d(-13, -12);
-      glVertex2d(  3, -12);
+      glVertex2d(-10, -12);
+      glVertex2d(  6, -12);
     } glEnd();
     // Main body:
     glBegin(GL_QUAD_STRIP); {
       glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( 12,  4);
-      glVertex2d(-17,  4);
+      glVertex2d( 15,  4);
+      glVertex2d(-14,  4);
       glColor3f(0.75, 0.75, 0.75); // light gray
-      glVertex2d( 17,  0);
-      glVertex2d(-17,  0);
+      glVertex2d( 20,  0);
+      glVertex2d(-14,  0);
       glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( 12, -4);
-      glVertex2d(-17, -4);
+      glVertex2d( 15, -4);
+      glVertex2d(-14, -4);
     } glEnd();
     // Windshield:
     glBegin(GL_TRIANGLE_STRIP); {
       glColor3f(0, 0.5, 0.5); // dim cyan
-      glVertex2d(11,  2);
+      glVertex2d(14,  2);
       glColor3f(0, 1, 1); // cyan
-      glVertex2d(15,  0);
-      glVertex2d( 9,  0);
+      glVertex2d(18,  0);
+      glVertex2d(12,  0);
       glColor3f(0, 0.5, 0.5); // dim cyan
-      glVertex2d(11, -2);
+      glVertex2d(15, -2);
     } glEnd();
   } glPopMatrix();
 }

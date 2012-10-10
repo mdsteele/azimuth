@@ -143,6 +143,8 @@ typedef struct {
   uint64_t upgrades1, upgrades2;
   uint64_t rooms1, rooms2, rooms3;
   uint64_t flags;
+  // Total game time for this playthrough so far, in seconds:
+  double total_time;
   // The room in which we last saved the game:
   az_room_key_t save_room;
   // Current ship supplies:

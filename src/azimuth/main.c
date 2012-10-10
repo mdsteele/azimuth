@@ -94,8 +94,12 @@ static void event_loop(void) {
             case SDLK_DOWN: state.ship.controls.down = true; break;
             case SDLK_LEFT: state.ship.controls.left = true; break;
             case SDLK_RIGHT: state.ship.controls.right = true; break;
-            case SDLK_v: state.ship.controls.fire1 = true; break;
+            case SDLK_v:
+              state.ship.controls.fire_pressed = true;
+              state.ship.controls.fire_held = true;
+              break;
             case SDLK_x: state.ship.controls.util = true; break;
+            case SDLK_z: state.ship.controls.burn = true; break;
             default: break;
           }
           break;
@@ -105,8 +109,9 @@ static void event_loop(void) {
             case SDLK_DOWN: state.ship.controls.down = false; break;
             case SDLK_LEFT: state.ship.controls.left = false; break;
             case SDLK_RIGHT: state.ship.controls.right = false; break;
-            case SDLK_v: state.ship.controls.fire1 = false; break;
+            case SDLK_v: state.ship.controls.fire_held = false; break;
             case SDLK_x: state.ship.controls.util = false; break;
+            case SDLK_z: state.ship.controls.burn = false; break;
             default: break;
           }
           break;

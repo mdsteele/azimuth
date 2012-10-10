@@ -34,7 +34,7 @@
 void az_tick_ship(az_space_state_t *state, double time) {
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
-  const az_controls_t *controls = &ship->controls;
+  az_controls_t *controls = &ship->controls;
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
   const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
 
@@ -91,7 +91,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Turning left:
   if (controls->left && !controls->right) {
-    if (!controls->util) {
+    if (!controls->burn) {
       ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
@@ -102,7 +102,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Turning right:
   if (controls->right && !controls->left) {
-    if (!controls->util) {
+    if (!controls->burn) {
       ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
@@ -113,7 +113,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Forward thrust:
   if (controls->up && !controls->down) {
-    if (!controls->util) {
+    if (!controls->burn) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse, ship->angle));
     } else if (has_lateral) {
@@ -145,7 +145,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
 
   // Activate tractor beam if necessary:
-  if (controls->util && controls->fire1 && !ship->tractor_beam.active) {
+  if (controls->util && controls->fire_pressed && !ship->tractor_beam.active) {
     assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
@@ -161,6 +161,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
       ship->tractor_beam.active = true;
       ship->tractor_beam.node_uid = tractor_node->uid;
       ship->tractor_beam.distance = best_distance;
+      controls->fire_pressed = false;
     }
   }
   // TODO: Apply tractor beam's velocity changes
@@ -172,7 +173,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Fire projectiles:
   const double fire_cost = 20.0;
-  if (state->ship.controls.fire1 && state->ship.player.energy >= fire_cost) {
+  if (state->ship.controls.fire_pressed &&
+      state->ship.player.energy >= fire_cost) {
     az_projectile_t *projectile;
     if (az_insert_projectile(state, &projectile)) {
       state->ship.player.energy -= fire_cost;
@@ -182,7 +184,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
                                      az_vpolar(18, state->ship.angle));
       projectile->velocity = az_vpolar(600.0, state->ship.angle);
       projectile->lifetime = 1.0;
-      state->ship.controls.fire1 = false;
+      state->ship.controls.fire_pressed = false;
     }
   }
 }

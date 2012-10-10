@@ -47,6 +47,7 @@ static void tick_camera(az_vector_t *camera, az_vector_t towards,
 }
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  state->ship.player.total_time += time;
   ++state->clock;
   az_tick_particles(state, time);
   az_tick_pickups(state, time);
