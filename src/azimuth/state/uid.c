@@ -26,6 +26,9 @@
 #define AZ_UID_INDEX_MASK 0xFFFFu
 #define AZ_UID_COUNT_STEP 0x10000u
 
+const az_uid_t AZ_NULL_UID = 0u;
+const az_uid_t AZ_SHIP_UID = (az_uid_t)(-1);
+
 void az_assign_uid(int index, az_uid_t *uid) {
   assert(index == (index & AZ_UID_INDEX_MASK));
   *uid = ((*uid + AZ_UID_COUNT_STEP) & ~AZ_UID_INDEX_MASK) | index;

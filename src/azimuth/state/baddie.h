@@ -21,6 +21,7 @@
 #ifndef AZIMUTH_STATE_BADDIE_H_
 #define AZIMUTH_STATE_BADDIE_H_
 
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -39,6 +40,7 @@ typedef struct {
 typedef struct {
   az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
   const az_baddie_data_t *data;
+  az_uid_t uid;
   az_vector_t position;
   az_vector_t velocity;
   double angle;

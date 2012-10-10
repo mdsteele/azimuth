@@ -33,6 +33,13 @@
 // one was removed).
 typedef uint64_t az_uid_t;
 
+// A zeroed az_uid_t struct; a UID that will never be created by a call to
+// az_assign_uid.
+extern const az_uid_t AZ_NULL_UID;
+// A special UID that represents the ship; it will never be created by a call
+// to az_assign_uid.
+extern const az_uid_t AZ_SHIP_UID;
+
 // Reinitialize a UID with a new value.  The index should be the array index at
 // which the object that this UID is for is stored.
 void az_assign_uid(int index, az_uid_t *uid);

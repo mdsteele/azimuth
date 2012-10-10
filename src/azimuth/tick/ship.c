@@ -173,17 +173,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Fire projectiles:
   const double fire_cost = 20.0;
-  if (state->ship.controls.fire_pressed &&
-      state->ship.player.energy >= fire_cost) {
-    az_projectile_t *projectile;
-    if (az_insert_projectile(state, &projectile)) {
-      state->ship.player.energy -= fire_cost;
-      projectile->kind = AZ_PROJ_GUN_NORMAL;
-      projectile->fired_by_enemy = false;
-      projectile->position = az_vadd(state->ship.position,
-                                     az_vpolar(18, state->ship.angle));
-      projectile->velocity = az_vpolar(600.0, state->ship.angle);
-      projectile->lifetime = 1.0;
+  if (controls->fire_pressed && player->energy >= fire_cost) {
+    az_projectile_t *proj;
+    if (az_insert_projectile(state, &proj)) {
+      player->energy -= fire_cost;
+      az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, false,
+                         az_vadd(ship->position, az_vpolar(18.0, ship->angle)),
+                         ship->angle);
       state->ship.controls.fire_pressed = false;
     }
   }

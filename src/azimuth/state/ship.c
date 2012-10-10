@@ -27,6 +27,8 @@
 
 /*===========================================================================*/
 
+#define SHIP_BOUNDING_RADIUS 20.0
+
 static const az_vector_t ship_vertices[] = {
   {20, 0}, {15, 4}, {6, 12}, {-10, 12}, {-11, 7}, {-14, 4},
   {-14, -4}, {-11, -7}, {-10, -12}, {6, -12}, {15, -4}
@@ -40,7 +42,8 @@ static const az_polygon_t ship_polygon = {
 // Return true if the given point should count as intersecting the ship's
 // shield perimeter.
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point) {
-  return az_convex_polygon_contains(ship_polygon, az_vrelative(
+  return az_vwithin(point, ship->position, SHIP_BOUNDING_RADIUS) &&
+    az_convex_polygon_contains(ship_polygon, az_vrelative(
       point, ship->position, ship->angle));
 }
 

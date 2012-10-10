@@ -19,17 +19,41 @@
 
 #include "azimuth/tick/projectile.h"
 
+#include <stdlib.h> // for NULL
+
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
+#include "azimuth/state/uid.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/
+
+// Called when a projectile hits a baddie or the ship.  If the projectile is
+// hitting the ship, baddie will be NULL.
+static void on_projectile_hit(az_space_state_t *state, az_projectile_t *proj,
+                              az_baddie_t *baddie) {
+  if (proj->data->piercing) {
+    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
+  } else {
+    proj->kind = AZ_PROJ_NOTHING;
+  }
+
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = (az_color_t){255, 255, 255, 255};
+    particle->position = proj->position;
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.3;
+    particle->param1 = 10;
+  }
+}
 
 static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
                             double time) {
   // Age the projectile, and remove it if it is expired.
   proj->age += time;
-  if (proj->age > proj->lifetime) {
+  if (proj->age > proj->data->lifetime) {
     proj->kind = AZ_PROJ_NOTHING;
     return;
   }
@@ -40,9 +64,10 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Check if the projectile hits anything.  If it was fired by an enemy, it
   // can hit the ship:
   if (proj->fired_by_enemy) {
-    if (az_point_hits_ship(&state->ship, proj->position)) {
-      state->ship.player.shields -= 5.0;
-      proj->kind = AZ_PROJ_NOTHING;
+    if (proj->last_hit_uid != AZ_SHIP_UID &&
+        az_point_hits_ship(&state->ship, proj->position)) {
+      state->ship.player.shields -= proj->data->damage;
+      on_projectile_hit(state, proj, NULL);
       return;
     }
   }
@@ -50,29 +75,21 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   else {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->uid == proj->last_hit_uid) continue;
       if (az_vwithin(baddie->position, proj->position, 20.0)) {
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_BOOM;
-          particle->color = (az_color_t){255, 255, 255, 255};
-          particle->position = proj->position;
-          particle->velocity = AZ_VZERO;
-          particle->lifetime = 0.3;
-          particle->param1 = 10;
-        }
-        baddie->health -= 1.0;
+        on_projectile_hit(state, proj, baddie);
+        baddie->health -= proj->data->damage;
         if (baddie->health <= 0.0) {
           baddie->kind = AZ_BAD_NOTHING;
           az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, baddie->position);
         }
-        proj->kind = AZ_PROJ_NOTHING;
         return;
       }
     }
   }
   // If it didn't hit the ship or a baddie already, the projectile can hit
   // walls (unless this kind of projectile passes through walls):
-  if (!az_proj_kind_passes_through_walls(proj->kind)) {
+  if (!proj->data->phased) {
     if (false) return; // TODO: check for wall collisions
   }
 

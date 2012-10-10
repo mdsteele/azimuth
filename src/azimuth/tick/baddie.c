@@ -43,12 +43,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->cooldown <= 0.0) {
         az_projectile_t *proj;
         if (az_insert_projectile(state, &proj)) {
-          proj->kind = AZ_PROJ_GUN_NORMAL;
-          proj->fired_by_enemy = true;
-          proj->position = az_vadd(baddie->position,
-                                   az_vpolar(20.0, baddie->angle));
-          proj->velocity = az_vpolar(400.0, baddie->angle);
-          proj->lifetime = 1.0;
+          az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, true,
+                             az_vadd(baddie->position,
+                                     az_vpolar(20.0, baddie->angle)),
+                             baddie->angle);
           baddie->cooldown = 0.5;
         }
       }

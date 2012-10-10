@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -43,20 +44,36 @@ typedef enum {
   AZ_PROJ_ROCKET,
   AZ_PROJ_HYPER_ROCKET,
   AZ_PROJ_BOMB,
-  AZ_PROJ_HYPER_BOMB
+  AZ_PROJ_MEGA_BOMB
 } az_proj_kind_t;
 
 typedef struct {
+  double speed;
+  double lifetime; // how long the projectile lasts, in seconds
+  double damage;
+  bool phased; // true if the projectile passes thorugh walls
+  bool piercing; // true if the projectile pierces through enemies
+} az_proj_data_t;
+
+typedef struct {
   az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
+  const az_proj_data_t *data;
   bool fired_by_enemy; // if true, this projectile can hit the ship
   az_vector_t position;
   az_vector_t velocity;
-  double age, lifetime; // seconds
+  double age; // seconds
+  // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
+  // gun), this records the UID of the last baddie hit.  The projectile cannot
+  // immediately hit this same baddie again.  This can also be AZ_SHIP_UID if
+  // it last hit the ship.
+  az_uid_t last_hit_uid;
 } az_projectile_t;
 
-// Return true if this kind of projectile passes through walls instead of
-// hitting them (e.g. if it came from the PHASE gun).
-bool az_proj_kind_passes_through_walls(az_proj_kind_t kind);
+// Set reasonable initial field values for a projectile of the given kind,
+// fired from the given position at the given angle.
+void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
+                        bool fired_by_enemy, az_vector_t position,
+                        double angle);
 
 /*===========================================================================*/
 

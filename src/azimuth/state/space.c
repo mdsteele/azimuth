@@ -32,6 +32,7 @@ bool az_insert_baddie(az_space_state_t *state,
                       az_baddie_t **baddie_out) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
+      az_assign_uid(baddie - state->baddies, &baddie->uid);
       *baddie_out = baddie;
       return true;
     }
