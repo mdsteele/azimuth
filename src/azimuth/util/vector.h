@@ -52,8 +52,20 @@ az_vector_t az_vadd(az_vector_t v1, az_vector_t v2);
 az_vector_t az_vsub(az_vector_t v1, az_vector_t v2);
 // Multiply a vector by a scalar.
 az_vector_t az_vmul(az_vector_t v, double f);
-// Divide a vector by a scalar.
+// Divide a vector by a scalar.  The scalar must be nonzero.
 az_vector_t az_vdiv(az_vector_t v, double f);
+
+// Compute the dot product of the two vectors.
+double az_vdot(az_vector_t v1, az_vector_t v2);
+// Project the first vector onto the second.  The second vector must be
+// nonzero.
+az_vector_t az_vproj(az_vector_t v1, az_vector_t v2);
+
+// Rotate a vector counterclockwise by the given angle.
+az_vector_t az_vrotate(az_vector_t v, double radians);
+// Return the vector v, relative to an object at the given position and
+// angle.  This is essentially a combination of az_vsub and az_vrotate.
+az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle);
 
 // Get the length of the vector.
 double az_vnorm(az_vector_t v);

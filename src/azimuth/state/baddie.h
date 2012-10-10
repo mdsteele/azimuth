@@ -43,6 +43,7 @@ typedef struct {
   az_vector_t velocity;
   double angle;
   double health;
+  double cooldown; // time until baddie can attack again, in seconds
   // The baddie's "components" describe the positions of its subparts.  The
   // meanings of these are specific to the baddie kind.
   struct {

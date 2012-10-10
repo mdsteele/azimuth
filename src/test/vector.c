@@ -26,6 +26,9 @@
 
 /*===========================================================================*/
 
+#define EXPECT_VAPPROX(ve, va) \
+  EXPECT_APPROX(0.0, az_vnorm(az_vsub((va), (ve))))
+
 void test_mod2pi(void) {
   for (double t = -20.0; t < 20.0; t += 0.1) {
     const double t2 = az_mod2pi(t);
@@ -42,6 +45,14 @@ void test_vector_polar(void) {
   const az_vector_t v = az_vpolar(m, t);
   EXPECT_APPROX(m, az_vnorm(v));
   EXPECT_APPROX(az_mod2pi(t), az_vtheta(v));
+}
+
+void test_vector_rotate(void) {
+  EXPECT_VAPPROX(AZ_VZERO, az_vrotate(AZ_VZERO, 47.3));
+  EXPECT_VAPPROX(((az_vector_t){-1, 1}),
+                 az_vrotate((az_vector_t){1, 1}, AZ_HALF_PI));
+  EXPECT_VAPPROX(((az_vector_t){1.0, sqrt(3)}),
+                 az_vrotate((az_vector_t){-1, sqrt(3)}, AZ_DEG2RAD(-60.0)));
 }
 
 /*===========================================================================*/

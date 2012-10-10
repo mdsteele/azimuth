@@ -25,8 +25,11 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
+
+void az_tick_baddies(az_space_state_t *state, double time);
 
 bool az_proj_hits_baddie(az_projectile_t *proj, az_baddie_t *baddie);
 

@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_random);
   RUN_TEST(test_uids);
   RUN_TEST(test_vector_polar);
+  RUN_TEST(test_vector_rotate);
 
   return final_test_summary();
 }

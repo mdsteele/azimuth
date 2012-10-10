@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/player.h"
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -45,6 +46,10 @@ typedef struct {
     double distance;
   } tractor_beam;
 } az_ship_t;
+
+// Return true if the given point should count as intersecting the ship's
+// shield perimeter.
+bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point);
 
 /*===========================================================================*/
 

@@ -17,34 +17,31 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_UTIL_POLYGON_H_
-#define AZIMUTH_UTIL_POLYGON_H_
+#include "azimuth/state/ship.h"
 
 #include <stdbool.h>
 
+#include "azimuth/util/misc.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-// Represents a closed 2D polygon.  It is usually expected that the polygon is
-// non-self-intersecting, and that the vertices come in counter-clockwise
-// order.  The `vertices` field is generally not considered to own the array
-// that it points to.
-typedef struct {
-  int num_vertices;
-  const az_vector_t *vertices;
-} az_polygon_t;
+static const az_vector_t ship_vertices[] = {
+  {17, 0}, {12, 4}, {3, 12}, {-13, 12}, {-14, 7}, {-17, 4},
+  {-17, -4}, {-14, -7}, {-13, -12}, {3, -12}, {12, -4}
+};
 
-// Test if the point is in the polygon.  The polygon must be
-// non-self-intersecting, but it need not be convex.
-bool az_polygon_contains(const az_polygon_t polygon, az_vector_t point);
+static const az_polygon_t ship_polygon = {
+  .num_vertices = AZ_ARRAY_SIZE(ship_vertices),
+  .vertices = ship_vertices
+};
 
-// Test if the point is in the polygon.  The polygon must be convex, the
-// vertices must come in counter-clockwise order.  This function is more
-// efficient, but less general, than az_polygon_contains().
-bool az_convex_polygon_contains(const az_polygon_t polygon, az_vector_t point);
+// Return true if the given point should count as intersecting the ship's
+// shield perimeter.
+bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point) {
+  return az_convex_polygon_contains(ship_polygon, az_vrelative(
+      point, ship->position, ship->angle));
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_UTIL_POLYGON_H_

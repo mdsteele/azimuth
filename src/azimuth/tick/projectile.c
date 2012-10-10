@@ -40,7 +40,11 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Check if the projectile hits anything.  If it was fired by an enemy, it
   // can hit the ship:
   if (proj->fired_by_enemy) {
-    // TODO: check if hits ship
+    if (az_point_hits_ship(&state->ship, proj->position)) {
+      state->ship.player.shields -= 5.0;
+      proj->kind = AZ_PROJ_NOTHING;
+      return;
+    }
   }
   // Or, if the projectile was fired by the ship, it can hit baddies:
   else {

@@ -58,8 +58,8 @@ static void draw_camera_view(az_space_state_t *state) {
   //az_draw_walls(state);
   az_draw_nodes(state);
   az_draw_pickups(state);
-  az_draw_baddies(state);
   az_draw_projectiles(state);
+  az_draw_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
 }

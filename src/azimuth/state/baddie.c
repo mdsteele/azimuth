@@ -49,6 +49,7 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->velocity = AZ_VZERO;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
+  baddie->cooldown = 0.0;
 }
 
 /*===========================================================================*/

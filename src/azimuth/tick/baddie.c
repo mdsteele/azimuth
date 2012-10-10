@@ -24,8 +24,46 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                        double time) {
+  baddie->position = az_vadd(baddie->position,
+                             az_vmul(baddie->velocity, time));
+  if (baddie->cooldown >= 0.0) {
+    baddie->cooldown = az_dmax(0.0, baddie->cooldown - time);
+  }
+  switch (baddie->kind) {
+    case AZ_BAD_LUMP:
+      break;
+    case AZ_BAD_TURRET:
+      if (baddie->cooldown <= 0.0) {
+        az_projectile_t *proj;
+        if (az_insert_projectile(state, &proj)) {
+          proj->kind = AZ_PROJ_GUN_NORMAL;
+          proj->fired_by_enemy = true;
+          proj->position = az_vadd(baddie->position,
+                                   az_vpolar(20.0, baddie->angle));
+          proj->velocity = az_vpolar(400.0, baddie->angle);
+          proj->lifetime = 1.0;
+          baddie->cooldown = 0.5;
+        }
+      }
+      break;
+    default: assert(false);
+  }
+}
+
+void az_tick_baddies(az_space_state_t *state, double time) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING) continue;
+    assert(baddie->health > 0.0);
+    tick_baddie(state, baddie, time);
+  }
+}
 
 bool az_proj_hits_baddie(az_projectile_t *proj, az_baddie_t *baddie) {
   if (!az_vwithin(proj->position, baddie->position,

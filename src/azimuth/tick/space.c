@@ -22,6 +22,7 @@
 #include <math.h> // for pow
 
 #include "azimuth/state/space.h"
+#include "azimuth/tick/baddie.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
@@ -50,6 +51,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   az_tick_particles(state, time);
   az_tick_pickups(state, time);
   az_tick_projectiles(state, time);
+  az_tick_baddies(state, time);
   az_tick_ship(state, time);
   tick_camera(&state->camera, state->ship.position, time);
   tick_timer(&state->timer, time);
