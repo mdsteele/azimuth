@@ -60,15 +60,23 @@ double az_vdot(az_vector_t v1, az_vector_t v2);
 // Project the first vector onto the second.  The second vector must be
 // nonzero.
 az_vector_t az_vproj(az_vector_t v1, az_vector_t v2);
+// Flatten the first vector with respect to the second.  The second vector must
+// be nonzero.
+az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2);
 
 // Rotate a vector counterclockwise by the given angle.
 az_vector_t az_vrotate(az_vector_t v, double radians);
+// Rotate a vector 90 degrees counterclockwise.
+az_vector_t az_vrot90ccw(az_vector_t v);
 // Return the vector v, relative to an object at the given position and
 // angle.  This is essentially a combination of az_vsub and az_vrotate.
 az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle);
 
 // Get the length of the vector.
 double az_vnorm(az_vector_t v);
+// Return a unit vector with the same direction as the given vector.  The
+// vector must be nonzero.
+az_vector_t az_vunit(az_vector_t v);
 
 // Get the polar theta angle of the vector.
 double az_vtheta(az_vector_t v);
@@ -85,6 +93,9 @@ int az_imin(int a, int b);
 int az_imax(int a, int b);
 double az_dmin(double a, double b);
 double az_dmax(double a, double b);
+
+// Test if two (finite) doubles are approximately equal.
+bool az_dapprox(double a, double b);
 
 /*===========================================================================*/
 

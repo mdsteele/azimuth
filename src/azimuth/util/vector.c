@@ -67,12 +67,20 @@ az_vector_t az_vproj(az_vector_t v1, az_vector_t v2) {
   return az_vmul(v2, az_vdot(v1, v2) / sqnorm);
 }
 
+az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2) {
+  return az_vsub(v1, az_vproj(v1, v2));
+}
+
 az_vector_t az_vrotate(az_vector_t v, double radians) {
   assert(vfinite(v));
   assert(isfinite(radians));
   const double c = cos(radians);
   const double s = sin(radians);
   return (az_vector_t){.x = v.x * c - v.y * s, .y = v.y * c + v.x * s};
+}
+
+az_vector_t az_vrot90ccw(az_vector_t v) {
+  return (az_vector_t){.x = -v.y, .y = v.x};
 }
 
 az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle) {
@@ -82,6 +90,13 @@ az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle) {
 double az_vnorm(az_vector_t v) {
   assert(vfinite(v));
   return hypot(v.x, v.y);
+}
+
+az_vector_t az_vunit(az_vector_t v) {
+  assert(vfinite(v));
+  const double norm = az_vnorm(v);
+  assert(norm > 0.0);
+  return az_vdiv(v, norm);
 }
 
 double az_vtheta(az_vector_t v) {
@@ -114,6 +129,15 @@ double az_dmin(double a, double b) {
 
 double az_dmax(double a, double b) {
   return a > b ? a : b;
+}
+
+#define EPSILON 0.00000001
+
+bool az_dapprox(double a, double b) {
+  assert(isfinite(a));
+  assert(isfinite(b));
+  const double d = a - b;
+  return (d < EPSILON && d > -EPSILON);
 }
 
 /*===========================================================================*/

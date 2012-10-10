@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h> // for EXIT_FAILURE and EXIT_SUCCESS
 
-/*===========================================================================*/
+#include "azimuth/util/vector.h" // for az_dapprox
 
-#define EPSILON 0.00000001
+/*===========================================================================*/
 
 bool _current_test_failed = false;
 unsigned int _num_tests_failed = 0u;
@@ -60,11 +60,6 @@ static void test_failure(void) {
   }
 }
 
-static bool dapprox(double a, double b) {
-  double d = a - b;
-  return (d < EPSILON && d > -EPSILON);
-}
-
 bool _expect_true(bool condition, const char *message) {
   if (condition) return true;
   test_failure();
@@ -73,7 +68,7 @@ bool _expect_true(bool condition, const char *message) {
 }
 
 bool _expect_approx(double expected, double actual, const char *message) {
-  if (dapprox(expected, actual)) return true;
+  if (az_dapprox(expected, actual)) return true;
   test_failure();
   printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %g vs. %g\n",
          message, expected, actual);

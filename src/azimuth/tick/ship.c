@@ -19,6 +19,7 @@
 
 #include "azimuth/tick/ship.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
@@ -46,9 +47,35 @@ void az_tick_ship(az_space_state_t *state, double time) {
   player->energy = az_dmin(player->max_energy,
                            player->energy + recharge_rate * time);
 
-  // Apply velocity:
-  ship->position = az_vadd(ship->position,
-                           az_vmul(ship->velocity, time));
+  // Deactivate tractor beam if necessary, otherwise get the node it is locked
+  // onto.
+  az_node_t *tractor_node = NULL;
+  if (ship->tractor_beam.active) {
+    if (!controls->util ||
+        !az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node)) {
+      ship->tractor_beam.active = false;
+    }
+  }
+
+  // Apply velocity.  If the tractor beam is active, that implies angular
+  // motion (around the locked-onto node); otherwise, linear motion.
+  if (ship->tractor_beam.active) {
+    assert(tractor_node != NULL);
+    const az_vector_t delta = az_vsub(ship->position, tractor_node->position);
+    assert(az_dapprox(0.0, az_vdot(ship->velocity, delta)));
+    assert(az_dapprox(ship->tractor_beam.distance, az_vnorm(delta)));
+    const double invdist = 1.0 / ship->tractor_beam.distance;
+    const double dtheta =
+      time * invdist *
+      az_vdot(ship->velocity, az_vrot90ccw(az_vmul(delta, invdist)));
+    ship->position = az_vadd(az_vrotate(delta, dtheta),
+                             tractor_node->position);
+    ship->velocity = az_vrotate(ship->velocity, dtheta);
+    ship->angle = az_mod2pi(ship->angle + dtheta);
+  } else {
+    assert(tractor_node == NULL);
+    ship->position = az_vadd(ship->position, az_vmul(ship->velocity, time));
+  }
 
   // Apply gravity:
   // Gravity works as follows.  By the spherical shell theorem, the force of
@@ -117,30 +144,31 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
 
-  // Deactivate tractor beam:
-  if (!controls->util) {
-    ship->tractor_beam.active = false;
-  }
-  // Activate tractor beam:
+  // Activate tractor beam if necessary:
   if (controls->util && controls->fire1 && !ship->tractor_beam.active) {
-    az_node_t *closest_node = NULL;
+    assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
       if (node->kind != AZ_NODE_NOTHING) {
         const double dist = az_vnorm(az_vsub(node->position, ship->position));
         if (dist <= best_distance) {
-          closest_node = node;
+          tractor_node = node;
           best_distance = dist;
         }
       }
     }
-    if (closest_node != NULL) {
+    if (tractor_node != NULL) {
       ship->tractor_beam.active = true;
-      ship->tractor_beam.node_uid = closest_node->uid;
+      ship->tractor_beam.node_uid = tractor_node->uid;
       ship->tractor_beam.distance = best_distance;
     }
   }
   // TODO: Apply tractor beam's velocity changes
+  if (ship->tractor_beam.active) {
+    assert(tractor_node != NULL);
+    ship->velocity = az_vflatten(ship->velocity,
+        az_vsub(ship->position, tractor_node->position));
+  }
 
   // Fire projectiles:
   const double fire_cost = 20.0;
