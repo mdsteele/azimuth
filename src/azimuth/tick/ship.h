@@ -17,42 +17,16 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/tick/space.h"
-
-#include <math.h> // for pow
+#pragma once
+#ifndef AZIMUTH_TICK_SHIP_H_
+#define AZIMUTH_TICK_SHIP_H_
 
 #include "azimuth/state/space.h"
-#include "azimuth/tick/particle.h"
-#include "azimuth/tick/pickup.h"
-#include "azimuth/tick/projectile.h"
-#include "azimuth/tick/ship.h"
-#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void tick_timer(az_timer_t *timer, double time) {
-  if (timer->active_for < 0.0) return;
-  if (timer->active_for < 10.0) timer->active_for += time;
-  timer->time_remaining = az_dmax(0.0, timer->time_remaining - time);
-}
-
-static void tick_camera(az_vector_t *camera, az_vector_t towards,
-                        double time) {
-  const double tracking_base = 0.00003; // smaller = faster tracking
-  const az_vector_t difference = az_vsub(towards, *camera);
-  const az_vector_t change =
-    az_vmul(difference, 1.0 - pow(tracking_base, time));
-  *camera = az_vadd(*camera, change);
-}
-
-void az_tick_space_state(az_space_state_t *state, double time) {
-  ++state->clock;
-  az_tick_particles(state, time);
-  az_tick_pickups(state, time);
-  az_tick_projectiles(state, time);
-  az_tick_ship(state, time);
-  tick_camera(&state->camera, state->ship.position, time);
-  tick_timer(&state->timer, time);
-}
+void az_tick_ship(az_space_state_t *state, double time);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_TICK_SHIP_H_
