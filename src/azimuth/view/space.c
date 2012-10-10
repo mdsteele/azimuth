@@ -19,7 +19,7 @@
 
 #include "azimuth/view/space.h"
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/space.h"

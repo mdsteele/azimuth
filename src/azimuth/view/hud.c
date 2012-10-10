@@ -23,7 +23,7 @@
 #include <stdio.h> // for sprintf
 #include <string.h> // for strlen
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/space.h"

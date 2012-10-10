@@ -21,7 +21,7 @@
 
 #include <string.h> // for strlen
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 /*===========================================================================*/
 

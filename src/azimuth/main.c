@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 #include <SDL/SDL.h>
 
 #include "azimuth/constants.h"

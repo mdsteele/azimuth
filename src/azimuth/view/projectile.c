@@ -19,7 +19,7 @@
 
 #include "azimuth/view/projectile.h"
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"

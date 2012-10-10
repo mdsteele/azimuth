@@ -22,7 +22,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 #include "azimuth/state/node.h"
 #include "azimuth/state/ship.h"

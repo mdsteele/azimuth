@@ -23,7 +23,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include <OpenGL/gl.h>
+#include <GL/gl.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"

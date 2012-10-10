@@ -23,7 +23,7 @@ OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
 CFLAGS = -Wall -Werror -O1
-C99FLAGS = -std=c99 -pedantic $(CFLAGS)
+C99FLAGS = -std=c99 -pedantic $(CFLAGS) -I$(SRCDIR)
 
 HEADERS := $(shell find $(SRCDIR) -name '*.h')
 MAIN_C99FILES := $(shell find $(SRCDIR)/azimuth -name '*.c')
@@ -33,23 +33,34 @@ TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 
+OS_NAME := $(shell uname)
+ifeq "$(OS_NAME)" "Darwin"
+  CFLAGS += -I$(SRCDIR)/macosx
+  MAIN_OBJFILES += $(OBJDIR)/macosx/SDLMain.o
+  MAIN_LIBFLAGS := -framework Cocoa -framework OpenGL -framework SDL
+  TEST_LIBFLAGS :=
+else
+  MAIN_LIBFLAGS := -lGL -lSDL
+  TEST_LIBFLAGS := -lm
+endif
+
 #=============================================================================#
 
 .PHONY: all
 all: $(BINDIR)/azimuth $(BINDIR)/unit_tests
 
-$(BINDIR)/azimuth: $(MAIN_OBJFILES) $(OBJDIR)/SDLMain.o
+$(BINDIR)/azimuth: $(MAIN_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) \
-	     -framework Cocoa -framework OpenGL -framework SDL
+	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
 
 $(BINDIR)/unit_tests: $(TEST_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS)
+	@gcc -o $@ $^ $(CFLAGS) $(TEST_LIBFLAGS)
 
-$(OBJDIR)/SDLMain.o: $(SRCDIR)/SDLMain.m $(SRCDIR)/SDLMain.h
+$(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
+                            $(SRCDIR)/macosx/SDLMain.h
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
 	@gcc -o $@ -c $< $(CFLAGS)
@@ -57,7 +68,7 @@ $(OBJDIR)/SDLMain.o: $(SRCDIR)/SDLMain.m $(SRCDIR)/SDLMain.h
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(C99FLAGS) -Isrc/
+	@gcc -o $@ -c $< $(C99FLAGS)
 
 #=============================================================================#
 
