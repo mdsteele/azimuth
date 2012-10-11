@@ -30,20 +30,20 @@
 #include "azimuth/view/particle.h"
 #include "azimuth/view/pickup.h"
 #include "azimuth/view/projectile.h"
+#include "azimuth/view/wall.h"
 #include "azimuth/view/ship.h"
 
 /*===========================================================================*/
 
 static void draw_camera_view(az_space_state_t *state) {
-  // center:
   glPushMatrix(); {
     glColor4f(1, 0, 0, 1); // red
-    glBegin(GL_LINE_LOOP); {
-      glVertex2d( 50,  50);
-      glVertex2d(-50,  50);
-      glVertex2d(-50, -50);
-      glVertex2d( 50, -50);
-    } glEnd();
+    //glBegin(GL_LINE_LOOP); {
+    //  glVertex2d( 50,  50);
+    //  glVertex2d(-50,  50);
+    //  glVertex2d(-50, -50);
+    //  glVertex2d( 50, -50);
+    //} glEnd();
     glBegin(GL_LINE_LOOP); {
       glVertex2d( 250,  250);
       glVertex2d(   0,  330);
@@ -55,7 +55,8 @@ static void draw_camera_view(az_space_state_t *state) {
       glVertex2d( 330,    0);
     } glEnd();
   } glPopMatrix();
-  //az_draw_walls(state);
+
+  az_draw_walls(state);
   az_draw_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);

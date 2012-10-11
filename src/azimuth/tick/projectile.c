@@ -19,6 +19,7 @@
 
 #include "azimuth/tick/projectile.h"
 
+#include <assert.h>
 #include <stdlib.h> // for NULL
 
 #include "azimuth/state/projectile.h"
@@ -28,16 +29,8 @@
 
 /*===========================================================================*/
 
-// Called when a projectile hits a baddie or the ship.  If the projectile is
-// hitting the ship, baddie will be NULL.
-static void on_projectile_hit(az_space_state_t *state, az_projectile_t *proj,
-                              az_baddie_t *baddie) {
-  if (proj->data->piercing) {
-    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
-  } else {
-    proj->kind = AZ_PROJ_NOTHING;
-  }
-
+static void on_projectile_impact(az_space_state_t *state,
+                                   az_projectile_t *proj) {
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
     particle->kind = AZ_PAR_BOOM;
@@ -47,6 +40,26 @@ static void on_projectile_hit(az_space_state_t *state, az_projectile_t *proj,
     particle->lifetime = 0.3;
     particle->param1 = 10;
   }
+}
+
+static void on_projectile_hit_wall(az_space_state_t *state,
+                                   az_projectile_t *proj) {
+  assert(!proj->data->phased);
+  proj->kind = AZ_PROJ_NOTHING;
+  on_projectile_impact(state, proj);
+}
+
+// Called when a projectile hits a baddie or the ship.  If the projectile is
+// hitting the ship, baddie will be NULL.
+static void on_projectile_hit_target(az_space_state_t *state,
+                                     az_projectile_t *proj,
+                                     az_baddie_t *baddie) {
+  if (proj->data->piercing) {
+    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
+  } else {
+    proj->kind = AZ_PROJ_NOTHING;
+  }
+  on_projectile_impact(state, proj);
 }
 
 static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
@@ -67,7 +80,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     if (proj->last_hit_uid != AZ_SHIP_UID &&
         az_point_hits_ship(&state->ship, proj->position)) {
       state->ship.player.shields -= proj->data->damage;
-      on_projectile_hit(state, proj, NULL);
+      on_projectile_hit_target(state, proj, NULL);
       return;
     }
   }
@@ -77,7 +90,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
       if (az_vwithin(baddie->position, proj->position, 20.0)) {
-        on_projectile_hit(state, proj, baddie);
+        on_projectile_hit_target(state, proj, baddie);
         baddie->health -= proj->data->damage;
         if (baddie->health <= 0.0) {
           baddie->kind = AZ_BAD_NOTHING;
@@ -90,7 +103,13 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // If it didn't hit the ship or a baddie already, the projectile can hit
   // walls (unless this kind of projectile passes through walls):
   if (!proj->data->phased) {
-    if (false) return; // TODO: check for wall collisions
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      if (az_point_hits_wall(wall, proj->position)) {
+        on_projectile_hit_wall(state, proj);
+        return;
+      }
+    }
   }
 
   // The projectile still hasn't hit anything.  Apply kind-specific logic to

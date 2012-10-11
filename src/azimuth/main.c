@@ -26,6 +26,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
+#include "azimuth/state/wall.h"
 #include "azimuth/tick/space.h" // for az_tick_space_state
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/util/vector.h"
@@ -47,6 +48,16 @@ static az_space_state_t state = {
   }
 };
 
+static az_vector_t wall_vertices[4] = {
+  {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
+};
+
+static az_wall_data_t wall_data = {
+  .bounding_radius = 75.0,
+  .color = {255, 255, 0, 255},
+  .polygon = {.num_vertices = 4, .vertices = wall_vertices}
+};
+
 static void event_loop(void) {
   state.camera = state.ship.position;
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
@@ -64,6 +75,15 @@ static void event_loop(void) {
       node->kind = AZ_NODE_TRACTOR;
       node->position = (az_vector_t){150, -150};
       node->angle = 0;
+    }
+  }
+  {
+    az_wall_t *wall;
+    if (az_insert_wall(&state, &wall)) {
+      wall->kind = AZ_WALL_NORMAL;
+      wall->data = &wall_data;
+      wall->position = AZ_VZERO;
+      wall->angle = 0.0;
     }
   }
 
