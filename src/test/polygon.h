@@ -25,6 +25,7 @@
 
 void test_polygon_contains(void);
 void test_convex_polygon_contains(void);
+void test_ray_hits_polygon(void);
 
 /*===========================================================================*/
 

@@ -57,6 +57,9 @@ az_vector_t az_vdiv(az_vector_t v, double f);
 
 // Compute the dot product of the two vectors.
 double az_vdot(az_vector_t v1, az_vector_t v2);
+// Compute the magnitude of the cross product of the two vectors.
+double az_vcross(az_vector_t v1, az_vector_t v2);
+
 // Project the first vector onto the second.  The second vector must be
 // nonzero.
 az_vector_t az_vproj(az_vector_t v1, az_vector_t v2);
@@ -83,6 +86,10 @@ double az_vtheta(az_vector_t v);
 
 // Determine if two points are within the given distance of each other.
 bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist);
+// Determine if a ray, travelling delta from start, will ever pass within the
+// specified circle.
+bool az_ray_hits_circle(az_vector_t start, az_vector_t delta,
+                        az_vector_t center, double radius);
 
 // Add or subtract a multiple of 2pi from the given number so that the result
 // is between -pi and pi.

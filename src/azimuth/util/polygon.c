@@ -19,7 +19,10 @@
 
 #include "azimuth/util/polygon.h"
 
+#include <assert.h>
+#include <math.h> // for INFINITY and isfinite
 #include <stdbool.h>
+#include <stdlib.h> // for NULL
 
 #include "azimuth/util/vector.h"
 
@@ -77,12 +80,62 @@ bool az_convex_polygon_contains(const az_polygon_t polygon,
     // using the assumption that vertices come in counter-clockwise order.
     // Since this is a convex polygon, the point is outside the polygon iff it
     // is outside at least once edge.
-    if ((point.x - vertices[i].x) * (vertices[j].y - vertices[i].y) -
-        (point.y - vertices[i].y) * (vertices[j].x - vertices[i].x) >= 0.0) {
+    if (az_vcross(az_vsub(point, vertices[i]),
+                  az_vsub(vertices[j], vertices[i])) >= 0.0) {
       return false;
     }
   }
   return true;
+}
+
+bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
+                         az_vector_t delta, az_vector_t *point_out) {
+  const az_vector_t *vertices = polygon.vertices;
+  // We're going to iterate through the edges of the polygon, testing each one
+  // for an intersection with the ray.  We keep track of the smallest "time"
+  // (from 0 to 1) for which the ray hits something.  We also keep track of how
+  // many edges we hit at all (at any nonnegative "time"), because if we hit an
+  // odd number of edges that means we started inside the polygon, and should
+  // actually hit at time zero.
+  double best = INFINITY;
+  int hits = 0;
+  // Iterate over all edges in the polygon.  On each iteration, i is the index
+  // of the "primary" vertex, and j is the index of the vertex that comes just
+  // after it in the list (wrapping around at the end).
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    const az_vector_t edelta = az_vsub(vertices[j], vertices[i]);
+    const double denom = az_vcross(delta, edelta);
+    // Make sure the edge isn't parallel to the ray.
+    if (denom == 0.0) continue;
+    const az_vector_t rel = az_vsub(vertices[i], start);
+    // Make sure that the ray hits the edge line between the two vertices.
+    const double u = az_vcross(rel, delta) / denom;
+    assert(isfinite(u));
+    if (u < 0.0 || u >= 1.0) continue;
+    // Make sure that the ray hits the edge within the bounds of the ray.
+    const double t = az_vcross(rel, edelta) / denom;
+    assert(isfinite(t));
+    if (t < 0.0) continue;
+    ++hits;
+    if (t > 1.0) continue;
+    if (t < best) {
+      best = t;
+    }
+  }
+  // If we started inside the polygon, then we actually hit a time zero.
+  if (hits % 2 != 0) {
+    best = 0.0;
+  }
+  // If the ray hits the polygon, store the collision point in point_out.
+  const bool did_hit = best != INFINITY;
+  if (did_hit && point_out != NULL) {
+    assert(hits > 0);
+    assert(isfinite(best));
+    assert(0.0 <= best && best <= 1.0);
+    *point_out = az_vadd(start, az_vmul(delta, best));
+  }
+  // Return whether we hit the polygon.
+  return did_hit;
 }
 
 /*===========================================================================*/

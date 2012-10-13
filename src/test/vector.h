@@ -24,6 +24,7 @@
 /*===========================================================================*/
 
 void test_mod2pi(void);
+void test_ray_hits_circle(void);
 void test_vector_polar(void);
 void test_vector_rotate(void);
 

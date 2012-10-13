@@ -23,19 +23,21 @@
 
 #include <stdbool.h>
 
+#include "azimuth/util/vector.h"
+
 /*===========================================================================*/
 
 #define RUN_TEST(fn) _run_test(#fn, fn)
 
-#define EXPECT_TRUE(condition) do {             \
-    _expect_true(!!(condition), #condition);    \
-  } while (false)
+#define EXPECT_TRUE(condition) _expect_true(condition, #condition)
 
 #define EXPECT_FALSE(condition) EXPECT_TRUE(!(condition))
 
-#define EXPECT_APPROX(expected, actual) do {                    \
-    _expect_approx(expected, actual, #expected " == " #actual); \
-  } while (false)
+#define EXPECT_APPROX(expected, actual) \
+  _expect_approx(expected, actual, #expected " == " #actual)
+
+#define EXPECT_VAPPROX(expected, actual) \
+  _expect_vapprox(expected, actual, #expected " == " #actual)
 
 #define ASSERT_TRUE(condition) do {                             \
     if (!_expect_true(!!(condition), #condition)) return;       \
@@ -55,6 +57,9 @@ void _run_test(const char *name, void (*function)(void));
 bool _expect_true(bool condition, const char *message);
 
 bool _expect_approx(double expected, double actual, const char *message);
+
+bool _expect_vapprox(az_vector_t expected, az_vector_t actual,
+                     const char *message);
 
 /*===========================================================================*/
 

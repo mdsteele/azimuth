@@ -83,4 +83,35 @@ void test_convex_polygon_contains(void) {
   EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, -1}));
 }
 
+void test_ray_hits_polygon(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t intersect = nix;
+  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+
+  intersect = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){2, 4},
+                                  (az_vector_t){-1, -4}, &intersect));
+  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), intersect);
+
+  intersect = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){2, 4},
+                                  (az_vector_t){-5, -20}, &intersect));
+  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), intersect);
+
+  intersect = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){0.5, 0},
+                                  (az_vector_t){1, 0}, &intersect));
+  EXPECT_VAPPROX(((az_vector_t){0.5, 0}), intersect);
+
+  intersect = nix;
+  EXPECT_FALSE(az_ray_hits_polygon(triangle, (az_vector_t){-5, 0},
+                                   (az_vector_t){1, 0}, &intersect));
+  EXPECT_VAPPROX(nix, intersect);
+
+  intersect = nix;
+  EXPECT_FALSE(az_ray_hits_polygon(triangle, (az_vector_t){5, 4},
+                                   (az_vector_t){1, -5}, &intersect));
+  EXPECT_VAPPROX(nix, intersect);
+}
+
 /*===========================================================================*/

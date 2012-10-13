@@ -45,6 +45,12 @@ bool az_polygon_contains(const az_polygon_t polygon, az_vector_t point);
 // efficient, but less general, than az_polygon_contains().
 bool az_convex_polygon_contains(const az_polygon_t polygon, az_vector_t point);
 
+// Determine if a ray, travelling delta from start, will ever pass within the
+// specified circle.  If it does and if point_out is non-NULL, stores in
+// *point_out the first point on the polygon that the ray hits.
+bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
+                         az_vector_t delta, az_vector_t *point_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_POLYGON_H_
