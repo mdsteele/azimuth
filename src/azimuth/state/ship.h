@@ -52,6 +52,11 @@ typedef struct {
 // shield perimeter.
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point);
 
+// Determine if a ray, travelling delta from start, will hit the ship.  If it
+// does and if point_out is non-NULL, stores the intersection point there.
+bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
+                      az_vector_t delta, az_vector_t *point_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_SHIP_H_

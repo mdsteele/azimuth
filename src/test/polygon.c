@@ -114,4 +114,18 @@ void test_ray_hits_polygon(void) {
   EXPECT_VAPPROX(nix, intersect);
 }
 
+void test_ray_hits_polygon_trans(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t intersect = nix;
+  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+
+  intersect = nix;
+  EXPECT_TRUE(az_ray_hits_polygon_trans(triangle,
+                                        (az_vector_t){3, 0.059714999709336247},
+                                        1.3258176636680323,
+                                        (az_vector_t){3, 5},
+                                        (az_vector_t){0, -5}, &intersect));
+  EXPECT_VAPPROX(((az_vector_t){3, 2}), intersect);
+}
+
 /*===========================================================================*/

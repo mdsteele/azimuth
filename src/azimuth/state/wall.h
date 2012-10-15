@@ -52,6 +52,11 @@ typedef struct {
 // Return true if the given point intersects the wall.
 bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point);
 
+// Determine if a ray, travelling delta from start, will hit the wall.  If it
+// does and if point_out is non-NULL, stores the intersection point there.
+bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
+                      az_vector_t delta, az_vector_t *point_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_WALL_H_

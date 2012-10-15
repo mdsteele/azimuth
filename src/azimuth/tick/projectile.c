@@ -72,13 +72,17 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   }
 
   // Move the projectile by its velocity:
+  const az_vector_t start = proj->position;
   proj->position = az_vadd(proj->position, az_vmul(proj->velocity, time));
 
   // Check if the projectile hits anything.  If it was fired by an enemy, it
   // can hit the ship:
   if (proj->fired_by_enemy) {
+    az_vector_t hit_at;
     if (proj->last_hit_uid != AZ_SHIP_UID &&
-        az_point_hits_ship(&state->ship, proj->position)) {
+        az_ray_hits_ship(&state->ship, start, az_vsub(proj->position, start),
+                         &hit_at)) {
+      proj->position = hit_at;
       state->ship.player.shields -= proj->data->damage;
       on_projectile_hit_target(state, proj, NULL);
       return;
@@ -103,12 +107,17 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // If it didn't hit the ship or a baddie already, the projectile can hit
   // walls (unless this kind of projectile passes through walls):
   if (!proj->data->phased) {
+    az_vector_t hit_at = proj->position;
+    bool did_hit = false;
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_point_hits_wall(wall, proj->position)) {
-        on_projectile_hit_wall(state, proj);
-        return;
+      if (az_ray_hits_wall(wall, start, az_vsub(hit_at, start), &hit_at)) {
+        did_hit = true;
       }
+    }
+    if (did_hit) {
+      proj->position = hit_at;
+      on_projectile_hit_wall(state, proj);
     }
   }
 

@@ -138,4 +138,21 @@ bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
   return did_hit;
 }
 
+bool az_ray_hits_polygon_trans(const az_polygon_t polygon,
+                               az_vector_t polygon_position,
+                               double polygon_angle, az_vector_t start,
+                               az_vector_t delta, az_vector_t *point_out) {
+  if (az_ray_hits_polygon(polygon,
+                          az_vrelative(start, polygon_position, polygon_angle),
+                          az_vrelative(delta, AZ_VZERO, polygon_angle),
+                          point_out)) {
+    if (point_out != NULL) {
+      *point_out = az_vadd(az_vrotate(*point_out, polygon_angle),
+                           polygon_position);
+    }
+    return true;
+  }
+  return false;
+}
+
 /*===========================================================================*/
