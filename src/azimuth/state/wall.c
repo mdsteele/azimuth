@@ -41,7 +41,8 @@ bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
   return (az_ray_hits_circle(start, delta, wall->position,
                              wall->data->bounding_radius) &&
           az_ray_hits_polygon_trans(wall->data->polygon, wall->position,
-                                    wall->angle, start, delta, point_out));
+                                    wall->angle, start, delta,
+                                    point_out, NULL));
 }
 
 /*===========================================================================*/

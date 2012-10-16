@@ -19,6 +19,8 @@
 
 #include "test/polygon.h"
 
+#include <stdlib.h> // for NULL
+
 #include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -85,47 +87,66 @@ void test_convex_polygon_contains(void) {
 
 void test_ray_hits_polygon(void) {
   const az_vector_t nix = {99999, 99999};
-  az_vector_t intersect = nix;
+  az_vector_t intersect = nix, normal = nix;
   az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
 
-  intersect = nix;
-  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){2, 4},
-                                  (az_vector_t){-1, -4}, &intersect));
-  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), intersect);
+  // Check az_ray_hits_polygon works with NULLs for point_out and normal_out:
+  EXPECT_TRUE(az_ray_hits_polygon(
+      triangle, (az_vector_t){2, 4}, (az_vector_t){-1, -4}, NULL, NULL));
 
-  intersect = nix;
-  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){2, 4},
-                                  (az_vector_t){-5, -20}, &intersect));
+  // Check case where ray hits an edge:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(
+      triangle, (az_vector_t){2, 4}, (az_vector_t){-1, -4},
+      &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){1.5, 2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){4, 1}), az_vunit(normal));
 
-  intersect = nix;
-  EXPECT_TRUE(az_ray_hits_polygon(triangle, (az_vector_t){0.5, 0},
-                                  (az_vector_t){1, 0}, &intersect));
+  // Check case where ray hits several edges:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(
+      triangle, (az_vector_t){2, 4}, (az_vector_t){-5, -20},
+      &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){4, 1}), az_vunit(normal));
+
+  // Check case where ray is entirely inside polygon (should hit at the start
+  // point, with the normal being -delta):
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_polygon(
+      triangle, (az_vector_t){0.5, 0}, (az_vector_t){1, 0},
+      &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){0.5, 0}), intersect);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
 
-  intersect = nix;
-  EXPECT_FALSE(az_ray_hits_polygon(triangle, (az_vector_t){-5, 0},
-                                   (az_vector_t){1, 0}, &intersect));
+  // Check case where ray misses (by stopping short of polygon):
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_polygon(
+      triangle, (az_vector_t){-5, 0}, (az_vector_t){1, 0},
+      &intersect, &normal));
   EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
 
-  intersect = nix;
-  EXPECT_FALSE(az_ray_hits_polygon(triangle, (az_vector_t){5, 4},
-                                   (az_vector_t){1, -5}, &intersect));
+  // Check case where ray misses (by missing completely):
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_polygon(
+      triangle, (az_vector_t){5, 4}, (az_vector_t){1, -5},
+      &intersect, &normal));
   EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_ray_hits_polygon_trans(void) {
   const az_vector_t nix = {99999, 99999};
-  az_vector_t intersect = nix;
+  az_vector_t intersect = nix, normal = nix;
   az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
 
-  intersect = nix;
-  EXPECT_TRUE(az_ray_hits_polygon_trans(triangle,
-                                        (az_vector_t){3, 0.059714999709336247},
-                                        1.3258176636680323,
-                                        (az_vector_t){3, 5},
-                                        (az_vector_t){0, -5}, &intersect));
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_polygon_trans(
+      triangle, (az_vector_t){3, 0.059714999709336247}, 1.3258176636680323,
+      (az_vector_t){3, 5}, (az_vector_t){0, -5}, &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){3, 2}), intersect);
+  EXPECT_VAPPROX(((az_vector_t){0, 1}), az_vunit(normal));
 }
 
 /*===========================================================================*/

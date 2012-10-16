@@ -46,6 +46,10 @@ az_vector_t az_vsub(az_vector_t v1, az_vector_t v2) {
   return (az_vector_t){.x = v1.x - v2.x, .y = v1.y - v2.y};
 }
 
+az_vector_t az_vneg(az_vector_t v) {
+  return (az_vector_t){.x = -v.x, .y = -v.y};
+}
+
 az_vector_t az_vmul(az_vector_t v, double f) {
   return (az_vector_t){.x = v.x * f, .y = v.y * f};
 }

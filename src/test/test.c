@@ -70,7 +70,7 @@ bool _expect_true(bool condition, const char *message) {
 bool _expect_approx(double expected, double actual, const char *message) {
   if (az_dapprox(expected, actual)) return true;
   test_failure();
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %g vs. %g\n",
+  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            %.20g vs. %.20g\n",
          message, expected, actual);
   return false;
 }
@@ -79,7 +79,8 @@ bool _expect_vapprox(az_vector_t expected, az_vector_t actual,
                      const char *message) {
   if (az_dapprox(0.0, az_vnorm(az_vsub(expected, actual)))) return true;
   test_failure();
-  printf("    \x1b[1;31mFAILED:\x1b[m %s\n            (%g, %g) vs. (%g, %g)\n",
+  printf("    \x1b[1;31mFAILED:\x1b[m %s\n"
+         "            (%.20g, %.20g) vs. (%.20g, %.20g)\n",
          message, expected.x, expected.y, actual.x, actual.y);
   return false;
 }

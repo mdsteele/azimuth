@@ -20,6 +20,7 @@
 #include "azimuth/state/ship.h"
 
 #include <stdbool.h>
+#include <stdlib.h> // for NULL
 
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
@@ -49,8 +50,8 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out) {
   return (az_ray_hits_circle(start, delta, ship->position,
                              SHIP_BOUNDING_RADIUS) &&
-          az_ray_hits_polygon_trans(ship_polygon, ship->position,
-                                    ship->angle, start, delta, point_out));
+          az_ray_hits_polygon_trans(ship_polygon, ship->position, ship->angle,
+                                    start, delta, point_out, NULL));
 }
 
 /*===========================================================================*/

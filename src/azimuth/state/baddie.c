@@ -93,7 +93,8 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
   bool did_hit = false;
 
   // Check if we hit the main body of the baddie.
-  if (az_ray_hits_polygon(data->polygon, rel_start, rel_delta, point_out)) {
+  if (az_ray_hits_polygon(data->polygon, rel_start, rel_delta,
+                          point_out, NULL)) {
     if (point_out == NULL) return true;
     did_hit = true;
     rel_delta = az_vsub(*point_out, rel_start);
@@ -105,7 +106,7 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
     if (az_ray_hits_polygon_trans(data->components[i].polygon,
                                   baddie->components[i].position,
                                   baddie->components[i].angle,
-                                  rel_start, rel_delta, point_out)) {
+                                  rel_start, rel_delta, point_out, NULL)) {
       if (point_out == NULL) return true;
       did_hit = true;
       rel_delta = az_vsub(*point_out, rel_start);

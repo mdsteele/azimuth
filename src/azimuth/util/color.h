@@ -18,8 +18,8 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_COLOR_H_
-#define AZIMUTH_COLOR_H_
+#ifndef AZIMUTH_UTIL_COLOR_H_
+#define AZIMUTH_UTIL_COLOR_H_
 
 #include <stdint.h>
 
@@ -35,4 +35,4 @@ extern const az_color_t AZ_WHITE;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_COLOR_H_
+#endif // AZIMUTH_UTIL_COLOR_H_

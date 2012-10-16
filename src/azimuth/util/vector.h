@@ -50,6 +50,8 @@ az_vector_t az_vpolar(double magnitude, double theta);
 az_vector_t az_vadd(az_vector_t v1, az_vector_t v2);
 // Subtract the second vector from the first.
 az_vector_t az_vsub(az_vector_t v1, az_vector_t v2);
+// Negate a vector.
+az_vector_t az_vneg(az_vector_t v);
 // Multiply a vector by a scalar.
 az_vector_t az_vmul(az_vector_t v, double f);
 // Divide a vector by a scalar.  The scalar must be nonzero.

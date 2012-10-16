@@ -89,7 +89,8 @@ bool az_convex_polygon_contains(const az_polygon_t polygon,
 }
 
 bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
-                         az_vector_t delta, az_vector_t *point_out) {
+                         az_vector_t delta, az_vector_t *point_out,
+                         az_vector_t *normal_out) {
   const az_vector_t *vertices = polygon.vertices;
   // We're going to iterate through the edges of the polygon, testing each one
   // for an intersection with the ray.  We keep track of the smallest "time"
@@ -97,7 +98,8 @@ bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
   // many edges we hit at all (at any nonnegative "time"), because if we hit an
   // odd number of edges that means we started inside the polygon, and should
   // actually hit at time zero.
-  double best = INFINITY;
+  double best_time = INFINITY;
+  az_vector_t best_edge = AZ_VZERO;
   int hits = 0;
   // Iterate over all edges in the polygon.  On each iteration, i is the index
   // of the "primary" vertex, and j is the index of the vertex that comes just
@@ -118,37 +120,52 @@ bool az_ray_hits_polygon(const az_polygon_t polygon, az_vector_t start,
     if (t < 0.0) continue;
     ++hits;
     if (t > 1.0) continue;
-    if (t < best) {
-      best = t;
+    if (t < best_time) {
+      best_time = t;
+      best_edge = edelta;
     }
   }
-  // If we started inside the polygon, then we actually hit a time zero.
+  // If we started inside the polygon, then we actually hit at time zero.
   if (hits % 2 != 0) {
-    best = 0.0;
+    best_time = 0.0;
+    best_edge = AZ_VZERO;
   }
-  // If the ray hits the polygon, store the collision point in point_out.
-  const bool did_hit = best != INFINITY;
-  if (did_hit && point_out != NULL) {
+  // If the ray hits the polygon, store the collision point in point_out, and
+  // the normal vector in normal_out.
+  const bool did_hit = best_time != INFINITY;
+  if (did_hit) {
     assert(hits > 0);
-    assert(isfinite(best));
-    assert(0.0 <= best && best <= 1.0);
-    *point_out = az_vadd(start, az_vmul(delta, best));
+    assert(isfinite(best_time));
+    assert(0.0 <= best_time && best_time <= 1.0);
+    if (point_out != NULL) {
+      *point_out = az_vadd(start, az_vmul(delta, best_time));
+    }
+    if (normal_out != NULL) {
+      if (best_edge.x == 0.0 && best_edge.y == 0.0) {
+        *normal_out = az_vneg(delta);
+      } else {
+        *normal_out = az_vsub(az_vproj(delta, best_edge), delta);
+      }
+    }
   }
-  // Return whether we hit the polygon.
   return did_hit;
 }
 
 bool az_ray_hits_polygon_trans(const az_polygon_t polygon,
                                az_vector_t polygon_position,
                                double polygon_angle, az_vector_t start,
-                               az_vector_t delta, az_vector_t *point_out) {
+                               az_vector_t delta, az_vector_t *point_out,
+                               az_vector_t *normal_out) {
   if (az_ray_hits_polygon(polygon,
                           az_vrelative(start, polygon_position, polygon_angle),
                           az_vrelative(delta, AZ_VZERO, polygon_angle),
-                          point_out)) {
+                          point_out, normal_out)) {
     if (point_out != NULL) {
       *point_out = az_vadd(az_vrotate(*point_out, polygon_angle),
                            polygon_position);
+    }
+    if (normal_out != NULL) {
+      *normal_out = az_vrotate(*normal_out, polygon_angle);
     }
     return true;
   }
