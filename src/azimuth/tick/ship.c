@@ -196,6 +196,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_vector_t hit_at = az_vadd(ship->position, az_vpolar(1000, ship->angle));
     bool did_hit = false;
     az_color_t hit_color = AZ_WHITE;
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (az_ray_hits_baddie(baddie, gun_position,
+                             az_vsub(hit_at, gun_position), &hit_at)) {
+        did_hit = true;
+      }
+    }
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
       if (az_ray_hits_wall(wall, gun_position, az_vsub(hit_at, gun_position),

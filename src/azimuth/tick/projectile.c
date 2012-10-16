@@ -90,18 +90,24 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   }
   // Or, if the projectile was fired by the ship, it can hit baddies:
   else {
+    az_vector_t hit_at = proj->position;
+    az_baddie_t *hit_baddie = NULL;
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
-      if (az_vwithin(baddie->position, proj->position, 20.0)) {
-        on_projectile_hit_target(state, proj, baddie);
-        baddie->health -= proj->data->damage;
-        if (baddie->health <= 0.0) {
-          baddie->kind = AZ_BAD_NOTHING;
-          az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, baddie->position);
-        }
-        return;
+      if (az_ray_hits_baddie(baddie, start, az_vsub(hit_at, start), &hit_at)) {
+        hit_baddie = baddie;
       }
+    }
+    if (hit_baddie != NULL) {
+      proj->position = hit_at;
+      on_projectile_hit_target(state, proj, hit_baddie);
+      hit_baddie->health -= proj->data->damage;
+      if (hit_baddie->health <= 0.0) {
+        hit_baddie->kind = AZ_BAD_NOTHING;
+        az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, hit_baddie->position);
+      }
+      return;
     }
   }
   // If it didn't hit the ship or a baddie already, the projectile can hit

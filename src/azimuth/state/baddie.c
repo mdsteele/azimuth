@@ -21,11 +21,27 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h> // for NULL
 
 #include "azimuth/util/misc.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+#define DECL_COMPONENTS(c) .num_components=AZ_ARRAY_SIZE(c), .components=(c)
+#define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
+
+static const az_vector_t turret_vertices[] = {
+  {20, 0}, {10, 17.320508075688775}, {-10, 17.320508075688775},
+  {-20, 0}, {-10, -17.320508075688775}, {10, -17.320508075688775}
+};
+static const az_vector_t turret_cannon_vertices[] = {
+  {30, 5}, {0, 5}, {0, -5}, {30, -5}
+};
+static const az_component_data_t turret_components[] = {
+  { .bounding_radius = 30.5, .polygon = INIT_POLYGON(turret_cannon_vertices) }
+};
 
 static const az_baddie_data_t baddie_data[] = {
   [AZ_BAD_LUMP] = {
@@ -33,8 +49,10 @@ static const az_baddie_data_t baddie_data[] = {
     .max_health = 10.0
   },
   [AZ_BAD_TURRET] = {
-    .bounding_radius = 35.0,
-    .max_health = 15.0
+    .bounding_radius = 30.5,
+    .max_health = 15.0,
+    DECL_COMPONENTS(turret_components),
+    .polygon = INIT_POLYGON(turret_vertices)
   }
 };
 
@@ -50,6 +68,59 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
   baddie->cooldown = 0.0;
+  for (int i = 0; i < baddie->data->num_components; ++i) {
+    assert(i < AZ_ARRAY_SIZE(baddie->components));
+    baddie->components[i].position = AZ_VZERO;
+    baddie->components[i].angle = 0.0;
+  }
+}
+
+bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
+                        az_vector_t delta, az_vector_t *point_out) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  const az_baddie_data_t *data = baddie->data;
+
+  // Common case: if ray definitely misses baddie, return early.
+  if (!az_ray_hits_circle(start, delta, baddie->position,
+                          data->bounding_radius)) {
+    return false;
+  }
+
+  // Calculate start and delta relative to the positioning of the baddie.
+  const az_vector_t rel_start = az_vrelative(start, baddie->position,
+                                             baddie->angle);
+  az_vector_t rel_delta = az_vrelative(delta, AZ_VZERO, baddie->angle);
+  bool did_hit = false;
+
+  // Check if we hit the main body of the baddie.
+  if (az_ray_hits_polygon(data->polygon, rel_start, rel_delta, point_out)) {
+    if (point_out == NULL) return true;
+    did_hit = true;
+    rel_delta = az_vsub(*point_out, rel_start);
+  }
+
+  // Now check if we hit any of the baddie's components.
+  for (int i = 0; i < data->num_components; ++i) {
+    assert(i < AZ_ARRAY_SIZE(baddie->components));
+    if (az_ray_hits_polygon_trans(data->components[i].polygon,
+                                  baddie->components[i].position,
+                                  baddie->components[i].angle,
+                                  rel_start, rel_delta, point_out)) {
+      if (point_out == NULL) return true;
+      did_hit = true;
+      rel_delta = az_vsub(*point_out, rel_start);
+    }
+  }
+
+  // Fix up *point_out and return.
+  if (did_hit) {
+    // We returned early above if we hit and point_out was NULL, so if we're
+    // here and did_hit is true then point_out must not be NULL.
+    assert(point_out != NULL);
+    *point_out = az_vadd(az_vrotate(*point_out, baddie->angle),
+                         baddie->position);
+  }
+  return did_hit;
 }
 
 /*===========================================================================*/
