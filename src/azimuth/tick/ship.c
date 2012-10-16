@@ -24,9 +24,13 @@
 #include <stdlib.h> // for NULL
 
 #include "azimuth/constants.h"
+#include "azimuth/state/particle.h"
+#include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -171,16 +175,63 @@ void az_tick_ship(az_space_state_t *state, double time) {
         az_vsub(ship->position, tractor_node->position));
   }
 
+  const az_vector_t gun_position =
+    az_vadd(ship->position, az_vpolar(18, ship->angle));
+
   // Fire projectiles:
   const double fire_cost = 20.0;
   if (controls->fire_pressed && player->energy >= fire_cost) {
     az_projectile_t *proj;
     if (az_insert_projectile(state, &proj)) {
       player->energy -= fire_cost;
-      az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, false,
-                         az_vadd(ship->position, az_vpolar(18.0, ship->angle)),
+      az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, false, gun_position,
                          ship->angle);
-      state->ship.controls.fire_pressed = false;
+      controls->fire_pressed = false;
+    }
+  }
+
+  // Fire beam:
+  if (controls->fire_held) {
+    // Calculate where beam hits:
+    az_vector_t hit_at = az_vadd(ship->position, az_vpolar(1000, ship->angle));
+    bool did_hit = false;
+    az_color_t hit_color = AZ_WHITE;
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      if (az_ray_hits_wall(wall, gun_position, az_vsub(hit_at, gun_position),
+                           &hit_at)) {
+        did_hit = true;
+        hit_color = wall->data->color;
+      }
+    }
+    // Add particle for the beam itself:
+    az_particle_t *particle;
+    if (az_insert_particle(state, &particle)) {
+      particle->kind = AZ_PAR_BEAM;
+      particle->color = (az_color_t){
+        (az_clock_mod(6, 1, state->clock) < 3 ? 255 : 64),
+        (az_clock_mod(6, 1, state->clock + 2) < 3 ? 255 : 64),
+        (az_clock_mod(6, 1, state->clock + 4) < 3 ? 255 : 64),
+        192};
+      particle->position = gun_position;
+      particle->velocity = AZ_VZERO;
+      particle->angle = ship->angle;
+      particle->lifetime = 0.0;
+      particle->param1 = az_vnorm(az_vsub(hit_at, particle->position));
+      particle->param2 = 6 + az_clock_zigzag(6, 1, state->clock);
+    }
+    // Add particles off of what the beam hits:
+    if (did_hit) {
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_SPECK;
+        particle->color = hit_color;
+        particle->position = hit_at;
+        // TODO: Use collision normal to determine range of velocity theta.
+        particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
+                                       az_random() * AZ_PI);
+        particle->angle = 0.0;
+        particle->lifetime = 1.0;
+      }
     }
   }
 }

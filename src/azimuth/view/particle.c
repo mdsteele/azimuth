@@ -62,6 +62,19 @@ static void draw_particle(const az_particle_t *particle) {
         }
       } glEnd();
       break;
+    case AZ_PAR_BEAM:
+      glBegin(GL_QUAD_STRIP); {
+        with_color_alpha(particle->color, 0);
+        glVertex2d(0, particle->param2);
+        glVertex2d(particle->param1, particle->param2);
+        with_color_alpha(particle->color, 1);
+        glVertex2d(0, 0);
+        glVertex2d(particle->param1, 0);
+        with_color_alpha(particle->color, 0);
+        glVertex2d(0, -particle->param2);
+        glVertex2d(particle->param1, -particle->param2);
+      } glEnd();
+      break;
     default: assert(false);
   }
 }
@@ -71,6 +84,7 @@ void az_draw_particles(const az_space_state_t* state) {
     if (particle->kind == AZ_PAR_NOTHING) continue;
     glPushMatrix(); {
       glTranslated(particle->position.x, particle->position.y, 0);
+      glRotated(AZ_RAD2DEG(particle->angle), 0, 0, 1);
       draw_particle(particle);
     } glPopMatrix();
   }

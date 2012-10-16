@@ -17,37 +17,10 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_PARTICLE_H_
-#define AZIMUTH_STATE_PARTICLE_H_
-
 #include "azimuth/util/color.h"
-#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_PAR_NOTHING = 0,
-  // SPECK: A single point.
-  AZ_PAR_SPECK,
-  // SEGMENT: A spinning line segment.  param1=radius, param2=turnrate
-  AZ_PAR_SEGMENT,
-  // BOOM: An explosion.  param1=radius
-  AZ_PAR_BOOM,
-  // BEAM: A beam.  param1=length, param2=width/2
-  AZ_PAR_BEAM
-} az_particle_kind_t;
-
-typedef struct {
-  az_particle_kind_t kind; // if AZ_PAR_NOTHING, this particle is not present
-  az_color_t color;
-  az_vector_t position;
-  az_vector_t velocity;
-  double angle;
-  double age, lifetime; // seconds
-  double param1, param2; // meaning depends on kind
-} az_particle_t;
+const az_color_t AZ_WHITE = {255, 255, 255, 255};
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_STATE_PARTICLE_H_

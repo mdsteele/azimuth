@@ -23,7 +23,7 @@
 
 #include <stdbool.h>
 
-#include "azimuth/color.h"
+#include "azimuth/util/color.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 

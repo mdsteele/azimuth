@@ -25,9 +25,13 @@
 
 /*===========================================================================*/
 
+// Represents a color, with red, green, blue, and alpha components.
 typedef struct {
   uint8_t r, g, b, a;
 } az_color_t;
+
+// An opaque white color:
+extern const az_color_t AZ_WHITE;
 
 /*===========================================================================*/
 
