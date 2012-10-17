@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_player_give_upgrade);
   RUN_TEST(test_polygon_contains);
+  RUN_TEST(test_polygons_collide);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
   RUN_TEST(test_ray_hits_circle);

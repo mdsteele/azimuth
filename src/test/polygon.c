@@ -149,4 +149,64 @@ void test_ray_hits_polygon_trans(void) {
   EXPECT_VAPPROX(((az_vector_t){0, 1}), az_vunit(normal));
 }
 
+void test_polygons_collide(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix, normal = nix;
+  const az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+  const az_polygon_t square = MAKE_POLYGON(square_vertices);
+
+  // Check az_polygons_collide works with NULLs for out args:
+  pos = impact = normal = nix;
+  EXPECT_TRUE(az_polygons_collide(
+      square, AZ_VZERO, 0, triangle, (az_vector_t){0, -5}, AZ_HALF_PI,
+      (az_vector_t){0, 10}, NULL, NULL, NULL));
+
+  // Check case where corner of moving polygon hits edge of stationary polygon:
+  pos = impact = normal = nix;
+  EXPECT_TRUE(az_polygons_collide(
+      square, AZ_VZERO, 0, triangle, (az_vector_t){0, -5}, AZ_HALF_PI,
+      (az_vector_t){0, 10}, &pos, &impact, &normal));
+  EXPECT_VAPPROX(((az_vector_t){0, -3}), pos);
+  EXPECT_VAPPROX(((az_vector_t){0, -1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0, -1}), az_vunit(normal));
+
+  // Check case where corner of stationary polygon hits edge of moving polygon:
+  pos = impact = normal = nix;
+  EXPECT_TRUE(az_polygons_collide(
+      triangle, AZ_VZERO, 0, square, (az_vector_t){-5, -3}, AZ_PI,
+      (az_vector_t){10, 0}, &pos, &impact, &normal));
+  EXPECT_VAPPROX(((az_vector_t){-4, -3}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-3, -3}), impact);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Check another case where corner of stationary polygon hits edge of moving
+  // polygon:
+  pos = impact = normal = nix;
+  EXPECT_TRUE(az_polygons_collide(
+      triangle, AZ_VZERO, 0, square, (az_vector_t){-6, -6}, AZ_PI/4,
+      (az_vector_t){10, 10}, &pos, &impact, &normal));
+  EXPECT_VAPPROX(((az_vector_t){-3.707106781186548, -3.707106781186548}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-3, -3}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
+
+  // Check case where polygons don't collide:
+  pos = impact = normal = nix;
+  EXPECT_FALSE(az_polygons_collide(
+      square, AZ_VZERO, 0, triangle, (az_vector_t){5, -3}, 1.3258176636680323,
+      (az_vector_t){-10, 0}, &pos, &impact, &normal));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Check case where stationary polygon is not at origin:
+  pos = impact = normal = nix;
+  EXPECT_TRUE(az_polygons_collide(
+      triangle, (az_vector_t){5, -2}, -AZ_HALF_PI,
+      square, (az_vector_t){-1, 4}, AZ_PI / 4,
+      (az_vector_t){10, -10}, &pos, &impact, &normal));
+  EXPECT_VAPPROX(((az_vector_t){1.2928932188134525, 1.7071067811865475}), pos);
+  EXPECT_VAPPROX(((az_vector_t){2, 1}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
+}
+
 /*===========================================================================*/

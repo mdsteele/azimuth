@@ -27,6 +27,7 @@ void test_polygon_contains(void);
 void test_convex_polygon_contains(void);
 void test_ray_hits_polygon(void);
 void test_ray_hits_polygon_trans(void);
+void test_polygons_collide(void);
 
 /*===========================================================================*/
 
