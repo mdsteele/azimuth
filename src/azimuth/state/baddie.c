@@ -76,7 +76,8 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
 }
 
 bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
-                        az_vector_t delta, az_vector_t *point_out) {
+                        az_vector_t delta, az_vector_t *point_out,
+                        az_vector_t *normal_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
 
@@ -87,15 +88,14 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
   }
 
   // Calculate start and delta relative to the positioning of the baddie.
-  const az_vector_t rel_start = az_vrelative(start, baddie->position,
-                                             baddie->angle);
-  az_vector_t rel_delta = az_vrelative(delta, AZ_VZERO, baddie->angle);
+  const az_vector_t rel_start = az_vrotate(az_vsub(start, baddie->position),
+                                           -baddie->angle);
+  az_vector_t rel_delta = az_vrotate(delta, -baddie->angle);
   bool did_hit = false;
 
   // Check if we hit the main body of the baddie.
   if (az_ray_hits_polygon(data->polygon, rel_start, rel_delta,
-                          point_out, NULL)) {
-    if (point_out == NULL) return true;
+                          point_out, normal_out)) {
     did_hit = true;
     rel_delta = az_vsub(*point_out, rel_start);
   }
@@ -106,20 +106,22 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
     if (az_ray_hits_polygon_trans(data->components[i].polygon,
                                   baddie->components[i].position,
                                   baddie->components[i].angle,
-                                  rel_start, rel_delta, point_out, NULL)) {
-      if (point_out == NULL) return true;
+                                  rel_start, rel_delta,
+                                  point_out, normal_out)) {
       did_hit = true;
       rel_delta = az_vsub(*point_out, rel_start);
     }
   }
 
-  // Fix up *point_out and return.
+  // Fix up *point_out and *normal_out and return.
   if (did_hit) {
-    // We returned early above if we hit and point_out was NULL, so if we're
-    // here and did_hit is true then point_out must not be NULL.
-    assert(point_out != NULL);
-    *point_out = az_vadd(az_vrotate(*point_out, baddie->angle),
-                         baddie->position);
+    if (point_out != NULL) {
+      *point_out = az_vadd(az_vrotate(*point_out, baddie->angle),
+                           baddie->position);
+    }
+    if (normal_out != NULL) {
+      *normal_out = az_vrotate(*normal_out, baddie->angle);
+    }
   }
   return did_hit;
 }

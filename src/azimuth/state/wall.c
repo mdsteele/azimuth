@@ -36,13 +36,14 @@ bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point) {
 }
 
 bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out) {
+                      az_vector_t delta, az_vector_t *point_out,
+                      az_vector_t *normal_out) {
   assert(wall->kind != AZ_WALL_NOTHING);
   return (az_ray_hits_circle(start, delta, wall->position,
                              wall->data->bounding_radius) &&
           az_ray_hits_polygon_trans(wall->data->polygon, wall->position,
                                     wall->angle, start, delta,
-                                    point_out, NULL));
+                                    point_out, normal_out));
 }
 
 /*===========================================================================*/

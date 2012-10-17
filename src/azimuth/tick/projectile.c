@@ -26,11 +26,12 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 
 /*===========================================================================*/
 
 static void on_projectile_impact(az_space_state_t *state,
-                                   az_projectile_t *proj) {
+                                 az_projectile_t *proj) {
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
     particle->kind = AZ_PAR_BOOM;
@@ -39,6 +40,17 @@ static void on_projectile_impact(az_space_state_t *state,
     particle->velocity = AZ_VZERO;
     particle->lifetime = 0.3;
     particle->param1 = 10;
+  }
+  for (int i = 0; i < 5; ++i) {
+    if (az_insert_particle(state, &particle)) {
+      particle->kind = AZ_PAR_SPECK;
+      particle->color = AZ_WHITE;
+      particle->position = proj->position;
+      particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
+                                     az_random() * AZ_TWO_PI);
+      particle->angle = 0.0;
+      particle->lifetime = 1.0;
+    } else break;
   }
 }
 
@@ -95,7 +107,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
-      if (az_ray_hits_baddie(baddie, start, az_vsub(hit_at, start), &hit_at)) {
+      if (az_ray_hits_baddie(baddie, start, az_vsub(hit_at, start),
+                             &hit_at, NULL)) {
         hit_baddie = baddie;
       }
     }
@@ -117,7 +130,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     bool did_hit = false;
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_ray_hits_wall(wall, start, az_vsub(hit_at, start), &hit_at)) {
+      if (az_ray_hits_wall(wall, start, az_vsub(hit_at, start),
+                           &hit_at, NULL)) {
         did_hit = true;
       }
     }
