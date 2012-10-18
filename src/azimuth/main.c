@@ -18,12 +18,13 @@
 =============================================================================*/
 
 #include <stdbool.h>
-#include <stdio.h>
+#include <stdlib.h> // for EXIT_SUCCESS
 
-#include <GL/gl.h>
-#include <SDL/SDL.h>
+#include <SDL/SDL.h> // for main() renaming
 
 #include "azimuth/constants.h"
+#include "azimuth/gui/event.h"
+#include "azimuth/gui/screen.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
@@ -33,9 +34,6 @@
 #include "azimuth/view/space.h"
 
 /*===========================================================================*/
-
-#define VIDEO_DEPTH 32
-#define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
 static az_space_state_t state = {
   .clock = 0, .timer.active_for = -1,
@@ -104,47 +102,39 @@ static void event_loop(void) {
     // Tick the state:
     az_tick_space_state(&state, 1.0/60.0);
     // Draw the screen:
-    glClear(GL_COLOR_BUFFER_BIT);
-    glLoadIdentity();
-    az_space_draw_screen(&state);
-    glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
-    glFinish();
-    SDL_GL_SwapBuffers();
+    az_start_screen_redraw(); {
+      az_space_draw_screen(&state);
+    } az_finish_screen_redraw();
 
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-        case SDL_QUIT:
+    az_event_t event;
+    while (az_poll_event(&event)) {
+      switch (event.kind) {
+        case AZ_EVENT_QUIT:
           return;
-        case SDL_KEYDOWN:
-          switch (event.key.keysym.sym) {
-            case SDLK_q:
-              if (event.key.keysym.mod & (KMOD_CTRL | KMOD_META)) {
-                return;
-              }
-              break;
-            case SDLK_UP: state.ship.controls.up = true; break;
-            case SDLK_DOWN: state.ship.controls.down = true; break;
-            case SDLK_LEFT: state.ship.controls.left = true; break;
-            case SDLK_RIGHT: state.ship.controls.right = true; break;
-            case SDLK_v:
+        case AZ_EVENT_KEY_DOWN:
+          switch (event.key.name) {
+            case AZ_KEY_UP_ARROW: state.ship.controls.up = true; break;
+            case AZ_KEY_DOWN_ARROW: state.ship.controls.down = true; break;
+            case AZ_KEY_LEFT_ARROW: state.ship.controls.left = true; break;
+            case AZ_KEY_RIGHT_ARROW: state.ship.controls.right = true; break;
+            case AZ_KEY_V:
               state.ship.controls.fire_pressed = true;
               state.ship.controls.fire_held = true;
               break;
-            case SDLK_x: state.ship.controls.util = true; break;
-            case SDLK_z: state.ship.controls.burn = true; break;
+            case AZ_KEY_X: state.ship.controls.util = true; break;
+            case AZ_KEY_Z: state.ship.controls.burn = true; break;
             default: break;
           }
           break;
-        case SDL_KEYUP:
-          switch (event.key.keysym.sym) {
-            case SDLK_UP: state.ship.controls.up = false; break;
-            case SDLK_DOWN: state.ship.controls.down = false; break;
-            case SDLK_LEFT: state.ship.controls.left = false; break;
-            case SDLK_RIGHT: state.ship.controls.right = false; break;
-            case SDLK_v: state.ship.controls.fire_held = false; break;
-            case SDLK_x: state.ship.controls.util = false; break;
-            case SDLK_z: state.ship.controls.burn = false; break;
+        case AZ_EVENT_KEY_UP:
+          switch (event.key.name) {
+            case AZ_KEY_UP_ARROW: state.ship.controls.up = false; break;
+            case AZ_KEY_DOWN_ARROW: state.ship.controls.down = false; break;
+            case AZ_KEY_LEFT_ARROW: state.ship.controls.left = false; break;
+            case AZ_KEY_RIGHT_ARROW: state.ship.controls.right = false; break;
+            case AZ_KEY_V: state.ship.controls.fire_held = false; break;
+            case AZ_KEY_X: state.ship.controls.util = false; break;
+            case AZ_KEY_Z: state.ship.controls.burn = false; break;
             default: break;
           }
           break;
@@ -155,61 +145,12 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  // Initialize our own code:
   az_init_random();
+  az_init_gui(false);
 
-  // Start up SDL (quit if we fail):
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) return 1;
-
-  // Enable OpenGL double-buffering:
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  // Enable vsync:
-#if SDL_VERSION_ATLEAST(1,3,0)
-  SDL_GL_SetSwapInterval(1);
-#else
-  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-#endif
-  // Enable antialiasing:
-  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
-
-  // Init the display (quit if we fail):
-  if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT,
-                        VIDEO_DEPTH, VIDEO_FLAGS)) {
-    SDL_Quit();
-    return 1;
-  }
-
-  // Turn off the depth buffer:
-  glDisable(GL_DEPTH_TEST);
-  glDepthMask(GL_FALSE);
-  // Enable alpha blending:
-  glEnable(GL_BLEND);
-  glBlendEquation(GL_FUNC_ADD);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  // Enable antialiasing:
-  glEnable(GL_POINT_SMOOTH);
-  glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_LINE_SMOOTH);
-  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_POLYGON_SMOOTH);
-  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-  // Set the view:
-  glClearColor(0, 0, 0, 0);
-  glClearDepth(1.0f);
-  glViewport(0, 0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, 0, 1, -1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  // Run the game:
   event_loop();
 
-  // Exit cleanly:
-  SDL_Quit();
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 /*===========================================================================*/
