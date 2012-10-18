@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/player.h"
-
 #include "azimuth/state/player.h"
 #include "test/test.h"
 

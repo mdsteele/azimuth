@@ -27,7 +27,7 @@
 
 /*===========================================================================*/
 
-#define RUN_TEST(fn) _run_test(#fn, fn)
+#define RUN_TEST(fn) do { extern void fn(void); _run_test(#fn, fn); } while (0)
 
 #define EXPECT_TRUE(condition) _expect_true(condition, #condition)
 

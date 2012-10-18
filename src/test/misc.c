@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/misc.h"
-
 #include "azimuth/util/misc.h"
 #include "test/test.h"
 

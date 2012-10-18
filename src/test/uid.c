@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/uid.h"
-
 #include "azimuth/state/uid.h"
 #include "test/test.h"
 

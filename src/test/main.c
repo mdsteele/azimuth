@@ -17,15 +17,8 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/test.h"
-
 #include "azimuth/util/random.h" // for az_init_random
-#include "test/misc.h"
-#include "test/player.h"
-#include "test/polygon.h"
-#include "test/random.h"
-#include "test/uid.h"
-#include "test/vector.h"
+#include "test/test.h"
 
 /*===========================================================================*/
 

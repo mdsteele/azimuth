@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/vector.h"
-
 #include <math.h>
 
 #include "azimuth/util/vector.h"

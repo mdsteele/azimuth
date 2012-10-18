@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/random.h"
-
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "test/test.h"

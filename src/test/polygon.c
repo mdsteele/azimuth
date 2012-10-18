@@ -17,8 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "test/polygon.h"
-
 #include <stdlib.h> // for NULL
 
 #include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
