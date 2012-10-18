@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
+#include "azimuth/state/wall.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -52,6 +53,17 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                              SHIP_BOUNDING_RADIUS) &&
           az_ray_hits_polygon_trans(ship_polygon, ship->position, ship->angle,
                                     start, delta, point_out, NULL));
+}
+
+bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
+                            az_vector_t delta, az_vector_t *pos_out,
+                            az_vector_t *impact_out, az_vector_t *normal_out) {
+  return (az_ray_hits_circle(ship->position, delta, wall->position,
+                             SHIP_BOUNDING_RADIUS +
+                             wall->data->bounding_radius) &&
+          az_polygons_collide(wall->data->polygon, wall->position, wall->angle,
+                              ship_polygon, ship->position, ship->angle,
+                              delta, pos_out, impact_out, normal_out));
 }
 
 /*===========================================================================*/

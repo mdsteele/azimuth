@@ -25,6 +25,7 @@
 
 #include "azimuth/state/player.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/state/wall.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -56,6 +57,12 @@ bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point);
 // does and if point_out is non-NULL, stores the intersection point there.
 bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out);
+
+// Determine if the ship would hit the given wall if the ship travelled along
+// the given delta vector.
+bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
+                            az_vector_t delta, az_vector_t *pos_out,
+                            az_vector_t *impact_out, az_vector_t *normal_out);
 
 /*===========================================================================*/
 

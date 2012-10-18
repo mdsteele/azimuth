@@ -55,6 +55,7 @@ static az_vector_t wall_vertices[4] = {
 static az_wall_data_t wall_data = {
   .bounding_radius = 75.0,
   .color = {255, 255, 0, 255},
+  .elasticity = 0.4,
   .polygon = {.num_vertices = 4, .vertices = wall_vertices}
 };
 
@@ -84,6 +85,18 @@ static void event_loop(void) {
       wall->data = &wall_data;
       wall->position = AZ_VZERO;
       wall->angle = 0.0;
+    }
+    if (az_insert_wall(&state, &wall)) {
+      wall->kind = AZ_WALL_NORMAL;
+      wall->data = &wall_data;
+      wall->position = (az_vector_t){0, 300};
+      wall->angle = 0.2;
+    }
+    if (az_insert_wall(&state, &wall)) {
+      wall->kind = AZ_WALL_NORMAL;
+      wall->data = &wall_data;
+      wall->position = (az_vector_t){120, 30};
+      wall->angle = 0.6;
     }
   }
 

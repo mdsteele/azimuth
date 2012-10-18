@@ -64,6 +64,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Apply velocity.  If the tractor beam is active, that implies angular
   // motion (around the locked-onto node); otherwise, linear motion.
   if (ship->tractor_beam.active) {
+    // TODO: check for wall/baddie impacts
     assert(tractor_node != NULL);
     const az_vector_t delta = az_vsub(ship->position, tractor_node->position);
     assert(az_dapprox(0.0, az_vdot(ship->velocity, delta)));
@@ -78,7 +79,48 @@ void az_tick_ship(az_space_state_t *state, double time) {
     ship->angle = az_mod2pi(ship->angle + dtheta);
   } else {
     assert(tractor_node == NULL);
-    ship->position = az_vadd(ship->position, az_vmul(ship->velocity, time));
+
+    // Check for wall impacts.
+    // TODO: Also check for baddie impacts.
+    // TODO: What do we do if the ship is stationary, but hits the wall due to
+    //   rotating?  Maybe the ship should be treated as a circle rather than as
+    //   a polygon (at least for wall impacts, if not for projectiles).
+    az_vector_t end_pos = az_vadd(ship->position,
+                                  az_vmul(ship->velocity, time));
+    az_vector_t impact = AZ_VZERO;
+    az_vector_t normal = AZ_VZERO;
+    az_wall_t *hit_wall = NULL;
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      if (az_ship_would_hit_wall(wall, ship, az_vsub(end_pos, ship->position),
+                                 &end_pos, &impact, &normal)) {
+        hit_wall = wall;
+      }
+    }
+    ship->position = end_pos;
+    if (hit_wall != NULL) {
+      // Push the ship slightly away from the impact point (so that we're
+      // hopefully no longer in contact with the wall).
+      if (normal.x != 0.0 || normal.y != 0.0) {
+        ship->position = az_vadd(ship->position,
+                                 az_vmul(az_vunit(normal), 1.0));
+      }
+      // Bounce the ship off the wall.
+      ship->velocity = az_vsub(ship->velocity,
+                               az_vmul(az_vproj(ship->velocity, normal),
+                                       1.0 + hit_wall->data->elasticity));
+      // TODO: Damage the ship.
+      // Put a particle at the impact point.
+      az_particle_t *particle;
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_BOOM;
+        particle->color = (az_color_t){255, 255, 255, 255};
+        particle->position = impact;
+        particle->velocity = AZ_VZERO;
+        particle->lifetime = 0.3;
+        particle->param1 = 10;
+      }
+    }
   }
 
   // Apply gravity:
