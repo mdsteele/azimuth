@@ -49,6 +49,9 @@ typedef struct {
   double angle;
 } az_wall_t;
 
+const az_wall_data_t *az_get_wall_data(int index);
+int az_wall_data_index(const az_wall_data_t *data);
+
 // Return true if the given point intersects the wall.
 bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point);
 

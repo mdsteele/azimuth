@@ -27,16 +27,24 @@ C99FLAGS = -std=c99 -pedantic $(CFLAGS) -I$(SRCDIR)
 
 HEADERS := $(shell find $(SRCDIR) -name '*.h')
 MAIN_C99FILES := $(shell find $(SRCDIR)/azimuth -name '*.c')
+EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/gui -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/system -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/util -name '*.c') \
+	         $(shell find $(SRCDIR)/azimuth/view -name '*.c')
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
 	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
 	         $(shell find $(SRCDIR)/azimuth/util -name '*.c')
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
+EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
   MAIN_OBJFILES += $(OBJDIR)/macosx/SDLMain.o
+  EDIT_OBJFILES += $(OBJDIR)/macosx/SDLMain.o
   MAIN_LIBFLAGS := -framework Cocoa -framework OpenGL -framework SDL
   TEST_LIBFLAGS :=
 else
@@ -47,9 +55,14 @@ endif
 #=============================================================================#
 
 .PHONY: all
-all: $(BINDIR)/azimuth $(BINDIR)/unit_tests
+all: $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
 
 $(BINDIR)/azimuth: $(MAIN_OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
+
+$(BINDIR)/editor: $(EDIT_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
 	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
@@ -75,6 +88,10 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
 .PHONY: run
 run: $(BINDIR)/azimuth
 	$(BINDIR)/azimuth
+
+.PHONY: edit
+edit: $(BINDIR)/editor
+	$(BINDIR)/editor
 
 .PHONY: test
 test: $(BINDIR)/unit_tests

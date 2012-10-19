@@ -40,10 +40,45 @@
 
 static az_key_name_t sdl_key_to_az_key(SDLKey key) {
   switch (key) {
+    case SDLK_RETURN: return AZ_KEY_RETURN;
+    case SDLK_SPACE: return AZ_KEY_SPACE;
+    case SDLK_0: return AZ_KEY_0;
+    case SDLK_1: return AZ_KEY_1;
+    case SDLK_2: return AZ_KEY_2;
+    case SDLK_3: return AZ_KEY_3;
+    case SDLK_4: return AZ_KEY_4;
+    case SDLK_5: return AZ_KEY_5;
+    case SDLK_6: return AZ_KEY_6;
+    case SDLK_7: return AZ_KEY_7;
+    case SDLK_8: return AZ_KEY_8;
+    case SDLK_9: return AZ_KEY_9;
+    case SDLK_a: return AZ_KEY_A;
+    case SDLK_b: return AZ_KEY_B;
     case SDLK_c: return AZ_KEY_C;
+    case SDLK_d: return AZ_KEY_D;
+    case SDLK_e: return AZ_KEY_E;
+    case SDLK_f: return AZ_KEY_F;
+    case SDLK_g: return AZ_KEY_G;
+    case SDLK_h: return AZ_KEY_H;
+    case SDLK_i: return AZ_KEY_I;
+    case SDLK_j: return AZ_KEY_J;
+    case SDLK_k: return AZ_KEY_K;
+    case SDLK_l: return AZ_KEY_L;
+    case SDLK_m: return AZ_KEY_M;
+    case SDLK_n: return AZ_KEY_N;
+    case SDLK_o: return AZ_KEY_O;
+    case SDLK_p: return AZ_KEY_P;
+    case SDLK_q: return AZ_KEY_Q;
+    case SDLK_r: return AZ_KEY_R;
+    case SDLK_s: return AZ_KEY_S;
+    case SDLK_t: return AZ_KEY_T;
+    case SDLK_u: return AZ_KEY_U;
     case SDLK_v: return AZ_KEY_V;
+    case SDLK_w: return AZ_KEY_W;
     case SDLK_x: return AZ_KEY_X;
+    case SDLK_y: return AZ_KEY_Y;
     case SDLK_z: return AZ_KEY_Z;
+    case SDLK_BACKSPACE: return AZ_KEY_BACKSPACE;
     case SDLK_UP: return AZ_KEY_UP_ARROW;
     case SDLK_DOWN: return AZ_KEY_DOWN_ARROW;
     case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
@@ -127,6 +162,11 @@ bool az_poll_event(az_event_t *event) {
     assert(false); // unreachable
   }
   return false;
+}
+
+bool az_get_mouse_position(int *x, int *y) {
+  SDL_GetMouseState(x, y);
+  return true;
 }
 
 /*===========================================================================*/

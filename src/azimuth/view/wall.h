@@ -22,8 +22,11 @@
 #define AZIMUTH_VIEW_WALL_H_
 
 #include "azimuth/state/space.h"
+#include "azimuth/state/wall.h"
 
 /*===========================================================================*/
+
+void az_draw_wall(const az_wall_t *wall);
 
 void az_draw_walls(const az_space_state_t* state);
 

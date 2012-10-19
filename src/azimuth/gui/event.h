@@ -35,11 +35,46 @@ typedef enum {
 
 typedef enum {
   AZ_KEY_UNKNOWN = 0,
+  AZ_KEY_RETURN = '\n',
+  AZ_KEY_SPACE = ' ',
+  AZ_KEY_0 = '0',
+  AZ_KEY_1 = '1',
+  AZ_KEY_2 = '2',
+  AZ_KEY_3 = '3',
+  AZ_KEY_4 = '4',
+  AZ_KEY_5 = '5',
+  AZ_KEY_6 = '6',
+  AZ_KEY_7 = '7',
+  AZ_KEY_8 = '8',
+  AZ_KEY_9 = '9',
+  AZ_KEY_A = 'A',
+  AZ_KEY_B = 'B',
   AZ_KEY_C = 'C',
+  AZ_KEY_D = 'D',
+  AZ_KEY_E = 'E',
+  AZ_KEY_F = 'F',
+  AZ_KEY_G = 'G',
+  AZ_KEY_H = 'H',
+  AZ_KEY_I = 'I',
+  AZ_KEY_J = 'J',
+  AZ_KEY_K = 'K',
+  AZ_KEY_L = 'L',
+  AZ_KEY_M = 'M',
+  AZ_KEY_N = 'N',
+  AZ_KEY_O = 'O',
+  AZ_KEY_P = 'P',
+  AZ_KEY_Q = 'Q',
+  AZ_KEY_R = 'R',
+  AZ_KEY_S = 'S',
+  AZ_KEY_T = 'T',
+  AZ_KEY_U = 'U',
   AZ_KEY_V = 'V',
+  AZ_KEY_W = 'W',
   AZ_KEY_X = 'X',
+  AZ_KEY_Y = 'Y',
   AZ_KEY_Z = 'Z',
-  AZ_KEY_UP_ARROW = 0x80,
+  AZ_KEY_BACKSPACE = 0x7f,
+  AZ_KEY_UP_ARROW,
   AZ_KEY_DOWN_ARROW,
   AZ_KEY_LEFT_ARROW,
   AZ_KEY_RIGHT_ARROW
@@ -60,6 +95,10 @@ typedef union {
 // Get the next event in the queue and return true, or return false if the
 // event queue is empty.
 bool az_poll_event(az_event_t *event);
+
+// Get the current position of the mouse in the window and return true, or
+// return false if the mouse is not currently in the window.
+bool az_get_mouse_position(int *x, int *y);
 
 /*===========================================================================*/
 

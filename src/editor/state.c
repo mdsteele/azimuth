@@ -17,38 +17,53 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/wall.h"
+#include "editor/state.h"
 
-#include <GL/gl.h>
-
-#include "azimuth/state/space.h"
-#include "azimuth/state/wall.h"
-#include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void with_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
+#define SCROLL_SPEED 5.0
+#define SPIN_RADIUS 80.0
 
-void az_draw_wall(const az_wall_t *wall) {
-  const az_wall_data_t *data = wall->data;
-  glPushMatrix(); {
-    glTranslated(wall->position.x, wall->position.y, 0);
-    glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-    with_color(data->color);
-    glBegin(GL_LINE_LOOP); {
-      for (int i = 0; i < data->polygon.num_vertices; ++i) {
-        glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
+void az_tick_editor_state(az_editor_state_t *state) {
+  if (state->controls.up && !state->controls.down) {
+    if (state->spin_camera) {
+      state->camera = az_vadd(state->camera,
+                              az_vpolar(SCROLL_SPEED,
+                                        az_vtheta(state->camera)));
+    } else {
+      state->camera.y += SCROLL_SPEED;
+    }
+  }
+  if (state->controls.down && !state->controls.up) {
+    if (state->spin_camera) {
+      if (az_vnorm(state->camera) <= SCROLL_SPEED) {
+        state->camera = az_vpolar(0.0001, az_vtheta(state->camera));
+      } else {
+        state->camera = az_vsub(state->camera,
+                                az_vpolar(SCROLL_SPEED,
+                                          az_vtheta(state->camera)));
       }
-    } glEnd();
-  } glPopMatrix();
-}
-
-void az_draw_walls(const az_space_state_t *state) {
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_BAD_NOTHING) continue;
-    az_draw_wall(wall);
+    } else {
+      state->camera.y -= SCROLL_SPEED;
+    }
+  }
+  if (state->controls.left && !state->controls.right) {
+    if (state->spin_camera) {
+      state->camera = az_vrotate(state->camera, SCROLL_SPEED /
+                                 (SPIN_RADIUS + az_vnorm(state->camera)));
+    } else {
+      state->camera.x -= SCROLL_SPEED;
+    }
+  }
+  if (state->controls.right && !state->controls.left) {
+    if (state->spin_camera) {
+      state->camera = az_vrotate(state->camera, -SCROLL_SPEED /
+                                 (SPIN_RADIUS + az_vnorm(state->camera)));
+    } else {
+      state->camera.x += SCROLL_SPEED;
+    }
   }
 }
 

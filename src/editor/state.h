@@ -17,39 +17,36 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/wall.h"
+#pragma once
+#ifndef EDITOR_STATE_H_
+#define EDITOR_STATE_H_
 
-#include <GL/gl.h>
+#include <stdbool.h>
 
-#include "azimuth/state/space.h"
-#include "azimuth/state/wall.h"
-#include "azimuth/util/misc.h"
+#include "azimuth/state/room.h"
+#include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+typedef enum {
+  AZ_TOOL_SELECT = 0,
+  AZ_TOOL_MOVE,
+  AZ_TOOL_ROTATE
+} az_editor_tool_t;
+
+typedef struct {
+  az_vector_t camera;
+  bool spin_camera;
+  struct {
+    bool up, down, left, right;
+  } controls;
+  az_editor_tool_t tool;
+  az_room_t *room;
+  az_wall_t *selected_wall;
+} az_editor_state_t;
+
+void az_tick_editor_state(az_editor_state_t *state);
 
 /*===========================================================================*/
 
-static void with_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
-
-void az_draw_wall(const az_wall_t *wall) {
-  const az_wall_data_t *data = wall->data;
-  glPushMatrix(); {
-    glTranslated(wall->position.x, wall->position.y, 0);
-    glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-    with_color(data->color);
-    glBegin(GL_LINE_LOOP); {
-      for (int i = 0; i < data->polygon.num_vertices; ++i) {
-        glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
-      }
-    } glEnd();
-  } glPopMatrix();
-}
-
-void az_draw_walls(const az_space_state_t *state) {
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_BAD_NOTHING) continue;
-    az_draw_wall(wall);
-  }
-}
-
-/*===========================================================================*/
+#endif // EDITOR_STATE_H_

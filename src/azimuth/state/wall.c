@@ -23,10 +23,38 @@
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
+#include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+#define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
+
+static az_vector_t wall_vertices_0[] = {
+  {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
+};
+
+static const az_wall_data_t wall_datas[] = {
+  [0] = {
+    .bounding_radius = 75.0,
+    .color = {255, 255, 0, 255},
+    .elasticity = 0.4,
+    .polygon = INIT_POLYGON(wall_vertices_0)
+  }
+};
+
+const az_wall_data_t *az_get_wall_data(int index) {
+  if (index < 0 || index >= AZ_ARRAY_SIZE(wall_datas)) return NULL;
+  return &wall_datas[index];
+}
+
+int az_wall_data_index(const az_wall_data_t *data) {
+  if (data < wall_datas || data >= wall_datas + AZ_ARRAY_SIZE(wall_datas)) {
+    return -1;
+  }
+  return data - wall_datas;
+}
 
 bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point) {
   assert(wall->kind != AZ_WALL_NOTHING);

@@ -17,39 +17,33 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/wall.h"
+#pragma once
+#ifndef AZIMUTH_STATE_ROOM_H_
+#define AZIMUTH_STATE_ROOM_H_
 
-#include <GL/gl.h>
-
-#include "azimuth/state/space.h"
+#include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/wall.h"
-#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-static void with_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
+typedef struct {
+  az_room_key_t key;
+  int num_walls, max_num_walls;
+  az_wall_t *walls;
+} az_room_t;
 
-void az_draw_wall(const az_wall_t *wall) {
-  const az_wall_data_t *data = wall->data;
-  glPushMatrix(); {
-    glTranslated(wall->position.x, wall->position.y, 0);
-    glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-    with_color(data->color);
-    glBegin(GL_LINE_LOOP); {
-      for (int i = 0; i < data->polygon.num_vertices; ++i) {
-        glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
-      }
-    } glEnd();
-  } glPopMatrix();
-}
+// Attempt to open the file located at the given path and load room data from
+// it.  Return a pointer to the newly allocated room object (which must be
+// destroyed later with az_destroy_room), or NULL if anything went wrong.
+az_room_t *az_load_room_from_file(const char *filepath);
 
-void az_draw_walls(const az_space_state_t *state) {
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_BAD_NOTHING) continue;
-    az_draw_wall(wall);
-  }
-}
+// Attempt to save a room to the file located at the given path.  Return true
+// on success, or false on failure.
+bool az_save_room_to_file(const az_room_t *room, const char *filepath);
+
+// Delete a room object and all its data arrays.
+void az_destroy_room(az_room_t *room);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_STATE_ROOM_H_
