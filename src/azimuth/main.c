@@ -109,8 +109,6 @@ static void event_loop(void) {
     az_event_t event;
     while (az_poll_event(&event)) {
       switch (event.kind) {
-        case AZ_EVENT_QUIT:
-          return;
         case AZ_EVENT_KEY_DOWN:
           switch (event.key.name) {
             case AZ_KEY_UP_ARROW: state.ship.controls.up = true; break;

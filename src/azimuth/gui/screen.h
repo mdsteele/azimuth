@@ -17,6 +17,10 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
+#pragma once
+#ifndef AZIMUTH_GUI_SCREEN_H_
+#define AZIMUTH_GUI_SCREEN_H_
+
 #include <stdbool.h>
 
 /*===========================================================================*/
@@ -38,3 +42,5 @@ void az_start_screen_redraw(void);
 void az_finish_screen_redraw(void);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_GUI_SCREEN_H_

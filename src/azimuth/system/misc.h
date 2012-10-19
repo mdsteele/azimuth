@@ -18,49 +18,14 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_GUI_EVENT_H_
-#define AZIMUTH_GUI_EVENT_H_
-
-#include <stdbool.h>
+#ifndef AZIMUTH_SYSTEM_MISC_H_
+#define AZIMUTH_SYSTEM_MISC_H_
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_EVENT_KEY_DOWN,
-  AZ_EVENT_KEY_UP,
-  AZ_EVENT_MOUSE_DOWN,
-  AZ_EVENT_MOUSE_UP,
-  AZ_EVENT_MOUSE_MOVE
-} az_event_kind_t;
-
-typedef enum {
-  AZ_KEY_UNKNOWN = 0,
-  AZ_KEY_C = 'C',
-  AZ_KEY_V = 'V',
-  AZ_KEY_X = 'X',
-  AZ_KEY_Z = 'Z',
-  AZ_KEY_UP_ARROW = 0x80,
-  AZ_KEY_DOWN_ARROW,
-  AZ_KEY_LEFT_ARROW,
-  AZ_KEY_RIGHT_ARROW
-} az_key_name_t;
-
-typedef union {
-  az_event_kind_t kind;
-  struct {
-    az_event_kind_t kind;
-    az_key_name_t name;
-  } key;
-  struct {
-    az_event_kind_t kind;
-    int x, y;
-  } mouse;
-} az_event_t;
-
-// Get the next event in the queue and return true, or return false if the
-// event queue is empty.
-bool az_poll_event(az_event_t *event);
+// Sleep for (roughly) the specified number of milliseconds.
+void az_sleep_millis(unsigned long milliseconds);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_GUI_EVENT_H_
+#endif // AZIMUTH_SYSTEM_MISC_H_

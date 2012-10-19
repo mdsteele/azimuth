@@ -21,10 +21,12 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h> // for exit and EXIT_SUCCESS
 
 #include <SDL/SDL.h>
 
 #include "azimuth/gui/screen.h"
+#include "azimuth/system/misc.h"
 
 /*===========================================================================*/
 
@@ -50,13 +52,36 @@ static az_key_name_t sdl_key_to_az_key(SDLKey key) {
   }
 }
 
+static void pause_until_refocus(void) {
+  SDL_Event sdl_event;
+  while (true) {
+    while (SDL_PollEvent(&sdl_event)) {
+      switch (sdl_event.type) {
+        case SDL_ACTIVEEVENT:
+          if (sdl_event.active.gain == 1 &&
+              (sdl_event.active.state & SDL_APPINPUTFOCUS)) {
+            return;
+          }
+          continue;
+        case SDL_QUIT:
+          exit(EXIT_SUCCESS);
+        default: continue;
+      }
+    }
+    az_sleep_millis(100);
+  }
+}
+
 bool az_poll_event(az_event_t *event) {
   SDL_Event sdl_event;
   while (SDL_PollEvent(&sdl_event)) {
     switch (sdl_event.type) {
-      case SDL_QUIT:
-        event->kind = AZ_EVENT_QUIT;
-        return true;
+      case SDL_ACTIVEEVENT:
+        if (sdl_event.active.gain == 0 &&
+            (sdl_event.active.state & SDL_APPINPUTFOCUS)) {
+          pause_until_refocus();
+        }
+        continue;
       case SDL_KEYDOWN:
         if (sdl_event.key.keysym.mod & AZ_KMOD_CMD) {
           // For Command/Ctrl-M, toggle fullscreen, then get the next event.
@@ -64,10 +89,9 @@ bool az_poll_event(az_event_t *event) {
             az_set_fullscreen(!az_is_fullscreen());
             continue;
           }
-          // Turn Command/Ctrl-Q into an QUIT event.
+          // For Command/Ctrl-Q, quit the game.
           else if (sdl_event.key.keysym.sym == SDLK_q) {
-            event->kind = AZ_EVENT_QUIT;
-            return true;
+            exit(EXIT_SUCCESS);
           }
         }
         event->kind = AZ_EVENT_KEY_DOWN;
@@ -96,6 +120,8 @@ bool az_poll_event(az_event_t *event) {
         event->mouse.x = sdl_event.motion.x;
         event->mouse.y = sdl_event.motion.y;
         return true;
+      case SDL_QUIT:
+        exit(EXIT_SUCCESS);
       default: continue;
     }
     assert(false); // unreachable
