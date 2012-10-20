@@ -131,10 +131,12 @@ bool az_poll_event(az_event_t *event) {
         }
         event->kind = AZ_EVENT_KEY_DOWN;
         event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
+        event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         return true;
       case SDL_KEYUP:
         event->kind = AZ_EVENT_KEY_UP;
         event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
+        event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         return true;
       case SDL_MOUSEBUTTONDOWN:
         // Ignore all but the left mouse button.

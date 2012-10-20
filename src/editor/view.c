@@ -82,6 +82,16 @@ static void draw_hud(az_editor_state_t* state) {
     glColor3f(1, 1, 1); // white
     az_draw_string((az_vector_t){10, AZ_SCREEN_HEIGHT - 18}, 8, buffer);
   }
+
+  // Draw the unsaved indicator:
+  if (state->unsaved) {
+    glColor3f(1, 0.5, 0); // orange
+    glBegin(GL_TRIANGLES); {
+      glVertex2d(5, 5);
+      glVertex2d(5, 15);
+      glVertex2d(15, 5);
+    } glEnd();
+  }
 }
 
 void az_editor_draw_screen(az_editor_state_t* state) {

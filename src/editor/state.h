@@ -42,6 +42,7 @@ typedef struct {
   az_editor_tool_t tool;
   az_room_t *room;
   az_wall_t *selected_wall;
+  bool unsaved;
 } az_editor_state_t;
 
 void az_tick_editor_state(az_editor_state_t *state);

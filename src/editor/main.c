@@ -19,6 +19,7 @@
 
 #include <math.h> // for INFINITY
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h> // for EXIT_SUCCESS
 
 #include <SDL/SDL.h> // for main() renaming
@@ -33,6 +34,14 @@
 /*===========================================================================*/
 
 static az_editor_state_t state;
+
+static void do_save(void) {
+  if (az_save_room_to_file(state.room, "data/rooms/room000.txt")) {
+    state.unsaved = false;
+  } else {
+    printf("Failed to save room.\n");
+  }
+}
 
 static void do_select(int x, int y) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
@@ -55,6 +64,7 @@ static void do_move(int x, int y, int dx, int dy) {
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
   state.selected_wall->position =
     az_vadd(state.selected_wall->position, az_vsub(pt1, pt0));
+  state.unsaved = true;
 }
 
 static void do_rotate(int x, int y, int dx, int dy) {
@@ -65,6 +75,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
     az_mod2pi(state.selected_wall->angle +
               az_vtheta(az_vsub(pt1, state.selected_wall->position)) -
               az_vtheta(az_vsub(pt0, state.selected_wall->position)));
+  state.unsaved = true;
 }
 
 static void event_loop(void) {
@@ -86,6 +97,9 @@ static void event_loop(void) {
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
             case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
+            case AZ_KEY_S:
+              if (event.key.command) do_save();
+              break;
             default: break;
           }
           break;
@@ -131,9 +145,9 @@ int main(int argc, char **argv) {
   az_init_gui(false);
 
   az_room_t *room = az_load_room_from_file("data/rooms/room000.txt");
-  if (room == NULL) printf("failed to open room\n");
+  if (room == NULL) printf("Failed to open room.\n");
   else {
-    printf("loaded room with %d walls\n", room->num_walls);
+    printf("Loaded room with %d walls.\n", room->num_walls);
     state.room = room;
     event_loop();
     az_destroy_room(room);

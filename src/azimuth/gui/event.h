@@ -85,12 +85,13 @@ typedef union {
   struct {
     az_event_kind_t kind;
     az_key_name_t name;
+    bool command; // true if Command/Ctrl (depending on OS) key is held
   } key;
   struct {
     az_event_kind_t kind;
-    int x, y;
-    int dx, dy;
-    bool pressed;
+    int x, y; // current mouse position
+    int dx, dy; // change in mouse position (for MOUSE_MOVE only)
+    bool pressed; // true if left mouse button is held
   } mouse;
 } az_event_t;
 
