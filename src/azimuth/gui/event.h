@@ -89,6 +89,8 @@ typedef union {
   struct {
     az_event_kind_t kind;
     int x, y;
+    int dx, dy;
+    bool pressed;
   } mouse;
 } az_event_t;
 

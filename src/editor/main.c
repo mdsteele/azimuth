@@ -49,6 +49,24 @@ static void do_select(int x, int y) {
   state.selected_wall = best_wall;
 }
 
+static void do_move(int x, int y, int dx, int dy) {
+  if (state.selected_wall == NULL) return;
+  const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
+  const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
+  state.selected_wall->position =
+    az_vadd(state.selected_wall->position, az_vsub(pt1, pt0));
+}
+
+static void do_rotate(int x, int y, int dx, int dy) {
+  if (state.selected_wall == NULL) return;
+  const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
+  const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
+  state.selected_wall->angle =
+    az_mod2pi(state.selected_wall->angle +
+              az_vtheta(az_vsub(pt1, state.selected_wall->position)) -
+              az_vtheta(az_vsub(pt0, state.selected_wall->position)));
+}
+
 static void event_loop(void) {
   while (true) {
     az_tick_editor_state(&state);
@@ -68,7 +86,6 @@ static void event_loop(void) {
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
             case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
-            case AZ_KEY_S: state.tool = AZ_TOOL_SELECT; break;
             default: break;
           }
           break;
@@ -83,10 +100,24 @@ static void event_loop(void) {
           break;
         case AZ_EVENT_MOUSE_DOWN:
           switch (state.tool) {
-            case AZ_TOOL_SELECT:
+            case AZ_TOOL_MOVE:
+            case AZ_TOOL_ROTATE:
               do_select(event.mouse.x, event.mouse.y);
               break;
-            default: break;
+          }
+          break;
+        case AZ_EVENT_MOUSE_MOVE:
+          if (event.mouse.pressed) {
+            switch (state.tool) {
+              case AZ_TOOL_MOVE:
+                do_move(event.mouse.x, event.mouse.y,
+                        event.mouse.dx, event.mouse.dy);
+                break;
+              case AZ_TOOL_ROTATE:
+                do_rotate(event.mouse.x, event.mouse.y,
+                          event.mouse.dx, event.mouse.dy);
+                break;
+            }
           }
           break;
         default: break;

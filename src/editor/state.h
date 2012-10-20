@@ -29,8 +29,7 @@
 /*===========================================================================*/
 
 typedef enum {
-  AZ_TOOL_SELECT = 0,
-  AZ_TOOL_MOVE,
+  AZ_TOOL_MOVE = 0,
   AZ_TOOL_ROTATE
 } az_editor_tool_t;
 

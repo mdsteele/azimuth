@@ -142,6 +142,8 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_MOUSE_DOWN;
         event->mouse.x = sdl_event.button.x;
         event->mouse.y = sdl_event.button.y;
+        event->mouse.dx = event->mouse.dy = 0;
+        event->mouse.pressed = true;
         return true;
       case SDL_MOUSEBUTTONUP:
         // Ignore all but the left mouse button.
@@ -149,11 +151,17 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_MOUSE_UP;
         event->mouse.x = sdl_event.button.x;
         event->mouse.y = sdl_event.button.y;
+        event->mouse.dx = event->mouse.dy = 0;
+        event->mouse.pressed = false;
         return true;
       case SDL_MOUSEMOTION:
         event->kind = AZ_EVENT_MOUSE_MOVE;
         event->mouse.x = sdl_event.motion.x;
         event->mouse.y = sdl_event.motion.y;
+        event->mouse.dx = sdl_event.motion.xrel;
+        event->mouse.dy = sdl_event.motion.yrel;
+        event->mouse.pressed = (bool)(sdl_event.motion.state &
+                                      SDL_BUTTON(SDL_BUTTON_LEFT));
         return true;
       case SDL_QUIT:
         exit(EXIT_SUCCESS);
@@ -165,6 +173,7 @@ bool az_poll_event(az_event_t *event) {
 }
 
 bool az_get_mouse_position(int *x, int *y) {
+  if (!(SDL_GetAppState() & SDL_APPMOUSEFOCUS)) return false;
   SDL_GetMouseState(x, y);
   return true;
 }
