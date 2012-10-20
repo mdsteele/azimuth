@@ -69,6 +69,10 @@ static void draw_hud(az_editor_state_t* state) {
       tool_name = "ROTATE";
       glColor3f(1, 0, 0);
       break;
+    case AZ_TOOL_ADD:
+      tool_name = "ADD";
+      glColor3f(1, 1, 0);
+      break;
   }
   az_draw_string((az_vector_t){AZ_SCREEN_WIDTH - 10 - 8 * strlen(tool_name),
                                AZ_SCREEN_HEIGHT - 18}, 8, tool_name);

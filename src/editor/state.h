@@ -30,7 +30,8 @@
 
 typedef enum {
   AZ_TOOL_MOVE = 0,
-  AZ_TOOL_ROTATE
+  AZ_TOOL_ROTATE,
+  AZ_TOOL_ADD
 } az_editor_tool_t;
 
 typedef struct {

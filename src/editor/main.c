@@ -17,6 +17,7 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
+#include <assert.h>
 #include <math.h> // for INFINITY
 #include <stdbool.h>
 #include <stdio.h>
@@ -78,6 +79,50 @@ static void do_rotate(int x, int y, int dx, int dy) {
   state.unsaved = true;
 }
 
+static void do_add(int x, int y) {
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  az_room_t *room = state.room;
+  assert(room->num_walls <= room->max_num_walls);
+  if (room->num_walls == room->max_num_walls) {
+    const int new_max = room->max_num_walls * 2 - room->max_num_walls / 2;
+    az_wall_t *new_walls = realloc(room->walls, new_max * sizeof(az_wall_t));
+    if (new_walls == NULL) return;
+    room->max_num_walls = new_max;
+    room->walls = new_walls;
+  }
+  assert(room->num_walls < room->max_num_walls);
+  az_wall_t *wall = &room->walls[room->num_walls];
+  wall->kind = AZ_WALL_NORMAL;
+  wall->data = az_get_wall_data(0); // TODO allow selecting wall data
+  wall->position = pt;
+  wall->angle = 0.0;
+  ++room->num_walls;
+  state.selected_wall = wall;
+  state.unsaved = true;
+}
+
+static void do_remove(void) {
+  if (state.selected_wall == NULL) return;
+  az_room_t *room = state.room;
+  for (int i = state.selected_wall + 1 - room->walls;
+       i < room->num_walls; ++i) {
+    room->walls[i - 1] = room->walls[i];
+  }
+  --room->num_walls;
+  state.selected_wall = NULL;
+  state.unsaved = true;
+  // Shrink walls array if it's now way too big.
+  if (room->num_walls < room->max_num_walls / 3) {
+    const int new_max = room->max_num_walls - room->max_num_walls / 3;
+    assert(room->num_walls <= new_max);
+    az_wall_t *new_walls = realloc(room->walls, new_max * sizeof(az_wall_t));
+    if (new_walls != NULL) {
+      room->max_num_walls = new_max;
+      room->walls = new_walls;
+    }
+  }
+}
+
 static void event_loop(void) {
   while (true) {
     az_tick_editor_state(&state);
@@ -90,16 +135,18 @@ static void event_loop(void) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
           switch (event.key.name) {
-            case AZ_KEY_UP_ARROW: state.controls.up = true; break;
-            case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
-            case AZ_KEY_LEFT_ARROW: state.controls.left = true; break;
-            case AZ_KEY_RIGHT_ARROW: state.controls.right = true; break;
+            case AZ_KEY_A: state.tool = AZ_TOOL_ADD; break;
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
             case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
             case AZ_KEY_S:
               if (event.key.command) do_save();
               break;
+            case AZ_KEY_BACKSPACE: do_remove(); break;
+            case AZ_KEY_UP_ARROW: state.controls.up = true; break;
+            case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
+            case AZ_KEY_LEFT_ARROW: state.controls.left = true; break;
+            case AZ_KEY_RIGHT_ARROW: state.controls.right = true; break;
             default: break;
           }
           break;
@@ -118,11 +165,15 @@ static void event_loop(void) {
             case AZ_TOOL_ROTATE:
               do_select(event.mouse.x, event.mouse.y);
               break;
+            case AZ_TOOL_ADD:
+              do_add(event.mouse.x, event.mouse.y);
+              break;
           }
           break;
         case AZ_EVENT_MOUSE_MOVE:
           if (event.mouse.pressed) {
             switch (state.tool) {
+              case AZ_TOOL_ADD:
               case AZ_TOOL_MOVE:
                 do_move(event.mouse.x, event.mouse.y,
                         event.mouse.dx, event.mouse.dy);
