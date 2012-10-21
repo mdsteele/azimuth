@@ -18,7 +18,7 @@
 =============================================================================*/
 
 #include <stdbool.h>
-#include <stdlib.h> // for EXIT_SUCCESS
+#include <stdlib.h>
 
 #include <SDL/SDL.h> // for main() renaming
 
@@ -26,8 +26,10 @@
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/player.h"
+#include "azimuth/state/room.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/system/resource.h"
 #include "azimuth/tick/space.h" // for az_tick_space_state
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/util/vector.h"
@@ -35,69 +37,52 @@
 
 /*===========================================================================*/
 
-static az_space_state_t state = {
-  .clock = 0, .timer.active_for = -1,
-  .ship = {
+static az_space_state_t state;
+
+static bool load_scenario(void) {
+  // Try to load the scenario data:
+  const char *resource_dir = az_get_resource_directory();
+  if (resource_dir == NULL) return false;
+  char buffer[strlen(resource_dir) + 20];
+  sprintf(buffer, "%s/rooms/room000.txt", resource_dir);
+  az_room_t *room = az_load_room_from_file(buffer);
+  if (room == NULL) return false;
+  for (int i = 0; i < room->num_walls; ++i) {
+    az_wall_t *wall;
+    if (az_insert_wall(&state, &wall)) {
+      *wall = room->walls[i];
+    }
+  }
+  az_destroy_room(room);
+
+  // Set up the state:
+  state.timer.active_for = -1;
+  state.ship = (az_ship_t){
     .player = {
       .shields = 55, .max_shields = 400, .energy = 98, .max_energy = 400,
       .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
     },
     .position = {50, 150}
-  }
-};
-
-static az_vector_t wall_vertices[4] = {
-  {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
-};
-
-static az_wall_data_t wall_data = {
-  .bounding_radius = 75.0,
-  .color = {255, 255, 0, 255},
-  .elasticity = 0.4,
-  .polygon = {.num_vertices = 4, .vertices = wall_vertices}
-};
-
-static void event_loop(void) {
+  };
   state.camera = state.ship.position;
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_00);
-  {
-    az_baddie_t *baddie;
-    if (az_insert_baddie(&state, &baddie)) {
-      az_init_baddie(baddie, AZ_BAD_TURRET, (az_vector_t){-150, -150}, 0.5);
-    }
+  az_baddie_t *baddie;
+  if (az_insert_baddie(&state, &baddie)) {
+    az_init_baddie(baddie, AZ_BAD_TURRET, (az_vector_t){80, -116}, 3.1);
   }
-  {
-    az_node_t *node;
-    if (az_insert_node(&state, &node)) {
-      node->kind = AZ_NODE_TRACTOR;
-      node->position = (az_vector_t){150, -150};
-      node->angle = 0;
-    }
-  }
-  {
-    az_wall_t *wall;
-    if (az_insert_wall(&state, &wall)) {
-      wall->kind = AZ_WALL_NORMAL;
-      wall->data = &wall_data;
-      wall->position = AZ_VZERO;
-      wall->angle = 0.0;
-    }
-    if (az_insert_wall(&state, &wall)) {
-      wall->kind = AZ_WALL_NORMAL;
-      wall->data = &wall_data;
-      wall->position = (az_vector_t){0, 300};
-      wall->angle = 0.2;
-    }
-    if (az_insert_wall(&state, &wall)) {
-      wall->kind = AZ_WALL_NORMAL;
-      wall->data = &wall_data;
-      wall->position = (az_vector_t){120, 30};
-      wall->angle = 0.6;
-    }
+  az_node_t *node;
+  if (az_insert_node(&state, &node)) {
+    node->kind = AZ_NODE_TRACTOR;
+    node->position = (az_vector_t){150, -150};
+    node->angle = 0;
   }
 
+  return true;
+}
+
+static void event_loop(void) {
   while (true) {
     // Tick the state:
     az_tick_space_state(&state, 1.0/60.0);
@@ -145,6 +130,11 @@ static void event_loop(void) {
 int main(int argc, char **argv) {
   az_init_random();
   az_init_gui(false);
+
+  if (!load_scenario()) {
+    printf("Failed to load scenario.\n");
+    return EXIT_FAILURE;
+  }
 
   event_loop();
 
