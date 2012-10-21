@@ -78,20 +78,4 @@ void az_tick_baddies(az_space_state_t *state, double time) {
   }
 }
 
-bool az_proj_hits_baddie(az_projectile_t *proj, az_baddie_t *baddie) {
-  if (!az_vwithin(proj->position, baddie->position,
-                  baddie->data->bounding_radius)) {
-    return false;
-  }
-
-  switch (baddie->kind) {
-    case AZ_BAD_LUMP:
-      return true; // FIXME
-    case AZ_BAD_TURRET:
-      return true; // FIXME
-    default: assert(false);
-  }
-  return false;
-}
-
 /*===========================================================================*/

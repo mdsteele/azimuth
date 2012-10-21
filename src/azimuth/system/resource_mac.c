@@ -17,20 +17,24 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_TICK_BADDIE_H_
-#define AZIMUTH_TICK_BADDIE_H_
+#include "azimuth/system/resource.h"
 
-#include <stdbool.h>
-
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/space.h"
+#include <CoreFoundation/CFBundle.h>
+#include <CoreFoundation/CFURL.h>
 
 /*===========================================================================*/
 
-void az_tick_baddies(az_space_state_t *state, double time);
+const char *az_get_resource_directory(void) {
+  static unsigned char path[1000];
+  if (path[0] == '\0') {
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFURLRef url = CFBundleCopyResourcesDirectoryURL(bundle);
+    if (!CFURLGetFileSystemRepresentation(url, true, path, sizeof(path))) {
+      path[0] = '\0';
+      return NULL;
+    }
+  }
+  return (char *)path;
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_TICK_BADDIE_H_

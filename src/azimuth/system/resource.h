@@ -18,19 +18,16 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_H_
-#define AZIMUTH_TICK_BADDIE_H_
-
-#include <stdbool.h>
-
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/space.h"
+#ifndef AZIMUTH_SYSTEM_RESOURCE_H_
+#define AZIMUTH_SYSTEM_RESOURCE_H_
 
 /*===========================================================================*/
 
-void az_tick_baddies(az_space_state_t *state, double time);
+// Get the path to the directory containing the game's resource files as a
+// NUL-terminated string (without the trailing slash).  If this fails, it will
+// return a NULL pointer.
+const char *az_get_resource_directory(void);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_H_
+#endif // AZIMUTH_SYSTEM_RESOURCE_H_
