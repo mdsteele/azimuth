@@ -35,6 +35,8 @@
 #define AZ_RAD2DEG(radians) ((double)(radians) * 57.295779513082323)
 #define AZ_DEG2RAD(degrees) ((double)(degrees) * 0.017453292519943295)
 
+/*===========================================================================*/
+
 // A 2d vector:
 typedef struct {
   double x, y;
@@ -92,6 +94,14 @@ bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist);
 // specified circle.
 bool az_ray_hits_circle(az_vector_t start, az_vector_t delta,
                         az_vector_t center, double radius);
+
+/*===========================================================================*/
+
+// Compute a mod b; b must be nonzero.  Note that this is _not_ the same as the
+// % operator; in C99, the return value of the % operator is specified to have
+// the sign of the dividend (i.e. it is a remainder operation), whereas this
+// function uses the sign of the divisor (i.e. it is a modulo operation).
+int az_modulo(int a, int b);
 
 // Add or subtract a multiple of 2pi from the given number so that the result
 // is between -pi and pi.

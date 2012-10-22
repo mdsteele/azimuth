@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
   RUN_TEST(test_convex_polygon_contains);
+  RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_player_give_upgrade);
   RUN_TEST(test_polygon_contains);

@@ -24,6 +24,20 @@
 
 /*===========================================================================*/
 
+void test_modulo(void) {
+  EXPECT_TRUE(az_modulo(10, 7) == 3);
+  EXPECT_TRUE(az_modulo(-10, 7) == 4);
+  EXPECT_TRUE(az_modulo(10, -7) == -4);
+  EXPECT_TRUE(az_modulo(-10, -7) == -3);
+
+  EXPECT_TRUE(az_modulo(0, 7) == 0);
+  EXPECT_TRUE(az_modulo(0, -7) == 0);
+  EXPECT_TRUE(az_modulo(14, 7) == 0);
+  EXPECT_TRUE(az_modulo(14, -7) == 0);
+  EXPECT_TRUE(az_modulo(-14, 7) == 0);
+  EXPECT_TRUE(az_modulo(-14, -7) == 0);
+}
+
 void test_mod2pi(void) {
   for (double t = -20.0; t < 20.0; t += 0.1) {
     const double t2 = az_mod2pi(t);

@@ -23,16 +23,17 @@
 
 #include <GL/gl.h>
 
+#include <azimuth/util/misc.h> // for AZ_ARRAY_SIZE
+
 /*===========================================================================*/
 
 #define FONT_SIZE 8
-#define NUM_CHAR_SPECS 127
 
 static struct {
   GLenum mode;
   size_t num_points;
   az_vector_t points[8];
-} char_specs[NUM_CHAR_SPECS] = {
+} char_specs[] = {
   ['!'] = {GL_LINES, 4, {{2,0}, {2,3}, {2,5}, {2,6}}},
   ['"'] = {GL_LINES, 4, {{1,0}, {1,3}, {4,0}, {4,3}}},
   ['#'] = {GL_LINES, 8, {{2,0}, {2,6}, {4,0}, {4,6},
@@ -148,7 +149,8 @@ static struct {
 };
 
 static void draw_char(int c) {
-  if (c >= 0 && c < NUM_CHAR_SPECS && char_specs[c].num_points > 0) {
+  if (c >= 0 && c < AZ_ARRAY_SIZE(char_specs) &&
+      char_specs[c].num_points > 0) {
     glBegin(char_specs[c].mode);
     const az_vector_t *points = char_specs[c].points;
     for (int i = 0; i < char_specs[c].num_points; ++i) {

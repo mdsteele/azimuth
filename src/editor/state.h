@@ -43,6 +43,7 @@ typedef struct {
   az_editor_tool_t tool;
   az_room_t *room;
   az_wall_t *selected_wall;
+  int wall_data_index;
   bool unsaved;
 } az_editor_state_t;
 

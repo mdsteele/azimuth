@@ -59,6 +59,9 @@ static void do_select(int x, int y) {
     }
   }
   state.selected_wall = best_wall;
+  if (state.selected_wall != NULL) {
+    state.wall_data_index = az_wall_data_index(state.selected_wall->data);
+  }
 }
 
 static void do_move(int x, int y, int dx, int dy) {
@@ -95,7 +98,7 @@ static void do_add(int x, int y) {
   assert(room->num_walls < room->max_num_walls);
   az_wall_t *wall = &room->walls[room->num_walls];
   wall->kind = AZ_WALL_NORMAL;
-  wall->data = az_get_wall_data(0); // TODO allow selecting wall data
+  wall->data = az_get_wall_data(state.wall_data_index);
   wall->position = pt;
   wall->angle = 0.0;
   ++room->num_walls;
@@ -125,6 +128,15 @@ static void do_remove(void) {
   }
 }
 
+static void do_change_data(int delta) {
+  state.wall_data_index = az_modulo(state.wall_data_index + delta,
+                                    AZ_NUM_WALL_DATAS);
+  if (state.selected_wall != NULL) {
+    state.selected_wall->data = az_get_wall_data(state.wall_data_index);
+    state.unsaved = true;
+  }
+}
+
 static void event_loop(void) {
   while (true) {
     az_tick_editor_state(&state);
@@ -140,6 +152,8 @@ static void event_loop(void) {
             case AZ_KEY_A: state.tool = AZ_TOOL_ADD; break;
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
+            case AZ_KEY_N: do_change_data(1); break;
+            case AZ_KEY_P: do_change_data(-1); break;
             case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
             case AZ_KEY_S:
               if (event.key.command) do_save();

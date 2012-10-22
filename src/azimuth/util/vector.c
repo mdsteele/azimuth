@@ -143,6 +143,15 @@ bool az_ray_hits_circle(az_vector_t start, az_vector_t rdelta,
   return az_vwithin(start, center, radius);
 }
 
+/*===========================================================================*/
+
+int az_modulo(int a, int b) {
+  assert(b != 0);
+  const int remainder = a % b;
+  if (remainder == 0) return 0;
+  return ((a < 0) ^ (b < 0) ? remainder + b : remainder);
+}
+
 double az_mod2pi(double theta) {
   assert(isfinite(theta));
   return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
