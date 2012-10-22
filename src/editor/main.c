@@ -28,7 +28,9 @@
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/room.h"
+#include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/util/random.h" // for az_init_random
+#include "azimuth/view/wall.h" // for az_init_wall_drawing
 #include "editor/state.h"
 #include "editor/view.h"
 
@@ -192,8 +194,10 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  az_init_random();
   az_init_gui(false);
+  az_init_random();
+  az_init_wall_datas();
+  az_init_wall_drawing();
 
   az_room_t *room = az_load_room_from_file("data/rooms/room000.txt");
   if (room == NULL) printf("Failed to open room.\n");

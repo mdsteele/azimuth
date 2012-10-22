@@ -19,6 +19,10 @@
 
 #include "azimuth/util/misc.h"
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 /*===========================================================================*/
 
 unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
@@ -31,6 +35,15 @@ unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
   const unsigned int m = modulus - 1;
   const unsigned long d = az_clock_mod(2 * m, slowdown, clock);
   return (d <= m ? d : 2 * m - d);
+}
+
+void _az_fatal(const char *funcname, const char *format, ...) {
+  va_list args;
+  fprintf(stderr, "Fatal error in %s: ", funcname);
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  exit(EXIT_FAILURE);
 }
 
 /*===========================================================================*/

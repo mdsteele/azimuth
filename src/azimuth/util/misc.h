@@ -42,6 +42,11 @@ unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
 unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
                               unsigned long clock);
 
+// Signal a fatal error and exit the program.
+#define AZ_FATAL(...) _az_fatal(__func__, __VA_ARGS__)
+void _az_fatal(const char *funcname, const char *format, ...)
+  __attribute__((__format__(__printf__,2,3),__noreturn__));
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_MISC_H_

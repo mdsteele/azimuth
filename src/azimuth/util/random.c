@@ -20,22 +20,29 @@
 #include "azimuth/util/random.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 
 /*===========================================================================*/
 
+static bool random_initialized = false;
+
 void az_init_random(void) {
+  assert(!random_initialized);
   srand(time(NULL));
+  random_initialized = true;
 }
 
 double az_random(void) {
+  assert(random_initialized);
   // This is a terrible, terrible implementation of random numbers.
   // TODO: Replace this with something better.
   return ((double)rand()) / (1.0 + (double)RAND_MAX);
 }
 
 int az_randint(int min, int max) {
+  assert(random_initialized);
   assert(min <= max);
   if (min == max) return min;
   // This is a terrible, terrible implementation of random numbers (just for

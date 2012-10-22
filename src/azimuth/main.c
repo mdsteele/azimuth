@@ -34,6 +34,7 @@
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/util/vector.h"
 #include "azimuth/view/space.h"
+#include "azimuth/view/wall.h" // for az_init_wall_drawing
 
 /*===========================================================================*/
 
@@ -128,8 +129,10 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  az_init_random();
   az_init_gui(false);
+  az_init_random();
+  az_init_wall_datas();
+  az_init_wall_drawing();
 
   if (!load_scenario()) {
     printf("Failed to load scenario.\n");

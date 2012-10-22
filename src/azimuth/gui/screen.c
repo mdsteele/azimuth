@@ -20,13 +20,12 @@
 #include "azimuth/gui/screen.h"
 
 #include <stdbool.h>
-#include <stdio.h> // for fprintf and stderr
-#include <stdlib.h>
 
 #include <GL/gl.h>
 #include <SDL/SDL.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/util/misc.h" // for AZ_FATAL
 
 /*===========================================================================*/
 
@@ -44,8 +43,7 @@ static bool currently_fullscreen;
 
 void az_init_gui(bool fullscreen) {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    fprintf(stderr, "SDL_Init failed.\n");
-    exit(EXIT_FAILURE);
+    AZ_FATAL("SDL_Init failed.\n");
   }
   atexit(SDL_Quit);
   SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "-M to run full-screen)",
@@ -76,8 +74,7 @@ void az_set_fullscreen(bool fullscreen) {
   // Init the display:
   if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, VIDEO_DEPTH,
                         VIDEO_FLAGS | (fullscreen ? SDL_FULLSCREEN : 0))) {
-    fprintf(stderr, "SDL_SetVideoMode failed.\n");
-    exit(EXIT_FAILURE);
+    AZ_FATAL("SDL_SetVideoMode failed.\n");
   }
 
   // Turn off the depth buffer:

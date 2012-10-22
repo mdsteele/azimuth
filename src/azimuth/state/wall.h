@@ -49,7 +49,19 @@ typedef struct {
   double angle;
 } az_wall_t;
 
+// The number of different wall data structs available.
+extern const int AZ_NUM_WALL_DATAS;
+
+// Call this at program startup to initialize all wall data.  In particular,
+// this must be called before any calls to az_get_wall_data.
+void az_init_wall_datas(void);
+
+// Get the static wall data struct for a particular index.  The index must be
+// between 0 (inclusive) and AZ_NUM_WALL_DATAS (exclusive).
 const az_wall_data_t *az_get_wall_data(int index);
+
+// Return the index for a wall data struct.  The pointer must be one that was
+// returned from az_get_wall_data.
 int az_wall_data_index(const az_wall_data_t *data);
 
 // Return true if the given point intersects the wall.

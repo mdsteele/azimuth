@@ -32,7 +32,6 @@
 // TODO: move these elsewhere
 #define AZ_MAX_NUM_ROOMS 192
 #define AZ_MAX_NUM_WALLS 250
-#define AZ_NUM_WALL_DATAS 2
 
 #define ALLOCATE(n, type) ((type *)_safe_calloc((n), sizeof(type)))
 
@@ -69,11 +68,10 @@ static void parse_wall_directive(az_load_room_t *loader) {
   double x, y, angle;
   if (fscanf(loader->file, "%d x%lf y%lf a%lf\n",
              &index, &x, &y, &angle) < 4) FAIL();
-  const az_wall_data_t *data = az_get_wall_data(index);
-  if (data == NULL) FAIL();
+  if (index < 0 || index >= AZ_NUM_WALL_DATAS) FAIL();
   az_wall_t *wall = &loader->room->walls[loader->room->num_walls];
   wall->kind = AZ_WALL_NORMAL;
-  wall->data = data;
+  wall->data = az_get_wall_data(index);
   wall->position = (az_vector_t){x, y};
   wall->angle = angle;
   ++loader->room->num_walls;

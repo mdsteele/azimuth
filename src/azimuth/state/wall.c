@@ -21,7 +21,6 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdlib.h> // for NULL
 
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
@@ -32,29 +31,59 @@
 #define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
 
 static az_vector_t wall_vertices_0[] = {
+  {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
+};
+static az_vector_t wall_vertices_1[] = {
   {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
 };
 
-static const az_wall_data_t wall_datas[] = {
+static az_wall_data_t wall_datas[] = {
   [0] = {
-    .bounding_radius = 75.0,
     .color = {255, 255, 0, 255},
     .elasticity = 0.4,
     .polygon = INIT_POLYGON(wall_vertices_0)
+  },
+  [1] = {
+    .color = {0, 255, 255, 255},
+    .elasticity = 0.4,
+    .polygon = INIT_POLYGON(wall_vertices_1)
   }
 };
 
+#undef INIT_POLYGON
+
+/*===========================================================================*/
+
+const int AZ_NUM_WALL_DATAS = AZ_ARRAY_SIZE(wall_datas);
+
+static bool wall_data_initialized = false;
+
+void az_init_wall_datas(void) {
+  assert(!wall_data_initialized);
+  AZ_ARRAY_LOOP(data, wall_datas) {
+    double radius = 0.0;
+    for (int i = 0; i < data->polygon.num_vertices; ++i) {
+      radius = az_dmax(radius, az_vnorm(data->polygon.vertices[i]));
+    }
+    data->bounding_radius = radius + 0.01; // small safety margin
+  }
+  wall_data_initialized = true;
+}
+
 const az_wall_data_t *az_get_wall_data(int index) {
-  if (index < 0 || index >= AZ_ARRAY_SIZE(wall_datas)) return NULL;
+  assert(wall_data_initialized);
+  assert(index >= 0);
+  assert(index < AZ_NUM_WALL_DATAS);
   return &wall_datas[index];
 }
 
 int az_wall_data_index(const az_wall_data_t *data) {
-  if (data < wall_datas || data >= wall_datas + AZ_ARRAY_SIZE(wall_datas)) {
-    return -1;
-  }
+  assert(data >= wall_datas);
+  assert(data < wall_datas + AZ_NUM_WALL_DATAS);
   return data - wall_datas;
 }
+
+/*===========================================================================*/
 
 bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point) {
   assert(wall->kind != AZ_WALL_NOTHING);

@@ -26,8 +26,15 @@
 
 /*===========================================================================*/
 
+// Call this at program startup to initialize drawing of walls.  This must be
+// called _after_ both az_init_gui and az_init_wall_datas, and must be called
+// _before_ any calls to az_draw_wall or az_draw_walls.
+void az_init_wall_drawing(void);
+
+// Draw a single wall.  The GL matrix should be at the camera position.
 void az_draw_wall(const az_wall_t *wall);
 
+// Draw all walls.  The GL matrix should be at the camera position.
 void az_draw_walls(const az_space_state_t* state);
 
 /*===========================================================================*/
