@@ -25,26 +25,41 @@
 
 #include "azimuth/state/room.h"
 #include "azimuth/util/vector.h"
+#include "editor/list.h"
 
 /*===========================================================================*/
 
 typedef enum {
   AZ_TOOL_MOVE = 0,
   AZ_TOOL_ROTATE,
-  AZ_TOOL_ADD
+  AZ_TOOL_BADDIE,
+  AZ_TOOL_WALL
 } az_editor_tool_t;
 
 typedef struct {
-  az_vector_t camera;
+  bool selected;
+  az_baddie_spec_t spec;
+} az_editor_baddie_t;
+
+typedef struct {
+  bool selected;
+  az_wall_t spec;
+} az_editor_wall_t;
+
+typedef struct {
+  bool unsaved;
   bool spin_camera;
+  az_vector_t camera;
   struct {
     bool up, down, left, right;
   } controls;
   az_editor_tool_t tool;
-  az_room_t *room;
-  az_wall_t *selected_wall;
-  int wall_data_index;
-  bool unsaved;
+  struct {
+    int wall_data_index;
+    az_baddie_kind_t baddie_kind;
+  } brush;
+  AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
+  AZ_LIST_DECLARE(az_editor_wall_t, walls);
 } az_editor_state_t;
 
 void az_tick_editor_state(az_editor_state_t *state);

@@ -103,7 +103,7 @@ void az_draw_wall(const az_wall_t *wall) {
 
 void az_draw_walls(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_BAD_NOTHING) continue;
+    if (wall->kind == AZ_WALL_NOTHING) continue;
     az_draw_wall(wall);
   }
 }

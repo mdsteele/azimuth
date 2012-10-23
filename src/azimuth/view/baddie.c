@@ -32,16 +32,15 @@
 
 /*===========================================================================*/
 
-static void draw_baddie(const az_baddie_t *baddie, unsigned long clock) {
+static void draw_baddie_internal(const az_baddie_t *baddie) {
   switch (baddie->kind) {
     case AZ_BAD_LUMP:
       glColor3f(1, 0, 1); // magenta
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(20, 0);
-        glVertex2d(15, 15);
-        glVertex2d(-15, 15);
-        glVertex2d(-15, -15);
-        glVertex2d(15, -15);
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < baddie->data->polygon.num_vertices; ++i) {
+          glVertex2d(baddie->data->polygon.vertices[i].x,
+                     baddie->data->polygon.vertices[i].y);
+        }
       } glEnd();
       break;
     case AZ_BAD_TURRET:
@@ -72,14 +71,18 @@ static void draw_baddie(const az_baddie_t *baddie, unsigned long clock) {
   }
 }
 
+void az_draw_baddie(const az_baddie_t *baddie) {
+  glPushMatrix(); {
+    glTranslated(baddie->position.x, baddie->position.y, 0);
+    glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);
+    draw_baddie_internal(baddie);
+  } glPopMatrix();
+}
+
 void az_draw_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) continue;
-    glPushMatrix(); {
-      glTranslated(baddie->position.x, baddie->position.y, 0);
-      glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);
-      draw_baddie(baddie, state->clock);
-    } glPopMatrix();
+    az_draw_baddie(baddie);
   }
 }
 

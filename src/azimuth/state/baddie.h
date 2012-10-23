@@ -27,6 +27,9 @@
 
 /*===========================================================================*/
 
+// The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
+#define AZ_NUM_BADDIE_KINDS 2
+
 typedef enum {
   AZ_BAD_NOTHING = 0,
   AZ_BAD_LUMP,
@@ -62,6 +65,10 @@ typedef struct {
     double angle;
   } components[4];
 } az_baddie_t;
+
+// Get the static baddie data struct for a particular baddie kind.  The kind
+// must not be AZ_BAD_NOTHING.
+const az_baddie_data_t *az_get_baddie_data(az_baddie_kind_t kind);
 
 // Set reasonable initial field values for a baddie of the given kind, at the
 // given position.

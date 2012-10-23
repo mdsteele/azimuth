@@ -21,13 +21,22 @@
 #ifndef AZIMUTH_STATE_ROOM_H_
 #define AZIMUTH_STATE_ROOM_H_
 
+#include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/wall.h"
 
 /*===========================================================================*/
 
 typedef struct {
+  az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
+  az_vector_t position;
+  double angle;
+} az_baddie_spec_t;
+
+typedef struct {
   az_room_key_t key;
+  int num_baddies, max_num_baddies;
+  az_baddie_spec_t *baddies;
   int num_walls, max_num_walls;
   az_wall_t *walls;
 } az_room_t;

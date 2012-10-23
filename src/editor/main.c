@@ -29,8 +29,10 @@
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
+#include "azimuth/util/misc.h" // for AZ_FATAL
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
+#include "editor/list.h"
 #include "editor/state.h"
 #include "editor/view.h"
 
@@ -38,101 +40,184 @@
 
 static az_editor_state_t state;
 
+static void deselect_all(void) {
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    baddie->selected = false;
+  }
+  AZ_LIST_LOOP(wall, state.walls) {
+    wall->selected = false;
+  }
+}
+
 static void do_save(void) {
-  if (az_save_room_to_file(state.room, "data/rooms/room000.txt")) {
+  az_room_t room = {.key = 0};
+  // Convert baddies:
+  room.num_baddies = room.max_num_baddies = AZ_LIST_SIZE(state.baddies);
+  room.baddies = calloc(room.num_baddies, sizeof(az_baddie_spec_t));
+  int i = 0;
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    room.baddies[i] = baddie->spec;
+    ++i;
+  }
+  // Convert walls:
+  room.num_walls = room.max_num_walls = AZ_LIST_SIZE(state.walls);
+  room.walls = calloc(room.num_walls, sizeof(az_wall_t));
+  i = 0;
+  AZ_LIST_LOOP(wall, state.walls) {
+    room.walls[i] = wall->spec;
+    ++i;
+  }
+  // Write to disk:
+  if (az_save_room_to_file(&room, "data/rooms/room000.txt")) {
     state.unsaved = false;
   } else {
     printf("Failed to save room.\n");
   }
+  // Clean up:
+  free(room.baddies);
+  free(room.walls);
 }
 
-static void do_select(int x, int y) {
+static void do_select(int x, int y, bool multi) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   double best_dist = INFINITY;
-  az_wall_t *best_wall = NULL;
-  for (int i = 0; i < state.room->num_walls; ++i) {
-    az_wall_t *wall = &state.room->walls[i];
-    double dist = az_vnorm(az_vsub(wall->position, pt));
-    if (dist <= wall->data->bounding_radius && dist < best_dist) {
+  az_editor_wall_t *best_wall = NULL;
+  AZ_LIST_LOOP(wall, state.walls) {
+    double dist = az_vnorm(az_vsub(wall->spec.position, pt));
+    if (dist <= wall->spec.data->bounding_radius && dist < best_dist) {
       best_dist = dist;
       best_wall = wall;
     }
   }
-  state.selected_wall = best_wall;
-  if (state.selected_wall != NULL) {
-    state.wall_data_index = az_wall_data_index(state.selected_wall->data);
+  az_editor_baddie_t *best_baddie = NULL;
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    double dist = az_vnorm(az_vsub(baddie->spec.position, pt));
+    if (dist <= az_get_baddie_data(baddie->spec.kind)->bounding_radius &&
+        dist < best_dist) {
+      best_dist = dist;
+      best_baddie = baddie;
+    }
+  }
+  // Select/deselect as appropriate:
+  if (best_baddie != NULL) {
+    if (multi) {
+      best_baddie->selected = !best_baddie->selected;
+    } else if (!best_baddie->selected) {
+      deselect_all();
+      best_baddie->selected = true;
+    }
+    state.brush.baddie_kind = best_baddie->spec.kind;
+  } else if (best_wall != NULL) {
+    if (multi) {
+      best_wall->selected = !best_wall->selected;
+    } else if (!best_wall->selected) {
+      deselect_all();
+      best_wall->selected = true;
+    }
+    state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
+  } else if (!multi) {
+    deselect_all();
   }
 }
 
 static void do_move(int x, int y, int dx, int dy) {
-  if (state.selected_wall == NULL) return;
-  const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
-  const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
-  state.selected_wall->position =
-    az_vadd(state.selected_wall->position, az_vsub(pt1, pt0));
-  state.unsaved = true;
+  const az_vector_t delta =
+    az_vsub(az_pixel_to_position(&state, x, y),
+            az_pixel_to_position(&state, x - dx, y - dy));
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    if (!baddie->selected) continue;
+    baddie->spec.position = az_vadd(baddie->spec.position, delta);
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(wall, state.walls) {
+    if (!wall->selected) continue;
+    wall->spec.position = az_vadd(wall->spec.position, delta);
+    state.unsaved = true;
+  }
 }
 
 static void do_rotate(int x, int y, int dx, int dy) {
-  if (state.selected_wall == NULL) return;
   const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
-  state.selected_wall->angle =
-    az_mod2pi(state.selected_wall->angle +
-              az_vtheta(az_vsub(pt1, state.selected_wall->position)) -
-              az_vtheta(az_vsub(pt0, state.selected_wall->position)));
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    if (!baddie->selected) continue;
+    baddie->spec.angle =
+      az_mod2pi(baddie->spec.angle +
+                az_vtheta(az_vsub(pt1, baddie->spec.position)) -
+                az_vtheta(az_vsub(pt0, baddie->spec.position)));
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(wall, state.walls) {
+    if (!wall->selected) continue;
+    wall->spec.angle =
+      az_mod2pi(wall->spec.angle +
+                az_vtheta(az_vsub(pt1, wall->spec.position)) -
+                az_vtheta(az_vsub(pt0, wall->spec.position)));
+    state.unsaved = true;
+  }
+}
+
+static void do_add_baddie(int x, int y) {
+  deselect_all();
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
+  baddie->selected = true;
+  baddie->spec.kind = state.brush.baddie_kind;
+  baddie->spec.position = pt;
+  baddie->spec.angle = 0.0;
   state.unsaved = true;
 }
 
-static void do_add(int x, int y) {
+static void do_add_wall(int x, int y) {
+  deselect_all();
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
-  az_room_t *room = state.room;
-  assert(room->num_walls <= room->max_num_walls);
-  if (room->num_walls == room->max_num_walls) {
-    const int new_max = room->max_num_walls * 2 - room->max_num_walls / 2;
-    az_wall_t *new_walls = realloc(room->walls, new_max * sizeof(az_wall_t));
-    if (new_walls == NULL) return;
-    room->max_num_walls = new_max;
-    room->walls = new_walls;
-  }
-  assert(room->num_walls < room->max_num_walls);
-  az_wall_t *wall = &room->walls[room->num_walls];
-  wall->kind = AZ_WALL_NORMAL;
-  wall->data = az_get_wall_data(state.wall_data_index);
-  wall->position = pt;
-  wall->angle = 0.0;
-  ++room->num_walls;
-  state.selected_wall = wall;
+  az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
+  wall->selected = true;
+  wall->spec.kind = AZ_WALL_NORMAL;
+  wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
+  wall->spec.position = pt;
+  wall->spec.angle = 0.0;
   state.unsaved = true;
 }
 
 static void do_remove(void) {
-  if (state.selected_wall == NULL) return;
-  az_room_t *room = state.room;
-  for (int i = state.selected_wall + 1 - room->walls;
-       i < room->num_walls; ++i) {
-    room->walls[i - 1] = room->walls[i];
-  }
-  --room->num_walls;
-  state.selected_wall = NULL;
-  state.unsaved = true;
-  // Shrink walls array if it's now way too big.
-  if (room->num_walls < room->max_num_walls / 3) {
-    const int new_max = room->max_num_walls - room->max_num_walls / 3;
-    assert(room->num_walls <= new_max);
-    az_wall_t *new_walls = realloc(room->walls, new_max * sizeof(az_wall_t));
-    if (new_walls != NULL) {
-      room->max_num_walls = new_max;
-      room->walls = new_walls;
+  {
+    AZ_LIST_DECLARE(az_editor_baddie_t, temp_baddies);
+    AZ_LIST_INIT(temp_baddies, 2);
+    AZ_LIST_LOOP(baddie, state.baddies) {
+      if (!baddie->selected) *AZ_LIST_ADD(temp_baddies) = *baddie;
+      else state.unsaved = true;
     }
+    AZ_LIST_SWAP(temp_baddies, state.baddies);
+    AZ_LIST_DESTROY(temp_baddies);
+  }
+  {
+    AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
+    AZ_LIST_INIT(temp_walls, 2);
+    AZ_LIST_LOOP(wall, state.walls) {
+      if (!wall->selected) *AZ_LIST_ADD(temp_walls) = *wall;
+      else state.unsaved = true;
+    }
+    AZ_LIST_SWAP(temp_walls, state.walls);
+    AZ_LIST_DESTROY(temp_walls);
   }
 }
 
 static void do_change_data(int delta) {
-  state.wall_data_index = az_modulo(state.wall_data_index + delta,
-                                    AZ_NUM_WALL_DATAS);
-  if (state.selected_wall != NULL) {
-    state.selected_wall->data = az_get_wall_data(state.wall_data_index);
+  AZ_LIST_LOOP(baddie, state.baddies) {
+    if (!baddie->selected) continue;
+    const az_baddie_kind_t new_kind =
+      az_modulo((int)baddie->spec.kind - 1 + delta, AZ_NUM_BADDIE_KINDS) + 1;
+    baddie->spec.kind = new_kind;
+    state.brush.baddie_kind = new_kind;
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(wall, state.walls) {
+    if (!wall->selected) continue;
+    const int old_index = az_wall_data_index(wall->spec.data);
+    const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
+    wall->spec.data = az_get_wall_data(new_index);
+    state.brush.wall_data_index = new_index;
     state.unsaved = true;
   }
 }
@@ -149,7 +234,7 @@ static void event_loop(void) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
           switch (event.key.name) {
-            case AZ_KEY_A: state.tool = AZ_TOOL_ADD; break;
+            case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
             case AZ_KEY_N: do_change_data(1); break;
@@ -158,6 +243,7 @@ static void event_loop(void) {
             case AZ_KEY_S:
               if (event.key.command) do_save();
               break;
+            case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
             case AZ_KEY_BACKSPACE: do_remove(); break;
             case AZ_KEY_UP_ARROW: state.controls.up = true; break;
             case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
@@ -179,18 +265,22 @@ static void event_loop(void) {
           switch (state.tool) {
             case AZ_TOOL_MOVE:
             case AZ_TOOL_ROTATE:
-              do_select(event.mouse.x, event.mouse.y);
+              do_select(event.mouse.x, event.mouse.y, az_is_shift_key_held());
               break;
-            case AZ_TOOL_ADD:
-              do_add(event.mouse.x, event.mouse.y);
+            case AZ_TOOL_BADDIE:
+              do_add_baddie(event.mouse.x, event.mouse.y);
+              break;
+            case AZ_TOOL_WALL:
+              do_add_wall(event.mouse.x, event.mouse.y);
               break;
           }
           break;
         case AZ_EVENT_MOUSE_MOVE:
           if (event.mouse.pressed) {
             switch (state.tool) {
-              case AZ_TOOL_ADD:
               case AZ_TOOL_MOVE:
+              case AZ_TOOL_BADDIE:
+              case AZ_TOOL_WALL:
                 do_move(event.mouse.x, event.mouse.y,
                         event.mouse.dx, event.mouse.dy);
                 break;
@@ -207,20 +297,38 @@ static void event_loop(void) {
   }
 }
 
+static void load_and_init_state(void) {
+  state.brush.baddie_kind = AZ_BAD_TURRET;
+  az_room_t *room = az_load_room_from_file("data/rooms/room000.txt");
+  if (room == NULL) AZ_FATAL("Failed to open room.\n");
+  AZ_LIST_INIT(state.baddies, room->num_baddies);
+  for (int i = 0; i < room->num_baddies; ++i) {
+    az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
+    baddie->spec = room->baddies[i];
+  }
+  AZ_LIST_INIT(state.walls, room->num_walls);
+  for (int i = 0; i < room->num_walls; ++i) {
+    az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
+    wall->spec = room->walls[i];
+  }
+  az_destroy_room(room);
+}
+
+static void destroy_state(void) {
+  AZ_LIST_DESTROY(state.baddies);
+  AZ_LIST_DESTROY(state.walls);
+}
+
 int main(int argc, char **argv) {
   az_init_gui(false);
   az_init_random();
   az_init_wall_datas();
   az_init_wall_drawing();
 
-  az_room_t *room = az_load_room_from_file("data/rooms/room000.txt");
-  if (room == NULL) printf("Failed to open room.\n");
-  else {
-    printf("Loaded room with %d walls.\n", room->num_walls);
-    state.room = room;
-    event_loop();
-    az_destroy_room(room);
-  }
+  load_and_init_state();
+  event_loop();
+  destroy_state();
+
   return EXIT_SUCCESS;
 }
 

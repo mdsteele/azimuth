@@ -27,33 +27,52 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/event.h" // for az_get_mouse_position
+#include "azimuth/state/baddie.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/baddie.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/wall.h"
+#include "editor/list.h"
 #include "editor/state.h"
 
 /*===========================================================================*/
 
+static void draw_selection_circle(az_vector_t position, double angle,
+                                  double radius) {
+  glPushMatrix(); {
+    glTranslated(position.x, position.y, 0);
+    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
+    glScaled(radius, radius, 1);
+    glColor3f(1, 1, 1); // white
+    glBegin(GL_LINE_STRIP); {
+      glVertex2d(0, 0);
+      for (int i = 0; i <= 36; ++i) {
+        glVertex2d(cos(i * AZ_PI / 18.0), sin(i * AZ_PI / 18.0));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_camera_view(az_editor_state_t* state) {
-  az_room_t *room = state->room;
-  for (int i = 0; i < room->num_walls; ++i) {
-    const az_wall_t *wall = &room->walls[i];
-    az_draw_wall(wall);
+  AZ_LIST_LOOP(wall, state->walls) {
+    az_draw_wall(&wall->spec);
   }
-  if (state->selected_wall != NULL) {
-    const az_wall_t *wall = state->selected_wall;
-    glPushMatrix(); {
-      glTranslated(wall->position.x, wall->position.y, 0);
-      glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-      glColor3f(1, 1, 1); // white
-      glBegin(GL_LINE_STRIP); {
-        glVertex2d(0, 0);
-        const double r = wall->data->bounding_radius;
-        for (int i = 0; i <= 36; ++i) {
-          glVertex2d(r * cos(i * AZ_PI / 18.0), r * sin(i * AZ_PI / 18.0));
-        }
-      } glEnd();
-    } glPopMatrix();
+  AZ_LIST_LOOP(editor_baddie, state->baddies) {
+    az_baddie_t real_baddie;
+    az_init_baddie(&real_baddie, editor_baddie->spec.kind,
+                   editor_baddie->spec.position, editor_baddie->spec.angle);
+    az_draw_baddie(&real_baddie);
+  }
+  AZ_LIST_LOOP(wall, state->walls) {
+    if (!wall->selected) continue;
+    draw_selection_circle(wall->spec.position, wall->spec.angle,
+                          wall->spec.data->bounding_radius);
+  }
+  AZ_LIST_LOOP(baddie, state->baddies) {
+    if (!baddie->selected) continue;
+    draw_selection_circle(baddie->spec.position, baddie->spec.angle,
+                          az_get_baddie_data(baddie->spec.kind)->
+                          bounding_radius);
   }
 }
 
@@ -69,8 +88,12 @@ static void draw_hud(az_editor_state_t* state) {
       tool_name = "ROTATE";
       glColor3f(1, 0, 0);
       break;
-    case AZ_TOOL_ADD:
-      tool_name = "ADD";
+    case AZ_TOOL_BADDIE:
+      tool_name = "BADDIE";
+      glColor3f(0, 0, 1);
+      break;
+    case AZ_TOOL_WALL:
+      tool_name = "WALL";
       glColor3f(1, 1, 0);
       break;
   }

@@ -30,6 +30,7 @@
 /*===========================================================================*/
 
 // TODO: move these elsewhere
+#define AZ_MAX_NUM_BADDIES 192
 #define AZ_MAX_NUM_ROOMS 192
 #define AZ_MAX_NUM_WALLS 250
 
@@ -53,13 +54,31 @@ typedef struct {
 #define FAIL() longjmp(loader->jump, 1)
 
 static void parse_room_header(az_load_room_t *loader) {
-  int room_num, num_walls;
-  if (fscanf(loader->file, "!R%d w%d\n", &room_num, &num_walls) < 2) FAIL();
+  int room_num, num_baddies, num_walls;
+  if (fscanf(loader->file, "!R%d b%d w%d\n",
+             &room_num, &num_baddies, &num_walls) < 3) FAIL();
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
+  if (num_baddies < 0 || num_baddies > AZ_MAX_NUM_BADDIES) FAIL();
+  loader->room->max_num_baddies = num_baddies;
+  loader->room->baddies = ALLOCATE(num_baddies, az_baddie_spec_t);
   if (num_walls < 0 || num_walls > AZ_MAX_NUM_WALLS) FAIL();
   loader->room->max_num_walls = num_walls;
   loader->room->walls = ALLOCATE(num_walls, az_wall_t);
+}
+
+static void parse_baddie_directive(az_load_room_t *loader) {
+  if (loader->room->num_baddies >= loader->room->max_num_baddies) FAIL();
+  int index;
+  double x, y, angle;
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf\n",
+             &index, &x, &y, &angle) < 4) FAIL();
+  if (index <= 0 || index > AZ_NUM_BADDIE_KINDS) FAIL();
+  az_baddie_spec_t *baddie = &loader->room->baddies[loader->room->num_baddies];
+  baddie->kind = (az_baddie_kind_t)index;
+  baddie->position = (az_vector_t){x, y};
+  baddie->angle = angle;
+  ++loader->room->num_baddies;
 }
 
 static void parse_wall_directive(az_load_room_t *loader) {
@@ -79,6 +98,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
 
 static bool parse_directive(az_load_room_t *loader) {
   switch (fgetc(loader->file)) {
+    case 'B': parse_baddie_directive(loader); return true;
     case 'W': parse_wall_directive(loader); return true;
     case EOF: return false;
     default: FAIL();
@@ -87,6 +107,7 @@ static bool parse_directive(az_load_room_t *loader) {
 }
 
 static void validate_room(az_load_room_t *loader) {
+  if (loader->room->num_baddies != loader->room->max_num_baddies) FAIL();
   if (loader->room->num_walls != loader->room->max_num_walls) FAIL();
 }
 
@@ -119,11 +140,16 @@ az_room_t *az_load_room_from_file(const char *filepath) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("!R%d w%d\n", room->key, room->num_walls);
+  WRITE("!R%d b%d w%d\n", room->key, room->num_baddies, room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_t *wall = &room->walls[i];
     WRITE("W%d x%.02f y%.02f a%f\n", az_wall_data_index(wall->data),
           wall->position.x, wall->position.y, wall->angle);
+  }
+  for (int i = 0; i < room->num_baddies; ++i) {
+    const az_baddie_spec_t *baddie = &room->baddies[i];
+    WRITE("B%d x%.02f y%.02f a%f\n", (int)baddie->kind,
+          baddie->position.x, baddie->position.y, baddie->angle);
   }
   return true;
 }
@@ -142,6 +168,7 @@ bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
 
 void az_destroy_room(az_room_t *room) {
   if (room == NULL) return;
+  free(room->baddies);
   free(room->walls);
   free(room);
 }

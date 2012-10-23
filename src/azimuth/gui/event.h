@@ -103,6 +103,8 @@ bool az_poll_event(az_event_t *event);
 // return false if the mouse is not currently in the window.
 bool az_get_mouse_position(int *x, int *y);
 
+bool az_is_shift_key_held(void);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_GUI_EVENT_H_

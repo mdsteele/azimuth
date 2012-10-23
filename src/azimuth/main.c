@@ -54,6 +54,13 @@ static bool load_scenario(void) {
       *wall = room->walls[i];
     }
   }
+  for (int i = 0; i < room->num_baddies; ++i) {
+    const az_baddie_spec_t *spec = &room->baddies[i];
+    az_baddie_t *baddie;
+    if (az_insert_baddie(&state, &baddie)) {
+      az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
+    }
+  }
   az_destroy_room(room);
 
   // Set up the state:
@@ -69,10 +76,6 @@ static bool load_scenario(void) {
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_00);
-  az_baddie_t *baddie;
-  if (az_insert_baddie(&state, &baddie)) {
-    az_init_baddie(baddie, AZ_BAD_TURRET, (az_vector_t){80, -116}, 3.1);
-  }
   az_node_t *node;
   if (az_insert_node(&state, &node)) {
     node->kind = AZ_NODE_TRACTOR;

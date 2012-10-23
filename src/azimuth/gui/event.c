@@ -180,4 +180,8 @@ bool az_get_mouse_position(int *x, int *y) {
   return true;
 }
 
+bool az_is_shift_key_held(void) {
+  return (bool)(SDL_GetModState() & KMOD_SHIFT);
+}
+
 /*===========================================================================*/

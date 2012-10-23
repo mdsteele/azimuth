@@ -32,6 +32,9 @@
 #define DECL_COMPONENTS(c) .num_components=AZ_ARRAY_SIZE(c), .components=(c)
 #define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
 
+static const az_vector_t lump_vertices[] = {
+  {20, 0}, {15, 15}, {-15, 15}, {-15, -15}, {15, -15}
+};
 static const az_vector_t turret_vertices[] = {
   {20, 0}, {10, 17.320508075688775}, {-10, 17.320508075688775},
   {-20, 0}, {-10, -17.320508075688775}, {10, -17.320508075688775}
@@ -46,7 +49,8 @@ static const az_component_data_t turret_components[] = {
 static const az_baddie_data_t baddie_data[] = {
   [AZ_BAD_LUMP] = {
     .bounding_radius = 20.0,
-    .max_health = 10.0
+    .max_health = 10.0,
+    .polygon = INIT_POLYGON(lump_vertices)
   },
   [AZ_BAD_TURRET] = {
     .bounding_radius = 30.5,
@@ -56,13 +60,20 @@ static const az_baddie_data_t baddie_data[] = {
   }
 };
 
+/*===========================================================================*/
+
+const az_baddie_data_t *az_get_baddie_data(az_baddie_kind_t kind) {
+  assert(kind != AZ_BAD_NOTHING);
+  const int data_index = (int)kind;
+  assert(0 <= data_index && data_index < AZ_ARRAY_SIZE(baddie_data));
+  return &baddie_data[data_index];
+}
+
 void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle) {
   assert(kind != AZ_BAD_NOTHING);
   baddie->kind = kind;
-  const int data_index = (int)kind;
-  assert(0 <= data_index && data_index < AZ_ARRAY_SIZE(baddie_data));
-  baddie->data = &baddie_data[data_index];
+  baddie->data = az_get_baddie_data(kind);
   baddie->position = position;
   baddie->velocity = AZ_VZERO;
   baddie->angle = angle;

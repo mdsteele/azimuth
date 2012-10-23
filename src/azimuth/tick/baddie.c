@@ -38,6 +38,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   }
   switch (baddie->kind) {
     case AZ_BAD_LUMP:
+      baddie->angle = az_mod2pi(baddie->angle + 3.0 * time);
       break;
     case AZ_BAD_TURRET:
       // Aim gun:
