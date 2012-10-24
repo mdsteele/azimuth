@@ -25,6 +25,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/tick/pickup.h" // for az_add_random_pickup
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 
@@ -118,7 +119,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       hit_baddie->health -= proj->data->damage;
       if (hit_baddie->health <= 0.0) {
         hit_baddie->kind = AZ_BAD_NOTHING;
-        az_try_add_pickup(state, AZ_PUP_LARGE_SHIELDS, hit_baddie->position);
+        az_add_random_pickup(state, hit_baddie->data->potential_pickups,
+                             hit_baddie->position);
       }
       return;
     }

@@ -44,6 +44,7 @@ typedef struct {
 typedef struct {
   double bounding_radius;
   double max_health;
+  unsigned int potential_pickups;
   int num_components;
   const az_component_data_t* components; // array of length num_components
   az_polygon_t polygon;

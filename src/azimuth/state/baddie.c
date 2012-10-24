@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
+#include "azimuth/state/pickup.h" // for AZ_PUPF_* macros
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -50,11 +51,14 @@ static const az_baddie_data_t baddie_data[] = {
   [AZ_BAD_LUMP] = {
     .bounding_radius = 20.0,
     .max_health = 10.0,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .polygon = INIT_POLYGON(lump_vertices)
   },
   [AZ_BAD_TURRET] = {
     .bounding_radius = 30.5,
     .max_health = 15.0,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
+                          AZ_PUPF_ROCKETS),
     DECL_COMPONENTS(turret_components),
     .polygon = INIT_POLYGON(turret_vertices)
   }

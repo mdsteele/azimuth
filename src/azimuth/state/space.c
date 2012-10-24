@@ -100,7 +100,7 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
 
 void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
                        az_vector_t position) {
-  if (kind == AZ_PUP_NOTHING) return;
+  assert(kind != AZ_PUP_NOTHING);
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) {
       pickup->kind = kind;

@@ -67,7 +67,7 @@ static bool load_scenario(void) {
   state.timer.active_for = -1;
   state.ship = (az_ship_t){
     .player = {
-      .shields = 55, .max_shields = 400, .energy = 98, .max_energy = 400,
+      .shields = 200, .max_shields = 400, .energy = 98, .max_energy = 400,
       .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
     },
     .position = {50, 150}
@@ -76,6 +76,9 @@ static bool load_scenario(void) {
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_00);
+  az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_01);
+  az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_02);
+  state.ship.player.rockets = 1;
   az_node_t *node;
   if (az_insert_node(&state, &node)) {
     node->kind = AZ_NODE_TRACTOR;
