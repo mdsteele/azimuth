@@ -30,6 +30,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
+#include "azimuth/view/door.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/wall.h"
 #include "editor/list.h"
@@ -63,6 +64,13 @@ static void draw_camera_view(az_editor_state_t* state) {
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     az_draw_baddie(&real_baddie);
   }
+  AZ_LIST_LOOP(editor_door, state->doors) {
+    az_door_t real_door;
+    real_door.kind = editor_door->spec.kind;
+    real_door.position = editor_door->spec.position;
+    real_door.angle = editor_door->spec.angle;
+    az_draw_door(&real_door);
+  }
   AZ_LIST_LOOP(wall, state->walls) {
     if (!wall->selected) continue;
     draw_selection_circle(wall->spec.position, wall->spec.angle,
@@ -73,6 +81,11 @@ static void draw_camera_view(az_editor_state_t* state) {
     draw_selection_circle(baddie->spec.position, baddie->spec.angle,
                           az_get_baddie_data(baddie->spec.kind)->
                           bounding_radius);
+  }
+  AZ_LIST_LOOP(door, state->doors) {
+    if (!door->selected) continue;
+    draw_selection_circle(door->spec.position, door->spec.angle,
+                          AZ_DOOR_BOUNDING_RADIUS);
   }
 }
 
@@ -91,6 +104,10 @@ static void draw_hud(az_editor_state_t* state) {
     case AZ_TOOL_BADDIE:
       tool_name = "BADDIE";
       glColor3f(0, 0, 1);
+      break;
+    case AZ_TOOL_DOOR:
+      tool_name = "DOOR";
+      glColor3f(0, 1, 0);
       break;
     case AZ_TOOL_WALL:
       tool_name = "WALL";

@@ -27,9 +27,11 @@
 /*===========================================================================*/
 
 // Draw a single door.  The GL matrix should be at the camera position.
+// Passages _will_ be drawn (schematically).
 void az_draw_door(const az_door_t *door);
 
-// Draw all doors.  The GL matrix should be at the camera position.
+// Draw all doors.  The GL matrix should be at the camera position.  Passages
+// will not be drawn (they are invisible).
 void az_draw_doors(const az_space_state_t *state);
 
 /*===========================================================================*/

@@ -133,6 +133,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   }
   // Doors:
   AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
     az_vector_t hit_at;
     if (az_ray_hits_door(door, start, delta, &hit_at, NULL)) {
       impact.type = AZ_IMP_DOOR;

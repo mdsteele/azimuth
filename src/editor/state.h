@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/room.h"
+#include "azimuth/state/wall.h"
 #include "azimuth/util/vector.h"
 #include "editor/list.h"
 
@@ -33,6 +34,7 @@ typedef enum {
   AZ_TOOL_MOVE = 0,
   AZ_TOOL_ROTATE,
   AZ_TOOL_BADDIE,
+  AZ_TOOL_DOOR,
   AZ_TOOL_WALL
 } az_editor_tool_t;
 
@@ -40,6 +42,11 @@ typedef struct {
   bool selected;
   az_baddie_spec_t spec;
 } az_editor_baddie_t;
+
+typedef struct {
+  bool selected;
+  az_door_spec_t spec;
+} az_editor_door_t;
 
 typedef struct {
   bool selected;
@@ -55,10 +62,12 @@ typedef struct {
   } controls;
   az_editor_tool_t tool;
   struct {
-    int wall_data_index;
     az_baddie_kind_t baddie_kind;
+    az_door_kind_t door_kind;
+    int wall_data_index;
   } brush;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
+  AZ_LIST_DECLARE(az_editor_door_t, doors);
   AZ_LIST_DECLARE(az_editor_wall_t, walls);
 } az_editor_state_t;
 

@@ -41,6 +41,7 @@ static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
 void az_tick_doors(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(door, state->doors) {
     if (door->kind == AZ_DOOR_NOTHING) continue;
+    if (door->kind == AZ_DOOR_PASSAGE) continue;
     tick_door(state, door, time);
   }
 }

@@ -26,11 +26,13 @@
 #include <stdlib.h>
 
 #include "azimuth/state/wall.h"
+#include "azimuth/util/misc.h" // for AZ_FATAL
 
 /*===========================================================================*/
 
 // TODO: move these elsewhere
 #define AZ_MAX_NUM_BADDIES 192
+#define AZ_MAX_NUM_DOORS 20
 #define AZ_MAX_NUM_ROOMS 192
 #define AZ_MAX_NUM_WALLS 250
 
@@ -39,8 +41,7 @@
 static void *_safe_calloc(size_t n, size_t size) {
   void *ptr = calloc(n, size);
   if (ptr == NULL) {
-    fprintf(stderr, "Out of memory.\n");
-    abort();
+    AZ_FATAL("Out of memory.\n");
   }
   return ptr;
 }
@@ -54,14 +55,17 @@ typedef struct {
 #define FAIL() longjmp(loader->jump, 1)
 
 static void parse_room_header(az_load_room_t *loader) {
-  int room_num, num_baddies, num_walls;
-  if (fscanf(loader->file, "!R%d b%d w%d\n",
-             &room_num, &num_baddies, &num_walls) < 3) FAIL();
+  int room_num, num_baddies, num_doors, num_walls;
+  if (fscanf(loader->file, "!R%d b%d d%d w%d\n",
+             &room_num, &num_baddies, &num_doors, &num_walls) < 4) FAIL();
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
   if (num_baddies < 0 || num_baddies > AZ_MAX_NUM_BADDIES) FAIL();
   loader->room->max_num_baddies = num_baddies;
   loader->room->baddies = ALLOCATE(num_baddies, az_baddie_spec_t);
+  if (num_doors < 0 || num_doors > AZ_MAX_NUM_DOORS) FAIL();
+  loader->room->max_num_doors = num_doors;
+  loader->room->doors = ALLOCATE(num_doors, az_door_spec_t);
   if (num_walls < 0 || num_walls > AZ_MAX_NUM_WALLS) FAIL();
   loader->room->max_num_walls = num_walls;
   loader->room->walls = ALLOCATE(num_walls, az_wall_t);
@@ -79,6 +83,22 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   baddie->position = (az_vector_t){x, y};
   baddie->angle = angle;
   ++loader->room->num_baddies;
+}
+
+static void parse_door_directive(az_load_room_t *loader) {
+  if (loader->room->num_doors >= loader->room->max_num_doors) FAIL();
+  int index, destination;
+  double x, y, angle;
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf r%d\n",
+             &index, &x, &y, &angle, &destination) < 5) FAIL();
+  if (index <= 0 || index > AZ_NUM_DOOR_KINDS) FAIL();
+  if (destination < 0 || destination >= AZ_MAX_NUM_ROOMS) FAIL();
+  az_door_spec_t *door = &loader->room->doors[loader->room->num_doors];
+  door->kind = (az_door_kind_t)index;
+  door->position = (az_vector_t){x, y};
+  door->angle = angle;
+  door->destination = (az_room_key_t)destination;
+  ++loader->room->num_doors;
 }
 
 static void parse_wall_directive(az_load_room_t *loader) {
@@ -99,6 +119,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
 static bool parse_directive(az_load_room_t *loader) {
   switch (fgetc(loader->file)) {
     case 'B': parse_baddie_directive(loader); return true;
+    case 'D': parse_door_directive(loader); return true;
     case 'W': parse_wall_directive(loader); return true;
     case EOF: return false;
     default: FAIL();
@@ -140,11 +161,17 @@ az_room_t *az_load_room_from_file(const char *filepath) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("!R%d b%d w%d\n", room->key, room->num_baddies, room->num_walls);
+  WRITE("!R%d b%d d%d w%d\n", room->key, room->num_baddies, room->num_doors,
+        room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_t *wall = &room->walls[i];
     WRITE("W%d x%.02f y%.02f a%f\n", az_wall_data_index(wall->data),
           wall->position.x, wall->position.y, wall->angle);
+  }
+  for (int i = 0; i < room->num_doors; ++i) {
+    const az_door_spec_t *door = &room->doors[i];
+    WRITE("D%d x%.02f y%.02f a%f r%d\n", (int)door->kind,
+          door->position.x, door->position.y, door->angle, door->destination);
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];

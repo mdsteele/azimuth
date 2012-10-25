@@ -28,6 +28,9 @@
 
 /*===========================================================================*/
 
+// The number of different door kinds there are, not counting AZ_DOOR_NOTHING:
+#define AZ_NUM_DOOR_KINDS 7
+
 typedef enum {
   AZ_DOOR_NOTHING = 0,
   AZ_DOOR_NORMAL, // openable by any weapon
@@ -43,7 +46,7 @@ typedef struct {
   az_door_kind_t kind; // if AZ_DOOR_NOTHING, this door is not present
   az_vector_t position;
   double angle;
-  az_room_key_t destination_room;
+  az_room_key_t destination;
   bool is_open; // is the door open/opening, or is it closed/closing
   double openness; // 0.0 = fully closed, 1.0 = fully open
 } az_door_t;

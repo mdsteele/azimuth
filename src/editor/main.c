@@ -44,6 +44,9 @@ static void deselect_all(void) {
   AZ_LIST_LOOP(baddie, state.baddies) {
     baddie->selected = false;
   }
+  AZ_LIST_LOOP(door, state.doors) {
+    door->selected = false;
+  }
   AZ_LIST_LOOP(wall, state.walls) {
     wall->selected = false;
   }
@@ -57,6 +60,14 @@ static void do_save(void) {
   int i = 0;
   AZ_LIST_LOOP(baddie, state.baddies) {
     room.baddies[i] = baddie->spec;
+    ++i;
+  }
+  // Convert doors:
+  room.num_doors = room.max_num_doors = AZ_LIST_SIZE(state.doors);
+  room.doors = calloc(room.num_doors, sizeof(az_door_spec_t));
+  i = 0;
+  AZ_LIST_LOOP(door, state.doors) {
+    room.doors[i] = door->spec;
     ++i;
   }
   // Convert walls:
@@ -98,6 +109,14 @@ static void do_select(int x, int y, bool multi) {
       best_baddie = baddie;
     }
   }
+  az_editor_door_t *best_door = NULL;
+  AZ_LIST_LOOP(door, state.doors) {
+    double dist = az_vnorm(az_vsub(door->spec.position, pt));
+    if (dist <= AZ_DOOR_BOUNDING_RADIUS && dist < best_dist) {
+      best_dist = dist;
+      best_door = door;
+    }
+  }
   // Select/deselect as appropriate:
   if (best_baddie != NULL) {
     if (multi) {
@@ -107,6 +126,14 @@ static void do_select(int x, int y, bool multi) {
       best_baddie->selected = true;
     }
     state.brush.baddie_kind = best_baddie->spec.kind;
+  } else if (best_door != NULL) {
+    if (multi) {
+      best_door->selected = !best_door->selected;
+    } else if (!best_door->selected) {
+      deselect_all();
+      best_door->selected = true;
+    }
+    state.brush.door_kind = best_door->spec.kind;
   } else if (best_wall != NULL) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
@@ -129,6 +156,11 @@ static void do_move(int x, int y, int dx, int dy) {
     baddie->spec.position = az_vadd(baddie->spec.position, delta);
     state.unsaved = true;
   }
+  AZ_LIST_LOOP(door, state.doors) {
+    if (!door->selected) continue;
+    door->spec.position = az_vadd(door->spec.position, delta);
+    state.unsaved = true;
+  }
   AZ_LIST_LOOP(wall, state.walls) {
     if (!wall->selected) continue;
     wall->spec.position = az_vadd(wall->spec.position, delta);
@@ -145,6 +177,14 @@ static void do_rotate(int x, int y, int dx, int dy) {
       az_mod2pi(baddie->spec.angle +
                 az_vtheta(az_vsub(pt1, baddie->spec.position)) -
                 az_vtheta(az_vsub(pt0, baddie->spec.position)));
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(door, state.doors) {
+    if (!door->selected) continue;
+    door->spec.angle =
+      az_mod2pi(door->spec.angle +
+                az_vtheta(az_vsub(pt1, door->spec.position)) -
+                az_vtheta(az_vsub(pt0, door->spec.position)));
     state.unsaved = true;
   }
   AZ_LIST_LOOP(wall, state.walls) {
@@ -165,6 +205,18 @@ static void do_add_baddie(int x, int y) {
   baddie->spec.kind = state.brush.baddie_kind;
   baddie->spec.position = pt;
   baddie->spec.angle = 0.0;
+  state.unsaved = true;
+}
+
+static void do_add_door(int x, int y) {
+  deselect_all();
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  az_editor_door_t *door = AZ_LIST_ADD(state.doors);
+  door->selected = true;
+  door->spec.kind = AZ_DOOR_NORMAL;
+  door->spec.position = pt;
+  door->spec.angle = 0.0;
+  door->spec.destination = 0; // TODO
   state.unsaved = true;
 }
 
@@ -192,6 +244,16 @@ static void do_remove(void) {
     AZ_LIST_DESTROY(temp_baddies);
   }
   {
+    AZ_LIST_DECLARE(az_editor_door_t, temp_doors);
+    AZ_LIST_INIT(temp_doors, 2);
+    AZ_LIST_LOOP(door, state.doors) {
+      if (!door->selected) *AZ_LIST_ADD(temp_doors) = *door;
+      else state.unsaved = true;
+    }
+    AZ_LIST_SWAP(temp_doors, state.doors);
+    AZ_LIST_DESTROY(temp_doors);
+  }
+  {
     AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
     AZ_LIST_INIT(temp_walls, 2);
     AZ_LIST_LOOP(wall, state.walls) {
@@ -210,6 +272,14 @@ static void do_change_data(int delta) {
       az_modulo((int)baddie->spec.kind - 1 + delta, AZ_NUM_BADDIE_KINDS) + 1;
     baddie->spec.kind = new_kind;
     state.brush.baddie_kind = new_kind;
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(door, state.doors) {
+    if (!door->selected) continue;
+    const az_door_kind_t new_kind =
+      az_modulo((int)door->spec.kind - 1 + delta, AZ_NUM_DOOR_KINDS) + 1;
+    door->spec.kind = new_kind;
+    state.brush.door_kind = new_kind;
     state.unsaved = true;
   }
   AZ_LIST_LOOP(wall, state.walls) {
@@ -236,6 +306,7 @@ static void event_loop(void) {
           switch (event.key.name) {
             case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
             case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
+            case AZ_KEY_D: state.tool = AZ_TOOL_DOOR; break;
             case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
             case AZ_KEY_N: do_change_data(1); break;
             case AZ_KEY_P: do_change_data(-1); break;
@@ -270,6 +341,9 @@ static void event_loop(void) {
             case AZ_TOOL_BADDIE:
               do_add_baddie(event.mouse.x, event.mouse.y);
               break;
+            case AZ_TOOL_DOOR:
+              do_add_door(event.mouse.x, event.mouse.y);
+              break;
             case AZ_TOOL_WALL:
               do_add_wall(event.mouse.x, event.mouse.y);
               break;
@@ -280,6 +354,7 @@ static void event_loop(void) {
             switch (state.tool) {
               case AZ_TOOL_MOVE:
               case AZ_TOOL_BADDIE:
+              case AZ_TOOL_DOOR:
               case AZ_TOOL_WALL:
                 do_move(event.mouse.x, event.mouse.y,
                         event.mouse.dx, event.mouse.dy);
@@ -306,6 +381,11 @@ static void load_and_init_state(void) {
     az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
     baddie->spec = room->baddies[i];
   }
+  AZ_LIST_INIT(state.doors, room->num_doors);
+  for (int i = 0; i < room->num_doors; ++i) {
+    az_editor_door_t *door = AZ_LIST_ADD(state.doors);
+    door->spec = room->doors[i];
+  }
   AZ_LIST_INIT(state.walls, room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
     az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
@@ -316,6 +396,7 @@ static void load_and_init_state(void) {
 
 static void destroy_state(void) {
   AZ_LIST_DESTROY(state.baddies);
+  AZ_LIST_DESTROY(state.doors);
   AZ_LIST_DESTROY(state.walls);
 }
 

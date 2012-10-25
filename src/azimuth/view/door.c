@@ -32,6 +32,16 @@
 
 /*===========================================================================*/
 
+void draw_passage(const az_door_t *door) {
+  glColor3f(0, 1, 0); // green
+  glBegin(GL_LINES); {
+    for (double x = 30; x >= -30; x -= 4) glVertex2d(x, 50);
+    for (double y = 50; y >= -50; y -= 4) glVertex2d(-30, y);
+    for (double x = -30; x <= 30; x += 4) glVertex2d(x, -50);
+    for (double y = -50; y <= 50; y += 4) glVertex2d(30, y);
+  } glEnd();
+}
+
 void draw_door_internal(const az_door_t *door) {
   az_color_t color = AZ_WHITE;
   switch (door->kind) {
@@ -54,7 +64,9 @@ void draw_door_internal(const az_door_t *door) {
     case AZ_DOOR_MEGA_BOMB:
       color = (az_color_t){0, 128, 255, 255};
       break;
-    case AZ_DOOR_PASSAGE: assert(false); return;
+    case AZ_DOOR_PASSAGE:
+      draw_passage(door);
+      return;
   }
 
   if (door->openness < 1.0) {

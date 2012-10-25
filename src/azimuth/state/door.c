@@ -19,6 +19,7 @@
 
 #include "azimuth/state/door.h"
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
@@ -41,9 +42,10 @@ static const az_polygon_t closed_door_polygon = {
 bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
   if (!az_ray_hits_circle(start, delta, door->position,
                           AZ_DOOR_BOUNDING_RADIUS)) return false;
-  if (door->is_open) return false; // TODO what about sides of door?
   return az_ray_hits_polygon_trans(closed_door_polygon, door->position,
                                    door->angle, start, delta, point_out,
                                    normal_out);

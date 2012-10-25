@@ -61,6 +61,16 @@ static bool load_scenario(void) {
       az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
     }
   }
+  for (int i = 0; i < room->num_doors; ++i) {
+    const az_door_spec_t *spec = &room->doors[i];
+    az_door_t *door;
+    if (az_insert_door(&state, &door)) {
+      door->kind = spec->kind;
+      door->position = spec->position;
+      door->angle = spec->angle;
+      door->destination = spec->destination;
+    }
+  }
   az_destroy_room(room);
 
   // Set up the state:
@@ -84,12 +94,6 @@ static bool load_scenario(void) {
     node->kind = AZ_NODE_TRACTOR;
     node->position = (az_vector_t){150, -150};
     node->angle = 0;
-  }
-  az_door_t *door;
-  if (az_insert_door(&state, &door)) {
-    door->kind = AZ_DOOR_LOCKED;
-    door->position = (az_vector_t){55, 340};
-    door->angle = -1.57;
   }
 
   return true;
