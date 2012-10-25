@@ -35,7 +35,7 @@ void az_init_wall_drawing(void);
 void az_draw_wall(const az_wall_t *wall);
 
 // Draw all walls.  The GL matrix should be at the camera position.
-void az_draw_walls(const az_space_state_t* state);
+void az_draw_walls(const az_space_state_t *state);
 
 /*===========================================================================*/
 

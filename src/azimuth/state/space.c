@@ -28,12 +28,23 @@
 
 /*===========================================================================*/
 
-bool az_insert_baddie(az_space_state_t *state,
-                      az_baddie_t **baddie_out) {
+bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
       az_assign_uid(baddie - state->baddies, &baddie->uid);
       *baddie_out = baddie;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool az_insert_door(az_space_state_t *state, az_door_t **door_out) {
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) {
+      door->is_open = false;
+      door->openness = 0.0;
+      *door_out = door;
       return true;
     }
   }
@@ -52,8 +63,7 @@ bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
   return false;
 }
 
-bool az_insert_node(az_space_state_t *state,
-                    az_node_t **node_out) {
+bool az_insert_node(az_space_state_t *state, az_node_t **node_out) {
   AZ_ARRAY_LOOP(node, state->nodes) {
     if (node->kind == AZ_NODE_NOTHING) {
       az_assign_uid(node - state->nodes, &node->uid);

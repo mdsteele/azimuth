@@ -17,62 +17,36 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#include "azimuth/state/door.h"
 
 #include <stdbool.h>
 
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/door.h"
-#include "azimuth/state/node.h"
-#include "azimuth/state/particle.h"
-#include "azimuth/state/pickup.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
-#include "azimuth/state/uid.h"
-#include "azimuth/state/wall.h"
+#include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
+const double AZ_DOOR_BOUNDING_RADIUS = 58.31;
 
-typedef struct {
-  unsigned long clock;
-  az_vector_t camera;
-  az_ship_t ship;
-  az_timer_t timer;
-  az_baddie_t baddies[100];
-  az_door_t doors[20];
-  az_node_t nodes[50];
-  az_particle_t particles[500];
-  az_pickup_t pickups[100];
-  az_projectile_t projectiles[250];
-  az_wall_t walls[250];
-} az_space_state_t;
+static const az_vector_t closed_door_vertices[] = {
+  {30, 50}, {-30, 50}, {-30, -50}, {30, -50}, {40, -35}, {40, 35}
+};
 
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
+static const az_polygon_t closed_door_polygon = {
+  .num_vertices = AZ_ARRAY_SIZE(closed_door_vertices),
+  .vertices = closed_door_vertices
+};
 
-bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
-
-bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
-                    az_node_t **node_out);
-bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
-
-bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
-
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
-
-bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
-
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
+bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
+                      az_vector_t delta, az_vector_t *point_out,
+                      az_vector_t *normal_out) {
+  if (!az_ray_hits_circle(start, delta, door->position,
+                          AZ_DOOR_BOUNDING_RADIUS)) return false;
+  if (door->is_open) return false; // TODO what about sides of door?
+  return az_ray_hits_polygon_trans(closed_door_polygon, door->position,
+                                   door->angle, start, delta, point_out,
+                                   normal_out);
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_STATE_SPACE_H_

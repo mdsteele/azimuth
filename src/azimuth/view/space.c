@@ -25,8 +25,9 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
-#include "azimuth/view/node.h"
+#include "azimuth/view/door.h"
 #include "azimuth/view/hud.h"
+#include "azimuth/view/node.h"
 #include "azimuth/view/particle.h"
 #include "azimuth/view/pickup.h"
 #include "azimuth/view/projectile.h"
@@ -36,26 +37,6 @@
 /*===========================================================================*/
 
 static void draw_camera_view(az_space_state_t *state) {
-  glPushMatrix(); {
-    glColor4f(1, 0, 0, 1); // red
-    //glBegin(GL_LINE_LOOP); {
-    //  glVertex2d( 50,  50);
-    //  glVertex2d(-50,  50);
-    //  glVertex2d(-50, -50);
-    //  glVertex2d( 50, -50);
-    //} glEnd();
-    glBegin(GL_LINE_LOOP); {
-      glVertex2d( 250,  250);
-      glVertex2d(   0,  330);
-      glVertex2d(-250,  250);
-      glVertex2d(-330,    0);
-      glVertex2d(-250, -250);
-      glVertex2d(   0, -330);
-      glVertex2d( 250, -250);
-      glVertex2d( 330,    0);
-    } glEnd();
-  } glPopMatrix();
-
   az_draw_walls(state);
   az_draw_nodes(state);
   az_draw_pickups(state);
@@ -63,6 +44,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
+  az_draw_doors(state);
 }
 
 void az_space_draw_screen(az_space_state_t *state) {

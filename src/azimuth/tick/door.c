@@ -17,62 +17,32 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#include "azimuth/tick/door.h"
 
-#include <stdbool.h>
-
-#include "azimuth/state/baddie.h"
 #include "azimuth/state/door.h"
-#include "azimuth/state/node.h"
-#include "azimuth/state/particle.h"
-#include "azimuth/state/pickup.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
-#include "azimuth/state/uid.h"
-#include "azimuth/state/wall.h"
-#include "azimuth/util/vector.h"
+#include "azimuth/state/space.h"
+#include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h" // for az_dmax and az_dmin
 
 /*===========================================================================*/
 
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
+// How long a door takes to open/close, in seconds:
+#define DOOR_OPEN_TIME 0.5
 
-typedef struct {
-  unsigned long clock;
-  az_vector_t camera;
-  az_ship_t ship;
-  az_timer_t timer;
-  az_baddie_t baddies[100];
-  az_door_t doors[20];
-  az_node_t nodes[50];
-  az_particle_t particles[500];
-  az_pickup_t pickups[100];
-  az_projectile_t projectiles[250];
-  az_wall_t walls[250];
-} az_space_state_t;
+static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
+  const double delta = (1.0 / DOOR_OPEN_TIME) * time;
+  if (door->is_open) {
+    door->openness = az_dmin(1.0, door->openness + delta);
+  } else {
+    door->openness = az_dmax(0.0, door->openness - delta);
+  }
+}
 
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
-
-bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
-
-bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
-                    az_node_t **node_out);
-bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
-
-bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
-
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
-
-bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
-
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
+void az_tick_doors(az_space_state_t *state, double time) {
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
+    tick_door(state, door, time);
+  }
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_STATE_SPACE_H_

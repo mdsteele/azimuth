@@ -29,8 +29,8 @@
 // Draw a single baddie.  The GL matrix should be at the camera position.
 void az_draw_baddie(const az_baddie_t *baddie);
 
-// Draw all walls.  The GL matrix should be at the camera position.
-void az_draw_baddies(const az_space_state_t* state);
+// Draw all baddies.  The GL matrix should be at the camera position.
+void az_draw_baddies(const az_space_state_t *state);
 
 /*===========================================================================*/
 

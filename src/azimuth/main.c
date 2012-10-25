@@ -85,6 +85,12 @@ static bool load_scenario(void) {
     node->position = (az_vector_t){150, -150};
     node->angle = 0;
   }
+  az_door_t *door;
+  if (az_insert_door(&state, &door)) {
+    door->kind = AZ_DOOR_LOCKED;
+    door->position = (az_vector_t){55, 340};
+    door->angle = -1.57;
+  }
 
   return true;
 }

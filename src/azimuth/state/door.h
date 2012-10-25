@@ -18,61 +18,45 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_SPACE_H_
-#define AZIMUTH_STATE_SPACE_H_
+#ifndef AZIMUTH_STATE_DOOR_H_
+#define AZIMUTH_STATE_DOOR_H_
 
 #include <stdbool.h>
 
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/door.h"
-#include "azimuth/state/node.h"
-#include "azimuth/state/particle.h"
-#include "azimuth/state/pickup.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/projectile.h"
-#include "azimuth/state/ship.h"
-#include "azimuth/state/uid.h"
-#include "azimuth/state/wall.h"
+#include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-typedef struct {
-  double active_for; // negative if timer is inactive
-  double time_remaining; // seconds
-} az_timer_t;
+typedef enum {
+  AZ_DOOR_NOTHING = 0,
+  AZ_DOOR_NORMAL, // openable by any weapon
+  AZ_DOOR_LOCKED, // cannot be opened
+  AZ_DOOR_ROCKET, // openable by a rocket of any kind
+  AZ_DOOR_HYPER_ROCKET, // openable only by a hyper rocket
+  AZ_DOOR_BOMB, // openable by a bomb of any kind
+  AZ_DOOR_MEGA_BOMB, // openable only by a mega bomb
+  AZ_DOOR_PASSAGE // no door per se; just a passage that leads to another room
+} az_door_kind_t;
 
 typedef struct {
-  unsigned long clock;
-  az_vector_t camera;
-  az_ship_t ship;
-  az_timer_t timer;
-  az_baddie_t baddies[100];
-  az_door_t doors[20];
-  az_node_t nodes[50];
-  az_particle_t particles[500];
-  az_pickup_t pickups[100];
-  az_projectile_t projectiles[250];
-  az_wall_t walls[250];
-} az_space_state_t;
+  az_door_kind_t kind; // if AZ_DOOR_NOTHING, this door is not present
+  az_vector_t position;
+  double angle;
+  az_room_key_t destination_room;
+  bool is_open; // is the door open/opening, or is it closed/closing
+  double openness; // 0.0 = fully closed, 1.0 = fully open
+} az_door_t;
 
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
+extern const double AZ_DOOR_BOUNDING_RADIUS;
 
-bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
-
-bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
-                    az_node_t **node_out);
-bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
-
-bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
-
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
-
-bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
-
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
+// Determine if a ray, travelling delta from start, will hit the door.  If it
+// does, stores the intersection point in *point_out (if point_out is non-NULL)
+// and the normal vector in *normal_out (if normal_out is non-NULL).
+bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
+                      az_vector_t delta, az_vector_t *point_out,
+                      az_vector_t *normal_out);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_SPACE_H_
+#endif // AZIMUTH_STATE_DOOR_H_
