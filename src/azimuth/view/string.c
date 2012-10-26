@@ -19,7 +19,8 @@
 
 #include "azimuth/view/string.h"
 
-#include <string.h> // for strlen
+#include <stdarg.h>
+#include <stdio.h>
 
 #include <GL/gl.h>
 
@@ -177,6 +178,19 @@ void az_draw_chars(az_vector_t topleft, double height,
       glTranslated(FONT_SIZE, 0, 0);
     }
   } glPopMatrix();
+}
+
+void az_draw_printf(az_vector_t topleft, double height,
+                    const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  const size_t size = vsnprintf(NULL, 0, format, args);
+  va_end(args);
+  char buffer[size + 1]; // add one for trailing '\0'
+  va_start(args, format);
+  vsprintf(buffer, format, args);
+  va_end(args);
+  az_draw_chars(topleft, height, buffer, size);
 }
 
 /*===========================================================================*/

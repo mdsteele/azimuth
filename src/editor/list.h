@@ -42,6 +42,11 @@
 // Get the current number of elements in a list.
 #define AZ_LIST_SIZE(list) ((list).num)
 
+// Get the index-th item in the list.  Performs range checking in debug builds.
+#define AZ_LIST_GET(list, index) \
+  ((__typeof__((list).items)) \
+   _az_list_get((list).num, (list).items, sizeof((list).items[0]), (index)))
+
 // Add an item to the end of a list, returning a pointer to the new
 // (uninitialized) item.  The list's memory will first be reallocated if it is
 // currently at maximum capacity.
@@ -77,6 +82,7 @@
 void _az_list_init(int *num, int *max, void **items, size_t item_size,
                    int init_max);
 void _az_list_destroy(int *num, int *max, void **items);
+void *_az_list_get(int num, void *items, size_t item_size, int index);
 void *_az_list_add(int *num, int *max, void **items, size_t item_size);
 void _az_list_remove(int *num, int *max, void **items, size_t item_size,
                      void *item);

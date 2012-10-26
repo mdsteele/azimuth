@@ -54,7 +54,13 @@ typedef struct {
 } az_editor_wall_t;
 
 typedef struct {
-  bool unsaved;
+  AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
+  AZ_LIST_DECLARE(az_editor_door_t, doors);
+  AZ_LIST_DECLARE(az_editor_wall_t, walls);
+} az_editor_room_t;
+
+typedef struct {
+  bool unsaved; // true if we currently have unsaved changes
   bool spin_camera;
   az_vector_t camera;
   struct {
@@ -66,9 +72,13 @@ typedef struct {
     az_door_kind_t door_kind;
     int wall_data_index;
   } brush;
-  AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
-  AZ_LIST_DECLARE(az_editor_door_t, doors);
-  AZ_LIST_DECLARE(az_editor_wall_t, walls);
+  az_room_key_t current_room;
+  struct {
+    az_room_key_t start_room;
+    az_vector_t start_position;
+    double start_angle;
+    AZ_LIST_DECLARE(az_editor_room_t, rooms);
+  } planet;
 } az_editor_state_t;
 
 void az_tick_editor_state(az_editor_state_t *state);

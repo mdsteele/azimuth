@@ -42,6 +42,12 @@ void _az_list_destroy(int *num, int *max, void **items) {
   *items = NULL;
 }
 
+void *_az_list_get(int num, void *items, size_t item_size, int index) {
+  assert(index >= 0);
+  assert(index < num);
+  return (char *)items + index * item_size;
+}
+
 void *_az_list_add(int *num, int *max, void **items, size_t item_size) {
   // Sanity check that the list isn't bigger than its maximum size.
   const int old_num = *num, old_max = *max;

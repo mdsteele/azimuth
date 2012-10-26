@@ -21,7 +21,7 @@
 #ifndef AZIMUTH_VIEW_STRING_H_
 #define AZIMUTH_VIEW_STRING_H_
 
-#include <stdlib.h> // for size_t
+#include <string.h> // for size_t
 
 #include "azimuth/util/vector.h"
 
@@ -29,12 +29,18 @@
 
 // Draw a (null-terminated) string.  You must set the current color before
 // calling this.
-void az_draw_string(az_vector_t topleft, double height, const char* string);
+void az_draw_string(az_vector_t topleft, double height, const char *string);
 
 // Draw a sequence of characters (with an explicit length).  You must set the
 // current color before calling this.
 void az_draw_chars(az_vector_t topleft, double height,
-                   const char* chars, size_t len);
+                   const char *chars, size_t len);
+
+// Draw a string based on a printf format string and args.  You must set the
+// current color before calling this.
+void az_draw_printf(az_vector_t topleft, double height,
+                    const char *format, ...)
+  __attribute__((__format__(__printf__,3,4)));
 
 /*===========================================================================*/
 

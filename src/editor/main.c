@@ -41,50 +41,50 @@
 
 static az_editor_state_t state;
 
-static void deselect_all(void) {
-  AZ_LIST_LOOP(baddie, state.baddies) {
+static void deselect_all(az_editor_room_t *room) {
+  AZ_LIST_LOOP(baddie, room->baddies) {
     baddie->selected = false;
   }
-  AZ_LIST_LOOP(door, state.doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     door->selected = false;
   }
-  AZ_LIST_LOOP(wall, state.walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     wall->selected = false;
   }
 }
 
 static void do_save(void) {
+  // Convert planet:
+  const int num_rooms = AZ_LIST_SIZE(state.planet.rooms);
   az_planet_t planet = {
-    .start_room = 0,
-    .start_position = {50.0, 100.0},
-    .start_angle = 0.0,
-    .num_rooms = 1,
-    .rooms = AZ_ALLOC(1, az_room_t)
+    .start_room = state.planet.start_room,
+    .start_position = state.planet.start_position,
+    .start_angle = state.planet.start_angle,
+    .num_rooms = num_rooms,
+    .rooms = AZ_ALLOC(num_rooms, az_room_t)
   };
-  az_room_t *room = &planet.rooms[0];
-  // Convert baddies:
-  room->num_baddies = room->max_num_baddies = AZ_LIST_SIZE(state.baddies);
-  room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
-  int i = 0;
-  AZ_LIST_LOOP(baddie, state.baddies) {
-    room->baddies[i] = baddie->spec;
-    ++i;
-  }
-  // Convert doors:
-  room->num_doors = room->max_num_doors = AZ_LIST_SIZE(state.doors);
-  room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
-  i = 0;
-  AZ_LIST_LOOP(door, state.doors) {
-    room->doors[i] = door->spec;
-    ++i;
-  }
-  // Convert walls:
-  room->num_walls = room->max_num_walls = AZ_LIST_SIZE(state.walls);
-  room->walls = AZ_ALLOC(room->num_walls, az_wall_t);
-  i = 0;
-  AZ_LIST_LOOP(wall, state.walls) {
-    room->walls[i] = wall->spec;
-    ++i;
+  // Convert rooms:
+  for (az_room_key_t key = 0; key < num_rooms; ++key) {
+    az_editor_room_t *eroom = AZ_LIST_GET(state.planet.rooms, key);
+    az_room_t *room = &planet.rooms[key];
+    // Convert baddies:
+    room->num_baddies = room->max_num_baddies = AZ_LIST_SIZE(eroom->baddies);
+    room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
+    for (int i = 0; i < room->num_baddies; ++i) {
+      room->baddies[i] = AZ_LIST_GET(eroom->baddies, i)->spec;
+    }
+    // Convert doors:
+    room->num_doors = room->max_num_doors = AZ_LIST_SIZE(eroom->doors);
+    room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
+    for (int i = 0; i < room->num_doors; ++i) {
+      room->doors[i] = AZ_LIST_GET(eroom->doors, i)->spec;
+    }
+    // Convert walls:
+    room->num_walls = room->max_num_walls = AZ_LIST_SIZE(eroom->walls);
+    room->walls = AZ_ALLOC(room->num_walls, az_wall_t);
+    for (int i = 0; i < room->num_walls; ++i) {
+      room->walls[i] = AZ_LIST_GET(eroom->walls, i)->spec;
+    }
   }
   // Write to disk:
   if (az_save_planet(&planet, "data")) {
@@ -97,10 +97,11 @@ static void do_save(void) {
 }
 
 static void do_select(int x, int y, bool multi) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   double best_dist = INFINITY;
   az_editor_wall_t *best_wall = NULL;
-  AZ_LIST_LOOP(wall, state.walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     double dist = az_vnorm(az_vsub(wall->spec.position, pt));
     if (dist <= wall->spec.data->bounding_radius && dist < best_dist) {
       best_dist = dist;
@@ -108,7 +109,7 @@ static void do_select(int x, int y, bool multi) {
     }
   }
   az_editor_baddie_t *best_baddie = NULL;
-  AZ_LIST_LOOP(baddie, state.baddies) {
+  AZ_LIST_LOOP(baddie, room->baddies) {
     double dist = az_vnorm(az_vsub(baddie->spec.position, pt));
     if (dist <= az_get_baddie_data(baddie->spec.kind)->bounding_radius &&
         dist < best_dist) {
@@ -117,7 +118,7 @@ static void do_select(int x, int y, bool multi) {
     }
   }
   az_editor_door_t *best_door = NULL;
-  AZ_LIST_LOOP(door, state.doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     double dist = az_vnorm(az_vsub(door->spec.position, pt));
     if (dist <= AZ_DOOR_BOUNDING_RADIUS && dist < best_dist) {
       best_dist = dist;
@@ -129,7 +130,7 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_baddie->selected = !best_baddie->selected;
     } else if (!best_baddie->selected) {
-      deselect_all();
+      deselect_all(room);
       best_baddie->selected = true;
     }
     state.brush.baddie_kind = best_baddie->spec.kind;
@@ -137,7 +138,7 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_door->selected = !best_door->selected;
     } else if (!best_door->selected) {
-      deselect_all();
+      deselect_all(room);
       best_door->selected = true;
     }
     state.brush.door_kind = best_door->spec.kind;
@@ -145,30 +146,31 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
     } else if (!best_wall->selected) {
-      deselect_all();
+      deselect_all(room);
       best_wall->selected = true;
     }
     state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
   } else if (!multi) {
-    deselect_all();
+    deselect_all(room);
   }
 }
 
 static void do_move(int x, int y, int dx, int dy) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_vector_t delta =
     az_vsub(az_pixel_to_position(&state, x, y),
             az_pixel_to_position(&state, x - dx, y - dy));
-  AZ_LIST_LOOP(baddie, state.baddies) {
+  AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     baddie->spec.position = az_vadd(baddie->spec.position, delta);
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(door, state.doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.position = az_vadd(door->spec.position, delta);
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(wall, state.walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     wall->spec.position = az_vadd(wall->spec.position, delta);
     state.unsaved = true;
@@ -176,9 +178,10 @@ static void do_move(int x, int y, int dx, int dy) {
 }
 
 static void do_rotate(int x, int y, int dx, int dy) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
-  AZ_LIST_LOOP(baddie, state.baddies) {
+  AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     baddie->spec.angle =
       az_mod2pi(baddie->spec.angle +
@@ -186,7 +189,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
                 az_vtheta(az_vsub(pt0, baddie->spec.position)));
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(door, state.doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.angle =
       az_mod2pi(door->spec.angle +
@@ -194,7 +197,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
                 az_vtheta(az_vsub(pt0, door->spec.position)));
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(wall, state.walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     wall->spec.angle =
       az_mod2pi(wall->spec.angle +
@@ -205,9 +208,10 @@ static void do_rotate(int x, int y, int dx, int dy) {
 }
 
 static void do_add_baddie(int x, int y) {
-  deselect_all();
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  deselect_all(room);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
-  az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
+  az_editor_baddie_t *baddie = AZ_LIST_ADD(room->baddies);
   baddie->selected = true;
   baddie->spec.kind = state.brush.baddie_kind;
   baddie->spec.position = pt;
@@ -216,21 +220,23 @@ static void do_add_baddie(int x, int y) {
 }
 
 static void do_add_door(int x, int y) {
-  deselect_all();
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  deselect_all(room);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
-  az_editor_door_t *door = AZ_LIST_ADD(state.doors);
+  az_editor_door_t *door = AZ_LIST_ADD(room->doors);
   door->selected = true;
   door->spec.kind = state.brush.door_kind;
   door->spec.position = pt;
   door->spec.angle = 0.0;
-  door->spec.destination = 0; // TODO
+  door->spec.destination = state.current_room;
   state.unsaved = true;
 }
 
 static void do_add_wall(int x, int y) {
-  deselect_all();
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  deselect_all(room);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
-  az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
+  az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
   wall->selected = true;
   wall->spec.kind = AZ_WALL_NORMAL;
   wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
@@ -240,40 +246,42 @@ static void do_add_wall(int x, int y) {
 }
 
 static void do_remove(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   {
     AZ_LIST_DECLARE(az_editor_baddie_t, temp_baddies);
     AZ_LIST_INIT(temp_baddies, 2);
-    AZ_LIST_LOOP(baddie, state.baddies) {
+    AZ_LIST_LOOP(baddie, room->baddies) {
       if (!baddie->selected) *AZ_LIST_ADD(temp_baddies) = *baddie;
       else state.unsaved = true;
     }
-    AZ_LIST_SWAP(temp_baddies, state.baddies);
+    AZ_LIST_SWAP(temp_baddies, room->baddies);
     AZ_LIST_DESTROY(temp_baddies);
   }
   {
     AZ_LIST_DECLARE(az_editor_door_t, temp_doors);
     AZ_LIST_INIT(temp_doors, 2);
-    AZ_LIST_LOOP(door, state.doors) {
+    AZ_LIST_LOOP(door, room->doors) {
       if (!door->selected) *AZ_LIST_ADD(temp_doors) = *door;
       else state.unsaved = true;
     }
-    AZ_LIST_SWAP(temp_doors, state.doors);
+    AZ_LIST_SWAP(temp_doors, room->doors);
     AZ_LIST_DESTROY(temp_doors);
   }
   {
     AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
     AZ_LIST_INIT(temp_walls, 2);
-    AZ_LIST_LOOP(wall, state.walls) {
+    AZ_LIST_LOOP(wall, room->walls) {
       if (!wall->selected) *AZ_LIST_ADD(temp_walls) = *wall;
       else state.unsaved = true;
     }
-    AZ_LIST_SWAP(temp_walls, state.walls);
+    AZ_LIST_SWAP(temp_walls, room->walls);
     AZ_LIST_DESTROY(temp_walls);
   }
 }
 
 static void do_change_data(int delta) {
-  AZ_LIST_LOOP(baddie, state.baddies) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     const az_baddie_kind_t new_kind =
       az_modulo((int)baddie->spec.kind - 1 + delta, AZ_NUM_BADDIE_KINDS) + 1;
@@ -281,7 +289,7 @@ static void do_change_data(int delta) {
     state.brush.baddie_kind = new_kind;
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(door, state.doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     const az_door_kind_t new_kind =
       az_modulo((int)door->spec.kind - 1 + delta, AZ_NUM_DOOR_KINDS) + 1;
@@ -289,7 +297,7 @@ static void do_change_data(int delta) {
     state.brush.door_kind = new_kind;
     state.unsaved = true;
   }
-  AZ_LIST_LOOP(wall, state.walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     const int old_index = az_wall_data_index(wall->spec.data);
     const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
@@ -385,31 +393,43 @@ static bool load_and_init_state(void) {
 
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;
-  const az_room_t *room = &planet.rooms[planet.start_room];
-  AZ_LIST_INIT(state.baddies, room->num_baddies);
-  for (int i = 0; i < room->num_baddies; ++i) {
-    az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
-    baddie->spec = room->baddies[i];
-  }
-  AZ_LIST_INIT(state.doors, room->num_doors);
-  for (int i = 0; i < room->num_doors; ++i) {
-    az_editor_door_t *door = AZ_LIST_ADD(state.doors);
-    door->spec = room->doors[i];
-  }
-  AZ_LIST_INIT(state.walls, room->num_walls);
-  for (int i = 0; i < room->num_walls; ++i) {
-    az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
-    wall->spec = room->walls[i];
-  }
-  az_destroy_planet(&planet);
 
+  state.planet.start_room = planet.start_room;
+  state.planet.start_position = planet.start_position;
+  state.planet.start_angle = planet.start_angle;
+  AZ_LIST_INIT(state.planet.rooms, planet.num_rooms);
+  for (az_room_key_t key = 0; key < planet.num_rooms; ++key) {
+    const az_room_t *room = &planet.rooms[key];
+    az_editor_room_t *eroom = AZ_LIST_ADD(state.planet.rooms);
+
+    AZ_LIST_INIT(eroom->baddies, room->num_baddies);
+    for (int i = 0; i < room->num_baddies; ++i) {
+      az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
+      baddie->spec = room->baddies[i];
+    }
+    AZ_LIST_INIT(eroom->doors, room->num_doors);
+    for (int i = 0; i < room->num_doors; ++i) {
+      az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
+      door->spec = room->doors[i];
+    }
+    AZ_LIST_INIT(eroom->walls, room->num_walls);
+    for (int i = 0; i < room->num_walls; ++i) {
+      az_editor_wall_t *wall = AZ_LIST_ADD(eroom->walls);
+      wall->spec = room->walls[i];
+    }
+  }
+
+  az_destroy_planet(&planet);
   return true;
 }
 
 static void destroy_state(void) {
-  AZ_LIST_DESTROY(state.baddies);
-  AZ_LIST_DESTROY(state.doors);
-  AZ_LIST_DESTROY(state.walls);
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    AZ_LIST_DESTROY(room->baddies);
+    AZ_LIST_DESTROY(room->doors);
+    AZ_LIST_DESTROY(room->walls);
+  }
+  AZ_LIST_DESTROY(state.planet.rooms);
 }
 
 int main(int argc, char **argv) {

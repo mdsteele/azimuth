@@ -55,34 +55,36 @@ static void draw_selection_circle(az_vector_t position, double angle,
 }
 
 static void draw_camera_view(az_editor_state_t* state) {
-  AZ_LIST_LOOP(wall, state->walls) {
+  az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
+                                       state->current_room);
+  AZ_LIST_LOOP(wall, room->walls) {
     az_draw_wall(&wall->spec);
   }
-  AZ_LIST_LOOP(editor_baddie, state->baddies) {
+  AZ_LIST_LOOP(editor_baddie, room->baddies) {
     az_baddie_t real_baddie;
     az_init_baddie(&real_baddie, editor_baddie->spec.kind,
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     az_draw_baddie(&real_baddie);
   }
-  AZ_LIST_LOOP(editor_door, state->doors) {
+  AZ_LIST_LOOP(editor_door, room->doors) {
     az_door_t real_door;
     real_door.kind = editor_door->spec.kind;
     real_door.position = editor_door->spec.position;
     real_door.angle = editor_door->spec.angle;
     az_draw_door(&real_door);
   }
-  AZ_LIST_LOOP(wall, state->walls) {
+  AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     draw_selection_circle(wall->spec.position, wall->spec.angle,
                           wall->spec.data->bounding_radius);
   }
-  AZ_LIST_LOOP(baddie, state->baddies) {
+  AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     draw_selection_circle(baddie->spec.position, baddie->spec.angle,
                           az_get_baddie_data(baddie->spec.kind)->
                           bounding_radius);
   }
-  AZ_LIST_LOOP(door, state->doors) {
+  AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     draw_selection_circle(door->spec.position, door->spec.angle,
                           AZ_DOOR_BOUNDING_RADIUS);
@@ -90,6 +92,10 @@ static void draw_camera_view(az_editor_state_t* state) {
 }
 
 static void draw_hud(az_editor_state_t* state) {
+  // Draw the room name:
+  glColor3f(1, 1, 1); // white
+  az_draw_printf((az_vector_t){20, 5}, 8, "[Room %03d]", state->current_room);
+
   // Draw the tool name:
   const char *tool_name = "???";
   switch (state->tool) {
@@ -114,17 +120,16 @@ static void draw_hud(az_editor_state_t* state) {
       glColor3f(1, 1, 0);
       break;
   }
-  az_draw_string((az_vector_t){AZ_SCREEN_WIDTH - 10 - 8 * strlen(tool_name),
-                               AZ_SCREEN_HEIGHT - 18}, 8, tool_name);
+  az_draw_string((az_vector_t){AZ_SCREEN_WIDTH - 5 - 8 * strlen(tool_name),
+                               AZ_SCREEN_HEIGHT - 13}, 8, tool_name);
 
   // Draw space coords of mouse position:
   int x, y;
   if (az_get_mouse_position(&x, &y)) {
     const az_vector_t pt = az_pixel_to_position(state, x, y);
-    char buffer[40];
-    snprintf(buffer, sizeof(buffer), "(%.01f, %.01f)", pt.x, pt.y);
     glColor3f(1, 1, 1); // white
-    az_draw_string((az_vector_t){10, AZ_SCREEN_HEIGHT - 18}, 8, buffer);
+    az_draw_printf((az_vector_t){5, AZ_SCREEN_HEIGHT - 13}, 8,
+                   "(%.01f, %.01f)", pt.x, pt.y);
   }
 
   // Draw the unsaved indicator:
