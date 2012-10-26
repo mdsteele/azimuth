@@ -17,41 +17,32 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/util/misc.h"
+#pragma once
+#ifndef AZIMUTH_STATE_PLANET_H_
+#define AZIMUTH_STATE_PLANET_H_
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+
+#include "azimuth/state/player.h" // for az_room_key_t
+#include "azimuth/state/room.h"
+
+/*===========================================================================*/
+
+typedef struct {
+  az_room_key_t start_room;
+  az_vector_t start_position;
+  double start_angle;
+  int num_rooms;
+  az_room_t *rooms;
+} az_planet_t;
+
+bool az_load_planet(const char *resource_dir, az_planet_t *planet_out);
+
+bool az_save_planet(const az_planet_t *planet, const char *resource_dir);
+
+// Delete the data arrays owned by a planet (but not the planet object itself).
+void az_destroy_planet(az_planet_t *planet);
 
 /*===========================================================================*/
 
-unsigned long az_clock_mod(unsigned int modulus, unsigned int slowdown,
-                           unsigned long clock) {
-  return (clock % (modulus * slowdown)) / slowdown;
-}
-
-unsigned long az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
-                              unsigned long clock) {
-  const unsigned int m = modulus - 1;
-  const unsigned long d = az_clock_mod(2 * m, slowdown, clock);
-  return (d <= m ? d : 2 * m - d);
-}
-
-void _az_fatal(const char *funcname, const char *format, ...) {
-  va_list args;
-  fprintf(stderr, "Fatal error in %s: ", funcname);
-  va_start(args, format);
-  vfprintf(stderr, format, args);
-  va_end(args);
-  exit(EXIT_FAILURE);
-}
-
-void *_az_alloc(const char *funcname, size_t n, size_t size) {
-  void *ptr = calloc(n, size);
-  if (ptr == NULL) {
-    _az_fatal(funcname, "Out of memory.\n");
-  }
-  return ptr;
-}
-
-/*===========================================================================*/
+#endif // AZIMUTH_STATE_PLANET_H_

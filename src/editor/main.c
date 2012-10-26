@@ -27,9 +27,10 @@
 
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
+#include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
-#include "azimuth/util/misc.h" // for AZ_FATAL
+#include "azimuth/util/misc.h" // for AZ_ALLOC
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 #include "editor/list.h"
@@ -53,40 +54,46 @@ static void deselect_all(void) {
 }
 
 static void do_save(void) {
-  az_room_t room = {.key = 0};
+  az_planet_t planet = {
+    .start_room = 0,
+    .start_position = {50.0, 100.0},
+    .start_angle = 0.0,
+    .num_rooms = 1,
+    .rooms = AZ_ALLOC(1, az_room_t)
+  };
+  az_room_t *room = &planet.rooms[0];
   // Convert baddies:
-  room.num_baddies = room.max_num_baddies = AZ_LIST_SIZE(state.baddies);
-  room.baddies = calloc(room.num_baddies, sizeof(az_baddie_spec_t));
+  room->num_baddies = room->max_num_baddies = AZ_LIST_SIZE(state.baddies);
+  room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
   int i = 0;
   AZ_LIST_LOOP(baddie, state.baddies) {
-    room.baddies[i] = baddie->spec;
+    room->baddies[i] = baddie->spec;
     ++i;
   }
   // Convert doors:
-  room.num_doors = room.max_num_doors = AZ_LIST_SIZE(state.doors);
-  room.doors = calloc(room.num_doors, sizeof(az_door_spec_t));
+  room->num_doors = room->max_num_doors = AZ_LIST_SIZE(state.doors);
+  room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
   i = 0;
   AZ_LIST_LOOP(door, state.doors) {
-    room.doors[i] = door->spec;
+    room->doors[i] = door->spec;
     ++i;
   }
   // Convert walls:
-  room.num_walls = room.max_num_walls = AZ_LIST_SIZE(state.walls);
-  room.walls = calloc(room.num_walls, sizeof(az_wall_t));
+  room->num_walls = room->max_num_walls = AZ_LIST_SIZE(state.walls);
+  room->walls = AZ_ALLOC(room->num_walls, az_wall_t);
   i = 0;
   AZ_LIST_LOOP(wall, state.walls) {
-    room.walls[i] = wall->spec;
+    room->walls[i] = wall->spec;
     ++i;
   }
   // Write to disk:
-  if (az_save_room_to_file(&room, "data/rooms/room000.txt")) {
+  if (az_save_planet(&planet, "data")) {
     state.unsaved = false;
   } else {
-    printf("Failed to save room.\n");
+    printf("Failed to save scenario.\n");
   }
   // Clean up:
-  free(room.baddies);
-  free(room.walls);
+  az_destroy_planet(&planet);
 }
 
 static void do_select(int x, int y, bool multi) {
@@ -213,7 +220,7 @@ static void do_add_door(int x, int y) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_door_t *door = AZ_LIST_ADD(state.doors);
   door->selected = true;
-  door->spec.kind = AZ_DOOR_NORMAL;
+  door->spec.kind = state.brush.door_kind;
   door->spec.position = pt;
   door->spec.angle = 0.0;
   door->spec.destination = 0; // TODO
@@ -372,10 +379,13 @@ static void event_loop(void) {
   }
 }
 
-static void load_and_init_state(void) {
-  state.brush.baddie_kind = AZ_BAD_TURRET;
-  az_room_t *room = az_load_room_from_file("data/rooms/room000.txt");
-  if (room == NULL) AZ_FATAL("Failed to open room.\n");
+static bool load_and_init_state(void) {
+  state.brush.baddie_kind = AZ_BAD_LUMP;
+  state.brush.door_kind = AZ_DOOR_NORMAL;
+
+  az_planet_t planet;
+  if (!az_load_planet("data", &planet)) return false;
+  const az_room_t *room = &planet.rooms[planet.start_room];
   AZ_LIST_INIT(state.baddies, room->num_baddies);
   for (int i = 0; i < room->num_baddies; ++i) {
     az_editor_baddie_t *baddie = AZ_LIST_ADD(state.baddies);
@@ -391,7 +401,9 @@ static void load_and_init_state(void) {
     az_editor_wall_t *wall = AZ_LIST_ADD(state.walls);
     wall->spec = room->walls[i];
   }
-  az_destroy_room(room);
+  az_destroy_planet(&planet);
+
+  return true;
 }
 
 static void destroy_state(void) {
@@ -406,7 +418,10 @@ int main(int argc, char **argv) {
   az_init_wall_datas();
   az_init_wall_drawing();
 
-  load_and_init_state();
+  if (!load_and_init_state()) {
+    printf("Failed to load scenario.\n");
+    return EXIT_FAILURE;
+  }
   event_loop();
   destroy_state();
 

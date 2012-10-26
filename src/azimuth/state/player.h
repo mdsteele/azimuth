@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "azimuth/constants.h"
+
 /*===========================================================================*/
 
 #define AZ_ROCKETS_PER_AMMO_UPGRADE 5
@@ -142,6 +144,11 @@ typedef struct {
   // Bitmasks storing game progress:
   uint64_t upgrades1, upgrades2;
   uint64_t rooms1, rooms2, rooms3;
+#if AZ_MAX_NUM_ROOMS > 64 * 3
+#error "Not enough roomsN bitvectors in az_player_t."
+#elif AZ_MAX_NUM_ROOMS <= 64 * 2
+#error "Too many roomsN bitvectors in az_player_t."
+#endif
   uint64_t flags;
   // Total game time for this playthrough so far, in seconds:
   double total_time;

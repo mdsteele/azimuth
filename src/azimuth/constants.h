@@ -33,7 +33,7 @@
 #if (AZ_SCREEN_WIDTH/2)*(AZ_SCREEN_WIDTH/2) + \
     (AZ_SCREEN_HEIGHT/2)*(AZ_SCREEN_HEIGHT/2) != \
     AZ_SCREEN_RADIUS*AZ_SCREEN_RADIUS
-#error Incorrect AZ_SCREEN_RADIUS value.
+#error "Incorrect AZ_SCREEN_RADIUS value."
 #endif
 
 /*===========================================================================*/
@@ -47,6 +47,8 @@
 /*===========================================================================*/
 // Planetoid:
 
+// The maximum number of rooms allowed in the game scenario:
+#define AZ_MAX_NUM_ROOMS 192
 // The radius of the planetoid in which the game takes place, in pixels:
 #define AZ_PLANETOID_RADIUS 100000.0
 // The acceleration due to gravity at the surface of the planetoid, in

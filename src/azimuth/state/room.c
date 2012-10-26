@@ -25,30 +25,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/state/wall.h"
-#include "azimuth/util/misc.h" // for AZ_FATAL
+#include "azimuth/util/misc.h" // for AZ_ALLOC
 
 /*===========================================================================*/
 
 // TODO: move these elsewhere
 #define AZ_MAX_NUM_BADDIES 192
 #define AZ_MAX_NUM_DOORS 20
-#define AZ_MAX_NUM_ROOMS 192
 #define AZ_MAX_NUM_WALLS 250
-
-#define ALLOCATE(n, type) ((type *)_safe_calloc((n), sizeof(type)))
-
-static void *_safe_calloc(size_t n, size_t size) {
-  void *ptr = calloc(n, size);
-  if (ptr == NULL) {
-    AZ_FATAL("Out of memory.\n");
-  }
-  return ptr;
-}
 
 typedef struct {
   FILE *file;
   az_room_t *room;
+  bool success;
   jmp_buf jump;
 } az_load_room_t;
 
@@ -62,13 +53,13 @@ static void parse_room_header(az_load_room_t *loader) {
   loader->room->key = room_num;
   if (num_baddies < 0 || num_baddies > AZ_MAX_NUM_BADDIES) FAIL();
   loader->room->max_num_baddies = num_baddies;
-  loader->room->baddies = ALLOCATE(num_baddies, az_baddie_spec_t);
+  loader->room->baddies = AZ_ALLOC(num_baddies, az_baddie_spec_t);
   if (num_doors < 0 || num_doors > AZ_MAX_NUM_DOORS) FAIL();
   loader->room->max_num_doors = num_doors;
-  loader->room->doors = ALLOCATE(num_doors, az_door_spec_t);
+  loader->room->doors = AZ_ALLOC(num_doors, az_door_spec_t);
   if (num_walls < 0 || num_walls > AZ_MAX_NUM_WALLS) FAIL();
   loader->room->max_num_walls = num_walls;
-  loader->room->walls = ALLOCATE(num_walls, az_wall_t);
+  loader->room->walls = AZ_ALLOC(num_walls, az_wall_t);
 }
 
 static void parse_baddie_directive(az_load_room_t *loader) {
@@ -137,21 +128,22 @@ static void validate_room(az_load_room_t *loader) {
 static void parse_room(az_load_room_t *loader) {
   if (setjmp(loader->jump) != 0) {
     az_destroy_room(loader->room);
-    loader->room = NULL;
     return;
   }
   parse_room_header(loader);
   while (parse_directive(loader));
   validate_room(loader);
+  loader->success = true;
 }
 
-az_room_t *az_load_room_from_file(const char *filepath) {
+bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
+  assert(room_out != NULL);
   FILE *file = fopen(filepath, "r");
-  if (file == NULL) return NULL;
-  az_load_room_t loader = { .file = file, .room = ALLOCATE(1, az_room_t) };
+  if (file == NULL) return false;
+  az_load_room_t loader = { .file = file, .room = room_out, .success = false};
   parse_room(&loader);
   fclose(file);
-  return loader.room;
+  return loader.success;
 }
 
 /*===========================================================================*/
@@ -194,10 +186,19 @@ bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
 /*===========================================================================*/
 
 void az_destroy_room(az_room_t *room) {
-  if (room == NULL) return;
+  assert(room != NULL);
+
   free(room->baddies);
+  room->num_baddies = room->max_num_baddies = 0;
+  room->baddies = NULL;
+
+  free(room->doors);
+  room->num_doors = room->max_num_doors = 0;
+  room->doors = NULL;
+
   free(room->walls);
-  free(room);
+  room->num_walls = room->max_num_walls = 0;
+  room->walls = NULL;
 }
 
 /*===========================================================================*/

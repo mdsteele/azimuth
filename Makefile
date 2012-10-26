@@ -40,7 +40,7 @@ TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
 EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
-RESOURCE_FILES := $(shell find $(DATADIR)/rooms -name 'room*.txt')
+RESOURCE_FILES := $(shell find $(DATADIR)/rooms -name '*.txt') \
 
 ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
 

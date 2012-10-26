@@ -25,6 +25,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
+#include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/space.h"
@@ -38,16 +39,11 @@
 
 /*===========================================================================*/
 
+static az_planet_t planet;
 static az_space_state_t state;
 
-static bool load_scenario(void) {
-  // Try to load the scenario data:
-  const char *resource_dir = az_get_resource_directory();
-  if (resource_dir == NULL) return false;
-  char buffer[strlen(resource_dir) + 20];
-  sprintf(buffer, "%s/rooms/room000.txt", resource_dir);
-  az_room_t *room = az_load_room_from_file(buffer);
-  if (room == NULL) return false;
+static void init_state_for_room(const az_room_t *room,
+                                az_vector_t ship_position, double ship_angle) {
   for (int i = 0; i < room->num_walls; ++i) {
     az_wall_t *wall;
     if (az_insert_wall(&state, &wall)) {
@@ -71,18 +67,30 @@ static bool load_scenario(void) {
       door->destination = spec->destination;
     }
   }
-  az_destroy_room(room);
 
-  // Set up the state:
-  state.timer.active_for = -1;
+  state.ship.position = ship_position;
+  state.ship.angle = ship_angle;
+  state.ship.velocity = AZ_VZERO;
+  state.camera = state.ship.position;
+}
+
+static bool load_scenario(void) {
+  // Try to load the scenario data:
+  const char *resource_dir = az_get_resource_directory();
+  if (resource_dir == NULL) return false;
+  if (!az_load_planet(resource_dir, &planet)) return false;
+
   state.ship = (az_ship_t){
     .player = {
       .shields = 200, .max_shields = 400, .energy = 98, .max_energy = 400,
       .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
     },
-    .position = {50, 150}
   };
-  state.camera = state.ship.position;
+  state.timer.active_for = -1;
+
+  init_state_for_room(&planet.rooms[planet.start_room], planet.start_position,
+                      planet.start_angle);
+
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_00);
