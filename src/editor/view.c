@@ -47,26 +47,7 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
   }
 }
 
-static void draw_selection_circle(az_vector_t position, double angle,
-                                  double radius) {
-  glPushMatrix(); {
-    glTranslated(position.x, position.y, 0);
-    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
-    glScaled(radius, radius, 1);
-    glColor3f(1, 1, 1); // white
-    glBegin(GL_LINE_STRIP); {
-      glVertex2d(0, 0);
-      for (int i = 0; i <= 36; ++i) {
-        glVertex2d(cos(i * AZ_PI / 18.0), sin(i * AZ_PI / 18.0));
-      }
-    } glEnd();
-  } glPopMatrix();
-}
-
-static void draw_camera_view(az_editor_state_t* state) {
-  az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
-                                       state->current_room);
-  // Draw objects:
+static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   AZ_LIST_LOOP(wall, room->walls) {
     az_draw_wall(&wall->spec);
   }
@@ -89,6 +70,48 @@ static void draw_camera_view(az_editor_state_t* state) {
                      editor_door->spec.destination);
     } glPopMatrix();
   }
+}
+
+static void draw_selection_circle(az_vector_t position, double angle,
+                                  double radius) {
+  glPushMatrix(); {
+    glTranslated(position.x, position.y, 0);
+    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
+    glScaled(radius, radius, 1);
+    glColor3f(1, 1, 1); // white
+    glBegin(GL_LINE_STRIP); {
+      glVertex2d(0, 0);
+      for (int i = 0; i <= 36; ++i) {
+        glVertex2d(cos(i * AZ_PI / 18.0), sin(i * AZ_PI / 18.0));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
+static void draw_camera_view(az_editor_state_t *state) {
+  // Draw other rooms:
+  for (int i = 0; i < AZ_LIST_SIZE(state->planet.rooms); ++i) {
+    if (i == state->current_room) continue;
+    draw_room(state, AZ_LIST_GET(state->planet.rooms, i));
+  }
+
+  // Fade out other rooms:
+  glPushMatrix(); {
+    camera_to_screen_orient(state, state->camera);
+    glColor4f(0, 0, 0, 0.75); // black tint
+    glBegin(GL_QUADS); {
+      glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+      glVertex2i(-AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+      glVertex2i(-AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+      glVertex2i( AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+    } glEnd();
+  } glPopMatrix();
+
+  // Draw current room:
+  az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
+                                       state->current_room);
+  draw_room(state, room);
+
   // Draw selection circles:
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;

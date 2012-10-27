@@ -40,6 +40,7 @@ typedef enum {
 
 typedef enum {
   AZ_ETA_NOTHING = 0,
+  AZ_ETA_SET_CURRENT_ROOM,
   AZ_ETA_SET_DOOR_DEST
 } az_editor_text_action_t;
 
