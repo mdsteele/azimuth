@@ -38,6 +38,11 @@ typedef enum {
   AZ_TOOL_WALL
 } az_editor_tool_t;
 
+typedef enum {
+  AZ_ETA_NOTHING = 0,
+  AZ_ETA_SET_DOOR_DEST
+} az_editor_text_action_t;
+
 typedef struct {
   bool selected;
   az_baddie_spec_t spec;
@@ -60,12 +65,18 @@ typedef struct {
 } az_editor_room_t;
 
 typedef struct {
+  unsigned long clock;
   bool unsaved; // true if we currently have unsaved changes
   bool spin_camera;
   az_vector_t camera;
   struct {
     bool up, down, left, right;
   } controls;
+  struct {
+    az_editor_text_action_t action; // if AZ_ETA_NOTHING, text box inactive
+    int length;
+    char buffer[100];
+  } text;
   az_editor_tool_t tool;
   struct {
     az_baddie_kind_t baddie_kind;

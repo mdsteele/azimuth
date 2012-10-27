@@ -36,6 +36,7 @@ typedef enum {
 typedef enum {
   AZ_KEY_UNKNOWN = 0,
   AZ_KEY_RETURN = '\n',
+  AZ_KEY_ESCAPE = '\x1b',
   AZ_KEY_SPACE = ' ',
   AZ_KEY_0 = '0',
   AZ_KEY_1 = '1',
@@ -86,6 +87,8 @@ typedef union {
     az_event_kind_t kind;
     az_key_name_t name;
     bool command; // true if Command/Ctrl (depending on OS) key is held
+    bool shift; // true if Shift key is held
+    int character; // unicode character
   } key;
   struct {
     az_event_kind_t kind;

@@ -27,6 +27,8 @@
 #define SPIN_RADIUS 80.0
 
 void az_tick_editor_state(az_editor_state_t *state) {
+  ++state->clock;
+
   if (state->controls.up && !state->controls.down) {
     if (state->spin_camera) {
       state->camera = az_vadd(state->camera,

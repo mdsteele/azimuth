@@ -170,9 +170,8 @@ void az_draw_string(az_vector_t topleft, double height, const char* string) {
 void az_draw_chars(az_vector_t topleft, double height,
                    const char* chars, size_t len) {
   glPushMatrix(); {
-    glTranslated(topleft.x, topleft.y, 0);
+    glTranslated(topleft.x + 0.5, topleft.y + 0.5, 0);
     glScaled(height / FONT_SIZE, height / FONT_SIZE, 1);
-    glTranslated(0.5, 0.5, 0);
     for (size_t i = 0; i < len; ++i) {
       draw_char(chars[i]);
       glTranslated(FONT_SIZE, 0, 0);

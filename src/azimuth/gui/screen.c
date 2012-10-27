@@ -76,6 +76,8 @@ void az_set_fullscreen(bool fullscreen) {
                         VIDEO_FLAGS | (fullscreen ? SDL_FULLSCREEN : 0))) {
     AZ_FATAL("SDL_SetVideoMode failed.\n");
   }
+  // Enable unicode values for keyboard events:
+  SDL_EnableUNICODE(1);
 
   // Turn off the depth buffer:
   glDisable(GL_DEPTH_TEST);

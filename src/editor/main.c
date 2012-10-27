@@ -307,6 +307,43 @@ static void do_change_data(int delta) {
   }
 }
 
+static void begin_set_door_dest(void) {
+  assert(state.text.action == AZ_ETA_NOTHING);
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  bool any_doors = false;
+  az_room_key_t key = 0;
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->selected) {
+      any_doors = true;
+      key = door->spec.destination;
+      break;
+    }
+  }
+  if (!any_doors) return;
+  const int length =
+    snprintf(state.text.buffer, AZ_ARRAY_SIZE(state.text.buffer), "%03d", key);
+  state.text.length = az_imin(length, AZ_ARRAY_SIZE(state.text.buffer));
+  state.text.action = AZ_ETA_SET_DOOR_DEST;
+}
+
+static void try_set_door_dest(void) {
+  assert(state.text.action == AZ_ETA_SET_DOOR_DEST);
+  assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
+  state.text.buffer[state.text.length] = '\0';
+  az_room_key_t key;
+  int count;
+  if (sscanf(state.text.buffer, "%d%n", &key, &count) < 1) return;
+  if (count != state.text.length) return;
+  if (key < 0 || key >= AZ_LIST_SIZE(state.planet.rooms)) return;
+  state.text.action = AZ_ETA_NOTHING;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(door, room->doors) {
+    if (!door->selected) continue;
+    door->spec.destination = key;
+    state.unsaved = true;
+  }
+}
+
 static void event_loop(void) {
   while (true) {
     az_tick_editor_state(&state);
@@ -318,24 +355,47 @@ static void event_loop(void) {
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          switch (event.key.name) {
-            case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
-            case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
-            case AZ_KEY_D: state.tool = AZ_TOOL_DOOR; break;
-            case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
-            case AZ_KEY_N: do_change_data(1); break;
-            case AZ_KEY_P: do_change_data(-1); break;
-            case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
-            case AZ_KEY_S:
-              if (event.key.command) do_save();
-              break;
-            case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
-            case AZ_KEY_BACKSPACE: do_remove(); break;
-            case AZ_KEY_UP_ARROW: state.controls.up = true; break;
-            case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
-            case AZ_KEY_LEFT_ARROW: state.controls.left = true; break;
-            case AZ_KEY_RIGHT_ARROW: state.controls.right = true; break;
-            default: break;
+          if (state.text.action != AZ_ETA_NOTHING) {
+            if (event.key.name == AZ_KEY_RETURN) {
+              switch (state.text.action) {
+                case AZ_ETA_NOTHING: assert(false); break;
+                case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
+              }
+            } else if (event.key.name == AZ_KEY_ESCAPE) {
+              state.text.action = AZ_ETA_NOTHING;
+            } else if (event.key.name == AZ_KEY_BACKSPACE) {
+              if (state.text.length > 0) {
+                --state.text.length;
+              }
+            } else if (event.key.character >= ' ' &&
+                       event.key.character < '\x7f') {
+              if (state.text.length < AZ_ARRAY_SIZE(state.text.buffer) - 1) {
+                state.text.buffer[state.text.length++] = event.key.character;
+              }
+            }
+          } else {
+            switch (event.key.name) {
+              case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
+              case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
+              case AZ_KEY_D:
+                if (event.key.shift) begin_set_door_dest();
+                else state.tool = AZ_TOOL_DOOR;
+                break;
+              case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
+              case AZ_KEY_N: do_change_data(1); break;
+              case AZ_KEY_P: do_change_data(-1); break;
+              case AZ_KEY_R: state.tool = AZ_TOOL_ROTATE; break;
+              case AZ_KEY_S:
+                if (event.key.command) do_save();
+                break;
+              case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
+              case AZ_KEY_BACKSPACE: do_remove(); break;
+              case AZ_KEY_UP_ARROW: state.controls.up = true; break;
+              case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
+              case AZ_KEY_LEFT_ARROW: state.controls.left = true; break;
+              case AZ_KEY_RIGHT_ARROW: state.controls.right = true; break;
+              default: break;
+          }
           }
           break;
         case AZ_EVENT_KEY_UP:

@@ -20,7 +20,6 @@
 #include "editor/view.h"
 
 #include <math.h>
-#include <stdio.h> // for snprintf
 #include <string.h> // for strlen
 
 #include <GL/gl.h>
@@ -28,6 +27,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/gui/event.h" // for az_get_mouse_position
 #include "azimuth/state/baddie.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/door.h"
@@ -37,6 +37,15 @@
 #include "editor/state.h"
 
 /*===========================================================================*/
+
+static void camera_to_screen_orient(const az_editor_state_t *state,
+                                    az_vector_t position) {
+  glTranslated(position.x, position.y, 0);
+  glScaled(1, -1, 1);
+  if (state->spin_camera) {
+    glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);
+  }
+}
 
 static void draw_selection_circle(az_vector_t position, double angle,
                                   double radius) {
@@ -57,6 +66,7 @@ static void draw_selection_circle(az_vector_t position, double angle,
 static void draw_camera_view(az_editor_state_t* state) {
   az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
                                        state->current_room);
+  // Draw objects:
   AZ_LIST_LOOP(wall, room->walls) {
     az_draw_wall(&wall->spec);
   }
@@ -72,7 +82,14 @@ static void draw_camera_view(az_editor_state_t* state) {
     real_door.position = editor_door->spec.position;
     real_door.angle = editor_door->spec.angle;
     az_draw_door(&real_door);
+    glPushMatrix(); {
+      camera_to_screen_orient(state, real_door.position);
+      glColor3f(0, 0, 1); // blue
+      az_draw_printf((az_vector_t){-23, -7}, 16, "%03d",
+                     editor_door->spec.destination);
+    } glPopMatrix();
   }
+  // Draw selection circles:
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     draw_selection_circle(wall->spec.position, wall->spec.angle,
@@ -140,6 +157,39 @@ static void draw_hud(az_editor_state_t* state) {
       glVertex2d(5, 15);
       glVertex2d(15, 5);
     } glEnd();
+  }
+
+  // Draw the text box:
+  if (state->text.action != AZ_ETA_NOTHING) {
+    const double left = 5.5;
+    const double right = AZ_SCREEN_WIDTH - 5.5;
+    const double top = 20.5;
+    const double bottom = top + 22;
+    glColor3f(0, 0, 0); // black
+    glBegin(GL_QUADS); {
+      glVertex2d(left, top);
+      glVertex2d(left, bottom);
+      glVertex2d(right, bottom);
+      glVertex2d(right, top);
+    } glEnd();
+    glColor3f(0, 1, 1); // cyan
+    glBegin(GL_LINE_LOOP); {
+      glVertex2d(left, top);
+      glVertex2d(left, bottom);
+      glVertex2d(right, bottom);
+      glVertex2d(right, top);
+    } glEnd();
+    glColor3f(1, 1, 1); // white
+    az_draw_chars((az_vector_t){9, 24}, 16, state->text.buffer,
+                  state->text.length);
+    if (az_clock_mod(2, 16, state->clock) != 0) {
+      glColor3f(1, 0, 0); // red
+      glBegin(GL_LINES); {
+        const double x = 9.5 + 16 * state->text.length;
+        glVertex2d(x, top + 3);
+        glVertex2d(x, bottom - 3);
+      } glEnd();
+    }
   }
 }
 

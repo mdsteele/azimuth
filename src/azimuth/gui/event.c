@@ -41,6 +41,7 @@
 static az_key_name_t sdl_key_to_az_key(SDLKey key) {
   switch (key) {
     case SDLK_RETURN: return AZ_KEY_RETURN;
+    case SDLK_ESCAPE: return AZ_KEY_ESCAPE;
     case SDLK_SPACE: return AZ_KEY_SPACE;
     case SDLK_0: return AZ_KEY_0;
     case SDLK_1: return AZ_KEY_1;
@@ -132,11 +133,15 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_KEY_DOWN;
         event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
+        event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
+        event->key.character = sdl_event.key.keysym.unicode;
         return true;
       case SDL_KEYUP:
         event->kind = AZ_EVENT_KEY_UP;
         event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
+        event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
+        event->key.character = sdl_event.key.keysym.unicode;
         return true;
       case SDL_MOUSEBUTTONDOWN:
         // Ignore all but the left mouse button.
