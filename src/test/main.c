@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_player_give_upgrade);
+  RUN_TEST(test_player_set_room_visited);
   RUN_TEST(test_polygon_contains);
   RUN_TEST(test_polygons_collide);
   RUN_TEST(test_randint);

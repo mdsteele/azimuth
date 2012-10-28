@@ -60,6 +60,13 @@ bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out);
 
+// Determine if a ray, travelling delta from start, will enter the door (that
+// is, hit the area of the door interior that counts as passing through the
+// door).  If it does, stores the intersection point in *point_out (if
+// point_out is non-NULL).
+bool az_ray_enters_door(const az_door_t *door, az_vector_t start,
+                        az_vector_t delta, az_vector_t *point_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_DOOR_H_

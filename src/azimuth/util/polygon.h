@@ -23,9 +23,13 @@
 
 #include <stdbool.h>
 
+#include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+#define AZ_INIT_POLYGON(array) \
+  { .num_vertices = AZ_ARRAY_SIZE(array), .vertices = (array) }
 
 // Represents a closed 2D polygon.  It is usually expected that the polygon is
 // non-self-intersecting, and that the vertices come in counter-clockwise

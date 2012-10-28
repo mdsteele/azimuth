@@ -152,8 +152,9 @@ typedef struct {
   uint64_t flags;
   // Total game time for this playthrough so far, in seconds:
   double total_time;
-  // The room in which we last saved the game:
-  az_room_key_t save_room;
+  // The room we're currently in.  For save files, this indicates the room in
+  // which we last saved.
+  az_room_key_t current_room;
   // Current ship supplies:
   double shields, max_shields;
   double energy, max_energy;
@@ -170,9 +171,9 @@ bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade);
 void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade);
 
 // Check whether the player has visited a particular room yet.
-bool az_test_room(const az_player_t *player, az_room_key_t room);
+bool az_test_room_visited(const az_player_t *player, az_room_key_t room);
 // Set the player as having visited the given room.
-void az_set_room(az_player_t *player, az_room_key_t room);
+void az_set_room_visited(az_player_t *player, az_room_key_t room);
 
 // Check whether a given game flag is set for the player.
 bool az_test_flag(const az_player_t *player, az_flag_t flag);

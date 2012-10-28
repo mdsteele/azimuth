@@ -20,6 +20,9 @@
 #include "azimuth/state/player.h"
 
 #include <assert.h>
+#include <stdbool.h>
+
+#include "azimuth/constants.h"
 
 /*===========================================================================*/
 
@@ -69,6 +72,30 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
     player->upgrades1 |= (1u << index);
   } else {
     player->upgrades2 |= (1u << (index - 64));
+  }
+}
+
+bool az_test_room_visited(const az_player_t *player, az_room_key_t room) {
+  const unsigned int index = (unsigned int)room;
+  assert(index < AZ_MAX_NUM_ROOMS);
+  if (index < 64u) {
+    return (bool)(player->rooms1 & (1u << index));
+  } else if (index < 128u) {
+    return (bool)(player->rooms2 & (1u << (index - 64u)));
+  } else {
+    return (bool)(player->rooms3 & (1u << (index - 128u)));
+  }
+}
+
+void az_set_room_visited(az_player_t *player, az_room_key_t room) {
+  const unsigned int index = (unsigned int)room;
+  assert(index < AZ_MAX_NUM_ROOMS);
+  if (index < 64u) {
+    player->rooms1 |=  (1u << index);
+  } else if (index < 128u) {
+    player->rooms2 |= (1u << (index - 64u));
+  } else {
+    player->rooms3 |= (1u << (index - 128u));
   }
 }
 

@@ -46,4 +46,36 @@ void test_player_give_upgrade(void) {
   EXPECT_TRUE(player.max_shields == 150);
 }
 
+void test_player_set_room_visited(void) {
+  az_player_t player = {.max_shields = 100};
+  EXPECT_FALSE(az_test_room_visited(&player, 37));
+  EXPECT_FALSE(az_test_room_visited(&player, 38));
+  EXPECT_FALSE(az_test_room_visited(&player, 100));
+  EXPECT_FALSE(az_test_room_visited(&player, 150));
+
+  az_set_room_visited(&player, 100);
+  EXPECT_FALSE(az_test_room_visited(&player, 37));
+  EXPECT_FALSE(az_test_room_visited(&player, 38));
+  EXPECT_TRUE(az_test_room_visited(&player, 100));
+  EXPECT_FALSE(az_test_room_visited(&player, 150));
+
+  az_set_room_visited(&player, 38);
+  EXPECT_FALSE(az_test_room_visited(&player, 37));
+  EXPECT_TRUE(az_test_room_visited(&player, 38));
+  EXPECT_TRUE(az_test_room_visited(&player, 100));
+  EXPECT_FALSE(az_test_room_visited(&player, 150));
+
+  az_set_room_visited(&player, 150);
+  EXPECT_FALSE(az_test_room_visited(&player, 37));
+  EXPECT_TRUE(az_test_room_visited(&player, 38));
+  EXPECT_TRUE(az_test_room_visited(&player, 100));
+  EXPECT_TRUE(az_test_room_visited(&player, 150));
+
+  az_set_room_visited(&player, 37);
+  EXPECT_TRUE(az_test_room_visited(&player, 37));
+  EXPECT_TRUE(az_test_room_visited(&player, 38));
+  EXPECT_TRUE(az_test_room_visited(&player, 100));
+  EXPECT_TRUE(az_test_room_visited(&player, 150));
+}
+
 /*===========================================================================*/

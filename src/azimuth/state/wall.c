@@ -28,8 +28,6 @@
 
 /*===========================================================================*/
 
-#define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
-
 static az_vector_t wall_vertices_0[] = {
   {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
 };
@@ -41,16 +39,14 @@ static az_wall_data_t wall_datas[] = {
   [0] = {
     .color = {255, 255, 0, 255},
     .elasticity = 0.4,
-    .polygon = INIT_POLYGON(wall_vertices_0)
+    .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   },
   [1] = {
     .color = {0, 255, 255, 255},
     .elasticity = 0.4,
-    .polygon = INIT_POLYGON(wall_vertices_1)
+    .polygon = AZ_INIT_POLYGON(wall_vertices_1)
   }
 };
-
-#undef INIT_POLYGON
 
 /*===========================================================================*/
 

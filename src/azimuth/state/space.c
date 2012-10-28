@@ -22,11 +22,48 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "azimuth/state/room.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+void az_clear_space(az_space_state_t *state) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) baddie->kind = AZ_BAD_NOTHING;
+  AZ_ARRAY_LOOP(door, state->doors) door->kind = AZ_DOOR_NOTHING;
+  AZ_ARRAY_LOOP(node, state->nodes) node->kind = AZ_NODE_NOTHING;
+  AZ_ARRAY_LOOP(particle, state->particles) particle->kind = AZ_PAR_NOTHING;
+  AZ_ARRAY_LOOP(pickup, state->pickups) pickup->kind = AZ_PUP_NOTHING;
+  AZ_ARRAY_LOOP(proj, state->projectiles) proj->kind = AZ_PROJ_NOTHING;
+  AZ_ARRAY_LOOP(wall, state->walls) wall->kind = AZ_WALL_NOTHING;
+}
+
+void az_enter_room(az_space_state_t *state, const az_room_t *room) {
+  for (int i = 0; i < room->num_walls; ++i) {
+    az_wall_t *wall;
+    if (az_insert_wall(state, &wall)) {
+      *wall = room->walls[i];
+    }
+  }
+  for (int i = 0; i < room->num_baddies; ++i) {
+    az_baddie_t *baddie;
+    if (az_insert_baddie(state, &baddie)) {
+      const az_baddie_spec_t *spec = &room->baddies[i];
+      az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
+    }
+  }
+  for (int i = 0; i < room->num_doors; ++i) {
+    az_door_t *door;
+    if (az_insert_door(state, &door)) {
+      const az_door_spec_t *spec = &room->doors[i];
+      door->kind = spec->kind;
+      door->position = spec->position;
+      door->angle = spec->angle;
+      door->destination = spec->destination;
+    }
+  }
+}
 
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {

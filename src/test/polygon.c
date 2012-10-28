@@ -19,15 +19,11 @@
 
 #include <stdlib.h> // for NULL
 
-#include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 #include "test/test.h"
 
 /*===========================================================================*/
-
-#define MAKE_POLYGON(v) \
-  ((az_polygon_t){.num_vertices = AZ_ARRAY_SIZE(v), .vertices = v})
 
 static az_vector_t triangle_vertices[3] = {{-3, -3}, {2, 0}, {1, 4}};
 
@@ -39,7 +35,7 @@ static az_vector_t square_vertices[5] =
   {{1, 1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}};
 
 void test_polygon_contains(void) {
-  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   // Simple case: a convex polygon.
   EXPECT_TRUE(az_polygon_contains(triangle, (az_vector_t){0, 1}));
   EXPECT_TRUE(az_polygon_contains(triangle, AZ_VZERO));
@@ -49,7 +45,7 @@ void test_polygon_contains(void) {
   EXPECT_FALSE(az_polygon_contains(triangle, (az_vector_t){-5, 10}));
 
   // Trickier: a concave polygon.
-  az_polygon_t hexagon = MAKE_POLYGON(concave_hexagon_vertices);
+  const az_polygon_t hexagon = AZ_INIT_POLYGON(concave_hexagon_vertices);
   EXPECT_TRUE(az_polygon_contains(hexagon, AZ_VZERO));
   EXPECT_TRUE(az_polygon_contains(hexagon, (az_vector_t){-1, 2.5}));
   EXPECT_TRUE(az_polygon_contains(hexagon, (az_vector_t){-1.5, -2}));
@@ -59,7 +55,7 @@ void test_polygon_contains(void) {
   EXPECT_FALSE(az_polygon_contains(hexagon, (az_vector_t){-5, -1}));
 
   // Let do some tests with colinear edges:
-  az_polygon_t square = MAKE_POLYGON(square_vertices);
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
   EXPECT_TRUE(az_polygon_contains(square, AZ_VZERO));
   EXPECT_TRUE(az_polygon_contains(square, (az_vector_t){0.5, 0.5}));
   EXPECT_FALSE(az_polygon_contains(square, (az_vector_t){-5, 1}));
@@ -67,7 +63,7 @@ void test_polygon_contains(void) {
 }
 
 void test_convex_polygon_contains(void) {
-  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   EXPECT_TRUE(az_convex_polygon_contains(triangle, (az_vector_t){0, 1}));
   EXPECT_TRUE(az_convex_polygon_contains(triangle, AZ_VZERO));
   EXPECT_TRUE(az_convex_polygon_contains(triangle, (az_vector_t){1.5, 0.5}));
@@ -76,7 +72,7 @@ void test_convex_polygon_contains(void) {
   EXPECT_FALSE(az_convex_polygon_contains(triangle, (az_vector_t){-5, 10}));
 
   // Let do some tests with colinear edges:
-  az_polygon_t square = MAKE_POLYGON(square_vertices);
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
   EXPECT_TRUE(az_convex_polygon_contains(square, AZ_VZERO));
   EXPECT_TRUE(az_convex_polygon_contains(square, (az_vector_t){0.5, 0.5}));
   EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, 1}));
@@ -86,7 +82,7 @@ void test_convex_polygon_contains(void) {
 void test_ray_hits_polygon(void) {
   const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;
-  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
   // Check az_ray_hits_polygon works with NULLs for point_out and normal_out:
   EXPECT_TRUE(az_ray_hits_polygon(
@@ -137,7 +133,7 @@ void test_ray_hits_polygon(void) {
 void test_ray_hits_polygon_trans(void) {
   const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;
-  az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
   intersect = normal = nix;
   EXPECT_TRUE(az_ray_hits_polygon_trans(
@@ -150,8 +146,8 @@ void test_ray_hits_polygon_trans(void) {
 void test_polygons_collide(void) {
   const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix, normal = nix;
-  const az_polygon_t triangle = MAKE_POLYGON(triangle_vertices);
-  const az_polygon_t square = MAKE_POLYGON(square_vertices);
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_polygons_collide works with NULLs for out args:
   pos = impact = normal = nix;

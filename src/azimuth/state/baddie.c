@@ -31,7 +31,6 @@
 /*===========================================================================*/
 
 #define DECL_COMPONENTS(c) .num_components=AZ_ARRAY_SIZE(c), .components=(c)
-#define INIT_POLYGON(v) { .num_vertices=AZ_ARRAY_SIZE(v), .vertices=(v) }
 
 static const az_vector_t lump_vertices[] = {
   {20, 0}, {15, 15}, {-15, 15}, {-15, -15}, {15, -15}
@@ -44,7 +43,8 @@ static const az_vector_t turret_cannon_vertices[] = {
   {30, 5}, {0, 5}, {0, -5}, {30, -5}
 };
 static const az_component_data_t turret_components[] = {
-  { .bounding_radius = 30.5, .polygon = INIT_POLYGON(turret_cannon_vertices) }
+  { .bounding_radius = 30.5,
+    .polygon = AZ_INIT_POLYGON(turret_cannon_vertices) }
 };
 
 static const az_baddie_data_t baddie_data[] = {
@@ -52,7 +52,7 @@ static const az_baddie_data_t baddie_data[] = {
     .bounding_radius = 20.0,
     .max_health = 10.0,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .polygon = INIT_POLYGON(lump_vertices)
+    .polygon = AZ_INIT_POLYGON(lump_vertices)
   },
   [AZ_BAD_TURRET] = {
     .bounding_radius = 30.5,
@@ -60,7 +60,7 @@ static const az_baddie_data_t baddie_data[] = {
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
     DECL_COMPONENTS(turret_components),
-    .polygon = INIT_POLYGON(turret_vertices)
+    .polygon = AZ_INIT_POLYGON(turret_vertices)
   }
 };
 

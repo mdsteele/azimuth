@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "azimuth/util/misc.h" // for AZ_ARRAY_SIZE
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
@@ -34,10 +33,8 @@ static const az_vector_t closed_door_vertices[] = {
   {30, 50}, {-30, 50}, {-30, -50}, {30, -50}, {40, -35}, {40, 35}
 };
 
-static const az_polygon_t closed_door_polygon = {
-  .num_vertices = AZ_ARRAY_SIZE(closed_door_vertices),
-  .vertices = closed_door_vertices
-};
+static const az_polygon_t closed_door_polygon =
+  AZ_INIT_POLYGON(closed_door_vertices);
 
 bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
@@ -49,6 +46,23 @@ bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
   return az_ray_hits_polygon_trans(closed_door_polygon, door->position,
                                    door->angle, start, delta, point_out,
                                    normal_out);
+}
+
+static const az_vector_t entrance_vertices[] = {
+  {10, 50}, {-30, 50}, {-30, -50}, {10, -50}
+};
+
+static const az_polygon_t entrance_polygon =
+  AZ_INIT_POLYGON(entrance_vertices);
+
+bool az_ray_enters_door(const az_door_t *door, az_vector_t start,
+                        az_vector_t delta, az_vector_t *point_out) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind != AZ_DOOR_PASSAGE && !door->is_open) return false;
+  if (!az_ray_hits_circle(start, delta, door->position,
+                          AZ_DOOR_BOUNDING_RADIUS)) return false;
+  return az_ray_hits_polygon_trans(entrance_polygon, door->position,
+                                   door->angle, start, delta, point_out, NULL);
 }
 
 /*===========================================================================*/

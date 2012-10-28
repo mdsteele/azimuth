@@ -44,29 +44,7 @@ static az_space_state_t state;
 
 static void init_state_for_room(const az_room_t *room,
                                 az_vector_t ship_position, double ship_angle) {
-  for (int i = 0; i < room->num_walls; ++i) {
-    az_wall_t *wall;
-    if (az_insert_wall(&state, &wall)) {
-      *wall = room->walls[i];
-    }
-  }
-  for (int i = 0; i < room->num_baddies; ++i) {
-    const az_baddie_spec_t *spec = &room->baddies[i];
-    az_baddie_t *baddie;
-    if (az_insert_baddie(&state, &baddie)) {
-      az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
-    }
-  }
-  for (int i = 0; i < room->num_doors; ++i) {
-    const az_door_spec_t *spec = &room->doors[i];
-    az_door_t *door;
-    if (az_insert_door(&state, &door)) {
-      door->kind = spec->kind;
-      door->position = spec->position;
-      door->angle = spec->angle;
-      door->destination = spec->destination;
-    }
-  }
+  az_enter_room(&state, room);
 
   state.ship.position = ship_position;
   state.ship.angle = ship_angle;
@@ -79,6 +57,7 @@ static bool load_scenario(void) {
   const char *resource_dir = az_get_resource_directory();
   if (resource_dir == NULL) return false;
   if (!az_load_planet(resource_dir, &planet)) return false;
+  state.planet = &planet;
 
   state.ship = (az_ship_t){
     .player = {
@@ -90,6 +69,7 @@ static bool load_scenario(void) {
 
   init_state_for_room(&planet.rooms[planet.start_room], planet.start_position,
                       planet.start_angle);
+  state.ship.player.current_room = planet.start_room;
 
   az_give_upgrade(&state.ship.player, AZ_UPG_LATERAL_THRUSTERS);
   az_give_upgrade(&state.ship.player, AZ_UPG_RETRO_THRUSTERS);

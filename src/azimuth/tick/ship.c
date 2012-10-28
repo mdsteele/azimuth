@@ -35,14 +35,24 @@
 
 /*===========================================================================*/
 
-void az_tick_ship(az_space_state_t *state, double time) {
-  az_ship_t *ship = &state->ship;
-  az_player_t *player = &ship->player;
-  az_controls_t *controls = &ship->controls;
-  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
-  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
+typedef enum {
+  AZ_COL_NOTHING = 0,
+  AZ_COL_BADDIE,
+  AZ_COL_DOOR_OUTSIDE,
+  AZ_COL_DOOR_INSIDE,
+  AZ_COL_WALL
+} az_collide_type_t;
 
-  // Recharge energy:
+typedef struct {
+  az_collide_type_t type;
+  union {
+    az_baddie_t *baddie;
+    az_door_t *door;
+    az_wall_t *wall;
+  } target;
+} az_collide_target_t;
+
+static void recharge_ship_energy(az_player_t *player, double time) {
   const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
     (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ?
      AZ_FUSION_REACTOR_RECHARGE_RATE : 0.0) +
@@ -50,6 +60,76 @@ void az_tick_ship(az_space_state_t *state, double time) {
      AZ_QUANTUM_REACTOR_RECHARGE_RATE : 0.0);
   player->energy = az_dmin(player->max_energy,
                            player->energy + recharge_rate * time);
+}
+
+static void on_ship_enter_door(az_space_state_t *state, az_door_t *door) {
+  state->mode = AZ_MODE_DOORWAY;
+  state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
+  state->mode_data.doorway.progress = 0.0;
+  state->mode_data.doorway.door = door;
+}
+
+static void on_ship_hit_wall(az_space_state_t *state,
+                             double elasticity, double impact_damage_coeff,
+                             az_vector_t impact_point,
+                             az_vector_t impact_normal) {
+  az_ship_t *ship = &state->ship;
+  // Push the ship slightly away from the impact point (so that we're
+  // hopefully no longer in contact with the wall).
+  if (impact_normal.x != 0.0 || impact_normal.y != 0.0) {
+    ship->position = az_vadd(ship->position,
+                             az_vmul(az_vunit(impact_normal), 0.5));
+  }
+  // Bounce the ship off the wall.
+  ship->velocity = az_vsub(ship->velocity,
+                           az_vmul(az_vproj(ship->velocity, impact_normal),
+                                   1.0 + elasticity));
+  // TODO: Damage the ship.
+  // Put a particle at the impact point.
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = (az_color_t){255, 255, 255, 255};
+    particle->position = impact_point;
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.3;
+    particle->param1 = 10;
+  }
+}
+
+static void apply_gravity_to_ship(az_ship_t *ship, double time) {
+  // Gravity works as follows.  By the spherical shell theorem, the force of
+  // gravity on the ship (while inside the planetoid) varies linearly with the
+  // distance from the planetoid's center, so the change in velocity is time *
+  // surface_gravity * vnorm(position) / planetoid_radius.  However, we should
+  // then multiply this scalar by the unit vector pointing from the ship
+  // towards the core, which is -position/vnorm(position).  The vnorm(position)
+  // factors cancel and we end up with what we have here.
+  ship->velocity = az_vadd(ship->velocity,
+      az_vmul(ship->position, -time *
+              (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
+}
+
+static void apply_drag_to_ship(az_ship_t *ship, double time) {
+  const double base_max_speed =
+    AZ_SHIP_BASE_MAX_SPEED *
+    (az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR) ?
+     AZ_DYNAMIC_ARMOR_SPEED_MULT : 1.0);
+  const double drag_coeff =
+    AZ_SHIP_BASE_THRUST_ACCEL / (base_max_speed * base_max_speed);
+  const az_vector_t drag_force =
+    az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
+  ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
+}
+
+void az_tick_ship(az_space_state_t *state, double time) {
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
+  az_controls_t *controls = &ship->controls;
+  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
+  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
+
+  recharge_ship_energy(player, time);
 
   // Deactivate tractor beam if necessary, otherwise get the node it is locked
   // onto.
@@ -80,60 +160,65 @@ void az_tick_ship(az_space_state_t *state, double time) {
   } else {
     assert(tractor_node == NULL);
 
-    // Check for wall impacts.
-    // TODO: Also check for baddie impacts.
-    // TODO: What do we do if the ship is stationary, but hits the wall due to
-    //   rotating?  Maybe the ship should be treated as a circle rather than as
-    //   a polygon (at least for wall impacts, if not for projectiles).
-    az_vector_t end_pos = az_vadd(ship->position,
-                                  az_vmul(ship->velocity, time));
-    az_vector_t impact = AZ_VZERO;
-    az_vector_t normal = AZ_VZERO;
-    az_wall_t *hit_wall = NULL;
+    // Figure out what, if anything, the ship hits:
+    const az_vector_t start = ship->position;
+    az_vector_t delta = az_vmul(ship->velocity, time);
+    az_collide_target_t collide = {.type = AZ_COL_NOTHING};
+    az_vector_t impact_pos = AZ_VZERO, normal = AZ_VZERO;
+    // Walls:
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_ship_would_hit_wall(wall, ship, az_vsub(end_pos, ship->position),
-                                 &end_pos, &impact, &normal)) {
-        hit_wall = wall;
+      az_vector_t end_pos;
+      if (az_ship_would_hit_wall(wall, ship, delta,
+                                 &end_pos, &impact_pos, &normal)) {
+        collide.type = AZ_COL_WALL;
+        collide.target.wall = wall;
+        delta = az_vsub(end_pos, start);
       }
     }
-    ship->position = end_pos;
-    if (hit_wall != NULL) {
-      // Push the ship slightly away from the impact point (so that we're
-      // hopefully no longer in contact with the wall).
-      if (normal.x != 0.0 || normal.y != 0.0) {
-        ship->position = az_vadd(ship->position,
-                                 az_vmul(az_vunit(normal), 1.0));
+    // Doors:
+    AZ_ARRAY_LOOP(door, state->doors) {
+      if (door->kind == AZ_DOOR_NOTHING) continue;
+      az_vector_t end_pos;
+      if (az_ray_enters_door(door, start, delta, &end_pos)) {
+        collide.type = AZ_COL_DOOR_INSIDE;
+        collide.target.door = door;
+        delta = az_vsub(end_pos, start);
       }
-      // Bounce the ship off the wall.
-      ship->velocity = az_vsub(ship->velocity,
-                               az_vmul(az_vproj(ship->velocity, normal),
-                                       1.0 + hit_wall->data->elasticity));
-      // TODO: Damage the ship.
-      // Put a particle at the impact point.
-      az_particle_t *particle;
-      if (az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_BOOM;
-        particle->color = (az_color_t){255, 255, 255, 255};
-        particle->position = impact;
-        particle->velocity = AZ_VZERO;
-        particle->lifetime = 0.3;
-        particle->param1 = 10;
+      if (false/*TODO: az_ship_would_hit_door(door, ship, delta,
+                                 &end_pos, &impact_pos, &normal)*/) {
+        collide.type = AZ_COL_DOOR_OUTSIDE;
+        collide.target.door = door;
+        delta = az_vsub(end_pos, start);
       }
+    }
+    // Baddies:
+    // TODO: Ship collisions with baddies
+
+    // Move the ship:
+    ship->position = az_vadd(start, delta);
+
+    // Resolve the collision (if any):
+    switch (collide.type) {
+      case AZ_COL_NOTHING: break;
+      case AZ_COL_BADDIE: assert(false); break; // TODO
+      case AZ_COL_DOOR_INSIDE:
+        on_ship_enter_door(state, collide.target.door);
+        break;
+      case AZ_COL_DOOR_OUTSIDE:
+        on_ship_hit_wall(state, 0.5, 0.0, impact_pos, normal);
+        break;
+      case AZ_COL_WALL:
+        on_ship_hit_wall(state, collide.target.wall->data->elasticity,
+                         collide.target.wall->data->impact_damage_coeff,
+                         impact_pos, normal);
+        break;
     }
   }
 
-  // Apply gravity:
-  // Gravity works as follows.  By the spherical shell theorem, the force of
-  // gravity on the ship (while inside the planetoid) varies linearly with the
-  // distance from the planetoid's center, so the change in velocity is time *
-  // surface_gravity * vnorm(position) / planetoid_radius.  However, we should
-  // then multiply this scalar by the unit vector pointing from the ship
-  // towards the core, which is -position/vnorm(position).  The vnorm(position)
-  // factors cancel and we end up with what we have here.
-  ship->velocity = az_vadd(ship->velocity,
-      az_vmul(ship->position, -time *
-              (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
+  if (state->mode != AZ_MODE_NORMAL) return;
+
+  apply_gravity_to_ship(ship, time);
 
   // Turning left:
   if (controls->left && !controls->right) {
@@ -179,16 +264,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
-  // Apply drag:
-  const double base_max_speed =
-    AZ_SHIP_BASE_MAX_SPEED *
-    (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR) ?
-     AZ_DYNAMIC_ARMOR_SPEED_MULT : 1.0);
-  const double drag_coeff =
-    AZ_SHIP_BASE_THRUST_ACCEL / (base_max_speed * base_max_speed);
-  const az_vector_t drag_force =
-    az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
-  ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
+  apply_drag_to_ship(ship, time);
 
   // Activate tractor beam if necessary:
   if (controls->util && controls->fire_pressed && !ship->tractor_beam.active) {
@@ -210,7 +286,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
       controls->fire_pressed = false;
     }
   }
-  // TODO: Apply tractor beam's velocity changes
+  // Apply tractor beam's velocity changes:
   if (ship->tractor_beam.active) {
     assert(tractor_node != NULL);
     ship->velocity = az_vflatten(ship->velocity,

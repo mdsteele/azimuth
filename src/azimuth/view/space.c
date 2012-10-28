@@ -19,6 +19,8 @@
 
 #include "azimuth/view/space.h"
 
+#include <assert.h>
+
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
@@ -48,6 +50,25 @@ static void draw_camera_view(az_space_state_t *state) {
 }
 
 void az_space_draw_screen(az_space_state_t *state) {
+  // Check if we're in a mode where we should be tinting the camera view black.
+  double fade_alpha = 0.0;
+  if (state->mode == AZ_MODE_DOORWAY) {
+    switch (state->mode_data.doorway.step) {
+      case AZ_DWS_FADE_OUT:
+        fade_alpha = state->mode_data.doorway.progress;
+        break;
+      case AZ_DWS_SHIFT:
+        fade_alpha = 1.0;
+        break;
+      case AZ_DWS_FADE_IN:
+        fade_alpha = 1.0 - state->mode_data.doorway.progress;
+        break;
+    }
+  }
+  assert(fade_alpha >= 0.0);
+  assert(fade_alpha <= 1.0);
+
+  // Draw the camera view.
   glPushMatrix(); {
     // Make positive Y be up instead of down.
     glScaled(1, -1, 1);
@@ -57,8 +78,22 @@ void az_space_draw_screen(az_space_state_t *state) {
     glTranslated(0, -az_vnorm(state->camera), 0);
     glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);
     // Draw what the camera sees.
-    draw_camera_view(state);
+    if (fade_alpha < 1.0) draw_camera_view(state);
+    if (state->mode == AZ_MODE_DOORWAY) {
+      // TODO: draw door transition
+    }
   } glPopMatrix();
+
+  // Tint the camera view black (based on fade_alpha).
+  if (fade_alpha > 0.0) {
+    glColor4f(0, 0, 0, fade_alpha);
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glVertex2i(AZ_SCREEN_WIDTH, 0);
+    } glEnd();
+  }
 
   az_draw_hud(state);
 }
