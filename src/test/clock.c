@@ -17,7 +17,7 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/util/misc.h"
+#include "azimuth/util/clock.h"
 #include "test/test.h"
 
 /*===========================================================================*/

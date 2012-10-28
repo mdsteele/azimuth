@@ -35,18 +35,20 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 typedef struct {
-  double active_for; // negative if timer is inactive
+  bool is_active;
+  double active_for;
   double time_remaining; // seconds
 } az_timer_t;
 
 typedef struct {
   const az_planet_t *planet;
-  unsigned long clock;
+  az_clock_t clock;
   az_vector_t camera;
   az_ship_t ship;
   az_timer_t timer;

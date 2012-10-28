@@ -27,13 +27,14 @@
 
 #include "azimuth/state/pickup.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void draw_pickup(az_pickup_kind_t kind, unsigned long clock) {
-  double radius = 0.5 * (double)(clock % 16);
+static void draw_pickup(az_pickup_kind_t kind, az_clock_t clock) {
+  double radius = 0.5 * (double)az_clock_mod(16, 1, clock);
   switch (kind) {
     case AZ_PUP_ROCKETS:
       glColor3f(1, 0, 0);
@@ -53,7 +54,7 @@ static void draw_pickup(az_pickup_kind_t kind, unsigned long clock) {
         glVertex2d( 4.5, -4.5);
         glVertex2d( 1.5, -3.5);
       } glEnd();
-      glColor3f(0, (clock % 8 < 4 ? 0 : 1), 1);
+      glColor3f(0, (az_clock_mod(2, 4, clock) == 0 ? 0 : 1), 1);
       glBegin(GL_LINE_LOOP); {
         glVertex2d( 1.5,  4.5);
         glVertex2d( 2.5,  2.5);
@@ -66,7 +67,7 @@ static void draw_pickup(az_pickup_kind_t kind, unsigned long clock) {
       } glEnd();
       break;
     case AZ_PUP_BOMBS:
-      glColor3f(1, (clock % 8 < 4 ? 0 : 1), 0);
+      glColor3f(1, (az_clock_mod(2, 4, clock) == 0 ? 0 : 1), 0);
       glBegin(GL_POLYGON); {
         glVertex2d( 1.5,  2.5);
         glVertex2d( 2.5,  1.5);

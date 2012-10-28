@@ -27,6 +27,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/string.h"
 
@@ -201,8 +202,8 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   } glPopMatrix();
 }
 
-static void draw_hud_timer(const az_timer_t *timer, unsigned long clock) {
-  if (timer->active_for < 0) return;
+static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
+  if (!timer->is_active) return;
   glPushMatrix(); {
     const int width = 2 * HUD_PADDING + 7 * 24;
     const int height = 2 * HUD_PADDING + 24;
@@ -228,7 +229,7 @@ static void draw_hud_timer(const az_timer_t *timer, unsigned long clock) {
     if (timer->time_remaining >= 10.0) {
       glColor3f(1, 1, 1); // white
     } else {
-      if (clock % 6 < 3) glColor3f(1, 1, 0); // yellow
+      if (az_clock_mod(2, 3, clock) == 0) glColor3f(1, 1, 0); // yellow
       else glColor3f(1, 0, 0); // red
     }
     char buffer[8];

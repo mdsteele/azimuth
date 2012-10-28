@@ -100,7 +100,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
 }
 
 static void tick_timer(az_timer_t *timer, double time) {
-  if (timer->active_for < 0.0) return;
+  if (!timer->is_active) return;
   if (timer->active_for < 10.0) timer->active_for += time;
   timer->time_remaining = az_dmax(0.0, timer->time_remaining - time);
 }

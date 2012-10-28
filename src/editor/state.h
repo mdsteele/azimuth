@@ -25,6 +25,7 @@
 
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 #include "editor/list.h"
 
@@ -66,7 +67,7 @@ typedef struct {
 } az_editor_room_t;
 
 typedef struct {
-  unsigned long clock;
+  az_clock_t clock;
   bool unsaved; // true if we currently have unsaved changes
   bool spin_camera;
   az_vector_t camera;

@@ -18,35 +18,23 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_UTIL_MISC_H_
-#define AZIMUTH_UTIL_MISC_H_
-
-#include <string.h> // for size_t
+#ifndef AZIMUTH_UTIL_CLOCK_H_
+#define AZIMUTH_UTIL_CLOCK_H_
 
 /*===========================================================================*/
 
-// Get the length of a statically-sized array, as a compile-time constant.
-#define AZ_ARRAY_SIZE(a) \
-  ((sizeof(a) / sizeof(*(a))) / !(sizeof(a) % sizeof(*(a))))
+typedef unsigned long az_clock_t;
 
-// Loop over a statically-sized array.
-#define AZ_ARRAY_LOOP(var_name, array) \
-  for (__typeof__(&*(array)) var_name = (array); \
-       var_name != (array) + AZ_ARRAY_SIZE(array); ++var_name)
+// Return a number that cycles from zero up to (modulus - 1), with the number
+// advancing by one for every `slowdown` ticks of the clock.
+unsigned int az_clock_mod(unsigned int modulus, unsigned int slowdown,
+                          az_clock_t clock);
 
-// Signal a fatal error and exit the program.
-#define AZ_FATAL(...) _az_fatal(__func__, __VA_ARGS__)
-void _az_fatal(const char *funcname, const char *format, ...)
-  __attribute__((__format__(__printf__,2,3),__noreturn__));
-
-// Allocate a block of memory large enough to fit a type[n] array.  If you only
-// want to allocate a single object rather than an array, simply use n=1.  This
-// will never return NULL; instead, if memory allocation fails, this will
-// signal a fatal error and exit the program.
-#define AZ_ALLOC(n, type) ((type *)_az_alloc(__func__, (n), sizeof(type)))
-void *_az_alloc(const char *funcname, size_t n, size_t size)
-  __attribute__((__malloc__));
+// Return a number that cycles from zero up to (modulus - 1) and back down
+// again, with the number advancing by one every `slowdown` ticks of the clock.
+unsigned int az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
+                             az_clock_t clock);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_UTIL_MISC_H_
+#endif // AZIMUTH_UTIL_CLOCK_H_

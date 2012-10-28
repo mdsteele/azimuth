@@ -65,7 +65,6 @@ static bool load_scenario(void) {
       .gun1 = AZ_GUN_HOMING, .gun2 = AZ_GUN_BURST, .ordnance = AZ_ORDN_NONE
     },
   };
-  state.timer.active_for = -1;
 
   init_state_for_room(&planet.rooms[planet.start_room], planet.start_position,
                       planet.start_angle);
@@ -77,12 +76,6 @@ static bool load_scenario(void) {
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_01);
   az_give_upgrade(&state.ship.player, AZ_UPG_ROCKET_AMMO_02);
   state.ship.player.rockets = 1;
-  az_node_t *node;
-  if (az_insert_node(&state, &node)) {
-    node->kind = AZ_NODE_TRACTOR;
-    node->position = (az_vector_t){150, -150};
-    node->angle = 0;
-  }
 
   return true;
 }
