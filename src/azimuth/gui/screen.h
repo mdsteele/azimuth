@@ -25,6 +25,13 @@
 
 /*===========================================================================*/
 
+typedef void (*az_init_func_t)(void);
+
+// Register a function to be called each time OpenGL is (re)initialized, which
+// happens when calling az_init_gui and/or az_set_fullscreen.  Any calls made
+// to this function must be made _before_ calling az_init_gui.
+void az_register_gl_init_func(az_init_func_t func);
+
 // Initialize the GUI/window.  This should be called exactly once, at program
 // startup, before making any OpenGL calls.
 void az_init_gui(bool fullscreen);

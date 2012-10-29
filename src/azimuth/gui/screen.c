@@ -19,13 +19,14 @@
 
 #include "azimuth/gui/screen.h"
 
+#include <assert.h>
 #include <stdbool.h>
 
 #include <GL/gl.h>
 #include <SDL/SDL.h>
 
 #include "azimuth/constants.h"
-#include "azimuth/util/misc.h" // for AZ_FATAL
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
@@ -39,24 +40,40 @@
 #define VIDEO_DEPTH 32
 #define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
+static bool gui_initialized = false;
 static bool currently_fullscreen;
+static int num_gl_init_funcs = 0;
+static az_init_func_t gl_init_funcs[8];
+
+void az_register_gl_init_func(az_init_func_t func) {
+  assert(!gui_initialized);
+  if (num_gl_init_funcs >= AZ_ARRAY_SIZE(gl_init_funcs)) {
+    AZ_FATAL("gl_init_funcs array is full.");
+  } else {
+    gl_init_funcs[num_gl_init_funcs++] = func;
+  }
+}
 
 void az_init_gui(bool fullscreen) {
+  assert(!gui_initialized);
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     AZ_FATAL("SDL_Init failed.\n");
   }
   atexit(SDL_Quit);
   SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "-M to run full-screen)",
                     "Azimuth");
+  gui_initialized = true;
   currently_fullscreen = !fullscreen;
   az_set_fullscreen(fullscreen);
 }
 
 bool az_is_fullscreen(void) {
+  assert(gui_initialized);
   return currently_fullscreen;
 }
 
 void az_set_fullscreen(bool fullscreen) {
+  assert(gui_initialized);
   if (fullscreen == currently_fullscreen) return;
   currently_fullscreen = fullscreen;
   // Enable OpenGL double-buffering:
@@ -102,14 +119,21 @@ void az_set_fullscreen(bool fullscreen) {
   glOrtho(0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, 0, 1, -1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
+  // Run GL init functions:
+  for (int i = 0; i < num_gl_init_funcs; ++i) {
+    gl_init_funcs[i]();
+  }
 }
 
 void az_start_screen_redraw(void) {
+  assert(gui_initialized);
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
 }
 
 void az_finish_screen_redraw(void) {
+  assert(gui_initialized);
   glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
   glFinish();
   SDL_GL_SwapBuffers();

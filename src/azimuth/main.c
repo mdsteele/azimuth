@@ -126,10 +126,10 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  az_init_gui(false);
   az_init_random();
   az_init_wall_datas();
-  az_init_wall_drawing();
+  az_register_gl_init_func(az_init_wall_drawing);
+  az_init_gui(false);
 
   if (!load_scenario()) {
     printf("Failed to load scenario.\n");

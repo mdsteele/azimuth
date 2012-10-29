@@ -75,11 +75,9 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
   } glEndList();
 }
 
-static bool wall_drawing_initialized = false;
 static GLuint wall_display_lists_start;
 
 void az_init_wall_drawing(void) {
-  assert(!wall_drawing_initialized);
   wall_display_lists_start = glGenLists(AZ_NUM_WALL_DATAS);
   if (wall_display_lists_start == 0u) {
     AZ_FATAL("glGenLists failed.\n");
@@ -87,17 +85,18 @@ void az_init_wall_drawing(void) {
   for (int i = 0; i < AZ_NUM_WALL_DATAS; ++i) {
     compile_wall(az_get_wall_data(i), wall_display_lists_start + i);
   }
-  wall_drawing_initialized = true;
 }
 
 /*===========================================================================*/
 
 void az_draw_wall(const az_wall_t *wall) {
-  assert(wall_drawing_initialized);
+  const GLuint display_list =
+    wall_display_lists_start + az_wall_data_index(wall->data);
+  assert(glIsList(display_list));
   glPushMatrix(); {
     glTranslated(wall->position.x, wall->position.y, 0);
     glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-    glCallList(wall_display_lists_start + az_wall_data_index(wall->data));
+    glCallList(display_list);
   } glPopMatrix();
 }
 
