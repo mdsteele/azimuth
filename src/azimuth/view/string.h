@@ -27,20 +27,27 @@
 
 /*===========================================================================*/
 
+typedef enum {
+  AZ_ALIGN_LEFT,
+  AZ_ALIGN_CENTER,
+  AZ_ALIGN_RIGHT
+} az_alignment_t;
+
 // Draw a (null-terminated) string.  You must set the current color before
 // calling this.
-void az_draw_string(az_vector_t topleft, double height, const char *string);
+void az_draw_string(double height, az_alignment_t align, double x, double top,
+                    const char *string);
 
 // Draw a sequence of characters (with an explicit length).  You must set the
 // current color before calling this.
-void az_draw_chars(az_vector_t topleft, double height,
+void az_draw_chars(double height, az_alignment_t align, double x, double top,
                    const char *chars, size_t len);
 
 // Draw a string based on a printf format string and args.  You must set the
 // current color before calling this.
-void az_draw_printf(az_vector_t topleft, double height,
+void az_draw_printf(double height, az_alignment_t align, double x, double top,
                     const char *format, ...)
-  __attribute__((__format__(__printf__,3,4)));
+  __attribute__((__format__(__printf__,5,6)));
 
 /*===========================================================================*/
 

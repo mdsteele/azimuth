@@ -163,14 +163,21 @@ static void draw_char(int c) {
 
 /*===========================================================================*/
 
-void az_draw_string(az_vector_t topleft, double height, const char* string) {
-  az_draw_chars(topleft, height, string, strlen(string));
+void az_draw_string(double height, az_alignment_t align, double x, double top,
+                    const char* string) {
+  az_draw_chars(height, align, x, top, string, strlen(string));
 }
 
-void az_draw_chars(az_vector_t topleft, double height,
+void az_draw_chars(double height, az_alignment_t align, double x, double top,
                    const char* chars, size_t len) {
+  double left = x;
+  switch (align) {
+    case AZ_ALIGN_LEFT: break;
+    case AZ_ALIGN_CENTER: left -= 0.5 * len * height; break;
+    case AZ_ALIGN_RIGHT: left -= len * height; break;
+  }
   glPushMatrix(); {
-    glTranslated(topleft.x + 0.5, topleft.y + 0.5, 0);
+    glTranslated(left + 0.5, top + 0.5, 0);
     glScaled(height / FONT_SIZE, height / FONT_SIZE, 1);
     for (size_t i = 0; i < len; ++i) {
       draw_char(chars[i]);
@@ -179,7 +186,7 @@ void az_draw_chars(az_vector_t topleft, double height,
   } glPopMatrix();
 }
 
-void az_draw_printf(az_vector_t topleft, double height,
+void az_draw_printf(double height, az_alignment_t align, double x, double top,
                     const char *format, ...) {
   va_list args;
   va_start(args, format);
@@ -189,7 +196,7 @@ void az_draw_printf(az_vector_t topleft, double height,
   va_start(args, format);
   vsprintf(buffer, format, args);
   va_end(args);
-  az_draw_chars(topleft, height, buffer, size);
+  az_draw_chars(height, align, x, top, buffer, size);
 }
 
 /*===========================================================================*/

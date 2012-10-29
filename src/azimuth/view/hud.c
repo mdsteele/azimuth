@@ -20,8 +20,6 @@
 #include "azimuth/view/hud.h"
 
 #include <assert.h>
-#include <stdio.h> // for sprintf
-#include <string.h> // for strlen
 
 #include <GL/gl.h>
 
@@ -75,8 +73,8 @@ static void draw_hud_shields_energy(const az_player_t *player) {
     glTranslated(HUD_PADDING, HUD_PADDING, 0);
 
     glColor3f(1, 1, 1); // white
-    az_draw_string((az_vector_t){0,1}, 8, "SHIELD");
-    az_draw_string((az_vector_t){0,16}, 8, "ENERGY");
+    az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "SHIELD");
+    az_draw_string(8, AZ_ALIGN_LEFT, 0, 16, "ENERGY");
 
     glColor3f(0, 0.75, 0.75); // cyan
     draw_hud_bar(50, 0, player->shields, player->max_shields);
@@ -132,8 +130,7 @@ static void draw_hud_gun_name(int left, int top, az_gun_t gun) {
 
     set_gun_color(gun);
     const char *name = gun_name(gun);
-    az_draw_string((az_vector_t){left + 28 - strlen(name) * 4, top + 2},
-                   8, name);
+    az_draw_string(8, AZ_ALIGN_CENTER, left + 28, top + 2, name);
   }
 }
 
@@ -163,17 +160,15 @@ static void draw_hud_ordnance(int left, int top, bool is_rockets,
   // Draw quantity string.
   if (cur >= max) glColor3f(1, 1, 0);
   else glColor3f(1, 1, 1);
-  char buffer[4];
-  const int len = sprintf(buffer, "%d", az_imin(999, cur));
-  az_draw_chars((az_vector_t){left + 32 - 8 * len, top + 2}, 8, buffer, len);
+  az_draw_printf(8, AZ_ALIGN_RIGHT, left + 32, top + 2, "%d", cur);
 
   // Draw icon.
   if (is_rockets) {
     glColor3f(1, 1, 1);
-    az_draw_string((az_vector_t){left + 36, top + 2}, 8, "R");
+    az_draw_string(8, AZ_ALIGN_LEFT, left + 36, top + 2, "R");
   } else {
     glColor3f(1, 1, 1);
-    az_draw_string((az_vector_t){left + 36, top + 2}, 8, "B");
+    az_draw_string(8, AZ_ALIGN_LEFT, left + 36, top + 2, "B");
   }
 }
 
@@ -232,12 +227,11 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
       if (az_clock_mod(2, 3, clock) == 0) glColor3f(1, 1, 0); // yellow
       else glColor3f(1, 0, 0); // red
     }
-    char buffer[8];
     const int minutes = az_imin(9, ((int)timer->time_remaining) / 60);
     const int seconds = ((int)timer->time_remaining) % 60;
     const int jiffies = ((int)(timer->time_remaining * 100)) % 100;
-    const int len = sprintf(buffer, "%d:%02d:%02d", minutes, seconds, jiffies);
-    az_draw_chars((az_vector_t){HUD_PADDING, HUD_PADDING}, 24, buffer, len);
+    az_draw_printf(24, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING,
+                   "%d:%02d:%02d", minutes, seconds, jiffies);
   } glPopMatrix();
 }
 

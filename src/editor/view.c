@@ -21,7 +21,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include <string.h> // for strlen
 
 #include <GL/gl.h>
 
@@ -138,7 +137,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     glPushMatrix(); {
       camera_to_screen_orient(state, real_door.position);
       glColor3f(0, 0, 1); // blue
-      az_draw_printf((az_vector_t){-23, -7}, 16, "%03d",
+      az_draw_printf(16, AZ_ALIGN_CENTER, 0, -7, "%03d",
                      editor_door->spec.destination);
     } glPopMatrix();
   }
@@ -214,7 +213,7 @@ static void draw_camera_view(az_editor_state_t *state) {
 static void draw_hud(az_editor_state_t* state) {
   // Draw the room name:
   glColor3f(1, 1, 1); // white
-  az_draw_printf((az_vector_t){20, 5}, 8, "[Room %03d]", state->current_room);
+  az_draw_printf(8, AZ_ALIGN_LEFT, 20, 5, "[Room %03d]", state->current_room);
 
   // Draw the tool name:
   const char *tool_name = "???";
@@ -244,15 +243,15 @@ static void draw_hud(az_editor_state_t* state) {
       glColor3f(1, 1, 0);
       break;
   }
-  az_draw_string((az_vector_t){AZ_SCREEN_WIDTH - 5 - 8 * strlen(tool_name),
-                               AZ_SCREEN_HEIGHT - 13}, 8, tool_name);
+  az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5, AZ_SCREEN_HEIGHT - 13,
+                 tool_name);
 
   // Draw space coords of mouse position:
   int x, y;
   if (az_get_mouse_position(&x, &y)) {
     const az_vector_t pt = az_pixel_to_position(state, x, y);
     glColor3f(1, 1, 1); // white
-    az_draw_printf((az_vector_t){5, AZ_SCREEN_HEIGHT - 13}, 8,
+    az_draw_printf(8, AZ_ALIGN_LEFT, 5, AZ_SCREEN_HEIGHT - 13,
                    "(%.01f, %.01f)", pt.x, pt.y);
   }
 
@@ -287,7 +286,7 @@ static void draw_hud(az_editor_state_t* state) {
       glVertex2d(right, top);
     } glEnd();
     glColor3f(1, 1, 1); // white
-    az_draw_chars((az_vector_t){9, 24}, 16, state->text.buffer,
+    az_draw_chars(16, AZ_ALIGN_LEFT, 9, 24, state->text.buffer,
                   state->text.length);
     if (az_clock_mod(2, 16, state->clock) != 0) {
       glColor3f(1, 0, 0); // red
