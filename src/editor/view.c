@@ -19,6 +19,7 @@
 
 #include "editor/view.h"
 
+#include <assert.h>
 #include <math.h>
 #include <string.h> // for strlen
 
@@ -37,6 +38,77 @@
 #include "editor/state.h"
 
 /*===========================================================================*/
+
+static void arc_vertices(double r, double start_theta, double end_theta) {
+  const double step = az_dmin(0.1, (end_theta - start_theta) * 0.05);
+  for (double theta = start_theta;
+       (theta < end_theta) == (start_theta < end_theta); theta += step) {
+    glVertex2d(r * cos(theta), r * sin(theta));
+  }
+}
+
+// Draw the bounds of where the camera center is allowed to be within the given
+// room.
+static void draw_camera_center_bounds(const az_editor_room_t *room) {
+  const az_camera_bounds_t *bounds = &room->camera_bounds;
+  const double min_r = bounds->min_r;
+  const double max_r = min_r + bounds->r_span;
+  const double min_theta = bounds->min_theta;
+  const double max_theta = min_theta + bounds->theta_span;
+  glColor4f(1, 0.5, 0, 0.5); // orange tint
+  glBegin(GL_LINE_LOOP); {
+    glVertex2d(min_r * cos(min_theta), min_r * sin(min_theta));
+    glVertex2d(max_r * cos(min_theta), max_r * sin(min_theta));
+    arc_vertices(max_r, min_theta, max_theta);
+    glVertex2d(max_r * cos(max_theta), max_r * sin(max_theta));
+    glVertex2d(min_r * cos(max_theta), min_r * sin(max_theta));
+    arc_vertices(min_r, max_theta, min_theta);
+  } glEnd();
+}
+
+// Draw the (approximate) bounds of what the camera can actually see within the
+// given room.
+static void draw_camera_edge_bounds(const az_editor_room_t *room) {
+  const az_camera_bounds_t *bounds = &room->camera_bounds;
+  double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+  double r_span = bounds->r_span + AZ_SCREEN_HEIGHT;
+  if (min_r < 0.0) {
+    r_span += min_r;
+    min_r = 0.0;
+  }
+  glColor4f(1, 1, 1, 0.5); // white tint
+  glBegin(GL_LINE_LOOP); {
+    const double max_r = min_r + r_span;
+    const double min_theta = bounds->min_theta;
+    const double theta_span = bounds->theta_span;
+    const double max_theta = min_theta + theta_span;
+    arc_vertices(min_r, max_theta, min_theta);
+    const az_vector_t vright =
+      az_vneg(az_vrot90ccw(az_vpolar(AZ_SCREEN_WIDTH/2, min_theta)));
+    const double minc = cos(min_theta), mins = sin(min_theta);
+    glVertex2d(min_r * minc, min_r * mins);
+    glVertex2d(min_r * minc + vright.x, min_r * mins + vright.y);
+    const az_vector_t topright = {max_r * minc + vright.x,
+                                  max_r * mins + vright.y};
+    glVertex2d(topright.x, topright.y);
+    const double topright_theta = az_vtheta(topright);
+    const double topright_theta_plus = topright_theta + theta_span;
+    arc_vertices(az_vnorm(topright), topright_theta, topright_theta_plus);
+    const az_vector_t vleft =
+      az_vrot90ccw(az_vpolar(AZ_SCREEN_WIDTH/2, max_theta));
+    const double maxc = cos(max_theta), maxs = sin(max_theta);
+    const az_vector_t topleft = {max_r * maxc + vleft.x,
+                                 max_r * maxs + vleft.y};
+    double topleft_theta = az_vtheta(topleft);
+    while (topleft_theta < topright_theta_plus) topleft_theta += AZ_TWO_PI;
+    arc_vertices(az_vnorm(topleft),
+                 az_dmax(topleft_theta - theta_span, topright_theta_plus),
+                 topleft_theta);
+    glVertex2d(topleft.x, topleft.y);
+    glVertex2d(min_r * maxc + vleft.x, min_r * maxs + vleft.y);
+    glVertex2d(min_r * maxc, min_r * maxs);
+  } glEnd();
+}
 
 static void camera_to_screen_orient(const az_editor_state_t *state,
                                     az_vector_t position) {
@@ -112,6 +184,14 @@ static void draw_camera_view(az_editor_state_t *state) {
                                        state->current_room);
   draw_room(state, room);
 
+  // Draw the camera bounds, and a dot for the camera center.
+  draw_camera_center_bounds(room);
+  draw_camera_edge_bounds(room);
+  glColor4f(1, 0, 0, 0.5); // red tint
+  glBegin(GL_POINTS); {
+    glVertex2d(state->camera.x, state->camera.y);
+  } glEnd();
+
   // Draw selection circles:
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
@@ -146,6 +226,10 @@ static void draw_hud(az_editor_state_t* state) {
     case AZ_TOOL_ROTATE:
       tool_name = "ROTATE";
       glColor3f(1, 0, 0);
+      break;
+    case AZ_TOOL_CAMERA:
+      tool_name = "CAMERA";
+      glColor3f(1, 0.5, 0);
       break;
     case AZ_TOOL_BADDIE:
       tool_name = "BADDIE";

@@ -34,6 +34,7 @@
 typedef enum {
   AZ_TOOL_MOVE = 0,
   AZ_TOOL_ROTATE,
+  AZ_TOOL_CAMERA,
   AZ_TOOL_BADDIE,
   AZ_TOOL_DOOR,
   AZ_TOOL_WALL
@@ -61,6 +62,7 @@ typedef struct {
 } az_editor_wall_t;
 
 typedef struct {
+  az_camera_bounds_t camera_bounds;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
   AZ_LIST_DECLARE(az_editor_door_t, doors);
   AZ_LIST_DECLARE(az_editor_wall_t, walls);

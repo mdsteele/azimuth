@@ -29,6 +29,13 @@
 /*===========================================================================*/
 
 typedef struct {
+  double min_r;
+  double r_span;
+  double min_theta;
+  double theta_span;
+} az_camera_bounds_t;
+
+typedef struct {
   az_baddie_kind_t kind;
   az_vector_t position;
   double angle;
@@ -43,6 +50,7 @@ typedef struct {
 
 typedef struct {
   az_room_key_t key;
+  az_camera_bounds_t camera_bounds;
   int num_baddies, max_num_baddies;
   az_baddie_spec_t *baddies;
   int num_doors, max_num_doors;

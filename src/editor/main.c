@@ -41,16 +41,37 @@
 
 static az_editor_state_t state;
 
-static void deselect_all(az_editor_room_t *room) {
+static void center_camera_on_current_room(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  double min_x = INFINITY, max_x = -INFINITY;
+  double min_y = INFINITY, max_y = -INFINITY;
   AZ_LIST_LOOP(baddie, room->baddies) {
-    baddie->selected = false;
+    min_x = az_dmin(min_x, baddie->spec.position.x);
+    max_x = az_dmax(max_x, baddie->spec.position.x);
+    min_y = az_dmin(min_y, baddie->spec.position.y);
+    max_y = az_dmax(max_y, baddie->spec.position.y);
   }
   AZ_LIST_LOOP(door, room->doors) {
-    door->selected = false;
+    min_x = az_dmin(min_x, door->spec.position.x);
+    max_x = az_dmax(max_x, door->spec.position.x);
+    min_y = az_dmin(min_y, door->spec.position.y);
+    max_y = az_dmax(max_y, door->spec.position.y);
   }
   AZ_LIST_LOOP(wall, room->walls) {
-    wall->selected = false;
+    min_x = az_dmin(min_x, wall->spec.position.x);
+    max_x = az_dmax(max_x, wall->spec.position.x);
+    min_y = az_dmin(min_y, wall->spec.position.y);
+    max_y = az_dmax(max_y, wall->spec.position.y);
   }
+  if (min_x > max_x) return;
+  else assert(min_y <= max_y);
+  state.camera = (az_vector_t){(min_x + max_x) * 0.5, (min_y + max_y) * 0.5};
+}
+
+static void deselect_all(az_editor_room_t *room) {
+  AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = false;
+  AZ_LIST_LOOP(door, room->doors) door->selected = false;
+  AZ_LIST_LOOP(wall, room->walls) wall->selected = false;
 }
 
 static void do_save(void) {
@@ -67,6 +88,7 @@ static void do_save(void) {
   for (az_room_key_t key = 0; key < num_rooms; ++key) {
     az_editor_room_t *eroom = AZ_LIST_GET(state.planet.rooms, key);
     az_room_t *room = &planet.rooms[key];
+    room->camera_bounds = eroom->camera_bounds;
     // Convert baddies:
     room->num_baddies = room->max_num_baddies = AZ_LIST_SIZE(eroom->baddies);
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
@@ -102,7 +124,7 @@ static void do_select(int x, int y, bool multi) {
   double best_dist = INFINITY;
   az_editor_wall_t *best_wall = NULL;
   AZ_LIST_LOOP(wall, room->walls) {
-    double dist = az_vnorm(az_vsub(wall->spec.position, pt));
+    double dist = az_vdist(pt, wall->spec.position);
     if (dist <= wall->spec.data->bounding_radius && dist < best_dist) {
       best_dist = dist;
       best_wall = wall;
@@ -110,7 +132,7 @@ static void do_select(int x, int y, bool multi) {
   }
   az_editor_baddie_t *best_baddie = NULL;
   AZ_LIST_LOOP(baddie, room->baddies) {
-    double dist = az_vnorm(az_vsub(baddie->spec.position, pt));
+    double dist = az_vdist(pt, baddie->spec.position);
     if (dist <= az_get_baddie_data(baddie->spec.kind)->bounding_radius &&
         dist < best_dist) {
       best_dist = dist;
@@ -119,7 +141,7 @@ static void do_select(int x, int y, bool multi) {
   }
   az_editor_door_t *best_door = NULL;
   AZ_LIST_LOOP(door, room->doors) {
-    double dist = az_vnorm(az_vsub(door->spec.position, pt));
+    double dist = az_vdist(pt, door->spec.position);
     if (dist <= AZ_DOOR_BOUNDING_RADIUS && dist < best_dist) {
       best_dist = dist;
       best_door = door;
@@ -205,6 +227,38 @@ static void do_rotate(int x, int y, int dx, int dy) {
                 az_vtheta(az_vsub(pt0, wall->spec.position)));
     state.unsaved = true;
   }
+}
+
+static void do_set_camera_bounds(int x, int y) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_camera_bounds_t *bounds = &room->camera_bounds;
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  const double new_r = az_vnorm(pt);
+  const double new_theta = az_vtheta(pt);
+  // Update r-bounds:
+  if (new_r < bounds->min_r + 0.5 * bounds->r_span) {
+    bounds->r_span += bounds->min_r - new_r;
+    bounds->min_r = new_r;
+  } else {
+    bounds->r_span = new_r - bounds->min_r;
+  }
+  // Update theta-bounds:
+  if (az_mod2pi(new_theta -
+                (bounds->min_theta + 0.5 * bounds->theta_span)) < 0.0) {
+    bounds->theta_span += az_mod2pi(bounds->min_theta - new_theta);
+    bounds->min_theta = new_theta;
+  } else {
+    bounds->theta_span = az_mod2pi(new_theta - bounds->min_theta);
+    if (bounds->theta_span < 0.0) bounds->theta_span += AZ_TWO_PI;
+  }
+  // Verify that the new camera bounds are still valid:
+  assert(bounds->min_r >= 0.0);
+  assert(bounds->r_span >= 0.0);
+  assert(bounds->min_theta >= -AZ_PI);
+  assert(bounds->min_theta <= AZ_PI);
+  assert(bounds->theta_span >= 0.0);
+  assert(bounds->theta_span <= AZ_TWO_PI);
+  state.unsaved = true;
 }
 
 static void do_add_baddie(int x, int y) {
@@ -327,7 +381,7 @@ static void try_set_current_room(void) {
   if (key < 0 || key >= AZ_LIST_SIZE(state.planet.rooms)) return;
   state.text.action = AZ_ETA_NOTHING;
   state.current_room = key;
-  // TODO: center camera on room
+  center_camera_on_current_room();
 }
 
 static void begin_set_door_dest(void) {
@@ -400,7 +454,7 @@ static void event_loop(void) {
           } else {
             switch (event.key.name) {
               case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
-              case AZ_KEY_C: state.spin_camera = !state.spin_camera; break;
+              case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
               case AZ_KEY_D:
                 if (event.key.shift) begin_set_door_dest();
                 else state.tool = AZ_TOOL_DOOR;
@@ -414,6 +468,7 @@ static void event_loop(void) {
                 break;
               case AZ_KEY_S:
                 if (event.key.command) do_save();
+                else state.spin_camera = !state.spin_camera;
                 break;
               case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
               case AZ_KEY_BACKSPACE: do_remove(); break;
@@ -440,6 +495,9 @@ static void event_loop(void) {
             case AZ_TOOL_ROTATE:
               do_select(event.mouse.x, event.mouse.y, az_is_shift_key_held());
               break;
+            case AZ_TOOL_CAMERA:
+              do_set_camera_bounds(event.mouse.x, event.mouse.y);
+              break;
             case AZ_TOOL_BADDIE:
               do_add_baddie(event.mouse.x, event.mouse.y);
               break;
@@ -465,6 +523,9 @@ static void event_loop(void) {
                 do_rotate(event.mouse.x, event.mouse.y,
                           event.mouse.dx, event.mouse.dy);
                 break;
+              case AZ_TOOL_CAMERA:
+                do_set_camera_bounds(event.mouse.x, event.mouse.y);
+                break;
             }
           }
           break;
@@ -481,7 +542,6 @@ static bool load_and_init_state(void) {
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;
 
-  // TODO: center camera on starting room
   state.current_room = state.planet.start_room = planet.start_room;
   state.planet.start_position = planet.start_position;
   state.planet.start_angle = planet.start_angle;
@@ -489,7 +549,7 @@ static bool load_and_init_state(void) {
   for (az_room_key_t key = 0; key < planet.num_rooms; ++key) {
     const az_room_t *room = &planet.rooms[key];
     az_editor_room_t *eroom = AZ_LIST_ADD(state.planet.rooms);
-
+    eroom->camera_bounds = room->camera_bounds;
     AZ_LIST_INIT(eroom->baddies, room->num_baddies);
     for (int i = 0; i < room->num_baddies; ++i) {
       az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
@@ -508,6 +568,8 @@ static bool load_and_init_state(void) {
   }
 
   az_destroy_planet(&planet);
+
+  center_camera_on_current_room();
   return true;
 }
 

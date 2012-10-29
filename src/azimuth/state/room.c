@@ -47,10 +47,17 @@ typedef struct {
 
 static void parse_room_header(az_load_room_t *loader) {
   int room_num, num_baddies, num_doors, num_walls;
-  if (fscanf(loader->file, "!R%d b%d d%d w%d\n",
-             &room_num, &num_baddies, &num_doors, &num_walls) < 4) FAIL();
+  double min_r, r_span, min_theta, theta_span;
+  if (fscanf(loader->file, "!R%d c(%lf,%lf,%lf,%lf) b%d d%d w%d\n",
+             &room_num, &min_r, &r_span, &min_theta, &theta_span,
+             &num_baddies, &num_doors, &num_walls) < 8) FAIL();
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
+  if (min_r < 0.0 || r_span < 0.0 || theta_span < 0.0) FAIL();
+  loader->room->camera_bounds.min_r = min_r;
+  loader->room->camera_bounds.r_span = r_span;
+  loader->room->camera_bounds.min_theta = min_theta;
+  loader->room->camera_bounds.theta_span = theta_span;
   if (num_baddies < 0 || num_baddies > AZ_MAX_NUM_BADDIES) FAIL();
   loader->room->max_num_baddies = num_baddies;
   loader->room->baddies = AZ_ALLOC(num_baddies, az_baddie_spec_t);
@@ -153,8 +160,10 @@ bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("!R%d b%d d%d w%d\n", room->key, room->num_baddies, room->num_doors,
-        room->num_walls);
+  WRITE("!R%d c(%.02f,%.02f,%f,%f) b%d d%d w%d\n", room->key,
+        room->camera_bounds.min_r, room->camera_bounds.r_span,
+        room->camera_bounds.min_theta, room->camera_bounds.theta_span,
+        room->num_baddies, room->num_doors, room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_t *wall = &room->walls[i];
     WRITE("W%d x%.02f y%.02f a%f\n", az_wall_data_index(wall->data),

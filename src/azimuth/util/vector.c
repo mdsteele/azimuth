@@ -112,6 +112,10 @@ double az_vtheta(az_vector_t v) {
   return atan2(v.y, v.x);
 }
 
+double az_vdist(az_vector_t v1, az_vector_t v2) {
+  return az_vnorm(az_vsub(v1, v2));
+}
+
 bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist) {
   assert(isfinite(dist));
   return ((v1.x - v2.x) * (v1.x - v2.x) +

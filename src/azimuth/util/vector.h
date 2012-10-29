@@ -88,6 +88,8 @@ az_vector_t az_vunit(az_vector_t v);
 // Get the polar theta angle of the vector.
 double az_vtheta(az_vector_t v);
 
+// Get the distance between two vectors.
+double az_vdist(az_vector_t v1, az_vector_t v2);
 // Determine if two points are within the given distance of each other.
 bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist);
 // Determine if a ray, travelling delta from start, will ever pass within the
