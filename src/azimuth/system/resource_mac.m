@@ -21,15 +21,45 @@
 
 #include <CoreFoundation/CFBundle.h>
 #include <CoreFoundation/CFURL.h>
+#include <Foundation/Foundation.h>
 
 /*===========================================================================*/
 
+const char *az_get_app_data_directory(void) {
+  static char path_buffer[PATH_MAX];
+  if (path_buffer[0] == '\0') {
+    // Get the path to the user's Application Support directory.
+    NSArray *array =
+      NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
+                                          NSUserDomainMask, YES);
+    if ([array count] <= 0) return NULL;
+    NSString *path_string = [[array objectAtIndex: 0]
+                              stringByAppendingString: @"/Azimuth"];
+    // Create the directory (if it doesn't already exist).
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if (![fileManager createDirectoryAtPath: path_string
+                      withIntermediateDirectories: YES
+                      attributes: nil
+                      error: nil]) {
+      return NULL;
+    }
+    // Copy the directory path into the buffer.
+    if (![path_string getCString: path_buffer
+                      maxLength: sizeof(path_buffer)
+                      encoding: NSUTF8StringEncoding]) {
+      path_buffer[0] = '\0';
+      return NULL;
+    }
+  }
+  return path_buffer;
+}
+
 const char *az_get_resource_directory(void) {
-  static unsigned char path[1000];
+  static unsigned char path[PATH_MAX];
   if (path[0] == '\0') {
     CFBundleRef bundle = CFBundleGetMainBundle();
     CFURLRef url = CFBundleCopyResourcesDirectoryURL(bundle);
-    if (!CFURLGetFileSystemRepresentation(url, true, path, sizeof(path))) {
+    if (!CFURLGetFileSystemRepresentation(url, YES, path, sizeof(path))) {
       path[0] = '\0';
       return NULL;
     }

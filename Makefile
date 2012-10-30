@@ -23,20 +23,23 @@ OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
-CFLAGS = -Wall -Werror -O1
-C99FLAGS = -std=c99 -pedantic $(CFLAGS) -I$(SRCDIR)
+CFLAGS = -Wall -Werror -O1 -I$(SRCDIR)
+C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
 HEADERS := $(shell find $(SRCDIR) -name '*.h')
-MAIN_C99FILES := $(shell find $(SRCDIR)/azimuth -name '*.c')
+AZ_GUI_C99FILES := $(shell find $(SRCDIR)/azimuth/gui -name '*.c')
+AZ_STATE_C99FILES := $(shell find $(SRCDIR)/azimuth/state -name '*.c')
+AZ_TICK_C99FILES := $(shell find $(SRCDIR)/azimuth/tick -name '*.c')
+AZ_UTIL_C99FILES := $(shell find $(SRCDIR)/azimuth/util -name '*.c')
+AZ_VIEW_C99FILES := $(shell find $(SRCDIR)/azimuth/view -name '*.c')
+MAIN_C99FILES := $(SRCDIR)/azimuth/main.c \
+                 $(AZ_GUI_C99FILES) $(AZ_STATE_C99FILES) $(AZ_TICK_C99FILES) \
+                 $(AZ_UTIL_C99FILES) $(AZ_VIEW_C99FILES)
 EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/gui -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/system -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/util -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/view -name '*.c')
+                 $(AZ_GUI_C99FILES) $(AZ_STATE_C99FILES) $(AZ_UTIL_C99FILES) \
+                 $(AZ_VIEW_C99FILES)
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/state -name '*.c') \
-	         $(shell find $(SRCDIR)/azimuth/util -name '*.c')
+                 $(AZ_STATE_C99FILES) $(AZ_UTIL_C99FILES)
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
 EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
@@ -47,15 +50,24 @@ ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
-  MAIN_OBJFILES += $(OBJDIR)/macosx/SDLMain.o
+  MAIN_OBJFILES += $(OBJDIR)/macosx/SDLMain.o \
+                   $(OBJDIR)/azimuth/system/resource_mac.o
   EDIT_OBJFILES += $(OBJDIR)/macosx/SDLMain.o
-  MAIN_LIBFLAGS := -framework Cocoa -framework OpenGL -framework SDL
-  TEST_LIBFLAGS :=
+  MAIN_LIBFLAGS = -framework Cocoa -framework OpenGL -framework SDL
+  TEST_LIBFLAGS =
   ALL_TARGETS += app
+  SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
+                    $(OBJDIR)/azimuth/system/misc_posix.o \
+                    $(OBJDIR)/azimuth/system/resource_mac.o
 else
-  MAIN_LIBFLAGS := -lGL -lSDL
-  TEST_LIBFLAGS := -lm
+  MAIN_LIBFLAGS = -lGL -lSDL
+  TEST_LIBFLAGS = -lm
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/misc_posix.o \
+                    $(OBJDIR)/azimuth/system/resource_linux.o
 endif
+
+MAIN_OBJFILES += $(SYSTEM_OBJFILES)
+EDIT_OBJFILES += $(SYSTEM_OBJFILES)
 
 #=============================================================================#
 # Default build target:
@@ -83,6 +95,12 @@ $(BINDIR)/unit_tests: $(TEST_OBJFILES)
 
 $(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
                             $(SRCDIR)/macosx/SDLMain.h
+	@echo "Compiling $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ -c $< $(CFLAGS)
+
+$(OBJDIR)/azimuth/system/resource_mac.o: \
+    $(SRCDIR)/azimuth/system/resource_mac.m $(HEADERS)
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
 	@gcc -o $@ -c $< $(CFLAGS)
