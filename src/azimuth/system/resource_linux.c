@@ -17,16 +17,60 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/system/misc.h"
+#include "azimuth/system/resource.h"
 
-#include <time.h>
+#include <errno.h>
+#include <linux/limits.h> // for PATH_MAX
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <wordexp.h>
 
 /*===========================================================================*/
 
-void az_sleep_millis(unsigned long milliseconds) {
-  struct timespec time = {.tv_sec = milliseconds / 1000,
-                          .tv_nsec = (milliseconds % 1000) * 1000000};
-  nanosleep(&time, NULL);
+const char *az_get_app_data_directory(void) {
+  static char path_buffer[PATH_MAX];
+  if (path_buffer[0] == '\0') {
+    // First, do tilde-expansion so we get a path in the user's homedir.
+    wordexp_t words;
+    wordexp("~/.azimuth-game", &words, 0);
+    if (words.we_wordc < 1) {
+      wordfree(&words);
+      return NULL;
+    }
+    strncpy(path_buffer, words.we_wordv[0], sizeof(path_buffer) - 1);
+    wordfree(&words);
+    struct stat stat_buffer;
+    // Try to stat the desired path.
+    if (stat(path_buffer, &stat_buffer) == 0) {
+      // If the path exists but isn't a directory, we fail.
+      if (!S_ISDIR(stat_buffer.st_mode)) {
+        path_buffer[0] = '\0';
+        return NULL;
+      }
+    }
+    // If the directory doesn't exist, try to create it.  If we can't create
+    // it, or if stat failed for some other reason, we fail.
+    else if (errno != ENOENT || mkdir(path_buffer, 0700) != 0) {
+      path_buffer[0] = '\0';
+      return NULL;
+    }
+  }
+  return path_buffer;
+}
+
+const char *az_get_resource_directory(void) {
+  static char path_buffer[PATH_MAX];
+  if (path_buffer[0] == '\0') {
+    int len = readlink("/proc/self/exe", path_buffer, sizeof(path_buffer) - 1);
+    if (len < 0) {
+      path_buffer[0] = '\0';
+      return NULL;
+    }
+    while (--len > 0 && path_buffer[len] != '/');
+    path_buffer[len] = '\0';
+  }
+  return path_buffer;
 }
 
 /*===========================================================================*/
