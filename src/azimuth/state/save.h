@@ -18,31 +18,32 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_NODE_H_
-#define AZIMUTH_STATE_NODE_H_
+#ifndef AZIMUTH_STATE_SAVE_H_
+#define AZIMUTH_STATE_SAVE_H_
 
-#include "azimuth/state/uid.h"
-#include "azimuth/util/vector.h"
+#include <stdbool.h>
+
+#include "azimuth/state/planet.h"
+#include "azimuth/state/player.h"
 
 /*===========================================================================*/
-
-typedef enum {
-  AZ_NODE_NOTHING = 0,
-  AZ_NODE_SAVE_POINT,
-  AZ_NODE_TRACTOR,
-  AZ_NODE_REFILL_SHIELD,
-  AZ_NODE_REFILL_AMMO,
-  AZ_NODE_REFILL_ALL,
-  AZ_NODE_COMM
-} az_node_kind_t;
 
 typedef struct {
-  az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
-  az_uid_t uid;
-  az_vector_t position;
-  double angle;
-} az_node_t;
+  struct {
+    bool present; // false if there is nothing saved here
+    az_player_t player;
+  } games[6];
+} az_saved_games_t;
+
+void az_reset_saved_games(az_saved_games_t *games);
+
+bool az_load_games_from_file(const az_planet_t *planet,
+                             const char *filepath,
+                             az_saved_games_t *games_out);
+
+bool az_save_games_to_file(const az_saved_games_t *games,
+                           const char *filepath);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_NODE_H_
+#endif // AZIMUTH_STATE_SAVE_H_

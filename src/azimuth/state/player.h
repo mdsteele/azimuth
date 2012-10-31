@@ -118,6 +118,7 @@ typedef enum {
 
 // Which primary weapon module does the player have equipped?
 typedef enum {
+  AZ_GUN_NONE = 0,
   AZ_GUN_CHARGE,
   AZ_GUN_FREEZE,
   AZ_GUN_TRIPLE,
@@ -125,15 +126,14 @@ typedef enum {
   AZ_GUN_BEAM,
   AZ_GUN_PHASE,
   AZ_GUN_BURST,
-  AZ_GUN_PIERCE,
-  AZ_GUN_NONE
+  AZ_GUN_PIERCE
 } az_gun_t;
 
 // Which secondary (ordnance) weapon does the player have equipped?
 typedef enum {
+  AZ_ORDN_NONE = 0,
   AZ_ORDN_ROCKETS,
-  AZ_ORDN_BOMBS,
-  AZ_ORDN_NONE
+  AZ_ORDN_BOMBS
 } az_ordnance_t;
 
 typedef int az_room_key_t;
@@ -164,6 +164,11 @@ typedef struct {
   az_gun_t gun1, gun2;
   az_ordnance_t ordnance;
 } az_player_t;
+
+// Set a the player's fields as they should be for a new game (except for the
+// current_room field, which is simply zeroed, and should be set to the correct
+// initial room for the planet).
+void az_init_player(az_player_t *player);
 
 // Check whether the player has a particular upgrade yet.
 bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade);

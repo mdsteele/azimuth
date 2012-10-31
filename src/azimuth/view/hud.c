@@ -197,6 +197,30 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   } glPopMatrix();
 }
 
+static void draw_hud_message(const az_message_t *message) {
+  if (message->time_remaining <= 0.0) return;
+  glPushMatrix(); {
+    const int width = 2 * HUD_PADDING + message->length * 8;
+    const int height = 2 * HUD_PADDING + 8;
+    glTranslated(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN - height, 0);
+    const double fade_time = 0.8; // seconds
+    const double alpha = (message->time_remaining >= fade_time ? 1.0 :
+                          message->time_remaining / fade_time);
+
+    glColor4f(0, 0, 0, 0.75 * alpha); // tinted-black
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(0, height);
+      glVertex2i(width, height);
+      glVertex2i(width, 0);
+    } glEnd();
+
+    glColor4f(1, 1, 1, alpha); // white
+    az_draw_chars(8, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING,
+                  message->string, message->length);
+  } glPopMatrix();
+}
+
 static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
   if (!timer->is_active) return;
   glPushMatrix(); {
@@ -213,12 +237,12 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
                  az_imin(yend, ystart + offset), 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(0, height);
-    glVertex2i(width, height);
-    glVertex2i(width, 0);
-    glEnd();
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(0, height);
+      glVertex2i(width, height);
+      glVertex2i(width, 0);
+    } glEnd();
 
     assert(timer->time_remaining >= 0.0);
     if (timer->time_remaining >= 10.0) {
@@ -240,6 +264,7 @@ void az_draw_hud(const az_space_state_t *state) {
   draw_hud_shields_energy(player);
   draw_hud_weapons_selection(player);
   // TODO: draw boss health bar, when relevant
+  draw_hud_message(&state->message);
   draw_hud_timer(&state->timer, state->clock);
 }
 

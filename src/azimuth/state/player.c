@@ -21,8 +21,18 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <string.h> // for memset
 
 #include "azimuth/constants.h"
+
+/*===========================================================================*/
+
+void az_init_player(az_player_t *player) {
+  memset(player, 0, sizeof(*player));
+  player->shields = player->max_shields = AZ_INITIAL_MAX_SHIELDS;
+  player->energy = player->max_energy = AZ_INITIAL_MAX_ENERGY;
+}
 
 /*===========================================================================*/
 
@@ -33,9 +43,9 @@ bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade) {
   const unsigned int index = (unsigned int)upgrade;
   assert(index < MAX_UPGRADES);
   if (index < 64u) {
-    return 0 != (player->upgrades1 & (1u << index));
+    return 0 != (player->upgrades1 & (UINT64_C(1) << index));
   } else {
-    return 0 != (player->upgrades2 & (1u << (index - 64u)));
+    return 0 != (player->upgrades2 & (UINT64_C(1) << (index - 64u)));
   }
 }
 
@@ -69,21 +79,23 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   const unsigned int index = (unsigned int)upgrade;
   assert(index < MAX_UPGRADES);
   if (index < 64u) {
-    player->upgrades1 |= (1u << index);
+    player->upgrades1 |= (UINT64_C(1) << index);
   } else {
-    player->upgrades2 |= (1u << (index - 64));
+    player->upgrades2 |= (UINT64_C(1) << (index - 64));
   }
 }
+
+/*===========================================================================*/
 
 bool az_test_room_visited(const az_player_t *player, az_room_key_t room) {
   const unsigned int index = (unsigned int)room;
   assert(index < AZ_MAX_NUM_ROOMS);
   if (index < 64u) {
-    return (bool)(player->rooms1 & (1u << index));
+    return (bool)(player->rooms1 & (UINT64_C(1) << index));
   } else if (index < 128u) {
-    return (bool)(player->rooms2 & (1u << (index - 64u)));
+    return (bool)(player->rooms2 & (UINT64_C(1) << (index - 64u)));
   } else {
-    return (bool)(player->rooms3 & (1u << (index - 128u)));
+    return (bool)(player->rooms3 & (UINT64_C(1) << (index - 128u)));
   }
 }
 
@@ -91,11 +103,11 @@ void az_set_room_visited(az_player_t *player, az_room_key_t room) {
   const unsigned int index = (unsigned int)room;
   assert(index < AZ_MAX_NUM_ROOMS);
   if (index < 64u) {
-    player->rooms1 |=  (1u << index);
+    player->rooms1 |=  (UINT64_C(1) << index);
   } else if (index < 128u) {
-    player->rooms2 |= (1u << (index - 64u));
+    player->rooms2 |= (UINT64_C(1) << (index - 64u));
   } else {
-    player->rooms3 |= (1u << (index - 128u));
+    player->rooms3 |= (UINT64_C(1) << (index - 128u));
   }
 }
 

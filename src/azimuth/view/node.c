@@ -33,6 +33,15 @@
 
 static void draw_node(const az_node_t *node) {
   switch (node->kind) {
+    case AZ_NODE_SAVE_POINT:
+      glColor3f(1, 1, 1); // white
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(25, 18);
+        glVertex2d(-25, 18);
+        glVertex2d(-25, -18);
+        glVertex2d(25, -18);
+      } glEnd();
+      break;
     case AZ_NODE_TRACTOR:
       glColor3f(1, 1, 1); // white
       glBegin(GL_LINE_LOOP); {

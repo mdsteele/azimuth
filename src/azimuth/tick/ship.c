@@ -97,6 +97,21 @@ static void on_ship_hit_wall(az_space_state_t *state,
   }
 }
 
+static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
+  const az_node_t *best_node = NULL;
+  double best_dist = 50.0;
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind == AZ_NODE_NOTHING) continue;
+    if (node->kind == AZ_NODE_TRACTOR) continue;
+    const double dist = az_vdist(node->position, state->ship.position);
+    if (dist <= best_dist) {
+      best_dist = dist;
+      best_node = node;
+    }
+  }
+  return best_node;
+}
+
 static void apply_gravity_to_ship(az_ship_t *ship, double time) {
   // Gravity works as follows.  By the spherical shell theorem, the force of
   // gravity on the ship (while inside the planetoid) varies linearly with the
@@ -135,7 +150,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // onto.
   az_node_t *tractor_node = NULL;
   if (ship->tractor_beam.active) {
-    if (!controls->util ||
+    if (!controls->util_held ||
         !az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node)) {
       ship->tractor_beam.active = false;
     }
@@ -216,6 +231,19 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // If we press the util key while near a save point, initiate saving.
+  if (controls->util_pressed) {
+    controls->util_pressed = false;
+    const az_node_t *node = choose_nearby_node(state);
+    // TODO: Handle other kinds of node actions (e.g. refill/comm nodes)
+    if (node != NULL && node->kind == AZ_NODE_SAVE_POINT) {
+      state->mode = AZ_MODE_SAVING;
+    }
+  }
+
+  // By now it's possible we've changed modes (e.g. we may have gone through a
+  // door, or been destroyed by a wall impact).  We should only continue
+  // onwards if we're still in normal mode.
   if (state->mode != AZ_MODE_NORMAL) return;
 
   apply_gravity_to_ship(ship, time);
@@ -267,7 +295,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
   apply_drag_to_ship(ship, time);
 
   // Activate tractor beam if necessary:
-  if (controls->util && controls->fire_pressed && !ship->tractor_beam.active) {
+  if (controls->util_held && controls->fire_pressed &&
+      !ship->tractor_beam.active) {
     assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {

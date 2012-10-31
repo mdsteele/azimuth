@@ -41,6 +41,12 @@
 /*===========================================================================*/
 
 typedef struct {
+  const char *string; // not necessarily NUL-terminated
+  unsigned int length; // length of string
+  double time_remaining; // seconds
+} az_message_t;
+
+typedef struct {
   bool is_active;
   double active_for;
   double time_remaining; // seconds
@@ -48,16 +54,19 @@ typedef struct {
 
 typedef struct {
   const az_planet_t *planet;
+  int save_file_index;
   az_clock_t clock;
   az_vector_t camera;
   az_ship_t ship;
+  az_message_t message;
   az_timer_t timer;
 
   // Mode information:
   enum {
     AZ_MODE_NORMAL, // flying around; the normal mode of gameplay
     AZ_MODE_DOORWAY, // waiting while we pass through a door
-    AZ_MODE_GAME_OVER // showing the game over animation
+    AZ_MODE_GAME_OVER, // showing the game over animation
+    AZ_MODE_SAVING // using a save point
   } mode;
   union {
     struct {

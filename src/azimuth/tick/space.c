@@ -99,6 +99,10 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_message(az_message_t *message, double time) {
+  message->time_remaining = az_dmax(0.0, message->time_remaining - time);
+}
+
 static void tick_timer(az_timer_t *timer, double time) {
   if (!timer->is_active) return;
   if (timer->active_for < 10.0) timer->active_for += time;
@@ -138,17 +142,34 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   ++state->clock;
   az_tick_particles(state, time);
   az_tick_pickups(state, time);
-  if (state->mode == AZ_MODE_DOORWAY) {
-    tick_doorway_mode(state, time);
-  }
-  if (state->mode != AZ_MODE_DOORWAY ||
-      state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
-    az_tick_doors(state, time);
-    az_tick_projectiles(state, time);
-    az_tick_baddies(state, time);
-    az_tick_ship(state, time);
+  switch (state->mode) {
+    case AZ_MODE_NORMAL:
+      az_tick_doors(state, time);
+      az_tick_projectiles(state, time);
+      az_tick_baddies(state, time);
+      az_tick_ship(state, time);
+      break;
+    case AZ_MODE_DOORWAY:
+      tick_doorway_mode(state, time);
+      if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
+        az_tick_doors(state, time);
+        az_tick_projectiles(state, time);
+        az_tick_baddies(state, time);
+        az_tick_ship(state, time);
+      }
+      break;
+    case AZ_MODE_GAME_OVER:
+      // TODO: tick game over mode
+      az_tick_doors(state, time);
+      az_tick_projectiles(state, time);
+      az_tick_baddies(state, time);
+      break;
+    case AZ_MODE_SAVING:
+      // TODO: maybe we should add some kind of saving animation?
+      break;
   }
   tick_camera(state, time);
+  tick_message(&state->message, time);
   tick_timer(&state->timer, time);
 }
 

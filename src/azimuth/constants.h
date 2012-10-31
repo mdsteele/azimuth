@@ -56,6 +56,14 @@
 #define AZ_PLANETOID_SURFACE_GRAVITY 1.6
 
 /*===========================================================================*/
+// Player:
+
+// The max energy you start with, with no upgrades:
+#define AZ_INITIAL_MAX_ENERGY 100
+// The max shields you start with, with no upgrades:
+#define AZ_INITIAL_MAX_SHIELDS 100
+
+/*===========================================================================*/
 // Ship:
 
 // How fast the ship should be able to travel, using only normal thrusters,
