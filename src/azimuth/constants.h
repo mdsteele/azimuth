@@ -64,6 +64,12 @@
 #define AZ_INITIAL_MAX_SHIELDS 100
 
 /*===========================================================================*/
+// Saving:
+
+// How many slots there are in which to save a game:
+#define AZ_NUM_SAVED_GAME_SLOTS 6
+
+/*===========================================================================*/
 // Ship:
 
 // How fast the ship should be able to travel, using only normal thrusters,

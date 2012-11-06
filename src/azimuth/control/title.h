@@ -18,35 +18,20 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_SAVE_H_
-#define AZIMUTH_STATE_SAVE_H_
+#ifndef AZIMUTH_CONTROL_TITLE_H_
+#define AZIMUTH_CONTROL_TITLE_H_
 
-#include <stdbool.h>
-
-#include "azimuth/constants.h"
-#include "azimuth/state/planet.h"
-#include "azimuth/state/player.h"
+#include "azimuth/state/save.h"
 
 /*===========================================================================*/
 
 typedef struct {
-  bool present; // false if there is nothing saved here
-  az_player_t player;
-} az_saved_game_t;
+  enum { AZ_TA_START_GAME, AZ_TA_QUIT } kind;
+  int slot_index;
+} az_title_action_t;
 
-typedef struct {
-  az_saved_game_t games[AZ_NUM_SAVED_GAME_SLOTS];
-} az_saved_games_t;
-
-void az_reset_saved_games(az_saved_games_t *games);
-
-bool az_load_games_from_file(const az_planet_t *planet,
-                             const char *filepath,
-                             az_saved_games_t *games_out);
-
-bool az_save_games_to_file(const az_saved_games_t *games,
-                           const char *filepath);
+az_title_action_t az_title_event_loop(az_saved_games_t *saved_games);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_SAVE_H_
+#endif // AZIMUTH_CONTROL_TITLE_H_

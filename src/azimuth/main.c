@@ -24,6 +24,7 @@
 #include <SDL/SDL.h> // for main() renaming
 
 #include "azimuth/constants.h"
+#include "azimuth/control/title.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
@@ -114,8 +115,8 @@ static bool save_current_game(void) {
   return az_save_games_to_file(&saved_games, path_buffer);
 }
 
-static void event_loop(void) {
-  begin_saved_game(0);
+static void event_loop(int saved_game_index) {
+  begin_saved_game(saved_game_index);
 
   while (true) {
     // Tick the state:
@@ -190,7 +191,13 @@ int main(int argc, char **argv) {
 
   load_saved_games();
 
-  event_loop();
+  const az_title_action_t action = az_title_event_loop(&saved_games);
+  switch (action.kind) {
+    case AZ_TA_QUIT: return EXIT_SUCCESS;
+    case AZ_TA_START_GAME:
+      event_loop(action.slot_index);
+      break;
+  }
 
   return EXIT_SUCCESS;
 }

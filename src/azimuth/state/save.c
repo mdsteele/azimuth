@@ -85,7 +85,7 @@ static bool parse_saved_games(const az_planet_t *planet, FILE *file,
         break;
       case 'N':
         game->present = false;
-        fscanf(file, "\n");
+        (void)fscanf(file, "\n");
         break;
       default: return false;
     }

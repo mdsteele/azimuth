@@ -173,7 +173,7 @@ void az_draw_chars(double height, az_alignment_t align, double x, double top,
   double left = x;
   switch (align) {
     case AZ_ALIGN_LEFT: break;
-    case AZ_ALIGN_CENTER: left -= 0.5 * len * height; break;
+    case AZ_ALIGN_CENTER: left -= 0.5 * (len * height - 0.25 * height); break;
     case AZ_ALIGN_RIGHT: left -= len * height; break;
   }
   glPushMatrix(); {

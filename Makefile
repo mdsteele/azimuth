@@ -27,19 +27,20 @@ CFLAGS = -Wall -Werror -O1 -I$(SRCDIR)
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
 HEADERS := $(shell find $(SRCDIR) -name '*.h')
+AZ_CONTROL_C99FILES := $(shell find $(SRCDIR)/azimuth/control -name '*.c')
 AZ_GUI_C99FILES := $(shell find $(SRCDIR)/azimuth/gui -name '*.c')
 AZ_STATE_C99FILES := $(shell find $(SRCDIR)/azimuth/state -name '*.c')
 AZ_TICK_C99FILES := $(shell find $(SRCDIR)/azimuth/tick -name '*.c')
 AZ_UTIL_C99FILES := $(shell find $(SRCDIR)/azimuth/util -name '*.c')
 AZ_VIEW_C99FILES := $(shell find $(SRCDIR)/azimuth/view -name '*.c')
 MAIN_C99FILES := $(SRCDIR)/azimuth/main.c \
-                 $(AZ_GUI_C99FILES) $(AZ_STATE_C99FILES) $(AZ_TICK_C99FILES) \
-                 $(AZ_UTIL_C99FILES) $(AZ_VIEW_C99FILES)
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_TICK_C99FILES) \
+                 $(AZ_GUI_C99FILES) $(AZ_VIEW_C99FILES) $(AZ_CONTROL_C99FILES)
 EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
-                 $(AZ_GUI_C99FILES) $(AZ_STATE_C99FILES) $(AZ_UTIL_C99FILES) \
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_GUI_C99FILES) \
                  $(AZ_VIEW_C99FILES)
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
-                 $(AZ_STATE_C99FILES) $(AZ_UTIL_C99FILES)
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
 EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES))
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
