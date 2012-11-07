@@ -37,6 +37,7 @@ typedef enum {
   AZ_TOOL_CAMERA,
   AZ_TOOL_BADDIE,
   AZ_TOOL_DOOR,
+  AZ_TOOL_NODE,
   AZ_TOOL_WALL
 } az_editor_tool_t;
 
@@ -58,6 +59,11 @@ typedef struct {
 
 typedef struct {
   bool selected;
+  az_node_spec_t spec;
+} az_editor_node_t;
+
+typedef struct {
+  bool selected;
   az_wall_t spec;
 } az_editor_wall_t;
 
@@ -65,6 +71,7 @@ typedef struct {
   az_camera_bounds_t camera_bounds;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
   AZ_LIST_DECLARE(az_editor_door_t, doors);
+  AZ_LIST_DECLARE(az_editor_node_t, nodes);
   AZ_LIST_DECLARE(az_editor_wall_t, walls);
 } az_editor_room_t;
 
@@ -85,6 +92,7 @@ typedef struct {
   struct {
     az_baddie_kind_t baddie_kind;
     az_door_kind_t door_kind;
+    az_node_kind_t node_kind;
     int wall_data_index;
   } brush;
   az_room_key_t current_room;

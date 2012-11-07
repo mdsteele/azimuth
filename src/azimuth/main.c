@@ -65,15 +65,6 @@ static void load_saved_games(void) {
   }
 }
 
-static void add_save_point(void) {
-  az_node_t *node;
-  if (az_insert_node(&state, &node)) {
-    node->kind = AZ_NODE_SAVE_POINT;
-    node->position = (az_vector_t){-50, 850};
-    node->angle = 1.0;
-  }
-}
-
 static void begin_saved_game(int index) {
   assert(index >= 0);
   assert(index < AZ_ARRAY_SIZE(saved_games.games));
@@ -82,7 +73,6 @@ static void begin_saved_game(int index) {
     // Resume saved game:
     state.ship.player = saved_games.games[index].player;
     az_enter_room(&state, &planet.rooms[state.ship.player.current_room]);
-    add_save_point(); // TODO remove this
     AZ_ARRAY_LOOP(node, state.nodes) {
       if (node->kind == AZ_NODE_SAVE_POINT) {
         state.ship.position = node->position;
@@ -95,7 +85,6 @@ static void begin_saved_game(int index) {
     az_init_player(&state.ship.player);
     state.ship.player.current_room = planet.start_room;
     az_enter_room(&state, &planet.rooms[planet.start_room]);
-    add_save_point(); // TODO remove this
     state.ship.position = planet.start_position;
     state.ship.angle = planet.start_angle;
   }

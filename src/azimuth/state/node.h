@@ -26,6 +26,9 @@
 
 /*===========================================================================*/
 
+// The number of different node kinds there are, not counting AZ_NODE_NOTHING:
+#define AZ_NUM_NODE_KINDS 6
+
 typedef enum {
   AZ_NODE_NOTHING = 0,
   AZ_NODE_SAVE_POINT,
@@ -42,6 +45,8 @@ typedef struct {
   az_vector_t position;
   double angle;
 } az_node_t;
+
+#define AZ_NODE_BOUNDING_RADIUS 50.0
 
 /*===========================================================================*/
 

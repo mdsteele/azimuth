@@ -23,6 +23,7 @@
 
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/door.h" // for az_door_kind_t
+#include "azimuth/state/node.h" // for az_node_kind_t
 #include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/wall.h"
 
@@ -49,13 +50,21 @@ typedef struct {
 } az_door_spec_t;
 
 typedef struct {
+  az_node_kind_t kind;
+  az_vector_t position;
+  double angle;
+} az_node_spec_t;
+
+typedef struct {
   az_room_key_t key;
   az_camera_bounds_t camera_bounds;
-  int num_baddies, max_num_baddies;
+  int num_baddies;
   az_baddie_spec_t *baddies;
-  int num_doors, max_num_doors;
+  int num_doors;
   az_door_spec_t *doors;
-  int num_walls, max_num_walls;
+  int num_nodes;
+  az_node_spec_t *nodes;
+  int num_walls;
   az_wall_t *walls;
 } az_room_t;
 

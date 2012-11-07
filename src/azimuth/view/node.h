@@ -21,10 +21,15 @@
 #ifndef AZIMUTH_VIEW_NODE_H_
 #define AZIMUTH_VIEW_NODE_H_
 
+#include "azimuth/state/node.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
+// Draw a single node.  The GL matrix should be at the camera position.
+void az_draw_node(const az_node_t *node);
+
+// Draw all node.  The GL matrix should be at the camera position.
 void az_draw_nodes(const az_space_state_t* state);
 
 /*===========================================================================*/

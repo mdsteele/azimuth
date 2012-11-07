@@ -63,6 +63,15 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       door->destination = spec->destination;
     }
   }
+  for (int i = 0; i < room->num_nodes; ++i) {
+    az_node_t *node;
+    if (az_insert_node(state, &node)) {
+      const az_node_spec_t *spec = &room->nodes[i];
+      node->kind = spec->kind;
+      node->position = spec->position;
+      node->angle = spec->angle;
+    }
+  }
 }
 
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {

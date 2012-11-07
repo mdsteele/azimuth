@@ -31,8 +31,9 @@
 
 /*===========================================================================*/
 
-static void draw_node(const az_node_t *node) {
+static void draw_node_internal(const az_node_t *node) {
   switch (node->kind) {
+    case AZ_NODE_NOTHING: assert(false); break;
     case AZ_NODE_SAVE_POINT:
       glColor3f(1, 1, 1); // white
       glBegin(GL_LINE_LOOP); {
@@ -54,18 +55,29 @@ static void draw_node(const az_node_t *node) {
       } glEnd();
       break;
     // TODO: draw other kinds of nodes
-    default: assert(false);
+    default:
+      glColor3f(1, 1, 1); // white
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(10, 0);
+        glVertex2d(-10, 10);
+        glVertex2d(-10, -10);
+      } glEnd();
+      break;
   }
+}
+
+void az_draw_node(const az_node_t *node) {
+  glPushMatrix(); {
+    glTranslated(node->position.x, node->position.y, 0);
+    glRotated(AZ_RAD2DEG(node->angle), 0, 0, 1);
+    draw_node_internal(node);
+  } glPopMatrix();
 }
 
 void az_draw_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
     if (node->kind == AZ_NODE_NOTHING) continue;
-    glPushMatrix(); {
-      glTranslated(node->position.x, node->position.y, 0);
-      glRotated(AZ_RAD2DEG(node->angle), 0, 0, 1);
-      draw_node(node);
-    } glPopMatrix();
+    az_draw_node(node);
   }
 }
 

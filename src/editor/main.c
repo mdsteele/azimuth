@@ -57,6 +57,12 @@ static void center_camera_on_current_room(void) {
     min_y = az_dmin(min_y, door->spec.position.y);
     max_y = az_dmax(max_y, door->spec.position.y);
   }
+  AZ_LIST_LOOP(node, room->nodes) {
+    min_x = az_dmin(min_x, node->spec.position.x);
+    max_x = az_dmax(max_x, node->spec.position.x);
+    min_y = az_dmin(min_y, node->spec.position.y);
+    max_y = az_dmax(max_y, node->spec.position.y);
+  }
   AZ_LIST_LOOP(wall, room->walls) {
     min_x = az_dmin(min_x, wall->spec.position.x);
     max_x = az_dmax(max_x, wall->spec.position.x);
@@ -71,6 +77,7 @@ static void center_camera_on_current_room(void) {
 static void deselect_all(az_editor_room_t *room) {
   AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = false;
   AZ_LIST_LOOP(door, room->doors) door->selected = false;
+  AZ_LIST_LOOP(node, room->nodes) node->selected = false;
   AZ_LIST_LOOP(wall, room->walls) wall->selected = false;
 }
 
@@ -90,19 +97,25 @@ static void do_save(void) {
     az_room_t *room = &planet.rooms[key];
     room->camera_bounds = eroom->camera_bounds;
     // Convert baddies:
-    room->num_baddies = room->max_num_baddies = AZ_LIST_SIZE(eroom->baddies);
+    room->num_baddies = AZ_LIST_SIZE(eroom->baddies);
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
     for (int i = 0; i < room->num_baddies; ++i) {
       room->baddies[i] = AZ_LIST_GET(eroom->baddies, i)->spec;
     }
     // Convert doors:
-    room->num_doors = room->max_num_doors = AZ_LIST_SIZE(eroom->doors);
+    room->num_doors = AZ_LIST_SIZE(eroom->doors);
     room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
     for (int i = 0; i < room->num_doors; ++i) {
       room->doors[i] = AZ_LIST_GET(eroom->doors, i)->spec;
     }
+    // Convert nodes:
+    room->num_nodes = AZ_LIST_SIZE(eroom->nodes);
+    room->nodes = AZ_ALLOC(room->num_nodes, az_node_spec_t);
+    for (int i = 0; i < room->num_nodes; ++i) {
+      room->nodes[i] = AZ_LIST_GET(eroom->nodes, i)->spec;
+    }
     // Convert walls:
-    room->num_walls = room->max_num_walls = AZ_LIST_SIZE(eroom->walls);
+    room->num_walls = AZ_LIST_SIZE(eroom->walls);
     room->walls = AZ_ALLOC(room->num_walls, az_wall_t);
     for (int i = 0; i < room->num_walls; ++i) {
       room->walls[i] = AZ_LIST_GET(eroom->walls, i)->spec;
@@ -128,6 +141,14 @@ static void do_select(int x, int y, bool multi) {
     if (dist <= wall->spec.data->bounding_radius && dist < best_dist) {
       best_dist = dist;
       best_wall = wall;
+    }
+  }
+  az_editor_node_t *best_node = NULL;
+  AZ_LIST_LOOP(node, room->nodes) {
+    double dist = az_vdist(pt, node->spec.position);
+    if (dist <= AZ_NODE_BOUNDING_RADIUS && dist < best_dist) {
+      best_dist = dist;
+      best_node = node;
     }
   }
   az_editor_baddie_t *best_baddie = NULL;
@@ -164,6 +185,14 @@ static void do_select(int x, int y, bool multi) {
       best_door->selected = true;
     }
     state.brush.door_kind = best_door->spec.kind;
+  } else if (best_node != NULL) {
+    if (multi) {
+      best_node->selected = !best_node->selected;
+    } else if (!best_node->selected) {
+      deselect_all(room);
+      best_node->selected = true;
+    }
+    state.brush.node_kind = best_node->spec.kind;
   } else if (best_wall != NULL) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
@@ -192,6 +221,11 @@ static void do_move(int x, int y, int dx, int dy) {
     door->spec.position = az_vadd(door->spec.position, delta);
     state.unsaved = true;
   }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected) continue;
+    node->spec.position = az_vadd(node->spec.position, delta);
+    state.unsaved = true;
+  }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     wall->spec.position = az_vadd(wall->spec.position, delta);
@@ -217,6 +251,14 @@ static void do_rotate(int x, int y, int dx, int dy) {
       az_mod2pi(door->spec.angle +
                 az_vtheta(az_vsub(pt1, door->spec.position)) -
                 az_vtheta(az_vsub(pt0, door->spec.position)));
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected) continue;
+    node->spec.angle =
+      az_mod2pi(node->spec.angle +
+                az_vtheta(az_vsub(pt1, node->spec.position)) -
+                az_vtheta(az_vsub(pt0, node->spec.position)));
     state.unsaved = true;
   }
   AZ_LIST_LOOP(wall, room->walls) {
@@ -286,6 +328,18 @@ static void do_add_door(int x, int y) {
   state.unsaved = true;
 }
 
+static void do_add_node(int x, int y) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  deselect_all(room);
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
+  node->selected = true;
+  node->spec.kind = state.brush.node_kind;
+  node->spec.position = pt;
+  node->spec.angle = 0.0;
+  state.unsaved = true;
+}
+
 static void do_add_wall(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   deselect_all(room);
@@ -322,6 +376,16 @@ static void do_remove(void) {
     AZ_LIST_DESTROY(temp_doors);
   }
   {
+    AZ_LIST_DECLARE(az_editor_node_t, temp_nodes);
+    AZ_LIST_INIT(temp_nodes, 2);
+    AZ_LIST_LOOP(node, room->nodes) {
+      if (!node->selected) *AZ_LIST_ADD(temp_nodes) = *node;
+      else state.unsaved = true;
+    }
+    AZ_LIST_SWAP(temp_nodes, room->nodes);
+    AZ_LIST_DESTROY(temp_nodes);
+  }
+  {
     AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
     AZ_LIST_INIT(temp_walls, 2);
     AZ_LIST_LOOP(wall, room->walls) {
@@ -349,6 +413,14 @@ static void do_change_data(int delta) {
       az_modulo((int)door->spec.kind - 1 + delta, AZ_NUM_DOOR_KINDS) + 1;
     door->spec.kind = new_kind;
     state.brush.door_kind = new_kind;
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected) continue;
+    const az_node_kind_t new_kind =
+      az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
+    node->spec.kind = new_kind;
+    state.brush.node_kind = new_kind;
     state.unsaved = true;
   }
   AZ_LIST_LOOP(wall, room->walls) {
@@ -460,7 +532,8 @@ static void event_loop(void) {
                 else state.tool = AZ_TOOL_DOOR;
                 break;
               case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
-              case AZ_KEY_N: do_change_data(1); break;
+              case AZ_KEY_N: state.tool = AZ_TOOL_NODE; break;
+              case AZ_KEY_O: do_change_data(1); break;
               case AZ_KEY_P: do_change_data(-1); break;
               case AZ_KEY_R:
                 if (event.key.shift) begin_set_current_room();
@@ -504,6 +577,9 @@ static void event_loop(void) {
             case AZ_TOOL_DOOR:
               do_add_door(event.mouse.x, event.mouse.y);
               break;
+            case AZ_TOOL_NODE:
+              do_add_node(event.mouse.x, event.mouse.y);
+              break;
             case AZ_TOOL_WALL:
               do_add_wall(event.mouse.x, event.mouse.y);
               break;
@@ -515,6 +591,7 @@ static void event_loop(void) {
               case AZ_TOOL_MOVE:
               case AZ_TOOL_BADDIE:
               case AZ_TOOL_DOOR:
+              case AZ_TOOL_NODE:
               case AZ_TOOL_WALL:
                 do_move(event.mouse.x, event.mouse.y,
                         event.mouse.dx, event.mouse.dy);
@@ -538,6 +615,7 @@ static void event_loop(void) {
 static bool load_and_init_state(void) {
   state.brush.baddie_kind = AZ_BAD_LUMP;
   state.brush.door_kind = AZ_DOOR_NORMAL;
+  state.brush.node_kind = AZ_NODE_TRACTOR;
 
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;
@@ -559,6 +637,11 @@ static bool load_and_init_state(void) {
     for (int i = 0; i < room->num_doors; ++i) {
       az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
       door->spec = room->doors[i];
+    }
+    AZ_LIST_INIT(eroom->nodes, room->num_nodes);
+    for (int i = 0; i < room->num_nodes; ++i) {
+      az_editor_node_t *node = AZ_LIST_ADD(eroom->nodes);
+      node->spec = room->nodes[i];
     }
     AZ_LIST_INIT(eroom->walls, room->num_walls);
     for (int i = 0; i < room->num_walls; ++i) {
