@@ -26,25 +26,19 @@ BINDIR = $(OUTDIR)/bin
 CFLAGS = -Wall -Werror -O1 -I$(SRCDIR)
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
-HEADERS := $(shell find $(SRCDIR) -name '*.h')
-AZ_CONTROL_C99FILES := $(shell find $(SRCDIR)/azimuth/control -name '*.c')
-AZ_GUI_C99FILES := $(shell find $(SRCDIR)/azimuth/gui -name '*.c')
-AZ_STATE_C99FILES := $(shell find $(SRCDIR)/azimuth/state -name '*.c')
-AZ_TICK_C99FILES := $(shell find $(SRCDIR)/azimuth/tick -name '*.c')
-AZ_UTIL_C99FILES := $(shell find $(SRCDIR)/azimuth/util -name '*.c')
-AZ_VIEW_C99FILES := $(shell find $(SRCDIR)/azimuth/view -name '*.c')
-MAIN_C99FILES := $(SRCDIR)/azimuth/main.c \
-                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_TICK_C99FILES) \
-                 $(AZ_GUI_C99FILES) $(AZ_VIEW_C99FILES) $(AZ_CONTROL_C99FILES)
-EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
-                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_GUI_C99FILES) \
-                 $(AZ_VIEW_C99FILES)
-TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
-                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
-MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES))
-EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES))
-TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
-RESOURCE_FILES := $(shell find $(DATADIR)/rooms -name '*.txt') \
+define compile-sys
+	@echo "Compiling $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ -c $< $(CFLAGS)
+endef
+define compile-c99
+	@echo "Compiling $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ -c $< $(C99FLAGS)
+endef
+
+#=============================================================================#
+# Determine what OS we're on and what targets we're building.
 
 ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
 
@@ -65,8 +59,41 @@ else
   ALL_TARGETS += linux_app
 endif
 
-MAIN_OBJFILES += $(SYSTEM_OBJFILES)
-EDIT_OBJFILES += $(SYSTEM_OBJFILES)
+#=============================================================================#
+# Find all of the source files:
+
+AZ_CONTROL_HEADERS := $(shell find $(SRCDIR)/azimuth/control -name '*.h')
+AZ_GUI_HEADERS := $(shell find $(SRCDIR)/azimuth/gui -name '*.h')
+AZ_STATE_HEADERS := $(shell find $(SRCDIR)/azimuth/state -name '*.h')
+AZ_SYSTEM_HEADERS := $(shell find $(SRCDIR)/azimuth/system -name '*.h')
+AZ_TICK_HEADERS := $(shell find $(SRCDIR)/azimuth/tick -name '*.h')
+AZ_VIEW_HEADERS := $(shell find $(SRCDIR)/azimuth/view -name '*.h')
+AZ_EDITOR_HEADERS := $(shell find $(SRCDIR)/editor -name '*.h')
+AZ_TEST_HEADERS := $(shell find $(SRCDIR)/test -name '*.h')
+
+AZ_CONTROL_C99FILES := $(shell find $(SRCDIR)/azimuth/control -name '*.c')
+AZ_GUI_C99FILES := $(shell find $(SRCDIR)/azimuth/gui -name '*.c')
+AZ_STATE_C99FILES := $(shell find $(SRCDIR)/azimuth/state -name '*.c')
+AZ_TICK_C99FILES := $(shell find $(SRCDIR)/azimuth/tick -name '*.c')
+AZ_UTIL_C99FILES := $(shell find $(SRCDIR)/azimuth/util -name '*.c')
+AZ_VIEW_C99FILES := $(shell find $(SRCDIR)/azimuth/view -name '*.c')
+
+MAIN_C99FILES := $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_TICK_C99FILES) \
+                 $(AZ_GUI_C99FILES) $(AZ_VIEW_C99FILES) \
+                 $(AZ_CONTROL_C99FILES) $(SRCDIR)/azimuth/main.c
+EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_GUI_C99FILES) \
+                 $(AZ_VIEW_C99FILES)
+TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
+
+MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES)) \
+                 $(SYSTEM_OBJFILES)
+EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES)) \
+                 $(SYSTEM_OBJFILES)
+TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
+
+RESOURCE_FILES := $(shell find $(DATADIR)/rooms -name '*.txt') \
 
 #=============================================================================#
 # Default build target:
@@ -75,7 +102,7 @@ EDIT_OBJFILES += $(SYSTEM_OBJFILES)
 all: $(ALL_TARGETS)
 
 #=============================================================================#
-# Build rules for compiling code:
+# Build rules for linking the executables:
 
 $(BINDIR)/azimuth: $(MAIN_OBJFILES)
 	@echo "Linking $@"
@@ -92,28 +119,63 @@ $(BINDIR)/unit_tests: $(TEST_OBJFILES)
 	@mkdir -p $(@D)
 	@gcc -o $@ $^ $(CFLAGS) $(TEST_LIBFLAGS)
 
+#=============================================================================#
+# Build rules for compiling system-specific code:
+
 $(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
                             $(SRCDIR)/macosx/SDLMain.h
-	@echo "Compiling $@"
-	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(CFLAGS)
+	$(compile-sys)
 
 $(OBJDIR)/azimuth/system/resource_mac.o: \
-    $(SRCDIR)/azimuth/system/resource_mac.m $(HEADERS)
-	@echo "Compiling $@"
-	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(CFLAGS)
+    $(SRCDIR)/azimuth/system/resource_mac.m $(AZ_SYSTEM_HEADERS)
+	$(compile-sys)
 
-$(OBJDIR)/azimuth/system/%.o: \
-    $(SRCDIR)/azimuth/system/%.c $(HEADERS)
-	@echo "Compiling $@"
-	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(CFLAGS)
+$(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c $(AZ_SYSTEM_HEADERS)
+	$(compile-sys)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
-	@echo "Compiling $@"
-	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(C99FLAGS)
+#=============================================================================#
+# Build rules for compiling non-system-specific code:
+
+$(OBJDIR)/azimuth/util/%.o: $(SRCDIR)/azimuth/util/%.c $(AZ_UTIL_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/state/%.o: $(SRCDIR)/azimuth/state/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/tick/%.o: $(SRCDIR)/azimuth/tick/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_TICK_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/gui/%.o: $(SRCDIR)/azimuth/gui/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_SYSTEM_HEADERS) $(AZ_GUI_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/view/%.o: $(SRCDIR)/azimuth/view/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_GUI_HEADERS) \
+    $(AZ_VIEW_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/control/%.o: $(SRCDIR)/azimuth/control/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_SYSTEM_HEADERS) $(AZ_STATE_HEADERS) \
+    $(AZ_TICK_HEADERS) $(AZ_GUI_HEADERS) $(AZ_VIEW_HEADERS) \
+    $(AZ_CONTROL_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/azimuth/main.o: $(SRCDIR)/azimuth/main.c \
+    $(AZ_UTIL_HEADERS) $(AZ_SYSTEM_HEADERS) $(AZ_STATE_HEADERS) \
+    $(AZ_TICK_HEADERS) $(AZ_GUI_HEADERS) $(AZ_VIEW_HEADERS) \
+    $(AZ_CONTROL_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/editor/%.o: $(SRCDIR)/editor/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_SYSTEM_HEADERS) $(AZ_STATE_HEADERS) \
+    $(AZ_GUI_HEADERS) $(AZ_VIEW_HEADERS) $(AZ_EDITOR_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/test/%.o: $(SRCDIR)/test/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_TEST_HEADERS)
+	$(compile-c99)
 
 #=============================================================================#
 # Build rules for bundling Mac OS X application:
