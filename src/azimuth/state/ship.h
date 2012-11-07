@@ -51,6 +51,9 @@ typedef struct {
   } tractor_beam;
 } az_ship_t;
 
+// Return true if the ship is present (i.e. not destroyed), false otherwise.
+bool az_ship_is_present(const az_ship_t *ship);
+
 // Return true if the given point should count as intersecting the ship's
 // shield perimeter.
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point);

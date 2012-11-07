@@ -64,6 +64,9 @@ void az_space_draw_screen(az_space_state_t *state) {
         fade_alpha = 1.0 - state->mode_data.doorway.progress;
         break;
     }
+  } else if (state->mode == AZ_MODE_GAME_OVER &&
+             state->mode_data.game_over.step == AZ_GOS_FADE_OUT) {
+    fade_alpha = state->mode_data.game_over.progress;
   }
   assert(fade_alpha >= 0.0);
   assert(fade_alpha <= 1.0);

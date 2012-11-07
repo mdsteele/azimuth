@@ -99,6 +99,25 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_game_over_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_GAME_OVER);
+  const double asplode_time = 0.5; // seconds
+  const double fade_time = 2.0; // seconds
+  switch (state->mode_data.game_over.step) {
+    case AZ_GOS_ASPLODE:
+      state->mode_data.game_over.progress += time / asplode_time;
+      if (state->mode_data.game_over.progress >= 1.0) {
+        state->mode_data.game_over.step = AZ_GOS_FADE_OUT;
+        state->mode_data.game_over.progress = 0.0;
+      }
+      break;
+    case AZ_GOS_FADE_OUT:
+      state->mode_data.game_over.progress =
+        az_dmin(1.0, state->mode_data.game_over.progress + time / fade_time);
+      break;
+  }
+}
+
 static void tick_message(az_message_t *message, double time) {
   message->time_remaining = az_dmax(0.0, message->time_remaining - time);
 }
@@ -138,6 +157,12 @@ static void tick_camera(az_space_state_t *state, double time) {
 }
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  // If we're in game over mode and the ship is asploding, go into slow-motion:
+  if (state->mode == AZ_MODE_GAME_OVER &&
+      state->mode_data.game_over.step == AZ_GOS_ASPLODE) {
+    time *= 0.4;
+  }
+
   state->ship.player.total_time += time;
   ++state->clock;
   az_tick_particles(state, time);
@@ -159,7 +184,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       }
       break;
     case AZ_MODE_GAME_OVER:
-      // TODO: tick game over mode
+      tick_game_over_mode(state, time);
       az_tick_doors(state, time);
       az_tick_projectiles(state, time);
       az_tick_baddies(state, time);

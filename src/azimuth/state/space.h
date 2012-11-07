@@ -75,7 +75,7 @@ typedef struct {
       const az_door_t *door;
     } doorway;
     struct {
-      enum { AZ_GOS_FADE_OUT, AZ_GOS_ASPLODE } step;
+      enum { AZ_GOS_ASPLODE, AZ_GOS_FADE_OUT } step;
       double progress; // 0.0 to 1.0
     } game_over;
   } mode_data;
@@ -89,6 +89,8 @@ typedef struct {
   az_projectile_t projectiles[250];
   az_wall_t walls[250];
 } az_space_state_t;
+
+/*===========================================================================*/
 
 // Remove all objects (baddies, doors, etc.), but leave other fields unchanged.
 void az_clear_space(az_space_state_t *state);
@@ -117,6 +119,12 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 // is already full, this silently does nothing.
 void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
                        az_vector_t position);
+
+/*===========================================================================*/
+
+// Reduce the ship's shields by the given amount.  If this is enough to destroy
+// the ship, change to game-over mode.
+void az_damage_ship(az_space_state_t *state, double damage);
 
 /*===========================================================================*/
 

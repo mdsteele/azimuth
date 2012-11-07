@@ -138,6 +138,7 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
 }
 
 void az_tick_ship(az_space_state_t *state, double time) {
+  if (state->mode == AZ_MODE_GAME_OVER) return;
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;

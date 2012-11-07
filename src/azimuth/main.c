@@ -68,7 +68,11 @@ static void load_saved_games(void) {
 static void begin_saved_game(int index) {
   assert(index >= 0);
   assert(index < AZ_ARRAY_SIZE(saved_games.games));
+  memset(&state, 0, sizeof(state));
+  state.planet = &planet;
   state.save_file_index = index;
+  state.mode = AZ_MODE_NORMAL;
+
   if (saved_games.games[index].present) {
     // Resume saved game:
     state.ship.player = saved_games.games[index].player;
@@ -88,6 +92,7 @@ static void begin_saved_game(int index) {
     state.ship.position = planet.start_position;
     state.ship.angle = planet.start_angle;
   }
+
   state.ship.velocity = AZ_VZERO;
   state.camera = state.ship.position;
 }
@@ -104,7 +109,7 @@ static bool save_current_game(void) {
   return az_save_games_to_file(&saved_games, path_buffer);
 }
 
-static void event_loop(int saved_game_index) {
+static void az_space_event_loop(int saved_game_index) {
   begin_saved_game(saved_game_index);
 
   while (true) {
@@ -115,7 +120,12 @@ static void event_loop(int saved_game_index) {
       az_space_draw_screen(&state);
     } az_finish_screen_redraw();
 
-    if (state.mode == AZ_MODE_SAVING) {
+    if (state.mode == AZ_MODE_GAME_OVER) {
+      if (state.mode_data.game_over.step == AZ_GOS_FADE_OUT &&
+          state.mode_data.game_over.progress >= 1.0) {
+        return;
+      }
+    } else if (state.mode == AZ_MODE_SAVING) {
       const bool ok = save_current_game();
       state.message.time_remaining = 4.0;
       if (ok) {
@@ -167,6 +177,12 @@ static void event_loop(int saved_game_index) {
   }
 }
 
+typedef enum {
+  AZ_CONTROLLER_TITLE,
+  AZ_CONTROLLER_SPACE,
+  AZ_CONTROLLER_GAME_OVER
+} az_controller_t;
+
 int main(int argc, char **argv) {
   az_init_random();
   az_init_wall_datas();
@@ -180,15 +196,35 @@ int main(int argc, char **argv) {
 
   load_saved_games();
 
-  const az_title_action_t action = az_title_event_loop(&saved_games);
-  switch (action.kind) {
-    case AZ_TA_QUIT: return EXIT_SUCCESS;
-    case AZ_TA_START_GAME:
-      event_loop(action.slot_index);
-      break;
+  az_controller_t controller = AZ_CONTROLLER_TITLE;
+  int saved_game_slot_index = 0;
+  while (true) {
+    switch (controller) {
+      case AZ_CONTROLLER_TITLE:
+        {
+          const az_title_action_t action = az_title_event_loop(&saved_games);
+          switch (action.kind) {
+            case AZ_TA_QUIT:
+              return EXIT_SUCCESS;
+            case AZ_TA_START_GAME:
+              controller = AZ_CONTROLLER_SPACE;
+              saved_game_slot_index = action.slot_index;
+              break;
+          }
+        }
+        break;
+      case AZ_CONTROLLER_SPACE:
+        az_space_event_loop(saved_game_slot_index);
+        controller = AZ_CONTROLLER_GAME_OVER;
+        break;
+      case AZ_CONTROLLER_GAME_OVER:
+        // TODO: Implement a game over screen.
+        controller = AZ_CONTROLLER_TITLE;
+        break;
+    }
   }
-
-  return EXIT_SUCCESS;
+  assert(false); // unreachable
+  return EXIT_FAILURE;
 }
 
 /*===========================================================================*/

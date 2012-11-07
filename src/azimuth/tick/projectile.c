@@ -142,7 +142,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     }
   }
   // Ship:
-  if (proj->fired_by_enemy && proj->last_hit_uid != AZ_SHIP_UID) {
+  if (proj->fired_by_enemy && proj->last_hit_uid != AZ_SHIP_UID &&
+      az_ship_is_present(&state->ship)) {
     az_vector_t hit_at;
     if (az_ray_hits_ship(&state->ship, start, delta, &hit_at)) {
       impact.type = AZ_IMP_SHIP;
@@ -189,7 +190,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       on_projectile_hit_wall(state, proj);
       break;
     case AZ_IMP_SHIP:
-      state->ship.player.shields -= proj->data->damage;
+      az_damage_ship(state, proj->data->damage);
       on_projectile_hit_target(state, proj, NULL);
       break;
     case AZ_IMP_WALL:

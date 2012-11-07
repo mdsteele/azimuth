@@ -25,6 +25,7 @@
 #include "azimuth/state/room.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -163,6 +164,40 @@ void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
       pickup->position = position;
       pickup->age = 0.0;
       return;
+    }
+  }
+}
+
+/*===========================================================================*/
+
+void az_damage_ship(az_space_state_t *state, double damage) {
+  state->ship.player.shields -= damage;
+  if (state->ship.player.shields <= 0.0) {
+    state->ship.player.shields = 0.0;
+    // Put us into game-over mode:
+    state->mode = AZ_MODE_GAME_OVER;
+    state->mode_data.game_over.step = AZ_GOS_ASPLODE;
+    state->mode_data.game_over.progress = 0.0;
+    // Add particles for ship debris:
+    az_particle_t *particle;
+    if (az_insert_particle(state, &particle)) {
+      particle->kind = AZ_PAR_BOOM;
+      particle->color = AZ_WHITE;
+      particle->position = state->ship.position;
+      particle->velocity = AZ_VZERO;
+      particle->lifetime = 0.5;
+      particle->param1 = 30;
+    }
+    for (int i = 0; i < 20; ++i) {
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_SPECK;
+        particle->color = AZ_WHITE;
+        particle->position = state->ship.position;
+        particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
+                                       az_random() * AZ_TWO_PI);
+        particle->angle = 0.0;
+        particle->lifetime = 2.0;
+      } else break;
     }
   }
 }

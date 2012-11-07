@@ -34,6 +34,7 @@
 
 void az_draw_ship(az_space_state_t* state) {
   const az_ship_t *ship = &state->ship;
+  if (!az_ship_is_present(ship)) return;
   const az_controls_t *controls = &ship->controls;
 
   // Draw the tractor beam:
