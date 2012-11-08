@@ -162,6 +162,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (ship->tractor_beam.active) {
     // TODO: check for wall/baddie impacts
     assert(tractor_node != NULL);
+    assert(tractor_node->kind == AZ_NODE_TRACTOR);
     const az_vector_t delta = az_vsub(ship->position, tractor_node->position);
     assert(az_dapprox(0.0, az_vdot(ship->velocity, delta)));
     assert(az_dapprox(ship->tractor_beam.distance, az_vnorm(delta)));
@@ -301,7 +302,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
-      if (node->kind != AZ_NODE_NOTHING) {
+      if (node->kind == AZ_NODE_TRACTOR) {
         const double dist = az_vnorm(az_vsub(node->position, ship->position));
         if (dist <= best_distance) {
           tractor_node = node;
@@ -319,6 +320,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Apply tractor beam's velocity changes:
   if (ship->tractor_beam.active) {
     assert(tractor_node != NULL);
+    assert(tractor_node->kind == AZ_NODE_TRACTOR);
     ship->velocity = az_vflatten(ship->velocity,
         az_vsub(ship->position, tractor_node->position));
   }
@@ -327,6 +329,15 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_vadd(ship->position, az_vpolar(18, ship->angle));
 
   // Fire projectiles:
+  if (controls->ordn_held && controls->fire_pressed) {
+    az_projectile_t *proj;
+    if (player->rockets > 0 && az_insert_projectile(state, &proj)) {
+      az_init_projectile(proj, AZ_PROJ_ROCKET, false, gun_position,
+                         ship->angle);
+      --player->rockets;
+    }
+    controls->fire_pressed = false;
+  }
   const double fire_cost = 20.0;
   if (controls->fire_pressed && player->energy >= fire_cost) {
     az_projectile_t *proj;
@@ -334,12 +345,12 @@ void az_tick_ship(az_space_state_t *state, double time) {
       player->energy -= fire_cost;
       az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, false, gun_position,
                          ship->angle);
-      controls->fire_pressed = false;
     }
+    controls->fire_pressed = false;
   }
 
   // Fire beam:
-  if (controls->fire_held) {
+  if (false && controls->fire_held) {
     // Calculate where beam hits:
     az_vector_t hit_at = az_vadd(ship->position, az_vpolar(1000, ship->angle));
     az_vector_t normal = AZ_VZERO;

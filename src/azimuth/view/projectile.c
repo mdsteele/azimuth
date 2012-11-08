@@ -65,6 +65,15 @@ static void draw_projectile(const az_projectile_t* proj) {
         glVertex2d(-6, -8);
       } glEnd();
       break;
+    case AZ_PROJ_ROCKET:
+      // FIXME
+      glColor3f(1, 0, 1);
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(5, 0);
+        glVertex2d(-5, 3);
+        glVertex2d(-5, -3);
+      } glEnd();
+      break;
   }
 }
 

@@ -50,7 +50,9 @@ typedef enum {
 typedef struct {
   double speed;
   double lifetime; // how long the projectile lasts, in seconds
-  double damage;
+  double impact_damage; // how much damage the projectile deals on impact
+  double splash_damage; // how much damage the explosion deals
+  double splash_radius; // radius of explosion (zero for most projectiles)
   bool phased; // true if the projectile passes thorugh walls
   bool piercing; // true if the projectile pierces through enemies
 } az_proj_data_t;

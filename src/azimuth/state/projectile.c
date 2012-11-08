@@ -30,29 +30,38 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_NORMAL] = {
     .speed = 600.0,
     .lifetime = 1.0,
-    .damage = 1.0
+    .impact_damage = 1.0
   },
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
     .lifetime = 1.0,
-    .damage = 1.0,
+    .impact_damage = 1.0,
     .phased = true
   },
   [AZ_PROJ_GUN_PIERCE] = {
     .speed = 600.0,
     .lifetime = 1.0,
-    .damage = 2.0,
+    .impact_damage = 2.0,
     .piercing = true
+  },
+  [AZ_PROJ_ROCKET] = {
+    .speed = 800.0,
+    .lifetime = 1.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 20.0
   },
   [AZ_PROJ_BOMB] = {
     .speed = 0.0,
     .lifetime = 10.0,
-    .damage = 25.0
+    .splash_damage = 25.0,
+    .splash_radius = 50.0
   },
   [AZ_PROJ_MEGA_BOMB] = {
     .speed = 0.0,
     .lifetime = 10.0,
-    .damage = 75.0
+    .splash_damage = 75.0,
+    .splash_radius = 100.0
   },
 };
 

@@ -130,6 +130,9 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
               state.ship.controls.fire_pressed = true;
               state.ship.controls.fire_held = true;
               break;
+            case AZ_KEY_C:
+              state.ship.controls.ordn_held = true;
+              break;
             case AZ_KEY_X:
               state.ship.controls.util_pressed = true;
               state.ship.controls.util_held = true;
@@ -145,6 +148,7 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
             case AZ_KEY_LEFT_ARROW: state.ship.controls.left = false; break;
             case AZ_KEY_RIGHT_ARROW: state.ship.controls.right = false; break;
             case AZ_KEY_V: state.ship.controls.fire_held = false; break;
+            case AZ_KEY_C: state.ship.controls.ordn_held = false; break;
             case AZ_KEY_X: state.ship.controls.util_held = false; break;
             case AZ_KEY_Z: state.ship.controls.burn = false; break;
             default: break;

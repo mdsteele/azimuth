@@ -48,9 +48,39 @@ typedef struct {
   } target;
 } az_impact_target_t;
 
+static void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                             double damage) {
+  baddie->health -= damage;
+  if (baddie->health <= 0.0) {
+    baddie->kind = AZ_BAD_NOTHING;
+    az_add_random_pickup(state, baddie->data->potential_pickups,
+                         baddie->position);
+  }
+}
 
+// Common projectile impact code, called by both on_projectile_hit_wall and
+// on_projectile_hit_target.
 static void on_projectile_impact(az_space_state_t *state,
                                  az_projectile_t *proj) {
+  const double radius = proj->data->splash_radius;
+  // Deal splash damage, if applicable.
+  if (radius > 0.0 && proj->data->splash_damage > 0.0) {
+    if (proj->fired_by_enemy) {
+      if (az_vwithin(state->ship.position, proj->position, radius)) {
+        az_damage_ship(state, proj->data->splash_damage);
+      }
+    } else {
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind == AZ_BAD_NOTHING) continue;
+        if (az_vwithin(baddie->position, proj->position,
+                       radius + baddie->data->bounding_radius)) {
+          az_damage_baddie(state, baddie, proj->data->splash_damage);
+        }
+      }
+    }
+  }
+
+  // Add particles.
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
     particle->kind = AZ_PAR_BOOM;
@@ -58,7 +88,7 @@ static void on_projectile_impact(az_space_state_t *state,
     particle->position = proj->position;
     particle->velocity = AZ_VZERO;
     particle->lifetime = 0.3;
-    particle->param1 = 10;
+    particle->param1 = (radius <= 0.0 ? 10.0 : radius);
   }
   for (int i = 0; i < 5; ++i) {
     if (az_insert_particle(state, &particle)) {
@@ -73,6 +103,8 @@ static void on_projectile_impact(az_space_state_t *state,
   }
 }
 
+// Called when a projectile hits a wall or a door.  Note that phased
+// projectiles can't ever hit walls, but they _can_ hit doors.
 static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj) {
   proj->kind = AZ_PROJ_NOTHING;
@@ -84,11 +116,19 @@ static void on_projectile_hit_wall(az_space_state_t *state,
 static void on_projectile_hit_target(az_space_state_t *state,
                                      az_projectile_t *proj,
                                      az_baddie_t *baddie) {
+  // Deal impact damage:
+  if (baddie == NULL) {
+    az_damage_ship(state, proj->data->impact_damage);
+  } else {
+    az_damage_baddie(state, baddie, proj->data->impact_damage);
+  }
+  // Remove the projecitle (unless it's a piercing projectile).
   if (proj->data->piercing) {
     proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
   } else {
     proj->kind = AZ_PROJ_NOTHING;
   }
+  // Run common impact code:
   on_projectile_impact(state, proj);
 }
 
@@ -174,13 +214,6 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_BADDIE:
       on_projectile_hit_target(state, proj, impact.target.baddie);
-      impact.target.baddie->health -= proj->data->damage;
-      if (impact.target.baddie->health <= 0.0) {
-        impact.target.baddie->kind = AZ_BAD_NOTHING;
-        az_add_random_pickup(state,
-                             impact.target.baddie->data->potential_pickups,
-                             impact.target.baddie->position);
-      }
       break;
     case AZ_IMP_DOOR:
       if (!proj->fired_by_enemy) {
@@ -190,7 +223,6 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       on_projectile_hit_wall(state, proj);
       break;
     case AZ_IMP_SHIP:
-      az_damage_ship(state, proj->data->damage);
       on_projectile_hit_target(state, proj, NULL);
       break;
     case AZ_IMP_WALL:

@@ -33,7 +33,7 @@
 typedef struct {
   bool up, down, left, right;
   bool fire_pressed, fire_held;
-  bool ordn;
+  bool ordn_held;
   bool util_pressed, util_held;
   bool burn;
 } az_controls_t;
