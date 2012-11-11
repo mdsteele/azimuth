@@ -75,9 +75,6 @@ az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2);
 az_vector_t az_vrotate(az_vector_t v, double radians);
 // Rotate a vector 90 degrees counterclockwise.
 az_vector_t az_vrot90ccw(az_vector_t v);
-// Return the vector v, relative to an object at the given position and
-// angle.  This is essentially a combination of az_vsub and az_vrotate.
-az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle);
 
 // Get the length of the vector.
 double az_vnorm(az_vector_t v);

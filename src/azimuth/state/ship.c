@@ -47,8 +47,8 @@ bool az_ship_is_present(const az_ship_t *ship) {
 
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point) {
   return az_vwithin(point, ship->position, SHIP_BOUNDING_RADIUS) &&
-    az_convex_polygon_contains(ship_polygon, az_vrelative(
-      point, ship->position, ship->angle));
+    az_convex_polygon_contains(ship_polygon,
+        az_vrotate(az_vsub(point, ship->position), -ship->angle));
 }
 
 bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,

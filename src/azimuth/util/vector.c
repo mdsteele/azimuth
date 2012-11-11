@@ -91,10 +91,6 @@ az_vector_t az_vrot90ccw(az_vector_t v) {
   return (az_vector_t){.x = -v.y, .y = v.x};
 }
 
-az_vector_t az_vrelative(az_vector_t v, az_vector_t pos, double angle) {
-  return az_vrotate(az_vsub(v, pos), -angle);
-}
-
 double az_vnorm(az_vector_t v) {
   assert(vfinite(v));
   return hypot(v.x, v.y);

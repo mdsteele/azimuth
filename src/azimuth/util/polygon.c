@@ -172,9 +172,8 @@ bool az_ray_hits_polygon_trans(az_polygon_t polygon,
                                az_vector_t delta, az_vector_t *point_out,
                                az_vector_t *normal_out) {
   if (az_ray_hits_polygon(polygon,
-                          az_vrelative(start, polygon_position, polygon_angle),
-                          az_vrelative(delta, AZ_VZERO, polygon_angle),
-                          point_out, normal_out)) {
+          az_vrotate(az_vsub(start, polygon_position), -polygon_angle),
+          az_vrotate(delta, -polygon_angle), point_out, normal_out)) {
     if (point_out != NULL) {
       *point_out = az_vadd(az_vrotate(*point_out, polygon_angle),
                            polygon_position);
@@ -311,8 +310,8 @@ bool az_circle_hits_polygon_trans(
     az_vector_t *pos_out, az_vector_t *impact_out) {
   if (az_circle_hits_polygon(
           polygon, radius,
-          az_vrelative(start, polygon_position, polygon_angle),
-          az_vrelative(delta, AZ_VZERO, polygon_angle),
+          az_vrotate(az_vsub(start, polygon_position), -polygon_angle),
+          az_vrotate(delta, -polygon_angle),
           pos_out, impact_out)) {
     if (pos_out != NULL) {
       *pos_out =
