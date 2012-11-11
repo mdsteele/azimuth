@@ -88,6 +88,8 @@ bool az_convex_polygon_contains(az_polygon_t polygon,
   return true;
 }
 
+/*===========================================================================*/
+
 static bool az_ray_hits_polygon_internal(
     az_polygon_t polygon, az_vector_t start, az_vector_t delta,
     double *time_out, az_vector_t *normal_out) {
@@ -184,6 +186,148 @@ bool az_ray_hits_polygon_trans(az_polygon_t polygon,
   }
   return false;
 }
+
+/*===========================================================================*/
+
+bool az_circle_hits_point(
+    az_vector_t point, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(radius >= 0.0);
+  // If the point is already inside the circle, we're immediately done.
+  if (az_vwithin(point, start, radius)) {
+    if (pos_out != NULL) *pos_out = start;
+    if (impact_out != NULL) *impact_out = point;
+    return true;
+  }
+  // Set up a quadratic equation modeling when the circle will hit the point
+  // (assuming it travels t*delta from start at time t).
+  const az_vector_t sdelta = az_vsub(start, point);
+  const double a = az_vdot(delta, delta);
+  const double b = 2.0 * az_vdot(sdelta, delta);
+  const double c = az_vdot(sdelta, sdelta) - radius * radius;
+  const double discriminant = b * b - 4.0 * a * c;
+  // If the discriminant is negative, there is no solution, so the circle
+  // misses the point.
+  if (discriminant < 0) return false;
+  // Otherwise, there's a solution, but we need to check if it's in range.
+  const double root = sqrt(discriminant);
+  const double t1 = (-b + root) / (2.0 * a);
+  const double t2 = (-b - root) / (2.0 * a);
+  const double t = (0.0 <= t1 && (t1 <= t2 || t2 < 0.0) ? t1 : t2);
+  if (0.0 <= t && t <= 1.0) {
+    if (pos_out != NULL) *pos_out = az_vadd(start, az_vmul(delta, t));
+    if (impact_out != NULL) *impact_out = point;
+    return true;
+  } else return false;
+}
+
+bool az_circle_hits_line(az_vector_t p1, az_vector_t p2, double radius,
+                         az_vector_t start, az_vector_t delta,
+                         az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(radius >= 0.0);
+  // Calculate the vector from start to the nearest point on the line.
+  const az_vector_t to_line =
+    az_vflatten(az_vsub(p1, start), az_vsub(p1, p2));
+  // If the circle is already intersecting the line, then we're done.
+  if (az_vdot(to_line, to_line) <= radius * radius) {
+    if (pos_out != NULL) *pos_out = start;
+    if (impact_out != NULL) *impact_out = az_vadd(to_line, start);
+    return true;
+  }
+  // Else, if the circle is moving away from the line, it doesn't hit it.
+  if (az_vdot(to_line, delta) <= 0.0) return false;
+  // Else, calculate how long it takes the circle to hit the line.
+  const double dist = az_vnorm(to_line);
+  const double a = az_vnorm(az_vproj(delta, to_line));
+  assert(a != 0.0);
+  const double b = dist - radius;
+  const double t = b / a;
+  if (0.0 <= t && t <= 1.0) {
+    const az_vector_t pos = az_vadd(start, az_vmul(delta, t));
+    if (pos_out != NULL) *pos_out = pos;
+    if (impact_out != NULL) {
+      *impact_out = az_vadd(pos, az_vmul(az_vdiv(to_line, dist), radius));
+    }
+    return true;
+  }
+  return false;
+}
+
+static bool circle_hits_line_segment_internal(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
+  az_vector_t pos = AZ_VZERO, impact = AZ_VZERO;
+  const bool hit = az_circle_hits_line(p1, p2, radius, start, delta, &pos,
+                                       &impact);
+  if (!hit) return false;
+  const az_vector_t seg = az_vsub(p2, p1);
+  if (az_vdot(seg, az_vsub(impact, p1)) < 0.0 ||
+      az_vdot(seg, az_vsub(impact, p2)) > 0.0) return false;
+  if (pos_out != NULL) *pos_out = pos;
+  if (impact_out != NULL) *impact_out = impact;
+  return true;
+}
+
+bool az_circle_hits_line_segment(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
+  // FIXME
+  return circle_hits_line_segment_internal(p1, p2, radius, start, delta,
+                                           pos_out, impact_out);
+}
+
+bool az_circle_hits_polygon(
+    az_polygon_t polygon, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  bool hit = false;
+  az_vector_t hit_at;
+  // Check if the circle hits any corners of the polygon.
+  for (int i = 0; i < polygon.num_vertices; ++i) {
+    if (az_circle_hits_point(polygon.vertices[i], radius, start, delta,
+                             &hit_at, impact_out)) {
+      hit = true;
+      delta = az_vsub(hit_at, start);
+    }
+  }
+  // Check if the circle hits any edges of the polygon.
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (circle_hits_line_segment_internal(
+            polygon.vertices[i], polygon.vertices[j], radius, start, delta,
+            &hit_at, impact_out)) {
+      hit = true;
+      delta = az_vsub(hit_at, start);
+    }
+  }
+  // Return the final answer.
+  if (hit && pos_out != NULL) {
+    *pos_out = az_vadd(start, delta);
+  }
+  return hit;
+}
+
+bool az_circle_hits_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  if (az_circle_hits_polygon(
+          polygon, radius,
+          az_vrelative(start, polygon_position, polygon_angle),
+          az_vrelative(delta, AZ_VZERO, polygon_angle),
+          pos_out, impact_out)) {
+    if (pos_out != NULL) {
+      *pos_out =
+        az_vadd(az_vrotate(*pos_out, polygon_angle), polygon_position);
+    }
+    if (impact_out != NULL) {
+      *impact_out =
+        az_vadd(az_vrotate(*impact_out, polygon_angle), polygon_position);
+    }
+    return true;
+  }
+  return false;
+}
+
+/*===========================================================================*/
 
 // This function works much the same as az_polygons_collide, but assumes that
 // s_polygon is at the origin, unrotated.  az_polygons_collide is then

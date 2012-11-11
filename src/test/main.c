@@ -25,6 +25,11 @@
 int main(int argc, char **argv) {
   az_init_random();
 
+  RUN_TEST(test_circle_hits_line);
+  RUN_TEST(test_circle_hits_line_segment);
+  RUN_TEST(test_circle_hits_point);
+  RUN_TEST(test_circle_hits_polygon);
+  RUN_TEST(test_circle_hits_polygon_trans);
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
   RUN_TEST(test_convex_polygon_contains);

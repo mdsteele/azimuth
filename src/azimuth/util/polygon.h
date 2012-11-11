@@ -40,14 +40,18 @@ typedef struct {
   const az_vector_t *vertices;
 } az_polygon_t;
 
+/*===========================================================================*/
+
 // Test if the point is in the polygon.  The polygon must be
 // non-self-intersecting, but it need not be convex.
 bool az_polygon_contains(az_polygon_t polygon, az_vector_t point);
 
-// Test if the point is in the polygon.  The polygon must be convex, the
+// Test if the point is in the polygon.  The polygon must be convex, and the
 // vertices must come in counter-clockwise order.  This function is more
 // efficient, but less general, than az_polygon_contains().
 bool az_convex_polygon_contains(az_polygon_t polygon, az_vector_t point);
+
+/*===========================================================================*/
 
 // Determine if a ray, travelling delta from start, will ever pass within the
 // specified polygon.  If it does, stores in *point_out the first point on the
@@ -66,6 +70,45 @@ bool az_ray_hits_polygon_trans(az_polygon_t polygon,
                                double polygon_angle, az_vector_t start,
                                az_vector_t delta, az_vector_t *point_out,
                                az_vector_t *normal_out);
+
+/*===========================================================================*/
+
+// The following functions each determine if a circle with the specified
+// radius, travelling delta form start, will ever intersect a particular shape
+// (depending on the function).  If it does, the function stores in *pos_out
+// the earliest position of the circle at which it touches the line (if pos_out
+// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// non-NULL).
+
+// Determine if the circle will ever intersect the given point.
+bool az_circle_hits_point(
+    az_vector_t point, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will ever intersect the infinite line passing
+// through p1 and p2.
+bool az_circle_hits_line(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will ever intersect the finite line segment between
+// p1 and p2.
+bool az_circle_hits_line_segment(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will ever intersect the polygon.
+bool az_circle_hits_polygon(
+    az_polygon_t polygon, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will ever intersect the transformed polygon.
+bool az_circle_hits_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+/*===========================================================================*/
 
 // Determine if two polygons, one stationary and one moving, collide as the
 // moving polygon travels along the m_delta vector.  If a collision does occur,

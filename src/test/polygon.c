@@ -17,6 +17,7 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
+#include <math.h>
 #include <stdlib.h> // for NULL
 
 #include "azimuth/util/polygon.h"
@@ -33,6 +34,8 @@ static az_vector_t concave_hexagon_vertices[6] = {
 
 static az_vector_t square_vertices[5] =
   {{1, 1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+
+/*===========================================================================*/
 
 void test_polygon_contains(void) {
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
@@ -78,6 +81,8 @@ void test_convex_polygon_contains(void) {
   EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, 1}));
   EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, -1}));
 }
+
+/*===========================================================================*/
 
 void test_ray_hits_polygon(void) {
   const az_vector_t nix = {99999, 99999};
@@ -142,6 +147,192 @@ void test_ray_hits_polygon_trans(void) {
   EXPECT_VAPPROX(((az_vector_t){3, 2}), intersect);
   EXPECT_VAPPROX(((az_vector_t){0, 1}), az_vunit(normal));
 }
+
+/*===========================================================================*/
+
+void test_circle_hits_point(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_circle_hits_point works with NULLs for pos_out and impact_out:
+  EXPECT_TRUE(az_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 0},
+      NULL, NULL));
+
+  // Check case where circle hits point dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 0},
+      &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){-1, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+
+  // Check case where point starts inside circle.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_point(
+      (az_vector_t){-5, 7}, 2.0, (az_vector_t){-6, 6}, (az_vector_t){9, -15},
+      &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){-6, 6}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-5, 7}), impact);
+
+  // Check case where circle misses point.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 10},
+      &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+
+  // Check case where circle stops short of point.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){3, 0},
+      &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+}
+
+void test_circle_hits_line(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
+  EXPECT_TRUE(az_circle_hits_line(
+      (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
+      (az_vector_t){0, 10}, NULL, NULL));
+
+  // Check case where circle hits line dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_line(
+      (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){15, -1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){15, 1}), impact);
+
+  // Check case where circle is already intersecting line.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_line(
+      (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){12, 2},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){12, 2}), pos);
+  EXPECT_VAPPROX(((az_vector_t){12, 1}), impact);
+
+  // Check case where circle goes wrong direction.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_line(
+      (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
+      (az_vector_t){0, -10}, &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+
+  // Check case where circle stops short of line.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_line(
+      (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
+      (az_vector_t){0, 3}, &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+}
+
+void test_circle_hits_line_segment(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
+  EXPECT_TRUE(az_circle_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){6, -5},
+      (az_vector_t){0, 10}, NULL, NULL));
+
+  // Check case where circle hits line segment dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){6, -5},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){6, -1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){6, 1}), impact);
+
+  // Check case where circle would hit infinite line, but misses line segment.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){16, -5},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+
+  // Check case where circle would hit infinite line, but misses line segment
+  // on the other side.
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){0, -5},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+}
+
+void test_circle_hits_polygon(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix;
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+
+  // Check az_circle_hits_polygon works with NULLs for pos_out and impact_out:
+  EXPECT_TRUE(az_circle_hits_polygon(
+      triangle, 2.0, (az_vector_t){3.940285000290664, 5.4850712500726659},
+      (az_vector_t){-4, -10}, NULL, NULL));
+
+  // Check case where circle hits an edge of the triangle:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      triangle, 2.0, (az_vector_t){5.4402850002906638, 7.4850712500726662},
+      (az_vector_t){-4, -10}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3.4402850002906638, 2.4850712500726662}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), impact);
+
+  // Check case where circle hits a corner of the triangle:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      triangle, 2.0, (az_vector_t){4, 7}, (az_vector_t){-10, -10},
+      &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){2.4142135623730949, 5.4142135623730949}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 4}), impact);
+
+  // Check case where circle hits an edge of the square:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      square, 0.3, (az_vector_t){-5, 0}, (az_vector_t){20, 0}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){-1.3, 0}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), impact);
+
+  // Check case where circle hits a corner of the square:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      square, sqrt(2), (az_vector_t){-5, 2}, (az_vector_t){20, 0},
+      &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){-2, 2}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-1, 1}), impact);
+
+  // Check case where circle misses the square:
+  pos = impact = nix;
+  EXPECT_FALSE(az_circle_hits_polygon(
+      square, 0.2, (az_vector_t){-5, 1.21}, (az_vector_t){20, 0},
+      &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+}
+
+void test_circle_hits_polygon_trans(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t pos = nix, impact = nix;
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
+
+  EXPECT_TRUE(az_circle_hits_polygon_trans(
+      triangle, (az_vector_t){3, 0.059714999709336247}, 1.3258176636680323,
+      2.0, (az_vector_t){3, 5}, (az_vector_t){0, -5}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 4}), pos);
+  EXPECT_VAPPROX(((az_vector_t){3, 2}), impact);
+}
+
+/*===========================================================================*/
 
 void test_polygons_collide(void) {
   const az_vector_t nix = {99999, 99999};
