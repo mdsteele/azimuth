@@ -76,7 +76,7 @@ bool az_ray_hits_polygon_trans(az_polygon_t polygon,
 // The following functions each determine if a circle with the specified
 // radius, travelling delta form start, will ever intersect a particular shape
 // (depending on the function).  If it does, the function stores in *pos_out
-// the earliest position of the circle at which it touches the line (if pos_out
+// the first position of the circle at which it touches the shape (if pos_out
 // is non-NULL) and in *impact_out the point of intersection (if impact_out is
 // non-NULL).
 

@@ -48,6 +48,20 @@ bool az_ray_hits_door(const az_door_t *door, az_vector_t start,
                                    normal_out);
 }
 
+bool az_circle_hits_door(
+    const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
+  return (az_ray_hits_circle(start, delta, door->position,
+                             AZ_DOOR_BOUNDING_RADIUS + radius) &&
+          az_circle_hits_polygon_trans(closed_door_polygon, door->position,
+                                       door->angle, radius, start, delta,
+                                       pos_out, impact_out));
+}
+
+/*===========================================================================*/
+
 static const az_vector_t entrance_vertices[] = {
   {10, 50}, {-30, 50}, {-30, -50}, {10, -50}
 };

@@ -49,6 +49,8 @@ typedef struct {
   double angle;
 } az_wall_t;
 
+/*===========================================================================*/
+
 // The number of different wall data structs available.
 extern const int AZ_NUM_WALL_DATAS;
 
@@ -64,6 +66,8 @@ const az_wall_data_t *az_get_wall_data(int index);
 // returned from az_get_wall_data.
 int az_wall_data_index(const az_wall_data_t *data);
 
+/*===========================================================================*/
+
 // Return true if the given point intersects the wall.
 bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point);
 
@@ -73,6 +77,15 @@ bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point);
 bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out);
+
+// Determine if a circle with the given radius, travelling delta from start,
+// will hit the wall.  If it does, the function stores in *pos_out
+// the earliest position of the circle at which it touches the wall (if pos_out
+// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// non-NULL).
+bool az_circle_hits_wall(
+    const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out);
 
 /*===========================================================================*/
 

@@ -35,6 +35,9 @@
 
 /*===========================================================================*/
 
+// The radius of the ship for purposes of collisions with e.g. walls.
+#define AZ_SHIP_DEFLECTOR_RADIUS 15.0
+
 typedef enum {
   AZ_COL_NOTHING = 0,
   AZ_COL_BADDIE,
@@ -71,9 +74,9 @@ static void on_ship_enter_door(az_space_state_t *state, az_door_t *door) {
 
 static void on_ship_hit_wall(az_space_state_t *state,
                              double elasticity, double impact_damage_coeff,
-                             az_vector_t impact_point,
-                             az_vector_t impact_normal) {
+                             az_vector_t impact_point) {
   az_ship_t *ship = &state->ship;
+  const az_vector_t impact_normal = az_vsub(ship->position, impact_point);
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with the wall).
   if (impact_normal.x != 0.0 || impact_normal.y != 0.0) {
@@ -181,13 +184,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
     const az_vector_t start = ship->position;
     az_vector_t delta = az_vmul(ship->velocity, time);
     az_collide_target_t collide = {.type = AZ_COL_NOTHING};
-    az_vector_t impact_pos = AZ_VZERO, normal = AZ_VZERO;
+    az_vector_t impact_pos = AZ_VZERO;
     // Walls:
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
       az_vector_t end_pos;
-      if (az_ship_would_hit_wall(wall, ship, delta,
-                                 &end_pos, &impact_pos, &normal)) {
+      if (az_circle_hits_wall(wall, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
+                              &end_pos, &impact_pos)) {
         collide.type = AZ_COL_WALL;
         collide.target.wall = wall;
         delta = az_vsub(end_pos, start);
@@ -202,8 +205,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
         collide.target.door = door;
         delta = az_vsub(end_pos, start);
       }
-      if (false/*TODO: az_ship_would_hit_door(door, ship, delta,
-                                 &end_pos, &impact_pos, &normal)*/) {
+      if (az_circle_hits_door(door, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
+                              &end_pos, &impact_pos)) {
         collide.type = AZ_COL_DOOR_OUTSIDE;
         collide.target.door = door;
         delta = az_vsub(end_pos, start);
@@ -223,12 +226,12 @@ void az_tick_ship(az_space_state_t *state, double time) {
         on_ship_enter_door(state, collide.target.door);
         break;
       case AZ_COL_DOOR_OUTSIDE:
-        on_ship_hit_wall(state, 0.5, 0.0, impact_pos, normal);
+        on_ship_hit_wall(state, 0.5, 0.0, impact_pos);
         break;
       case AZ_COL_WALL:
         on_ship_hit_wall(state, collide.target.wall->data->elasticity,
                          collide.target.wall->data->impact_damage_coeff,
-                         impact_pos, normal);
+                         impact_pos);
         break;
     }
   }
