@@ -93,6 +93,7 @@ typedef struct {
     az_baddie_kind_t baddie_kind;
     az_door_kind_t door_kind;
     az_node_kind_t node_kind;
+    az_upgrade_t upgrade_kind;
     int wall_data_index;
   } brush;
   az_room_key_t current_room;

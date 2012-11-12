@@ -23,11 +23,12 @@
 
 #include "azimuth/state/node.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
 // Draw a single node.  The GL matrix should be at the camera position.
-void az_draw_node(const az_node_t *node);
+void az_draw_node(const az_node_t *node, az_clock_t clock);
 
 // Draw all node.  The GL matrix should be at the camera position.
 void az_draw_nodes(const az_space_state_t* state);

@@ -65,12 +65,15 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     }
   }
   for (int i = 0; i < room->num_nodes; ++i) {
+    const az_node_spec_t *spec = &room->nodes[i];
+    if (spec->kind == AZ_NODE_UPGRADE &&
+        az_has_upgrade(&state->ship.player, spec->upgrade)) continue;
     az_node_t *node;
     if (az_insert_node(state, &node)) {
-      const az_node_spec_t *spec = &room->nodes[i];
       node->kind = spec->kind;
       node->position = spec->position;
       node->angle = spec->angle;
+      node->upgrade = spec->upgrade;
     }
   }
 }

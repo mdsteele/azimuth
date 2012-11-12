@@ -21,21 +21,21 @@
 #ifndef AZIMUTH_STATE_NODE_H_
 #define AZIMUTH_STATE_NODE_H_
 
+#include "azimuth/state/player.h" // for az_upgrade_t
 #include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 6
+#define AZ_NUM_NODE_KINDS 5
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
   AZ_NODE_SAVE_POINT,
   AZ_NODE_TRACTOR,
-  AZ_NODE_REFILL_SHIELD,
-  AZ_NODE_REFILL_AMMO,
-  AZ_NODE_REFILL_ALL,
+  AZ_NODE_UPGRADE,
+  AZ_NODE_REFILL,
   AZ_NODE_COMM
 } az_node_kind_t;
 
@@ -44,6 +44,7 @@ typedef struct {
   az_uid_t uid;
   az_vector_t position;
   double angle;
+  az_upgrade_t upgrade; // only used for AZ_NODE_UPGRADE nodes
 } az_node_t;
 
 #define AZ_NODE_BOUNDING_RADIUS 50.0

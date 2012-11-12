@@ -36,12 +36,10 @@ void az_init_player(az_player_t *player) {
 
 /*===========================================================================*/
 
-#define MAX_UPGRADES 128u
-
 // Check whether the player has a particular upgrade yet.
 bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade) {
   const unsigned int index = (unsigned int)upgrade;
-  assert(index < MAX_UPGRADES);
+  assert(index < AZ_NUM_UPGRADES);
   if (index < 64u) {
     return 0 != (player->upgrades1 & (UINT64_C(1) << index));
   } else {
@@ -77,7 +75,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
 
   // Record the upgrade as acquired.
   const unsigned int index = (unsigned int)upgrade;
-  assert(index < MAX_UPGRADES);
+  assert(index < AZ_NUM_UPGRADES);
   if (index < 64u) {
     player->upgrades1 |= (UINT64_C(1) << index);
   } else {

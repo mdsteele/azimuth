@@ -116,6 +116,9 @@ typedef enum {
   AZ_UPG_SHIELD_BATTERY_11
 } az_upgrade_t;
 
+// The number of different upgrade kinds:
+#define AZ_NUM_UPGRADES ((int)AZ_UPG_SHIELD_BATTERY_11 + 1)
+
 // Which primary weapon module does the player have equipped?
 typedef enum {
   AZ_GUN_NONE = 0,

@@ -193,6 +193,9 @@ static void do_select(int x, int y, bool multi) {
       best_node->selected = true;
     }
     state.brush.node_kind = best_node->spec.kind;
+    if (best_node->spec.kind == AZ_NODE_UPGRADE) {
+      state.brush.upgrade_kind = best_node->spec.upgrade;
+    }
   } else if (best_wall != NULL) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
@@ -337,6 +340,7 @@ static void do_add_node(int x, int y) {
   node->spec.kind = state.brush.node_kind;
   node->spec.position = pt;
   node->spec.angle = 0.0;
+  node->spec.upgrade = state.brush.upgrade_kind;
   state.unsaved = true;
 }
 
@@ -397,7 +401,7 @@ static void do_remove(void) {
   }
 }
 
-static void do_change_data(int delta) {
+static void do_change_data(int delta, bool secondary) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
@@ -417,10 +421,17 @@ static void do_change_data(int delta) {
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
-    const az_node_kind_t new_kind =
-      az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
-    node->spec.kind = new_kind;
-    state.brush.node_kind = new_kind;
+    if (node->spec.kind == AZ_NODE_UPGRADE && secondary) {
+      const az_upgrade_t new_upgrade =
+        az_modulo((int)node->spec.upgrade + delta, AZ_NUM_UPGRADES);
+      node->spec.upgrade = new_upgrade;
+      state.brush.upgrade_kind = new_upgrade;
+    } else {
+      const az_node_kind_t new_kind =
+        az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
+      node->spec.kind = new_kind;
+      state.brush.node_kind = new_kind;
+    }
     state.unsaved = true;
   }
   AZ_LIST_LOOP(wall, room->walls) {
@@ -533,8 +544,8 @@ static void event_loop(void) {
                 break;
               case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
               case AZ_KEY_N: state.tool = AZ_TOOL_NODE; break;
-              case AZ_KEY_O: do_change_data(1); break;
-              case AZ_KEY_P: do_change_data(-1); break;
+              case AZ_KEY_O: do_change_data(1, event.key.shift); break;
+              case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
               case AZ_KEY_R:
                 if (event.key.shift) begin_set_current_room();
                 else state.tool = AZ_TOOL_ROTATE;
@@ -616,6 +627,7 @@ static bool load_and_init_state(void) {
   state.brush.baddie_kind = AZ_BAD_LUMP;
   state.brush.door_kind = AZ_DOOR_NORMAL;
   state.brush.node_kind = AZ_NODE_TRACTOR;
+  state.brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
 
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;

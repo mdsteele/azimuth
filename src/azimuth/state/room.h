@@ -24,7 +24,7 @@
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/door.h" // for az_door_kind_t
 #include "azimuth/state/node.h" // for az_node_kind_t
-#include "azimuth/state/player.h" // for az_room_key_t
+#include "azimuth/state/player.h" // for az_room_key_t and az_upgrade_t
 #include "azimuth/state/wall.h"
 
 /*===========================================================================*/
@@ -53,6 +53,7 @@ typedef struct {
   az_node_kind_t kind;
   az_vector_t position;
   double angle;
+  az_upgrade_t upgrade; // only used for AZ_NODE_UPGRADE nodes
 } az_node_spec_t;
 
 typedef struct {

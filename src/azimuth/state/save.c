@@ -59,7 +59,7 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
       az_give_upgrade(player, (az_upgrade_t)i);
     }
   }
-  for (unsigned int i = 64u; i < 128u; ++i) {
+  for (unsigned int i = 64u; i < AZ_NUM_UPGRADES; ++i) {
     if (upgrades2 & (UINT64_C(1) << (i - 64u))) {
       az_give_upgrade(player, (az_upgrade_t)i);
     }

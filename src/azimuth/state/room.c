@@ -110,15 +110,20 @@ static void parse_door_directive(az_load_room_t *loader) {
 
 static void parse_node_directive(az_load_room_t *loader) {
   if (loader->room->num_nodes >= loader->num_nodes) FAIL();
-  int index;
+  int kind, upgrade = 0;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf\n",
-             &index, &x, &y, &angle) < 4) FAIL();
-  if (index <= 0 || index > AZ_NUM_NODE_KINDS) FAIL();
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf",
+             &kind, &x, &y, &angle) < 4) FAIL();
+  if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
+  if (kind == AZ_NODE_UPGRADE) {
+    if (fscanf(loader->file, " u%d\n", &upgrade) < 1) FAIL();
+    if (upgrade <= 0 || upgrade >= AZ_NUM_UPGRADES) FAIL();
+  } else (void)fscanf(loader->file, "\n");
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
-  node->kind = (az_node_kind_t)index;
+  node->kind = (az_node_kind_t)kind;
   node->position = (az_vector_t){x, y};
   node->angle = angle;
+  node->upgrade = (az_upgrade_t)upgrade;
   ++loader->room->num_nodes;
 }
 
@@ -202,8 +207,12 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
-    WRITE("N%d x%.02f y%.02f a%f\n", (int)node->kind,
+    WRITE("N%d x%.02f y%.02f a%f", (int)node->kind,
           node->position.x, node->position.y, node->angle);
+    if (node->kind == AZ_NODE_UPGRADE) {
+      WRITE(" u%d", (int)node->upgrade);
+    }
+    WRITE("\n");
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];

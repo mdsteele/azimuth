@@ -128,7 +128,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     real_node.kind = editor_node->spec.kind;
     real_node.position = editor_node->spec.position;
     real_node.angle = editor_node->spec.angle;
-    az_draw_node(&real_node);
+    real_node.upgrade = editor_node->spec.upgrade;
+    az_draw_node(&real_node, state->clock);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
     az_baddie_t real_baddie;
