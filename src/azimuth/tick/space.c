@@ -118,6 +118,28 @@ static void tick_game_over_mode(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_upgrade_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_UPGRADE);
+  const double open_close_time = 0.5; // seconds
+  switch (state->mode_data.doorway.step) {
+    case AZ_UGS_OPEN:
+      state->mode_data.upgrade.progress += time / open_close_time;
+      if (state->mode_data.upgrade.progress >= 1.0) {
+        state->mode_data.upgrade.step = AZ_UGS_MESSAGE;
+        state->mode_data.upgrade.progress = 0.0;
+      }
+      break;
+    case AZ_UGS_MESSAGE:
+      break;
+    case AZ_UGS_CLOSE:
+      state->mode_data.upgrade.progress += time / open_close_time;
+      if (state->mode_data.upgrade.progress >= 1.0) {
+        state->mode = AZ_MODE_NORMAL;
+      }
+      break;
+  }
+}
+
 static void tick_message(az_message_t *message, double time) {
   message->time_remaining = az_dmax(0.0, message->time_remaining - time);
 }
@@ -191,6 +213,9 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_SAVING:
       // TODO: maybe we should add some kind of saving animation?
+      break;
+    case AZ_MODE_UPGRADE:
+      tick_upgrade_mode(state, time);
       break;
   }
   tick_camera(state, time);

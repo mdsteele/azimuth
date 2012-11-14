@@ -142,6 +142,11 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
           }
           break;
         case AZ_EVENT_KEY_UP:
+          if (state.mode == AZ_MODE_UPGRADE &&
+              state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
+            state.mode_data.upgrade.step = AZ_UGS_CLOSE;
+            state.mode_data.upgrade.progress = 0.0;
+          }
           switch (event.key.name) {
             case AZ_KEY_UP_ARROW: state.ship.controls.up = false; break;
             case AZ_KEY_DOWN_ARROW: state.ship.controls.down = false; break;

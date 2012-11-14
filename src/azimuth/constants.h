@@ -87,6 +87,9 @@
 /*===========================================================================*/
 // Upgrades:
 
+// How close the ship must be to an upgrade to pick it up:
+#define AZ_UPGRADE_COLLECTION_RADIUS 30.0
+
 // The factor by which having the Dynamic Armor upgrade boosts your effective
 // maximum speed with normal thrusters:
 #define AZ_DYNAMIC_ARMOR_SPEED_MULT 1.5

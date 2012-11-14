@@ -20,6 +20,7 @@
 #include "azimuth/view/hud.h"
 
 #include <assert.h>
+#include <math.h> // for sqrt
 
 #include <GL/gl.h>
 
@@ -83,6 +84,8 @@ static void draw_hud_shields_energy(const az_player_t *player) {
     draw_hud_bar(50, 15, player->energy, player->max_energy);
   } glPopMatrix();
 }
+
+/*===========================================================================*/
 
 static const char *gun_name(az_gun_t gun) {
   switch (gun) {
@@ -198,6 +201,8 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   } glPopMatrix();
 }
 
+/*===========================================================================*/
+
 static void draw_hud_message(const az_message_t *message) {
   if (message->time_remaining <= 0.0) return;
   glPushMatrix(); {
@@ -260,6 +265,104 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
   } glPopMatrix();
 }
 
+/*===========================================================================*/
+
+#define UPGRADE_BOX_WIDTH 500
+#define UPGRADE_BOX_HEIGHT 94
+
+static void draw_upgrade_box_frame(double openness) {
+  assert(openness >= 0.0);
+  assert(openness <= 1.0);
+  const double width = sqrt(openness) * UPGRADE_BOX_WIDTH;
+  const double height = openness * openness * UPGRADE_BOX_HEIGHT;
+  const double left = 0.5 * (AZ_SCREEN_WIDTH - width);
+  const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
+  glColor4f(0, 0, 0, 0.875); // black tint
+  glBegin(GL_QUADS); {
+    glVertex2d(left, top);
+    glVertex2d(left + width, top);
+    glVertex2d(left + width, top + height);
+    glVertex2d(left, top + height);
+  } glEnd();
+  glColor3f(0, 1, 0); // green
+  glBegin(GL_LINE_LOOP); {
+    glVertex2d(left, top);
+    glVertex2d(left + width, top);
+    glVertex2d(left + width, top + height);
+    glVertex2d(left, top + height);
+  } glEnd();
+}
+
+static void draw_upgrade_box_message(az_upgrade_t upgrade) {
+  const char *name = NULL, *line1 = NULL, *line2 = NULL;
+  switch (upgrade) {
+    case AZ_UPG_GUN_CHARGE:
+      name = "CHARGE GUN";
+      line1 = "Hold [V] to charge, release to fire.";
+      break;
+    case AZ_UPG_ROCKET_AMMO_00:
+    case AZ_UPG_ROCKET_AMMO_01:
+    case AZ_UPG_ROCKET_AMMO_02:
+    case AZ_UPG_ROCKET_AMMO_03:
+    case AZ_UPG_ROCKET_AMMO_04:
+    case AZ_UPG_ROCKET_AMMO_05:
+    case AZ_UPG_ROCKET_AMMO_06:
+    case AZ_UPG_ROCKET_AMMO_07:
+    case AZ_UPG_ROCKET_AMMO_08:
+    case AZ_UPG_ROCKET_AMMO_09:
+    case AZ_UPG_ROCKET_AMMO_10:
+    case AZ_UPG_ROCKET_AMMO_11:
+    case AZ_UPG_ROCKET_AMMO_12:
+    case AZ_UPG_ROCKET_AMMO_13:
+    case AZ_UPG_ROCKET_AMMO_14:
+    case AZ_UPG_ROCKET_AMMO_15:
+    case AZ_UPG_ROCKET_AMMO_16:
+    case AZ_UPG_ROCKET_AMMO_17:
+    case AZ_UPG_ROCKET_AMMO_18:
+    case AZ_UPG_ROCKET_AMMO_19:
+      name = "ROCKETS";
+      line1 = "Maximum rockets increased by 5.";
+      line2 = "Press [9] to select, hold [C] and press [V] to fire.";
+      break;
+    case AZ_UPG_REACTIVE_ARMOR:
+      name = "REACTIVE ARMOR";
+      line1 = "All damage taken is reduced by half.";
+      line2 = "Colliding with enemies will now damage them.";
+      break;
+    default:
+      name = "?????";
+      line1 = "TODO describe other upgrades";
+      break;
+  }
+  assert(name != NULL);
+  assert(line1 != NULL);
+  const double top = 0.5 * (AZ_SCREEN_HEIGHT - UPGRADE_BOX_HEIGHT);
+  glColor3f(1, 1, 1); // white
+  az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 18, name);
+  az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, line1);
+  if (line2 != NULL) {
+    az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 68, line2);
+  }
+}
+
+static void draw_upgrade_box(const az_space_state_t *state) {
+  assert(state->mode == AZ_MODE_UPGRADE);
+  switch (state->mode_data.upgrade.step) {
+    case AZ_UGS_OPEN:
+      draw_upgrade_box_frame(state->mode_data.upgrade.progress);
+      break;
+    case AZ_UGS_MESSAGE:
+      draw_upgrade_box_frame(1.0);
+      draw_upgrade_box_message(state->mode_data.upgrade.upgrade);
+      break;
+    case AZ_UGS_CLOSE:
+      draw_upgrade_box_frame(1.0 - state->mode_data.upgrade.progress);
+      break;
+  }
+}
+
+/*===========================================================================*/
+
 void az_draw_hud(const az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
@@ -269,6 +372,9 @@ void az_draw_hud(const az_space_state_t *state) {
   // TODO: draw boss health bar, when relevant
   draw_hud_message(&state->message);
   draw_hud_timer(&state->timer, state->clock);
+  if (state->mode == AZ_MODE_UPGRADE) {
+    draw_upgrade_box(state);
+  }
 }
 
 /*===========================================================================*/

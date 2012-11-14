@@ -246,6 +246,23 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // Check if we hit an upgrade.
+  if (state->mode == AZ_MODE_NORMAL) {
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind != AZ_NODE_UPGRADE) continue;
+      if (az_vwithin(ship->position, node->position,
+                     AZ_UPGRADE_COLLECTION_RADIUS)) {
+        state->mode = AZ_MODE_UPGRADE;
+        state->mode_data.upgrade.step = AZ_UGS_OPEN;
+        state->mode_data.upgrade.progress = 0.0;
+        state->mode_data.upgrade.upgrade = node->upgrade;
+        node->kind = AZ_NODE_NOTHING;
+        az_give_upgrade(player, node->upgrade);
+        break;
+      }
+    }
+  }
+
   // By now it's possible we've changed modes (e.g. we may have gone through a
   // door, or been destroyed by a wall impact).  We should only continue
   // onwards if we're still in normal mode.
