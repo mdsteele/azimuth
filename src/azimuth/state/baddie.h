@@ -67,6 +67,8 @@ typedef struct {
   } components[4];
 } az_baddie_t;
 
+/*===========================================================================*/
+
 // Get the static baddie data struct for a particular baddie kind.  The kind
 // must not be AZ_BAD_NOTHING.
 const az_baddie_data_t *az_get_baddie_data(az_baddie_kind_t kind);
@@ -76,12 +78,23 @@ const az_baddie_data_t *az_get_baddie_data(az_baddie_kind_t kind);
 void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle);
 
+/*===========================================================================*/
+
 // Determine if a ray, travelling delta from start, will hit the baddie.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
 // and the normal vector in *normal_out (if normal_out is non-NULL).
-bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
-                        az_vector_t delta, az_vector_t *point_out,
-                        az_vector_t *normal_out);
+bool az_ray_hits_baddie(
+    const az_baddie_t *baddie, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
+
+// Determine if a circle with the given radius, travelling delta from start,
+// will hit the baddie.  If it does, the function stores in *pos_out
+// the earliest position of the circle at which it touches the wall (if pos_out
+// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// non-NULL).
+bool az_circle_hits_baddie(
+    const az_baddie_t *baddie, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
 
 /*===========================================================================*/
 

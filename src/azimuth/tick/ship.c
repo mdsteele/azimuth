@@ -84,10 +84,13 @@ static void on_ship_hit_wall(az_space_state_t *state,
                              az_vmul(az_vunit(impact_normal), 0.5));
   }
   // Bounce the ship off the wall.
+  const double old_speed_fraction =
+    az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED;
   ship->velocity = az_vsub(ship->velocity,
                            az_vmul(az_vproj(ship->velocity, impact_normal),
                                    1.0 + elasticity));
-  // TODO: Damage the ship.
+  // Damage the ship.
+  az_damage_ship(state, impact_damage_coeff * old_speed_fraction);
   // Put a particle at the impact point.
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
@@ -185,14 +188,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_vector_t delta = az_vmul(ship->velocity, time);
     az_collide_target_t collide = {.type = AZ_COL_NOTHING};
     az_vector_t impact_pos = AZ_VZERO;
-    // Walls:
-    AZ_ARRAY_LOOP(wall, state->walls) {
-      if (wall->kind == AZ_WALL_NOTHING) continue;
+    // Baddies:
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
       az_vector_t end_pos;
-      if (az_circle_hits_wall(wall, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
-                              &end_pos, &impact_pos)) {
-        collide.type = AZ_COL_WALL;
-        collide.target.wall = wall;
+      if (az_circle_hits_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
+                                &end_pos, &impact_pos)) {
+        collide.type = AZ_COL_BADDIE;
+        collide.target.baddie = baddie;
         delta = az_vsub(end_pos, start);
       }
     }
@@ -212,8 +215,17 @@ void az_tick_ship(az_space_state_t *state, double time) {
         delta = az_vsub(end_pos, start);
       }
     }
-    // Baddies:
-    // TODO: Ship collisions with baddies
+    // Walls:
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      az_vector_t end_pos;
+      if (az_circle_hits_wall(wall, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
+                              &end_pos, &impact_pos)) {
+        collide.type = AZ_COL_WALL;
+        collide.target.wall = wall;
+        delta = az_vsub(end_pos, start);
+      }
+    }
 
     // Move the ship:
     ship->position = az_vadd(start, delta);
@@ -221,7 +233,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
     // Resolve the collision (if any):
     switch (collide.type) {
       case AZ_COL_NOTHING: break;
-      case AZ_COL_BADDIE: assert(false); break; // TODO
+      case AZ_COL_BADDIE:
+        // TODO: make these parameters depend on baddie
+        on_ship_hit_wall(state, 0.1, 10.0, impact_pos);
+        break;
       case AZ_COL_DOOR_INSIDE:
         on_ship_enter_door(state, collide.target.door);
         break;

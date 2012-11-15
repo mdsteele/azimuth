@@ -90,6 +90,8 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   }
 }
 
+/*===========================================================================*/
+
 bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
                         az_vector_t delta, az_vector_t *point_out,
                         az_vector_t *normal_out) {
@@ -107,35 +109,85 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
                                            -baddie->angle);
   az_vector_t rel_delta = az_vrotate(delta, -baddie->angle);
   bool did_hit = false;
+  az_vector_t point = AZ_VZERO;
 
   // Check if we hit the main body of the baddie.
   if (az_ray_hits_polygon(data->polygon, rel_start, rel_delta,
-                          point_out, normal_out)) {
+                          &point, normal_out)) {
     did_hit = true;
-    rel_delta = az_vsub(*point_out, rel_start);
+    rel_delta = az_vsub(point, rel_start);
   }
 
   // Now check if we hit any of the baddie's components.
   for (int i = 0; i < data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
-    if (az_ray_hits_polygon_trans(data->components[i].polygon,
-                                  baddie->components[i].position,
-                                  baddie->components[i].angle,
-                                  rel_start, rel_delta,
-                                  point_out, normal_out)) {
+    if (az_ray_hits_polygon_trans(
+            data->components[i].polygon, baddie->components[i].position,
+            baddie->components[i].angle, rel_start, rel_delta,
+            &point, normal_out)) {
       did_hit = true;
-      rel_delta = az_vsub(*point_out, rel_start);
+      rel_delta = az_vsub(point, rel_start);
     }
   }
 
   // Fix up *point_out and *normal_out and return.
   if (did_hit) {
     if (point_out != NULL) {
-      *point_out = az_vadd(az_vrotate(*point_out, baddie->angle),
-                           baddie->position);
+      *point_out = az_vadd(az_vrotate(point, baddie->angle), baddie->position);
     }
     if (normal_out != NULL) {
       *normal_out = az_vrotate(*normal_out, baddie->angle);
+    }
+  }
+  return did_hit;
+}
+
+bool az_circle_hits_baddie(
+    const az_baddie_t *baddie, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  const az_baddie_data_t *data = baddie->data;
+
+  // Common case: if circle definitely misses baddie, return early.
+  if (!az_ray_hits_circle(start, delta, baddie->position,
+                          data->bounding_radius + radius)) {
+    return false;
+  }
+
+  // Calculate start and delta relative to the positioning of the baddie.
+  const az_vector_t rel_start = az_vrotate(az_vsub(start, baddie->position),
+                                           -baddie->angle);
+  az_vector_t rel_delta = az_vrotate(delta, -baddie->angle);
+  bool did_hit = false;
+  az_vector_t pos = AZ_VZERO;
+
+  // Check if we hit the main body of the baddie.
+  if (az_circle_hits_polygon(data->polygon, radius, rel_start, rel_delta,
+                             &pos, impact_out)) {
+    did_hit = true;
+    rel_delta = az_vsub(pos, rel_start);
+  }
+
+  // Now check if we hit any of the baddie's components.
+  for (int i = 0; i < data->num_components; ++i) {
+    assert(i < AZ_ARRAY_SIZE(baddie->components));
+    if (az_circle_hits_polygon_trans(
+            data->components[i].polygon, baddie->components[i].position,
+            baddie->components[i].angle, radius, rel_start, rel_delta,
+            &pos, impact_out)) {
+      did_hit = true;
+      rel_delta = az_vsub(pos, rel_start);
+    }
+  }
+
+  // Fix up *pos_out and *impact_out and return.
+  if (did_hit) {
+    if (pos_out != NULL) {
+      *pos_out = az_vadd(az_vrotate(pos, baddie->angle), baddie->position);
+    }
+    if (impact_out != NULL) {
+      *impact_out = az_vadd(az_vrotate(*impact_out, baddie->angle),
+                            baddie->position);
     }
   }
   return did_hit;
