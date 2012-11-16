@@ -30,6 +30,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
+#include "azimuth/view/cursor.h"
 #include "azimuth/view/door.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
@@ -335,6 +336,7 @@ void az_editor_draw_screen(az_editor_state_t* state) {
   } glPopMatrix();
 
   draw_hud(state);
+  az_draw_cursor();
 }
 
 az_vector_t az_pixel_to_position(az_editor_state_t *state, int x, int y) {

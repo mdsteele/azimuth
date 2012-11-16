@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/cursor.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -421,6 +422,8 @@ void az_title_draw_screen(const az_title_state_t *state) {
   if (state->mode == AZ_TMODE_STARTING) {
     fade_screen_black(state->mode_data.starting.progress);
   }
+
+  az_draw_cursor();
 }
 
 /*===========================================================================*/

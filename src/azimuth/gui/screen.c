@@ -40,13 +40,14 @@
 #define VIDEO_DEPTH 32
 #define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
 
-static bool gui_initialized = false;
+static bool sdl_initialized = false;
+static bool display_initialized = false;
 static bool currently_fullscreen;
 static int num_gl_init_funcs = 0;
 static az_init_func_t gl_init_funcs[8];
 
 void az_register_gl_init_func(az_init_func_t func) {
-  assert(!gui_initialized);
+  assert(!sdl_initialized);
   if (num_gl_init_funcs >= AZ_ARRAY_SIZE(gl_init_funcs)) {
     AZ_FATAL("gl_init_funcs array is full.");
   } else {
@@ -55,26 +56,27 @@ void az_register_gl_init_func(az_init_func_t func) {
 }
 
 void az_init_gui(bool fullscreen) {
-  assert(!gui_initialized);
+  assert(!sdl_initialized);
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     AZ_FATAL("SDL_Init failed.\n");
   }
   atexit(SDL_Quit);
   SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "-M to run full-screen)",
                     "Azimuth");
-  gui_initialized = true;
-  currently_fullscreen = !fullscreen;
+  sdl_initialized = true;
   az_set_fullscreen(fullscreen);
+  SDL_ShowCursor(SDL_DISABLE);
 }
 
 bool az_is_fullscreen(void) {
-  assert(gui_initialized);
+  assert(sdl_initialized);
+  assert(display_initialized);
   return currently_fullscreen;
 }
 
 void az_set_fullscreen(bool fullscreen) {
-  assert(gui_initialized);
-  if (fullscreen == currently_fullscreen) return;
+  assert(sdl_initialized);
+  if (display_initialized && fullscreen == currently_fullscreen) return;
   currently_fullscreen = fullscreen;
   // Enable OpenGL double-buffering:
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -89,10 +91,18 @@ void az_set_fullscreen(bool fullscreen) {
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
   // Init the display:
+  int x = 0, y = 0;
+  if (display_initialized) {
+    SDL_GetMouseState(&x, &y);
+  }
   if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, VIDEO_DEPTH,
                         VIDEO_FLAGS | (fullscreen ? SDL_FULLSCREEN : 0))) {
     AZ_FATAL("SDL_SetVideoMode failed.\n");
   }
+  if (display_initialized) {
+    SDL_WarpMouse(x, y);
+  }
+
   // Enable unicode values for keyboard events:
   SDL_EnableUNICODE(1);
 
@@ -124,16 +134,20 @@ void az_set_fullscreen(bool fullscreen) {
   for (int i = 0; i < num_gl_init_funcs; ++i) {
     gl_init_funcs[i]();
   }
+
+  display_initialized = true;
 }
 
 void az_start_screen_redraw(void) {
-  assert(gui_initialized);
+  assert(sdl_initialized);
+  assert(display_initialized);
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
 }
 
 void az_finish_screen_redraw(void) {
-  assert(gui_initialized);
+  assert(sdl_initialized);
+  assert(display_initialized);
   glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
   glFinish();
   SDL_GL_SwapBuffers();
