@@ -38,6 +38,35 @@
 
 /*===========================================================================*/
 
+static double mode_fade_alpha(az_space_state_t *state) {
+  switch (state->mode) {
+    case AZ_MODE_DOORWAY:
+      switch (state->mode_data.doorway.step) {
+        case AZ_DWS_FADE_OUT:
+          return state->mode_data.doorway.progress;
+        case AZ_DWS_SHIFT:
+          return 1.0;
+        case AZ_DWS_FADE_IN:
+          return 1.0 - state->mode_data.doorway.progress;
+      }
+      assert(false); // unreachable
+    case AZ_MODE_GAME_OVER:
+      if (state->mode_data.game_over.step == AZ_GOS_FADE_OUT) {
+        return state->mode_data.game_over.progress;
+      }
+      return 0.0;
+    case AZ_MODE_PAUSING:
+      return state->mode_data.pause.progress;
+    case AZ_MODE_RESUMING:
+      return 1.0 - state->mode_data.pause.progress;
+    case AZ_MODE_NORMAL:
+    case AZ_MODE_SAVING:
+    case AZ_MODE_UPGRADE:
+      return 0.0;
+  }
+  assert(false); // unreachable
+}
+
 static void draw_camera_view(az_space_state_t *state) {
   az_draw_walls(state);
   az_draw_nodes(state);
@@ -51,23 +80,7 @@ static void draw_camera_view(az_space_state_t *state) {
 
 void az_space_draw_screen(az_space_state_t *state) {
   // Check if we're in a mode where we should be tinting the camera view black.
-  double fade_alpha = 0.0;
-  if (state->mode == AZ_MODE_DOORWAY) {
-    switch (state->mode_data.doorway.step) {
-      case AZ_DWS_FADE_OUT:
-        fade_alpha = state->mode_data.doorway.progress;
-        break;
-      case AZ_DWS_SHIFT:
-        fade_alpha = 1.0;
-        break;
-      case AZ_DWS_FADE_IN:
-        fade_alpha = 1.0 - state->mode_data.doorway.progress;
-        break;
-    }
-  } else if (state->mode == AZ_MODE_GAME_OVER &&
-             state->mode_data.game_over.step == AZ_GOS_FADE_OUT) {
-    fade_alpha = state->mode_data.game_over.progress;
-  }
+  const double fade_alpha = mode_fade_alpha(state);
   assert(fade_alpha >= 0.0);
   assert(fade_alpha <= 1.0);
 
@@ -81,7 +94,9 @@ void az_space_draw_screen(az_space_state_t *state) {
     glTranslated(0, -az_vnorm(state->camera), 0);
     glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);
     // Draw what the camera sees.
-    if (fade_alpha < 1.0) draw_camera_view(state);
+    if (fade_alpha < 1.0) {
+      draw_camera_view(state);
+    }
     if (state->mode == AZ_MODE_DOORWAY) {
       // TODO: draw door transition
     }

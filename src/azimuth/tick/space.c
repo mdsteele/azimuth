@@ -118,6 +118,18 @@ static void tick_game_over_mode(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_pause_resume_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING);
+  const double pause_unpause_time = 0.25; // seconds
+  state->mode_data.pause.progress =
+    az_dmin(1.0, state->mode_data.pause.progress +
+            time / pause_unpause_time);
+  if (state->mode == AZ_MODE_RESUMING &&
+      state->mode_data.pause.progress >= 1.0) {
+    state->mode = AZ_MODE_NORMAL;
+  }
+}
+
 static void tick_upgrade_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_UPGRADE);
   const double open_close_time = 0.5; // seconds
@@ -179,6 +191,12 @@ static void tick_camera(az_space_state_t *state, double time) {
 }
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  // If we're pausing or unpausing, nothing else should happen.
+  if (state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING) {
+    tick_pause_resume_mode(state, time);
+    return;
+  }
+
   // If we're in game over mode and the ship is asploding, go into slow-motion:
   if (state->mode == AZ_MODE_GAME_OVER &&
       state->mode_data.game_over.step == AZ_GOS_ASPLODE) {
@@ -188,9 +206,9 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   state->ship.player.total_time += time;
   ++state->clock;
   az_tick_particles(state, time);
-  az_tick_pickups(state, time);
   switch (state->mode) {
     case AZ_MODE_NORMAL:
+      az_tick_pickups(state, time);
       az_tick_doors(state, time);
       az_tick_projectiles(state, time);
       az_tick_baddies(state, time);
@@ -199,6 +217,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
       if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
+        az_tick_pickups(state, time);
         az_tick_doors(state, time);
         az_tick_projectiles(state, time);
         az_tick_baddies(state, time);
@@ -207,9 +226,14 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
+      az_tick_pickups(state, time);
       az_tick_doors(state, time);
       az_tick_projectiles(state, time);
       az_tick_baddies(state, time);
+      break;
+    case AZ_MODE_PAUSING:
+    case AZ_MODE_RESUMING:
+      assert(false); // unreachable; these modes are handled above
       break;
     case AZ_MODE_SAVING:
       // TODO: maybe we should add some kind of saving animation?

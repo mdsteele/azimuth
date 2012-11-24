@@ -94,11 +94,11 @@ int main(int argc, char **argv) {
       case AZ_CONTROLLER_SPACE:
         switch (az_space_event_loop(&planet, &saved_games,
                                     saved_game_slot_index)) {
+          case AZ_SA_EXIT_TO_TITLE:
+            controller = AZ_CONTROLLER_TITLE;
+            break;
           case AZ_SA_GAME_OVER:
             controller = AZ_CONTROLLER_GAME_OVER;
-            break;
-          case AZ_SA_VICTORY:
-            controller = AZ_CONTROLLER_TITLE;
             break;
         }
         break;

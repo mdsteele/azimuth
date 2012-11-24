@@ -18,23 +18,22 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_CONTROL_SPACE_H_
-#define AZIMUTH_CONTROL_SPACE_H_
+#ifndef AZIMUTH_CONTROL_PAUSED_H_
+#define AZIMUTH_CONTROL_PAUSED_H_
 
 #include "azimuth/state/planet.h"
-#include "azimuth/state/save.h"
+#include "azimuth/state/ship.h"
 
 /*===========================================================================*/
 
 typedef enum {
-  AZ_SA_EXIT_TO_TITLE,
-  AZ_SA_GAME_OVER
-} az_space_action_t;
+  AZ_PA_RESUME,
+  AZ_PA_EXIT_TO_TITLE
+} az_paused_action_t;
 
-az_space_action_t az_space_event_loop(const az_planet_t *planet,
-                                      az_saved_games_t *saved_games,
-                                      int saved_game_index);
+az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
+                                        az_player_t *player);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_CONTROL_SPACE_H_
+#endif // AZIMUTH_CONTROL_PAUSED_H_

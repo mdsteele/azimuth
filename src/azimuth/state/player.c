@@ -28,6 +28,25 @@
 
 /*===========================================================================*/
 
+const char *az_gun_name(az_gun_t gun) {
+  switch (gun) {
+    case AZ_GUN_NONE:
+      assert(false);
+      break;
+    case AZ_GUN_CHARGE: return "CHARGE";
+    case AZ_GUN_FREEZE: return "FREEZE";
+    case AZ_GUN_TRIPLE: return "TRIPLE";
+    case AZ_GUN_HOMING: return "HOMING";
+    case AZ_GUN_BEAM:   return "BEAM";
+    case AZ_GUN_PHASE:  return "PHASE";
+    case AZ_GUN_BURST:  return "BURST";
+    case AZ_GUN_PIERCE: return "PIERCE";
+  }
+  return "XXXXXX";
+}
+
+/*===========================================================================*/
+
 void az_init_player(az_player_t *player) {
   memset(player, 0, sizeof(*player));
   player->shields = player->max_shields = AZ_INITIAL_MAX_SHIELDS;

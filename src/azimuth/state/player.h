@@ -39,10 +39,10 @@ typedef enum {
   AZ_UPG_GUN_FREEZE,
   AZ_UPG_GUN_TRIPLE,
   AZ_UPG_GUN_HOMING,
-  AZ_UPG_GUN_BEAM,
   AZ_UPG_GUN_PHASE,
   AZ_UPG_GUN_BURST,
   AZ_UPG_GUN_PIERCE,
+  AZ_UPG_GUN_BEAM,
   // Rockets:
   AZ_UPG_ROCKET_AMMO_00,
   AZ_UPG_ROCKET_AMMO_01,
@@ -79,13 +79,14 @@ typedef enum {
   AZ_UPG_BOMB_AMMO_09,
   AZ_UPG_MEGA_BOMBS,
   AZ_UPG_ATTUNED_EXPLOSIVES,
-  // Engines:
+  // Misc:
   AZ_UPG_TRACTOR_BEAM,
+  AZ_UPG_INFRASCANNER,
+  // Engines:
   AZ_UPG_RETRO_THRUSTERS,
   AZ_UPG_LATERAL_THRUSTERS,
-  AZ_UPG_AFTERBURNER,
-  AZ_UPG_BLAZER,
-  AZ_UPG_SPRINT_THRUSTERS,
+  AZ_UPG_CPLUS_DRIVE,
+  AZ_UPG_ORION_BOOSTER,
   // Armor:
   AZ_UPG_HARDENED_ARMOR,
   AZ_UPG_THERMAL_ARMOR,
@@ -126,11 +127,14 @@ typedef enum {
   AZ_GUN_FREEZE,
   AZ_GUN_TRIPLE,
   AZ_GUN_HOMING,
-  AZ_GUN_BEAM,
   AZ_GUN_PHASE,
   AZ_GUN_BURST,
-  AZ_GUN_PIERCE
+  AZ_GUN_PIERCE,
+  AZ_GUN_BEAM
 } az_gun_t;
+
+// Get the name for a gun kind.  The argument must not be AZ_GUN_NONE.
+const char *az_gun_name(az_gun_t gun);
 
 // Which secondary (ordnance) weapon does the player have equipped?
 typedef enum {
@@ -138,6 +142,8 @@ typedef enum {
   AZ_ORDN_ROCKETS,
   AZ_ORDN_BOMBS
 } az_ordnance_t;
+
+/*===========================================================================*/
 
 typedef int az_room_key_t;
 typedef int az_flag_t;

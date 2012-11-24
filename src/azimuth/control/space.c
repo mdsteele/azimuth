@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdio.h> // for sprintf
 
+#include "azimuth/control/paused.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
@@ -99,12 +100,32 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
       az_space_draw_screen(&state);
     } az_finish_screen_redraw();
 
+    // Check the current mode; we may need to do something before we move on to
+    // handling events.
     if (state.mode == AZ_MODE_GAME_OVER) {
+      // If we're at the end of the game over animation, exit this controller
+      // and signal that we should transition to the game over screen
+      // controller.
       if (state.mode_data.game_over.step == AZ_GOS_FADE_OUT &&
           state.mode_data.game_over.progress >= 1.0) {
         return AZ_SA_GAME_OVER;
       }
+    } else if (state.mode == AZ_MODE_PAUSING) {
+      // If we're at the end of the pausing animation, directly engage the
+      // paused screen controller, and once it's done, either resume the game
+      // or exit to the title screen, as appropriate.
+      if (state.mode_data.pause.progress >= 1.0) {
+        switch (az_paused_event_loop(planet, &state.ship.player)) {
+          case AZ_PA_RESUME:
+            state.mode = AZ_MODE_RESUMING;
+            state.mode_data.pause.progress = 0.0;
+            break;
+          case AZ_PA_EXIT_TO_TITLE:
+            return AZ_SA_EXIT_TO_TITLE;
+        }
+      }
     } else if (state.mode == AZ_MODE_SAVING) {
+      // If we need to save the game, do so.
       const bool ok = save_current_game(saved_games);
       state.message.time_remaining = 4.0;
       if (ok) {
@@ -117,11 +138,24 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
       state.mode = AZ_MODE_NORMAL;
     }
 
+    // Handle the event queue.
     az_event_t event;
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
+          // Ignore keystrokes if not in normal mode (except to dismiss
+          // upgrade message box).
+          if (state.mode == AZ_MODE_UPGRADE &&
+              state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
+            state.mode_data.upgrade.step = AZ_UGS_CLOSE;
+            state.mode_data.upgrade.progress = 0.0;
+          } else if (state.mode != AZ_MODE_NORMAL) break;
+          // Handle the keystroke:
           switch (event.key.name) {
+            case AZ_KEY_RETURN:
+              state.mode = AZ_MODE_PAUSING;
+              state.mode_data.pause.progress = 0.0;
+              break;
             case AZ_KEY_UP_ARROW: state.ship.controls.up = true; break;
             case AZ_KEY_DOWN_ARROW: state.ship.controls.down = true; break;
             case AZ_KEY_LEFT_ARROW: state.ship.controls.left = true; break;
@@ -142,11 +176,6 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
           }
           break;
         case AZ_EVENT_KEY_UP:
-          if (state.mode == AZ_MODE_UPGRADE &&
-              state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
-            state.mode_data.upgrade.step = AZ_UGS_CLOSE;
-            state.mode_data.upgrade.progress = 0.0;
-          }
           switch (event.key.name) {
             case AZ_KEY_UP_ARROW: state.ship.controls.up = false; break;
             case AZ_KEY_DOWN_ARROW: state.ship.controls.down = false; break;

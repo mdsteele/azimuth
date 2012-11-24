@@ -87,21 +87,6 @@ static void draw_hud_shields_energy(const az_player_t *player) {
 
 /*===========================================================================*/
 
-static const char *gun_name(az_gun_t gun) {
-  switch (gun) {
-    case AZ_GUN_CHARGE: return "CHARGE";
-    case AZ_GUN_FREEZE: return "FREEZE";
-    case AZ_GUN_TRIPLE: return "TRIPLE";
-    case AZ_GUN_HOMING: return "HOMING";
-    case AZ_GUN_BEAM:   return "BEAM";
-    case AZ_GUN_PHASE:  return "PHASE";
-    case AZ_GUN_BURST:  return "BURST";
-    case AZ_GUN_PIERCE: return "PIERCE";
-    default: assert(false);
-  }
-  return "XXXXXX";
-}
-
 static void set_gun_color(az_gun_t gun) {
   switch (gun) {
     case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
@@ -133,7 +118,7 @@ static void draw_hud_gun_name(int left, int top, az_gun_t gun) {
     glEnd();
 
     set_gun_color(gun);
-    const char *name = gun_name(gun);
+    const char *name = az_gun_name(gun);
     az_draw_string(8, AZ_ALIGN_CENTER, left + 28, top + 2, name);
   }
 }

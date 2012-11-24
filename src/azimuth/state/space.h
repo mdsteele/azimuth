@@ -66,6 +66,8 @@ typedef struct {
     AZ_MODE_NORMAL, // flying around; the normal mode of gameplay
     AZ_MODE_DOORWAY, // waiting while we pass through a door
     AZ_MODE_GAME_OVER, // showing the game over animation
+    AZ_MODE_PAUSING, // entering the pause screen
+    AZ_MODE_RESUMING, // leaving the pause screen
     AZ_MODE_SAVING, // using a save point
     AZ_MODE_UPGRADE // receiving an upgrade
   } mode;
@@ -79,6 +81,9 @@ typedef struct {
       enum { AZ_GOS_ASPLODE, AZ_GOS_FADE_OUT } step;
       double progress; // 0.0 to 1.0
     } game_over;
+    struct {
+      double progress; // 0.0 to 1.0
+    } pause; // used for both PAUSING and RESUMING mode
     struct {
       enum { AZ_UGS_OPEN, AZ_UGS_MESSAGE, AZ_UGS_CLOSE } step;
       double progress; // 0.0 to 1.0
