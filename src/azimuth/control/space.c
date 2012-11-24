@@ -27,6 +27,7 @@
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
+#include "azimuth/state/player.h"
 #include "azimuth/state/save.h"
 #include "azimuth/state/space.h"
 #include "azimuth/system/resource.h"
@@ -172,6 +173,36 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
               state.ship.controls.util_held = true;
               break;
             case AZ_KEY_Z: state.ship.controls.burn = true; break;
+            case AZ_KEY_1:
+              az_select_gun(&state.ship.player, AZ_GUN_CHARGE);
+              break;
+            case AZ_KEY_2:
+              az_select_gun(&state.ship.player, AZ_GUN_FREEZE);
+              break;
+            case AZ_KEY_3:
+              az_select_gun(&state.ship.player, AZ_GUN_TRIPLE);
+              break;
+            case AZ_KEY_4:
+              az_select_gun(&state.ship.player, AZ_GUN_HOMING);
+              break;
+            case AZ_KEY_5:
+              az_select_gun(&state.ship.player, AZ_GUN_PHASE);
+              break;
+            case AZ_KEY_6:
+              az_select_gun(&state.ship.player, AZ_GUN_BURST);
+              break;
+            case AZ_KEY_7:
+              az_select_gun(&state.ship.player, AZ_GUN_PIERCE);
+              break;
+            case AZ_KEY_8:
+              az_select_gun(&state.ship.player, AZ_GUN_BEAM);
+              break;
+            case AZ_KEY_9:
+              az_select_ordnance(&state.ship.player, AZ_ORDN_ROCKETS);
+              break;
+            case AZ_KEY_0:
+              az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
+              break;
             default: break;
           }
           break;

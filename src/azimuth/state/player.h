@@ -171,6 +171,7 @@ typedef struct {
   int bombs, max_bombs;
   // Current weapon selections:
   az_gun_t gun1, gun2;
+  bool next_gun; // false for gun1, true for gun2
   az_ordnance_t ordnance;
 } az_player_t;
 
@@ -195,6 +196,13 @@ bool az_test_flag(const az_player_t *player, az_flag_t flag);
 void az_set_flag(az_player_t *player, az_flag_t flag);
 // Clear the given game flag for the player.
 void az_clear_flag(az_player_t *player, az_flag_t flag);
+
+// Change which gun the player has selected.  This will have no effect if the
+// player hasn't yet acquired the given gun.
+void az_select_gun(az_player_t *player, az_gun_t gun);
+// Change which ordnance (rockets or bombs) the player has selected.  This will
+// have no effect if the player hasn't yet acquired the given ordnance.
+void az_select_ordnance(az_player_t *player, az_ordnance_t ordn);
 
 /*===========================================================================*/
 

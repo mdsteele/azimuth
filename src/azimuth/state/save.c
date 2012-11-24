@@ -54,6 +54,8 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
       player->current_room >= planet->num_rooms) {
     return false;
   }
+  // Grant upgrades to the player.  This will correctly set their maximum
+  // shields/energy/rockets/bombs.
   for (unsigned int i = 0u; i < 64u; ++i) {
     if (upgrades1 & (UINT64_C(1) << i)) {
       az_give_upgrade(player, (az_upgrade_t)i);
@@ -64,13 +66,25 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
       az_give_upgrade(player, (az_upgrade_t)i);
     }
   }
+  // Validate and set current ammo stock (rockets and bombs).
   if (rockets < 0 || rockets > player->max_rockets) return false;
   else player->rockets = rockets;
   if (bombs < 0 || bombs > player->max_bombs) return false;
   else player->bombs = bombs;
+  // Save points recharge energy and shields, so set shields and energy to
+  // their maximums.
   player->shields = player->max_shields;
   player->energy = player->max_energy;
-  // TODO: validate and set gun1/gun2/ordnance
+  // Validate and select guns.
+  if (gun1 < (int)AZ_GUN_NONE || gun1 > (int)AZ_GUN_BEAM ||
+      gun2 < (int)AZ_GUN_NONE || gun2 > (int)AZ_GUN_BEAM) return false;
+  az_select_gun(player, (az_gun_t)gun1);
+  az_select_gun(player, (az_gun_t)gun2);
+  // Validate and select ordnance.
+  if (ordnance < (int)AZ_ORDN_NONE || ordnance > (int)AZ_ORDN_BOMBS) {
+    return false;
+  }
+  az_select_ordnance(player, (az_ordnance_t)ordnance);
   return true;
 }
 

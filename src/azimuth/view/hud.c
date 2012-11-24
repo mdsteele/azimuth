@@ -285,6 +285,21 @@ static void draw_upgrade_box_message(az_upgrade_t upgrade) {
       name = "CHARGE GUN";
       line1 = "Hold [V] to charge, release to fire.";
       break;
+    case AZ_UPG_GUN_FREEZE:
+      name = "FREEZE GUN";
+      line1 = "Shots can freeze enemies.";
+      line2 = "Press [2] to select, press [V] to fire.";
+      break;
+    case AZ_UPG_GUN_TRIPLE:
+      name = "TRIPLE GUN";
+      line1 = "Fires three shots at once.";
+      line2 = "Press [3] to select, press [V] to fire.";
+      break;
+    case AZ_UPG_GUN_HOMING:
+      name = "HOMING GUN";
+      line1 = "Shots will seek out enemies.";
+      line2 = "Press [4] to select, press [V] to fire.";
+      break;
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
     case AZ_UPG_ROCKET_AMMO_02:
