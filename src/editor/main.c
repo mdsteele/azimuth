@@ -30,7 +30,7 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
-#include "azimuth/util/misc.h" // for AZ_ALLOC
+#include "azimuth/util/misc.h"
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 #include "editor/list.h"
@@ -518,7 +518,7 @@ static void event_loop(void) {
           if (state.text.action != AZ_ETA_NOTHING) {
             if (event.key.name == AZ_KEY_RETURN) {
               switch (state.text.action) {
-                case AZ_ETA_NOTHING: assert(false); break;
+                case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
                 case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
                 case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
               }

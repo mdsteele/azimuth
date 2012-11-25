@@ -32,7 +32,7 @@
 
 /*===========================================================================*/
 
-void draw_passage(const az_door_t *door) {
+static void draw_passage(const az_door_t *door) {
   glColor3f(0, 1, 0); // green
   glBegin(GL_LINES); {
     for (double x = 30; x >= -30; x -= 4) glVertex2d(x, 50);
@@ -42,10 +42,10 @@ void draw_passage(const az_door_t *door) {
   } glEnd();
 }
 
-void draw_door_internal(const az_door_t *door) {
+static void draw_door_internal(const az_door_t *door) {
   az_color_t color = AZ_WHITE;
   switch (door->kind) {
-    case AZ_DOOR_NOTHING: assert(false); return;
+    case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_DOOR_NORMAL:
       color = (az_color_t){192, 192, 192, 255};
       break;
@@ -98,6 +98,7 @@ void draw_door_internal(const az_door_t *door) {
 }
 
 void az_draw_door(const az_door_t *door) {
+  assert(door->kind != AZ_DOOR_NOTHING);
   glPushMatrix(); {
     glTranslated(door->position.x, door->position.y, 0);
     glRotated(AZ_RAD2DEG(door->angle), 0, 0, 1);

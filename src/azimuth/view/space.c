@@ -25,6 +25,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/door.h"
@@ -49,7 +50,7 @@ static double mode_fade_alpha(az_space_state_t *state) {
         case AZ_DWS_FADE_IN:
           return 1.0 - state->mode_data.doorway.progress;
       }
-      assert(false); // unreachable
+      AZ_ASSERT_UNREACHABLE();
     case AZ_MODE_GAME_OVER:
       if (state->mode_data.game_over.step == AZ_GOS_FADE_OUT) {
         return state->mode_data.game_over.progress;
@@ -64,7 +65,7 @@ static double mode_fade_alpha(az_space_state_t *state) {
     case AZ_MODE_UPGRADE:
       return 0.0;
   }
-  assert(false); // unreachable
+  AZ_ASSERT_UNREACHABLE();
 }
 
 static void draw_camera_view(az_space_state_t *state) {

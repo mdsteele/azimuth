@@ -352,8 +352,7 @@ static bool button_is_active(const az_title_state_t *state,
     case AZ_BUTTON_CANCEL:
       return state->mode == AZ_TMODE_ERASING;
   }
-  assert(false); // unreachable
-  return false;
+  AZ_ASSERT_UNREACHABLE();
 }
 
 static void reset_button(az_title_button_t *button) {

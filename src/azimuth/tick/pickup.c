@@ -39,6 +39,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
     if (az_vwithin(pickup->position, state->ship.position,
                    AZ_PICKUP_COLLECTION_RANGE)) {
       switch (pickup->kind) {
+        case AZ_PUP_NOTHING: AZ_ASSERT_UNREACHABLE();
         case AZ_PUP_ROCKETS:
           player->rockets = az_imin(player->max_rockets, player->rockets +
                                     AZ_ROCKETS_PER_PICKUP);
@@ -59,7 +60,6 @@ void az_tick_pickups(az_space_state_t *state, double time) {
           player->shields = az_imin(player->max_shields, player->shields +
                                     AZ_SHIELDS_PER_LARGE_PICKUP);
           break;
-        default: assert(false);
       }
       pickup->kind = AZ_PUP_NOTHING;
     } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {

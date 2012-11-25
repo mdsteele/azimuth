@@ -34,10 +34,10 @@ const char *az_gun_name(az_gun_t gun) {
     case AZ_GUN_FREEZE: return "FREEZE";
     case AZ_GUN_TRIPLE: return "TRIPLE";
     case AZ_GUN_HOMING: return "HOMING";
-    case AZ_GUN_BEAM:   return "BEAM";
     case AZ_GUN_PHASE:  return "PHASE";
     case AZ_GUN_BURST:  return "BURST";
     case AZ_GUN_PIERCE: return "PIERCE";
+    case AZ_GUN_BEAM:   return "BEAM";
     default: assert(false);
   }
   return "XXXXXX";
@@ -178,7 +178,6 @@ void az_select_ordnance(az_player_t *player, az_ordnance_t ordn) {
     case AZ_ORDN_BOMBS:
       if (player->max_bombs <= 0) return;
       break;
-    default: assert(false);
   }
   player->ordnance = ordn;
 }

@@ -34,6 +34,7 @@
 
 static void draw_baddie_internal(const az_baddie_t *baddie) {
   switch (baddie->kind) {
+    case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
       glColor3f(1, 0, 1); // magenta
       glBegin(GL_POLYGON); {
@@ -67,11 +68,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie) {
         }
       } glEnd();
       break;
-    default: assert(false);
   }
 }
 
 void az_draw_baddie(const az_baddie_t *baddie) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
   glPushMatrix(); {
     glTranslated(baddie->position.x, baddie->position.y, 0);
     glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);

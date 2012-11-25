@@ -19,7 +19,6 @@
 
 #include "azimuth/view/pickup.h"
 
-#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -36,6 +35,7 @@
 static void draw_pickup(az_pickup_kind_t kind, az_clock_t clock) {
   double radius = 0.5 * (double)az_clock_mod(16, 1, clock);
   switch (kind) {
+    case AZ_PUP_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PUP_ROCKETS:
       glColor3f(1, 0, 0);
       glBegin(GL_LINES); {
@@ -105,7 +105,6 @@ static void draw_pickup(az_pickup_kind_t kind, az_clock_t clock) {
         }
       } glEnd();
       break;
-    default: assert(false);
   }
 }
 

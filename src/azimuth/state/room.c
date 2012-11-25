@@ -27,7 +27,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/state/wall.h"
-#include "azimuth/util/misc.h" // for AZ_ALLOC
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
@@ -151,7 +151,7 @@ static bool parse_directive(az_load_room_t *loader) {
     case EOF: return false;
     default: FAIL();
   }
-  assert(false); // unreachable
+  AZ_ASSERT_UNREACHABLE();
 }
 
 static void validate_room(az_load_room_t *loader) {

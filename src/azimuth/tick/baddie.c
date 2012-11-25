@@ -37,6 +37,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     baddie->cooldown = az_dmax(0.0, baddie->cooldown - time);
   }
   switch (baddie->kind) {
+    case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
       baddie->angle = az_mod2pi(baddie->angle + 3.0 * time);
       break;
@@ -67,7 +68,6 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
-    default: assert(false);
   }
 }
 

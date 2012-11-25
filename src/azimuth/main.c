@@ -17,7 +17,6 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -30,6 +29,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/system/resource.h"
+#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
@@ -108,8 +108,7 @@ int main(int argc, char **argv) {
         break;
     }
   }
-  assert(false); // unreachable
-  return EXIT_FAILURE;
+  AZ_ASSERT_UNREACHABLE();
 }
 
 /*===========================================================================*/

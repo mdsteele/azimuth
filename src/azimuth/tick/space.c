@@ -29,6 +29,7 @@
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
 #include "azimuth/tick/ship.h"
+#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -233,8 +234,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_PAUSING:
     case AZ_MODE_RESUMING:
-      assert(false); // unreachable; these modes are handled above
-      break;
+      AZ_ASSERT_UNREACHABLE(); // these modes are handled above
     case AZ_MODE_SAVING:
       // TODO: maybe we should add some kind of saving animation?
       break;

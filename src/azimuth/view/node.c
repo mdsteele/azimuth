@@ -19,7 +19,6 @@
 
 #include "azimuth/view/node.h"
 
-#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -130,7 +129,7 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
 
 static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
   switch (node->kind) {
-    case AZ_NODE_NOTHING: assert(false); break;
+    case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_NODE_SAVE_POINT:
       glColor3f(1, 1, 1); // white
       glBegin(GL_LINE_LOOP); {

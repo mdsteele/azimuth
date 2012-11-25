@@ -27,6 +27,7 @@
 
 #include "azimuth/gui/screen.h"
 #include "azimuth/system/misc.h"
+#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 
 /*===========================================================================*/
 
@@ -174,7 +175,7 @@ bool az_poll_event(az_event_t *event) {
         exit(EXIT_SUCCESS);
       default: continue;
     }
-    assert(false); // unreachable
+    AZ_ASSERT_UNREACHABLE();
   }
   return false;
 }

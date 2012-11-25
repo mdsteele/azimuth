@@ -28,6 +28,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
 #include "azimuth/view/string.h"
 
@@ -89,6 +90,7 @@ static void draw_hud_shields_energy(const az_player_t *player) {
 
 static void set_gun_color(az_gun_t gun) {
   switch (gun) {
+    case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
     case AZ_GUN_FREEZE: glColor3f(0, 1, 1); break;
     case AZ_GUN_TRIPLE: glColor3f(0, 1, 0); break;
@@ -97,7 +99,6 @@ static void set_gun_color(az_gun_t gun) {
     case AZ_GUN_PHASE:  glColor3f(1, 1, 0); break;
     case AZ_GUN_BURST:  glColor3f(0.5, 0.5, 0.5); break;
     case AZ_GUN_PIERCE: glColor3f(1, 0, 1); break;
-    default: assert(false);
   }
 }
 

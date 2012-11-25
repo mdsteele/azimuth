@@ -39,6 +39,7 @@ static void with_color_alpha(az_color_t color, double alpha_factor) {
 static void draw_particle(const az_particle_t *particle) {
   assert(particle->age <= particle->lifetime);
   switch (particle->kind) {
+    case AZ_PAR_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PAR_SPECK:
       glBegin(GL_POINTS); {
         const double ratio = particle->age / particle->lifetime;
@@ -75,7 +76,6 @@ static void draw_particle(const az_particle_t *particle) {
         glVertex2d(particle->param1, -particle->param2);
       } glEnd();
       break;
-    default: assert(false);
   }
 }
 
