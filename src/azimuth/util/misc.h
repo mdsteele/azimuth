@@ -47,6 +47,12 @@ void _az_fatal(const char *funcname, const char *format, ...)
 void *_az_alloc(const char *funcname, size_t n, size_t size)
   __attribute__((__malloc__));
 
+// Use this macro to indicate that this point in the code should never be
+// reached at runtime.  If it is reached anyway (presumably due to a bug), it
+// will terminate the program with a fatal error.
+// TODO: Consider using __builtin_unreachable or somewuch here for NDEBUG.
+#define AZ_ASSERT_UNREACHABLE() AZ_FATAL("line %d: unreachable\n", __LINE__)
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_MISC_H_

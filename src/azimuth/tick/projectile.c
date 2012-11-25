@@ -20,6 +20,7 @@
 #include "azimuth/tick/projectile.h"
 
 #include <assert.h>
+#include <math.h> // for INFINITY
 #include <stdlib.h> // for NULL
 
 #include "azimuth/state/projectile.h"
@@ -132,6 +133,40 @@ static void on_projectile_hit_target(az_space_state_t *state,
   on_projectile_impact(state, proj);
 }
 
+static void projectile_home_in(az_space_state_t *state,
+                               az_projectile_t *proj,
+                               double time) {
+  assert(proj->data->homing);
+  // First, figure out what position we're homing in on.
+  az_vector_t goal = state->ship.position;
+  if (!proj->fired_by_enemy) {
+    double best_dist = INFINITY;
+    bool found_target = false;
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->uid == proj->last_hit_uid) continue;
+      const double dist = az_vdist(baddie->position, proj->position);
+      if (dist < best_dist) {
+        best_dist = dist;
+        found_target = true;
+        goal = baddie->position;
+      }
+    }
+    if (!found_target) return;
+  }
+  // Now, home in on the goal position.
+  const double turn_radians = time * 2.5;
+  const double proj_speed = az_vnorm(proj->velocity);
+  const double proj_angle = az_vtheta(proj->velocity);
+  const double goal_angle = az_vtheta(az_vsub(goal, proj->position));
+  const double angle_delta = az_mod2pi(proj_angle - goal_angle);
+  const double new_angle =
+    (angle_delta < 0.0 ?
+     (-angle_delta <= turn_radians ? goal_angle : proj_angle + turn_radians) :
+     (angle_delta <= turn_radians ? goal_angle : proj_angle - turn_radians));
+  proj->velocity = az_vpolar(proj_speed, new_angle);
+}
+
 static void projectile_special_logic(az_space_state_t *state,
                                      az_projectile_t *proj,
                                      double time) {
@@ -210,6 +245,9 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Resolve the impact (if any):
   switch (impact.type) {
     case AZ_IMP_NOTHING:
+      if (proj->data->homing) {
+        projectile_home_in(state, proj, time);
+      }
       projectile_special_logic(state, proj, time);
       break;
     case AZ_IMP_BADDIE:

@@ -32,6 +32,23 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 1.0,
     .impact_damage = 1.0
   },
+  [AZ_PROJ_GUN_TRIPLE] = {
+    .speed = 600.0,
+    .lifetime = 1.0,
+    .impact_damage = 0.8
+  },
+  [AZ_PROJ_GUN_HOMING] = {
+    .speed = 500.0,
+    .lifetime = 1.5,
+    .impact_damage = 0.5,
+    .homing = true
+  },
+  [AZ_PROJ_GUN_TRIPLE_HOMING] = {
+    .speed = 500.0,
+    .lifetime = 1.5,
+    .impact_damage = 0.4,
+    .homing = true
+  },
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
     .lifetime = 1.0,
@@ -39,9 +56,22 @@ static const az_proj_data_t proj_data[] = {
     .phased = true
   },
   [AZ_PROJ_GUN_PIERCE] = {
-    .speed = 600.0,
+    .speed = 700.0,
     .lifetime = 1.0,
     .impact_damage = 2.0,
+    .piercing = true
+  },
+  [AZ_PROJ_GUN_TRIPLE_PIERCE] = {
+    .speed = 700.0,
+    .lifetime = 1.0,
+    .impact_damage = 1.6,
+    .piercing = true
+  },
+  [AZ_PROJ_GUN_HOMING_PIERCE] = {
+    .speed = 600.0,
+    .lifetime = 1.0,
+    .impact_damage = 1.0,
+    .homing = true,
     .piercing = true
   },
   [AZ_PROJ_ROCKET] = {

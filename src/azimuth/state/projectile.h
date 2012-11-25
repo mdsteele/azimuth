@@ -32,15 +32,33 @@ typedef enum {
   AZ_PROJ_NOTHING = 0,
   AZ_PROJ_GUN_NORMAL,
   AZ_PROJ_GUN_CHARGED_NORMAL,
-  AZ_PROJ_GUN_ICE,
-  AZ_PROJ_GUN_CHARGED_ICE,
+  AZ_PROJ_GUN_FREEZE,
+  AZ_PROJ_GUN_CHARGED_FREEZE,
+  AZ_PROJ_GUN_TRIPLE,
+  AZ_PROJ_GUN_CHARGED_TRIPLE,
   AZ_PROJ_GUN_HOMING,
   AZ_PROJ_GUN_CHARGED_HOMING,
   AZ_PROJ_GUN_PHASE,
   AZ_PROJ_GUN_CHARGED_PHASE,
+  AZ_PROJ_GUN_BURST,
+  AZ_PROJ_GUN_CHARGED_BURST,
   AZ_PROJ_GUN_PIERCE,
   AZ_PROJ_GUN_CHARGED_PIERCE,
-  // TODO add more gun projectiles
+  AZ_PROJ_GUN_FREEZE_TRIPLE,
+  AZ_PROJ_GUN_FREEZE_HOMING,
+  AZ_PROJ_GUN_FREEZE_PHASE,
+  AZ_PROJ_GUN_FREEZE_BURST,
+  AZ_PROJ_GUN_FREEZE_PIERCE,
+  AZ_PROJ_GUN_TRIPLE_HOMING,
+  AZ_PROJ_GUN_TRIPLE_PHASE,
+  AZ_PROJ_GUN_TRIPLE_BURST,
+  AZ_PROJ_GUN_TRIPLE_PIERCE,
+  AZ_PROJ_GUN_HOMING_PHASE,
+  AZ_PROJ_GUN_HOMING_BURST,
+  AZ_PROJ_GUN_HOMING_PIERCE,
+  AZ_PROJ_GUN_PHASE_BURST,
+  AZ_PROJ_GUN_PHASE_PIERCE,
+  AZ_PROJ_GUN_BURST_PIERCE,
   AZ_PROJ_ROCKET,
   AZ_PROJ_HYPER_ROCKET,
   AZ_PROJ_BOMB,
@@ -53,6 +71,7 @@ typedef struct {
   double impact_damage; // how much damage the projectile deals on impact
   double splash_damage; // how much damage the explosion deals
   double splash_radius; // radius of explosion (zero for most projectiles)
+  bool homing; // true if the projectile seeks out enemies
   bool phased; // true if the projectile passes thorugh walls
   bool piercing; // true if the projectile pierces through enemies
 } az_proj_data_t;

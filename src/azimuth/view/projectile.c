@@ -32,6 +32,7 @@ static void draw_projectile(const az_projectile_t* proj) {
   switch (proj->kind) {
     default: // TODO: add other types
     case AZ_PROJ_GUN_NORMAL:
+    case AZ_PROJ_GUN_TRIPLE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
         glVertex2d( 0.0,  0.0);
@@ -48,7 +49,18 @@ static void draw_projectile(const az_projectile_t* proj) {
         glVertex2d( 2.0,  0.0);
       } glEnd();
       break;
+    case AZ_PROJ_GUN_HOMING:
+    case AZ_PROJ_GUN_TRIPLE_HOMING:
+      glBegin(GL_TRIANGLES); {
+        glColor3f(0, 0, 1); // blue
+        glVertex2d(4, 0);
+        glVertex2d(-4, 4);
+        glVertex2d(-4, -4);
+      } glEnd();
+      break;
     case AZ_PROJ_GUN_PIERCE:
+    case AZ_PROJ_GUN_TRIPLE_PIERCE:
+    case AZ_PROJ_GUN_HOMING_PIERCE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 0, 1, 0.75); // magenta
         glVertex2d(2, 0);
@@ -66,7 +78,6 @@ static void draw_projectile(const az_projectile_t* proj) {
       } glEnd();
       break;
     case AZ_PROJ_ROCKET:
-      // FIXME
       glColor3f(1, 0, 1);
       glBegin(GL_LINE_LOOP); {
         glVertex2d(5, 0);

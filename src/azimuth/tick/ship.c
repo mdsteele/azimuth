@@ -143,6 +143,144 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
 }
 
+/*===========================================================================*/
+
+static void fire_gun_multi(az_space_state_t *state, double energy_mult,
+                           az_proj_kind_t kind, int num_shots, double dtheta) {
+  const double energy_cost = 20.0 * energy_mult;
+  az_ship_t *ship = &state->ship;
+  if (ship->player.energy < energy_cost) return;
+  ship->player.energy -= energy_cost;
+  const az_vector_t gun_position =
+    az_vadd(ship->position, az_vpolar(18, ship->angle));
+  double theta = 0.0;
+  for (int i = 0; i < num_shots; ++i) {
+    az_projectile_t *proj;
+    if (az_insert_projectile(state, &proj)) {
+      az_init_projectile(proj, kind, false, gun_position, ship->angle + theta);
+    } else break;
+    theta = -theta;
+    if (i % 2 == 0) theta += dtheta;
+  }
+}
+
+static void fire_gun_single(az_space_state_t *state, double energy_mult,
+                            az_proj_kind_t kind) {
+  fire_gun_multi(state, energy_mult, kind, 1, 0.0);
+}
+
+static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
+  // TODO implement beam weapons
+}
+
+static void fire_weapons(az_space_state_t *state, double time) {
+  az_ship_t *ship = &state->ship;
+  az_controls_t *controls = &ship->controls;
+  if (!controls->fire_pressed) return;
+  controls->fire_pressed = false;
+  az_player_t *player = &ship->player;
+  const az_vector_t gun_position =
+    az_vadd(ship->position, az_vpolar(18, ship->angle));
+  az_projectile_t *proj = NULL;
+
+  // If the ordnance key is held, we should be firing ordnance.
+  if (controls->ordn_held) {
+    switch (player->ordnance) {
+      case AZ_ORDN_NONE: return;
+      case AZ_ORDN_ROCKETS:
+        if (player->rockets <= 0) return;
+        if (az_insert_projectile(state, &proj)) {
+          az_init_projectile(proj, AZ_PROJ_ROCKET, false, gun_position,
+                             ship->angle);
+          --player->rockets;
+        }
+        return;
+      case AZ_ORDN_BOMBS:
+        if (player->bombs <= 0) return;
+        if (az_insert_projectile(state, &proj)) {
+          az_init_projectile(proj, AZ_PROJ_BOMB, false, gun_position,
+                             ship->angle);
+          --player->bombs;
+        }
+        return;
+    }
+    AZ_ASSERT_UNREACHABLE();
+  }
+
+  // If we're not firing ordnance, we should be firing our gun.
+  az_gun_t minor_gun = player->gun1, major_gun = player->gun2;
+  if (minor_gun == AZ_GUN_CHARGE) minor_gun = AZ_GUN_NONE;
+  if (major_gun == AZ_GUN_NONE) {
+    major_gun = minor_gun;
+    minor_gun = AZ_GUN_NONE;
+  }
+  assert(minor_gun < major_gun ||
+         (minor_gun == AZ_GUN_NONE && major_gun == AZ_GUN_NONE));
+  switch (major_gun) {
+    case AZ_GUN_NONE:
+      assert(minor_gun == AZ_GUN_NONE);
+      fire_gun_single(state, 1.0, AZ_PROJ_GUN_NORMAL);
+      return;
+    case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
+    case AZ_GUN_FREEZE:
+      assert(minor_gun == AZ_GUN_NONE);
+      fire_gun_single(state, 1.5, AZ_PROJ_GUN_FREEZE);
+      return;
+    case AZ_GUN_TRIPLE:
+      switch (minor_gun) {
+        case AZ_GUN_NONE:
+          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10));
+          return;
+        case AZ_GUN_FREEZE:
+          fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_TRIPLE,
+                         3, AZ_DEG2RAD(10));
+          return;
+        default: AZ_ASSERT_UNREACHABLE();
+      }
+    case AZ_GUN_HOMING:
+      switch (minor_gun) {
+        case AZ_GUN_NONE:
+          fire_gun_single(state, 2.0, AZ_PROJ_GUN_HOMING);
+          return;
+        case AZ_GUN_FREEZE:
+          fire_gun_single(state, 3.0, AZ_PROJ_GUN_FREEZE_HOMING);
+          return;
+        case AZ_GUN_TRIPLE:
+          fire_gun_multi(state, 4.0, AZ_PROJ_GUN_TRIPLE_HOMING,
+                         3, AZ_DEG2RAD(30));
+          return;
+        default: AZ_ASSERT_UNREACHABLE();
+      }
+    case AZ_GUN_PHASE: return; // TODO
+    case AZ_GUN_BURST: return; // TODO
+    case AZ_GUN_PIERCE:
+      switch (minor_gun) {
+        case AZ_GUN_NONE:
+          fire_gun_single(state, 3.0, AZ_PROJ_GUN_PIERCE);
+          return;
+        case AZ_GUN_FREEZE:
+          fire_gun_single(state, 4.5, AZ_PROJ_GUN_FREEZE_PIERCE);
+          return;
+        case AZ_GUN_TRIPLE:
+          fire_gun_multi(state, 6.0, AZ_PROJ_GUN_TRIPLE_PIERCE,
+                         3, AZ_DEG2RAD(10));
+          return;
+        case AZ_GUN_HOMING:
+          fire_gun_single(state, 6.0, AZ_PROJ_GUN_HOMING_PIERCE);
+          return;
+        case AZ_GUN_PHASE: return; // TODO
+        case AZ_GUN_BURST: return; // TODO
+        default: AZ_ASSERT_UNREACHABLE();
+      }
+    case AZ_GUN_BEAM:
+      fire_beam(state, minor_gun, time);
+      return;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
+
+/*===========================================================================*/
+
 void az_tick_ship(az_space_state_t *state, double time) {
   if (state->mode == AZ_MODE_GAME_OVER) return;
   az_ship_t *ship = &state->ship;
@@ -360,32 +498,12 @@ void az_tick_ship(az_space_state_t *state, double time) {
         az_vsub(ship->position, tractor_node->position));
   }
 
-  const az_vector_t gun_position =
-    az_vadd(ship->position, az_vpolar(18, ship->angle));
-
-  // Fire projectiles:
-  if (controls->ordn_held && controls->fire_pressed) {
-    az_projectile_t *proj;
-    if (player->rockets > 0 && az_insert_projectile(state, &proj)) {
-      az_init_projectile(proj, AZ_PROJ_ROCKET, false, gun_position,
-                         ship->angle);
-      --player->rockets;
-    }
-    controls->fire_pressed = false;
-  }
-  const double fire_cost = 20.0;
-  if (controls->fire_pressed && player->energy >= fire_cost) {
-    az_projectile_t *proj;
-    if (az_insert_projectile(state, &proj)) {
-      player->energy -= fire_cost;
-      az_init_projectile(proj, AZ_PROJ_GUN_NORMAL, false, gun_position,
-                         ship->angle);
-    }
-    controls->fire_pressed = false;
-  }
+  fire_weapons(state, time);
 
   // Fire beam:
   if (false && controls->fire_held) {
+    const az_vector_t gun_position =
+      az_vadd(ship->position, az_vpolar(18, ship->angle));
     // Calculate where beam hits:
     az_vector_t hit_at = az_vadd(ship->position, az_vpolar(1000, ship->angle));
     az_vector_t normal = AZ_VZERO;

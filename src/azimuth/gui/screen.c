@@ -49,7 +49,7 @@ static az_init_func_t gl_init_funcs[8];
 void az_register_gl_init_func(az_init_func_t func) {
   assert(!sdl_initialized);
   if (num_gl_init_funcs >= AZ_ARRAY_SIZE(gl_init_funcs)) {
-    AZ_FATAL("gl_init_funcs array is full.");
+    AZ_FATAL("gl_init_funcs array is full.\n");
   } else {
     gl_init_funcs[num_gl_init_funcs++] = func;
   }
