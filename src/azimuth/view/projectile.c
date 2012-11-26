@@ -28,11 +28,12 @@
 
 /*===========================================================================*/
 
-static void draw_projectile(const az_projectile_t* proj) {
+static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   switch (proj->kind) {
     default: // TODO: add other types
     case AZ_PROJ_GUN_NORMAL:
     case AZ_PROJ_GUN_TRIPLE:
+    case AZ_PROJ_GUN_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
         glVertex2d( 0.0,  0.0);
@@ -69,11 +70,12 @@ static void draw_projectile(const az_projectile_t* proj) {
       break;
     case AZ_PROJ_GUN_HOMING:
     case AZ_PROJ_GUN_TRIPLE_HOMING:
+    case AZ_PROJ_GUN_HOMING_SHRAPNEL:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0, 1); // blue
         glVertex2d(4, 0);
-        glVertex2d(-4, 4);
-        glVertex2d(-4, -4);
+        glVertex2d(-4, 2);
+        glVertex2d(-4, -2);
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
@@ -83,6 +85,25 @@ static void draw_projectile(const az_projectile_t* proj) {
         glVertex2d(-8, 4);
         glVertex2d(-8, -4);
       } glEnd();
+      break;
+    case AZ_PROJ_GUN_BURST:
+    case AZ_PROJ_GUN_TRIPLE_BURST:
+    case AZ_PROJ_GUN_HOMING_BURST:
+    case AZ_PROJ_GUN_BURST_PIERCE:
+      glPushMatrix(); {
+        glRotated(10 * az_clock_mod(36, 1, clock), 0, 0, 1);
+        glColor3f(0.75, 0.5, 0.25);
+        glBegin(GL_QUADS); {
+          glVertex2d(5, 0);
+          glVertex2d(2, 3);
+          glVertex2d(-1, 0);
+          glVertex2d(2, -3);
+          glVertex2d(-5, 0);
+          glVertex2d(-2, -3);
+          glVertex2d(1, 0);
+          glVertex2d(-2, 3);
+        } glEnd();
+      } glPopMatrix();
       break;
     case AZ_PROJ_GUN_PIERCE:
     case AZ_PROJ_GUN_TRIPLE_PIERCE:
@@ -120,7 +141,7 @@ void az_draw_projectiles(const az_space_state_t* state) {
     glPushMatrix(); {
       glTranslated(proj->position.x, proj->position.y, 0);
       glRotated(AZ_RAD2DEG(az_vtheta(proj->velocity)), 0, 0, 1);
-      draw_projectile(proj);
+      draw_projectile(proj, state->clock);
     } glPopMatrix();
   }
 }

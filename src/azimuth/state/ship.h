@@ -60,9 +60,11 @@ bool az_ship_is_present(const az_ship_t *ship);
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point);
 
 // Determine if a ray, travelling delta from start, will hit the ship.  If it
-// does and if point_out is non-NULL, stores the intersection point there.
+// does, stores the intersection point in *point_out (if point_out is non-NULL)
+// and the normal vector in *normal_out (if normal_out is non-NULL).
 bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out);
+                      az_vector_t delta, az_vector_t *point_out,
+                      az_vector_t *normal_out);
 
 // Determine if the ship would hit the given wall if the ship travelled along
 // the given delta vector.

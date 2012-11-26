@@ -71,6 +71,42 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 1.0,
     .phased = true
   },
+  [AZ_PROJ_GUN_BURST] = {
+    .speed = 1000.0,
+    .lifetime = 1.0,
+    .impact_damage = 1.5,
+    .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
+  },
+  [AZ_PROJ_GUN_TRIPLE_BURST] = {
+    .speed = 1000.0,
+    .lifetime = 1.0,
+    .impact_damage = 1.0,
+    .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
+  },
+  [AZ_PROJ_GUN_HOMING_BURST] = {
+    .speed = 1000.0,
+    .lifetime = 1.0,
+    .impact_damage = 1.5,
+    .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL
+  },
+  [AZ_PROJ_GUN_BURST_PIERCE] = {
+    .speed = 1000.0,
+    .lifetime = 1.0,
+    .impact_damage = 3.0,
+    .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
+    .piercing = true
+  },
+  [AZ_PROJ_GUN_SHRAPNEL] = {
+    .speed = 500.0,
+    .lifetime = 0.8,
+    .impact_damage = 0.5
+  },
+  [AZ_PROJ_GUN_HOMING_SHRAPNEL] = {
+    .speed = 400.0,
+    .lifetime = 1.1,
+    .impact_damage = 0.5,
+    .homing = true
+  },
   [AZ_PROJ_GUN_PIERCE] = {
     .speed = 700.0,
     .lifetime = 1.0,

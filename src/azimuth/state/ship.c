@@ -52,11 +52,12 @@ bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point) {
 }
 
 bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out) {
+                      az_vector_t delta, az_vector_t *point_out,
+                      az_vector_t *normal_out) {
   return (az_ray_hits_circle(start, delta, ship->position,
                              SHIP_BOUNDING_RADIUS) &&
           az_ray_hits_polygon_trans(ship_polygon, ship->position, ship->angle,
-                                    start, delta, point_out, NULL));
+                                    start, delta, point_out, normal_out));
 }
 
 bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,

@@ -52,7 +52,7 @@ typedef struct {
 // Common projectile impact code, called by both on_projectile_hit_wall and
 // on_projectile_hit_target.
 static void on_projectile_impact(az_space_state_t *state,
-                                 az_projectile_t *proj) {
+                                 az_projectile_t *proj, az_vector_t normal) {
   const double radius = proj->data->splash_radius;
   // Deal splash damage, if applicable.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
@@ -66,6 +66,24 @@ static void on_projectile_impact(az_space_state_t *state,
         if (az_vwithin(baddie->position, proj->position,
                        radius + baddie->data->bounding_radius)) {
           az_damage_baddie(state, baddie, proj->data->splash_damage);
+        }
+      }
+    }
+  }
+
+  // If applicable, burst into shrapnel.
+  if (proj->data->shrapnel_kind != AZ_PROJ_NOTHING) {
+    const double mid_theta = az_vtheta(normal);
+    for (int i = -2; i <= 2; ++i) {
+      const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random() - 0.5);
+      az_projectile_t *shrapnel;
+      if (az_insert_projectile(state, &shrapnel)) {
+        az_init_projectile(shrapnel, proj->data->shrapnel_kind, false,
+                           az_vadd(proj->position, az_vpolar(0.1, theta)),
+                           theta);
+        if (!shrapnel->data->homing) {
+          shrapnel->velocity =
+            az_vmul(shrapnel->velocity, 0.5 + 0.5 * az_random());
         }
       }
     }
@@ -97,16 +115,18 @@ static void on_projectile_impact(az_space_state_t *state,
 // Called when a projectile hits a wall or a door.  Note that phased
 // projectiles can't ever hit walls, but they _can_ hit doors.
 static void on_projectile_hit_wall(az_space_state_t *state,
-                                   az_projectile_t *proj) {
+                                   az_projectile_t *proj, az_vector_t normal) {
+  on_projectile_impact(state, proj, normal);
   proj->kind = AZ_PROJ_NOTHING;
-  on_projectile_impact(state, proj);
 }
 
 // Called when a projectile hits a baddie or the ship.  If the projectile is
 // hitting the ship, baddie will be NULL.
 static void on_projectile_hit_target(az_space_state_t *state,
                                      az_projectile_t *proj,
-                                     az_baddie_t *baddie) {
+                                     az_baddie_t *baddie, az_vector_t normal) {
+  // Run common impact code:
+  on_projectile_impact(state, proj, normal);
   // Deal impact damage:
   if (baddie == NULL) {
     az_damage_ship(state, proj->data->impact_damage);
@@ -119,8 +139,6 @@ static void on_projectile_hit_target(az_space_state_t *state,
   } else {
     proj->kind = AZ_PROJ_NOTHING;
   }
-  // Run common impact code:
-  on_projectile_impact(state, proj);
 }
 
 static void projectile_home_in(az_space_state_t *state,
@@ -185,12 +203,13 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   const az_vector_t start = proj->position;
   az_vector_t delta = az_vmul(proj->velocity, time);
   az_impact_target_t impact = {.type = AZ_IMP_NOTHING};
+  az_vector_t normal = AZ_VZERO;
   // Walls:
   if (!proj->data->phased) {
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
       az_vector_t hit_at;
-      if (az_ray_hits_wall(wall, start, delta, &hit_at, NULL)) {
+      if (az_ray_hits_wall(wall, start, delta, &hit_at, &normal)) {
         impact.type = AZ_IMP_WALL;
         impact.target.wall = wall;
         delta = az_vsub(hit_at, start);
@@ -201,7 +220,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   AZ_ARRAY_LOOP(door, state->doors) {
     if (door->kind == AZ_DOOR_NOTHING) continue;
     az_vector_t hit_at;
-    if (az_ray_hits_door(door, start, delta, &hit_at, NULL)) {
+    if (az_ray_hits_door(door, start, delta, &hit_at, &normal)) {
       impact.type = AZ_IMP_DOOR;
       impact.target.door = door;
       delta = az_vsub(hit_at, start);
@@ -211,7 +230,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   if (proj->fired_by_enemy && proj->last_hit_uid != AZ_SHIP_UID &&
       az_ship_is_present(&state->ship)) {
     az_vector_t hit_at;
-    if (az_ray_hits_ship(&state->ship, start, delta, &hit_at)) {
+    if (az_ray_hits_ship(&state->ship, start, delta, &hit_at, &normal)) {
       impact.type = AZ_IMP_SHIP;
       delta = az_vsub(hit_at, start);
     }
@@ -222,7 +241,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
       az_vector_t hit_at;
-      if (az_ray_hits_baddie(baddie, start, delta, &hit_at, NULL)) {
+      if (az_ray_hits_baddie(baddie, start, delta, &hit_at, &normal)) {
         impact.type = AZ_IMP_BADDIE;
         impact.target.baddie = baddie;
         delta = az_vsub(hit_at, start);
@@ -242,20 +261,20 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       projectile_special_logic(state, proj, time);
       break;
     case AZ_IMP_BADDIE:
-      on_projectile_hit_target(state, proj, impact.target.baddie);
+      on_projectile_hit_target(state, proj, impact.target.baddie, normal);
       break;
     case AZ_IMP_DOOR:
       if (!proj->fired_by_enemy) {
         // TODO: Test kind of projectile against kind of door.
         impact.target.door->is_open = true;
       }
-      on_projectile_hit_wall(state, proj);
+      on_projectile_hit_wall(state, proj, normal);
       break;
     case AZ_IMP_SHIP:
-      on_projectile_hit_target(state, proj, NULL);
+      on_projectile_hit_target(state, proj, NULL, normal);
       break;
     case AZ_IMP_WALL:
-      on_projectile_hit_wall(state, proj);
+      on_projectile_hit_wall(state, proj, normal);
       break;
   }
 }

@@ -203,7 +203,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.7; break;
     case AZ_GUN_HOMING: energy_cost *= 2.0; damage_mult *= 0.5; break;
     case AZ_GUN_PHASE: energy_cost *= 2.0; break;
-    case AZ_GUN_BURST: energy_cost *= 2.0; break;
+    case AZ_GUN_BURST: energy_cost *= 2.5; break;
     case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
@@ -416,7 +416,9 @@ static void fire_weapons(az_space_state_t *state, double time) {
                          4, AZ_DEG2RAD(90), AZ_DEG2RAD(45));
           break;
         case AZ_GUN_PHASE: break; // TODO
-        case AZ_GUN_BURST: break; // TODO
+        case AZ_GUN_BURST:
+          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0);
+          break;
         case AZ_GUN_PIERCE: break; // TODO
         case AZ_GUN_BEAM: break; // TODO
       }
@@ -474,7 +476,22 @@ static void fire_weapons(az_space_state_t *state, double time) {
         default: AZ_ASSERT_UNREACHABLE();
       }
     case AZ_GUN_PHASE: return; // TODO
-    case AZ_GUN_BURST: return; // TODO
+    case AZ_GUN_BURST:
+      switch (minor_gun) {
+        case AZ_GUN_NONE:
+          fire_gun_single(state, 2.5, AZ_PROJ_GUN_BURST);
+          return;
+        case AZ_GUN_FREEZE: return; // TODO
+        case AZ_GUN_TRIPLE:
+          fire_gun_multi(state, 5.0, AZ_PROJ_GUN_TRIPLE_BURST,
+                         3, AZ_DEG2RAD(1), 0);
+          return;
+        case AZ_GUN_HOMING:
+          fire_gun_single(state, 5.0, AZ_PROJ_GUN_HOMING_BURST);
+          return;
+        case AZ_GUN_PHASE: return; // TODO
+        default: AZ_ASSERT_UNREACHABLE();
+      }
     case AZ_GUN_PIERCE:
       switch (minor_gun) {
         case AZ_GUN_NONE:
@@ -491,7 +508,9 @@ static void fire_weapons(az_space_state_t *state, double time) {
           fire_gun_single(state, 6.0, AZ_PROJ_GUN_HOMING_PIERCE);
           return;
         case AZ_GUN_PHASE: return; // TODO
-        case AZ_GUN_BURST: return; // TODO
+        case AZ_GUN_BURST:
+          fire_gun_single(state, 7.0, AZ_PROJ_GUN_BURST_PIERCE);
+          return;
         default: AZ_ASSERT_UNREACHABLE();
       }
     case AZ_GUN_BEAM:
