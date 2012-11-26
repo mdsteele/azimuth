@@ -49,19 +49,19 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_GUN_HOMING] = {
     .speed = 500.0,
-    .lifetime = 1.5,
+    .lifetime = 3.0,
     .impact_damage = 0.5,
     .homing = true
   },
   [AZ_PROJ_GUN_CHARGED_HOMING] = {
     .speed = 500.0,
-    .lifetime = 1.5,
+    .lifetime = 5.0,
     .impact_damage = 2.5,
     .homing = true
   },
   [AZ_PROJ_GUN_TRIPLE_HOMING] = {
     .speed = 500.0,
-    .lifetime = 1.5,
+    .lifetime = 3.0,
     .impact_damage = 0.4,
     .homing = true
   },
@@ -85,7 +85,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_GUN_HOMING_PIERCE] = {
     .speed = 600.0,
-    .lifetime = 1.0,
+    .lifetime = 3.0,
     .impact_damage = 1.0,
     .homing = true,
     .piercing = true

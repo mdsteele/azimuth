@@ -127,6 +127,7 @@ static void projectile_home_in(az_space_state_t *state,
                                az_projectile_t *proj,
                                double time) {
   assert(proj->data->homing);
+  const double proj_angle = az_vtheta(proj->velocity);
   // First, figure out what position we're homing in on.
   az_vector_t goal = state->ship.position;
   if (!proj->fired_by_enemy) {
@@ -135,7 +136,9 @@ static void projectile_home_in(az_space_state_t *state,
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
-      const double dist = az_vdist(baddie->position, proj->position);
+      const double dist = az_vdist(baddie->position, proj->position) +
+        fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
+                       proj_angle)) * 100.0;
       if (dist < best_dist) {
         best_dist = dist;
         found_target = true;
@@ -145,16 +148,14 @@ static void projectile_home_in(az_space_state_t *state,
     if (!found_target) return;
   }
   // Now, home in on the goal position.
-  const double turn_radians = time * 2.5;
-  const double proj_speed = az_vnorm(proj->velocity);
-  const double proj_angle = az_vtheta(proj->velocity);
+  const double turn_radians = time * 3.5;
   const double goal_angle = az_vtheta(az_vsub(goal, proj->position));
   const double angle_delta = az_mod2pi(proj_angle - goal_angle);
   const double new_angle =
     (angle_delta < 0.0 ?
      (-angle_delta <= turn_radians ? goal_angle : proj_angle + turn_radians) :
      (angle_delta <= turn_radians ? goal_angle : proj_angle - turn_radians));
-  proj->velocity = az_vpolar(proj_speed, new_angle);
+  proj->velocity = az_vpolar(proj->data->speed, new_angle);
 }
 
 static void projectile_special_logic(az_space_state_t *state,
