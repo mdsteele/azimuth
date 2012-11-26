@@ -36,7 +36,9 @@
 
 /*===========================================================================*/
 
-// The radius of the ship for purposes of collisions with e.g. walls.
+// The time needed to charge the CHARGE gun, in seconds:
+#define AZ_CHARGE_GUN_CHARGING_TIME 0.6
+// The radius of the ship for purposes of collisions with e.g. walls:
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 
 typedef enum {
@@ -147,9 +149,8 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
 /*===========================================================================*/
 
 static void fire_gun_multi(az_space_state_t *state, double energy_mult,
-                           az_proj_kind_t kind, int num_shots, double dtheta) {
-  if (!state->ship.controls.fire_pressed) return;
-  state->ship.controls.fire_pressed = false;
+                           az_proj_kind_t kind, int num_shots, double dtheta,
+                           double theta_offset) {
   const double energy_cost = 20.0 * energy_mult;
   az_ship_t *ship = &state->ship;
   if (ship->player.energy < energy_cost) return;
@@ -160,7 +161,8 @@ static void fire_gun_multi(az_space_state_t *state, double energy_mult,
   for (int i = 0; i < num_shots; ++i) {
     az_projectile_t *proj;
     if (az_insert_projectile(state, &proj)) {
-      az_init_projectile(proj, kind, false, gun_position, ship->angle + theta);
+      az_init_projectile(proj, kind, false, gun_position,
+                         ship->angle + theta_offset + theta);
     } else break;
     theta = -theta;
     if (i % 2 == 0) theta += dtheta;
@@ -169,7 +171,7 @@ static void fire_gun_multi(az_space_state_t *state, double energy_mult,
 
 static void fire_gun_single(az_space_state_t *state, double energy_mult,
                             az_proj_kind_t kind) {
-  fire_gun_multi(state, energy_mult, kind, 1, 0.0);
+  fire_gun_multi(state, energy_mult, kind, 1, 0.0, 0.0);
 }
 
 static void beam_emit_particles(az_space_state_t *state, az_vector_t position,
@@ -205,7 +207,10 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
-  if (ship->player.energy < energy_cost) return;
+  if (ship->player.energy < energy_cost) {
+    ship->player.energy = 0.0;
+    return;
+  }
   ship->player.energy -= energy_cost;
 
   az_vector_t beam_start =
@@ -349,9 +354,19 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
 
 static void fire_weapons(az_space_state_t *state, double time) {
   az_ship_t *ship = &state->ship;
-  az_controls_t *controls = &ship->controls;
-  if (!(controls->fire_pressed || controls->fire_held)) return;
   az_player_t *player = &ship->player;
+  az_controls_t *controls = &ship->controls;
+  assert(player->gun2 != AZ_GUN_CHARGE);
+  if (player->gun1 == AZ_GUN_CHARGE) {
+    if (controls->fire_held) {
+      ship->gun_charge = fmin(1.0, ship->gun_charge +
+                              AZ_CHARGE_GUN_CHARGING_TIME * time);
+    }
+  } else {
+    ship->gun_charge = 0.0;
+  }
+  if (!(controls->fire_pressed || controls->fire_held ||
+        ship->gun_charge > 0.0)) return;
   const az_vector_t gun_position =
     az_vadd(ship->position, az_vpolar(18, ship->angle));
   az_projectile_t *proj = NULL;
@@ -381,7 +396,36 @@ static void fire_weapons(az_space_state_t *state, double time) {
     AZ_ASSERT_UNREACHABLE();
   }
 
-  // If we're not firing ordnance, we should be firing our gun.
+  // If we're not firing ordnance, we should be firing our gun.  If the gun is
+  // fully charged and the player releases the fire key, fire a charged shot.
+  if (ship->gun_charge > 0.0 && !controls->fire_held) {
+    assert(player->gun1 == AZ_GUN_CHARGE);
+    if (ship->gun_charge >= 1.0) {
+      switch (player->gun2) {
+        case AZ_GUN_NONE:
+          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL);
+          break;
+        case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
+        case AZ_GUN_FREEZE: break; // TODO
+        case AZ_GUN_TRIPLE:
+          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                         3, AZ_DEG2RAD(10), 0);
+          break;
+        case AZ_GUN_HOMING:
+          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING,
+                         4, AZ_DEG2RAD(90), AZ_DEG2RAD(45));
+          break;
+        case AZ_GUN_PHASE: break; // TODO
+        case AZ_GUN_BURST: break; // TODO
+        case AZ_GUN_PIERCE: break; // TODO
+        case AZ_GUN_BEAM: break; // TODO
+      }
+    }
+    ship->gun_charge = 0.0;
+    return;
+  }
+
+  // If we're not firing a charged shot, just fire a normal shot.
   az_gun_t minor_gun = player->gun1, major_gun = player->gun2;
   if (minor_gun == AZ_GUN_CHARGE) minor_gun = AZ_GUN_NONE;
   if (major_gun == AZ_GUN_NONE) {
@@ -390,6 +434,10 @@ static void fire_weapons(az_space_state_t *state, double time) {
   }
   assert(minor_gun < major_gun ||
          (minor_gun == AZ_GUN_NONE && major_gun == AZ_GUN_NONE));
+  if (major_gun == AZ_GUN_BEAM) {
+    if (!controls->fire_held) return;
+  } else if (!controls->fire_pressed) return;
+  controls->fire_pressed = false;
   switch (major_gun) {
     case AZ_GUN_NONE:
       assert(minor_gun == AZ_GUN_NONE);
@@ -403,11 +451,11 @@ static void fire_weapons(az_space_state_t *state, double time) {
     case AZ_GUN_TRIPLE:
       switch (minor_gun) {
         case AZ_GUN_NONE:
-          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10));
+          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10), 0);
           return;
         case AZ_GUN_FREEZE:
           fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_TRIPLE,
-                         3, AZ_DEG2RAD(10));
+                         3, AZ_DEG2RAD(10), 0);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
@@ -421,7 +469,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 4.0, AZ_PROJ_GUN_TRIPLE_HOMING,
-                         3, AZ_DEG2RAD(30));
+                         3, AZ_DEG2RAD(30), 0);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
@@ -437,7 +485,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 6.0, AZ_PROJ_GUN_TRIPLE_PIERCE,
-                         3, AZ_DEG2RAD(10));
+                         3, AZ_DEG2RAD(10), 0);
           return;
         case AZ_GUN_HOMING:
           fire_gun_single(state, 6.0, AZ_PROJ_GUN_HOMING_PIERCE);
@@ -463,7 +511,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
   const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
 
-  recharge_ship_energy(player, time);
+  if (!(controls->fire_held &&
+        (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM))) {
+    recharge_ship_energy(player, time);
+  }
 
   // Deactivate tractor beam if necessary, otherwise get the node it is locked
   // onto.

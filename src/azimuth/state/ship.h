@@ -44,6 +44,7 @@ typedef struct {
   az_vector_t position; // pixels
   az_vector_t velocity; // pixels/second
   double angle; // radians
+  double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   struct {
     bool active;
     az_uid_t node_uid;

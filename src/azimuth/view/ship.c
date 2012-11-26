@@ -19,6 +19,7 @@
 
 #include "azimuth/view/ship.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -127,7 +128,28 @@ void az_draw_ship(az_space_state_t* state) {
         } glEnd();
       }
     }
-    // TODO: exhaust for lateral thrusters and afterburner, if active
+    // Gun charge:
+    if (ship->gun_charge > 0.0) {
+      assert(ship->gun_charge <= 1.0);
+      glPushMatrix(); {
+        glTranslated(20, 0, 0);
+        const double radius = ship->gun_charge *
+          (7.0 + 0.3 * az_clock_zigzag(10, 1, state->clock));
+        const int offset = 6 * az_clock_mod(60, 1, state->clock);
+        for (int n = 0; n < 2; ++n) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor4f(1, 1, 0.5, 0.4);
+            glVertex2d(0, 0);
+            glColor4f(1, 1, 1, 0.0);
+            for (int i = 0; i <= 360; i += 60) {
+              const double degrees = (n == 0 ? i + offset : i - offset);
+              glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
+                         radius * sin(AZ_DEG2RAD(degrees)));
+            }
+          } glEnd();
+        }
+      } glPopMatrix();
+    }
     // Engines:
     glBegin(GL_QUADS); {
       // Struts:

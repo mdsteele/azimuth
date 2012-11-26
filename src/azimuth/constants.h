@@ -106,7 +106,7 @@
 // How much damage the BEAM gun normally deals per second:
 #define AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND 15.0
 // How much energy the BEAM gun normally uses per second:
-#define AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND 300.0
+#define AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND 75.0
 
 /*===========================================================================*/
 

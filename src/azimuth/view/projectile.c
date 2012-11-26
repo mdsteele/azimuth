@@ -49,6 +49,24 @@ static void draw_projectile(const az_projectile_t* proj) {
         glVertex2d( 2.0,  0.0);
       } glEnd();
       break;
+    case AZ_PROJ_GUN_CHARGED_NORMAL:
+    case AZ_PROJ_GUN_CHARGED_TRIPLE:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 1, 0.75); // white
+        glVertex2d( 0.0,  0.0);
+        glVertex2d( 4.0,  0.0);
+        glVertex2d( 3.0,  3.0);
+        glVertex2d( 0.0,  4.0);
+        glVertex2d(-3.0,  3.0);
+        glColor4f(1, 1, 1, 0); // transparent white
+        glVertex2d(-20.,  0.0);
+        glColor3f(1, 1, 1); // white
+        glVertex2d(-3.0, -3.0);
+        glVertex2d( 0.0, -4.0);
+        glVertex2d( 3.0, -3.0);
+        glVertex2d( 4.0,  0.0);
+      } glEnd();
+      break;
     case AZ_PROJ_GUN_HOMING:
     case AZ_PROJ_GUN_TRIPLE_HOMING:
       glBegin(GL_TRIANGLES); {
@@ -56,6 +74,14 @@ static void draw_projectile(const az_projectile_t* proj) {
         glVertex2d(4, 0);
         glVertex2d(-4, 4);
         glVertex2d(-4, -4);
+      } glEnd();
+      break;
+    case AZ_PROJ_GUN_CHARGED_HOMING:
+      glBegin(GL_TRIANGLES); {
+        glColor3f(0, 0, 1); // blue
+        glVertex2d(8, 0);
+        glVertex2d(-8, 4);
+        glVertex2d(-8, -4);
       } glEnd();
       break;
     case AZ_PROJ_GUN_PIERCE:

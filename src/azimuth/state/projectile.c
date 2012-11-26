@@ -32,15 +32,31 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 1.0,
     .impact_damage = 1.0
   },
+  [AZ_PROJ_GUN_CHARGED_NORMAL] = {
+    .speed = 800.0,
+    .lifetime = 1.0,
+    .impact_damage = 5.0
+  },
   [AZ_PROJ_GUN_TRIPLE] = {
     .speed = 600.0,
     .lifetime = 1.0,
     .impact_damage = 0.8
   },
+  [AZ_PROJ_GUN_CHARGED_TRIPLE] = {
+    .speed = 800.0,
+    .lifetime = 1.0,
+    .impact_damage = 4.0
+  },
   [AZ_PROJ_GUN_HOMING] = {
     .speed = 500.0,
     .lifetime = 1.5,
     .impact_damage = 0.5,
+    .homing = true
+  },
+  [AZ_PROJ_GUN_CHARGED_HOMING] = {
+    .speed = 500.0,
+    .lifetime = 1.5,
+    .impact_damage = 2.5,
     .homing = true
   },
   [AZ_PROJ_GUN_TRIPLE_HOMING] = {
