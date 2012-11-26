@@ -126,16 +126,16 @@ bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
 
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 
-// Add a pickup of the given kind at the given position.  If the pickups array
-// is already full, this silently does nothing.
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position);
-
 /*===========================================================================*/
 
 // Reduce the ship's shields by the given amount.  If this is enough to destroy
 // the ship, change to game-over mode.
 void az_damage_ship(az_space_state_t *state, double damage);
+
+// Reduce the baddie's health by the given amount.  If this is enough to
+// destroy the baddie, remove it and add particles/pickups in its place.
+void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                      double damage);
 
 /*===========================================================================*/
 

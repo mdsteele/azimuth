@@ -22,21 +22,10 @@
 #define AZIMUTH_TICK_PICKUP_H_
 
 #include "azimuth/state/space.h"
-#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 void az_tick_pickups(az_space_state_t *state, double time);
-
-// Add a random pickup (maybe) at the given position; the pickup is selected
-// randomly based on potential_pickups, which should be one or more AZ_PUPF_*
-// flags bitwise-or'd together.  If the AZ_PUPF_NOTHING flag is included, then
-// there's a chance that no pickup will be dropped.  If potential_pickups is
-// zero (no flags), then no pickup is placed, same as if it were just
-// AZ_PUPF_NOTHING.
-void az_add_random_pickup(az_space_state_t *state,
-                          unsigned int potential_pickups,
-                          az_vector_t position);
 
 /*===========================================================================*/
 

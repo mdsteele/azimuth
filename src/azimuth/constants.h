@@ -101,5 +101,13 @@
 #define AZ_QUANTUM_REACTOR_RECHARGE_RATE 125.0
 
 /*===========================================================================*/
+// Weapons:
+
+// How much damage the BEAM gun normally deals per second:
+#define AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND 15.0
+// How much energy the BEAM gun normally uses per second:
+#define AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND 300.0
+
+/*===========================================================================*/
 
 #endif // AZIMUTH_CONSTANTS_H_

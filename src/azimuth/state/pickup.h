@@ -21,6 +21,7 @@
 #ifndef AZIMUTH_STATE_PICKUP_H_
 #define AZIMUTH_STATE_PICKUP_H_
 
+#include "azimuth/state/player.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -52,6 +53,16 @@ typedef struct {
   az_vector_t position;
   double age; // seconds
 } az_pickup_t;
+
+/*===========================================================================*/
+
+// Choose a random pickup kind (which might be AZ_PUP_NOTHING) based on
+// potential_pickups, which should be one or more AZ_PUPF_* flags bitwise-or'd
+// together.  If the AZ_PUPF_NOTHING flag is included, then there's a chance
+// that no pickup will be dropped.  Moreover, a pickup kind that the player
+// does not currently need will never be chosen.
+az_pickup_kind_t az_choose_random_pickup_kind(
+    const az_player_t *player, unsigned int potential_pickups);
 
 /*===========================================================================*/
 

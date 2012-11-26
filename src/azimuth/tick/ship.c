@@ -20,6 +20,7 @@
 #include "azimuth/tick/ship.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
@@ -147,6 +148,8 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
 
 static void fire_gun_multi(az_space_state_t *state, double energy_mult,
                            az_proj_kind_t kind, int num_shots, double dtheta) {
+  if (!state->ship.controls.fire_pressed) return;
+  state->ship.controls.fire_pressed = false;
   const double energy_cost = 20.0 * energy_mult;
   az_ship_t *ship = &state->ship;
   if (ship->player.energy < energy_cost) return;
@@ -169,22 +172,193 @@ static void fire_gun_single(az_space_state_t *state, double energy_mult,
   fire_gun_multi(state, energy_mult, kind, 1, 0.0);
 }
 
+static void beam_emit_particles(az_space_state_t *state, az_vector_t position,
+                                az_vector_t normal, az_color_t color) {
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_SPECK;
+    particle->color = color;
+    particle->position = position;
+    particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
+                                   az_vtheta(normal) +
+                                   (az_random() - 0.5) * AZ_PI);
+    particle->angle = 0.0;
+    particle->lifetime = 1.0;
+  }
+}
+
 static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
-  // TODO implement beam weapons
+  az_ship_t *ship = &state->ship;
+  if (!ship->controls.fire_held) return;
+
+  // Determine how much energy the beam needs and how much damage it'll do:
+  double energy_cost = AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND * time;
+  double damage_mult = 1.0;
+  switch (minor) {
+    case AZ_GUN_NONE: break;
+    case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
+    case AZ_GUN_FREEZE: energy_cost *= 1.5; break;
+    case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.7; break;
+    case AZ_GUN_HOMING: energy_cost *= 2.0; damage_mult *= 0.5; break;
+    case AZ_GUN_PHASE: energy_cost *= 2.0; break;
+    case AZ_GUN_BURST: energy_cost *= 2.0; break;
+    case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
+    case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
+  }
+  if (ship->player.energy < energy_cost) return;
+  ship->player.energy -= energy_cost;
+
+  az_vector_t beam_start =
+    az_vadd(ship->position, az_vpolar(18, ship->angle));
+  double beam_init_angle = ship->angle;
+  // Normally, there will be a single beam.  But for a TRIPLE/BEAM gun, there
+  // are three beams, and for a BURST/BEAM gun, the beam reflects off of
+  // whatever it hits, creating a second beam.
+  const int num_beams = (minor == AZ_GUN_TRIPLE ? 3 :
+                         minor == AZ_GUN_BURST ? 3 : 1);
+  for (int beam_index = 0; beam_index < num_beams; ++beam_index) {
+    // Determine how much damage the beam should do.  If this is a BURST beam,
+    // it loses power with each reflection.
+    if (minor == AZ_GUN_BURST && beam_index > 0) {
+      damage_mult *= 0.5;
+    }
+    const double damage =
+      AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND * damage_mult * time;
+
+    // Determine the angle of the beam.  If this is a TRIPLE beam, the second
+    // and third beams are at offset angles; if this is a HOMING beam, the
+    // angle will point towards the nearest baddie.
+    double beam_angle = beam_init_angle;
+    if (minor == AZ_GUN_TRIPLE) {
+      if (beam_index == 1) beam_angle += AZ_DEG2RAD(10);
+      else if (beam_index == 2) beam_angle -= AZ_DEG2RAD(10);
+    } else if (minor == AZ_GUN_HOMING) {
+      double best_dist = INFINITY;
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind == AZ_BAD_NOTHING) continue;
+        const az_vector_t delta = az_vsub(baddie->position, beam_start);
+        const double dist = az_vnorm(delta);
+        if (dist >= best_dist) continue;
+        const double angle = az_vtheta(delta);
+        if (fabs(az_mod2pi(angle - beam_init_angle)) <= AZ_DEG2RAD(30)) {
+          best_dist = dist;
+          beam_angle = angle;
+        }
+      }
+    }
+
+    // Determine what the beam hits (if anything), and calculate its ending
+    // point and the normal vector at impact.
+    az_vector_t delta = az_vpolar(2.5 * AZ_SCREEN_RADIUS, beam_angle);
+    az_vector_t normal = AZ_VZERO;
+    bool did_hit = false;
+    az_color_t hit_color = AZ_WHITE;
+    az_door_t *hit_door = NULL;
+    if (minor != AZ_GUN_PHASE) {
+      AZ_ARRAY_LOOP(door, state->doors) {
+        if (door->kind == AZ_DOOR_NOTHING) continue;
+        az_vector_t hit_at;
+        if (az_ray_hits_door(door, beam_start, delta, &hit_at, &normal)) {
+          did_hit = true;
+          delta = az_vsub(hit_at, beam_start);
+          hit_door = door;
+        }
+      }
+      AZ_ARRAY_LOOP(wall, state->walls) {
+        if (wall->kind == AZ_WALL_NOTHING) continue;
+        az_vector_t hit_at;
+        if (az_ray_hits_wall(wall, beam_start, delta, &hit_at, &normal)) {
+          did_hit = true;
+          delta = az_vsub(hit_at, beam_start);
+          hit_color = wall->data->color;
+        }
+      }
+    }
+    az_baddie_t *hit_baddie = NULL;
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      az_vector_t hit_at, baddie_normal;
+      if (az_ray_hits_baddie(baddie, beam_start, delta, &hit_at,
+                             &baddie_normal)) {
+        did_hit = true;
+        if (minor == AZ_GUN_PIERCE) {
+          beam_emit_particles(state, hit_at, baddie_normal, AZ_WHITE);
+          az_damage_baddie(state, baddie, damage);
+        } else {
+          delta = az_vsub(hit_at, beam_start);
+          normal = baddie_normal;
+          hit_color = AZ_WHITE;
+          hit_baddie = baddie;
+          hit_door = NULL;
+        }
+      }
+    }
+    const az_vector_t beam_end = az_vadd(beam_start, delta);
+
+    // Add a particle for the beam itself:
+    az_particle_t *particle;
+    if (az_insert_particle(state, &particle)) {
+      particle->kind = AZ_PAR_BEAM;
+      const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+      particle->color = (az_color_t){
+        (minor == AZ_GUN_FREEZE ? alt : 255),
+        (minor == AZ_GUN_FREEZE ? 128 : minor == AZ_GUN_PIERCE ? 0 : alt),
+        (minor == AZ_GUN_FREEZE ? 255 : minor == AZ_GUN_PHASE ? 0 : alt),
+        192};
+      particle->position = beam_start;
+      particle->velocity = AZ_VZERO;
+      particle->angle = beam_angle;
+      particle->lifetime = 0.0;
+      particle->param1 = az_vnorm(delta);
+      particle->param2 =
+        sqrt(damage_mult) * (3.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
+    }
+
+    // Resolve hits:
+    if (did_hit) {
+      // Add particles off of whatever the beam hits:
+      beam_emit_particles(state, beam_end, normal, hit_color);
+      // If we hit a (normal) door, open the door.
+      if (hit_door != NULL) {
+        assert(minor != AZ_GUN_PHASE); // phased beams can't hit doors
+        assert(hit_baddie == NULL);
+        if (hit_door->kind == AZ_DOOR_NORMAL) {
+          hit_door->is_open = true;
+        }
+      }
+      // If we hit a baddie, damage it.
+      if (hit_baddie != NULL) {
+        assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
+        assert(hit_door == NULL);
+        az_damage_baddie(state, hit_baddie, damage);
+        // TODO: if FREEZE beam, freeze the baddie
+      }
+      // If this is a BURST beam, the next beam reflects off of the impact
+      // point.
+      if (minor == AZ_GUN_BURST) {
+        const double normal_theta = az_vtheta(normal);
+        beam_start = az_vadd(beam_end, az_vpolar(0.1, normal_theta));
+        beam_init_angle = az_mod2pi(2.0 * normal_theta - beam_angle + AZ_PI);
+      }
+    }
+    // If a BURST beam doesn't hit anything, it doesn't reflect (so there is no
+    // additional beam).
+    else if (minor == AZ_GUN_BURST) break;
+  }
 }
 
 static void fire_weapons(az_space_state_t *state, double time) {
   az_ship_t *ship = &state->ship;
   az_controls_t *controls = &ship->controls;
-  if (!controls->fire_pressed) return;
-  controls->fire_pressed = false;
+  if (!(controls->fire_pressed || controls->fire_held)) return;
   az_player_t *player = &ship->player;
   const az_vector_t gun_position =
     az_vadd(ship->position, az_vpolar(18, ship->angle));
   az_projectile_t *proj = NULL;
 
   // If the ordnance key is held, we should be firing ordnance.
-  if (controls->ordn_held) {
+  if (controls->fire_pressed && controls->ordn_held) {
+    controls->fire_pressed = false;
     switch (player->ordnance) {
       case AZ_ORDN_NONE: return;
       case AZ_ORDN_ROCKETS:
@@ -499,62 +673,6 @@ void az_tick_ship(az_space_state_t *state, double time) {
   }
 
   fire_weapons(state, time);
-
-  // Fire beam:
-  if (false && controls->fire_held) {
-    const az_vector_t gun_position =
-      az_vadd(ship->position, az_vpolar(18, ship->angle));
-    // Calculate where beam hits:
-    az_vector_t hit_at = az_vadd(ship->position, az_vpolar(1000, ship->angle));
-    az_vector_t normal = AZ_VZERO;
-    bool did_hit = false;
-    az_color_t hit_color = AZ_WHITE;
-    AZ_ARRAY_LOOP(baddie, state->baddies) {
-      if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (az_ray_hits_baddie(baddie, gun_position,
-                             az_vsub(hit_at, gun_position),
-                             &hit_at, &normal)) {
-        did_hit = true;
-      }
-    }
-    AZ_ARRAY_LOOP(wall, state->walls) {
-      if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_ray_hits_wall(wall, gun_position, az_vsub(hit_at, gun_position),
-                           &hit_at, &normal)) {
-        did_hit = true;
-        hit_color = wall->data->color;
-      }
-    }
-    // Add particle for the beam itself:
-    az_particle_t *particle;
-    if (az_insert_particle(state, &particle)) {
-      particle->kind = AZ_PAR_BEAM;
-      particle->color = (az_color_t){
-        (az_clock_mod(6, 1, state->clock) < 3 ? 255 : 64),
-        (az_clock_mod(6, 1, state->clock + 2) < 3 ? 255 : 64),
-        (az_clock_mod(6, 1, state->clock + 4) < 3 ? 255 : 64),
-        192};
-      particle->position = gun_position;
-      particle->velocity = AZ_VZERO;
-      particle->angle = ship->angle;
-      particle->lifetime = 0.0;
-      particle->param1 = az_vnorm(az_vsub(hit_at, particle->position));
-      particle->param2 = 6 + az_clock_zigzag(6, 1, state->clock);
-    }
-    // Add particles off of what the beam hits:
-    if (did_hit) {
-      if (az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_SPECK;
-        particle->color = hit_color;
-        particle->position = hit_at;
-        particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
-                                       az_vtheta(normal) +
-                                       (az_random() - 0.5) * AZ_PI);
-        particle->angle = 0.0;
-        particle->lifetime = 1.0;
-      }
-    }
-  }
 }
 
 /*===========================================================================*/

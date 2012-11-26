@@ -158,9 +158,12 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
   return false;
 }
 
-void az_try_add_pickup(az_space_state_t *state, az_pickup_kind_t kind,
-                       az_vector_t position) {
-  assert(kind != AZ_PUP_NOTHING);
+static void add_random_pickup(az_space_state_t *state,
+                              unsigned int potential_pickups,
+                              az_vector_t position) {
+  const az_pickup_kind_t kind =
+    az_choose_random_pickup_kind(&state->ship.player, potential_pickups);
+  if (kind == AZ_PUP_NOTHING) return;
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) {
       pickup->kind = kind;
@@ -202,6 +205,17 @@ void az_damage_ship(az_space_state_t *state, double damage) {
         particle->lifetime = 2.0;
       } else break;
     }
+  }
+}
+
+void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                      double damage) {
+  baddie->health -= damage;
+  if (baddie->health <= 0.0) {
+    baddie->kind = AZ_BAD_NOTHING;
+    // TODO add baddie debris
+    add_random_pickup(state, baddie->data->potential_pickups,
+                      baddie->position);
   }
 }
 

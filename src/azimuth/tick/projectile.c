@@ -49,16 +49,6 @@ typedef struct {
   } target;
 } az_impact_target_t;
 
-static void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                             double damage) {
-  baddie->health -= damage;
-  if (baddie->health <= 0.0) {
-    baddie->kind = AZ_BAD_NOTHING;
-    az_add_random_pickup(state, baddie->data->potential_pickups,
-                         baddie->position);
-  }
-}
-
 // Common projectile impact code, called by both on_projectile_hit_wall and
 // on_projectile_hit_target.
 static void on_projectile_impact(az_space_state_t *state,
