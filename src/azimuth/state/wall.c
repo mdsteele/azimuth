@@ -20,6 +20,7 @@
 #include "azimuth/state/wall.h"
 
 #include <assert.h>
+#include <math.h> // for fmax
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
@@ -34,6 +35,10 @@ static az_vector_t wall_vertices_0[] = {
 static az_vector_t wall_vertices_1[] = {
   {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
 };
+static az_vector_t wall_vertices_2[] = {
+  {10, -25}, {60, -25}, {60, 25}, {-10.710678, 25},
+  {-60.710678, -25}, {-25.355339, -60.355339}
+};
 
 static az_wall_data_t wall_datas[] = {
   [0] = {
@@ -45,6 +50,11 @@ static az_wall_data_t wall_datas[] = {
     .color = {0, 255, 255, 255},
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_1)
+  },
+  [2] = {
+    .color = {255, 255, 0, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_2)
   }
 };
 
@@ -59,7 +69,7 @@ void az_init_wall_datas(void) {
   AZ_ARRAY_LOOP(data, wall_datas) {
     double radius = 0.0;
     for (int i = 0; i < data->polygon.num_vertices; ++i) {
-      radius = az_dmax(radius, az_vnorm(data->polygon.vertices[i]));
+      radius = fmax(radius, az_vnorm(data->polygon.vertices[i]));
     }
     data->bounding_radius = radius + 0.01; // small safety margin
   }

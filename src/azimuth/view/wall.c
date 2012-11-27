@@ -20,6 +20,7 @@
 #include "azimuth/view/wall.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include <GL/gl.h>
@@ -30,15 +31,15 @@
 
 /*===========================================================================*/
 
-static void with_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
+static double mod2pi_nonneg(double theta) {
+  const double theta2 = az_mod2pi(theta);
+  return (theta2 < 0.0 ? theta2 + AZ_TWO_PI : theta2);
 }
 
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
-  // TODO: Right now, the below doesn't work correctly for concave walls.
   glNewList(list, GL_COMPILE); {
     glColor3f(0, 0, 0);
-    glBegin(GL_POLYGON); {
+    glBegin(GL_TRIANGLE_FAN); {
       for (int i = 0; i < data->polygon.num_vertices; ++i) {
         glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
       }
@@ -54,20 +55,22 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         az_vector_t c = data->polygon.vertices[(i + 2) % n];
         az_vector_t d = data->polygon.vertices[(i + 3) % n];
         glBegin(GL_QUADS); {
-          with_color(c1);
+          glColor4ub(c1.r, c1.g, c1.b, c1.a);
           glVertex2d(b.x, b.y);
           glVertex2d(c.x, c.y);
-          with_color(c2);
-          const double bezel = 20.0;
+          glColor4ub(c2.r, c2.g, c2.b, c2.a);
+          const double bezel = 18.0;
           const double td = az_vtheta(az_vsub(d, c));
           const double tb = az_vtheta(az_vsub(b, c));
+          const double ttc = 0.5 * mod2pi_nonneg(tb - td);
           az_vector_t dd =
-            az_vadd(c, az_vpolar(bezel, td + az_mod2pi(tb - td) / 2));
+            az_vadd(c, az_vpolar(bezel / sin(ttc), td + ttc));
           glVertex2d(dd.x, dd.y);
           const double ta = az_vtheta(az_vsub(a, b));
           const double tc = az_vtheta(az_vsub(c, b));
+          const double ttb = 0.5 * mod2pi_nonneg(ta - tc);
           az_vector_t aa =
-            az_vadd(b, az_vpolar(bezel, ta + az_mod2pi(tc - ta) / 2));
+            az_vadd(b, az_vpolar(bezel / sin(ttb), tc + ttb));
           glVertex2d(aa.x, aa.y);
         } glEnd();
       }
