@@ -367,28 +367,30 @@ static void fire_weapons(az_space_state_t *state, double time) {
   }
   if (!(controls->fire_pressed || controls->fire_held ||
         ship->gun_charge > 0.0)) return;
-  const az_vector_t gun_position =
-    az_vadd(ship->position, az_vpolar(18, ship->angle));
-  az_projectile_t *proj = NULL;
 
   // If the ordnance key is held, we should be firing ordnance.
   if (controls->fire_pressed && controls->ordn_held) {
     controls->fire_pressed = false;
+    az_projectile_t *proj;
     switch (player->ordnance) {
       case AZ_ORDN_NONE: return;
       case AZ_ORDN_ROCKETS:
         if (player->rockets <= 0) return;
         if (az_insert_projectile(state, &proj)) {
-          az_init_projectile(proj, AZ_PROJ_ROCKET, false, gun_position,
-                             ship->angle);
+          az_init_projectile(
+              proj, AZ_PROJ_ROCKET, false,
+              az_vadd(ship->position, az_vpolar(18, ship->angle)),
+              ship->angle);
           --player->rockets;
         }
         return;
       case AZ_ORDN_BOMBS:
         if (player->bombs <= 0) return;
         if (az_insert_projectile(state, &proj)) {
-          az_init_projectile(proj, AZ_PROJ_BOMB, false, gun_position,
-                             ship->angle);
+          az_init_projectile(
+              proj, AZ_PROJ_BOMB, false,
+              az_vadd(ship->position, az_vpolar(-12, ship->angle)),
+              ship->angle);
           --player->bombs;
         }
         return;

@@ -54,19 +54,16 @@ typedef struct {
 static void on_projectile_impact(az_space_state_t *state,
                                  az_projectile_t *proj, az_vector_t normal) {
   const double radius = proj->data->splash_radius;
-  // Deal splash damage, if applicable.
+  // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
-    if (proj->fired_by_enemy) {
-      if (az_vwithin(state->ship.position, proj->position, radius)) {
-        az_damage_ship(state, proj->data->splash_damage);
-      }
-    } else {
-      AZ_ARRAY_LOOP(baddie, state->baddies) {
-        if (baddie->kind == AZ_BAD_NOTHING) continue;
-        if (az_vwithin(baddie->position, proj->position,
-                       radius + baddie->data->bounding_radius)) {
-          az_damage_baddie(state, baddie, proj->data->splash_damage);
-        }
+    if (az_vwithin(state->ship.position, proj->position, radius)) {
+      az_damage_ship(state, proj->data->splash_damage);
+    }
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (az_vwithin(baddie->position, proj->position,
+                     radius + baddie->data->bounding_radius)) {
+        az_damage_baddie(state, baddie, proj->data->splash_damage);
       }
     }
   }
@@ -181,11 +178,29 @@ static void projectile_special_logic(az_space_state_t *state,
                                      double time) {
   // The projectile still hasn't hit anything.  Apply kind-specific logic to
   // the projectile (e.g. homing projectiles will home in).
+  az_particle_t *particle;
   switch (proj->kind) {
-    case AZ_PROJ_BOMB:
-      //maybe_detonate_bomb(state, proj);
+    case AZ_PROJ_ROCKET:
+    case AZ_PROJ_HYPER_ROCKET:
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_SPECK;
+        particle->color = (az_color_t){255, 255, 0, 255};
+        particle->position = proj->position;
+        particle->velocity =
+          az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
+                     (az_random() - 0.5) * AZ_DEG2RAD(60));
+        particle->angle = 0.0;
+        particle->lifetime = 1.0;
+      }
       break;
-    // TODO: implement logic for other special projectile kinds here
+    case AZ_PROJ_BOMB:
+    case AZ_PROJ_MEGA_BOMB:
+      if (proj->age >= 0.5 * proj->data->lifetime) {
+        on_projectile_hit_wall(state, proj, AZ_VZERO);
+      } else {
+        proj->velocity = az_vrotate(proj->velocity, 1.5 * time);
+      }
+      break;
     default: break;
   }
 }

@@ -19,6 +19,8 @@
 
 #include "azimuth/view/projectile.h"
 
+#include <math.h>
+
 #include <GL/gl.h>
 
 #include "azimuth/state/projectile.h"
@@ -125,11 +127,44 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_ROCKET:
-      glColor3f(1, 0, 1);
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(5, 0);
-        glVertex2d(-5, 3);
-        glVertex2d(-5, -3);
+      glColor3f(0.5, 0, 0); // dark red
+      glBegin(GL_QUADS); {
+        const int y = 2 - az_clock_mod(6, 2, clock);
+        glVertex2i(-11, y);
+        glVertex2i(-11, y + 2);
+        glVertex2i(-4, y + 2);
+        glVertex2i(-4, y);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(-9, -2);
+        glVertex2i(2, -2);
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(-9, 0);
+        glVertex2i(4, 0);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(-9, 2);
+        glVertex2i(2, 2);
+      } glEnd();
+      glColor3f(0.5, 0, 0); // dark red
+      glBegin(GL_QUADS); {
+        const int y = -4 + az_clock_mod(6, 2, clock);
+        glVertex2i(-11, y);
+        glVertex2i(-11, y + 2);
+        glVertex2i(-4, y + 2);
+        glVertex2i(-4, y);
+      } glEnd();
+      break;
+    case AZ_PROJ_BOMB:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, 0);
+        const double radius = 4.0;
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          if (blue) glColor3f(0, 0, 0.75); // blue
+          else glColor3f(0.5, 0.5, 0.5); // gray
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
       } glEnd();
       break;
   }

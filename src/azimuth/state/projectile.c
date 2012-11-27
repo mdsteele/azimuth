@@ -72,25 +72,25 @@ static const az_proj_data_t proj_data[] = {
     .phased = true
   },
   [AZ_PROJ_GUN_BURST] = {
-    .speed = 1000.0,
+    .speed = 900.0,
     .lifetime = 1.0,
     .impact_damage = 1.5,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
   },
   [AZ_PROJ_GUN_TRIPLE_BURST] = {
-    .speed = 1000.0,
+    .speed = 900.0,
     .lifetime = 1.0,
     .impact_damage = 1.0,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
   },
   [AZ_PROJ_GUN_HOMING_BURST] = {
-    .speed = 1000.0,
+    .speed = 900.0,
     .lifetime = 1.0,
     .impact_damage = 1.5,
     .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL
   },
   [AZ_PROJ_GUN_BURST_PIERCE] = {
-    .speed = 1000.0,
+    .speed = 900.0,
     .lifetime = 1.0,
     .impact_damage = 3.0,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
@@ -127,23 +127,23 @@ static const az_proj_data_t proj_data[] = {
     .piercing = true
   },
   [AZ_PROJ_ROCKET] = {
-    .speed = 800.0,
-    .lifetime = 1.0,
+    .speed = 1000.0,
+    .lifetime = 3.0,
     .impact_damage = 5.0,
     .splash_damage = 5.0,
-    .splash_radius = 20.0
+    .splash_radius = 25.0
   },
   [AZ_PROJ_BOMB] = {
-    .speed = 0.0,
-    .lifetime = 10.0,
+    .speed = -0.001,
+    .lifetime = 3.0,
     .splash_damage = 25.0,
-    .splash_radius = 50.0
+    .splash_radius = 60.0
   },
   [AZ_PROJ_MEGA_BOMB] = {
-    .speed = 0.0,
-    .lifetime = 10.0,
+    .speed = -0.001,
+    .lifetime = 6.0,
     .splash_damage = 75.0,
-    .splash_radius = 100.0
+    .splash_radius = 200.0
   },
 };
 
