@@ -74,11 +74,11 @@ static void center_camera_on_current_room(void) {
   state.camera = (az_vector_t){(min_x + max_x) * 0.5, (min_y + max_y) * 0.5};
 }
 
-static void deselect_all(az_editor_room_t *room) {
-  AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = false;
-  AZ_LIST_LOOP(door, room->doors) door->selected = false;
-  AZ_LIST_LOOP(node, room->nodes) node->selected = false;
-  AZ_LIST_LOOP(wall, room->walls) wall->selected = false;
+static void select_all(az_editor_room_t *room, bool selected) {
+  AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = selected;
+  AZ_LIST_LOOP(door, room->doors) door->selected = selected;
+  AZ_LIST_LOOP(node, room->nodes) node->selected = selected;
+  AZ_LIST_LOOP(wall, room->walls) wall->selected = selected;
 }
 
 static void do_save(void) {
@@ -173,7 +173,7 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_baddie->selected = !best_baddie->selected;
     } else if (!best_baddie->selected) {
-      deselect_all(room);
+      select_all(room, false);
       best_baddie->selected = true;
     }
     state.brush.baddie_kind = best_baddie->spec.kind;
@@ -181,7 +181,7 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_door->selected = !best_door->selected;
     } else if (!best_door->selected) {
-      deselect_all(room);
+      select_all(room, false);
       best_door->selected = true;
     }
     state.brush.door_kind = best_door->spec.kind;
@@ -189,7 +189,7 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_node->selected = !best_node->selected;
     } else if (!best_node->selected) {
-      deselect_all(room);
+      select_all(room, false);
       best_node->selected = true;
     }
     state.brush.node_kind = best_node->spec.kind;
@@ -200,12 +200,12 @@ static void do_select(int x, int y, bool multi) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
     } else if (!best_wall->selected) {
-      deselect_all(room);
+      select_all(room, false);
       best_wall->selected = true;
     }
     state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
   } else if (!multi) {
-    deselect_all(room);
+    select_all(room, false);
   }
 }
 
@@ -308,7 +308,7 @@ static void do_set_camera_bounds(int x, int y) {
 
 static void do_add_baddie(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  deselect_all(room);
+  select_all(room, false);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_baddie_t *baddie = AZ_LIST_ADD(room->baddies);
   baddie->selected = true;
@@ -320,7 +320,7 @@ static void do_add_baddie(int x, int y) {
 
 static void do_add_door(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  deselect_all(room);
+  select_all(room, false);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_door_t *door = AZ_LIST_ADD(room->doors);
   door->selected = true;
@@ -333,7 +333,7 @@ static void do_add_door(int x, int y) {
 
 static void do_add_node(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  deselect_all(room);
+  select_all(room, false);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
   node->selected = true;
@@ -346,7 +346,7 @@ static void do_add_node(int x, int y) {
 
 static void do_add_wall(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  deselect_all(room);
+  select_all(room, false);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
   wall->selected = true;
@@ -536,6 +536,12 @@ static void event_loop(void) {
             }
           } else {
             switch (event.key.name) {
+              case AZ_KEY_A:
+                if (event.key.command) {
+                  select_all(AZ_LIST_GET(state.planet.rooms,
+                                         state.current_room), true);
+                }
+                break;
               case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
               case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
               case AZ_KEY_D:
