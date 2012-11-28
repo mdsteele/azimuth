@@ -32,11 +32,11 @@
 #define SHIP_BOUNDING_RADIUS 20.0
 
 static const az_vector_t ship_vertices[] = {
-  {20, 0}, {15, 4}, {6, 12}, {-10, 12}, {-11, 7}, {-14, 4},
-  {-14, -4}, {-11, -7}, {-10, -12}, {6, -12}, {15, -4}
+  {20, 0}, {15, 4}, {6, 12}, {-10, 12}, {-14, 4},
+  {-14, -4}, {-10, -12}, {6, -12}, {15, -4}
 };
 
-static const az_polygon_t ship_polygon = {
+const az_polygon_t AZ_SHIP_POLYGON = {
   .num_vertices = AZ_ARRAY_SIZE(ship_vertices),
   .vertices = ship_vertices
 };
@@ -47,7 +47,7 @@ bool az_ship_is_present(const az_ship_t *ship) {
 
 bool az_point_hits_ship(const az_ship_t *ship, az_vector_t point) {
   return az_vwithin(point, ship->position, SHIP_BOUNDING_RADIUS) &&
-    az_convex_polygon_contains(ship_polygon,
+    az_convex_polygon_contains(AZ_SHIP_POLYGON,
         az_vrotate(az_vsub(point, ship->position), -ship->angle));
 }
 
@@ -56,8 +56,9 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                       az_vector_t *normal_out) {
   return (az_ray_hits_circle(start, delta, ship->position,
                              SHIP_BOUNDING_RADIUS) &&
-          az_ray_hits_polygon_trans(ship_polygon, ship->position, ship->angle,
-                                    start, delta, point_out, normal_out));
+          az_ray_hits_polygon_trans(AZ_SHIP_POLYGON, ship->position,
+                                    ship->angle, start, delta,
+                                    point_out, normal_out));
 }
 
 bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
@@ -67,7 +68,7 @@ bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
                              SHIP_BOUNDING_RADIUS +
                              wall->data->bounding_radius) &&
           az_polygons_collide(wall->data->polygon, wall->position, wall->angle,
-                              ship_polygon, ship->position, ship->angle,
+                              AZ_SHIP_POLYGON, ship->position, ship->angle,
                               delta, pos_out, impact_out, normal_out));
 }
 

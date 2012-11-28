@@ -193,6 +193,24 @@ void az_draw_ship(az_space_state_t* state) {
       glColor3f(0, 0.5, 0.5); // dim cyan
       glVertex2d(15, -2);
     } glEnd();
+
+    // Shield flare:
+    if (ship->shield_flare > 0.0) {
+      assert(ship->shield_flare <= 1.0);
+      glBegin(GL_QUAD_STRIP); {
+        const GLfloat alpha = 0.6 * ship->shield_flare;
+        const double scale = 1.0 + 0.7 * ship->shield_flare;
+        for (int i = AZ_SHIP_POLYGON.num_vertices - 1, j = 0;
+             j <= AZ_SHIP_POLYGON.num_vertices; i = j++) {
+          glColor4f(0, 1, 1, alpha);
+          const az_vector_t v1 = AZ_SHIP_POLYGON.vertices[i];
+          glVertex2d(v1.x, v1.y);
+          glColor4f(0, 1, 1, 0);
+          const az_vector_t v2 = az_vmul(v1, scale);
+          glVertex2d(v2.x, v2.y);
+        }
+      } glEnd();
+    }
   } glPopMatrix();
 }
 

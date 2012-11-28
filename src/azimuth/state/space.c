@@ -177,6 +177,10 @@ static void add_random_pickup(az_space_state_t *state,
 /*===========================================================================*/
 
 void az_damage_ship(az_space_state_t *state, double damage) {
+  assert(state->ship.player.shields > 0.0);
+  assert(damage >= 0.0);
+  if (damage <= 0.0) return;
+  state->ship.shield_flare = 1.0;
   state->ship.player.shields -= damage;
   if (state->ship.player.shields <= 0.0) {
     state->ship.player.shields = 0.0;

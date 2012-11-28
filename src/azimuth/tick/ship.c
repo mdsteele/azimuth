@@ -38,6 +38,8 @@
 
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 0.6
+// How long it takes the ship's shield flare to die down, in seconds:
+#define AZ_SHIP_SHIELD_FLARE_TIME 0.5
 // The radius of the ship for purposes of collisions with e.g. walls:
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 
@@ -529,9 +531,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
-  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
-  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
 
+  // Allow the shield flare to die down a bit.
+  assert(ship->shield_flare >= 0.0);
+  assert(ship->shield_flare <= 1.0);
+  ship->shield_flare =
+    fmax(0.0, ship->shield_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
+
+  // Recharge energy, but only if we're not currently firing a beam gun.
   if (!(controls->fire_held &&
         (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM))) {
     recharge_ship_energy(player, time);
@@ -668,6 +675,9 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (state->mode != AZ_MODE_NORMAL) return;
 
   apply_gravity_to_ship(ship, time);
+
+  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
+  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
 
   // Turning left:
   if (controls->left && !controls->right) {

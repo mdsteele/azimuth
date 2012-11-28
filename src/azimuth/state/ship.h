@@ -45,12 +45,15 @@ typedef struct {
   az_vector_t velocity; // pixels/second
   double angle; // radians
   double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
+  double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   struct {
     bool active;
     az_uid_t node_uid;
     double distance;
   } tractor_beam;
 } az_ship_t;
+
+const extern az_polygon_t AZ_SHIP_POLYGON;
 
 // Return true if the ship is present (i.e. not destroyed), false otherwise.
 bool az_ship_is_present(const az_ship_t *ship);
