@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
+#include <string.h> // for memset
 
 #include "azimuth/state/pickup.h" // for AZ_PUPF_* macros
 #include "azimuth/util/misc.h"
@@ -76,18 +77,16 @@ const az_baddie_data_t *az_get_baddie_data(az_baddie_kind_t kind) {
 void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle) {
   assert(kind != AZ_BAD_NOTHING);
+  const az_uid_t uid = baddie->uid;
+  assert(uid != AZ_NULL_UID);
+  assert(uid != AZ_SHIP_UID);
+  memset(baddie, 0, sizeof(*baddie));
   baddie->kind = kind;
   baddie->data = az_get_baddie_data(kind);
+  baddie->uid = uid;
   baddie->position = position;
-  baddie->velocity = AZ_VZERO;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
-  baddie->cooldown = 0.0;
-  for (int i = 0; i < baddie->data->num_components; ++i) {
-    assert(i < AZ_ARRAY_SIZE(baddie->components));
-    baddie->components[i].position = AZ_VZERO;
-    baddie->components[i].angle = 0.0;
-  }
 }
 
 /*===========================================================================*/

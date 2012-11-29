@@ -33,10 +33,11 @@
 /*===========================================================================*/
 
 static void draw_baddie_internal(const az_baddie_t *baddie) {
+  const double flare = baddie->armor_flare;
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
-      glColor3f(1, 0, 1); // magenta
+      glColor3f(1, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
         for (int i = 0; i < baddie->data->polygon.num_vertices; ++i) {
           glVertex2d(baddie->data->polygon.vertices[i].x,
@@ -48,18 +49,18 @@ static void draw_baddie_internal(const az_baddie_t *baddie) {
       glPushMatrix(); {
         glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
         glBegin(GL_QUAD_STRIP); {
-          glColor3f(0.25, 0.25, 0.25); // dark gray
+          glColor3f(0.25 + 0.25 * flare, 0.25, 0.25); // dark gray
           glVertex2d( 0,  5);
           glVertex2d(30,  5);
-          glColor3f(0.75, 0.75, 0.75); // light gray
+          glColor3f(0.75 + 0.25 * flare, 0.75, 0.75); // light gray
           glVertex2d( 0,  0);
           glVertex2d(30,  0);
-          glColor3f(0.25, 0.25, 0.25); // dark gray
+          glColor3f(0.25 + 0.25 * flare, 0.25, 0.25); // dark gray
           glVertex2d( 0, -5);
           glVertex2d(30, -5);
         } glEnd();
       } glPopMatrix();
-      glColor3f(0.5, 0.5, 0.5); // gray
+      glColor3f(0.5 + 0.5 * flare, 0.5, 0.5); // gray
       glBegin(GL_POLYGON); {
         const double radius = 20;
         for (int i = 0; i <= 6; ++i) {

@@ -214,6 +214,11 @@ void az_damage_ship(az_space_state_t *state, double damage) {
 
 void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
                       double damage) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  assert(baddie->health > 0.0);
+  assert(damage >= 0.0);
+  if (damage <= 0.0) return;
+  baddie->armor_flare = 1.0;
   baddie->health -= damage;
   if (baddie->health <= 0.0) {
     baddie->kind = AZ_BAD_NOTHING;

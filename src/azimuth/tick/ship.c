@@ -66,8 +66,8 @@ static void recharge_ship_energy(az_player_t *player, double time) {
      AZ_FUSION_REACTOR_RECHARGE_RATE : 0.0) +
     (az_has_upgrade(player, AZ_UPG_QUANTUM_REACTOR) ?
      AZ_QUANTUM_REACTOR_RECHARGE_RATE : 0.0);
-  player->energy = az_dmin(player->max_energy,
-                           player->energy + recharge_rate * time);
+  player->energy = fmin(player->max_energy,
+                        player->energy + recharge_rate * time);
 }
 
 static void on_ship_enter_door(az_space_state_t *state, az_door_t *door) {

@@ -20,6 +20,7 @@
 #include "azimuth/tick/baddie.h"
 
 #include <assert.h>
+#include <math.h> // for fmax
 #include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
@@ -29,13 +30,22 @@
 
 /*===========================================================================*/
 
+// How long it takes a baddie's armor flare to die down, in seconds:
+#define AZ_BADDIE_ARMOR_FLARE_TIME 0.3
+
 static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         double time) {
+  // Allow the armor flare to die down a bit.
+  assert(baddie->armor_flare >= 0.0);
+  assert(baddie->armor_flare <= 1.0);
+  baddie->armor_flare =
+    fmax(0.0, baddie->armor_flare - time / AZ_BADDIE_ARMOR_FLARE_TIME);
+  // Cool down the baddie's weapon.
+  baddie->cooldown = fmax(0.0, baddie->cooldown - time);
+  // Apply velocity.
   baddie->position = az_vadd(baddie->position,
                              az_vmul(baddie->velocity, time));
-  if (baddie->cooldown >= 0.0) {
-    baddie->cooldown = az_dmax(0.0, baddie->cooldown - time);
-  }
+  // Perform kind-specific logic.
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
