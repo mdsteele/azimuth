@@ -159,7 +159,7 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
 }
 
 static void add_random_pickup(az_space_state_t *state,
-                              unsigned int potential_pickups,
+                              az_pickup_flags_t potential_pickups,
                               az_vector_t position) {
   const az_pickup_kind_t kind =
     az_choose_random_pickup_kind(&state->ship.player, potential_pickups);

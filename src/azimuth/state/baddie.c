@@ -58,6 +58,7 @@ static const az_baddie_data_t baddie_data[] = {
   [AZ_BAD_TURRET] = {
     .bounding_radius = 30.5,
     .max_health = 15.0,
+    .immunities = AZ_DMGF_NORMAL,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
     DECL_COMPONENTS(turret_components),

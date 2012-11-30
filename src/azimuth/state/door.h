@@ -23,7 +23,7 @@
 
 #include <stdbool.h>
 
-#include "azimuth/state/player.h" // for az_room_key_t
+#include "azimuth/state/player.h" // for az_damage_flags_t and az_room_key_t
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -41,6 +41,12 @@ typedef enum {
   AZ_DOOR_MEGA_BOMB, // openable only by a mega bomb
   AZ_DOOR_PASSAGE // no door per se; just a passage that leads to another room
 } az_door_kind_t;
+
+// Determine whether damage of the given kind will open a door of the given
+// kind.  The door kind must not be AZ_DOOR_NOTHING.
+bool az_can_open_door(az_door_kind_t door_kind, az_damage_flags_t damage_kind);
+
+/*===========================================================================*/
 
 typedef struct {
   az_door_kind_t kind; // if AZ_DOOR_NOTHING, this door is not present

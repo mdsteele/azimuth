@@ -35,7 +35,8 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_NORMAL] = {
     .speed = 800.0,
     .lifetime = 1.0,
-    .impact_damage = 5.0
+    .impact_damage = 5.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_TRIPLE] = {
     .speed = 600.0,
@@ -45,7 +46,8 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_TRIPLE] = {
     .speed = 800.0,
     .lifetime = 1.0,
-    .impact_damage = 4.0
+    .impact_damage = 4.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_HOMING] = {
     .speed = 500.0,
@@ -57,6 +59,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 500.0,
     .lifetime = 5.0,
     .impact_damage = 2.5,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
     .homing = true
   },
   [AZ_PROJ_GUN_TRIPLE_HOMING] = {
@@ -111,18 +114,28 @@ static const az_proj_data_t proj_data[] = {
     .speed = 700.0,
     .lifetime = 1.0,
     .impact_damage = 2.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
+    .piercing = true
+  },
+  [AZ_PROJ_GUN_CHARGED_PIERCE] = {
+    .speed = 800.0,
+    .lifetime = 1.0,
+    .impact_damage = 10.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
     .piercing = true
   },
   [AZ_PROJ_GUN_TRIPLE_PIERCE] = {
     .speed = 700.0,
     .lifetime = 1.0,
     .impact_damage = 1.6,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .piercing = true
   },
   [AZ_PROJ_GUN_HOMING_PIERCE] = {
     .speed = 600.0,
     .lifetime = 3.0,
     .impact_damage = 1.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .homing = true,
     .piercing = true
   },
@@ -131,19 +144,22 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 3.0,
     .impact_damage = 5.0,
     .splash_damage = 5.0,
-    .splash_radius = 25.0
+    .splash_radius = 25.0,
+    .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_BOMB] = {
     .speed = -0.001,
     .lifetime = 3.0,
     .splash_damage = 25.0,
-    .splash_radius = 60.0
+    .splash_radius = 60.0,
+    .damage_kind = AZ_DMGF_BOMB
   },
   [AZ_PROJ_MEGA_BOMB] = {
     .speed = -0.001,
     .lifetime = 6.0,
     .splash_damage = 75.0,
-    .splash_radius = 200.0
+    .splash_radius = 200.0,
+    .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB
   },
 };
 

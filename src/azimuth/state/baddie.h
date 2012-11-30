@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_STATE_BADDIE_H_
 #define AZIMUTH_STATE_BADDIE_H_
 
+#include "azimuth/state/pickup.h" // for az_pickup_flags_t
+#include "azimuth/state/player.h" // for az_damage_kinds_t
 #include "azimuth/state/uid.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -44,7 +46,8 @@ typedef struct {
 typedef struct {
   double bounding_radius;
   double max_health;
-  unsigned int potential_pickups;
+  az_damage_flags_t immunities;
+  az_pickup_flags_t potential_pickups;
   int num_components;
   const az_component_data_t* components; // array of length num_components
   az_polygon_t polygon;

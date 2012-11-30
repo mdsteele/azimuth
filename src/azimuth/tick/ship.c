@@ -25,6 +25,7 @@
 #include <stdlib.h> // for NULL
 
 #include "azimuth/constants.h"
+#include "azimuth/state/door.h"
 #include "azimuth/state/particle.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
@@ -215,6 +216,10 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
   }
   ship->player.energy -= energy_cost;
 
+  az_damage_flags_t damage_kind = AZ_DMGF_NORMAL;
+  if (minor == AZ_GUN_FREEZE) damage_kind |= AZ_DMGF_FREEZE;
+  if (minor == AZ_GUN_PIERCE) damage_kind |= AZ_DMGF_PIERCE;
+
   az_vector_t beam_start =
     az_vadd(ship->position, az_vpolar(18, ship->angle));
   double beam_init_angle = ship->angle;
@@ -290,7 +295,9 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         did_hit = true;
         if (minor == AZ_GUN_PIERCE) {
           beam_emit_particles(state, hit_at, baddie_normal, AZ_WHITE);
-          az_damage_baddie(state, baddie, damage);
+          if (damage_kind & ~(baddie->data->immunities)) {
+            az_damage_baddie(state, baddie, damage);
+          }
         } else {
           delta = az_vsub(hit_at, beam_start);
           normal = baddie_normal;
@@ -325,11 +332,11 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     if (did_hit) {
       // Add particles off of whatever the beam hits:
       beam_emit_particles(state, beam_end, normal, hit_color);
-      // If we hit a (normal) door, open the door.
+      // If we hit a door, try to open the door.
       if (hit_door != NULL) {
         assert(minor != AZ_GUN_PHASE); // phased beams can't hit doors
         assert(hit_baddie == NULL);
-        if (hit_door->kind == AZ_DOOR_NORMAL) {
+        if (az_can_open_door(hit_door->kind, damage_kind)) {
           hit_door->is_open = true;
         }
       }
@@ -337,8 +344,13 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       if (hit_baddie != NULL) {
         assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
         assert(hit_door == NULL);
-        az_damage_baddie(state, hit_baddie, damage);
-        // TODO: if FREEZE beam, freeze the baddie
+        if (damage_kind & ~(hit_baddie->data->immunities)) {
+          az_damage_baddie(state, hit_baddie, damage);
+          if (minor == AZ_GUN_FREEZE &&
+              !(hit_baddie->data->immunities & AZ_DMGF_FREEZE)) {
+            // TODO: freeze the baddie
+          }
+        }
       }
       // If this is a BURST beam, the next beam reflects off of the impact
       // point.
@@ -423,7 +435,9 @@ static void fire_weapons(az_space_state_t *state, double time) {
         case AZ_GUN_BURST:
           fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0);
           break;
-        case AZ_GUN_PIERCE: break; // TODO
+        case AZ_GUN_PIERCE:
+          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE);
+          break;
         case AZ_GUN_BEAM: break; // TODO
       }
     }

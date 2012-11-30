@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/player.h" // for az_damage_flags_t
 #include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
@@ -73,6 +74,7 @@ typedef struct {
   double splash_damage; // how much damage the explosion deals
   double splash_radius; // radius of explosion (zero for most projectiles)
   az_proj_kind_t shrapnel_kind; // if AZ_PROJ_NOTHING, this proj doesn't burst
+  az_damage_flags_t damage_kind; // 0 is interpreted as normal damage
   bool homing; // true if the projectile seeks out enemies
   bool phased; // true if the projectile passes thorugh walls
   bool piercing; // true if the projectile pierces through enemies

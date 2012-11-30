@@ -21,17 +21,22 @@
 #ifndef AZIMUTH_STATE_PICKUP_H_
 #define AZIMUTH_STATE_PICKUP_H_
 
+#include <stdint.h>
+
 #include "azimuth/state/player.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
+// Constants:
 #define AZ_ROCKETS_PER_PICKUP 3
 #define AZ_BOMBS_PER_PICKUP 1
 #define AZ_SHIELDS_PER_SMALL_PICKUP 5
 #define AZ_SHIELDS_PER_MEDIUM_PICKUP 15
 #define AZ_SHIELDS_PER_LARGE_PICKUP 50
 
+// A bitset of pickup flags, made from OR-ing together the below constants:
+typedef uint_fast8_t az_pickup_flags_t;
 #define AZ_PUPF_NOTHING (1u << AZ_PUP_NOTHING)
 #define AZ_PUPF_ROCKETS (1u << AZ_PUP_ROCKETS)
 #define AZ_PUPF_BOMBS (1u << AZ_PUP_BOMBS)
@@ -62,7 +67,7 @@ typedef struct {
 // that no pickup will be dropped.  Moreover, a pickup kind that the player
 // does not currently need will never be chosen.
 az_pickup_kind_t az_choose_random_pickup_kind(
-    const az_player_t *player, unsigned int potential_pickups);
+    const az_player_t *player, az_pickup_flags_t potential_pickups);
 
 /*===========================================================================*/
 

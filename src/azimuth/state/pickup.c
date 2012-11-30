@@ -34,7 +34,7 @@
 #define LSHIELDS_PROB 1
 
 az_pickup_kind_t az_choose_random_pickup_kind(
-    const az_player_t *player, unsigned int potential_pickups) {
+    const az_player_t *player, az_pickup_flags_t potential_pickups) {
   // Filter the permitted pickups; do not include pickups that the player
   // doesn't currently need.
   if (player->rockets >= player->max_rockets) {

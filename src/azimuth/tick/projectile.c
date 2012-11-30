@@ -49,13 +49,37 @@ typedef struct {
   } target;
 } az_impact_target_t;
 
+static void try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                              az_damage_flags_t damage_kind, double damage) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  az_damage_flags_t modified_damage_kind = damage_kind;
+  modified_damage_kind &= ~AZ_DMGF_FREEZE;
+  if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
+  if (modified_damage_kind & ~(baddie->data->immunities)) {
+    az_damage_baddie(state, baddie, damage);
+    if ((damage_kind & AZ_DMGF_FREEZE) &&
+        !(baddie->data->immunities & AZ_DMGF_FREEZE)) {
+      // TODO freeze baddie
+    }
+  }
+}
+
+static void try_open_door(az_door_t *door, az_damage_flags_t damage_kind) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (az_can_open_door(door->kind, damage_kind)) {
+    door->is_open = true;
+  }
+}
+
 // Common projectile impact code, called by both on_projectile_hit_wall and
 // on_projectile_hit_target.
 static void on_projectile_impact(az_space_state_t *state,
                                  az_projectile_t *proj, az_vector_t normal) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
   const double radius = proj->data->splash_radius;
   // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
+    // TODO: allow explosion to open doors
     if (az_vwithin(state->ship.position, proj->position, radius)) {
       az_damage_ship(state, proj->data->splash_damage);
     }
@@ -63,7 +87,8 @@ static void on_projectile_impact(az_space_state_t *state,
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_vwithin(baddie->position, proj->position,
                      radius + baddie->data->bounding_radius)) {
-        az_damage_baddie(state, baddie, proj->data->splash_damage);
+        try_damage_baddie(state, baddie, proj->data->damage_kind,
+                          proj->data->splash_damage);
       }
     }
   }
@@ -113,6 +138,7 @@ static void on_projectile_impact(az_space_state_t *state,
 // projectiles can't ever hit walls, but they _can_ hit doors.
 static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
   on_projectile_impact(state, proj, normal);
   proj->kind = AZ_PROJ_NOTHING;
 }
@@ -122,18 +148,25 @@ static void on_projectile_hit_wall(az_space_state_t *state,
 static void on_projectile_hit_target(az_space_state_t *state,
                                      az_projectile_t *proj,
                                      az_baddie_t *baddie, az_vector_t normal) {
-  // Run common impact code:
-  on_projectile_impact(state, proj, normal);
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  // If this is a piercing projectile, make sure we don't immediately hit the
+  // same target again.
+  if (proj->data->piercing) {
+    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
+  }
   // Deal impact damage:
   if (baddie == NULL) {
     az_damage_ship(state, proj->data->impact_damage);
   } else {
-    az_damage_baddie(state, baddie, proj->data->impact_damage);
+    try_damage_baddie(state, baddie, proj->data->damage_kind,
+                      proj->data->impact_damage);
   }
-  // Remove the projecitle (unless it's a piercing projectile).
-  if (proj->data->piercing) {
-    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
-  } else {
+  // Note that at this point, the baddie may now be dead and removed.  So we
+  // can no longer use the `baddie` pointer.
+  // Run common impact code:
+  on_projectile_impact(state, proj, normal);
+  // Remove the projectile (unless it's piercing).
+  if (!proj->data->piercing) {
     proj->kind = AZ_PROJ_NOTHING;
   }
 }
@@ -280,8 +313,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_DOOR:
       if (!proj->fired_by_enemy) {
-        // TODO: Test kind of projectile against kind of door.
-        impact.target.door->is_open = true;
+        try_open_door(impact.target.door, proj->data->damage_kind);
       }
       on_projectile_hit_wall(state, proj, normal);
       break;

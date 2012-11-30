@@ -22,8 +22,32 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "azimuth/state/player.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+bool az_can_open_door(az_door_kind_t door_kind,
+                      az_damage_flags_t damage_kind) {
+  assert(door_kind != AZ_DOOR_NOTHING);
+  switch (door_kind) {
+    case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_DOOR_NORMAL: return true;
+    case AZ_DOOR_LOCKED: return false;
+    case AZ_DOOR_ROCKET:
+      return (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET));
+    case AZ_DOOR_HYPER_ROCKET:
+      return (damage_kind & AZ_DMGF_HYPER_ROCKET);
+    case AZ_DOOR_BOMB:
+      return (damage_kind & (AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB));
+    case AZ_DOOR_MEGA_BOMB:
+      return (damage_kind & AZ_DMGF_MEGA_BOMB);
+    case AZ_DOOR_PASSAGE: return false;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
 
 /*===========================================================================*/
 

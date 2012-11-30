@@ -120,6 +120,8 @@ typedef enum {
 // The number of different upgrade kinds:
 #define AZ_NUM_UPGRADES ((int)AZ_UPG_SHIELD_BATTERY_11 + 1)
 
+/*===========================================================================*/
+
 // Which primary weapon module does the player have equipped?
 typedef enum {
   AZ_GUN_NONE = 0,
@@ -142,6 +144,23 @@ typedef enum {
   AZ_ORDN_ROCKETS,
   AZ_ORDN_BOMBS
 } az_ordnance_t;
+
+// A bitset of damage kinds, made from OR-ing together the below constants.
+// This type is used for checking whether or not a given baddie is immune to
+// damage from a given weapon.  Note that AZ_DMGF_FREEZE is special -- it
+// determines whether a baddie can be frozen, assuming it isn't immune to the
+// weapon based on the other flags.
+typedef uint_fast16_t az_damage_flags_t;
+#define AZ_DMGF_NORMAL       ((az_damage_flags_t)(1u << 0))
+#define AZ_DMGF_CHARGED      ((az_damage_flags_t)(1u << 1))
+#define AZ_DMGF_FREEZE       ((az_damage_flags_t)(1u << 2))
+#define AZ_DMGF_PIERCE       ((az_damage_flags_t)(1u << 3))
+#define AZ_DMGF_ROCKET       ((az_damage_flags_t)(1u << 4))
+#define AZ_DMGF_BOMB         ((az_damage_flags_t)(1u << 5))
+#define AZ_DMGF_HYPER_ROCKET ((az_damage_flags_t)(1u << 6))
+#define AZ_DMGF_MEGA_BOMB    ((az_damage_flags_t)(1u << 7))
+#define AZ_DMGF_CPLUS        ((az_damage_flags_t)(1u << 8))
+#define AZ_DMGF_REACTIVE     ((az_damage_flags_t)(1u << 9))
 
 /*===========================================================================*/
 
