@@ -218,7 +218,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
 
   az_damage_flags_t damage_kind = AZ_DMGF_NORMAL;
   if (minor == AZ_GUN_FREEZE) damage_kind |= AZ_DMGF_FREEZE;
-  if (minor == AZ_GUN_PIERCE) damage_kind |= AZ_DMGF_PIERCE;
+  else if (minor == AZ_GUN_PIERCE) damage_kind |= AZ_DMGF_PIERCE;
 
   az_vector_t beam_start =
     az_vadd(ship->position, az_vpolar(18, ship->angle));
@@ -295,9 +295,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         did_hit = true;
         if (minor == AZ_GUN_PIERCE) {
           beam_emit_particles(state, hit_at, baddie_normal, AZ_WHITE);
-          if (damage_kind & ~(baddie->data->immunities)) {
-            az_damage_baddie(state, baddie, damage);
-          }
+          az_try_damage_baddie(state, baddie, damage_kind, damage);
         } else {
           delta = az_vsub(hit_at, beam_start);
           normal = baddie_normal;
@@ -344,13 +342,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       if (hit_baddie != NULL) {
         assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
         assert(hit_door == NULL);
-        if (damage_kind & ~(hit_baddie->data->immunities)) {
-          az_damage_baddie(state, hit_baddie, damage);
-          if (minor == AZ_GUN_FREEZE &&
-              !(hit_baddie->data->immunities & AZ_DMGF_FREEZE)) {
-            // TODO: freeze the baddie
-          }
-        }
+        az_try_damage_baddie(state, hit_baddie, damage_kind, damage);
       }
       // If this is a BURST beam, the next beam reflects off of the impact
       // point.
@@ -422,7 +414,9 @@ static void fire_weapons(az_space_state_t *state, double time) {
           fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL);
           break;
         case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
-        case AZ_GUN_FREEZE: break; // TODO
+        case AZ_GUN_FREEZE:
+          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE);
+          break;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
                          3, AZ_DEG2RAD(10), 0);
@@ -499,7 +493,9 @@ static void fire_weapons(az_space_state_t *state, double time) {
         case AZ_GUN_NONE:
           fire_gun_single(state, 2.5, AZ_PROJ_GUN_BURST);
           return;
-        case AZ_GUN_FREEZE: return; // TODO
+        case AZ_GUN_FREEZE:
+          fire_gun_single(state, 3.75, AZ_PROJ_GUN_FREEZE_BURST);
+          return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 5.0, AZ_PROJ_GUN_TRIPLE_BURST,
                          3, AZ_DEG2RAD(1), 0);
@@ -640,7 +636,9 @@ void az_tick_ship(az_space_state_t *state, double time) {
       case AZ_COL_NOTHING: break;
       case AZ_COL_BADDIE:
         // TODO: make these parameters depend on baddie
-        on_ship_hit_wall(state, 0.1, 10.0, impact_pos);
+        on_ship_hit_wall(state, 0.1,
+                         (collide.target.baddie->frozen > 0.0 ? 0.0 : 10.0),
+                         impact_pos);
         break;
       case AZ_COL_DOOR_INSIDE:
         on_ship_enter_door(state, collide.target.door);

@@ -32,6 +32,8 @@
 
 // How long it takes a baddie's armor flare to die down, in seconds:
 #define AZ_BADDIE_ARMOR_FLARE_TIME 0.3
+// How long it takes a baddie to unfreeze, in seconds.
+#define AZ_BADDIE_THAW_TIME 8.0
 
 static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         double time) {
@@ -40,6 +42,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   assert(baddie->armor_flare <= 1.0);
   baddie->armor_flare =
     fmax(0.0, baddie->armor_flare - time / AZ_BADDIE_ARMOR_FLARE_TIME);
+  // Allow the baddie to thaw a bit.
+  assert(baddie->frozen >= 0.0);
+  assert(baddie->frozen <= 1.0);
+  baddie->frozen = fmax(0.0, baddie->frozen - time / AZ_BADDIE_THAW_TIME);
+  if (baddie->frozen > 0.0) {
+    baddie->velocity = AZ_VZERO;
+    return;
+  }
   // Cool down the baddie's weapon.
   baddie->cooldown = fmax(0.0, baddie->cooldown - time);
   // Apply velocity.

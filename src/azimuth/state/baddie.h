@@ -62,6 +62,7 @@ typedef struct {
   double angle;
   double health;
   double armor_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
+  double frozen; // from 0.0 (unfrozen) to 1.0 (was just now frozen)
   double cooldown; // time until baddie can attack again, in seconds
   // The baddie's "components" describe the positions of its subparts.  The
   // meanings of these are specific to the baddie kind.

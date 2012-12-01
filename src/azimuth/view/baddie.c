@@ -27,17 +27,21 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void draw_baddie_internal(const az_baddie_t *baddie) {
+static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   const double flare = baddie->armor_flare;
+  const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
+                         baddie->frozen >= 0.2 ? 0.5 + 0.5 * baddie->frozen :
+                         az_clock_mod(3, 2, clock) < 2 ? 0.6 : 0.0);
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
-      glColor3f(1, 0, 1 - 0.75 * flare); // magenta
+      glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
         for (int i = 0; i < baddie->data->polygon.num_vertices; ++i) {
           glVertex2d(baddie->data->polygon.vertices[i].x,
@@ -49,18 +53,21 @@ static void draw_baddie_internal(const az_baddie_t *baddie) {
       glPushMatrix(); {
         glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
         glBegin(GL_QUAD_STRIP); {
-          glColor3f(0.25 + 0.25 * flare, 0.25, 0.25); // dark gray
+          glColor3f(0.25 + 0.25 * flare, 0.25,
+                    0.25 + 0.25 * frozen); // dark gray
           glVertex2d( 0,  5);
           glVertex2d(30,  5);
-          glColor3f(0.75 + 0.25 * flare, 0.75, 0.75); // light gray
+          glColor3f(0.75 + 0.25 * flare, 0.75,
+                    0.75 + 0.25 * frozen); // light gray
           glVertex2d( 0,  0);
           glVertex2d(30,  0);
-          glColor3f(0.25 + 0.25 * flare, 0.25, 0.25); // dark gray
+          glColor3f(0.25 + 0.25 * flare, 0.25,
+                    0.25 + 0.25 * frozen); // dark gray
           glVertex2d( 0, -5);
           glVertex2d(30, -5);
         } glEnd();
       } glPopMatrix();
-      glColor3f(0.5 + 0.5 * flare, 0.5, 0.5); // gray
+      glColor3f(0.5 + 0.5 * flare, 0.5, 0.5 + 0.5 * frozen); // gray
       glBegin(GL_POLYGON); {
         const double radius = 20;
         for (int i = 0; i <= 6; ++i) {
@@ -72,19 +79,19 @@ static void draw_baddie_internal(const az_baddie_t *baddie) {
   }
 }
 
-void az_draw_baddie(const az_baddie_t *baddie) {
+void az_draw_baddie(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   glPushMatrix(); {
     glTranslated(baddie->position.x, baddie->position.y, 0);
     glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);
-    draw_baddie_internal(baddie);
+    draw_baddie_internal(baddie, clock);
   } glPopMatrix();
 }
 
 void az_draw_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) continue;
-    az_draw_baddie(baddie);
+    az_draw_baddie(baddie, state->clock);
   }
 }
 

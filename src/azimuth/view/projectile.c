@@ -70,6 +70,25 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2d( 4.0,  0.0);
       } glEnd();
       break;
+    case AZ_PROJ_GUN_FREEZE:
+    case AZ_PROJ_GUN_CHARGED_FREEZE:
+    case AZ_PROJ_GUN_FREEZE_TRIPLE:
+    case AZ_PROJ_GUN_FREEZE_HOMING:
+    case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(0.5, 1, 1, 0.75); // cyan
+        glVertex2d(0, 0);
+        for (int i = 0; i <= 12; ++i) {
+          if (i % 2) glColor4f(0.5, 0.5, 1, 0.75); // blue
+          else glColor4f(0.5, 1, 1, 0.75); // cyan
+          double r = 5.0 - 2.0 * (i % 2);
+          if (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE) r *= 1.5;
+          else if (proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL) r *= 0.75;
+          double t = AZ_DEG2RAD(30 * i + 3 * az_clock_mod(120, 1, clock));
+          glVertex2d(r * cos(t), r * sin(t));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_GUN_HOMING:
     case AZ_PROJ_GUN_TRIPLE_HOMING:
     case AZ_PROJ_GUN_HOMING_SHRAPNEL:
@@ -89,6 +108,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_BURST:
+    case AZ_PROJ_GUN_FREEZE_BURST:
     case AZ_PROJ_GUN_TRIPLE_BURST:
     case AZ_PROJ_GUN_HOMING_BURST:
     case AZ_PROJ_GUN_BURST_PIERCE:
@@ -108,23 +128,30 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_PROJ_GUN_PIERCE:
+    case AZ_PROJ_GUN_FREEZE_PIERCE:
     case AZ_PROJ_GUN_TRIPLE_PIERCE:
     case AZ_PROJ_GUN_HOMING_PIERCE:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor4f(1, 0, 1, 0.75); // magenta
-        glVertex2d(2, 0);
-        glColor4f(1, 0, 1, 0); // transparent magenta
-        glVertex2d(0, 4);
-        glVertex2d(-50, 0);
-        glVertex2d(0, -4);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        glVertex2d(-2, 0);
-        glColor4f(1, 0, 1, 0.75); // magenta
-        glVertex2d(-6, 8);
-        glVertex2d(2, 0);
-        glVertex2d(-6, -8);
-      } glEnd();
+      {
+        const GLfloat red =
+          (proj->kind == AZ_PROJ_GUN_FREEZE_PIERCE ? 0.3 : 1.0);
+        const GLfloat green =
+          (proj->kind == AZ_PROJ_GUN_FREEZE_PIERCE ? 0.8 : 0.0);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(red, green, 1, 0.75); // magenta
+          glVertex2d(2, 0);
+          glColor4f(red, green, 1, 0); // transparent magenta
+          glVertex2d(0, 4);
+          glVertex2d(-50, 0);
+          glVertex2d(0, -4);
+        } glEnd();
+        glBegin(GL_TRIANGLE_FAN); {
+          glVertex2d(-2, 0);
+          glColor4f(red, green, 1, 0.75); // magenta
+          glVertex2d(-6, 8);
+          glVertex2d(2, 0);
+          glVertex2d(-6, -8);
+        } glEnd();
+      }
       break;
     case AZ_PROJ_ROCKET:
       glColor3f(0.5, 0, 0); // dark red

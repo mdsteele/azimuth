@@ -49,21 +49,6 @@ typedef struct {
   } target;
 } az_impact_target_t;
 
-static void try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                              az_damage_flags_t damage_kind, double damage) {
-  assert(baddie->kind != AZ_BAD_NOTHING);
-  az_damage_flags_t modified_damage_kind = damage_kind;
-  modified_damage_kind &= ~AZ_DMGF_FREEZE;
-  if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-  if (modified_damage_kind & ~(baddie->data->immunities)) {
-    az_damage_baddie(state, baddie, damage);
-    if ((damage_kind & AZ_DMGF_FREEZE) &&
-        !(baddie->data->immunities & AZ_DMGF_FREEZE)) {
-      // TODO freeze baddie
-    }
-  }
-}
-
 static void try_open_door(az_door_t *door, az_damage_flags_t damage_kind) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (az_can_open_door(door->kind, damage_kind)) {
@@ -87,8 +72,8 @@ static void on_projectile_impact(az_space_state_t *state,
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_vwithin(baddie->position, proj->position,
                      radius + baddie->data->bounding_radius)) {
-        try_damage_baddie(state, baddie, proj->data->damage_kind,
-                          proj->data->splash_damage);
+        az_try_damage_baddie(state, baddie, proj->data->damage_kind,
+                             proj->data->splash_damage);
       }
     }
   }
@@ -158,8 +143,8 @@ static void on_projectile_hit_target(az_space_state_t *state,
   if (baddie == NULL) {
     az_damage_ship(state, proj->data->impact_damage);
   } else {
-    try_damage_baddie(state, baddie, proj->data->damage_kind,
-                      proj->data->impact_damage);
+    az_try_damage_baddie(state, baddie, proj->data->damage_kind,
+                         proj->data->impact_damage);
   }
   // Note that at this point, the baddie may now be dead and removed.  So we
   // can no longer use the `baddie` pointer.
@@ -213,6 +198,27 @@ static void projectile_special_logic(az_space_state_t *state,
   // the projectile (e.g. homing projectiles will home in).
   az_particle_t *particle;
   switch (proj->kind) {
+    case AZ_PROJ_GUN_FREEZE:
+    case AZ_PROJ_GUN_CHARGED_FREEZE:
+    case AZ_PROJ_GUN_FREEZE_TRIPLE:
+    case AZ_PROJ_GUN_FREEZE_HOMING:
+    case AZ_PROJ_GUN_FREEZE_BURST:
+    case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
+    case AZ_PROJ_GUN_FREEZE_PIERCE:
+      for (int i = (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 2 : 1);
+           i > 0; --i) {
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_SPECK;
+          particle->color = (az_color_t){0, 255, 255, 255};
+          particle->position = proj->position;
+          particle->velocity = az_vpolar(30.0, az_random() * AZ_TWO_PI);
+          particle->angle = 0.0;
+          particle->lifetime =
+            (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 1.0 :
+             proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL ? 0.2 : 0.3);
+        }
+      }
+      break;
     case AZ_PROJ_ROCKET:
     case AZ_PROJ_HYPER_ROCKET:
       if (az_insert_particle(state, &particle)) {

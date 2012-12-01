@@ -212,19 +212,44 @@ void az_damage_ship(az_space_state_t *state, double damage) {
   }
 }
 
-void az_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                      double damage) {
+// The level of health at or below which a baddie can be frozen.
+#define AZ_BADDIE_FREEZE_THRESHOLD 4.0
+
+void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                          az_damage_flags_t damage_kind,
+                          double damage_amount) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   assert(baddie->health > 0.0);
-  assert(damage >= 0.0);
-  if (damage <= 0.0) return;
+  assert(damage_amount >= 0.0);
+  // If the damage is zero, we can quit early.
+  if (damage_amount <= 0.0) return;
+
+  // Determine if the baddie is susceptible to this kind of damage; if not,
+  // quit early.
+  {
+    az_damage_flags_t modified_damage_kind = damage_kind;
+    modified_damage_kind &= ~AZ_DMGF_FREEZE;
+    if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
+    if (!(modified_damage_kind & ~(baddie->data->immunities))) return;
+  }
+
+  // Damage the baddie.
   baddie->armor_flare = 1.0;
-  baddie->health -= damage;
+  baddie->health -= damage_amount;
+
+  // If this was enough to kill the baddie, remove it and add debris/pickups in
+  // its place.
   if (baddie->health <= 0.0) {
     baddie->kind = AZ_BAD_NOTHING;
     // TODO add baddie debris
     add_random_pickup(state, baddie->data->potential_pickups,
                       baddie->position);
+  }
+  // Otherwise, if this was enough to freeze the baddie, and the damage kind
+  // includes AZ_DMGF_FREEZE, freeze the baddie.
+  else if ((damage_kind & AZ_DMGF_FREEZE) &&
+           baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
+    baddie->frozen = 1.0;
   }
 }
 

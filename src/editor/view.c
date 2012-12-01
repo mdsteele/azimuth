@@ -136,7 +136,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_baddie_t real_baddie;
     az_init_baddie(&real_baddie, editor_baddie->spec.kind,
                    editor_baddie->spec.position, editor_baddie->spec.angle);
-    az_draw_baddie(&real_baddie);
+    az_draw_baddie(&real_baddie, state->clock);
   }
   AZ_LIST_LOOP(editor_door, room->doors) {
     az_door_t real_door;
