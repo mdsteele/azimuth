@@ -41,6 +41,25 @@
 
 static az_editor_state_t state;
 
+static void add_new_room(void) {
+  const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
+  az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);
+  const double current_r = az_vnorm(state.camera);
+  const double theta_span = 200.0 / (80.0 + current_r);
+  room->camera_bounds = (az_camera_bounds_t){
+    .min_r = current_r - 100.0,
+    .r_span = 200.0,
+    .min_theta = az_mod2pi(az_vtheta(state.camera) - 0.5 * theta_span),
+    .theta_span = theta_span
+  };
+  AZ_LIST_INIT(room->baddies, 5);
+  AZ_LIST_INIT(room->doors, 5);
+  AZ_LIST_INIT(room->nodes, 5);
+  AZ_LIST_INIT(room->walls, 5);
+  state.current_room = room_key;
+  state.unsaved = true;
+}
+
 static void center_camera_on_current_room(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   double min_x = INFINITY, max_x = -INFINITY;
@@ -549,7 +568,10 @@ static void event_loop(void) {
                 else state.tool = AZ_TOOL_DOOR;
                 break;
               case AZ_KEY_M: state.tool = AZ_TOOL_MOVE; break;
-              case AZ_KEY_N: state.tool = AZ_TOOL_NODE; break;
+              case AZ_KEY_N:
+                if (event.key.command) add_new_room();
+                else state.tool = AZ_TOOL_NODE;
+                break;
               case AZ_KEY_O: do_change_data(1, event.key.shift); break;
               case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
               case AZ_KEY_R:
