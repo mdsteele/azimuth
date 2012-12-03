@@ -434,8 +434,7 @@ static void tick_mode(az_title_state_t *state, double time) {
   switch (state->mode) {
     case AZ_TMODE_STARTING:
       state->mode_data.starting.progress =
-        az_dmin(1.0, state->mode_data.starting.progress +
-                time / STARTING_TIME);
+        fmin(1.0, state->mode_data.starting.progress + time / STARTING_TIME);
       break;
     default: break;
   }
@@ -458,7 +457,7 @@ static void tick_save_slot(az_title_state_t *state, int index, double time) {
       (double)HOVER_PULSE_FRAMES;
   } else {
     slot->main_hover_pulse =
-      az_dmax(0.0, slot->main_hover_pulse - time / HOVER_DECAY_TIME);
+      fmax(0.0, slot->main_hover_pulse - time / HOVER_DECAY_TIME);
   }
   // Erase hover:
   if (state->mode == AZ_TMODE_NORMAL && slot->hover == AZ_TSS_HOVER_ERASE) {
@@ -469,7 +468,7 @@ static void tick_save_slot(az_title_state_t *state, int index, double time) {
       (double)HOVER_PULSE_FRAMES;
   } else {
     slot->erase_hover_pulse =
-      az_dmax(0.0, slot->erase_hover_pulse - time / HOVER_DECAY_TIME);
+      fmax(0.0, slot->erase_hover_pulse - time / HOVER_DECAY_TIME);
   }
 }
 
@@ -491,7 +490,7 @@ static void tick_button(az_title_state_t *state, az_title_button_t *button,
     }
   } else {
     button->hover_pulse =
-      az_dmax(0.0, button->hover_pulse - time / HOVER_DECAY_TIME);
+      fmax(0.0, button->hover_pulse - time / HOVER_DECAY_TIME);
   }
 }
 

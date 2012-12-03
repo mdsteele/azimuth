@@ -41,7 +41,7 @@
 /*===========================================================================*/
 
 static void arc_vertices(double r, double start_theta, double end_theta) {
-  const double step = az_dmin(0.1, (end_theta - start_theta) * 0.05);
+  const double step = fmin(0.1, (end_theta - start_theta) * 0.05);
   for (double theta = start_theta;
        (theta < end_theta) == (start_theta < end_theta); theta += step) {
     glVertex2d(r * cos(theta), r * sin(theta));
@@ -103,7 +103,7 @@ static void draw_camera_edge_bounds(const az_editor_room_t *room) {
     double topleft_theta = az_vtheta(topleft);
     while (topleft_theta < topright_theta_plus) topleft_theta += AZ_TWO_PI;
     arc_vertices(az_vnorm(topleft),
-                 az_dmax(topleft_theta - theta_span, topright_theta_plus),
+                 fmax(topleft_theta - theta_span, topright_theta_plus),
                  topleft_theta);
     glVertex2d(topleft.x, topleft.y);
     glVertex2d(min_r * maxc + vleft.x, min_r * maxs + vleft.y);

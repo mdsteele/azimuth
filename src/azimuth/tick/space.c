@@ -20,7 +20,7 @@
 #include "azimuth/tick/space.h"
 
 #include <assert.h>
-#include <math.h> // for INFINITY and pow
+#include <math.h>
 
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h"
@@ -114,7 +114,7 @@ static void tick_game_over_mode(az_space_state_t *state, double time) {
       break;
     case AZ_GOS_FADE_OUT:
       state->mode_data.game_over.progress =
-        az_dmin(1.0, state->mode_data.game_over.progress + time / fade_time);
+        fmin(1.0, state->mode_data.game_over.progress + time / fade_time);
       break;
   }
 }
@@ -123,8 +123,7 @@ static void tick_pause_resume_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING);
   const double pause_unpause_time = 0.25; // seconds
   state->mode_data.pause.progress =
-    az_dmin(1.0, state->mode_data.pause.progress +
-            time / pause_unpause_time);
+    fmin(1.0, state->mode_data.pause.progress + time / pause_unpause_time);
   if (state->mode == AZ_MODE_RESUMING &&
       state->mode_data.pause.progress >= 1.0) {
     state->mode = AZ_MODE_NORMAL;
@@ -154,13 +153,13 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
 }
 
 static void tick_message(az_message_t *message, double time) {
-  message->time_remaining = az_dmax(0.0, message->time_remaining - time);
+  message->time_remaining = fmax(0.0, message->time_remaining - time);
 }
 
 static void tick_timer(az_timer_t *timer, double time) {
   if (!timer->is_active) return;
   if (timer->active_for < 10.0) timer->active_for += time;
-  timer->time_remaining = az_dmax(0.0, timer->time_remaining - time);
+  timer->time_remaining = fmax(0.0, timer->time_remaining - time);
 }
 
 static void tick_camera_towards(az_vector_t *camera, az_vector_t towards,
@@ -180,13 +179,13 @@ static void tick_camera(az_space_state_t *state, double time) {
   // than clamping r because angles wrap around.
   const az_camera_bounds_t *bounds =
     &state->planet->rooms[state->ship.player.current_room].camera_bounds;
-  const double r = az_dmin(az_dmax(bounds->min_r, az_vnorm(towards)),
-                           bounds->min_r + bounds->r_span);
+  const double r = fmin(fmax(bounds->min_r, az_vnorm(towards)),
+                        bounds->min_r + bounds->r_span);
   const double half_span = 0.5 * bounds->theta_span;
   const double mid_theta = bounds->min_theta + half_span;
   const double theta = mid_theta +
-    az_dmin(az_dmax(-half_span, az_mod2pi(az_vtheta(towards) -
-                                          mid_theta)), half_span);
+    fmin(fmax(-half_span, az_mod2pi(az_vtheta(towards) - mid_theta)),
+         half_span);
   // Now move the camera towards the clamped position.
   tick_camera_towards(&state->camera, az_vpolar(r, theta), time);
 }

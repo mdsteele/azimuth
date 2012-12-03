@@ -106,11 +106,9 @@ int az_modulo(int a, int b);
 // is between -pi and pi.
 double az_mod2pi(double theta);
 
-// Min and max functions for ints and doubles:
+// Min and max functions for ints:
 int az_imin(int a, int b);
 int az_imax(int a, int b);
-double az_dmin(double a, double b);
-double az_dmax(double a, double b);
 
 // Test if two (finite) doubles are approximately equal.
 bool az_dapprox(double a, double b);

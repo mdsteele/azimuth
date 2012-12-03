@@ -20,7 +20,7 @@
 #include "azimuth/view/hud.h"
 
 #include <assert.h>
-#include <math.h> // for sqrt
+#include <math.h>
 
 #include <GL/gl.h>
 
@@ -224,7 +224,7 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
     const int xend = AZ_SCREEN_WIDTH - HUD_MARGIN - width;
     const int yend = AZ_SCREEN_HEIGHT - HUD_MARGIN - height;
     const double speed = 150.0; // pixels per second
-    const double offset = az_dmax(0.0, timer->active_for - 2.5) * speed;
+    const double offset = fmax(0.0, timer->active_for - 2.5) * speed;
     glTranslated(az_imin(xend, xstart + offset),
                  az_imin(yend, ystart + offset), 0);
 

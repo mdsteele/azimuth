@@ -18,7 +18,7 @@
 =============================================================================*/
 
 #include <assert.h>
-#include <math.h> // for INFINITY
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> // for EXIT_SUCCESS
@@ -65,28 +65,28 @@ static void center_camera_on_current_room(void) {
   double min_x = INFINITY, max_x = -INFINITY;
   double min_y = INFINITY, max_y = -INFINITY;
   AZ_LIST_LOOP(baddie, room->baddies) {
-    min_x = az_dmin(min_x, baddie->spec.position.x);
-    max_x = az_dmax(max_x, baddie->spec.position.x);
-    min_y = az_dmin(min_y, baddie->spec.position.y);
-    max_y = az_dmax(max_y, baddie->spec.position.y);
+    min_x = fmin(min_x, baddie->spec.position.x);
+    max_x = fmax(max_x, baddie->spec.position.x);
+    min_y = fmin(min_y, baddie->spec.position.y);
+    max_y = fmax(max_y, baddie->spec.position.y);
   }
   AZ_LIST_LOOP(door, room->doors) {
-    min_x = az_dmin(min_x, door->spec.position.x);
-    max_x = az_dmax(max_x, door->spec.position.x);
-    min_y = az_dmin(min_y, door->spec.position.y);
-    max_y = az_dmax(max_y, door->spec.position.y);
+    min_x = fmin(min_x, door->spec.position.x);
+    max_x = fmax(max_x, door->spec.position.x);
+    min_y = fmin(min_y, door->spec.position.y);
+    max_y = fmax(max_y, door->spec.position.y);
   }
   AZ_LIST_LOOP(node, room->nodes) {
-    min_x = az_dmin(min_x, node->spec.position.x);
-    max_x = az_dmax(max_x, node->spec.position.x);
-    min_y = az_dmin(min_y, node->spec.position.y);
-    max_y = az_dmax(max_y, node->spec.position.y);
+    min_x = fmin(min_x, node->spec.position.x);
+    max_x = fmax(max_x, node->spec.position.x);
+    min_y = fmin(min_y, node->spec.position.y);
+    max_y = fmax(max_y, node->spec.position.y);
   }
   AZ_LIST_LOOP(wall, room->walls) {
-    min_x = az_dmin(min_x, wall->spec.position.x);
-    max_x = az_dmax(max_x, wall->spec.position.x);
-    min_y = az_dmin(min_y, wall->spec.position.y);
-    max_y = az_dmax(max_y, wall->spec.position.y);
+    min_x = fmin(min_x, wall->spec.position.x);
+    max_x = fmax(max_x, wall->spec.position.x);
+    min_y = fmin(min_y, wall->spec.position.y);
+    max_y = fmax(max_y, wall->spec.position.y);
   }
   if (min_x > max_x) return;
   else assert(min_y <= max_y);

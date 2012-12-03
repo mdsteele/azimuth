@@ -19,10 +19,11 @@
 
 #include "azimuth/tick/door.h"
 
+#include <math.h>
+
 #include "azimuth/state/door.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
-#include "azimuth/util/vector.h" // for az_dmax and az_dmin
 
 /*===========================================================================*/
 
@@ -32,9 +33,9 @@
 static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
   const double delta = (1.0 / DOOR_OPEN_TIME) * time;
   if (door->is_open) {
-    door->openness = az_dmin(1.0, door->openness + delta);
+    door->openness = fmin(1.0, door->openness + delta);
   } else {
-    door->openness = az_dmax(0.0, door->openness - delta);
+    door->openness = fmax(0.0, door->openness - delta);
   }
 }
 

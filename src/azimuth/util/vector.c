@@ -165,14 +165,6 @@ int az_imax(int a, int b) {
   return a > b ? a : b;
 }
 
-double az_dmin(double a, double b) {
-  return a <= b ? a : b;
-}
-
-double az_dmax(double a, double b) {
-  return a > b ? a : b;
-}
-
 #define EPSILON 0.00000001
 
 bool az_dapprox(double a, double b) {
