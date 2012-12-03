@@ -22,6 +22,7 @@
 #define AZIMUTH_STATE_SPACE_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/door.h"
@@ -138,6 +139,42 @@ void az_damage_ship(az_space_state_t *state, double damage);
 // kind includes AZ_DMGF_FREEZE, this may freeze the baddie.
 void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
                           az_damage_flags_t damage_kind, double damage_amount);
+
+/*===========================================================================*/
+
+typedef enum {
+  AZ_IMP_NOTHING = 0,
+  AZ_IMP_BADDIE,
+  AZ_IMP_DOOR,
+  AZ_IMP_SHIP,
+  AZ_IMP_WALL
+} az_impact_type_t;
+
+typedef uint_fast8_t az_impact_flags_t;
+#define AZ_IMPF_BADDIE ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
+#define AZ_IMPF_DOOR   ((az_impact_flags_t)(1u << AZ_IMP_DOOR))
+#define AZ_IMPF_SHIP   ((az_impact_flags_t)(1u << AZ_IMP_SHIP))
+#define AZ_IMPF_WALL   ((az_impact_flags_t)(1u << AZ_IMP_WALL))
+
+typedef struct {
+  az_impact_type_t type;
+  union {
+    az_baddie_t *baddie;
+    az_door_t *door;
+    az_wall_t *wall;
+  } target;
+  az_vector_t position;
+  az_vector_t normal;
+} az_impact_t;
+
+void az_ray_impact(az_space_state_t *state, az_vector_t start,
+                   az_vector_t delta, az_impact_flags_t skip_types,
+                   az_uid_t skip_uid, az_impact_t *impact_out);
+
+void az_circle_impact(az_space_state_t *state, double radius,
+                      az_vector_t start, az_vector_t delta,
+                      az_impact_flags_t skip_types, az_uid_t skip_uid,
+                      az_impact_t *impact_out);
 
 /*===========================================================================*/
 

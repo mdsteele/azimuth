@@ -20,7 +20,7 @@
 #include "azimuth/tick/baddie.h"
 
 #include <assert.h>
-#include <math.h> // for fmax
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
@@ -85,6 +85,32 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                              az_vadd(baddie->position, az_vpolar(20.0, angle)),
                              angle);
           baddie->cooldown = 0.5;
+        }
+      }
+      break;
+    case AZ_BAD_ZIPPER:
+      {
+        az_impact_t impact;
+        az_ray_impact(state, baddie->position, az_vpolar(20.0, baddie->angle),
+                      0, baddie->uid, &impact);
+        if (impact.type != AZ_IMP_NOTHING) {
+          baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
+        }
+        baddie->velocity = az_vpolar(200.0, baddie->angle);
+      }
+      break;
+    case AZ_BAD_BOUNCER:
+      {
+        az_impact_t impact;
+        az_circle_impact(state, 15.0, baddie->position,
+                         az_vpolar(150.0 * time, baddie->angle),
+                         0, baddie->uid, &impact);
+        const double normal_theta = az_vtheta(impact.normal);
+        baddie->position =
+          az_vadd(impact.position, az_vpolar(0.01, normal_theta));
+        if (impact.type != AZ_IMP_NOTHING) {
+          baddie->angle = az_mod2pi(2.0 * normal_theta -
+                                    baddie->angle + AZ_PI);
         }
       }
       break;

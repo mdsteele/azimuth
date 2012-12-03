@@ -69,11 +69,14 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out);
 
-// Determine if the ship would hit the given wall if the ship travelled along
-// the given delta vector.
-bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
-                            az_vector_t delta, az_vector_t *pos_out,
-                            az_vector_t *impact_out, az_vector_t *normal_out);
+// Determine if a circle with the given radius, travelling delta from start,
+// will hit the ship.  If it does, the function stores in *pos_out
+// the earliest position of the circle at which it touches the wall (if pos_out
+// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// non-NULL).
+bool az_circle_hits_ship(const az_ship_t *ship, double radius,
+                         az_vector_t start, az_vector_t delta,
+                         az_vector_t *point_out, az_vector_t *impact_out);
 
 /*===========================================================================*/
 

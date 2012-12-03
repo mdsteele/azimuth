@@ -32,23 +32,6 @@
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_IMP_NOTHING = 0,
-  AZ_IMP_BADDIE,
-  AZ_IMP_DOOR,
-  AZ_IMP_SHIP,
-  AZ_IMP_WALL
-} az_impact_type_t;
-
-typedef struct {
-  az_impact_type_t type;
-  union {
-    az_baddie_t *baddie;
-    az_door_t *door;
-    az_wall_t *wall;
-  } target;
-} az_impact_target_t;
-
 static void try_open_door(az_door_t *door, az_damage_flags_t damage_kind) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (az_can_open_door(door->kind, damage_kind)) {
@@ -256,55 +239,15 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Figure out what, if anything, the projectile hits:
   const az_vector_t start = proj->position;
   az_vector_t delta = az_vmul(proj->velocity, time);
-  az_impact_target_t impact = {.type = AZ_IMP_NOTHING};
-  az_vector_t normal = AZ_VZERO;
-  // Walls:
-  if (!proj->data->phased) {
-    AZ_ARRAY_LOOP(wall, state->walls) {
-      if (wall->kind == AZ_WALL_NOTHING) continue;
-      az_vector_t hit_at;
-      if (az_ray_hits_wall(wall, start, delta, &hit_at, &normal)) {
-        impact.type = AZ_IMP_WALL;
-        impact.target.wall = wall;
-        delta = az_vsub(hit_at, start);
-      }
-    }
-  }
-  // Doors:
-  AZ_ARRAY_LOOP(door, state->doors) {
-    if (door->kind == AZ_DOOR_NOTHING) continue;
-    az_vector_t hit_at;
-    if (az_ray_hits_door(door, start, delta, &hit_at, &normal)) {
-      impact.type = AZ_IMP_DOOR;
-      impact.target.door = door;
-      delta = az_vsub(hit_at, start);
-    }
-  }
-  // Ship:
-  if (proj->fired_by_enemy && proj->last_hit_uid != AZ_SHIP_UID &&
-      az_ship_is_present(&state->ship)) {
-    az_vector_t hit_at;
-    if (az_ray_hits_ship(&state->ship, start, delta, &hit_at, &normal)) {
-      impact.type = AZ_IMP_SHIP;
-      delta = az_vsub(hit_at, start);
-    }
-  }
-  // Baddies:
-  if (!proj->fired_by_enemy) {
-    AZ_ARRAY_LOOP(baddie, state->baddies) {
-      if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->uid == proj->last_hit_uid) continue;
-      az_vector_t hit_at;
-      if (az_ray_hits_baddie(baddie, start, delta, &hit_at, &normal)) {
-        impact.type = AZ_IMP_BADDIE;
-        impact.target.baddie = baddie;
-        delta = az_vsub(hit_at, start);
-      }
-    }
-  }
+
+  az_impact_flags_t skip_types =
+    (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
+  if (proj->data->phased) skip_types |= AZ_IMPF_WALL;
+  az_impact_t impact;
+  az_ray_impact(state, start, delta, skip_types, proj->last_hit_uid, &impact);
 
   // Move the projectile:
-  proj->position = az_vadd(start, delta);
+  proj->position = impact.position;
 
   // Resolve the impact (if any):
   switch (impact.type) {
@@ -315,19 +258,20 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       projectile_special_logic(state, proj, time);
       break;
     case AZ_IMP_BADDIE:
-      on_projectile_hit_target(state, proj, impact.target.baddie, normal);
+      on_projectile_hit_target(state, proj, impact.target.baddie,
+                               impact.normal);
       break;
     case AZ_IMP_DOOR:
       if (!proj->fired_by_enemy) {
         try_open_door(impact.target.door, proj->data->damage_kind);
       }
-      on_projectile_hit_wall(state, proj, normal);
+      on_projectile_hit_wall(state, proj, impact.normal);
       break;
     case AZ_IMP_SHIP:
-      on_projectile_hit_target(state, proj, NULL, normal);
+      on_projectile_hit_target(state, proj, NULL, impact.normal);
       break;
     case AZ_IMP_WALL:
-      on_projectile_hit_wall(state, proj, normal);
+      on_projectile_hit_wall(state, proj, impact.normal);
       break;
   }
 }

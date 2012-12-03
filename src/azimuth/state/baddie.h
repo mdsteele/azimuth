@@ -29,14 +29,16 @@
 
 /*===========================================================================*/
 
-// The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 2
-
 typedef enum {
   AZ_BAD_NOTHING = 0,
   AZ_BAD_LUMP,
-  AZ_BAD_TURRET
+  AZ_BAD_TURRET,
+  AZ_BAD_ZIPPER,
+  AZ_BAD_BOUNCER
 } az_baddie_kind_t;
+
+// The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
+#define AZ_NUM_BADDIE_KINDS 4
 
 typedef struct {
   double bounding_radius;

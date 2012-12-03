@@ -61,15 +61,14 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
                                     point_out, normal_out));
 }
 
-bool az_ship_would_hit_wall(const az_wall_t *wall, const az_ship_t *ship,
-                            az_vector_t delta, az_vector_t *pos_out,
-                            az_vector_t *impact_out, az_vector_t *normal_out) {
-  return (az_ray_hits_circle(ship->position, delta, wall->position,
-                             SHIP_BOUNDING_RADIUS +
-                             wall->data->bounding_radius) &&
-          az_polygons_collide(wall->data->polygon, wall->position, wall->angle,
-                              AZ_SHIP_POLYGON, ship->position, ship->angle,
-                              delta, pos_out, impact_out, normal_out));
+bool az_circle_hits_ship(
+    const az_ship_t *ship, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  return (az_ray_hits_circle(start, delta, ship->position,
+                             SHIP_BOUNDING_RADIUS + radius) &&
+          az_circle_hits_polygon_trans(AZ_SHIP_POLYGON, ship->position,
+                                       ship->angle, radius, start, delta,
+                                       pos_out, impact_out));
 }
 
 /*===========================================================================*/

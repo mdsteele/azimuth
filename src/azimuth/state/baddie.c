@@ -47,6 +47,9 @@ static const az_component_data_t turret_components[] = {
   { .bounding_radius = 30.5,
     .polygon = AZ_INIT_POLYGON(turret_cannon_vertices) }
 };
+static const az_vector_t zipper_vertices[] = {
+  {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
+};
 
 static const az_baddie_data_t baddie_data[] = {
   [AZ_BAD_LUMP] = {
@@ -63,6 +66,18 @@ static const az_baddie_data_t baddie_data[] = {
                           AZ_PUPF_ROCKETS),
     DECL_COMPONENTS(turret_components),
     .polygon = AZ_INIT_POLYGON(turret_vertices)
+  },
+  [AZ_BAD_ZIPPER] = {
+    .bounding_radius = 20.0,
+    .max_health = 20.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .polygon = AZ_INIT_POLYGON(zipper_vertices)
+  },
+  [AZ_BAD_BOUNCER] = {
+    .bounding_radius = 15.0,
+    .max_health = 5.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .polygon = AZ_INIT_POLYGON(lump_vertices) // TODO change this
   }
 };
 

@@ -38,6 +38,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
                          baddie->frozen >= 0.2 ? 0.5 + 0.5 * baddie->frozen :
                          az_clock_mod(3, 2, clock) < 2 ? 0.6 : 0.0);
+  if (baddie->frozen > 0.0) clock = 0;
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_LUMP:
@@ -74,6 +75,36 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2d(radius * cos(i * AZ_PI / 3.0),
                      radius * sin(i * AZ_PI / 3.0));
         }
+      } glEnd();
+      break;
+    case AZ_BAD_ZIPPER:
+      glColor3f(flare, 1 - fmax(flare, 0.5 * frozen),
+                0.25 + 0.75 * frozen); // green
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < baddie->data->polygon.num_vertices; ++i) {
+          glVertex2d(baddie->data->polygon.vertices[i].x,
+                     baddie->data->polygon.vertices[i].y);
+        }
+      } glEnd();
+      break;
+    case AZ_BAD_BOUNCER:
+      glBegin(GL_TRIANGLE_FAN); {
+        const unsigned int zig = az_clock_zigzag(15, 1, clock);
+        glColor3f(1 - 0.75 * frozen, 0.25 + 0.01 * zig + 0.5 * flare,
+                  0.25 + 0.75 * frozen); // red
+        glVertex2d(0, 0);
+        glColor3f(0.25 + 0.02 * zig - 0.25 * frozen, 0.5 * flare,
+                  0.25 * frozen); // dark red
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.5, 0.25, 1);
+        glVertex2d(0, 7);
+        glColor4f(0.5, 0.25, 1, 0);
+        glVertex2d(3, 2); glVertex2d(3, 12); glVertex2d(-3, 12);
+        glVertex2d(-3, 2); glVertex2d(3, 2);
       } glEnd();
       break;
   }

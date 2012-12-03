@@ -254,3 +254,124 @@ void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
 }
 
 /*===========================================================================*/
+
+void az_ray_impact(az_space_state_t *state, az_vector_t start,
+                   az_vector_t delta, az_impact_flags_t skip_types,
+                   az_uid_t skip_uid, az_impact_t *impact_out) {
+  assert(impact_out != NULL);
+  impact_out->type = AZ_IMP_NOTHING;
+  az_vector_t *position = &impact_out->position;
+  az_vector_t *normal = &impact_out->normal;
+
+  // Walls:
+  if (!(skip_types & AZ_IMPF_WALL)) {
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      if (az_ray_hits_wall(wall, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_WALL;
+        impact_out->target.wall = wall;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+  // Doors:
+  if (!(skip_types & AZ_IMPF_DOOR)) {
+    AZ_ARRAY_LOOP(door, state->doors) {
+      if (door->kind == AZ_DOOR_NOTHING) continue;
+      if (az_ray_hits_door(door, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_DOOR;
+        impact_out->target.door = door;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+  // Ship:
+  if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
+      az_ship_is_present(&state->ship)) {
+    if (az_ray_hits_ship(&state->ship, start, delta, position, normal)) {
+      impact_out->type = AZ_IMP_SHIP;
+      delta = az_vsub(*position, start);
+    }
+  }
+  // Baddies:
+  if (!(skip_types & AZ_IMPF_BADDIE)) {
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->uid == skip_uid) continue;
+      if (az_ray_hits_baddie(baddie, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_BADDIE;
+        impact_out->target.baddie = baddie;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+
+  if (impact_out->type == AZ_IMP_NOTHING) {
+    *position = az_vadd(start, delta);
+    *normal = AZ_VZERO;
+  }
+}
+
+void az_circle_impact(az_space_state_t *state, double radius,
+                      az_vector_t start, az_vector_t delta,
+                      az_impact_flags_t skip_types, az_uid_t skip_uid,
+                      az_impact_t *impact_out) {
+  assert(impact_out != NULL);
+  impact_out->type = AZ_IMP_NOTHING;
+  az_vector_t *position = &impact_out->position;
+  az_vector_t *normal = &impact_out->normal;
+
+  // Walls:
+  if (!(skip_types & AZ_IMPF_WALL)) {
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) continue;
+      if (az_circle_hits_wall(wall, radius, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_WALL;
+        impact_out->target.wall = wall;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+  // Doors:
+  if (!(skip_types & AZ_IMPF_DOOR)) {
+    AZ_ARRAY_LOOP(door, state->doors) {
+      if (door->kind == AZ_DOOR_NOTHING) continue;
+      if (az_circle_hits_door(door, radius, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_DOOR;
+        impact_out->target.door = door;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+  // Ship:
+  if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
+      az_ship_is_present(&state->ship)) {
+    if (az_circle_hits_ship(&state->ship, radius, start, delta,
+                            position, normal)) {
+      impact_out->type = AZ_IMP_SHIP;
+      delta = az_vsub(*position, start);
+    }
+  }
+  // Baddies:
+  if (!(skip_types & AZ_IMPF_BADDIE)) {
+    AZ_ARRAY_LOOP(baddie, state->baddies) {
+      if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->uid == skip_uid) continue;
+      if (az_circle_hits_baddie(baddie, radius, start, delta,
+                                position, normal)) {
+        impact_out->type = AZ_IMP_BADDIE;
+        impact_out->target.baddie = baddie;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
+
+  if (impact_out->type == AZ_IMP_NOTHING) {
+    *position = az_vadd(start, delta);
+    *normal = AZ_VZERO;
+  } else {
+    *normal = az_vsub(*position, *normal);
+  }
+}
+
+/*===========================================================================*/
