@@ -39,6 +39,7 @@ static void draw_passage(const az_door_t *door) {
     for (double y = 50; y >= -50; y -= 4) glVertex2d(-30, y);
     for (double x = -30; x <= 30; x += 4) glVertex2d(x, -50);
     for (double y = -50; y <= 50; y += 4) glVertex2d(30, y);
+    for (double y = -50; y <= 50; y += 4) glVertex2d(-10, y);
   } glEnd();
 }
 

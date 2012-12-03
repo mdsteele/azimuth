@@ -237,14 +237,12 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   }
 
   // Figure out what, if anything, the projectile hits:
-  const az_vector_t start = proj->position;
-  az_vector_t delta = az_vmul(proj->velocity, time);
-
   az_impact_flags_t skip_types =
     (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
   if (proj->data->phased) skip_types |= AZ_IMPF_WALL;
   az_impact_t impact;
-  az_ray_impact(state, start, delta, skip_types, proj->last_hit_uid, &impact);
+  az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
+                skip_types, proj->last_hit_uid, &impact);
 
   // Move the projectile:
   proj->position = impact.position;
@@ -261,15 +259,16 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       on_projectile_hit_target(state, proj, impact.target.baddie,
                                impact.normal);
       break;
-    case AZ_IMP_DOOR:
+    case AZ_IMP_SHIP:
+      on_projectile_hit_target(state, proj, NULL, impact.normal);
+      break;
+    case AZ_IMP_DOOR_OUTSIDE:
       if (!proj->fired_by_enemy) {
         try_open_door(impact.target.door, proj->data->damage_kind);
       }
       on_projectile_hit_wall(state, proj, impact.normal);
       break;
-    case AZ_IMP_SHIP:
-      on_projectile_hit_target(state, proj, NULL, impact.normal);
-      break;
+    case AZ_IMP_DOOR_INSIDE:
     case AZ_IMP_WALL:
       on_projectile_hit_wall(state, proj, impact.normal);
       break;

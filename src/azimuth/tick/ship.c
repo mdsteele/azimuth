@@ -44,23 +44,6 @@
 // The radius of the ship for purposes of collisions with e.g. walls:
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 
-typedef enum {
-  AZ_COL_NOTHING = 0,
-  AZ_COL_BADDIE,
-  AZ_COL_DOOR_OUTSIDE,
-  AZ_COL_DOOR_INSIDE,
-  AZ_COL_WALL
-} az_collide_type_t;
-
-typedef struct {
-  az_collide_type_t type;
-  union {
-    az_baddie_t *baddie;
-    az_door_t *door;
-    az_wall_t *wall;
-  } target;
-} az_collide_target_t;
-
 static void recharge_ship_energy(az_player_t *player, double time) {
   const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
     (az_has_upgrade(player, AZ_UPG_FUSION_REACTOR) ?
@@ -80,9 +63,9 @@ static void on_ship_enter_door(az_space_state_t *state, az_door_t *door) {
 
 static void on_ship_hit_wall(az_space_state_t *state,
                              double elasticity, double impact_damage_coeff,
-                             az_vector_t impact_point) {
+                             az_vector_t impact_normal) {
   az_ship_t *ship = &state->ship;
-  const az_vector_t impact_normal = az_vsub(ship->position, impact_point);
+  const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with the wall).
   if (impact_normal.x != 0.0 || impact_normal.y != 0.0) {
@@ -259,53 +242,30 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       }
     }
 
-    // Determine what the beam hits (if anything), and calculate its ending
-    // point and the normal vector at impact.
-    az_vector_t delta = az_vpolar(2.5 * AZ_SCREEN_RADIUS, beam_angle);
-    az_vector_t normal = AZ_VZERO;
-    bool did_hit = false;
-    az_color_t hit_color = AZ_WHITE;
-    az_door_t *hit_door = NULL;
-    if (minor != AZ_GUN_PHASE) {
-      AZ_ARRAY_LOOP(door, state->doors) {
-        if (door->kind == AZ_DOOR_NOTHING) continue;
-        az_vector_t hit_at;
-        if (az_ray_hits_door(door, beam_start, delta, &hit_at, &normal)) {
-          did_hit = true;
-          delta = az_vsub(hit_at, beam_start);
-          hit_door = door;
-        }
-      }
-      AZ_ARRAY_LOOP(wall, state->walls) {
-        if (wall->kind == AZ_WALL_NOTHING) continue;
-        az_vector_t hit_at;
-        if (az_ray_hits_wall(wall, beam_start, delta, &hit_at, &normal)) {
-          did_hit = true;
-          delta = az_vsub(hit_at, beam_start);
-          hit_color = wall->data->color;
-        }
-      }
-    }
-    az_baddie_t *hit_baddie = NULL;
-    AZ_ARRAY_LOOP(baddie, state->baddies) {
-      if (baddie->kind == AZ_BAD_NOTHING) continue;
-      az_vector_t hit_at, baddie_normal;
-      if (az_ray_hits_baddie(baddie, beam_start, delta, &hit_at,
-                             &baddie_normal)) {
-        did_hit = true;
-        if (minor == AZ_GUN_PIERCE) {
-          beam_emit_particles(state, hit_at, baddie_normal, AZ_WHITE);
+    // Determine what the beam hits (if anything).
+    az_impact_t impact;
+    az_impact_flags_t skip_types = AZ_IMPF_SHIP;
+    if (minor == AZ_GUN_PHASE) {
+      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
+    } else if (minor == AZ_GUN_PIERCE) skip_types |= AZ_IMPF_BADDIE;
+    az_ray_impact(state, beam_start,
+                  az_vpolar(2.5 * AZ_SCREEN_RADIUS, beam_angle),
+                  skip_types, AZ_SHIP_UID, &impact);
+
+    // If this is a PIERCE beam, hit all baddies along the beam.
+    if (minor == AZ_GUN_PIERCE) {
+      assert(impact.type != AZ_IMP_BADDIE);
+      const az_vector_t delta = az_vsub(impact.position, beam_start);
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind == AZ_BAD_NOTHING) continue;
+        az_vector_t position, normal;
+        if (az_ray_hits_baddie(baddie, beam_start, delta,
+                               &position, &normal)) {
+          beam_emit_particles(state, position, normal, AZ_WHITE);
           az_try_damage_baddie(state, baddie, damage_kind, damage);
-        } else {
-          delta = az_vsub(hit_at, beam_start);
-          normal = baddie_normal;
-          hit_color = AZ_WHITE;
-          hit_baddie = baddie;
-          hit_door = NULL;
         }
       }
     }
-    const az_vector_t beam_end = az_vadd(beam_start, delta);
 
     // Add a particle for the beam itself:
     az_particle_t *particle;
@@ -321,34 +281,39 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       particle->velocity = AZ_VZERO;
       particle->angle = beam_angle;
       particle->lifetime = 0.0;
-      particle->param1 = az_vnorm(delta);
+      particle->param1 = az_vdist(beam_start, impact.position);
       particle->param2 =
         sqrt(damage_mult) * (3.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
     }
 
     // Resolve hits:
+    bool did_hit = true;
+    az_color_t hit_color = AZ_WHITE;
+    switch (impact.type) {
+      case AZ_IMP_NOTHING: did_hit = false; break;
+      case AZ_IMP_BADDIE:
+        assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
+        az_try_damage_baddie(state, impact.target.baddie, damage_kind, damage);
+        break;
+      case AZ_IMP_DOOR_INSIDE: did_hit = false; break;
+      case AZ_IMP_DOOR_OUTSIDE:
+        if (az_can_open_door(impact.target.door->kind, damage_kind)) {
+          impact.target.door->is_open = true;
+        }
+        break;
+      case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
+      case AZ_IMP_WALL:
+        hit_color = impact.target.wall->data->color;
+        break;
+    }
     if (did_hit) {
       // Add particles off of whatever the beam hits:
-      beam_emit_particles(state, beam_end, normal, hit_color);
-      // If we hit a door, try to open the door.
-      if (hit_door != NULL) {
-        assert(minor != AZ_GUN_PHASE); // phased beams can't hit doors
-        assert(hit_baddie == NULL);
-        if (az_can_open_door(hit_door->kind, damage_kind)) {
-          hit_door->is_open = true;
-        }
-      }
-      // If we hit a baddie, damage it.
-      if (hit_baddie != NULL) {
-        assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
-        assert(hit_door == NULL);
-        az_try_damage_baddie(state, hit_baddie, damage_kind, damage);
-      }
+      beam_emit_particles(state, impact.position, impact.normal, hit_color);
       // If this is a BURST beam, the next beam reflects off of the impact
       // point.
       if (minor == AZ_GUN_BURST) {
-        const double normal_theta = az_vtheta(normal);
-        beam_start = az_vadd(beam_end, az_vpolar(0.1, normal_theta));
+        const double normal_theta = az_vtheta(impact.normal);
+        beam_start = az_vadd(impact.position, az_vpolar(0.1, normal_theta));
         beam_init_angle = az_mod2pi(2.0 * normal_theta - beam_angle + AZ_PI);
       }
     }
@@ -585,71 +550,34 @@ void az_tick_ship(az_space_state_t *state, double time) {
     assert(tractor_node == NULL);
 
     // Figure out what, if anything, the ship hits:
-    const az_vector_t start = ship->position;
-    az_vector_t delta = az_vmul(ship->velocity, time);
-    az_collide_target_t collide = {.type = AZ_COL_NOTHING};
-    az_vector_t impact_pos = AZ_VZERO;
-    // Baddies:
-    AZ_ARRAY_LOOP(baddie, state->baddies) {
-      if (baddie->kind == AZ_BAD_NOTHING) continue;
-      az_vector_t end_pos;
-      if (az_circle_hits_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
-                                &end_pos, &impact_pos)) {
-        collide.type = AZ_COL_BADDIE;
-        collide.target.baddie = baddie;
-        delta = az_vsub(end_pos, start);
-      }
-    }
-    // Doors:
-    AZ_ARRAY_LOOP(door, state->doors) {
-      if (door->kind == AZ_DOOR_NOTHING) continue;
-      az_vector_t end_pos;
-      if (az_ray_enters_door(door, start, delta, &end_pos)) {
-        collide.type = AZ_COL_DOOR_INSIDE;
-        collide.target.door = door;
-        delta = az_vsub(end_pos, start);
-      }
-      if (az_circle_hits_door(door, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
-                              &end_pos, &impact_pos)) {
-        collide.type = AZ_COL_DOOR_OUTSIDE;
-        collide.target.door = door;
-        delta = az_vsub(end_pos, start);
-      }
-    }
-    // Walls:
-    AZ_ARRAY_LOOP(wall, state->walls) {
-      if (wall->kind == AZ_WALL_NOTHING) continue;
-      az_vector_t end_pos;
-      if (az_circle_hits_wall(wall, AZ_SHIP_DEFLECTOR_RADIUS, start, delta,
-                              &end_pos, &impact_pos)) {
-        collide.type = AZ_COL_WALL;
-        collide.target.wall = wall;
-        delta = az_vsub(end_pos, start);
-      }
-    }
+    az_impact_t impact;
+    az_circle_impact(state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
+                     az_vmul(ship->velocity, time), AZ_IMPF_SHIP, AZ_SHIP_UID,
+                     &impact);
 
     // Move the ship:
-    ship->position = az_vadd(start, delta);
+    ship->position = impact.position;
 
     // Resolve the collision (if any):
-    switch (collide.type) {
-      case AZ_COL_NOTHING: break;
-      case AZ_COL_BADDIE:
+    switch (impact.type) {
+      case AZ_IMP_NOTHING: break;
+      case AZ_IMP_BADDIE:
         // TODO: make these parameters depend on baddie
         on_ship_hit_wall(state, 0.1,
-                         (collide.target.baddie->frozen > 0.0 ? 0.0 : 10.0),
-                         impact_pos);
+                         (impact.target.baddie->frozen > 0.0 ? 0.0 : 10.0),
+                         impact.normal);
         break;
-      case AZ_COL_DOOR_INSIDE:
-        on_ship_enter_door(state, collide.target.door);
+      case AZ_IMP_DOOR_INSIDE:
+        on_ship_enter_door(state, impact.target.door);
         break;
-      case AZ_COL_DOOR_OUTSIDE:
-        on_ship_hit_wall(state, 0.5, 0.0, impact_pos);
+      case AZ_IMP_DOOR_OUTSIDE:
+        on_ship_hit_wall(state, 0.5, 0.0, impact.normal);
         break;
-      case AZ_COL_WALL:
-        on_ship_hit_wall(state, collide.target.wall->data->elasticity,
-                         collide.target.wall->data->impact_damage_coeff,
-                         impact_pos);
+      case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
+      case AZ_IMP_WALL:
+        on_ship_hit_wall(state, impact.target.wall->data->elasticity,
+                         impact.target.wall->data->impact_damage_coeff,
+                         impact.normal);
         break;
     }
   }

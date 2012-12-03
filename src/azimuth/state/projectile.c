@@ -129,6 +129,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 1.0,
     .impact_damage = 3.0,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .piercing = true
   },
   [AZ_PROJ_GUN_SHRAPNEL] = {

@@ -275,11 +275,19 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
     }
   }
   // Doors:
-  if (!(skip_types & AZ_IMPF_DOOR)) {
+  if (!(skip_types & AZ_IMPF_DOOR_INSIDE) ||
+      !(skip_types & AZ_IMPF_DOOR_OUTSIDE)) {
     AZ_ARRAY_LOOP(door, state->doors) {
       if (door->kind == AZ_DOOR_NOTHING) continue;
-      if (az_ray_hits_door(door, start, delta, position, normal)) {
-        impact_out->type = AZ_IMP_DOOR;
+      if (!(skip_types & AZ_IMPF_DOOR_INSIDE) &&
+          az_ray_hits_door_inside(door, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_DOOR_INSIDE;
+        impact_out->target.door = door;
+        delta = az_vsub(*position, start);
+      }
+      if (!(skip_types & AZ_IMPF_DOOR_OUTSIDE) &&
+          az_ray_hits_door_outside(door, start, delta, position, normal)) {
+        impact_out->type = AZ_IMP_DOOR_OUTSIDE;
         impact_out->target.door = door;
         delta = az_vsub(*position, start);
       }
@@ -333,11 +341,21 @@ void az_circle_impact(az_space_state_t *state, double radius,
     }
   }
   // Doors:
-  if (!(skip_types & AZ_IMPF_DOOR)) {
+  if (!(skip_types & AZ_IMPF_DOOR_INSIDE) ||
+      !(skip_types & AZ_IMPF_DOOR_OUTSIDE)) {
     AZ_ARRAY_LOOP(door, state->doors) {
       if (door->kind == AZ_DOOR_NOTHING) continue;
-      if (az_circle_hits_door(door, radius, start, delta, position, normal)) {
-        impact_out->type = AZ_IMP_DOOR;
+      if (!(skip_types & AZ_IMPF_DOOR_INSIDE) &&
+          az_circle_hits_door_inside(door, radius, start, delta,
+                                     position, normal)) {
+        impact_out->type = AZ_IMP_DOOR_INSIDE;
+        impact_out->target.door = door;
+        delta = az_vsub(*position, start);
+      }
+      if (!(skip_types & AZ_IMPF_DOOR_OUTSIDE) &&
+          az_circle_hits_door_outside(door, radius, start, delta,
+                                      position, normal)) {
+        impact_out->type = AZ_IMP_DOOR_OUTSIDE;
         impact_out->target.door = door;
         delta = az_vsub(*position, start);
       }

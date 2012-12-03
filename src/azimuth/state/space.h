@@ -145,16 +145,18 @@ void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
 typedef enum {
   AZ_IMP_NOTHING = 0,
   AZ_IMP_BADDIE,
-  AZ_IMP_DOOR,
+  AZ_IMP_DOOR_INSIDE,
+  AZ_IMP_DOOR_OUTSIDE,
   AZ_IMP_SHIP,
   AZ_IMP_WALL
 } az_impact_type_t;
 
 typedef uint_fast8_t az_impact_flags_t;
-#define AZ_IMPF_BADDIE ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
-#define AZ_IMPF_DOOR   ((az_impact_flags_t)(1u << AZ_IMP_DOOR))
-#define AZ_IMPF_SHIP   ((az_impact_flags_t)(1u << AZ_IMP_SHIP))
-#define AZ_IMPF_WALL   ((az_impact_flags_t)(1u << AZ_IMP_WALL))
+#define AZ_IMPF_BADDIE       ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
+#define AZ_IMPF_DOOR_INSIDE  ((az_impact_flags_t)(1u << AZ_IMP_DOOR_INSIDE))
+#define AZ_IMPF_DOOR_OUTSIDE ((az_impact_flags_t)(1u << AZ_IMP_DOOR_OUTSIDE))
+#define AZ_IMPF_SHIP         ((az_impact_flags_t)(1u << AZ_IMP_SHIP))
+#define AZ_IMPF_WALL         ((az_impact_flags_t)(1u << AZ_IMP_WALL))
 
 typedef struct {
   az_impact_type_t type;
