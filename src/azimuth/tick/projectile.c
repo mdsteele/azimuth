@@ -81,24 +81,32 @@ static void on_projectile_impact(az_space_state_t *state,
 
   // Add particles.
   az_particle_t *particle;
-  if (az_insert_particle(state, &particle)) {
-    particle->kind = AZ_PAR_BOOM;
-    particle->color = (az_color_t){255, 255, 255, 255};
-    particle->position = proj->position;
-    particle->velocity = AZ_VZERO;
-    particle->lifetime = 0.3;
-    particle->param1 = (radius <= 0.0 ? 10.0 : radius);
-  }
-  for (int i = 0; i < 5; ++i) {
-    if (az_insert_particle(state, &particle)) {
-      particle->kind = AZ_PAR_SPECK;
-      particle->color = AZ_WHITE;
-      particle->position = proj->position;
-      particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
-                                     az_random() * AZ_TWO_PI);
-      particle->angle = 0.0;
-      particle->lifetime = 1.0;
-    } else break;
+  switch (proj->kind) {
+    case AZ_PROJ_GUN_PHASE:
+    case AZ_PROJ_GUN_FREEZE_PHASE:
+    case AZ_PROJ_GUN_TRIPLE_PHASE:
+    case AZ_PROJ_GUN_HOMING_PHASE:
+    case AZ_PROJ_GUN_PHASE_BURST:
+    case AZ_PROJ_GUN_PHASE_PIERCE:
+      az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+                   az_vpolar(20.0 + 50.0 * az_random(),
+                             az_random() * AZ_TWO_PI));
+      break;
+    default:
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_BOOM;
+        particle->color = AZ_WHITE;
+        particle->position = proj->position;
+        particle->velocity = AZ_VZERO;
+        particle->lifetime = 0.3;
+        particle->param1 = (radius <= 0.0 ? 10.0 : radius);
+      }
+      for (int i = 0; i < 5; ++i) {
+        az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+                     az_vpolar(20.0 + 50.0 * az_random(),
+                               az_random() * AZ_TWO_PI));
+      }
+      break;
   }
 }
 
@@ -172,6 +180,7 @@ static void projectile_home_in(az_space_state_t *state,
      (-angle_delta <= turn_radians ? goal_angle : proj_angle + turn_radians) :
      (angle_delta <= turn_radians ? goal_angle : proj_angle - turn_radians));
   proj->velocity = az_vpolar(proj->data->speed, new_angle);
+  proj->angle = new_angle;
 }
 
 static void projectile_special_logic(az_space_state_t *state,
@@ -179,7 +188,6 @@ static void projectile_special_logic(az_space_state_t *state,
                                      double time) {
   // The projectile still hasn't hit anything.  Apply kind-specific logic to
   // the projectile (e.g. homing projectiles will home in).
-  az_particle_t *particle;
   switch (proj->kind) {
     case AZ_PROJ_GUN_FREEZE:
     case AZ_PROJ_GUN_CHARGED_FREEZE:
@@ -190,37 +198,24 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_GUN_FREEZE_PIERCE:
       for (int i = (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 2 : 1);
            i > 0; --i) {
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_SPECK;
-          particle->color = (az_color_t){0, 255, 255, 255};
-          particle->position = proj->position;
-          particle->velocity = az_vpolar(30.0, az_random() * AZ_TWO_PI);
-          particle->angle = 0.0;
-          particle->lifetime =
-            (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 1.0 :
-             proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL ? 0.2 : 0.3);
-        }
+        az_add_speck(state, (az_color_t){0, 255, 255, 255},
+                     (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 1.0 :
+                      proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL ? 0.2 : 0.3),
+                     proj->position, az_vpolar(30.0, az_random() * AZ_TWO_PI));
       }
       break;
     case AZ_PROJ_ROCKET:
     case AZ_PROJ_HYPER_ROCKET:
-      if (az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_SPECK;
-        particle->color = (az_color_t){255, 255, 0, 255};
-        particle->position = proj->position;
-        particle->velocity =
-          az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
-                     (az_random() - 0.5) * AZ_DEG2RAD(60));
-        particle->angle = 0.0;
-        particle->lifetime = 1.0;
-      }
+      az_add_speck(state, (az_color_t){255, 255, 0, 255}, 1.0, proj->position,
+                   az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
+                              (az_random() - 0.5) * AZ_DEG2RAD(60)));
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
       if (proj->age >= 0.5 * proj->data->lifetime) {
         on_projectile_hit_wall(state, proj, AZ_VZERO);
       } else {
-        proj->velocity = az_vrotate(proj->velocity, 1.5 * time);
+        proj->angle = az_mod2pi(proj->angle + 1.5 * time);
       }
       break;
     default: break;
@@ -239,7 +234,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Figure out what, if anything, the projectile hits:
   az_impact_flags_t skip_types =
     (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
-  if (proj->data->phased) skip_types |= AZ_IMPF_WALL;
+  if (proj->data->phased) skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
   az_impact_t impact;
   az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
                 skip_types, proj->last_hit_uid, &impact);

@@ -107,6 +107,44 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2d(-8, -4);
       } glEnd();
       break;
+    case AZ_PROJ_GUN_PHASE:
+    case AZ_PROJ_GUN_FREEZE_PHASE:
+    case AZ_PROJ_GUN_TRIPLE_PHASE:
+    case AZ_PROJ_GUN_HOMING_PHASE:
+    case AZ_PROJ_GUN_PHASE_BURST:
+    case AZ_PROJ_GUN_PHASE_PIERCE:
+      glBegin(GL_QUADS); {
+        const double r1 = proj->age * proj->data->speed;
+        const double w1 = r1 * tan(AZ_DEG2RAD(0.5));
+        const double a = proj->age / proj->data->lifetime;
+        const double r2 = fmin(r1, 30.0 * (1.0 - a * a));
+        const double w2 = (r1 - r2) * tan(AZ_DEG2RAD(0.5));
+        if (proj->kind == AZ_PROJ_GUN_FREEZE_PHASE) glColor3f(0.5, 0.75, 1);
+        else if (proj->kind == AZ_PROJ_GUN_PHASE_PIERCE &&
+                 az_clock_mod(2, 2, clock)) glColor3f(1, 0, 1);
+        else glColor3f(1, 1, 0.5);
+        glVertex2d(0, -w1);
+        glVertex2d(0, w1);
+        if (proj->kind == AZ_PROJ_GUN_FREEZE_PHASE) glColor4f(0, 0.5, 1, 0);
+        else if (proj->kind == AZ_PROJ_GUN_PHASE_PIERCE &&
+                 az_clock_mod(2, 2, clock)) glColor4f(1, 0, 1, 0);
+        else glColor4f(1, 0.5, 0, 0);
+        glVertex2d(-r2, w2);
+        glVertex2d(-r2, -w2);
+      } glEnd();
+      break;
+    case AZ_PROJ_GUN_CHARGED_PHASE:
+      glBegin(GL_QUADS); {
+        if (az_clock_mod(2, 2, clock)) glColor3f(1, 1, 0);
+        else glColor3f(1, 0, 1);
+        glVertex2d(2, -2);
+        glVertex2d(2, 2);
+        if (az_clock_mod(2, 2, clock)) glColor4f(1, 1, 0, 0);
+        else glColor4f(1, 0, 1, 0);
+        glVertex2d(-18 - 400 * proj->age, 2);
+        glVertex2d(-18 - 400 * proj->age, -2);
+      } glEnd();
+      break;
     case AZ_PROJ_GUN_BURST:
     case AZ_PROJ_GUN_FREEZE_BURST:
     case AZ_PROJ_GUN_TRIPLE_BURST:
@@ -114,7 +152,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_BURST_PIERCE:
       glPushMatrix(); {
         glRotated(10 * az_clock_mod(36, 1, clock), 0, 0, 1);
-        glColor3f(0.75, 0.5, 0.25);
+        glColor3f(0.75, 0.5, 0.25); // brown
         glBegin(GL_QUADS); {
           glVertex2d(5, 0);
           glVertex2d(2, 3);
@@ -202,7 +240,7 @@ void az_draw_projectiles(const az_space_state_t* state) {
     if (proj->kind == AZ_PROJ_NOTHING) continue;
     glPushMatrix(); {
       glTranslated(proj->position.x, proj->position.y, 0);
-      glRotated(AZ_RAD2DEG(az_vtheta(proj->velocity)), 0, 0, 1);
+      glRotated(AZ_RAD2DEG(proj->angle), 0, 0, 1);
       draw_projectile(proj, state->clock);
     } glPopMatrix();
   }

@@ -95,9 +95,52 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
-    .lifetime = 1.0,
-    .impact_damage = 1.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.1,
     .phased = true
+  },
+  [AZ_PROJ_GUN_CHARGED_PHASE] = {
+    .speed = 800.0,
+    .lifetime = 3.0,
+    .impact_damage = 10.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
+    .phased = true,
+    .piercing = true
+  },
+  [AZ_PROJ_GUN_FREEZE_PHASE] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.1,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
+    .phased = true
+  },
+  [AZ_PROJ_GUN_TRIPLE_PHASE] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.08,
+    .phased = true
+  },
+  [AZ_PROJ_GUN_HOMING_PHASE] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.05,
+    .homing = true,
+    .phased = true
+  },
+  [AZ_PROJ_GUN_PHASE_BURST] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.1,
+    .shrapnel_kind = AZ_PROJ_GUN_PHASE,
+    .phased = true
+  },
+  [AZ_PROJ_GUN_PHASE_PIERCE] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.2,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
+    .phased = true,
+    .piercing = true
   },
   [AZ_PROJ_GUN_BURST] = {
     .speed = 900.0,
@@ -194,14 +237,14 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_BOMB] = {
-    .speed = -0.001,
+    .speed = 0.0,
     .lifetime = 3.0,
     .splash_damage = 25.0,
     .splash_radius = 60.0,
     .damage_kind = AZ_DMGF_BOMB
   },
   [AZ_PROJ_MEGA_BOMB] = {
-    .speed = -0.001,
+    .speed = 0.0,
     .lifetime = 6.0,
     .splash_damage = 75.0,
     .splash_radius = 200.0,
@@ -220,6 +263,7 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
   proj->fired_by_enemy = fired_by_enemy;
   proj->position = position;
   proj->velocity = az_vpolar(proj->data->speed, angle);
+  proj->angle = angle;
   proj->age = 0.0;
   proj->last_hit_uid = AZ_NULL_UID;
 }

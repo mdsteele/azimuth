@@ -87,6 +87,7 @@ typedef struct {
   bool fired_by_enemy; // if true, this projectile can hit the ship
   az_vector_t position;
   az_vector_t velocity;
+  double angle;
   double age; // seconds
   // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
   // gun), this records the UID of the last baddie hit.  The projectile cannot

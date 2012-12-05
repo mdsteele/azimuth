@@ -136,6 +136,19 @@ bool az_insert_particle(az_space_state_t *state,
   return false;
 }
 
+void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
+                  az_vector_t position, az_vector_t velocity) {
+  az_particle_t *speck;
+  if (az_insert_particle(state, &speck)) {
+    speck->kind = AZ_PAR_SPECK;
+    speck->color = color;
+    speck->position = position;
+    speck->velocity = velocity;
+    speck->angle = 0.0;
+    speck->lifetime = lifetime;
+  }
+}
+
 bool az_insert_projectile(az_space_state_t *state,
                           az_projectile_t **proj_out) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
@@ -199,15 +212,9 @@ void az_damage_ship(az_space_state_t *state, double damage) {
       particle->param1 = 30;
     }
     for (int i = 0; i < 20; ++i) {
-      if (az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_SPECK;
-        particle->color = AZ_WHITE;
-        particle->position = state->ship.position;
-        particle->velocity = az_vpolar(20.0 + 50.0 * az_random(),
-                                       az_random() * AZ_TWO_PI);
-        particle->angle = 0.0;
-        particle->lifetime = 2.0;
-      } else break;
+      az_add_speck(state, AZ_WHITE, 2.0, state->ship.position,
+                   az_vpolar(20.0 + 50.0 * az_random(),
+                             az_random() * AZ_TWO_PI));
     }
   }
 }
