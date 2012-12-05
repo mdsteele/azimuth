@@ -237,9 +237,17 @@ static void draw_hud(az_editor_state_t* state) {
       tool_name = "MOVE";
       glColor3f(1, 0, 1);
       break;
+    case AZ_TOOL_MASS_MOVE:
+      tool_name = "MASS-MOVE";
+      glColor3f(1, 0.5, 1);
+      break;
     case AZ_TOOL_ROTATE:
       tool_name = "ROTATE";
       glColor3f(1, 0, 0);
+      break;
+    case AZ_TOOL_MASS_ROTATE:
+      tool_name = "MASS-ROTATE";
+      glColor3f(1, 0.5, 0.5);
       break;
     case AZ_TOOL_CAMERA:
       tool_name = "CAMERA";
