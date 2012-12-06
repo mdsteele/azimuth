@@ -32,7 +32,7 @@
 
 static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   switch (proj->kind) {
-    default: // TODO: add other types
+    case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PROJ_GUN_NORMAL:
     case AZ_PROJ_GUN_TRIPLE:
     case AZ_PROJ_GUN_SHRAPNEL:
@@ -166,6 +166,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_PROJ_GUN_PIERCE:
+    case AZ_PROJ_GUN_CHARGED_PIERCE:
     case AZ_PROJ_GUN_FREEZE_PIERCE:
     case AZ_PROJ_GUN_TRIPLE_PIERCE:
     case AZ_PROJ_GUN_HOMING_PIERCE:
@@ -192,7 +193,9 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       }
       break;
     case AZ_PROJ_ROCKET:
-      glColor3f(0.5, 0, 0); // dark red
+    case AZ_PROJ_HYPER_ROCKET:
+      if (proj->kind == AZ_PROJ_ROCKET) glColor3f(0.5, 0, 0); // dark red
+      else glColor3f(0.75, 0, 0.75); // magenta
       glBegin(GL_QUADS); {
         const int y = 2 - az_clock_mod(6, 2, clock);
         glVertex2i(-11, y);
@@ -211,7 +214,8 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2i(-9, 2);
         glVertex2i(2, 2);
       } glEnd();
-      glColor3f(0.5, 0, 0); // dark red
+      if (proj->kind == AZ_PROJ_ROCKET) glColor3f(0.5, 0, 0); // dark red
+      else glColor3f(0.75, 0, 0.75); // magenta
       glBegin(GL_QUADS); {
         const int y = -4 + az_clock_mod(6, 2, clock);
         glVertex2i(-11, y);
@@ -228,6 +232,21 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
           if (blue) glColor3f(0, 0, 0.75); // blue
           else glColor3f(0.5, 0.5, 0.5); // gray
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
+    case AZ_PROJ_MEGA_BOMB:
+      glBegin(GL_TRIANGLE_FAN); {
+        const bool blink = az_clock_mod(2, (proj->age >= 2.0 ? 5 : 15), clock);
+        if (blink) glColor3f(1, 1, 0.5); // yellow
+        else glColor3f(0.5, 0.5, 0.5); // gray
+        glVertex2i(0, 0);
+        const double radius = 6.0;
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          if (blue) glColor3f(0, 0.5, 0.75); // cyan
+          else if (blink) glColor3f(0.75, 0.75, 0.25); // yellow
+          else glColor3f(0.25, 0.25, 0.25); // dark gray
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();

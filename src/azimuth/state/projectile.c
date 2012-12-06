@@ -236,6 +236,14 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 25.0,
     .damage_kind = AZ_DMGF_ROCKET
   },
+  [AZ_PROJ_HYPER_ROCKET] = {
+    .speed = 1500.0,
+    .lifetime = 3.0,
+    .impact_damage = 25.0,
+    .splash_damage = 25.0,
+    .splash_radius = 40.0,
+    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
+  },
   [AZ_PROJ_BOMB] = {
     .speed = 0.0,
     .lifetime = 3.0,

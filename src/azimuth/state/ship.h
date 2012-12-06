@@ -45,6 +45,7 @@ typedef struct {
   az_vector_t velocity; // pixels/second
   double angle; // radians
   double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
+  double ordn_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   struct {
     bool active;

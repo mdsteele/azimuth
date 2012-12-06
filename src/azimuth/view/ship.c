@@ -128,6 +128,28 @@ void az_draw_ship(az_space_state_t* state) {
         } glEnd();
       }
     }
+    // Ordnance charge:
+    if (ship->ordn_charge > 0.0) {
+      assert(ship->ordn_charge <= 1.0);
+      glPushMatrix(); {
+        glTranslated(20, 0, 0);
+        const double mid_radius = ship->ordn_charge *
+          (4.0 + 0.6 * az_clock_zigzag(10, 1, state->clock));
+        const int offset = 6 * az_clock_mod(60, 1, state->clock);
+        glBegin(GL_TRIANGLE_FAN); {
+          if (ship->ordn_charge >= 1.0) glColor4f(1, 1, 0.25, 0.7);
+          else glColor4f(1, 0.25, 0.25, 0.7);
+          glVertex2d(0, 0);
+          glColor4f(1, 1, 1, 0.0);
+          for (int i = 0; i <= 8; ++i) {
+            const double radius = (i % 2 ? 0.5 * mid_radius : 2 * mid_radius);
+            const double degrees = 45 * i + offset;
+            glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
+                       radius * sin(AZ_DEG2RAD(degrees)));
+          }
+        } glEnd();
+      } glPopMatrix();
+    }
     // Gun charge:
     if (ship->gun_charge > 0.0) {
       assert(ship->gun_charge <= 1.0);
@@ -138,7 +160,8 @@ void az_draw_ship(az_space_state_t* state) {
         const int offset = 6 * az_clock_mod(60, 1, state->clock);
         for (int n = 0; n < 2; ++n) {
           glBegin(GL_TRIANGLE_FAN); {
-            glColor4f(1, 1, 0.5, 0.4);
+            if (ship->gun_charge >= 1.0) glColor4f(1, 1, 0.5, 0.4);
+            else glColor4f(1, 0.5, 0.5, 0.4);
             glVertex2d(0, 0);
             glColor4f(1, 1, 1, 0.0);
             for (int i = 0; i <= 360; i += 60) {

@@ -39,6 +39,12 @@
 
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 0.6
+// The time needed to charge up hyper/mega ordnance, in seconds:
+#define AZ_ORDN_CHARGING_TIME 0.6
+// How much rocket ammo is used up when we fire a hyper rocket:
+#define AZ_ROCKETS_PER_HYPER_ROCKET 5
+// How much bomb ammo is used up when we drop a mega bomb:
+#define AZ_BOMBS_PER_MEGA_BOMB 5
 // How long it takes the ship's shield flare to die down, in seconds:
 #define AZ_SHIP_SHIELD_FLARE_TIME 0.5
 // The radius of the ship for purposes of collisions with e.g. walls:
@@ -325,11 +331,18 @@ static void fire_weapons(az_space_state_t *state, double time) {
       ship->gun_charge = fmin(1.0, ship->gun_charge +
                               AZ_CHARGE_GUN_CHARGING_TIME * time);
     }
-  } else {
-    ship->gun_charge = 0.0;
-  }
-  if (!(controls->fire_pressed || controls->fire_held ||
-        ship->gun_charge > 0.0)) return;
+  } else ship->gun_charge = 0.0;
+  const bool has_hyper_rockets =
+    az_has_upgrade(&state->ship.player, AZ_UPG_HYPER_ROCKETS);
+  const bool has_mega_bombs =
+    az_has_upgrade(&state->ship.player, AZ_UPG_MEGA_BOMBS);
+  if ((has_hyper_rockets && ship->player.ordnance == AZ_ORDN_ROCKETS) ||
+      (has_mega_bombs && ship->player.ordnance == AZ_ORDN_BOMBS)) {
+    if (controls->ordn_held) {
+      ship->ordn_charge = fmin(1.0, ship->ordn_charge +
+                               AZ_ORDN_CHARGING_TIME * time);
+    }
+  } else ship->ordn_charge = 0.0;
 
   // If the ordnance key is held, we should be firing ordnance.
   if (controls->fire_pressed && controls->ordn_held) {
@@ -338,27 +351,55 @@ static void fire_weapons(az_space_state_t *state, double time) {
     switch (player->ordnance) {
       case AZ_ORDN_NONE: return;
       case AZ_ORDN_ROCKETS:
-        if (player->rockets <= 0) return;
-        if (az_insert_projectile(state, &proj)) {
-          az_init_projectile(
-              proj, AZ_PROJ_ROCKET, false,
-              az_vadd(ship->position, az_vpolar(18, ship->angle)),
-              ship->angle);
-          --player->rockets;
+        if (ship->ordn_charge >= 1.0 && has_hyper_rockets &&
+            player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
+          if (az_insert_projectile(state, &proj)) {
+            az_init_projectile(
+                proj, AZ_PROJ_HYPER_ROCKET, false,
+                az_vadd(ship->position, az_vpolar(18, ship->angle)),
+                ship->angle);
+            player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
+          }
+        } else {
+          if (player->rockets <= 0) return;
+          if (az_insert_projectile(state, &proj)) {
+            az_init_projectile(
+                proj, AZ_PROJ_ROCKET, false,
+                az_vadd(ship->position, az_vpolar(18, ship->angle)),
+                ship->angle);
+            --player->rockets;
+          }
         }
+        ship->ordn_charge = 0.0;
         return;
       case AZ_ORDN_BOMBS:
-        if (player->bombs <= 0) return;
-        if (az_insert_projectile(state, &proj)) {
-          az_init_projectile(
-              proj, AZ_PROJ_BOMB, false,
-              az_vadd(ship->position, az_vpolar(-12, ship->angle)),
-              ship->angle);
-          --player->bombs;
+        if (ship->ordn_charge >= 1.0 && has_mega_bombs &&
+            player->bombs >= AZ_BOMBS_PER_MEGA_BOMB) {
+          if (az_insert_projectile(state, &proj)) {
+            az_init_projectile(
+                proj, AZ_PROJ_MEGA_BOMB, false,
+                az_vadd(ship->position, az_vpolar(-12, ship->angle)),
+                ship->angle);
+            player->bombs -= AZ_BOMBS_PER_MEGA_BOMB;
+          }
+        } else {
+          if (player->bombs <= 0) return;
+          if (az_insert_projectile(state, &proj)) {
+            az_init_projectile(
+                proj, AZ_PROJ_BOMB, false,
+                az_vadd(ship->position, az_vpolar(-12, ship->angle)),
+                ship->angle);
+            --player->bombs;
+          }
         }
+        ship->ordn_charge = 0.0;
         return;
     }
     AZ_ASSERT_UNREACHABLE();
+  }
+
+  if (!controls->ordn_held || controls->fire_pressed) {
+    ship->ordn_charge = 0.0;
   }
 
   // If we're not firing ordnance, we should be firing our gun.  If the gun is
@@ -366,32 +407,51 @@ static void fire_weapons(az_space_state_t *state, double time) {
   if (ship->gun_charge > 0.0 && !controls->fire_held) {
     assert(player->gun1 == AZ_GUN_CHARGE);
     if (ship->gun_charge >= 1.0) {
-      switch (player->gun2) {
-        case AZ_GUN_NONE:
-          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL);
+      if (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
+          player->ordnance == AZ_ORDN_ROCKETS &&
+          player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
+        assert(has_hyper_rockets);
+        player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
+        switch (player->gun2) {
+          case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
+          case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
+          case AZ_GUN_FREEZE: break; // TODO
+          case AZ_GUN_TRIPLE: break; // TODO
+          case AZ_GUN_HOMING: break; // TODO
+          case AZ_GUN_PHASE: break; // TODO
+          case AZ_GUN_BURST: break; // TODO
+          case AZ_GUN_PIERCE: break; // TODO
+          case AZ_GUN_BEAM: break; // TODO
+        }
+        ship->ordn_charge = 0.0;
+      } else {
+        switch (player->gun2) {
+          case AZ_GUN_NONE:
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL);
+            break;
+          case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
+          case AZ_GUN_FREEZE:
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE);
+            break;
+          case AZ_GUN_TRIPLE:
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                           3, AZ_DEG2RAD(10), 0);
+            break;
+          case AZ_GUN_HOMING:
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING,
+                           4, AZ_DEG2RAD(90), AZ_DEG2RAD(45));
+            break;
+          case AZ_GUN_PHASE:
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE);
+            break;
+          case AZ_GUN_BURST:
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0);
           break;
-        case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
-        case AZ_GUN_FREEZE:
-          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE);
-          break;
-        case AZ_GUN_TRIPLE:
-          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
-                         3, AZ_DEG2RAD(10), 0);
-          break;
-        case AZ_GUN_HOMING:
-          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING,
-                         4, AZ_DEG2RAD(90), AZ_DEG2RAD(45));
-          break;
-        case AZ_GUN_PHASE:
-          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE);
-          break;
-        case AZ_GUN_BURST:
-          fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0);
-          break;
-        case AZ_GUN_PIERCE:
-          fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE);
-          break;
-        case AZ_GUN_BEAM: break; // TODO
+          case AZ_GUN_PIERCE:
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE);
+            break;
+          case AZ_GUN_BEAM: break; // TODO
+        }
       }
     }
     ship->gun_charge = 0.0;

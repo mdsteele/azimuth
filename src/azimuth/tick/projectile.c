@@ -205,10 +205,17 @@ static void projectile_special_logic(az_space_state_t *state,
       }
       break;
     case AZ_PROJ_ROCKET:
-    case AZ_PROJ_HYPER_ROCKET:
       az_add_speck(state, (az_color_t){255, 255, 0, 255}, 1.0, proj->position,
                    az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
                               (az_random() - 0.5) * AZ_DEG2RAD(60)));
+      break;
+    case AZ_PROJ_HYPER_ROCKET:
+      for (int i = 0; i < 6; ++i) {
+        az_add_speck(state, (az_color_t){255, 255, 0, 255},
+                     1.0 + az_random(), proj->position,
+                     az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
+                                (az_random() - 0.5) * AZ_DEG2RAD(10)));
+      }
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
