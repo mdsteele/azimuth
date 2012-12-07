@@ -46,13 +46,14 @@ typedef struct {
 } az_component_data_t;
 
 typedef struct {
-  double bounding_radius;
+  double overall_bounding_radius;
   double max_health;
   az_damage_flags_t immunities;
   az_pickup_flags_t potential_pickups;
   int num_components;
-  const az_component_data_t* components; // array of length num_components
-  az_polygon_t polygon;
+  const az_component_data_t *components; // array of length num_components
+  double main_bounding_radius;
+  az_polygon_t main_polygon;
 } az_baddie_data_t;
 
 typedef struct {
@@ -75,6 +76,11 @@ typedef struct {
 } az_baddie_t;
 
 /*===========================================================================*/
+
+// Call this at program startup to initialize all baddie data.  In particular,
+// this must be called before any calls to az_get_baddie_data or
+// az_init_baddie.
+void az_init_baddie_datas(void);
 
 // Get the static baddie data struct for a particular baddie kind.  The kind
 // must not be AZ_BAD_NOTHING.

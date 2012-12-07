@@ -71,6 +71,7 @@ bool az_polygon_contains(az_polygon_t polygon, az_vector_t point) {
 
 bool az_convex_polygon_contains(az_polygon_t polygon,
                                 az_vector_t point) {
+  if (polygon.num_vertices < 3) return false;
   const az_vector_t *vertices = polygon.vertices;
   // Iterate over all edges in the polygon.  On each iteration, i is the index
   // of the "primary" vertex, and j is the index of the vertex that comes just
@@ -218,6 +219,24 @@ bool az_circle_hits_point(
     if (impact_out != NULL) *impact_out = point;
     return true;
   } else return false;
+}
+
+bool az_circle_hits_circle(
+    double sradius, az_vector_t center, double mradius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(sradius >= 0.0);
+  assert(mradius >= 0.0);
+  az_vector_t pos;
+  if (!az_circle_hits_point(center, sradius + mradius, start, delta,
+                            &pos, NULL)) return false;
+  if (pos_out != NULL) *pos_out = pos;
+  if (impact_out != NULL) {
+    if (sradius > 0.0) {
+      *impact_out = az_vadd(center, az_vmul(az_vunit(az_vsub(pos, center)),
+                                            sradius));
+    } else *impact_out = center;
+  }
+  return true;
 }
 
 bool az_circle_hits_line(az_vector_t p1, az_vector_t p2, double radius,

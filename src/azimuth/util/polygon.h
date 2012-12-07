@@ -85,6 +85,11 @@ bool az_circle_hits_point(
     az_vector_t point, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
 
+// Determine if the circle will ever intersect the given circle.
+bool az_circle_hits_circle(
+    double sradius, az_vector_t center, double mradius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+
 // Determine if the circle will ever intersect the infinite line passing
 // through p1 and p2.
 bool az_circle_hits_line(

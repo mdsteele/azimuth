@@ -25,6 +25,7 @@
 #include "azimuth/control/space.h"
 #include "azimuth/control/title.h"
 #include "azimuth/gui/screen.h"
+#include "azimuth/state/baddie.h" // for az_init_baddie_datas
 #include "azimuth/state/planet.h"
 #include "azimuth/state/save.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
@@ -64,6 +65,7 @@ typedef enum {
 
 int main(int argc, char **argv) {
   az_init_random();
+  az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_wall_drawing);
   az_init_gui(false);

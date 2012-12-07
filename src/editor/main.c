@@ -27,6 +27,7 @@
 
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
+#include "azimuth/state/baddie.h" // for az_init_baddie_datas
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
@@ -173,7 +174,8 @@ static void do_select(int x, int y, bool multi) {
   az_editor_baddie_t *best_baddie = NULL;
   AZ_LIST_LOOP(baddie, room->baddies) {
     double dist = az_vdist(pt, baddie->spec.position);
-    if (dist <= az_get_baddie_data(baddie->spec.kind)->bounding_radius &&
+    if (dist <= az_get_baddie_data(baddie->spec.kind)->
+                overall_bounding_radius &&
         dist < best_dist) {
       best_dist = dist;
       best_baddie = baddie;
@@ -788,6 +790,7 @@ static void destroy_state(void) {
 
 int main(int argc, char **argv) {
   az_init_random();
+  az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_wall_drawing);
   az_init_gui(false);

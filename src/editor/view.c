@@ -216,7 +216,7 @@ static void draw_camera_view(az_editor_state_t *state) {
     if (!baddie->selected) continue;
     draw_selection_circle(baddie->spec.position, baddie->spec.angle,
                           az_get_baddie_data(baddie->spec.kind)->
-                          bounding_radius);
+                          overall_bounding_radius);
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
