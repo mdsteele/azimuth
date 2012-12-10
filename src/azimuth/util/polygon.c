@@ -91,6 +91,22 @@ bool az_convex_polygon_contains(az_polygon_t polygon,
 
 /*===========================================================================*/
 
+bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
+                                 az_vector_t center, double radius) {
+  return az_circle_hits_point(center, radius, start, delta, NULL, NULL);
+}
+
+bool az_ray_hits_circle(az_vector_t center, double radius,
+                        az_vector_t start, az_vector_t delta,
+                        az_vector_t *point_out, az_vector_t *normal_out) {
+  az_vector_t point;
+  if (!az_circle_hits_point(center, radius, start, delta,
+                            &point, NULL)) return false;
+  if (point_out != NULL) *point_out = point;
+  if (normal_out != NULL) *normal_out = az_vsub(point, center);
+  return true;
+}
+
 static bool az_ray_hits_polygon_internal(
     az_polygon_t polygon, az_vector_t start, az_vector_t delta,
     double *time_out, az_vector_t *normal_out) {

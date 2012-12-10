@@ -54,11 +54,25 @@ bool az_convex_polygon_contains(az_polygon_t polygon, az_vector_t point);
 /*===========================================================================*/
 
 // Determine if a ray, travelling delta from start, will ever pass within the
-// specified polygon.  If it does, stores in *point_out the first point on the
-// polygon that the ray hits (if point_out is non-NULL) and in *normal_out a
-// vector normal to the polygon at the point of collision (if normal_out is
-// non-NULL).  No guarantees are made about the length of the normal vector,
-// and in particular it may be zero.
+// specified circle.  This is like az_ray_hits_circle, but doesn't bother to
+// determine the impact point or normal -- just the yes/no return value.
+bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
+                                 az_vector_t center, double radius);
+
+// The following functions each determine if a ray, travelling delta form
+// start, will ever intersect a particular shape (depending on the function).
+// If it does, the function stores in *pos_out the first position of the circle
+// at which it touches the shape (if pos_out is non-NULL) and in *impact_out
+// the point of intersection (if impact_out is non-NULL).  No guarantees are
+// made about the length of the normal vector, and in particular it may be
+// zero (if there is no well-defined normal for the collision).
+
+// Determine if the ray will hit the given circle.
+bool az_ray_hits_circle(az_vector_t center, double radius,
+                        az_vector_t start, az_vector_t delta,
+                        az_vector_t *point_out, az_vector_t *normal_out);
+
+// Determine if the ray will hit the given polygon.
 bool az_ray_hits_polygon(az_polygon_t polygon, az_vector_t start,
                          az_vector_t delta, az_vector_t *point_out,
                          az_vector_t *normal_out);

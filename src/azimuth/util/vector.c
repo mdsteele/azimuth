@@ -118,31 +118,6 @@ bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist) {
           (v1.y - v2.y) * (v1.y - v2.y) <= dist * dist);
 }
 
-bool az_ray_hits_circle(az_vector_t start, az_vector_t rdelta,
-                        az_vector_t center, double radius) {
-  // Set up a quadratic equation modeling when the ray will hit the circle
-  // (assuming it travels t*delta from start at time t.  We should return true
-  // iff there is a solution between 0 and 1.
-  const az_vector_t cdelta = az_vsub(start, center);
-  const double a = az_vdot(rdelta, rdelta);
-  const double b = 2.0 * az_vdot(cdelta, rdelta);
-  const double c = az_vdot(cdelta, cdelta) - radius * radius;
-  const double discriminant = b * b - 4.0 * a * c;
-  // If the discriminant is negative, there is no solution, so the ray misses
-  // the circle.
-  if (discriminant < 0) return false;
-  // Otherwise, there's a solution, but we need to check if it's in range.
-  const double root = sqrt(discriminant);
-  const double t1 = (-b + root) / (2.0 * a);
-  if (0.0 <= t1 && t1 <= 1.0) return true;
-  const double t2 = (-b - root) / (2.0 * a);
-  if (0.0 <= t2 && t2 <= 1.0) return true;
-  // No solution.  Lastly, we need to check an uncommon case: if the start (and
-  // end) are completely inside the circle, we still want to count that as a
-  // hit.
-  return az_vwithin(start, center, radius);
-}
-
 /*===========================================================================*/
 
 int az_modulo(int a, int b) {

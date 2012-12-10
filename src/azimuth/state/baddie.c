@@ -168,8 +168,8 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
   const az_baddie_data_t *data = baddie->data;
 
   // Common case: if ray definitely misses baddie, return early.
-  if (!az_ray_hits_circle(start, delta, baddie->position,
-                          data->overall_bounding_radius)) {
+  if (!az_ray_hits_bounding_circle(start, delta, baddie->position,
+                                   data->overall_bounding_radius)) {
     return false;
   }
 
@@ -182,8 +182,8 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
 
   // Check if we hit the main body of the baddie.
   if (data->main_polygon.num_vertices > 0) {
-    if (az_ray_hits_circle(rel_start, rel_delta, AZ_VZERO,
-                           data->main_bounding_radius) &&
+    if (az_ray_hits_bounding_circle(rel_start, rel_delta, AZ_VZERO,
+                                    data->main_bounding_radius) &&
         az_ray_hits_polygon(data->main_polygon, rel_start, rel_delta,
                             &point, normal_out)) {
       did_hit = true;
@@ -201,7 +201,7 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
   // Now check if we hit any of the baddie's components.
   for (int i = 0; i < data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
-    if (az_ray_hits_circle(
+    if (az_ray_hits_bounding_circle(
             rel_start, rel_delta, baddie->components[i].position,
             data->components[i].bounding_radius) &&
         az_ray_hits_polygon_trans(
@@ -232,8 +232,8 @@ bool az_circle_hits_baddie(
   const az_baddie_data_t *data = baddie->data;
 
   // Common case: if circle definitely misses baddie, return early.
-  if (!az_ray_hits_circle(start, delta, baddie->position,
-                          data->overall_bounding_radius + radius)) {
+  if (!az_ray_hits_bounding_circle(start, delta, baddie->position,
+                                   data->overall_bounding_radius + radius)) {
     return false;
   }
 
@@ -246,8 +246,8 @@ bool az_circle_hits_baddie(
 
   // Check if we hit the main body of the baddie.
   if (data->main_polygon.num_vertices > 0) {
-    if (az_ray_hits_circle(rel_start, rel_delta, AZ_VZERO,
-                           data->main_bounding_radius + radius) &&
+    if (az_ray_hits_bounding_circle(rel_start, rel_delta, AZ_VZERO,
+                                    data->main_bounding_radius + radius) &&
         az_circle_hits_polygon(data->main_polygon, radius, rel_start,
                                rel_delta, &pos, impact_out)) {
       did_hit = true;
@@ -264,7 +264,7 @@ bool az_circle_hits_baddie(
   // Now check if we hit any of the baddie's components.
   for (int i = 0; i < data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
-    if (az_ray_hits_circle(
+    if (az_ray_hits_bounding_circle(
             rel_start, rel_delta, baddie->components[i].position,
             data->components[i].bounding_radius + radius) &&
         az_circle_hits_polygon_trans(

@@ -65,8 +65,8 @@ bool az_ray_hits_door_outside(
     az_vector_t *point_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
-  return (az_ray_hits_circle(start, delta, door->position,
-                             AZ_DOOR_BOUNDING_RADIUS) &&
+  return (az_ray_hits_bounding_circle(start, delta, door->position,
+                                      AZ_DOOR_BOUNDING_RADIUS) &&
           az_ray_hits_polygon_trans(closed_door_polygon, door->position,
                                     door->angle, start, delta, point_out,
                                     normal_out));
@@ -77,8 +77,8 @@ bool az_circle_hits_door_outside(
     az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
-  return (az_ray_hits_circle(start, delta, door->position,
-                             AZ_DOOR_BOUNDING_RADIUS + radius) &&
+  return (az_ray_hits_bounding_circle(start, delta, door->position,
+                                      AZ_DOOR_BOUNDING_RADIUS + radius) &&
           az_circle_hits_polygon_trans(closed_door_polygon, door->position,
                                        door->angle, radius, start, delta,
                                        pos_out, impact_out));
@@ -98,8 +98,8 @@ bool az_ray_hits_door_inside(
     az_vector_t *point_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind != AZ_DOOR_PASSAGE && !door->is_open) return false;
-  return (az_ray_hits_circle(start, delta, door->position,
-                             AZ_DOOR_BOUNDING_RADIUS) &&
+  return (az_ray_hits_bounding_circle(start, delta, door->position,
+                                      AZ_DOOR_BOUNDING_RADIUS) &&
           az_ray_hits_polygon_trans(entrance_polygon, door->position,
                                     door->angle, start, delta, point_out,
                                     normal_out));
@@ -110,8 +110,8 @@ bool az_circle_hits_door_inside(
     az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind != AZ_DOOR_PASSAGE && !door->is_open) return false;
-  return (az_ray_hits_circle(start, delta, door->position,
-                             AZ_DOOR_BOUNDING_RADIUS + radius) &&
+  return (az_ray_hits_bounding_circle(start, delta, door->position,
+                                      AZ_DOOR_BOUNDING_RADIUS + radius) &&
           az_circle_hits_polygon_trans(entrance_polygon, door->position,
                                        door->angle, radius, start, delta,
                                        pos_out, impact_out));

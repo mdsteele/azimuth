@@ -91,19 +91,12 @@ int az_wall_data_index(const az_wall_data_t *data) {
 
 /*===========================================================================*/
 
-bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point) {
-  assert(wall->kind != AZ_WALL_NOTHING);
-  return az_vwithin(point, wall->position, wall->data->bounding_radius) &&
-    az_polygon_contains(wall->data->polygon,
-        az_vrotate(az_vsub(point, wall->position), -wall->angle));
-}
-
 bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out) {
   assert(wall->kind != AZ_WALL_NOTHING);
-  return (az_ray_hits_circle(start, delta, wall->position,
-                             wall->data->bounding_radius) &&
+  return (az_ray_hits_bounding_circle(start, delta, wall->position,
+                                      wall->data->bounding_radius) &&
           az_ray_hits_polygon_trans(wall->data->polygon, wall->position,
                                     wall->angle, start, delta,
                                     point_out, normal_out));
@@ -113,8 +106,8 @@ bool az_circle_hits_wall(
     const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(wall->kind != AZ_WALL_NOTHING);
-  return (az_ray_hits_circle(start, delta, wall->position,
-                             wall->data->bounding_radius + radius) &&
+  return (az_ray_hits_bounding_circle(start, delta, wall->position,
+                                      wall->data->bounding_radius + radius) &&
           az_circle_hits_polygon_trans(wall->data->polygon, wall->position,
                                        wall->angle, radius, start, delta,
                                        pos_out, impact_out));

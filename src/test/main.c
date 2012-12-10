@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_polygons_collide);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
+  RUN_TEST(test_ray_hits_bounding_circle);
   RUN_TEST(test_ray_hits_circle);
   RUN_TEST(test_ray_hits_polygon);
   RUN_TEST(test_ray_hits_polygon_trans);

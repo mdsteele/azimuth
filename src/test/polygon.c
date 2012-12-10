@@ -92,6 +92,48 @@ void test_convex_polygon_contains(void) {
 
 /*===========================================================================*/
 
+void test_ray_hits_bounding_circle(void) {
+  // Ray passes from ouside of circle to inside:
+  EXPECT_TRUE(az_ray_hits_bounding_circle(
+      (az_vector_t){2, 2}, (az_vector_t){-2, -2}, (az_vector_t){0, 0}, 2));
+  // Simple ray misses circle:
+  EXPECT_FALSE(az_ray_hits_bounding_circle(
+      (az_vector_t){2, 2}, (az_vector_t){-1, -1}, (az_vector_t){0, 4}, 2));
+  // Ray completely inside circle:
+  EXPECT_TRUE(az_ray_hits_bounding_circle(
+      (az_vector_t){-4, 4}, (az_vector_t){2, 0}, (az_vector_t){-3, 4}, 2));
+  // Ray passes from one side of circle to the other:
+  EXPECT_TRUE(az_ray_hits_bounding_circle(
+      (az_vector_t){-8, 4}, (az_vector_t){16, 1}, (az_vector_t){-3, 4}, 2));
+  // Ray barely misses circle:
+  EXPECT_FALSE(az_ray_hits_bounding_circle(
+      (az_vector_t){-.5, .5}, (az_vector_t){1, -1}, (az_vector_t){-1, -1}, 1));
+  // Ray pointed away from circle:
+  EXPECT_FALSE(az_ray_hits_bounding_circle(
+      (az_vector_t){-1, 1}, (az_vector_t){0, 10}, (az_vector_t){-1, -1}, 1));
+  // Ray pointed towards circle, but stops just short:
+  EXPECT_FALSE(az_ray_hits_bounding_circle(
+      (az_vector_t){-1, 2}, (az_vector_t){0, -1}, (az_vector_t){-1, -1}, 1));
+}
+
+void test_ray_hits_circle(void) {
+  const az_vector_t nix = {99999, 99999};
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_ray_hits_circle works with NULLs for point_out and normal_out:
+  EXPECT_TRUE(az_ray_hits_circle(
+      (az_vector_t){0, 0}, 2.0, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
+      NULL, NULL));
+
+  // Ray passes from ouside of circle to inside:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_circle(
+      (az_vector_t){0, 0}, 2.0, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
+      &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){2, 0}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+}
+
 void test_ray_hits_polygon(void) {
   const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;

@@ -68,9 +68,6 @@ int az_wall_data_index(const az_wall_data_t *data);
 
 /*===========================================================================*/
 
-// Return true if the given point intersects the wall.
-bool az_point_hits_wall(const az_wall_t *wall, az_vector_t point);
-
 // Determine if a ray, travelling delta from start, will hit the wall.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
 // and the normal vector in *normal_out (if normal_out is non-NULL).
