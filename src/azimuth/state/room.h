@@ -22,19 +22,13 @@
 #define AZIMUTH_STATE_ROOM_H_
 
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
+#include "azimuth/state/camera.h" // for az_camera_bounds_t
 #include "azimuth/state/door.h" // for az_door_kind_t
 #include "azimuth/state/node.h" // for az_node_kind_t
 #include "azimuth/state/player.h" // for az_room_key_t and az_upgrade_t
 #include "azimuth/state/wall.h"
 
 /*===========================================================================*/
-
-typedef struct {
-  double min_r;
-  double r_span;
-  double min_theta;
-  double theta_span;
-} az_camera_bounds_t;
 
 typedef struct {
   az_baddie_kind_t kind;

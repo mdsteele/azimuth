@@ -24,6 +24,7 @@
 
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h"
+#include "azimuth/tick/camera.h"
 #include "azimuth/tick/door.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
@@ -162,34 +163,6 @@ static void tick_timer(az_timer_t *timer, double time) {
   timer->time_remaining = fmax(0.0, timer->time_remaining - time);
 }
 
-static void tick_camera_towards(az_vector_t *camera, az_vector_t towards,
-                                double time) {
-  const double tracking_base = 0.00003; // smaller = faster tracking
-  const az_vector_t difference = az_vsub(towards, *camera);
-  const az_vector_t change =
-    az_vmul(difference, 1.0 - pow(tracking_base, time));
-  *camera = az_vadd(*camera, change);
-}
-
-static void tick_camera(az_space_state_t *state, double time) {
-  // We want to move the camera towards the current ship position.
-  const az_vector_t towards = state->ship.position;
-  // Clamp the actual position the camera moves towards to be within the
-  // current room's camera bounds.  Note that clamping theta is a bit trickier
-  // than clamping r because angles wrap around.
-  const az_camera_bounds_t *bounds =
-    &state->planet->rooms[state->ship.player.current_room].camera_bounds;
-  const double r = fmin(fmax(bounds->min_r, az_vnorm(towards)),
-                        bounds->min_r + bounds->r_span);
-  const double half_span = 0.5 * bounds->theta_span;
-  const double mid_theta = bounds->min_theta + half_span;
-  const double theta = mid_theta +
-    fmin(fmax(-half_span, az_mod2pi(az_vtheta(towards) - mid_theta)),
-         half_span);
-  // Now move the camera towards the clamped position.
-  tick_camera_towards(&state->camera, az_vpolar(r, theta), time);
-}
-
 void az_tick_space_state(az_space_state_t *state, double time) {
   // If we're pausing or unpausing, nothing else should happen.
   if (state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING) {
@@ -241,7 +214,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       tick_upgrade_mode(state, time);
       break;
   }
-  tick_camera(state, time);
+  az_tick_camera(state, time);
   tick_message(&state->message, time);
   tick_timer(&state->timer, time);
 }

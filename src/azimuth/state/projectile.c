@@ -234,6 +234,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 5.0,
     .splash_damage = 5.0,
     .splash_radius = 25.0,
+    .impact_shake = 0.75,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_HYPER_ROCKET] = {
@@ -242,6 +243,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 25.0,
     .splash_damage = 25.0,
     .splash_radius = 40.0,
+    .impact_shake = 4.0,
     .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
   },
   [AZ_PROJ_BOMB] = {
@@ -249,6 +251,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 3.0,
     .splash_damage = 25.0,
     .splash_radius = 60.0,
+    .impact_shake = 1.5,
     .damage_kind = AZ_DMGF_BOMB
   },
   [AZ_PROJ_MEGA_BOMB] = {
@@ -256,6 +259,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 6.0,
     .splash_damage = 75.0,
     .splash_radius = 200.0,
+    .impact_shake = 3.0,
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB
   },
 };

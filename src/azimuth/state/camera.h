@@ -18,15 +18,41 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_SPACE_H_
-#define AZIMUTH_TICK_SPACE_H_
+#ifndef AZIMUTH_STATE_CAMERA_H_
+#define AZIMUTH_STATE_CAMERA_H_
 
-#include "azimuth/state/space.h"
-
-/*===========================================================================*/
-
-void az_tick_space_state(az_space_state_t *state, double time);
+#include "azimuth/util/clock.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_SPACE_H_
+typedef struct {
+  double min_r;
+  double r_span;
+  double min_theta;
+  double theta_span;
+} az_camera_bounds_t;
+
+// Clamp a vector to be within the given camera bounds.
+az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
+                               az_vector_t vec);
+
+/*===========================================================================*/
+
+typedef struct {
+  az_vector_t center;
+  double shake_horz, shake_vert;
+} az_camera_t;
+
+az_vector_t az_camera_shake_offset(const az_camera_t *camera,
+                                   az_clock_t clock);
+
+void az_track_camera_towards(az_camera_t *camera, az_vector_t goal,
+                             double time);
+
+// Apply shake to the camera.
+void az_shake_camera(az_camera_t *camera, double horz, double vert);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_STATE_CAMERA_H_

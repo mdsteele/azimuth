@@ -118,6 +118,10 @@ static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   on_projectile_impact(state, proj, normal);
+  const double shake = proj->data->impact_shake;
+  if (shake > 0.0) {
+    az_shake_camera(&state->camera, shake, shake * 0.75);
+  }
   proj->kind = AZ_PROJ_NOTHING;
 }
 
@@ -143,6 +147,10 @@ static void on_projectile_hit_target(az_space_state_t *state,
   // can no longer use the `baddie` pointer.
   // Run common impact code:
   on_projectile_impact(state, proj, normal);
+  const double shake = proj->data->impact_shake;
+  if (shake > 0.0) {
+    az_shake_camera(&state->camera, shake * 0.75, shake * 0.25);
+  }
   // Remove the projectile (unless it's piercing).
   if (!proj->data->piercing) {
     proj->kind = AZ_PROJ_NOTHING;

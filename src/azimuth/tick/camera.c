@@ -17,16 +17,19 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_TICK_SPACE_H_
-#define AZIMUTH_TICK_SPACE_H_
+#include "azimuth/tick/camera.h"
 
+#include "azimuth/state/camera.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_space_state(az_space_state_t *state, double time);
+void az_tick_camera(az_space_state_t *state, double time) {
+  const az_camera_bounds_t *bounds =
+    &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+  az_track_camera_towards(&state->camera,
+                          az_clamp_to_bounds(bounds, state->ship.position),
+                          time);
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_TICK_SPACE_H_

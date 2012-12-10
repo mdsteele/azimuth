@@ -72,7 +72,9 @@ static void begin_saved_game(const az_planet_t *planet,
   }
 
   state.ship.velocity = AZ_VZERO;
-  state.camera = state.ship.position;
+  const az_room_t *room = &planet->rooms[state.ship.player.current_room];
+  state.camera.center =
+    az_clamp_to_bounds(&room->camera_bounds, state.ship.position);
 }
 
 static bool save_current_game(az_saved_games_t *saved_games) {

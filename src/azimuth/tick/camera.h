@@ -18,15 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_SPACE_H_
-#define AZIMUTH_TICK_SPACE_H_
+#ifndef AZIMUTH_TICK_CAMERA_H_
+#define AZIMUTH_TICK_CAMERA_H_
 
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_space_state(az_space_state_t *state, double time);
+void az_tick_camera(az_space_state_t *state, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_SPACE_H_
+#endif // AZIMUTH_TICK_CAMERA_H_

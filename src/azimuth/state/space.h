@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/camera.h"
 #include "azimuth/state/door.h"
 #include "azimuth/state/node.h"
 #include "azimuth/state/particle.h"
@@ -57,7 +58,7 @@ typedef struct {
   const az_planet_t *planet;
   int save_file_index;
   az_clock_t clock;
-  az_vector_t camera;
+  az_camera_t camera;
   az_ship_t ship;
   az_message_t message;
   az_timer_t timer;

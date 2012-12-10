@@ -74,6 +74,7 @@ typedef struct {
   double impact_damage; // how much damage the projectile deals on impact
   double splash_damage; // how much damage the explosion deals
   double splash_radius; // radius of explosion (zero for most projectiles)
+  double impact_shake; // how much we shake the camera on impact
   az_proj_kind_t shrapnel_kind; // if AZ_PROJ_NOTHING, this proj doesn't burst
   az_damage_flags_t damage_kind; // 0 is interpreted as normal damage
   bool homing; // true if the projectile seeks out enemies

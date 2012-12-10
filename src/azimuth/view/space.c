@@ -92,8 +92,12 @@ void az_space_draw_screen(az_space_state_t *state) {
     // Center the screen on position (0, 0).
     glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
     // Move the screen to the camera pose.
-    glTranslated(0, -az_vnorm(state->camera), 0);
-    glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);
+    glTranslated(0, -az_vnorm(state->camera.center), 0);
+    glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera.center)), 0, 0, 1);
+    // Apply camera shake to the screen position.
+    const az_vector_t shake_offset =
+      az_camera_shake_offset(&state->camera, state->clock);
+    glTranslated(shake_offset.x, shake_offset.y, 0);
     // Draw what the camera sees.
     if (fade_alpha < 1.0) {
       draw_camera_view(state);
