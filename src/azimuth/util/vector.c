@@ -146,6 +146,13 @@ double az_mod2pi(double theta) {
   return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
 }
 
+double az_angle_towards(double theta, double delta, double goal) {
+  const double difference = az_mod2pi(theta - goal);
+  return az_mod2pi(difference < 0.0 ?
+                   (-difference <= delta ? goal : theta + delta) :
+                   (difference <= delta ? goal : theta - delta));
+}
+
 int az_imin(int a, int b) {
   return a <= b ? a : b;
 }

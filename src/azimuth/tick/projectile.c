@@ -194,13 +194,9 @@ static void projectile_home_in(az_space_state_t *state,
     if (!found_target) return;
   }
   // Now, home in on the goal position.
-  const double turn_radians = time * 3.5;
-  const double goal_angle = az_vtheta(az_vsub(goal, proj->position));
-  const double angle_delta = az_mod2pi(proj_angle - goal_angle);
   const double new_angle =
-    (angle_delta < 0.0 ?
-     (-angle_delta <= turn_radians ? goal_angle : proj_angle + turn_radians) :
-     (angle_delta <= turn_radians ? goal_angle : proj_angle - turn_radians));
+    az_angle_towards(proj_angle, time * 3.5,
+                     az_vtheta(az_vsub(goal, proj->position)));
   proj->velocity = az_vpolar(proj->data->speed, new_angle);
   proj->angle = new_angle;
 }

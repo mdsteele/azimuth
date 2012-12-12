@@ -109,6 +109,11 @@ int az_modulo(int a, int b);
 // is between -pi and pi.
 double az_mod2pi(double theta);
 
+// Add or subtract `delta` from the absolute angle `theta` to move it towards
+// the absolute angle `goal`, but don't overshoot if the two angles are within
+// `delta` of each other.
+double az_angle_towards(double theta, double delta, double goal);
+
 // Min and max functions for ints:
 int az_imin(int a, int b);
 int az_imax(int a, int b);

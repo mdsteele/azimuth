@@ -95,21 +95,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_TURRET:
       // Aim gun:
-      {
-        const double gun_angle = baddie->components[0].angle;
-        const double delta =
-          az_mod2pi(baddie->angle + gun_angle -
-                    az_vtheta(az_vsub(state->ship.position,
-                                      baddie->position)));
-        if (delta < 0.0 && gun_angle <= 1.0) {
-          baddie->components[0].angle += 2.0 * time;
-        } else if (delta > 0.0 && gun_angle >= -1.0) {
-          baddie->components[0].angle -= 2.0 * time;
-        }
-      }
+      baddie->components[0].angle =
+        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, 2.0 * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
       // Fire:
-      if (baddie->cooldown <= 0.0) {
-        // TODO: Only fire if it might hit the ship.
+      if (baddie->cooldown <= 0.0 &&
+          fabs(az_mod2pi(baddie->angle + baddie->components[0].angle -
+                         az_vtheta(az_vsub(state->ship.position,
+                                           baddie->position)))) < 0.1) {
         az_projectile_t *proj;
         if (az_insert_projectile(state, &proj)) {
           const double angle = baddie->angle + baddie->components[0].angle;
