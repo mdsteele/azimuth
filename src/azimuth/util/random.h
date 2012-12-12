@@ -26,8 +26,9 @@
 // Call this once, at startup, to initialize the random number generator.
 void az_init_random(void);
 
-// Return a random double from 0.0 (inclusive) to 1.0 (exclusive).
-double az_random(void);
+// Return a random double from min (inclusive) to max (exclusive).  max must
+// be greater than min, and both must be finite.
+double az_random(double min, double max);
 
 // Return a random integer in the (inclusive) range [min, max].  min must not
 // be greater than max.

@@ -67,7 +67,7 @@ static void on_projectile_impact(az_space_state_t *state,
   if (proj->data->shrapnel_kind != AZ_PROJ_NOTHING) {
     const double mid_theta = az_vtheta(normal);
     for (int i = -2; i <= 2; ++i) {
-      const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random() - 0.5);
+      const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random(-.5, .5));
       az_projectile_t *shrapnel;
       if (az_insert_projectile(state, &shrapnel)) {
         az_init_projectile(shrapnel, proj->data->shrapnel_kind, false,
@@ -75,7 +75,7 @@ static void on_projectile_impact(az_space_state_t *state,
                            theta);
         if (!shrapnel->data->homing) {
           shrapnel->velocity =
-            az_vmul(shrapnel->velocity, 0.5 + 0.5 * az_random());
+            az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
         }
       }
     }
@@ -91,8 +91,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_PHASE_PIERCE:
       az_add_speck(state, AZ_WHITE, 1.0, proj->position,
-                   az_vpolar(20.0 + 50.0 * az_random(),
-                             az_random() * AZ_TWO_PI));
+                   az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
       break;
     default:
       if (az_insert_particle(state, &particle)) {
@@ -105,8 +104,7 @@ static void on_projectile_impact(az_space_state_t *state,
       }
       for (int i = 0; i < 5; ++i) {
         az_add_speck(state, AZ_WHITE, 1.0, proj->position,
-                     az_vpolar(20.0 + 50.0 * az_random(),
-                               az_random() * AZ_TWO_PI));
+                     az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
       }
       break;
   }
@@ -225,20 +223,20 @@ static void projectile_special_logic(az_space_state_t *state,
         az_add_speck(state, (az_color_t){0, 255, 255, 255},
                      (proj->kind == AZ_PROJ_GUN_CHARGED_FREEZE ? 1.0 :
                       proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL ? 0.2 : 0.3),
-                     proj->position, az_vpolar(30.0, az_random() * AZ_TWO_PI));
+                     proj->position, az_vpolar(30.0, az_random(0, AZ_TWO_PI)));
       }
       break;
     case AZ_PROJ_ROCKET:
       az_add_speck(state, (az_color_t){255, 255, 0, 255}, 1.0, proj->position,
-                   az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
-                              (az_random() - 0.5) * AZ_DEG2RAD(60)));
+                   az_vrotate(az_vmul(proj->velocity, -az_random(0, 0.3)),
+                              (az_random(-AZ_DEG2RAD(30), AZ_DEG2RAD(30)))));
       break;
     case AZ_PROJ_HYPER_ROCKET:
       for (int i = 0; i < 6; ++i) {
         az_add_speck(state, (az_color_t){255, 255, 0, 255},
-                     1.0 + az_random(), proj->position,
-                     az_vrotate(az_vmul(proj->velocity, -0.3 * az_random()),
-                                (az_random() - 0.5) * AZ_DEG2RAD(10)));
+                     az_random(1.0, 2.0), proj->position,
+                     az_vrotate(az_vmul(proj->velocity, -az_random(0, 0.3)),
+                                (az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)))));
       }
       break;
     case AZ_PROJ_BOMB:

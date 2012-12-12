@@ -20,6 +20,7 @@
 #include "azimuth/util/random.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
@@ -34,11 +35,14 @@ void az_init_random(void) {
   random_initialized = true;
 }
 
-double az_random(void) {
+double az_random(double min, double max) {
   assert(random_initialized);
+  assert(isfinite(min));
+  assert(isfinite(max));
+  assert(min < max);
   // This is a terrible, terrible implementation of random numbers.
   // TODO: Replace this with something better.
-  return ((double)rand()) / (1.0 + (double)RAND_MAX);
+  return min + (max - min) * (double)rand() / (1.0 + (double)RAND_MAX);
 }
 
 int az_randint(int min, int max) {

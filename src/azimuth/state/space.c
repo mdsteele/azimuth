@@ -213,8 +213,7 @@ void az_damage_ship(az_space_state_t *state, double damage) {
     }
     for (int i = 0; i < 20; ++i) {
       az_add_speck(state, AZ_WHITE, 2.0, state->ship.position,
-                   az_vpolar(20.0 + 50.0 * az_random(),
-                             az_random() * AZ_TWO_PI));
+                   az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
     }
   }
 }

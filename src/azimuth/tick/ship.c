@@ -166,8 +166,8 @@ static void fire_gun_single(az_space_state_t *state, double energy_mult,
 static void beam_emit_particles(az_space_state_t *state, az_vector_t position,
                                 az_vector_t normal, az_color_t color) {
   az_add_speck(state, color, 1.0, position,
-               az_vpolar(20.0 + 50.0 * az_random(),
-                         az_vtheta(normal) + (az_random() - 0.5) * AZ_PI));
+               az_vpolar(az_random(20.0, 70.0), az_vtheta(normal) +
+                         az_random(-AZ_HALF_PI, AZ_HALF_PI)));
 }
 
 static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
