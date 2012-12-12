@@ -247,10 +247,7 @@ bool az_circle_hits_circle(
                             &pos, NULL)) return false;
   if (pos_out != NULL) *pos_out = pos;
   if (impact_out != NULL) {
-    if (sradius > 0.0) {
-      *impact_out = az_vadd(center, az_vmul(az_vunit(az_vsub(pos, center)),
-                                            sradius));
-    } else *impact_out = center;
+    *impact_out = az_vadd(center, az_vwithlen(az_vsub(pos, center), sradius));
   }
   return true;
 }

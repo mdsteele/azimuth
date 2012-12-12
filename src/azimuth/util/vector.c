@@ -103,6 +103,20 @@ az_vector_t az_vunit(az_vector_t v) {
   return az_vdiv(v, norm);
 }
 
+az_vector_t az_vwithlen(az_vector_t v, double length) {
+  assert(vfinite(v));
+  const double len = az_vnorm(v);
+  assert(len >= 0.0);
+  if (len > 0.0) return az_vmul(v, length / len);
+  else return (az_vector_t){length, 0.0};
+}
+
+az_vector_t az_vcaplen(az_vector_t v, double max_length) {
+  assert(vfinite(v));
+  const double length = az_vnorm(v);
+  return (length <= max_length ? v : az_vmul(v, max_length / length));
+}
+
 double az_vtheta(az_vector_t v) {
   assert(vfinite(v));
   return atan2(v.y, v.x);

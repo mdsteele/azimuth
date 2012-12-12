@@ -39,11 +39,15 @@
 #define EXPECT_VAPPROX(expected, actual) \
   _expect_vapprox(expected, actual, #expected " == " #actual)
 
-#define ASSERT_TRUE(condition) do {                             \
-    if (!_expect_true(!!(condition), #condition)) return;       \
+#define ASSERT_TRUE(condition) do { \
+    if (!_expect_true(condition, #condition)) return; \
   } while (false)
 
 #define ASSERT_FALSE(condition) ASSERT_TRUE(!(condition))
+
+#define ASSERT_APPROX(expected, actual) do { \
+    if (!_expect_approx(expected, actual, #expected " == " #actual)) return; \
+  } while (false)
 
 int final_test_summary(void);
 

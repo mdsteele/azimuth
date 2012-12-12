@@ -74,10 +74,7 @@ static void on_ship_hit_wall(az_space_state_t *state,
   const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with the wall).
-  if (impact_normal.x != 0.0 || impact_normal.y != 0.0) {
-    ship->position = az_vadd(ship->position,
-                             az_vmul(az_vunit(impact_normal), 0.5));
-  }
+  ship->position = az_vadd(ship->position, az_vwithlen(impact_normal, 0.5));
   // Bounce the ship off the wall.
   const double old_speed_fraction =
     az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED;

@@ -33,6 +33,24 @@
 
 /*===========================================================================*/
 
+static void draw_atom_electron(double radius, az_vector_t position,
+                               double angle) {
+  const double cmult = 1.0 + 0.2 * sin(angle);
+  const double rmult = 1.0 + 0.08 * sin(angle);
+  glPushMatrix(); {
+    glTranslated(position.x, position.y, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(cmult * 0.5, cmult * 0.7, cmult * 0.5); // greenish-gray
+      glVertex2d(-1, 1);
+      glColor3f(cmult * 0.20, cmult * 0.15, cmult * 0.25); // dark purple-gray
+      for (int i = 0; i <= 360; i += 15) {
+        glVertex2d(radius * rmult * cos(AZ_DEG2RAD(i)),
+                   radius * rmult * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   const double flare = baddie->armor_flare;
   const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
@@ -106,6 +124,29 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glVertex2d(3, 2); glVertex2d(3, 12); glVertex2d(-3, 12);
         glVertex2d(-3, 2); glVertex2d(3, 2);
       } glEnd();
+      break;
+    case AZ_BAD_ATOM:
+      for (int i = 0; i < baddie->data->num_components; ++i) {
+        const az_component_t *component = &baddie->components[i];
+        if (component->angle >= 0.0) continue;
+        draw_atom_electron(baddie->data->components[i].bounding_radius,
+                           component->position, component->angle);
+      }
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(flare, 1 - 0.5 * flare, frozen); // green
+        glVertex2d(-2, 2);
+        glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.1 + 0.4 * frozen);
+        const double radius = baddie->data->main_body.bounding_radius;
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      for (int i = 0; i < baddie->data->num_components; ++i) {
+        const az_component_t *component = &baddie->components[i];
+        if (component->angle < 0.0) continue;
+        draw_atom_electron(baddie->data->components[i].bounding_radius,
+                           component->position, component->angle);
+      }
       break;
   }
 }

@@ -37,6 +37,7 @@
 static const az_vector_t lump_vertices[] = {
   {20, 0}, {15, 15}, {-15, 15}, {-15, -15}, {15, -15}
 };
+
 static const az_vector_t turret_vertices[] = {
   {20, 0}, {10, 17.320508075688775}, {-10, 17.320508075688775},
   {-20, 0}, {-10, -17.320508075688775}, {10, -17.320508075688775}
@@ -48,8 +49,15 @@ static az_component_data_t turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
     .immunities = AZ_DMGF_NORMAL }
 };
+
 static const az_vector_t zipper_vertices[] = {
   {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
+};
+
+static az_component_data_t atom_components[] = {
+  { .bounding_radius = 6.3, .immunities = ~AZ_DMGF_MEGA_BOMB },
+  { .bounding_radius = 6.5, .immunities = ~AZ_DMGF_MEGA_BOMB },
+  { .bounding_radius = 6.7, .immunities = ~AZ_DMGF_MEGA_BOMB }
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -76,6 +84,13 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 5.0,
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 15.0 }
+  },
+  [AZ_BAD_ATOM] = {
+    .overall_bounding_radius = 40.0,
+    .max_health = 15.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .bounding_radius = 10.0 },
+    DECL_COMPONENTS(atom_components)
   }
 };
 
@@ -159,6 +174,14 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->position = position;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
+  switch (kind) {
+    case AZ_BAD_ATOM:
+      for (int i = 0; i < baddie->data->num_components; ++i) {
+        baddie->components[i].angle = i * AZ_DEG2RAD(100);
+      }
+      break;
+    default: break;
+  }
 }
 
 /*===========================================================================*/

@@ -30,6 +30,38 @@
 
 /*===========================================================================*/
 
+static void drift_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double max_speed) {
+  // Determine the drift vector.
+  const az_vector_t pos = baddie->position;
+  az_vector_t drift = AZ_VZERO;
+  if (az_ship_is_present(&state->ship)) {
+    drift = az_vwithlen(az_vsub(state->ship.position, pos), 100.0);
+  }
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
+    const az_vector_t delta = az_vsub(pos, door->position);
+    const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) drift = az_vadd(drift, az_vwithlen(delta, 200.0));
+    else drift = az_vadd(drift, az_vwithlen(delta, 100.0 * exp(-dist)));
+  }
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    const az_vector_t delta = az_vsub(pos, wall->position);
+    const double dist = az_vnorm(delta) - wall->data->bounding_radius -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) drift = az_vadd(drift, az_vwithlen(delta, 200.0));
+    else drift = az_vadd(drift, az_vwithlen(delta, 100.0 * exp(-dist)));
+  }
+  // Drift along the drift vector.
+  baddie->velocity =
+    az_vcaplen(az_vadd(baddie->velocity, az_vmul(drift, time)), max_speed);
+}
+
+/*===========================================================================*/
+
 // How long it takes a baddie's armor flare to die down, in seconds:
 #define AZ_BADDIE_ARMOR_FLARE_TIME 0.3
 // How long it takes a baddie to unfreeze, in seconds.
@@ -92,7 +124,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       {
         az_impact_t impact;
         az_ray_impact(state, baddie->position, az_vpolar(20.0, baddie->angle),
-                      0, baddie->uid, &impact);
+                      AZ_IMPF_BADDIE, baddie->uid, &impact);
         if (impact.type != AZ_IMP_NOTHING) {
           baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
         }
@@ -104,7 +136,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         az_impact_t impact;
         az_circle_impact(state, 15.0, baddie->position,
                          az_vpolar(150.0 * time, baddie->angle),
-                         0, baddie->uid, &impact);
+                         AZ_IMPF_BADDIE, baddie->uid, &impact);
         const double normal_theta = az_vtheta(impact.normal);
         baddie->position =
           az_vadd(impact.position, az_vpolar(0.01, normal_theta));
@@ -112,6 +144,17 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->angle = az_mod2pi(2.0 * normal_theta -
                                     baddie->angle + AZ_PI);
         }
+      }
+      break;
+    case AZ_BAD_ATOM:
+      drift_towards_ship(state, baddie, time, 70.0);
+      for (int i = 0; i < baddie->data->num_components; ++i) {
+        az_component_t *component = &baddie->components[i];
+        component->angle = az_mod2pi(component->angle + 3.5 * time);
+        component->position = az_vpolar(4.0, component->angle);
+        component->position.x *= 5.0;
+        component->position =
+          az_vrotate(component->position, i * AZ_DEG2RAD(120));
       }
       break;
   }

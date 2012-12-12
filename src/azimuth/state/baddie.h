@@ -34,11 +34,12 @@ typedef enum {
   AZ_BAD_LUMP,
   AZ_BAD_TURRET,
   AZ_BAD_ZIPPER,
-  AZ_BAD_BOUNCER
+  AZ_BAD_BOUNCER,
+  AZ_BAD_ATOM
 } az_baddie_kind_t;
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 4
+#define AZ_NUM_BADDIE_KINDS 5
 
 typedef struct {
   double bounding_radius;
@@ -55,6 +56,13 @@ typedef struct {
   const az_component_data_t *components; // array of length num_components
 } az_baddie_data_t;
 
+// A "component" describes the positions of a baddie subpart.  The meanings of
+// these components are specific to the baddie kind.
+typedef struct {
+  az_vector_t position;
+  double angle;
+} az_component_t;
+
 typedef struct {
   az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
   const az_baddie_data_t *data;
@@ -66,12 +74,7 @@ typedef struct {
   double armor_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   double frozen; // from 0.0 (unfrozen) to 1.0 (was just now frozen)
   double cooldown; // time until baddie can attack again, in seconds
-  // The baddie's "components" describe the positions of its subparts.  The
-  // meanings of these are specific to the baddie kind.
-  struct {
-    az_vector_t position;
-    double angle;
-  } components[4];
+  az_component_t components[4];
 } az_baddie_t;
 
 /*===========================================================================*/

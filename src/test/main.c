@@ -47,8 +47,11 @@ int main(int argc, char **argv) {
   RUN_TEST(test_ray_hits_polygon);
   RUN_TEST(test_ray_hits_polygon_trans);
   RUN_TEST(test_uids);
+  RUN_TEST(test_vcaplen);
   RUN_TEST(test_vector_polar);
   RUN_TEST(test_vector_rotate);
+  RUN_TEST(test_vunit);
+  RUN_TEST(test_vwithlen);
 
   return final_test_summary();
 }
