@@ -96,7 +96,7 @@ bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
   return az_circle_hits_point(center, radius, start, delta, NULL, NULL);
 }
 
-bool az_ray_hits_circle(az_vector_t center, double radius,
+bool az_ray_hits_circle(double radius, az_vector_t center,
                         az_vector_t start, az_vector_t delta,
                         az_vector_t *point_out, az_vector_t *normal_out) {
   az_vector_t point;

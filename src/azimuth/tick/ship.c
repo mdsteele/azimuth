@@ -257,10 +257,11 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       AZ_ARRAY_LOOP(baddie, state->baddies) {
         if (baddie->kind == AZ_BAD_NOTHING) continue;
         az_vector_t position, normal;
+        const az_component_data_t *component;
         if (az_ray_hits_baddie(baddie, beam_start, delta,
-                               &position, &normal)) {
+                               &position, &normal, &component)) {
           beam_emit_particles(state, position, normal, AZ_WHITE);
-          az_try_damage_baddie(state, baddie, damage_kind, damage);
+          az_try_damage_baddie(state, baddie, component, damage_kind, damage);
         }
       }
     }
@@ -291,7 +292,9 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       case AZ_IMP_NOTHING: did_hit = false; break;
       case AZ_IMP_BADDIE:
         assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
-        az_try_damage_baddie(state, impact.target.baddie, damage_kind, damage);
+        az_try_damage_baddie(
+            state, impact.target.baddie.baddie,
+            impact.target.baddie.component, damage_kind, damage);
         break;
       case AZ_IMP_DOOR_INSIDE: did_hit = false; break;
       case AZ_IMP_DOOR_OUTSIDE:
@@ -642,9 +645,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
       case AZ_IMP_NOTHING: break;
       case AZ_IMP_BADDIE:
         // TODO: make these parameters depend on baddie
-        on_ship_hit_wall(state, 0.1,
-                         (impact.target.baddie->frozen > 0.0 ? 0.0 : 10.0),
-                         impact.normal);
+        on_ship_hit_wall(
+            state, 0.1,
+            (impact.target.baddie.baddie->frozen > 0.0 ? 0.0 : 10.0),
+            impact.normal);
         break;
       case AZ_IMP_DOOR_INSIDE:
         on_ship_enter_door(state, impact.target.door);

@@ -138,10 +138,11 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 void az_damage_ship(az_space_state_t *state, double damage);
 
 // Reduce the baddie's health by the given amount, if the baddie is susceptible
-// to the given kind of damage.  If this is enough to  destroy the baddie,
+// to the given kind of damage.  If this is enough to destroy the baddie,
 // remove it and add particles/pickups in its place.  If the the given damage
 // kind includes AZ_DMGF_FREEZE, this may freeze the baddie.
 void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                          const az_component_data_t *component,
                           az_damage_flags_t damage_kind, double damage_amount);
 
 /*===========================================================================*/
@@ -165,7 +166,10 @@ typedef uint_fast8_t az_impact_flags_t;
 typedef struct {
   az_impact_type_t type;
   union {
-    az_baddie_t *baddie;
+    struct {
+      az_baddie_t *baddie;
+      const az_component_data_t *component;
+    } baddie;
     az_door_t *door;
     az_wall_t *wall;
   } target;

@@ -44,9 +44,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_LUMP:
       glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
-        for (int i = 0; i < baddie->data->main_polygon.num_vertices; ++i) {
-          glVertex2d(baddie->data->main_polygon.vertices[i].x,
-                     baddie->data->main_polygon.vertices[i].y);
+        for (int i = 0; i < baddie->data->main_body.polygon.num_vertices; ++i){
+          glVertex2d(baddie->data->main_body.polygon.vertices[i].x,
+                     baddie->data->main_body.polygon.vertices[i].y);
         }
       } glEnd();
       break;
@@ -81,9 +81,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       glColor3f(flare, 1 - fmax(flare, 0.5 * frozen),
                 0.25 + 0.75 * frozen); // green
       glBegin(GL_POLYGON); {
-        for (int i = 0; i < baddie->data->main_polygon.num_vertices; ++i) {
-          glVertex2d(baddie->data->main_polygon.vertices[i].x,
-                     baddie->data->main_polygon.vertices[i].y);
+        for (int i = 0; i < baddie->data->main_body.polygon.num_vertices; ++i){
+          glVertex2d(baddie->data->main_body.polygon.vertices[i].x,
+                     baddie->data->main_body.polygon.vertices[i].y);
         }
       } glEnd();
       break;

@@ -21,7 +21,6 @@
 
 #include <assert.h>
 #include <math.h> // for INFINITY
-#include <stdlib.h> // for NULL
 
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
@@ -57,7 +56,8 @@ static void on_projectile_impact(az_space_state_t *state,
       //       need an az_circle_intersects_baddie function, or whatever.
       if (az_vwithin(baddie->position, proj->position,
                      radius + baddie->data->overall_bounding_radius)) {
-        az_try_damage_baddie(state, baddie, proj->data->damage_kind,
+        az_try_damage_baddie(state, baddie, &baddie->data->main_body,
+                             proj->data->damage_kind,
                              proj->data->splash_damage);
       }
     }
@@ -118,43 +118,57 @@ static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   on_projectile_impact(state, proj, normal);
+  // Shake the screen.
   const double shake = proj->data->impact_shake;
   if (shake > 0.0) {
     az_shake_camera(&state->camera, shake, shake * 0.75);
   }
+  // Remove the projectile.  Note that we don't often call
+  // on_projectile_hit_wall for phased projectiles, but when we do (e.g. for
+  // hitting closed doors) we still want to remove the projetile.
   proj->kind = AZ_PROJ_NOTHING;
 }
 
-// Called when a projectile hits a baddie or the ship.  If the projectile is
-// hitting the ship, baddie will be NULL.
-static void on_projectile_hit_target(az_space_state_t *state,
-                                     az_projectile_t *proj,
-                                     az_baddie_t *baddie, az_vector_t normal) {
+// Common projectile impact code, called by both on_projectile_hit_baddie and
+// on_projectile_hit_ship.
+static void on_projectile_hit_target(
+    az_space_state_t *state, az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
-  // If this is a piercing projectile, make sure we don't immediately hit the
-  // same target again.
-  if (proj->data->piercing) {
-    proj->last_hit_uid = (baddie == NULL ? AZ_SHIP_UID : baddie->uid);
-  }
-  // Deal impact damage:
-  if (baddie == NULL) {
-    az_damage_ship(state, proj->data->impact_damage);
-  } else {
-    az_try_damage_baddie(state, baddie, proj->data->damage_kind,
-                         proj->data->impact_damage);
-  }
-  // Note that at this point, the baddie may now be dead and removed.  So we
-  // can no longer use the `baddie` pointer.
-  // Run common impact code:
   on_projectile_impact(state, proj, normal);
+  // Shake the screen (less than we do if the projectile hit a wall).
   const double shake = proj->data->impact_shake;
   if (shake > 0.0) {
     az_shake_camera(&state->camera, shake * 0.75, shake * 0.25);
   }
-  // Remove the projectile (unless it's piercing).
+  // Remove the projectile (unless it's piercing, in which case it should
+  // continue on beyond this target).
   if (!proj->data->piercing) {
     proj->kind = AZ_PROJ_NOTHING;
   }
+}
+
+// Called when a projectile hits a baddie.
+static void on_projectile_hit_baddie(
+    az_space_state_t *state, az_projectile_t *proj, az_baddie_t *baddie,
+    const az_component_data_t *component, az_vector_t normal) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  assert(!proj->fired_by_enemy);
+  proj->last_hit_uid = baddie->uid;
+  az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
+                       proj->data->impact_damage);
+  // Note that at this point, the baddie may now be dead and removed.  So we
+  // can no longer use the `baddie` or `component` pointers.
+  on_projectile_hit_target(state, proj, normal);
+}
+
+// Called when a projectile hits the ship.
+static void on_projectile_hit_ship(
+    az_space_state_t *state, az_projectile_t *proj, az_vector_t normal) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  assert(proj->fired_by_enemy);
+  proj->last_hit_uid = AZ_SHIP_UID;
+  az_damage_ship(state, proj->data->impact_damage);
+  on_projectile_hit_target(state, proj, normal);
 }
 
 static void projectile_home_in(az_space_state_t *state,
@@ -268,11 +282,11 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       projectile_special_logic(state, proj, time);
       break;
     case AZ_IMP_BADDIE:
-      on_projectile_hit_target(state, proj, impact.target.baddie,
-                               impact.normal);
+      on_projectile_hit_baddie(state, proj, impact.target.baddie.baddie,
+                               impact.target.baddie.component, impact.normal);
       break;
     case AZ_IMP_SHIP:
-      on_projectile_hit_target(state, proj, NULL, impact.normal);
+      on_projectile_hit_ship(state, proj, impact.normal);
       break;
     case AZ_IMP_DOOR_OUTSIDE:
       if (!proj->fired_by_enemy) {

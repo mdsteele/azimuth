@@ -143,9 +143,8 @@ void az_draw_ship(az_space_state_t* state) {
           glColor4f(1, 1, 1, 0.0);
           for (int i = 0; i <= 8; ++i) {
             const double radius = (i % 2 ? 0.5 * mid_radius : 2 * mid_radius);
-            const double degrees = 45 * i + offset;
-            glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
-                       radius * sin(AZ_DEG2RAD(degrees)));
+            const double theta = AZ_DEG2RAD(45 * i + offset) - ship->angle;
+            glVertex2d(radius * cos(theta), radius * sin(theta));
           }
         } glEnd();
       } glPopMatrix();

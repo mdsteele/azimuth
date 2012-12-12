@@ -122,13 +122,13 @@ void test_ray_hits_circle(void) {
 
   // Check az_ray_hits_circle works with NULLs for point_out and normal_out:
   EXPECT_TRUE(az_ray_hits_circle(
-      (az_vector_t){0, 0}, 2.0, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
+      2.0, (az_vector_t){0, 0}, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
       NULL, NULL));
 
   // Ray passes from ouside of circle to inside:
   intersect = normal = nix;
   EXPECT_TRUE(az_ray_hits_circle(
-      (az_vector_t){0, 0}, 2.0, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
+      2.0, (az_vector_t){0, 0}, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
       &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){2, 0}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));

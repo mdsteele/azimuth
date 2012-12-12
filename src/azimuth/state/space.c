@@ -222,9 +222,10 @@ void az_damage_ship(az_space_state_t *state, double damage) {
 // The level of health at or below which a baddie can be frozen.
 #define AZ_BADDIE_FREEZE_THRESHOLD 4.0
 
-void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                          az_damage_flags_t damage_kind,
-                          double damage_amount) {
+void az_try_damage_baddie(
+    az_space_state_t *state, az_baddie_t *baddie,
+    const az_component_data_t *component, az_damage_flags_t damage_kind,
+    double damage_amount) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   assert(baddie->health > 0.0);
   assert(damage_amount >= 0.0);
@@ -237,7 +238,7 @@ void az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
     az_damage_flags_t modified_damage_kind = damage_kind;
     modified_damage_kind &= ~AZ_DMGF_FREEZE;
     if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-    if (!(modified_damage_kind & ~(baddie->data->immunities))) return;
+    if (!(modified_damage_kind & ~(component->immunities))) return;
   }
 
   // Damage the baddie.
@@ -313,9 +314,12 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == skip_uid) continue;
-      if (az_ray_hits_baddie(baddie, start, delta, position, normal)) {
+      const az_component_data_t *component;
+      if (az_ray_hits_baddie(baddie, start, delta,
+                             position, normal, &component)) {
         impact_out->type = AZ_IMP_BADDIE;
-        impact_out->target.baddie = baddie;
+        impact_out->target.baddie.baddie = baddie;
+        impact_out->target.baddie.component = component;
         delta = az_vsub(*position, start);
       }
     }
@@ -382,10 +386,12 @@ void az_circle_impact(az_space_state_t *state, double radius,
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->uid == skip_uid) continue;
+      const az_component_data_t *component;
       if (az_circle_hits_baddie(baddie, radius, start, delta,
-                                position, normal)) {
+                                position, normal, &component)) {
         impact_out->type = AZ_IMP_BADDIE;
-        impact_out->target.baddie = baddie;
+        impact_out->target.baddie.baddie = baddie;
+        impact_out->target.baddie.component = component;
         delta = az_vsub(*position, start);
       }
     }

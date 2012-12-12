@@ -45,7 +45,8 @@ static const az_vector_t turret_cannon_vertices[] = {
   {30, 5}, {0, 5}, {0, -5}, {30, -5}
 };
 static az_component_data_t turret_components[] = {
-  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices) }
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
+    .immunities = AZ_DMGF_NORMAL }
 };
 static const az_vector_t zipper_vertices[] = {
   {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
@@ -55,26 +56,26 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .main_polygon = AZ_INIT_POLYGON(lump_vertices)
+    .main_body = { .polygon = AZ_INIT_POLYGON(lump_vertices) }
   },
   [AZ_BAD_TURRET] = {
     .overall_bounding_radius = 30.5,
     .max_health = 15.0,
-    .immunities = AZ_DMGF_NORMAL,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
-    DECL_COMPONENTS(turret_components),
-    .main_polygon = AZ_INIT_POLYGON(turret_vertices)
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .immunities = AZ_DMGF_NORMAL },
+    DECL_COMPONENTS(turret_components)
   },
   [AZ_BAD_ZIPPER] = {
     .max_health = 20.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_polygon = AZ_INIT_POLYGON(zipper_vertices)
+    .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices) }
   },
   [AZ_BAD_BOUNCER] = {
     .max_health = 5.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_bounding_radius = 15.0
+    .main_body = { .bounding_radius = 15.0 }
   }
 };
 
@@ -86,6 +87,14 @@ static double polygon_bounding_radius(az_polygon_t polygon) {
     radius = fmax(radius, az_vnorm(polygon.vertices[i]));
   }
   return radius + 0.01; // small safety margin
+}
+
+static void init_component_data(az_component_data_t *component) {
+  if (component->polygon.num_vertices > 0) {
+    assert(component->bounding_radius == 0.0);
+    component->bounding_radius =
+      polygon_bounding_radius(component->polygon);
+  } else assert(component->bounding_radius > 0.0);
 }
 
 static bool baddie_data_initialized = false;
@@ -108,24 +117,17 @@ void az_init_baddie_datas(void) {
       // far more convenient to go through the data->components pointer.
       az_component_data_t *component =
         (az_component_data_t *)(&data->components[i]);
-      if (component->polygon.num_vertices > 0) {
-        assert(component->bounding_radius == 0.0);
-        component->bounding_radius =
-          polygon_bounding_radius(component->polygon);
-      } else assert(component->bounding_radius > 0.0);
+      init_component_data(component);
     }
     // Set main body bounding radius.
-    if (data->main_polygon.num_vertices > 0) {
-      assert(data->main_bounding_radius == 0.0);
-      data->main_bounding_radius = polygon_bounding_radius(data->main_polygon);
-    } else assert(data->main_bounding_radius > 0.0);
+    init_component_data(&data->main_body);
     // Set overall bounding radius.
     if (data->num_components == 0) {
       assert(data->overall_bounding_radius == 0.0);
-      data->overall_bounding_radius = data->main_bounding_radius;
+      data->overall_bounding_radius = data->main_body.bounding_radius;
     }
     // Sanity-check the overall bounding radius.
-    assert(data->overall_bounding_radius >= data->main_bounding_radius);
+    assert(data->overall_bounding_radius >= data->main_body.bounding_radius);
     for (int i = 0; i < data->num_components; ++i) {
       assert(data->overall_bounding_radius >=
              data->components[i].bounding_radius);
@@ -161,9 +163,26 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
 
 /*===========================================================================*/
 
-bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
-                        az_vector_t delta, az_vector_t *point_out,
-                        az_vector_t *normal_out) {
+static bool ray_hits_component(
+    const az_component_data_t *component, az_vector_t position, double angle,
+    az_vector_t start, az_vector_t delta, az_vector_t *point_out,
+    az_vector_t *normal_out) {
+  if (component->polygon.num_vertices > 0) {
+    return (az_ray_hits_bounding_circle(start, delta, position,
+                                        component->bounding_radius) &&
+            az_ray_hits_polygon_trans(component->polygon, position,
+                                      angle, start, delta,
+                                      point_out, normal_out));
+  } else {
+    return az_ray_hits_circle(component->bounding_radius, position,
+                              start, delta, point_out, normal_out);
+  }
+}
+
+bool az_ray_hits_baddie(
+    const az_baddie_t *baddie, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out,
+    const az_component_data_t **component_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
 
@@ -177,57 +196,64 @@ bool az_ray_hits_baddie(const az_baddie_t *baddie, az_vector_t start,
   const az_vector_t rel_start = az_vrotate(az_vsub(start, baddie->position),
                                            -baddie->angle);
   az_vector_t rel_delta = az_vrotate(delta, -baddie->angle);
-  bool did_hit = false;
+  const az_component_data_t *hit_component = NULL;
   az_vector_t point = AZ_VZERO;
 
   // Check if we hit the main body of the baddie.
-  if (data->main_polygon.num_vertices > 0) {
-    if (az_ray_hits_bounding_circle(rel_start, rel_delta, AZ_VZERO,
-                                    data->main_bounding_radius) &&
-        az_ray_hits_polygon(data->main_polygon, rel_start, rel_delta,
-                            &point, normal_out)) {
-      did_hit = true;
-      rel_delta = az_vsub(point, rel_start);
-    }
-  } else {
-    if (az_circle_hits_point(AZ_VZERO, data->main_bounding_radius, rel_start,
-                             rel_delta, &point, NULL)) {
-      did_hit = true;
-      rel_delta = az_vsub(point, rel_start);
-      if (normal_out != NULL) *normal_out = point;
-    }
+  if (ray_hits_component(&data->main_body, AZ_VZERO, 0.0, rel_start,
+                         rel_delta, &point, normal_out)) {
+    hit_component = &data->main_body;
+    rel_delta = az_vsub(point, rel_start);
   }
 
   // Now check if we hit any of the baddie's components.
   for (int i = 0; i < data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
-    if (az_ray_hits_bounding_circle(
-            rel_start, rel_delta, baddie->components[i].position,
-            data->components[i].bounding_radius) &&
-        az_ray_hits_polygon_trans(
-            data->components[i].polygon, baddie->components[i].position,
-            baddie->components[i].angle, rel_start, rel_delta,
-            &point, normal_out)) {
-      did_hit = true;
+    const az_component_data_t *component = &data->components[i];
+    if (ray_hits_component(component, baddie->components[i].position,
+                           baddie->components[i].angle, rel_start, rel_delta,
+                           &point, normal_out)) {
+      hit_component = component;
       rel_delta = az_vsub(point, rel_start);
     }
   }
 
   // Fix up *point_out and *normal_out and return.
-  if (did_hit) {
+  if (hit_component != NULL) {
     if (point_out != NULL) {
       *point_out = az_vadd(az_vrotate(point, baddie->angle), baddie->position);
     }
     if (normal_out != NULL) {
       *normal_out = az_vrotate(*normal_out, baddie->angle);
     }
+    if (component_out != NULL) *component_out = hit_component;
+    return true;
   }
-  return did_hit;
+  return false;
+}
+
+/*===========================================================================*/
+
+static bool circle_hits_component(
+    const az_component_data_t *component, az_vector_t position, double angle,
+    double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  if (component->polygon.num_vertices > 0) {
+    return (az_ray_hits_bounding_circle(start, delta, position,
+                                        component->bounding_radius + radius) &&
+            az_circle_hits_polygon_trans(component->polygon, position, angle,
+                                         radius, start, delta,
+                                         pos_out, impact_out));
+  } else {
+    return az_circle_hits_circle(component->bounding_radius, position,
+                                 radius, start, delta, pos_out, impact_out);
+  }
 }
 
 bool az_circle_hits_baddie(
     const az_baddie_t *baddie, double radius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out,
+    const az_component_data_t **component_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
 
@@ -241,43 +267,30 @@ bool az_circle_hits_baddie(
   const az_vector_t rel_start = az_vrotate(az_vsub(start, baddie->position),
                                            -baddie->angle);
   az_vector_t rel_delta = az_vrotate(delta, -baddie->angle);
-  bool did_hit = false;
+  const az_component_data_t *hit_component = NULL;
   az_vector_t pos = AZ_VZERO;
 
   // Check if we hit the main body of the baddie.
-  if (data->main_polygon.num_vertices > 0) {
-    if (az_ray_hits_bounding_circle(rel_start, rel_delta, AZ_VZERO,
-                                    data->main_bounding_radius + radius) &&
-        az_circle_hits_polygon(data->main_polygon, radius, rel_start,
-                               rel_delta, &pos, impact_out)) {
-      did_hit = true;
-      rel_delta = az_vsub(pos, rel_start);
-    }
-  } else {
-    if (az_circle_hits_circle(data->main_bounding_radius, AZ_VZERO, radius,
-                              rel_start, rel_delta, &pos, impact_out)) {
-      did_hit = true;
-      rel_delta = az_vsub(pos, rel_start);
-    }
+  if (circle_hits_component(&data->main_body, AZ_VZERO, 0.0, radius, rel_start,
+                            rel_delta, &pos, impact_out)) {
+    hit_component = &data->main_body;
+    rel_delta = az_vsub(pos, rel_start);
   }
 
   // Now check if we hit any of the baddie's components.
   for (int i = 0; i < data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
-    if (az_ray_hits_bounding_circle(
-            rel_start, rel_delta, baddie->components[i].position,
-            data->components[i].bounding_radius + radius) &&
-        az_circle_hits_polygon_trans(
-            data->components[i].polygon, baddie->components[i].position,
-            baddie->components[i].angle, radius, rel_start, rel_delta,
-            &pos, impact_out)) {
-      did_hit = true;
+    const az_component_data_t *component = &data->components[i];
+    if (circle_hits_component(component, baddie->components[i].position,
+                              baddie->components[i].angle, radius, rel_start,
+                              rel_delta, &pos, impact_out)) {
+      hit_component = component;
       rel_delta = az_vsub(pos, rel_start);
     }
   }
 
   // Fix up *pos_out and *impact_out and return.
-  if (did_hit) {
+  if (hit_component != NULL) {
     if (pos_out != NULL) {
       *pos_out = az_vadd(az_vrotate(pos, baddie->angle), baddie->position);
     }
@@ -285,8 +298,10 @@ bool az_circle_hits_baddie(
       *impact_out = az_vadd(az_vrotate(*impact_out, baddie->angle),
                             baddie->position);
     }
+    if (component_out != NULL) *component_out = hit_component;
+    return true;
   }
-  return did_hit;
+  return false;
 }
 
 /*===========================================================================*/
