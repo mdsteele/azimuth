@@ -262,6 +262,11 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 3.0,
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB
   },
+  [AZ_PROJ_SPINE] = {
+    .speed = 200.0,
+    .lifetime = 4.0,
+    .impact_damage = 8.0
+  }
 };
 
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,

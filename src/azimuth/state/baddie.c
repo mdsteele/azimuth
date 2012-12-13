@@ -91,6 +91,11 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 10.0 },
     DECL_COMPONENTS(atom_components)
+  },
+  [AZ_BAD_SPINER] = {
+    .max_health = 10.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .bounding_radius = 18.0 }
   }
 };
 

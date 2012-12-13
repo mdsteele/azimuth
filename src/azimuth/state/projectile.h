@@ -31,6 +31,7 @@
 
 typedef enum {
   AZ_PROJ_NOTHING = 0,
+  // Ship projectiles:
   AZ_PROJ_GUN_NORMAL,
   AZ_PROJ_GUN_CHARGED_NORMAL,
   AZ_PROJ_GUN_FREEZE,
@@ -65,7 +66,9 @@ typedef enum {
   AZ_PROJ_ROCKET,
   AZ_PROJ_HYPER_ROCKET,
   AZ_PROJ_BOMB,
-  AZ_PROJ_MEGA_BOMB
+  AZ_PROJ_MEGA_BOMB,
+  // Baddie-only projectiles:
+  AZ_PROJ_SPINE
 } az_proj_kind_t;
 
 typedef struct {

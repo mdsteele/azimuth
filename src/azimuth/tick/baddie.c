@@ -32,28 +32,30 @@
 
 static void drift_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
-    double max_speed) {
+    double max_speed, double ship_force, double wall_force) {
   // Determine the drift vector.
   const az_vector_t pos = baddie->position;
   az_vector_t drift = AZ_VZERO;
   if (az_ship_is_present(&state->ship)) {
-    drift = az_vwithlen(az_vsub(state->ship.position, pos), 100.0);
+    drift = az_vwithlen(az_vsub(state->ship.position, pos), ship_force);
   }
   AZ_ARRAY_LOOP(door, state->doors) {
     if (door->kind == AZ_DOOR_NOTHING) continue;
     const az_vector_t delta = az_vsub(pos, door->position);
     const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
       baddie->data->overall_bounding_radius;
-    if (dist <= 0.0) drift = az_vadd(drift, az_vwithlen(delta, 200.0));
-    else drift = az_vadd(drift, az_vwithlen(delta, 100.0 * exp(-dist)));
+    if (dist <= 0.0) {
+      drift = az_vadd(drift, az_vwithlen(delta, 2 * wall_force));
+    } else drift = az_vadd(drift, az_vwithlen(delta, wall_force * exp(-dist)));
   }
   AZ_ARRAY_LOOP(wall, state->walls) {
     if (wall->kind == AZ_WALL_NOTHING) continue;
     const az_vector_t delta = az_vsub(pos, wall->position);
     const double dist = az_vnorm(delta) - wall->data->bounding_radius -
       baddie->data->overall_bounding_radius;
-    if (dist <= 0.0) drift = az_vadd(drift, az_vwithlen(delta, 200.0));
-    else drift = az_vadd(drift, az_vwithlen(delta, 100.0 * exp(-dist)));
+    if (dist <= 0.0) {
+      drift = az_vadd(drift, az_vwithlen(delta, 2 * wall_force));
+    } else drift = az_vadd(drift, az_vwithlen(delta, wall_force * exp(-dist)));
   }
   // Drift along the drift vector.
   baddie->velocity =
@@ -142,7 +144,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_ATOM:
-      drift_towards_ship(state, baddie, time, 70.0);
+      drift_towards_ship(state, baddie, time, 70, 100, 100);
       for (int i = 0; i < baddie->data->num_components; ++i) {
         az_component_t *component = &baddie->components[i];
         component->angle = az_mod2pi(component->angle + 3.5 * time);
@@ -150,6 +152,23 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         component->position.x *= 5.0;
         component->position =
           az_vrotate(component->position, i * AZ_DEG2RAD(120));
+      }
+      break;
+    case AZ_BAD_SPINER:
+      drift_towards_ship(state, baddie, time, 40, 10, 100);
+      baddie->angle = az_mod2pi(baddie->angle + 0.4 * time);
+      if (baddie->cooldown <= 0.0 &&
+          az_vwithin(baddie->position, state->ship.position, 200)) {
+        az_projectile_t *proj;
+        for (int i = 0; i < 360; i += 45) {
+          if (az_insert_projectile(state, &proj)) {
+            const double angle = baddie->angle + AZ_DEG2RAD(i);
+            az_init_projectile(proj, AZ_PROJ_SPINE, true,
+                               az_vadd(baddie->position,
+                                       az_vpolar(18.0, angle)), angle);
+          }
+        }
+        baddie->cooldown = 2.0;
       }
       break;
   }

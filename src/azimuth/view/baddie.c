@@ -51,6 +51,19 @@ static void draw_atom_electron(double radius, az_vector_t position,
   } glPopMatrix();
 }
 
+static void draw_spiner_spine(void) {
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor4f(0, 0.3, 0, 0);
+    glVertex2d(-3, 3);
+    glColor3f(0.6, 0.7, 0.6);
+    glVertex2d(5, 0);
+    glColor3f(0.6, 0.7, 0);
+    glVertex2d(-5, 0);
+    glColor4f(0, 0.3, 0, 0);
+    glVertex2d(-3, -3);
+  } glEnd();
+}
+
 static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   const double flare = baddie->armor_flare;
   const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
@@ -146,6 +159,42 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         if (component->angle < 0.0) continue;
         draw_atom_electron(baddie->data->components[i].bounding_radius,
                            component->position, component->angle);
+      }
+      break;
+    case AZ_BAD_SPINER:
+      if (baddie->cooldown < 1.0) {
+        for (int i = 0; i <= 360; i += 45) {
+          glPushMatrix(); {
+            glRotated(i, 0, 0, 1);
+            glTranslated(18.0 - 8.0 * baddie->cooldown, 0, 0);
+            draw_spiner_spine();
+          } glPopMatrix();
+        }
+      }
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(1 - frozen, 1 - 0.5 * flare, frozen); // yellow
+        glVertex2d(-2, 2);
+        glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
+        for (int i = 0; i <= 360; i += 15) {
+          double radius = baddie->data->main_body.bounding_radius +
+            0.2 * az_clock_zigzag(10, 3, clock) - 1.0;
+          if (i % 45 == 0) radius -= 2.0;
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      for (int i = 0; i <= 360; i += 45) {
+        glPushMatrix(); {
+          glRotated(i + 22.5, 0, 0, 1);
+          glTranslated(16 + 0.5 * az_clock_zigzag(6, 5, clock), 0, 0);
+          draw_spiner_spine();
+        } glPopMatrix();
+      }
+      for (int i = 0; i <= 360; i += 45) {
+        glPushMatrix(); {
+          glRotated(i + 11.25, 0, 0, 1);
+          glTranslated(8 + 0.5 * az_clock_zigzag(6, 7, clock), 0, 0);
+          draw_spiner_spine();
+        } glPopMatrix();
       }
       break;
   }

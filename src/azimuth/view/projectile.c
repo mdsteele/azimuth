@@ -251,6 +251,18 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_SPINE:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0, 0.3, 0);
+        glVertex2d(-3, 3);
+        glColor3f(0.6, 0.7, 0.6);
+        glVertex2d(5, 0);
+        glColor3f(0.6, 0.7, 0);
+        glVertex2d(-5, 0);
+        glColor3f(0, 0.3, 0);
+        glVertex2d(-3, -3);
+      } glEnd();
+      break;
   }
 }
 
