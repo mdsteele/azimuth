@@ -53,6 +53,28 @@ bool az_convex_polygon_contains(az_polygon_t polygon, az_vector_t point);
 
 /*===========================================================================*/
 
+// Determine if the specified circle overlaps any part of the infinite line
+// passing through p1 and p2.
+bool az_circle_touches_line(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center);
+
+// Determine if the specified circle overlaps any part of the line segment
+// from p1 to p2.
+bool az_circle_touches_line_segment(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center);
+
+// Determine if the specified circle overlaps any part of the polygon.
+bool az_circle_touches_polygon(
+    az_polygon_t polygon, double radius, az_vector_t center);
+
+// Like az_circle_touches_polygon, but translates and rotates the polygon as
+// specified before deciding if the circle touches it.
+bool az_circle_touches_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    double radius, az_vector_t center);
+
+/*===========================================================================*/
+
 // Determine if a ray, travelling delta from start, will ever pass within the
 // specified circle.  This is like az_ray_hits_circle, but doesn't bother to
 // determine the impact point or normal -- just the yes/no return value.

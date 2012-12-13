@@ -46,19 +46,29 @@ static void on_projectile_impact(az_space_state_t *state,
   const double radius = proj->data->splash_radius;
   // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
-    // TODO: allow explosion to open doors
+    // Damage the ship if it's within the blast.
     if (az_vwithin(state->ship.position, proj->position, radius)) {
       az_damage_ship(state, proj->data->splash_damage);
     }
+    // Damage baddies that are within the blast.
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       // TODO: This isn't a good condition on which to do splash damage.  We
-      //       need an az_circle_intersects_baddie function, or whatever.
+      //       need an az_circle_touches_baddie function, or whatever.
       if (az_vwithin(baddie->position, proj->position,
                      radius + baddie->data->overall_bounding_radius)) {
         az_try_damage_baddie(state, baddie, &baddie->data->main_body,
                              proj->data->damage_kind,
                              proj->data->splash_damage);
+      }
+    }
+    // Open doors that are within the blast.
+    if (!proj->fired_by_enemy) {
+      AZ_ARRAY_LOOP(door, state->doors) {
+        if (door->kind == AZ_DOOR_NOTHING) continue;
+        if (az_circle_touches_door_outside(door, radius, proj->position)) {
+          try_open_door(door, proj->data->damage_kind);
+        }
       }
     }
   }
@@ -221,6 +231,12 @@ static void projectile_special_logic(az_space_state_t *state,
                       proj->kind == AZ_PROJ_GUN_FREEZE_SHRAPNEL ? 0.2 : 0.3),
                      proj->position, az_vpolar(30.0, az_random(0, AZ_TWO_PI)));
       }
+      break;
+    case AZ_PROJ_GUN_HOMING:
+    case AZ_PROJ_GUN_CHARGED_HOMING:
+    case AZ_PROJ_GUN_TRIPLE_HOMING:
+      az_add_speck(state, (az_color_t){0, 0, 255, 255}, 0.2,
+                   proj->position, AZ_VZERO);
       break;
     case AZ_PROJ_ROCKET:
       az_add_speck(state, (az_color_t){255, 255, 0, 255}, 1.0, proj->position,

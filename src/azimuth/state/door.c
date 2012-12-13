@@ -60,6 +60,16 @@ static const az_vector_t closed_door_vertices[] = {
 static const az_polygon_t closed_door_polygon =
   AZ_INIT_POLYGON(closed_door_vertices);
 
+bool az_circle_touches_door_outside(
+    const az_door_t *door, double radius, az_vector_t center) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
+  return (az_vwithin(center, door->position,
+                     radius + AZ_DOOR_BOUNDING_RADIUS) &&
+          az_circle_touches_polygon_trans(closed_door_polygon, door->position,
+                                          door->angle, radius, center));
+}
+
 bool az_ray_hits_door_outside(
     const az_door_t *door, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {

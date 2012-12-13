@@ -91,6 +91,54 @@ bool az_convex_polygon_contains(az_polygon_t polygon,
 
 /*===========================================================================*/
 
+bool az_circle_touches_line(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center) {
+  assert(radius >= 0.0);
+  // Calculate the shortest vector from center to any point on the line.
+  const az_vector_t to_line =
+    az_vflatten(az_vsub(p1, center), az_vsub(p1, p2));
+  // Determine if that vector is no longer than radius.
+  return (az_vdot(to_line, to_line) <= radius * radius);
+}
+
+static bool circle_touches_line_segment_internal(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center) {
+  assert(radius >= 0.0);
+  if (!az_circle_touches_line(p1, p2, radius, center)) return false;
+  const az_vector_t seg = az_vsub(p2, p1);
+  return (az_vdot(seg, az_vsub(center, p1)) >= 0.0 &&
+          az_vdot(seg, az_vsub(center, p2)) <= 0.0);
+}
+
+bool az_circle_touches_line_segment(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center) {
+  return (az_vwithin(center, p1, radius) ||
+          az_vwithin(center, p2, radius) ||
+          circle_touches_line_segment_internal(p1, p2, radius, center));
+}
+
+bool az_circle_touches_polygon(
+    az_polygon_t polygon, double radius, az_vector_t center) {
+  for (int i = 0; i < polygon.num_vertices; ++i) {
+    if (az_vwithin(center, polygon.vertices[i], radius)) return true;
+  }
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (circle_touches_line_segment_internal(
+            polygon.vertices[i], polygon.vertices[j],
+            radius, center)) return true;
+  }
+  return az_polygon_contains(polygon, center);
+}
+
+bool az_circle_touches_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    double radius, az_vector_t center) {
+  return az_circle_touches_polygon(polygon, radius,
+      az_vrotate(az_vsub(center, polygon_position), -polygon_angle));
+}
+
+/*===========================================================================*/
+
 bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
                                  az_vector_t center, double radius) {
   return az_circle_hits_point(center, radius, start, delta, NULL, NULL);
@@ -302,9 +350,22 @@ static bool circle_hits_line_segment_internal(
 bool az_circle_hits_line_segment(
     az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
     az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out) {
-  // FIXME
-  return circle_hits_line_segment_internal(p1, p2, radius, start, delta,
-                                           pos_out, impact_out);
+  bool hit = false;
+  az_vector_t hit_at;
+  if (az_circle_hits_point(p1, radius, start, delta, &hit_at, impact_out)) {
+    hit = true;
+    delta = az_vsub(hit_at, start);
+  }
+  if (az_circle_hits_point(p2, radius, start, delta, &hit_at, impact_out)) {
+    hit = true;
+    delta = az_vsub(hit_at, start);
+  }
+  if (circle_hits_line_segment_internal(p1, p2, radius, start, delta,
+                                        &hit_at, impact_out)) {
+    hit = true;
+  }
+  if (hit && pos_out != NULL) *pos_out = hit_at;
+  return hit;
 }
 
 bool az_circle_hits_polygon(

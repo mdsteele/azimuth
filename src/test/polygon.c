@@ -92,6 +92,52 @@ void test_convex_polygon_contains(void) {
 
 /*===========================================================================*/
 
+void test_circle_touches_line(void) {
+  EXPECT_TRUE(az_circle_touches_line(
+      (az_vector_t){2, 4}, (az_vector_t){3, 3}, 1.5, (az_vector_t){1, 7}));
+  EXPECT_FALSE(az_circle_touches_line(
+      (az_vector_t){2, 4}, (az_vector_t){3, 3}, 1.4, (az_vector_t){3, 5}));
+}
+
+void test_circle_touches_line_segment(void) {
+  EXPECT_TRUE(az_circle_touches_line_segment(
+      (az_vector_t){1, 4}, (az_vector_t){3, 4}, 0.2, (az_vector_t){2, 4.1}));
+  EXPECT_TRUE(az_circle_touches_line_segment(
+      (az_vector_t){1, 4}, (az_vector_t){3, 4}, 0.3, (az_vector_t){3.1, 4.1}));
+  EXPECT_FALSE(az_circle_touches_line_segment(
+      (az_vector_t){1, 4}, (az_vector_t){3, 4}, 0.2, (az_vector_t){2, 4.3}));
+  EXPECT_FALSE(az_circle_touches_line_segment(
+      (az_vector_t){1, 4}, (az_vector_t){3, 4}, 0.2, (az_vector_t){4, 4.1}));
+}
+
+void test_circle_touches_polygon(void) {
+  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
+  // Case where circle touches vertex:
+  EXPECT_TRUE(az_circle_touches_polygon(
+      triangle, 0.15, (az_vector_t){2.1, 0}));
+  // Case where circle touches edge:
+  EXPECT_TRUE(az_circle_touches_polygon(
+      triangle, 0.15, (az_vector_t){1.6, 2}));
+  // Case where circle is completely inside polygon:
+  EXPECT_TRUE(az_circle_touches_polygon(
+      triangle, 0.1, (az_vector_t){0, 0}));
+  // Case where circle is doesn't touch polygon:
+  EXPECT_FALSE(az_circle_touches_polygon(
+      triangle, 1.0, (az_vector_t){3, -4}));
+}
+
+void test_circle_touches_polygon_trans(void) {
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+  EXPECT_TRUE(az_circle_touches_polygon_trans(
+      square, (az_vector_t){-10, 1}, AZ_DEG2RAD(45),
+      0.1, (az_vector_t){-10, 2.5}));
+  EXPECT_FALSE(az_circle_touches_polygon_trans(
+      square, (az_vector_t){-10, 1}, AZ_DEG2RAD(45),
+      0.1, (az_vector_t){-11, 2}));
+}
+
+/*===========================================================================*/
+
 void test_ray_hits_bounding_circle(void) {
   // Ray passes from ouside of circle to inside:
   EXPECT_TRUE(az_ray_hits_bounding_circle(
@@ -342,6 +388,15 @@ void test_circle_hits_line_segment(void) {
       (az_vector_t){0, 10}, &pos, &impact));
   EXPECT_VAPPROX(((az_vector_t){6, -1}), pos);
   EXPECT_VAPPROX(((az_vector_t){6, 1}), impact);
+
+  // Check case where circle grazes endpoint of line segment.
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_line_segment(
+      (az_vector_t){-3, 2}, (az_vector_t){4, 2},
+      sqrt(2), (az_vector_t){5, -4},
+      (az_vector_t){0, 10}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){5, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){4, 2}), impact);
 
   // Check case where circle would hit infinite line, but misses line segment.
   pos = impact = nix;

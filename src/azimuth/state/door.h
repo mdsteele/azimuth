@@ -59,6 +59,10 @@ typedef struct {
 
 extern const double AZ_DOOR_BOUNDING_RADIUS;
 
+// Determine if the specified circle overlaps any part of the door exterior.
+bool az_circle_touches_door_outside(
+    const az_door_t *door, double radius, az_vector_t center);
+
 // Determine if a ray, travelling delta from start, will hit the exterior of
 // the door (this is possible only for closed doors).  If it does, stores the
 // intersection point in *point_out (if point_out is non-NULL) and the normal
