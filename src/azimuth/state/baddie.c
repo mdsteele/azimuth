@@ -99,6 +99,8 @@ static az_baddie_data_t baddie_datas[] = {
   }
 };
 
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie_datas) == AZ_NUM_BADDIE_KINDS + 1);
+
 /*===========================================================================*/
 
 static double polygon_bounding_radius(az_polygon_t polygon) {

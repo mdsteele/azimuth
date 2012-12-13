@@ -71,6 +71,7 @@ static void on_ship_hit_wall(az_space_state_t *state,
                              double elasticity, double impact_damage_coeff,
                              az_vector_t impact_normal) {
   az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
   const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with the wall).

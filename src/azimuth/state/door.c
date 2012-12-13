@@ -29,6 +29,8 @@
 
 /*===========================================================================*/
 
+AZ_STATIC_ASSERT(AZ_NUM_DOOR_KINDS == AZ_DOOR_PASSAGE);
+
 bool az_can_open_door(az_door_kind_t door_kind,
                       az_damage_flags_t damage_kind) {
   assert(door_kind != AZ_DOOR_NOTHING);

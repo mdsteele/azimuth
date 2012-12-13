@@ -47,7 +47,8 @@ static void on_projectile_impact(az_space_state_t *state,
   // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
     // Damage the ship if it's within the blast.
-    if (az_vwithin(state->ship.position, proj->position, radius)) {
+    if (az_ship_is_present(&state->ship) &&
+        az_vwithin(state->ship.position, proj->position, radius)) {
       az_damage_ship(state, proj->data->splash_damage);
     }
     // Damage baddies that are within the blast.
@@ -174,6 +175,7 @@ static void on_projectile_hit_ship(
     az_space_state_t *state, az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(proj->fired_by_enemy);
+  assert(az_ship_is_present(&state->ship));
   proj->last_hit_uid = AZ_SHIP_UID;
   az_damage_ship(state, proj->data->impact_damage);
   on_projectile_hit_target(state, proj, normal);

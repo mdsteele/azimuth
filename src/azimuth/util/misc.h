@@ -50,8 +50,16 @@ void *_az_alloc(const char *funcname, size_t n, size_t size)
 // Use this macro to indicate that this point in the code should never be
 // reached at runtime.  If it is reached anyway (presumably due to a bug), it
 // will terminate the program with a fatal error.
-// TODO: Consider using __builtin_unreachable or somewuch here for NDEBUG.
+// TODO: Consider using __builtin_unreachable or somesuch here for NDEBUG.
 #define AZ_ASSERT_UNREACHABLE() AZ_FATAL("line %d: unreachable\n", __LINE__)
+
+// Use this macro to check at compile time that a (compile-time-constant)
+// expression is true.  It is legal at top-level or within a function.
+#define AZ_STATIC_ASSERT(condition) \
+  typedef int AZ_SA_JOIN(az_static_assertion_, __LINE__)[(condition) ? 1 : -1]
+// Helper macros for AZ_STATIC_ASSERT:
+#define AZ_SA_JOIN(a, b) AZ_SA_JOIN2(a, b)
+#define AZ_SA_JOIN2(a, b) a##b
 
 /*===========================================================================*/
 
