@@ -60,6 +60,11 @@ static az_component_data_t atom_components[] = {
   { .bounding_radius = 6.7, .immunities = ~AZ_DMGF_MEGA_BOMB }
 };
 
+static const az_vector_t box_vertices[] = {
+  {16, 11}, {11, 16}, {-11, 16}, {-16, 11},
+  {-16, -11}, {-11, -16}, {11, -16}, {16, -11}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -96,6 +101,19 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 10.0,
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 18.0 }
+  },
+  [AZ_BAD_BOX] = {
+    .max_health = 10.0,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
+    .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
+                   .immunities = AZ_DMGF_FREEZE }
+  },
+  [AZ_BAD_ARMORED_BOX] = {
+    .max_health = 20.0,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
   }
 };
 

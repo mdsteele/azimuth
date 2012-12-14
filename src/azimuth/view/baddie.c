@@ -64,6 +64,64 @@ static void draw_spiner_spine(void) {
   } glEnd();
 }
 
+static void draw_box(bool armored, double flare) {
+  glBegin(GL_QUADS); {
+    if (armored) glColor3f(0.45, 0.45 - 0.3 * flare, 0.65 - 0.3 * flare);
+    else glColor3f(0.65, 0.65 - 0.3 * flare, 0.65 - 0.3 * flare); // light gray
+    glVertex2d(10, 10);
+    glVertex2d(-10, 10);
+    glVertex2d(-10, -10);
+    glVertex2d(10, -10);
+
+    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glVertex2d(11, 16);
+    glVertex2d(-11, 16);
+    if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
+    else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
+    glVertex2d(-10, 10);
+    glVertex2d(10, 10);
+
+    glVertex2d(-10, -10);
+    glVertex2d(-10, 10);
+    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glVertex2d(-16, 11);
+    glVertex2d(-16, -11);
+
+    glVertex2d(16, -11);
+    glVertex2d(16, 11);
+    if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
+    else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
+    glVertex2d(10, 10);
+    glVertex2d(10, -10);
+
+    glVertex2d(10, -10);
+    glVertex2d(-10, -10);
+    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glVertex2d(-11, -16);
+    glVertex2d(11, -16);
+  } glEnd();
+  glBegin(GL_TRIANGLES); {
+    glColor3f(0.3, 0.3 - 0.2 * flare, 0.3 - 0.2 * flare); // dark gray
+    glVertex2d(10, 10);
+    glVertex2d(11, 16);
+    glVertex2d(16, 11);
+
+    glVertex2d(-10, 10);
+    glVertex2d(-11, 16);
+    glVertex2d(-16, 11);
+
+    glVertex2d(-10, -10);
+    glVertex2d(-16, -11);
+    glVertex2d(-11, -16);
+
+    glVertex2d(10, -10);
+    glVertex2d(11, -16);
+    glVertex2d(16, -11);
+  } glEnd();
+}
+
+/*===========================================================================*/
+
 static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   const double flare = baddie->armor_flare;
   const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
@@ -75,9 +133,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_LUMP:
       glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
-        for (int i = 0; i < baddie->data->main_body.polygon.num_vertices; ++i){
-          glVertex2d(baddie->data->main_body.polygon.vertices[i].x,
-                     baddie->data->main_body.polygon.vertices[i].y);
+        az_polygon_t polygon = baddie->data->main_body.polygon;
+        for (int i = 0; i < polygon.num_vertices; ++i) {
+          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
         }
       } glEnd();
       break;
@@ -112,9 +170,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       glColor3f(flare, 1 - fmax(flare, 0.5 * frozen),
                 0.25 + 0.75 * frozen); // green
       glBegin(GL_POLYGON); {
-        for (int i = 0; i < baddie->data->main_body.polygon.num_vertices; ++i){
-          glVertex2d(baddie->data->main_body.polygon.vertices[i].x,
-                     baddie->data->main_body.polygon.vertices[i].y);
+        az_polygon_t polygon = baddie->data->main_body.polygon;
+        for (int i = 0; i < polygon.num_vertices; ++i) {
+          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
         }
       } glEnd();
       break;
@@ -196,6 +254,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           draw_spiner_spine();
         } glPopMatrix();
       }
+      break;
+    case AZ_BAD_BOX:
+      assert(frozen == 0.0);
+      draw_box(false, flare);
+      break;
+    case AZ_BAD_ARMORED_BOX:
+      assert(frozen == 0.0);
+      draw_box(true, flare);
       break;
   }
 }

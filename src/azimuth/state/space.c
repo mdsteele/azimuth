@@ -255,6 +255,7 @@ void az_try_damage_baddie(
   // Otherwise, if this was enough to freeze the baddie, and the damage kind
   // includes AZ_DMGF_FREEZE, freeze the baddie.
   else if ((damage_kind & AZ_DMGF_FREEZE) &&
+           !(component->immunities & AZ_DMGF_FREEZE) &&
            baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
     baddie->frozen = 1.0;
   }

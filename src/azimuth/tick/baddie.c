@@ -171,6 +171,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 2.0;
       }
       break;
+    case AZ_BAD_BOX:
+    case AZ_BAD_ARMORED_BOX:
+      // Do nothing.
+      break;
   }
 }
 
