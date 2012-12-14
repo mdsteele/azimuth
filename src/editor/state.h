@@ -93,6 +93,7 @@ typedef struct {
   } text;
   az_editor_tool_t tool;
   struct {
+    double angle;
     az_baddie_kind_t baddie_kind;
     az_door_kind_t door_kind;
     az_node_kind_t node_kind;

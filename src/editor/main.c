@@ -197,6 +197,7 @@ static void do_select(int x, int y, bool multi) {
       select_all(room, false);
       best_baddie->selected = true;
     }
+    state.brush.angle = best_baddie->spec.angle;
     state.brush.baddie_kind = best_baddie->spec.kind;
   } else if (best_door != NULL) {
     if (multi) {
@@ -205,6 +206,7 @@ static void do_select(int x, int y, bool multi) {
       select_all(room, false);
       best_door->selected = true;
     }
+    state.brush.angle = best_door->spec.angle;
     state.brush.door_kind = best_door->spec.kind;
   } else if (best_node != NULL) {
     if (multi) {
@@ -213,6 +215,7 @@ static void do_select(int x, int y, bool multi) {
       select_all(room, false);
       best_node->selected = true;
     }
+    state.brush.angle = best_node->spec.angle;
     state.brush.node_kind = best_node->spec.kind;
     if (best_node->spec.kind == AZ_NODE_UPGRADE) {
       state.brush.upgrade_kind = best_node->spec.upgrade;
@@ -224,6 +227,7 @@ static void do_select(int x, int y, bool multi) {
       select_all(room, false);
       best_wall->selected = true;
     }
+    state.brush.angle = best_wall->spec.angle;
     state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
   } else if (!multi) {
     select_all(room, false);
@@ -303,7 +307,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
-    baddie->spec.angle =
+    baddie->spec.angle = state.brush.angle =
       az_mod2pi(baddie->spec.angle +
                 az_vtheta(az_vsub(pt1, baddie->spec.position)) -
                 az_vtheta(az_vsub(pt0, baddie->spec.position)));
@@ -311,7 +315,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
-    door->spec.angle =
+    door->spec.angle = state.brush.angle =
       az_mod2pi(door->spec.angle +
                 az_vtheta(az_vsub(pt1, door->spec.position)) -
                 az_vtheta(az_vsub(pt0, door->spec.position)));
@@ -319,7 +323,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
-    node->spec.angle =
+    node->spec.angle = state.brush.angle =
       az_mod2pi(node->spec.angle +
                 az_vtheta(az_vsub(pt1, node->spec.position)) -
                 az_vtheta(az_vsub(pt0, node->spec.position)));
@@ -327,7 +331,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
-    wall->spec.angle =
+    wall->spec.angle = state.brush.angle =
       az_mod2pi(wall->spec.angle +
                 az_vtheta(az_vsub(pt1, wall->spec.position)) -
                 az_vtheta(az_vsub(pt0, wall->spec.position)));
@@ -401,7 +405,7 @@ static void do_add_baddie(int x, int y) {
   baddie->selected = true;
   baddie->spec.kind = state.brush.baddie_kind;
   baddie->spec.position = pt;
-  baddie->spec.angle = 0.0;
+  baddie->spec.angle = state.brush.angle;
   state.unsaved = true;
 }
 
@@ -413,7 +417,7 @@ static void do_add_door(int x, int y) {
   door->selected = true;
   door->spec.kind = state.brush.door_kind;
   door->spec.position = pt;
-  door->spec.angle = 0.0;
+  door->spec.angle = state.brush.angle;
   door->spec.destination = state.current_room;
   state.unsaved = true;
 }
@@ -426,7 +430,7 @@ static void do_add_node(int x, int y) {
   node->selected = true;
   node->spec.kind = state.brush.node_kind;
   node->spec.position = pt;
-  node->spec.angle = 0.0;
+  node->spec.angle = state.brush.angle;
   node->spec.upgrade = state.brush.upgrade_kind;
   state.unsaved = true;
 }
@@ -440,7 +444,7 @@ static void do_add_wall(int x, int y) {
   wall->spec.kind = AZ_WALL_NORMAL;
   wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
   wall->spec.position = pt;
-  wall->spec.angle = 0.0;
+  wall->spec.angle = state.brush.angle;
   state.unsaved = true;
 }
 
@@ -763,6 +767,7 @@ static void event_loop(void) {
 }
 
 static bool load_and_init_state(void) {
+  state.spin_camera = true;
   state.zoom_level = 1.0;
   state.brush.baddie_kind = AZ_BAD_LUMP;
   state.brush.door_kind = AZ_DOOR_NORMAL;
