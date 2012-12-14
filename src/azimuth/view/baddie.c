@@ -68,55 +68,55 @@ static void draw_box(bool armored, double flare) {
   glBegin(GL_QUADS); {
     if (armored) glColor3f(0.45, 0.45 - 0.3 * flare, 0.65 - 0.3 * flare);
     else glColor3f(0.65, 0.65 - 0.3 * flare, 0.65 - 0.3 * flare); // light gray
-    glVertex2d(10, 10);
-    glVertex2d(-10, 10);
-    glVertex2d(-10, -10);
-    glVertex2d(10, -10);
+    glVertex2d(10, 7);
+    glVertex2d(-10, 7);
+    glVertex2d(-10, -7);
+    glVertex2d(10, -7);
 
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(11, 16);
-    glVertex2d(-11, 16);
+    glVertex2d(11, 13);
+    glVertex2d(-11, 13);
     if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
     else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
-    glVertex2d(-10, 10);
-    glVertex2d(10, 10);
+    glVertex2d(-10, 7);
+    glVertex2d(10, 7);
 
-    glVertex2d(-10, -10);
-    glVertex2d(-10, 10);
+    glVertex2d(-10, -7);
+    glVertex2d(-10, 7);
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(-16, 11);
-    glVertex2d(-16, -11);
+    glVertex2d(-16, 8);
+    glVertex2d(-16, -8);
 
-    glVertex2d(16, -11);
-    glVertex2d(16, 11);
+    glVertex2d(16, -8);
+    glVertex2d(16, 8);
     if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
     else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
-    glVertex2d(10, 10);
-    glVertex2d(10, -10);
+    glVertex2d(10, 7);
+    glVertex2d(10, -7);
 
-    glVertex2d(10, -10);
-    glVertex2d(-10, -10);
+    glVertex2d(10, -7);
+    glVertex2d(-10, -7);
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(-11, -16);
-    glVertex2d(11, -16);
+    glVertex2d(-11, -13);
+    glVertex2d(11, -13);
   } glEnd();
   glBegin(GL_TRIANGLES); {
     glColor3f(0.3, 0.3 - 0.2 * flare, 0.3 - 0.2 * flare); // dark gray
-    glVertex2d(10, 10);
-    glVertex2d(11, 16);
-    glVertex2d(16, 11);
+    glVertex2d(10, 7);
+    glVertex2d(11, 13);
+    glVertex2d(16, 8);
 
-    glVertex2d(-10, 10);
-    glVertex2d(-11, 16);
-    glVertex2d(-16, 11);
+    glVertex2d(-10, 7);
+    glVertex2d(-11, 13);
+    glVertex2d(-16, 8);
 
-    glVertex2d(-10, -10);
-    glVertex2d(-16, -11);
-    glVertex2d(-11, -16);
+    glVertex2d(-10, -7);
+    glVertex2d(-16, -8);
+    glVertex2d(-11, -13);
 
-    glVertex2d(10, -10);
-    glVertex2d(11, -16);
-    glVertex2d(16, -11);
+    glVertex2d(10, -7);
+    glVertex2d(11, -13);
+    glVertex2d(16, -8);
   } glEnd();
 }
 

@@ -61,8 +61,8 @@ static az_component_data_t atom_components[] = {
 };
 
 static const az_vector_t box_vertices[] = {
-  {16, 11}, {11, 16}, {-11, 16}, {-16, 11},
-  {-16, -11}, {-11, -16}, {11, -16}, {16, -11}
+  {16, 8}, {11, 13}, {-11, 13}, {-16, 8},
+  {-16, -8}, {-11, -13}, {11, -13}, {16, -8}
 };
 
 static az_baddie_data_t baddie_datas[] = {
