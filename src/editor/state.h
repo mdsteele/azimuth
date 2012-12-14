@@ -82,6 +82,7 @@ typedef struct {
   bool unsaved; // true if we currently have unsaved changes
   bool spin_camera;
   az_vector_t camera;
+  double zoom_level;
   struct {
     bool up, down, left, right;
   } controls;

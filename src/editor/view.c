@@ -179,6 +179,7 @@ static void draw_camera_view(az_editor_state_t *state) {
   // Fade out other rooms:
   glPushMatrix(); {
     camera_to_screen_orient(state, state->camera);
+    glScaled(state->zoom_level, state->zoom_level, 1);
     glColor4f(0, 0, 0, 0.75); // black tint
     glBegin(GL_QUADS); {
       glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
@@ -332,6 +333,8 @@ void az_editor_draw_screen(az_editor_state_t* state) {
     glScaled(1, -1, 1);
     // Center the screen on position (0, 0).
     glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+    // Zoom out.
+    glScaled(1.0 / state->zoom_level, 1.0 / state->zoom_level, 1);
     // Move the screen to the camera pose.
     if (state->spin_camera) {
       glTranslated(0, -az_vnorm(state->camera), 0);
@@ -347,8 +350,10 @@ void az_editor_draw_screen(az_editor_state_t* state) {
   az_draw_cursor();
 }
 
-az_vector_t az_pixel_to_position(az_editor_state_t *state, int x, int y) {
+az_vector_t az_pixel_to_position(const az_editor_state_t *state,
+                                 int x, int y) {
   az_vector_t pt = {x - AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2 - y};
+  pt = az_vmul(pt, state->zoom_level);
   if (state->spin_camera) {
     pt.y += az_vnorm(state->camera);
     pt = az_vrotate(pt, az_vtheta(state->camera) - AZ_HALF_PI);
