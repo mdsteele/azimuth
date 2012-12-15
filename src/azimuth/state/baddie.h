@@ -30,7 +30,7 @@
 /*===========================================================================*/
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 8
+#define AZ_NUM_BADDIE_KINDS 9
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -41,13 +41,17 @@ typedef enum {
   AZ_BAD_ATOM,
   AZ_BAD_SPINER,
   AZ_BAD_BOX,
-  AZ_BAD_ARMORED_BOX
+  AZ_BAD_ARMORED_BOX,
+  AZ_BAD_CLAM
 } az_baddie_kind_t;
 
 typedef struct {
+  az_vector_t init_position;
+  double init_angle;
   double bounding_radius;
   az_polygon_t polygon;
   az_damage_flags_t immunities;
+  double impact_damage;
 } az_component_data_t;
 
 typedef struct {

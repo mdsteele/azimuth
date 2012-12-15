@@ -76,6 +76,18 @@ static void draw_particle(const az_particle_t *particle) {
         glVertex2d(particle->param1, -particle->param2);
       } glEnd();
       break;
+    case AZ_PAR_EMBER:
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, 1);
+        glVertex2i(0, 0);
+        with_color_alpha(particle->color, 0);
+        const double radius =
+          particle->param1 * (1.0 - particle->age / particle->lifetime);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
   }
 }
 

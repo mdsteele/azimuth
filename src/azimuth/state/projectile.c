@@ -248,7 +248,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_BOMB] = {
     .speed = 0.0,
-    .lifetime = 3.0,
+    .lifetime = 1.5,
     .splash_damage = 25.0,
     .splash_radius = 60.0,
     .impact_shake = 1.5,
@@ -256,11 +256,21 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_MEGA_BOMB] = {
     .speed = 0.0,
-    .lifetime = 6.0,
+    .lifetime = 3.0,
     .splash_damage = 75.0,
     .splash_radius = 200.0,
     .impact_shake = 3.0,
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB
+  },
+  [AZ_PROJ_FIREBALL_FAST] = {
+    .speed = 550.0,
+    .lifetime = 2.0,
+    .impact_damage = 10.0
+  },
+  [AZ_PROJ_FIREBALL_SLOW] = {
+    .speed = 260.0,
+    .lifetime = 2.0,
+    .impact_damage = 10.0
   },
   [AZ_PROJ_SPINE] = {
     .speed = 200.0,

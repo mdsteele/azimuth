@@ -55,14 +55,30 @@ static const az_vector_t zipper_vertices[] = {
 };
 
 static az_component_data_t atom_components[] = {
-  { .bounding_radius = 6.3, .immunities = ~AZ_DMGF_MEGA_BOMB },
-  { .bounding_radius = 6.5, .immunities = ~AZ_DMGF_MEGA_BOMB },
-  { .bounding_radius = 6.7, .immunities = ~AZ_DMGF_MEGA_BOMB }
+  { .init_position = {20, 0},
+    .bounding_radius = 6.3, .immunities = ~AZ_DMGF_PIERCE },
+  { .init_position = {-1.675, -4.977}, .init_angle = AZ_DEG2RAD(100),
+    .bounding_radius = 6.5, .immunities = ~AZ_DMGF_PIERCE },
+  { .init_position = {8.212, 16.96}, .init_angle = AZ_DEG2RAD(200),
+    .bounding_radius = 6.7, .immunities = ~AZ_DMGF_PIERCE }
 };
 
 static const az_vector_t box_vertices[] = {
   {16, 8}, {11, 13}, {-11, 13}, {-16, 8},
   {-16, -8}, {-11, -13}, {11, -13}, {16, -8}
+};
+
+static const az_vector_t clam_shell1_vertices[] = {
+  {24, 0}, {27,  2}, {24,  8}, {20,  11}, {9,  14}, {-5, 10}, {-8,  6}, {-9, 0}
+};
+static const az_vector_t clam_shell2_vertices[] = {
+  {24, 0}, {27, -2}, {24, -7}, {19, -10}, {7, -13}, {-6, -9}, {-8, -5}, {-9, 0}
+};
+static az_component_data_t clam_components[] = {
+  { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell1_vertices),
+    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) },
+  { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell2_vertices),
+    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -114,6 +130,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
+  },
+  [AZ_BAD_CLAM] = {
+    .overall_bounding_radius = 30.0,
+    .max_health = 6.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .bounding_radius = 8.0 },
+    DECL_COMPONENTS(clam_components)
   }
 };
 
@@ -199,13 +222,10 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->position = position;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
-  switch (kind) {
-    case AZ_BAD_ATOM:
-      for (int i = 0; i < baddie->data->num_components; ++i) {
-        baddie->components[i].angle = i * AZ_DEG2RAD(100);
-      }
-      break;
-    default: break;
+  for (int i = 0; i < baddie->data->num_components; ++i) {
+    assert(i < AZ_ARRAY_SIZE(baddie->components));
+    baddie->components[i].position = baddie->data->components[i].init_position;
+    baddie->components[i].angle = baddie->data->components[i].init_angle;
   }
 }
 

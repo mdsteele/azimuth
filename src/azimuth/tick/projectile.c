@@ -213,6 +213,8 @@ static void projectile_home_in(az_space_state_t *state,
   proj->angle = new_angle;
 }
 
+// Called after aging the projectile, but before doing anything else (including
+// removing it if it is past its lifetime).
 static void projectile_special_logic(az_space_state_t *state,
                                      az_projectile_t *proj,
                                      double time) {
@@ -255,10 +257,25 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
-      if (proj->age >= 0.5 * proj->data->lifetime) {
+      if (proj->age >= proj->data->lifetime) {
         on_projectile_hit_wall(state, proj, AZ_VZERO);
       } else {
         proj->angle = az_mod2pi(proj->angle + 1.5 * time);
+      }
+      break;
+    case AZ_PROJ_FIREBALL_FAST:
+    case AZ_PROJ_FIREBALL_SLOW:
+      {
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_EMBER;
+          particle->color = (az_color_t){255, 128, 0, 128};
+          particle->position = proj->position;
+          particle->velocity = AZ_VZERO;
+          particle->angle = proj->angle;
+          particle->lifetime = 0.1;
+          particle->param1 = 5.0;
+        }
       }
       break;
     default: break;
@@ -269,6 +286,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
                             double time) {
   // Age the projectile, and remove it if it is expired.
   proj->age += time;
+  projectile_special_logic(state, proj, time);
+  if (proj->kind == AZ_PROJ_NOTHING) return;
   if (proj->age > proj->data->lifetime) {
     proj->kind = AZ_PROJ_NOTHING;
     return;
@@ -291,7 +310,6 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       if (proj->data->homing) {
         projectile_home_in(state, proj, time);
       }
-      projectile_special_logic(state, proj, time);
       break;
     case AZ_IMP_BADDIE:
       on_projectile_hit_baddie(state, proj, impact.target.baddie.baddie,

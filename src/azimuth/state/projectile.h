@@ -68,6 +68,8 @@ typedef enum {
   AZ_PROJ_BOMB,
   AZ_PROJ_MEGA_BOMB,
   // Baddie-only projectiles:
+  AZ_PROJ_FIREBALL_FAST,
+  AZ_PROJ_FIREBALL_SLOW,
   AZ_PROJ_SPINE
 } az_proj_kind_t;
 
