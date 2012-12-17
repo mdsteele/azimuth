@@ -111,6 +111,7 @@ static void tick_game_over_mode(az_space_state_t *state, double time) {
       if (state->mode_data.game_over.progress >= 1.0) {
         state->mode_data.game_over.step = AZ_GOS_FADE_OUT;
         state->mode_data.game_over.progress = 0.0;
+        az_stop_music(&state->soundboard, fade_time);
       }
       break;
     case AZ_GOS_FADE_OUT:

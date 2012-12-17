@@ -26,6 +26,7 @@
 #include <SDL/SDL.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/gui/audio.h" // for az_init_audio_mixer
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/
@@ -55,12 +56,15 @@ void az_register_gl_init_func(az_init_func_t func) {
   }
 }
 
-void az_init_gui(bool fullscreen) {
+void az_init_gui(bool fullscreen, bool enable_audio) {
   assert(!sdl_initialized);
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | (enable_audio ? SDL_INIT_AUDIO : 0)) != 0) {
     AZ_FATAL("SDL_Init failed.\n");
   }
   atexit(SDL_Quit);
+  if (enable_audio) {
+    az_init_audio_mixer();
+  }
   SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "-M to run full-screen)",
                     "Azimuth");
   sdl_initialized = true;

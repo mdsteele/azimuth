@@ -37,6 +37,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 
@@ -62,6 +63,7 @@ typedef struct {
   az_ship_t ship;
   az_message_t message;
   az_timer_t timer;
+  az_soundboard_t soundboard;
 
   // Mode information:
   enum {

@@ -1,0 +1,6 @@
+Put music files here; the Makefile will copy them into the finished game's
+resource directory.
+
+The music files are currently not checked into the git repository due to size.
+However, even if they are not present, the game will still compile and start up
+without any problems, and simply won't play any music when run.

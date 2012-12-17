@@ -22,10 +22,12 @@
 #include <stdio.h> // for sprintf
 #include <string.h> // for memset
 
+#include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/save.h"
 #include "azimuth/system/resource.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/view/title.h"
 
 /*===========================================================================*/
@@ -43,10 +45,12 @@ az_title_action_t az_title_event_loop(az_saved_games_t *saved_games) {
   static az_title_state_t state;
   memset(&state, 0, sizeof(state));
   state.saved_games = saved_games;
+  az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   while (true) {
     // Tick the state and redraw the screen.
     az_tick_title_state(&state, 1.0/60.0);
+    az_tick_audio_mixer(&state.soundboard);
     az_start_screen_redraw(); {
       az_title_draw_screen(&state);
     } az_finish_screen_redraw();

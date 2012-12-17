@@ -827,7 +827,7 @@ int main(int argc, char **argv) {
   az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_wall_drawing);
-  az_init_gui(false);
+  az_init_gui(false, false);
 
   if (!load_and_init_state()) {
     printf("Failed to load scenario.\n");

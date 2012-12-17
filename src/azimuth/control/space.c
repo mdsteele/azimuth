@@ -24,6 +24,7 @@
 #include <stdio.h> // for sprintf
 
 #include "azimuth/control/paused.h"
+#include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
@@ -75,6 +76,9 @@ static void begin_saved_game(const az_planet_t *planet,
   const az_room_t *room = &planet->rooms[state.ship.player.current_room];
   state.camera.center =
     az_clamp_to_bounds(&room->camera_bounds, state.ship.position);
+
+  // TODO: choose music based on what zone we're in
+  az_change_music(&state.soundboard, AZ_MUS_CNIDAM_ZONE);
 }
 
 static bool save_current_game(az_saved_games_t *saved_games) {
@@ -96,9 +100,9 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
   begin_saved_game(planet, saved_games, saved_game_index);
 
   while (true) {
-    // Tick the state:
+    // Tick the state and redraw the screen.
     az_tick_space_state(&state, 1.0/60.0);
-    // Draw the screen:
+    az_tick_audio_mixer(&state.soundboard);
     az_start_screen_redraw(); {
       az_space_draw_screen(&state);
     } az_finish_screen_redraw();

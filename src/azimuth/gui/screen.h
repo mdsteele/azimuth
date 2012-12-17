@@ -34,7 +34,7 @@ void az_register_gl_init_func(az_init_func_t func);
 
 // Initialize the GUI/window.  This should be called exactly once, at program
 // startup, before making any OpenGL calls.
-void az_init_gui(bool fullscreen);
+void az_init_gui(bool fullscreen, bool enable_audio);
 
 // Query whether we are currently in full-screen mode.
 bool az_is_fullscreen(void);

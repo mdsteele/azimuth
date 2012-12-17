@@ -18,57 +18,22 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_TITLE_H_
-#define AZIMUTH_VIEW_TITLE_H_
+#ifndef AZIMUTH_GUI_AUDIO_H_
+#define AZIMUTH_GUI_AUDIO_H_
 
-#include "azimuth/constants.h"
-#include "azimuth/state/save.h"
 #include "azimuth/util/audio.h"
-#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
-typedef struct {
-  enum { AZ_TSS_HOVER_NONE, AZ_TSS_HOVER_MAIN, AZ_TSS_HOVER_ERASE } hover;
-  az_clock_t hover_start;
-  double main_hover_pulse, erase_hover_pulse;
-} az_title_save_slot_t;
+// Initialize our audio system (once the GUI has been initialized).  This is
+// called by az_init_gui, and should not be called from elsewhere.
+void az_init_audio_mixer(void);
 
-typedef struct {
-  bool hovering;
-  az_clock_t hover_start;
-  double hover_pulse;
-} az_title_button_t;
-
-typedef struct {
-  const az_saved_games_t *saved_games;
-  az_clock_t clock;
-  az_soundboard_t soundboard;
-
-  enum {
-    // TODO intro sequence
-    AZ_TMODE_NORMAL = 0,
-    AZ_TMODE_ABOUT,
-    AZ_TMODE_ERASING,
-    AZ_TMODE_STARTING,
-    AZ_TMODE_QUITTING
-  } mode;
-  union {
-    struct { int slot_index; bool do_erase; } erasing;
-    struct { double progress; int slot_index; } starting;
-  } mode_data;
-
-  az_title_save_slot_t slots[AZ_NUM_SAVED_GAME_SLOTS];
-  az_title_button_t about_button, quit_button, confirm_button, cancel_button;
-} az_title_state_t;
-
-void az_title_draw_screen(const az_title_state_t *state);
-
-void az_tick_title_state(az_title_state_t *state, double time);
-
-void az_title_on_hover(az_title_state_t *state, int x, int y);
-void az_title_on_click(az_title_state_t *state, int x, int y);
+// Call this once per frame to update our audio system.  The audio system must
+// be initialized first (by calling az_init_gui, which will in turn call
+// az_init_audio_mixer above).
+void az_tick_audio_mixer(az_soundboard_t *soundboard);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_TITLE_H_
+#endif // AZIMUTH_GUI_AUDIO_H_

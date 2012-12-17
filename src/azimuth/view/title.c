@@ -428,7 +428,6 @@ void az_title_draw_screen(const az_title_state_t *state) {
 /*===========================================================================*/
 
 #define STARTING_TIME 0.9
-#define QUITTING_TIME 0.5
 
 static void tick_mode(az_title_state_t *state, double time) {
   switch (state->mode) {
@@ -592,6 +591,7 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
         state->mode = AZ_TMODE_STARTING;
         state->mode_data.starting.progress = 0.0;
         state->mode_data.starting.slot_index = i;
+        az_stop_music(&state->soundboard, STARTING_TIME);
       }
     }
   }

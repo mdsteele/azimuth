@@ -36,6 +36,11 @@ define compile-c99
 	@mkdir -p $(@D)
 	@gcc -o $@ -c $< $(C99FLAGS)
 endef
+define copy-file
+	@echo "Copying $<"
+	@mkdir -p $(@D)
+	@cp $< $@
+endef
 
 #=============================================================================#
 # Determine what OS we're on and what targets we're building.
@@ -45,14 +50,15 @@ ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
-  MAIN_LIBFLAGS = -framework Cocoa -framework OpenGL -framework SDL
+  MAIN_LIBFLAGS = -framework Cocoa -framework OpenGL \
+                  -framework SDL -framework SDL_mixer
   TEST_LIBFLAGS =
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
                     $(OBJDIR)/azimuth/system/misc_posix.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
-  MAIN_LIBFLAGS = -lGL -lSDL
+  MAIN_LIBFLAGS = -lGL -lSDL -lSDL_mixer
   TEST_LIBFLAGS = -lm
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/misc_posix.o \
                     $(OBJDIR)/azimuth/system/resource_linux.o
@@ -95,7 +101,8 @@ EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES)) \
                  $(SYSTEM_OBJFILES)
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 
-RESOURCE_FILES := $(shell find $(DATADIR)/rooms -name '*.txt') \
+RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.mp3') \
+                  $(shell find $(DATADIR)/rooms -name '*.txt')
 
 #=============================================================================#
 # Default build target:
@@ -192,24 +199,19 @@ MACOSX_APP_FILES := $(MACOSX_APPDIR)/Info.plist \
 macosx_app: $(MACOSX_APP_FILES)
 
 $(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
 
 $(MACOSX_APPDIR)/MacOS/azimuth: $(BINDIR)/azimuth
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
 
 $(MACOSX_APPDIR)/Resources/application.icns: $(DATADIR)/application.icns
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
+
+$(MACOSX_APPDIR)/Resources/music/%: $(DATADIR)/music/%
+	$(copy-file)
 
 $(MACOSX_APPDIR)/Resources/rooms/%: $(DATADIR)/rooms/%
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
 
 #=============================================================================#
 # Build rules for bundling Linux application:
@@ -222,14 +224,13 @@ LINUX_APP_FILES := $(LINUX_APPDIR)/Azimuth \
 linux_app: $(LINUX_APP_FILES)
 
 $(LINUX_APPDIR)/Azimuth: $(BINDIR)/azimuth
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
+
+$(LINUX_APPDIR)/music/%: $(DATADIR)/music/%
+	$(copy-file)
 
 $(LINUX_APPDIR)/rooms/%: $(DATADIR)/rooms/%
-	@echo "Copying $<"
-	@mkdir -p $(@D)
-	@cp $< $@
+	$(copy-file)
 
 #=============================================================================#
 # Convenience build targets:
