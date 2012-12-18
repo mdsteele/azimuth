@@ -31,10 +31,12 @@
 
 /*===========================================================================*/
 
-static void try_open_door(az_door_t *door, az_damage_flags_t damage_kind) {
+static void try_open_door(az_space_state_t *state, az_door_t *door,
+                          az_damage_flags_t damage_kind) {
   assert(door->kind != AZ_DOOR_NOTHING);
-  if (az_can_open_door(door->kind, damage_kind)) {
+  if (az_can_open_door(door->kind, damage_kind) && !door->is_open) {
     door->is_open = true;
+    az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
   }
 }
 
@@ -68,7 +70,7 @@ static void on_projectile_impact(az_space_state_t *state,
       AZ_ARRAY_LOOP(door, state->doors) {
         if (door->kind == AZ_DOOR_NOTHING) continue;
         if (az_circle_touches_door_outside(door, radius, proj->position)) {
-          try_open_door(door, proj->data->damage_kind);
+          try_open_door(state, door, proj->data->damage_kind);
         }
       }
     }
@@ -118,6 +120,23 @@ static void on_projectile_impact(az_space_state_t *state,
                      az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
       }
       break;
+  }
+
+  // Play sound.
+  switch (proj->kind) {
+    case AZ_PROJ_ROCKET:
+      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
+      break;
+    case AZ_PROJ_HYPER_ROCKET:
+      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
+      break;
+    case AZ_PROJ_BOMB:
+      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
+      break;
+    case AZ_PROJ_MEGA_BOMB:
+      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
+      break;
+    default: break;
   }
 }
 
@@ -262,6 +281,12 @@ static void projectile_special_logic(az_space_state_t *state,
       } else {
         proj->angle = az_mod2pi(proj->angle + 1.5 * time);
       }
+      if (proj->kind == AZ_PROJ_MEGA_BOMB &&
+          (proj->age < 2.0 ?
+           (ceil(2.0 * proj->age) > ceil(2.0 * (proj->age - time))) :
+           (ceil(6.0 * proj->age) > ceil(6.0 * (proj->age - time))))) {
+        az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
+      }
       break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
@@ -320,7 +345,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_DOOR_OUTSIDE:
       if (!proj->fired_by_enemy) {
-        try_open_door(impact.target.door, proj->data->damage_kind);
+        try_open_door(state, impact.target.door, proj->data->damage_kind);
       }
       on_projectile_hit_wall(state, proj, impact.normal);
       break;

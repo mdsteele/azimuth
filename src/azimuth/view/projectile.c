@@ -238,7 +238,9 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       break;
     case AZ_PROJ_MEGA_BOMB:
       glBegin(GL_TRIANGLE_FAN); {
-        const bool blink = az_clock_mod(2, (proj->age >= 2.0 ? 5 : 15), clock);
+        const bool blink = proj->age < 2.0 ?
+          ((int)ceil(4.0 * proj->age) % 2 == 1) :
+          ((int)ceil(12.0 * proj->age) % 2 == 1);
         if (blink) glColor3f(1, 1, 0.5); // yellow
         else glColor3f(0.5, 0.5, 0.5); // gray
         glVertex2i(0, 0);

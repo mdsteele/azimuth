@@ -94,6 +94,7 @@ static void on_ship_hit_wall(az_space_state_t *state,
     particle->lifetime = 0.3;
     particle->param1 = 10;
   }
+  az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
 }
 
 static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
@@ -140,7 +141,7 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
 
 static void fire_gun_multi(az_space_state_t *state, double energy_mult,
                            az_proj_kind_t kind, int num_shots, double dtheta,
-                           double theta_offset) {
+                           double theta_offset, az_sound_key_t sound) {
   const double energy_cost = 20.0 * energy_mult;
   az_ship_t *ship = &state->ship;
   if (ship->player.energy < energy_cost) return;
@@ -157,11 +158,12 @@ static void fire_gun_multi(az_space_state_t *state, double energy_mult,
     theta = -theta;
     if (i % 2 == 0) theta += dtheta;
   }
+  az_play_sound(&state->soundboard, sound);
 }
 
 static void fire_gun_single(az_space_state_t *state, double energy_mult,
-                            az_proj_kind_t kind) {
-  fire_gun_multi(state, energy_mult, kind, 1, 0.0, 0.0);
+                            az_proj_kind_t kind, az_sound_key_t sound) {
+  fire_gun_multi(state, energy_mult, kind, 1, 0.0, 0.0, sound);
 }
 
 static void beam_emit_particles(az_space_state_t *state, az_vector_t position,
@@ -370,6 +372,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                 az_vadd(ship->position, az_vpolar(18, ship->angle)),
                 ship->angle);
             --player->rockets;
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
           }
         }
         ship->ordn_charge = 0.0;
@@ -392,6 +395,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                 az_vadd(ship->position, az_vpolar(-12, ship->angle)),
                 ship->angle);
             --player->bombs;
+            az_play_sound(&state->soundboard, AZ_SND_DROP_BOMB);
           }
         }
         ship->ordn_charge = 0.0;
@@ -429,28 +433,34 @@ static void fire_weapons(az_space_state_t *state, double time) {
       } else {
         switch (player->gun2) {
           case AZ_GUN_NONE:
-            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,
+                            AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
           case AZ_GUN_FREEZE:
-            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE,
+                            AZ_SND_FIRE_GUN_FREEZE);
             break;
           case AZ_GUN_TRIPLE:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
-                           3, AZ_DEG2RAD(10), 0);
+                           3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_HOMING:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING,
-                           4, AZ_DEG2RAD(90), AZ_DEG2RAD(45));
+                           4, AZ_DEG2RAD(90), AZ_DEG2RAD(45),
+                           AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_PHASE:
-            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE,
+                            AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_BURST:
-            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0);
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0,
+                           AZ_SND_FIRE_GUN_NORMAL);
           break;
           case AZ_GUN_PIERCE:
-            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE,
+                            AZ_SND_FIRE_GUN_PIERCE);
             break;
           case AZ_GUN_BEAM: break; // TODO
         }
@@ -476,37 +486,38 @@ static void fire_weapons(az_space_state_t *state, double time) {
   switch (major_gun) {
     case AZ_GUN_NONE:
       assert(minor_gun == AZ_GUN_NONE);
-      fire_gun_single(state, 1.0, AZ_PROJ_GUN_NORMAL);
-      az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+      fire_gun_single(state, 1.0, AZ_PROJ_GUN_NORMAL, AZ_SND_FIRE_GUN_NORMAL);
       return;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_FREEZE:
       assert(minor_gun == AZ_GUN_NONE);
-      fire_gun_single(state, 1.5, AZ_PROJ_GUN_FREEZE);
+      fire_gun_single(state, 1.5, AZ_PROJ_GUN_FREEZE, AZ_SND_FIRE_GUN_FREEZE);
       return;
     case AZ_GUN_TRIPLE:
       switch (minor_gun) {
         case AZ_GUN_NONE:
-          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10), 0);
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10), 0,
+                         AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
           fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_TRIPLE,
-                         3, AZ_DEG2RAD(10), 0);
+                         3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_FREEZE);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
     case AZ_GUN_HOMING:
       switch (minor_gun) {
         case AZ_GUN_NONE:
-          fire_gun_single(state, 2.0, AZ_PROJ_GUN_HOMING);
+          fire_gun_single(state, 2.0, AZ_PROJ_GUN_HOMING,
+                          AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 3.0, AZ_PROJ_GUN_FREEZE_HOMING);
+          fire_gun_single(state, 3.0, AZ_PROJ_GUN_FREEZE_HOMING,
+                          AZ_SND_FIRE_GUN_FREEZE);
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 4.0, AZ_PROJ_GUN_TRIPLE_HOMING,
-                         3, AZ_DEG2RAD(30), 0);
+                         3, AZ_DEG2RAD(30), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
@@ -514,64 +525,71 @@ static void fire_weapons(az_space_state_t *state, double time) {
       switch (minor_gun) {
         case AZ_GUN_NONE:
           fire_gun_multi(state, 2.0, AZ_PROJ_GUN_PHASE,
-                         15, AZ_DEG2RAD(1), 0);
+                         15, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
           fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_PHASE,
-                         15, AZ_DEG2RAD(1), 0);
+                         15, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_FREEZE);
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 4.0, AZ_PROJ_GUN_TRIPLE_PHASE,
-                         45, AZ_DEG2RAD(1), 0);
+                         45, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_HOMING:
           fire_gun_multi(state, 4.0, AZ_PROJ_GUN_HOMING_PHASE,
-                         15, AZ_DEG2RAD(1), 0);
+                         15, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
     case AZ_GUN_BURST:
       switch (minor_gun) {
         case AZ_GUN_NONE:
-          fire_gun_single(state, 2.5, AZ_PROJ_GUN_BURST);
+          fire_gun_single(state, 2.5, AZ_PROJ_GUN_BURST,
+                          AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 3.75, AZ_PROJ_GUN_FREEZE_BURST);
+          fire_gun_single(state, 3.75, AZ_PROJ_GUN_FREEZE_BURST,
+                          AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 5.0, AZ_PROJ_GUN_TRIPLE_BURST,
-                         3, AZ_DEG2RAD(1), 0);
+                         3, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_HOMING:
-          fire_gun_single(state, 5.0, AZ_PROJ_GUN_HOMING_BURST);
+          fire_gun_single(state, 5.0, AZ_PROJ_GUN_HOMING_BURST,
+                          AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_PHASE:
           fire_gun_multi(state, 5.0, AZ_PROJ_GUN_PHASE_BURST,
-                         11, AZ_DEG2RAD(1), 0);
+                         11, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }
     case AZ_GUN_PIERCE:
       switch (minor_gun) {
         case AZ_GUN_NONE:
-          fire_gun_single(state, 3.0, AZ_PROJ_GUN_PIERCE);
+          fire_gun_single(state, 3.0, AZ_PROJ_GUN_PIERCE,
+                          AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 4.5, AZ_PROJ_GUN_FREEZE_PIERCE);
+          fire_gun_single(state, 4.5, AZ_PROJ_GUN_FREEZE_PIERCE,
+                          AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_TRIPLE:
           fire_gun_multi(state, 6.0, AZ_PROJ_GUN_TRIPLE_PIERCE,
-                         3, AZ_DEG2RAD(10), 0);
+                         3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_HOMING:
-          fire_gun_single(state, 6.0, AZ_PROJ_GUN_HOMING_PIERCE);
+          fire_gun_single(state, 6.0, AZ_PROJ_GUN_HOMING_PIERCE,
+                        AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_PHASE:
           fire_gun_multi(state, 6.0, AZ_PROJ_GUN_PHASE_PIERCE,
-                         21, AZ_DEG2RAD(1), 0);
+                         21, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_BURST:
-          fire_gun_single(state, 7.0, AZ_PROJ_GUN_BURST_PIERCE);
+          fire_gun_single(state, 7.0, AZ_PROJ_GUN_BURST_PIERCE,
+                          AZ_SND_FIRE_GUN_PIERCE);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }

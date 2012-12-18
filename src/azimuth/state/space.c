@@ -215,6 +215,7 @@ void az_damage_ship(az_space_state_t *state, double damage) {
       az_add_speck(state, AZ_WHITE, 2.0, state->ship.position,
                    az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
     }
+    az_play_sound(&state->soundboard, AZ_SND_EXPLODE_SHIP);
   }
 }
 

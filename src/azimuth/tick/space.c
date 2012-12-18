@@ -90,6 +90,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
       if (state->mode_data.doorway.progress >= 1.0) {
         state->mode_data.doorway.step = AZ_DWS_FADE_IN;
         state->mode_data.doorway.progress = 0.0;
+        az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
       }
       break;
     case AZ_DWS_FADE_IN:

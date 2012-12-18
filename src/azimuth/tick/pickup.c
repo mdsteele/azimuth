@@ -39,22 +39,27 @@ void az_tick_pickups(az_space_state_t *state, double time) {
         case AZ_PUP_ROCKETS:
           player->rockets = az_imin(player->max_rockets, player->rockets +
                                     AZ_ROCKETS_PER_PICKUP);
+          az_play_sound(&state->soundboard, AZ_SND_PICKUP_ORDNANCE);
           break;
         case AZ_PUP_BOMBS:
           player->bombs = az_imin(player->max_bombs, player->bombs +
                                   AZ_BOMBS_PER_PICKUP);
+          az_play_sound(&state->soundboard, AZ_SND_PICKUP_ORDNANCE);
           break;
         case AZ_PUP_SMALL_SHIELDS:
           player->shields = az_imin(player->max_shields, player->shields +
                                     AZ_SHIELDS_PER_SMALL_PICKUP);
+          az_play_sound(&state->soundboard, AZ_SND_PICKUP_SHIELDS);
           break;
         case AZ_PUP_MEDIUM_SHIELDS:
           player->shields = az_imin(player->max_shields, player->shields +
                                     AZ_SHIELDS_PER_MEDIUM_PICKUP);
+          az_play_sound(&state->soundboard, AZ_SND_PICKUP_SHIELDS);
           break;
         case AZ_PUP_LARGE_SHIELDS:
           player->shields = az_imin(player->max_shields, player->shields +
                                     AZ_SHIELDS_PER_LARGE_PICKUP);
+          az_play_sound(&state->soundboard, AZ_SND_PICKUP_SHIELDS);
           break;
       }
       pickup->kind = AZ_PUP_NOTHING;

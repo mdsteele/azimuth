@@ -185,11 +185,89 @@ typedef struct {
 } az_sound_entry_t;
 
 static az_sound_entry_t sound_entries[] = {
+  [AZ_SND_BLINK_MEGA_BOMB] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.119718313217,
+    .env_decay = 0.0704225376248,
+    .start_freq = 0.41549295187,
+    .square_duty = 0.19812,
+  },
+  [AZ_SND_DOOR_CLOSE] = {
+    .wave_kind = SINE,
+    .env_sustain = 0.352112680674, .env_decay = 0.12622,
+    .start_freq = 0.401408463717, .freq_slide = -0.197183,
+    .square_duty = 0.53694, .volume_adjust = -0.5
+  },
+  [AZ_SND_DOOR_OPEN] = {
+    .wave_kind = SINE,
+    .env_sustain = 0.352112680674, .env_decay = 0.12622,
+    .start_freq = 0.246478870511, .freq_slide = 0.197183,
+    .square_duty = 0.53694, .volume_adjust = -0.5
+  },
+  [AZ_SND_DROP_BOMB] = {
+    .wave_kind = SINE,
+    .env_sustain = 0.15671, .env_decay = 0.00384,
+    .start_freq = 0.380281686783, .square_duty = 0.36672,
+    .hpf_cutoff = 0.1, .volume_adjust = -0.314814834595
+  },
+  [AZ_SND_EXPLODE_BOMB] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.32941, .env_punch = 0.572, .env_decay = 0.23305,
+    .start_freq = 0.1548265, .freq_slide = -0.36946,
+    .vibrato_depth = 0.63161, .vibrato_speed = 0.38466,
+    .phaser_offset = 0.12768, .phaser_sweep = -0.28872
+  },
+  [AZ_SND_EXPLODE_HYPER_ROCKET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.31483, .env_punch = 0.26024, .env_decay = 0.4112,
+    .start_freq = 0.161971837282, .repeat_speed = 0.3807,
+    .volume_adjust = 0.333333435059
+  },
+  [AZ_SND_EXPLODE_MEGA_BOMB] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.4366197, .env_punch = 0.443, .env_decay = 0.3309859,
+    .start_freq = 0.161395, .freq_slide = -0.0140845179558,
+    .arp_mod = -0.5244799, .arp_speed = 0.74647885561, .repeat_speed = 0.59345
+  },
+  [AZ_SND_EXPLODE_ROCKET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.29941, .env_punch = 0.69464, .env_decay = 0.3665,
+    .start_freq = 0.6008111, .freq_slide = -0.25694,
+    .repeat_speed = 0.7266001, .volume_adjust = 0.222222213745
+  },
+  [AZ_SND_EXPLODE_SHIP] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.852112650, .env_punch = 1.0, .env_decay = 0.767605662,
+    .start_freq = 0.112676054239, .freq_slide = -0.0985915660858,
+    .vibrato_depth = 0.281690150499, .vibrato_speed = 0.12924,
+  },
+  [AZ_SND_FIRE_GUN_FREEZE] = {
+    .wave_kind = SINE,
+    .env_sustain = 0.13848, .env_punch = 0.12036, .env_decay = 0.21536,
+    .start_freq = 0.9788732, .freq_limit = 0.32917, .freq_slide = -0.22554,
+    .square_duty = 0.46895, .duty_sweep = 0.1842,
+    .hpf_cutoff = 0.007470001
+  },
   [AZ_SND_FIRE_GUN_NORMAL] = {
     .wave_kind = SINE,
-    .env_sustain = 0.25, .env_punch = 0.5, .env_decay = 0.25,
-    .start_freq = 0.4, .freq_slide = -0.3,
-    .volume_adjust = -0.5
+    .env_sustain = 0.10346, .env_punch = 0.16836, .env_decay = 0.18956,
+    .start_freq = 0.89034, .freq_limit = 0.08224, .freq_slide = -0.61922,
+    .square_duty = 0.2347, .duty_sweep = 0.0176,
+    .hpf_cutoff = 0.25965
+  },
+  [AZ_SND_FIRE_GUN_PIERCE] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.23076, .env_decay = 0.05284,
+    .start_freq = 0.7278, .freq_limit = 0.29536, .freq_slide = -0.29848,
+    .square_duty = 0.46265, .duty_sweep = -0.18305
+  },
+  [AZ_SND_FIRE_ROCKET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.39907, .env_punch = 0.65582, .env_decay = 0.39085,
+    .start_freq = 0.7881, .freq_slide = -0.30088,
+    .vibrato_depth = 0.59703, .vibrato_speed = 0.03828,
+    .phaser_offset = -0.09300001, .phaser_sweep = -0.19305,
+    .volume_adjust = -0.42592590332
   },
   [AZ_SND_FIRE_HYPER_ROCKET] = {
     .wave_kind = NOISE,
@@ -197,6 +275,23 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.2, .vibrato_depth = 0.5, .vibrato_speed = 0.75,
     .repeat_speed = 0.55,
     .phaser_offset = 0.25, .phaser_sweep = -0.25
+  },
+  [AZ_SND_HIT_WALL] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.03245, .env_decay = 0.10518,
+    .start_freq = 0.43334, .freq_slide = -0.57352
+  },
+  [AZ_SND_PICKUP_ORDNANCE] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.17572, .env_decay = 0.2746479,
+    .start_freq = 0.26918, .freq_slide = 0.25928,
+    .square_duty = 0.01332, .repeat_speed = 0.69412
+  },
+  [AZ_SND_PICKUP_SHIELDS] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.1376, .env_decay = 0.288732379675,
+    .start_freq = 0.225352108479, .freq_slide = 0.2832,
+    .repeat_speed = 0.542253494263
   }
 };
 
