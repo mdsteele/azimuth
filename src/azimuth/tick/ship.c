@@ -360,6 +360,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                 az_vadd(ship->position, az_vpolar(18, ship->angle)),
                 ship->angle);
             player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
           }
         } else {
           if (player->rockets <= 0) return;
@@ -476,6 +477,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
     case AZ_GUN_NONE:
       assert(minor_gun == AZ_GUN_NONE);
       fire_gun_single(state, 1.0, AZ_PROJ_GUN_NORMAL);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
       return;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_FREEZE:
@@ -486,6 +488,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
       switch (minor_gun) {
         case AZ_GUN_NONE:
           fire_gun_multi(state, 2.0, AZ_PROJ_GUN_TRIPLE, 3, AZ_DEG2RAD(10), 0);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
           fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_TRIPLE,

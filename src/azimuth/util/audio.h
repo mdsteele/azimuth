@@ -32,10 +32,8 @@ typedef enum {
 } az_music_key_t;
 
 typedef enum {
-  AZ_SND_FIRE_ROCKET,
-  AZ_SND_FIRE_HYPER_ROCKET,
-  AZ_SND_ROCKET_EXPLOSION,
-  AZ_SND_HYPER_ROCKET_EXPLOSION
+  AZ_SND_FIRE_GUN_NORMAL,
+  AZ_SND_FIRE_HYPER_ROCKET
 } az_sound_key_t;
 
 // A soundboard keeps track of what sounds/music we want to play next.  It will
@@ -46,7 +44,9 @@ typedef struct {
   enum { AZ_MUSA_NOTHING = 0, AZ_MUSA_CHANGE, AZ_MUSA_STOP } music_action;
   az_music_key_t next_music;
   int music_fade_out_millis;
-  // TODO keep track of sound effects here too
+  int num_oneshots;
+  az_sound_key_t oneshots[20];
+  // TODO add support for looping sounds
 } az_soundboard_t;
 
 /*===========================================================================*/
@@ -57,6 +57,10 @@ void az_change_music(az_soundboard_t *soundboard, az_music_key_t music);
 // Indicate that we would like to stop the current music (without playing
 // something else next), by fading out for the given amount of time.
 void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds);
+
+// Indicate that we should play the given sound (once).  The sound will not
+// loop, and cannot be cancelled once started.
+void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 /*===========================================================================*/
 

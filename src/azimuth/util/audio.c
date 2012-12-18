@@ -22,6 +22,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "azimuth/util/misc.h"
+
 /*===========================================================================*/
 
 void az_change_music(az_soundboard_t *soundboard, az_music_key_t music) {
@@ -33,6 +35,13 @@ void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds) {
   assert(fade_out_seconds >= 0.0);
   soundboard->music_action = AZ_MUSA_STOP;
   soundboard->music_fade_out_millis = (int)(1000.0 * fade_out_seconds);
+}
+
+void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+  if (soundboard->num_oneshots < AZ_ARRAY_SIZE(soundboard->oneshots)) {
+    soundboard->oneshots[soundboard->num_oneshots] = sound;
+    ++soundboard->num_oneshots;
+  }
 }
 
 /*===========================================================================*/
