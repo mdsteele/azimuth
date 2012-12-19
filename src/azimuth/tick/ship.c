@@ -359,8 +359,13 @@ static void fire_weapons(az_space_state_t *state, double time) {
   if ((has_hyper_rockets && ship->player.ordnance == AZ_ORDN_ROCKETS) ||
       (has_mega_bombs && ship->player.ordnance == AZ_ORDN_BOMBS)) {
     if (controls->ordn_held) {
-      ship->ordn_charge = fmin(1.0, ship->ordn_charge +
-                               AZ_ORDN_CHARGING_TIME * time);
+      if (ship->ordn_charge < 1.0) {
+        ship->ordn_charge = fmin(1.0, ship->ordn_charge +
+                                 AZ_ORDN_CHARGING_TIME * time);
+        az_persist_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
+      } else {
+        az_loop_sound(&state->soundboard, AZ_SND_CHARGED_ORDNANCE);
+      }
     }
   } else ship->ordn_charge = 0.0;
 

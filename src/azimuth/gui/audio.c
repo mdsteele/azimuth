@@ -34,6 +34,18 @@
 #include "azimuth/util/vector.h" // for AZ_TWO_PI
 
 /*===========================================================================*/
+// Constants:
+
+// We use 16-bit stereo at 22050 samples/sec and a buffer size of 4096 samples.
+#define AUDIO_FORMAT AUDIO_S16SYS
+#define AUDIO_CHANNELS 2
+#define AUDIO_RATE 22050
+#define AUDIO_BUFFERSIZE 4096
+
+// How many sound effects we can play simultaneously:
+#define NUM_MIXER_CHANNELS 16
+
+/*===========================================================================*/
 // Music:
 
 static struct {
@@ -169,7 +181,7 @@ typedef struct {
   // rather than constantly having to explicitly specify it as 1.0), and
   // second, we use a volume range of -1 to 1 instead of 0 to 1 (again so that
   // we can usually leave it at zero, rather than explicitly specifying 0.5).
-  enum { SQUARE, SAWTOOTH, SINE, NOISE } wave_kind;
+  enum { SQUARE, SAWTOOTH, TRIANGLE, SINE, NOISE } wave_kind;
   float env_attack, env_sustain, env_punch, env_decay;
   float start_freq, freq_limit, freq_slide, freq_delta_slide;
   float vibrato_depth, vibrato_speed;
@@ -186,7 +198,7 @@ typedef struct {
 
 static az_sound_entry_t sound_entries[] = {
   [AZ_SND_BEAM_FREEZE] = {
-    .wave_kind = SINE,
+    .wave_kind = TRIANGLE,
     .env_sustain = 1.0, .start_freq = 0.3943662,
     .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
     .square_duty = 0.35298
@@ -224,10 +236,25 @@ static az_sound_entry_t sound_entries[] = {
     .arp_speed = -0.4154, .square_duty = -0.8286, .phaser_offset = -0.7323943,
     .volume_adjust = -0.462962989807
   },
+  [AZ_SND_CHARGED_ORDNANCE] = {
+    .wave_kind = TRIANGLE,
+    .env_sustain = 0.6,
+    .start_freq = 0.202394367456, .freq_slide = 0.004733738,
+    .vibrato_depth = 0.33098590374, .vibrato_speed = 0.25,
+    .arp_speed = -0.4154, .square_duty = -0.8286, .phaser_offset = -0.7323943,
+    .volume_adjust = -0.462962989807
+  },
   [AZ_SND_CHARGING_GUN] = {
     .wave_kind = SQUARE,
     .env_attack = 1.0, .env_sustain = 0.34507, .env_decay = 0.246478870511,
     .start_freq = 0.1197183, .freq_slide = 0.118591,
+    .freq_delta_slide = 0.056338,
+    .square_duty = 0.40368, .duty_sweep = 0.0140844583511
+  },
+  [AZ_SND_CHARGING_ORDNANCE] = {
+    .wave_kind = TRIANGLE,
+    .env_attack = 1.0, .env_sustain = 0.34507, .env_decay = 0.246478870511,
+    .start_freq = 0.0897183, .freq_slide = 0.118591,
     .freq_delta_slide = 0.056338,
     .square_duty = 0.40368, .duty_sweep = 0.0140844583511
   },
@@ -566,7 +593,10 @@ static void synth_sound_wav(const az_sound_entry_t *entry) {
           sample = (fp < synth.square_duty ? 0.5f : -0.5f);
           break;
         case SAWTOOTH:
-          sample = 1.0f - fp * 2;
+          sample = 1.0f - fp * 2.0f;
+          break;
+        case TRIANGLE:
+          sample = 4.0f * fabs(fp - 0.5f) - 1.0f;
           break;
         case SINE:
           sample = (float)sin(fp * AZ_TWO_PI);
@@ -651,7 +681,7 @@ static struct {
   enum { PERSIST_INACTIVE = 0, PERSIST_PLAYING, PERSIST_FINISHED } status;
   az_sound_key_t sound;
   int channel;
-} persisting_sounds[12];
+} persisting_sounds[NUM_MIXER_CHANNELS];
 
 static void tick_sounds(const az_soundboard_t *soundboard) {
   bool done[soundboard->num_persists];
@@ -704,12 +734,6 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 /*===========================================================================*/
 // Audio system:
 
-// We use 16-bit stereo at 22050 samples/sec and a buffer size of 4096 samples.
-#define AUDIO_FORMAT AUDIO_S16SYS
-#define AUDIO_CHANNELS 2
-#define AUDIO_RATE 22050
-#define AUDIO_BUFFERSIZE 4096
-
 static bool audio_mixer_initialized = false;
 
 static void shut_down_audio_mixer(void) {
@@ -726,7 +750,7 @@ void az_init_audio_mixer(void) {
     AZ_FATAL("Mix_OpenAudio failed.\n");
   }
   atexit(shut_down_audio_mixer);
-  Mix_AllocateChannels(12);
+  Mix_AllocateChannels(NUM_MIXER_CHANNELS);
   // Load our music and sound data.
   load_all_music();
   generate_all_sounds();
