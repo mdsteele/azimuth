@@ -597,6 +597,11 @@ static void try_set_door_dest(void) {
 
 static void event_loop(void) {
   while (true) {
+    state.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
+    state.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
+    state.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
+    state.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
+
     az_tick_editor_state(&state);
     az_start_screen_redraw(); {
       az_editor_draw_screen(&state);
@@ -688,21 +693,8 @@ static void event_loop(void) {
                 break;
               case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
               case AZ_KEY_BACKSPACE: do_remove(); break;
-              case AZ_KEY_UP_ARROW: state.controls.up = true; break;
-              case AZ_KEY_DOWN_ARROW: state.controls.down = true; break;
-              case AZ_KEY_LEFT_ARROW: state.controls.left = true; break;
-              case AZ_KEY_RIGHT_ARROW: state.controls.right = true; break;
               default: break;
-          }
-          }
-          break;
-        case AZ_EVENT_KEY_UP:
-          switch (event.key.name) {
-            case AZ_KEY_UP_ARROW: state.controls.up = false; break;
-            case AZ_KEY_DOWN_ARROW: state.controls.down = false; break;
-            case AZ_KEY_LEFT_ARROW: state.controls.left = false; break;
-            case AZ_KEY_RIGHT_ARROW: state.controls.right = false; break;
-            default: break;
+            }
           }
           break;
         case AZ_EVENT_MOUSE_DOWN:

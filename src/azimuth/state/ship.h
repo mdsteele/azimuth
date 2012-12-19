@@ -35,7 +35,7 @@ typedef struct {
   bool fire_pressed, fire_held;
   bool ordn_held;
   bool util_pressed, util_held;
-  bool burn;
+  bool burn_held;
 } az_controls_t;
 
 typedef struct {

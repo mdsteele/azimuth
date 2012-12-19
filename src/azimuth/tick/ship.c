@@ -745,7 +745,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Turning left:
   if (controls->left && !controls->right) {
-    if (!controls->burn) {
+    if (!controls->burn_held) {
       ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
@@ -756,7 +756,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Turning right:
   if (controls->right && !controls->left) {
-    if (!controls->burn) {
+    if (!controls->burn_held) {
       ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
@@ -767,7 +767,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Forward thrust:
   if (controls->up && !controls->down) {
-    if (!controls->burn) {
+    if (!controls->burn_held) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse, ship->angle));
     } else if (has_lateral) {

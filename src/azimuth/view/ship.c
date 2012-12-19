@@ -82,7 +82,7 @@ void az_draw_ship(az_space_state_t* state) {
     if (controls->up && !controls->down) {
       double zig = az_clock_zigzag(10, 1, state->clock);
       // For forward thrusters:
-      if (!controls->burn) {
+      if (!controls->burn_held) {
         // From port engine:
         glBegin(GL_TRIANGLE_STRIP); {
           glColor4f(1, 0.5, 0, 0); // transparent orange

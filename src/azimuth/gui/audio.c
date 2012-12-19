@@ -677,18 +677,18 @@ static void free_all_sounds(void) {
   }
 }
 
-static struct {
-  enum { PERSIST_INACTIVE = 0, PERSIST_PLAYING, PERSIST_FINISHED } status;
-  az_sound_key_t sound;
-  int channel;
-} persisting_sounds[NUM_MIXER_CHANNELS];
-
 static void tick_sounds(const az_soundboard_t *soundboard) {
+  static struct {
+    enum { INACTIVE = 0, PLAYING, FINISHED } status;
+    az_sound_key_t sound;
+    int channel;
+  } persisting_sounds[NUM_MIXER_CHANNELS];
+
+  // Clean up unpersisted sounds.
   bool done[soundboard->num_persists];
   memset(done, 0, sizeof(bool) * soundboard->num_persists);
-  // Clean up unpersisted sounds.
   AZ_ARRAY_LOOP(persisting, persisting_sounds) {
-    if (persisting->status == PERSIST_INACTIVE) continue;
+    if (persisting->status == INACTIVE) continue;
     bool halt = true;
     for (int i = 0; i < soundboard->num_persists; ++i) {
       if (soundboard->persists[i].sound == persisting->sound) {
@@ -698,26 +698,27 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       }
     }
     if (halt) {
-      if (persisting->status == PERSIST_PLAYING) {
+      if (persisting->status == PLAYING) {
         Mix_HaltChannel(persisting->channel);
       }
-      persisting->status = PERSIST_INACTIVE;
-    } else if (persisting->status == PERSIST_PLAYING &&
+      persisting->status = INACTIVE;
+    } else if (persisting->status == PLAYING &&
                !Mix_Playing(persisting->channel)) {
-      persisting->status = PERSIST_FINISHED;
+      persisting->status = FINISHED;
     }
   }
+
   // Play new persistent sounds.
   for (int i = 0; i < soundboard->num_persists; ++i) {
     if (done[i]) continue;
     AZ_ARRAY_LOOP(persisting, persisting_sounds) {
-      if (persisting->status == PERSIST_INACTIVE) {
+      if (persisting->status == INACTIVE) {
         const az_sound_key_t sound = soundboard->persists[i].sound;
         const int channel =
           Mix_PlayChannel(-1, sound_entries[sound].chunk,
                           (soundboard->persists[i].loop ? -1 : 0));
         if (channel >= 0) {
-          persisting->status = PERSIST_PLAYING;
+          persisting->status = PLAYING;
           persisting->sound = sound;
           persisting->channel = channel;
         }
@@ -725,6 +726,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       }
     }
   }
+
   // Play one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
     Mix_PlayChannel(-1, sound_entries[soundboard->oneshots[i]].chunk, 0);

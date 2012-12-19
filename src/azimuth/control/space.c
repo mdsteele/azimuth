@@ -94,6 +94,18 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   return az_save_games_to_file(saved_games, path_buffer);
 }
 
+static void update_controls(void) {
+  state.ship.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
+  state.ship.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
+  state.ship.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
+  state.ship.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
+
+  state.ship.controls.fire_held = az_is_key_held(AZ_KEY_V);
+  state.ship.controls.ordn_held = az_is_key_held(AZ_KEY_C);
+  state.ship.controls.util_held = az_is_key_held(AZ_KEY_X);
+  state.ship.controls.burn_held = az_is_key_held(AZ_KEY_Z);
+}
+
 az_space_action_t az_space_event_loop(const az_planet_t *planet,
                                       az_saved_games_t *saved_games,
                                       int saved_game_index) {
@@ -101,6 +113,7 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
 
   while (true) {
     // Tick the state and redraw the screen.
+    update_controls();
     az_tick_space_state(&state, 1.0/60.0);
     az_tick_audio_mixer(&state.soundboard);
     az_start_screen_redraw(); {
@@ -163,22 +176,8 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
               state.mode = AZ_MODE_PAUSING;
               state.mode_data.pause.progress = 0.0;
               break;
-            case AZ_KEY_UP_ARROW: state.ship.controls.up = true; break;
-            case AZ_KEY_DOWN_ARROW: state.ship.controls.down = true; break;
-            case AZ_KEY_LEFT_ARROW: state.ship.controls.left = true; break;
-            case AZ_KEY_RIGHT_ARROW: state.ship.controls.right = true; break;
-            case AZ_KEY_V:
-              state.ship.controls.fire_pressed = true;
-              state.ship.controls.fire_held = true;
-              break;
-            case AZ_KEY_C:
-              state.ship.controls.ordn_held = true;
-              break;
-            case AZ_KEY_X:
-              state.ship.controls.util_pressed = true;
-              state.ship.controls.util_held = true;
-              break;
-            case AZ_KEY_Z: state.ship.controls.burn = true; break;
+            case AZ_KEY_V: state.ship.controls.fire_pressed = true; break;
+            case AZ_KEY_X: state.ship.controls.util_pressed = true; break;
             case AZ_KEY_1:
               az_select_gun(&state.ship.player, AZ_GUN_CHARGE);
               break;
@@ -209,19 +208,6 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
             case AZ_KEY_0:
               az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
               break;
-            default: break;
-          }
-          break;
-        case AZ_EVENT_KEY_UP:
-          switch (event.key.name) {
-            case AZ_KEY_UP_ARROW: state.ship.controls.up = false; break;
-            case AZ_KEY_DOWN_ARROW: state.ship.controls.down = false; break;
-            case AZ_KEY_LEFT_ARROW: state.ship.controls.left = false; break;
-            case AZ_KEY_RIGHT_ARROW: state.ship.controls.right = false; break;
-            case AZ_KEY_V: state.ship.controls.fire_held = false; break;
-            case AZ_KEY_C: state.ship.controls.ordn_held = false; break;
-            case AZ_KEY_X: state.ship.controls.util_held = false; break;
-            case AZ_KEY_Z: state.ship.controls.burn = false; break;
             default: break;
           }
           break;

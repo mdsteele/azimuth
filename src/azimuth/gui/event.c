@@ -39,6 +39,58 @@
 #define AZ_KMOD_CMD KMOD_CTRL
 #endif
 
+static SDLKey az_key_to_sdl_key(az_key_name_t key) {
+  assert(key != AZ_KEY_UNKNOWN);
+  switch (key) {
+    case AZ_KEY_UNKNOWN: AZ_ASSERT_UNREACHABLE();
+    case AZ_KEY_RETURN: return SDLK_RETURN;
+    case AZ_KEY_ESCAPE: return SDLK_ESCAPE;
+    case AZ_KEY_SPACE: return SDLK_SPACE;
+    case AZ_KEY_0: return SDLK_0;
+    case AZ_KEY_1: return SDLK_1;
+    case AZ_KEY_2: return SDLK_2;
+    case AZ_KEY_3: return SDLK_3;
+    case AZ_KEY_4: return SDLK_4;
+    case AZ_KEY_5: return SDLK_5;
+    case AZ_KEY_6: return SDLK_6;
+    case AZ_KEY_7: return SDLK_7;
+    case AZ_KEY_8: return SDLK_8;
+    case AZ_KEY_9: return SDLK_9;
+    case AZ_KEY_A: return SDLK_a;
+    case AZ_KEY_B: return SDLK_b;
+    case AZ_KEY_C: return SDLK_c;
+    case AZ_KEY_D: return SDLK_d;
+    case AZ_KEY_E: return SDLK_e;
+    case AZ_KEY_F: return SDLK_f;
+    case AZ_KEY_G: return SDLK_g;
+    case AZ_KEY_H: return SDLK_h;
+    case AZ_KEY_I: return SDLK_i;
+    case AZ_KEY_J: return SDLK_j;
+    case AZ_KEY_K: return SDLK_k;
+    case AZ_KEY_L: return SDLK_l;
+    case AZ_KEY_M: return SDLK_m;
+    case AZ_KEY_N: return SDLK_n;
+    case AZ_KEY_O: return SDLK_o;
+    case AZ_KEY_P: return SDLK_p;
+    case AZ_KEY_Q: return SDLK_q;
+    case AZ_KEY_R: return SDLK_r;
+    case AZ_KEY_S: return SDLK_s;
+    case AZ_KEY_T: return SDLK_t;
+    case AZ_KEY_U: return SDLK_u;
+    case AZ_KEY_V: return SDLK_v;
+    case AZ_KEY_W: return SDLK_w;
+    case AZ_KEY_X: return SDLK_x;
+    case AZ_KEY_Y: return SDLK_y;
+    case AZ_KEY_Z: return SDLK_z;
+    case AZ_KEY_BACKSPACE: return SDLK_BACKSPACE;
+    case AZ_KEY_UP_ARROW: return SDLK_UP;
+    case AZ_KEY_DOWN_ARROW: return SDLK_DOWN;
+    case AZ_KEY_LEFT_ARROW: return SDLK_LEFT;
+    case AZ_KEY_RIGHT_ARROW: return SDLK_RIGHT;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
+
 static az_key_name_t sdl_key_to_az_key(SDLKey key) {
   switch (key) {
     case SDLK_RETURN: return AZ_KEY_RETURN;
@@ -184,6 +236,11 @@ bool az_get_mouse_position(int *x, int *y) {
   if (!(SDL_GetAppState() & SDL_APPMOUSEFOCUS)) return false;
   SDL_GetMouseState(x, y);
   return true;
+}
+
+bool az_is_key_held(az_key_name_t key) {
+  assert(key != AZ_KEY_UNKNOWN);
+  return (bool)SDL_GetKeyState(NULL)[az_key_to_sdl_key(key)];
 }
 
 bool az_is_shift_key_held(void) {
