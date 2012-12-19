@@ -298,8 +298,10 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         break;
       case AZ_IMP_DOOR_INSIDE: did_hit = false; break;
       case AZ_IMP_DOOR_OUTSIDE:
+        assert(!impact.target.door->is_open);
         if (az_can_open_door(impact.target.door->kind, damage_kind)) {
           impact.target.door->is_open = true;
+          az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
         }
         break;
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
@@ -322,6 +324,16 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     // additional beam).
     else if (minor == AZ_GUN_BURST) break;
   }
+
+  // Play a looping sound (based on beam kind):
+  az_sound_key_t sound;
+  switch (minor) {
+    case AZ_GUN_FREEZE: sound = AZ_SND_BEAM_FREEZE; break;
+    case AZ_GUN_PHASE:  sound = AZ_SND_BEAM_PHASE;  break;
+    case AZ_GUN_PIERCE: sound = AZ_SND_BEAM_PIERCE; break;
+    default:            sound = AZ_SND_BEAM_NORMAL; break;
+  }
+  az_loop_sound(&state->soundboard, sound);
 }
 
 static void fire_weapons(az_space_state_t *state, double time) {
@@ -331,8 +343,13 @@ static void fire_weapons(az_space_state_t *state, double time) {
   assert(player->gun2 != AZ_GUN_CHARGE);
   if (player->gun1 == AZ_GUN_CHARGE) {
     if (controls->fire_held) {
-      ship->gun_charge = fmin(1.0, ship->gun_charge +
-                              AZ_CHARGE_GUN_CHARGING_TIME * time);
+      if (ship->gun_charge < 1.0) {
+        ship->gun_charge = fmin(1.0, ship->gun_charge +
+                                AZ_CHARGE_GUN_CHARGING_TIME * time);
+        az_persist_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
+      } else {
+        az_loop_sound(&state->soundboard, AZ_SND_CHARGED_GUN);
+      }
     }
   } else ship->gun_charge = 0.0;
   const bool has_hyper_rockets =

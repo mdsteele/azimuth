@@ -44,4 +44,21 @@ void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
   }
 }
 
+static void persist_sound_internal(
+    az_soundboard_t *soundboard, az_sound_key_t sound, bool loop) {
+  if (soundboard->num_persists < AZ_ARRAY_SIZE(soundboard->persists)) {
+    soundboard->persists[soundboard->num_persists].sound = sound;
+    soundboard->persists[soundboard->num_persists].loop = loop;
+    ++soundboard->num_persists;
+  }
+}
+
+void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+  persist_sound_internal(soundboard, sound, true);
+}
+
+void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+  persist_sound_internal(soundboard, sound, false);
+}
+
 /*===========================================================================*/

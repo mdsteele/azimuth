@@ -32,7 +32,13 @@ typedef enum {
 } az_music_key_t;
 
 typedef enum {
+  AZ_SND_BEAM_FREEZE,
+  AZ_SND_BEAM_NORMAL,
+  AZ_SND_BEAM_PHASE,
+  AZ_SND_BEAM_PIERCE,
   AZ_SND_BLINK_MEGA_BOMB,
+  AZ_SND_CHARGED_GUN,
+  AZ_SND_CHARGING_GUN,
   AZ_SND_DOOR_CLOSE,
   AZ_SND_DOOR_OPEN,
   AZ_SND_DROP_BOMB,
@@ -60,8 +66,9 @@ typedef struct {
   az_music_key_t next_music;
   int music_fade_out_millis;
   int num_oneshots;
-  az_sound_key_t oneshots[20];
-  // TODO add support for looping sounds
+  az_sound_key_t oneshots[10];
+  int num_persists;
+  struct { az_sound_key_t sound; bool loop; } persists[10];
 } az_soundboard_t;
 
 /*===========================================================================*/
@@ -76,6 +83,19 @@ void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds);
 // Indicate that we should play the given sound (once).  The sound will not
 // loop, and cannot be cancelled once started.
 void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
+
+// Indicate that we should start playing, or continue to play, the given sound.
+// To keep the sound going, we must call this function every frame with the
+// same sound, otherwise the sound will stop.  As long as we keep calling this
+// function, the sound will continue to loop.
+void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
+
+// Indicate that we should start playing, or continue to play, the given sound.
+// To keep the sound going, we must call this function every frame with the
+// same sound, otherwise the sound will stop.  The sound will play only once,
+// and won't restart until we stop calling this function for at least one frame
+// before calling it again.
+void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 /*===========================================================================*/
 

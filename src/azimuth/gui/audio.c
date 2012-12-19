@@ -185,12 +185,51 @@ typedef struct {
 } az_sound_entry_t;
 
 static az_sound_entry_t sound_entries[] = {
+  [AZ_SND_BEAM_FREEZE] = {
+    .wave_kind = SINE,
+    .env_sustain = 1.0, .start_freq = 0.3943662,
+    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
+    .square_duty = 0.35298
+  },
+  [AZ_SND_BEAM_NORMAL] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.1971831, .start_freq = 0.2943662,
+    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
+    .square_duty = 0.35298
+  },
+  [AZ_SND_BEAM_PHASE] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.1971831, .start_freq = 0.3443662,
+    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
+    .square_duty = 0.35298
+  },
+  [AZ_SND_BEAM_PIERCE] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.1971831, .start_freq = 0.3943662,
+    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
+    .square_duty = 0.35298
+  },
   [AZ_SND_BLINK_MEGA_BOMB] = {
     .wave_kind = SAWTOOTH,
     .env_sustain = 0.119718313217,
     .env_decay = 0.0704225376248,
     .start_freq = 0.41549295187,
     .square_duty = 0.19812,
+  },
+  [AZ_SND_CHARGED_GUN] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.323943674564,
+    .start_freq = 0.232394367456, .freq_slide = 0.004733738,
+    .vibrato_depth = 0.33098590374, .vibrato_speed = 0.33098590374,
+    .arp_speed = -0.4154, .square_duty = -0.8286, .phaser_offset = -0.7323943,
+    .volume_adjust = -0.462962989807
+  },
+  [AZ_SND_CHARGING_GUN] = {
+    .wave_kind = SQUARE,
+    .env_attack = 1.0, .env_sustain = 0.34507, .env_decay = 0.246478870511,
+    .start_freq = 0.1197183, .freq_slide = 0.118591,
+    .freq_delta_slide = 0.056338,
+    .square_duty = 0.40368, .duty_sweep = 0.0140844583511
   },
   [AZ_SND_DOOR_CLOSE] = {
     .wave_kind = SINE,
@@ -608,7 +647,55 @@ static void free_all_sounds(void) {
   }
 }
 
+static struct {
+  enum { PERSIST_INACTIVE = 0, PERSIST_PLAYING, PERSIST_FINISHED } status;
+  az_sound_key_t sound;
+  int channel;
+} persisting_sounds[12];
+
 static void tick_sounds(const az_soundboard_t *soundboard) {
+  bool done[soundboard->num_persists];
+  memset(done, 0, sizeof(bool) * soundboard->num_persists);
+  // Clean up unpersisted sounds.
+  AZ_ARRAY_LOOP(persisting, persisting_sounds) {
+    if (persisting->status == PERSIST_INACTIVE) continue;
+    bool halt = true;
+    for (int i = 0; i < soundboard->num_persists; ++i) {
+      if (soundboard->persists[i].sound == persisting->sound) {
+        halt = false;
+        done[i] = true;
+        break;
+      }
+    }
+    if (halt) {
+      if (persisting->status == PERSIST_PLAYING) {
+        Mix_HaltChannel(persisting->channel);
+      }
+      persisting->status = PERSIST_INACTIVE;
+    } else if (persisting->status == PERSIST_PLAYING &&
+               !Mix_Playing(persisting->channel)) {
+      persisting->status = PERSIST_FINISHED;
+    }
+  }
+  // Play new persistent sounds.
+  for (int i = 0; i < soundboard->num_persists; ++i) {
+    if (done[i]) continue;
+    AZ_ARRAY_LOOP(persisting, persisting_sounds) {
+      if (persisting->status == PERSIST_INACTIVE) {
+        const az_sound_key_t sound = soundboard->persists[i].sound;
+        const int channel =
+          Mix_PlayChannel(-1, sound_entries[sound].chunk,
+                          (soundboard->persists[i].loop ? -1 : 0));
+        if (channel >= 0) {
+          persisting->status = PERSIST_PLAYING;
+          persisting->sound = sound;
+          persisting->channel = channel;
+        }
+        break;
+      }
+    }
+  }
+  // Play one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
     Mix_PlayChannel(-1, sound_entries[soundboard->oneshots[i]].chunk, 0);
   }
