@@ -25,10 +25,15 @@
 
 /*===========================================================================*/
 
-const az_vector_t AZ_VZERO = {.x = 0, .y = 0};
+const az_vector_t AZ_VZERO = {.x = 0.0, .y = 0.0};
 
 static bool vfinite(az_vector_t v) {
   return isfinite(v.x) && isfinite(v.y);
+}
+
+bool az_vnonzero(az_vector_t v) {
+  assert(vfinite(v));
+  return (v.x != 0.0 && v.y != 0.0);
 }
 
 az_vector_t az_vpolar(double magnitude, double theta) {
@@ -105,6 +110,7 @@ az_vector_t az_vunit(az_vector_t v) {
 
 az_vector_t az_vwithlen(az_vector_t v, double length) {
   assert(vfinite(v));
+  assert(isfinite(length));
   const double len = az_vnorm(v);
   assert(len >= 0.0);
   if (len > 0.0) return az_vmul(v, length / len);
@@ -113,6 +119,8 @@ az_vector_t az_vwithlen(az_vector_t v, double length) {
 
 az_vector_t az_vcaplen(az_vector_t v, double max_length) {
   assert(vfinite(v));
+  assert(isfinite(max_length));
+  assert(max_length >= 0.0);
   const double length = az_vnorm(v);
   return (length <= max_length ? v : az_vmul(v, max_length / length));
 }

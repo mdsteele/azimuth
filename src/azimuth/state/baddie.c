@@ -81,6 +81,10 @@ static az_component_data_t clam_components[] = {
     .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
 };
 
+static const az_vector_t nightbug_vertices[] = {
+  {17, 0}, {9, 10}, {-11, 5}, {-11, -5}, {9, -10}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -137,6 +141,11 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 8.0 },
     DECL_COMPONENTS(clam_components)
+  },
+  [AZ_BAD_NIGHTBUG] = {
+    .max_health = 8.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(nightbug_vertices) }
   }
 };
 

@@ -25,11 +25,14 @@
 #include <string.h> // for memset
 
 #include "azimuth/constants.h"
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
 const char *az_gun_name(az_gun_t gun) {
+  assert(gun != AZ_GUN_NONE);
   switch (gun) {
+    case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_CHARGE: return "CHARGE";
     case AZ_GUN_FREEZE: return "FREEZE";
     case AZ_GUN_TRIPLE: return "TRIPLE";
@@ -38,9 +41,8 @@ const char *az_gun_name(az_gun_t gun) {
     case AZ_GUN_BURST:  return "BURST";
     case AZ_GUN_PIERCE: return "PIERCE";
     case AZ_GUN_BEAM:   return "BEAM";
-    default: assert(false);
   }
-  return "XXXXXX";
+  AZ_ASSERT_UNREACHABLE();
 }
 
 /*===========================================================================*/

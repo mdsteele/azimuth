@@ -45,6 +45,9 @@ typedef struct {
 // The zero vector:
 extern const az_vector_t AZ_VZERO;
 
+// Return false for the zero vector, true otherwise.
+bool az_vnonzero(az_vector_t v);
+
 // Create a vector from polar coordinates.
 az_vector_t az_vpolar(double magnitude, double theta);
 

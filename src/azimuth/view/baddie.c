@@ -308,6 +308,51 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_BAD_NIGHTBUG:
+      glPushMatrix(); {
+        const double invis = fmax(fmax(baddie->param, flare), frozen);
+        assert(0.0 <= invis && invis <= 1.0);
+        glBegin(GL_TRIANGLES); {
+          glColor4f(0.25, 0.12, frozen, invis); // dark brown
+          glVertex2d(-16, 0);
+          glColor4f(0.5, 0.2, frozen, invis * invis); // reddish-brown
+          glVertex2d(12, 6);
+          glVertex2d(12, -6);
+        } glEnd();
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(0.8, 0.4, 0.1 + 0.9 * frozen, invis); // light red-brown
+          glVertex2d(10, 0);
+          glColor4f(0.5, 0.2, frozen, invis * invis); // reddish-brown
+          for (int i = -90; i <= 90; i += 30) {
+            glVertex2d(10 + 7 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        for (int i = 0; i < 2; ++i) {
+          if (i == 1) glScaled(1, -1, 1);
+          glColor4f(0.25, 0.12, 0.5 * frozen, invis); // dark brown
+          glBegin(GL_TRIANGLES); {
+            const double zig = 0.5 * az_clock_zigzag(8, 3, clock) - 2.0;
+            for (int j = 0; j < 3; ++j) {
+              glVertex2d(12 - 7 * j, 7 - j);
+              glVertex2d(5 - 7 * j, 7 - j);
+              glVertex2d(3.0 - 7 * j + ((j + i) % 2 ? zig : -zig), 15 - j);
+            }
+          } glEnd();
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor4f(0.75 + 0.25 * flare - 0.75 * frozen, 0.5, frozen,
+                      fmax(0.08, invis)); // yellow-brown
+            glVertex2d(6, 4);
+            glColor4f(0.4 + 0.4 * flare - 0.4 * frozen, 0.2, frozen,
+                      fmax(0.08, invis * invis * invis)); // brown
+            const double zig = 0.3 * az_clock_zigzag(5, 2, clock);
+            glVertex2d(10, 0.25); glVertex2d(13, 3);
+            glVertex2d(12, 7); glVertex2d(10, 10);
+            glVertex2d(-5, 8 + zig); glVertex2d(-12, 4 + zig);
+            glVertex2d(-10, 0.5 + zig); glVertex2d(10, 0.25);
+          } glEnd();
+        }
+      } glPopMatrix();
+      break;
   }
 }
 

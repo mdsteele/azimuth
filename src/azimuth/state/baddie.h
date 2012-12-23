@@ -30,7 +30,7 @@
 /*===========================================================================*/
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 9
+#define AZ_NUM_BADDIE_KINDS 10
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -42,7 +42,8 @@ typedef enum {
   AZ_BAD_SPINER,
   AZ_BAD_BOX,
   AZ_BAD_ARMORED_BOX,
-  AZ_BAD_CLAM
+  AZ_BAD_CLAM,
+  AZ_BAD_NIGHTBUG
 } az_baddie_kind_t;
 
 typedef struct {
@@ -81,6 +82,8 @@ typedef struct {
   double armor_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   double frozen; // from 0.0 (unfrozen) to 1.0 (was just now frozen)
   double cooldown; // time until baddie can attack again, in seconds
+  double param; // the meaning of this is baddie-kind-specific
+  int state; // the meaning of this is baddie-kind-specific
   az_component_t components[4];
 } az_baddie_t;
 
