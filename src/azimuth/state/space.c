@@ -44,7 +44,11 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   for (int i = 0; i < room->num_walls; ++i) {
     az_wall_t *wall;
     if (az_insert_wall(state, &wall)) {
-      *wall = room->walls[i];
+      const az_wall_spec_t *spec = &room->walls[i];
+      wall->kind = spec->kind;
+      wall->data = spec->data;
+      wall->position = spec->position;
+      wall->angle = spec->angle;
     }
   }
   for (int i = 0; i < room->num_baddies; ++i) {
@@ -164,6 +168,7 @@ bool az_insert_projectile(az_space_state_t *state,
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
   AZ_ARRAY_LOOP(wall, state->walls) {
     if (wall->kind == AZ_WALL_NOTHING) {
+      wall->flare = 0.0;
       *wall_out = wall;
       return true;
     }

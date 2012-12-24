@@ -136,7 +136,7 @@ static void do_save(void) {
     }
     // Convert walls:
     room->num_walls = AZ_LIST_SIZE(eroom->walls);
-    room->walls = AZ_ALLOC(room->num_walls, az_wall_t);
+    room->walls = AZ_ALLOC(room->num_walls, az_wall_spec_t);
     for (int i = 0; i < room->num_walls; ++i) {
       room->walls[i] = AZ_LIST_GET(eroom->walls, i)->spec;
     }
@@ -228,6 +228,7 @@ static void do_select(int x, int y, bool multi) {
       best_wall->selected = true;
     }
     state.brush.angle = best_wall->spec.angle;
+    state.brush.wall_kind = best_wall->spec.kind;
     state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
   } else if (!multi) {
     select_all(room, false);
@@ -441,7 +442,7 @@ static void do_add_wall(int x, int y) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
   wall->selected = true;
-  wall->spec.kind = AZ_WALL_NORMAL;
+  wall->spec.kind = state.brush.wall_kind;
   wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
   wall->spec.position = pt;
   wall->spec.angle = state.brush.angle;
@@ -527,10 +528,17 @@ static void do_change_data(int delta, bool secondary) {
   }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
-    const int old_index = az_wall_data_index(wall->spec.data);
-    const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
-    wall->spec.data = az_get_wall_data(new_index);
-    state.brush.wall_data_index = new_index;
+    if (secondary) {
+      const az_wall_kind_t new_kind =
+        az_modulo((int)wall->spec.kind - 1 + delta, AZ_NUM_WALL_KINDS) + 1;
+      wall->spec.kind = new_kind;
+      state.brush.wall_kind = new_kind;
+    } else {
+      const int old_index = az_wall_data_index(wall->spec.data);
+      const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
+      wall->spec.data = az_get_wall_data(new_index);
+      state.brush.wall_data_index = new_index;
+    }
     state.unsaved = true;
   }
 }
@@ -765,6 +773,7 @@ static bool load_and_init_state(void) {
   state.brush.door_kind = AZ_DOOR_NORMAL;
   state.brush.node_kind = AZ_NODE_TRACTOR;
   state.brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
+  state.brush.wall_kind = AZ_WALL_INDESTRUCTIBLE;
 
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;

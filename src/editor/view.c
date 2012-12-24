@@ -121,8 +121,15 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
 }
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
-  AZ_LIST_LOOP(wall, room->walls) {
-    az_draw_wall(&wall->spec);
+  AZ_LIST_LOOP(editor_wall, room->walls) {
+    az_wall_t real_wall;
+    real_wall.kind = editor_wall->spec.kind;
+    real_wall.data = editor_wall->spec.data;
+    real_wall.position = editor_wall->spec.position;
+    real_wall.angle = editor_wall->spec.angle;
+    real_wall.flare = (real_wall.kind == AZ_WALL_INDESTRUCTIBLE ? 0.0 :
+                       0.5 + 0.01 * az_clock_zigzag(50, 1, state->clock));
+    az_draw_wall(&real_wall);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     az_node_t real_node;

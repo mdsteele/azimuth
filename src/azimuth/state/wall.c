@@ -91,6 +91,15 @@ int az_wall_data_index(const az_wall_data_t *data) {
 
 /*===========================================================================*/
 
+bool az_circle_touches_wall(
+    const az_wall_t *wall, double radius, az_vector_t center) {
+  assert(wall->kind != AZ_WALL_NOTHING);
+  return (az_vwithin(center, wall->position,
+                     radius + wall->data->bounding_radius) &&
+          az_circle_touches_polygon_trans(wall->data->polygon, wall->position,
+                                          wall->angle, radius, center));
+}
+
 bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
                       az_vector_t delta, az_vector_t *point_out,
                       az_vector_t *normal_out) {

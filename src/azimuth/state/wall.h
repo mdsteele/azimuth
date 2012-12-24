@@ -29,9 +29,18 @@
 
 /*===========================================================================*/
 
+// The number of different wall kinds there are, not counting AZ_WALL_NOTHING:
+#define AZ_NUM_WALL_KINDS 7
+
 typedef enum {
   AZ_WALL_NOTHING = 0,
-  AZ_WALL_NORMAL
+  AZ_WALL_INDESTRUCTIBLE,
+  AZ_WALL_DESTRUCTIBLE_CHARGED,
+  AZ_WALL_DESTRUCTIBLE_ROCKET,
+  AZ_WALL_DESTRUCTIBLE_HYPER_ROCKET,
+  AZ_WALL_DESTRUCTIBLE_BOMB,
+  AZ_WALL_DESTRUCTIBLE_MEGA_BOMB,
+  AZ_WALL_DESTRUCTIBLE_CPLUS
 } az_wall_kind_t;
 
 typedef struct {
@@ -47,6 +56,7 @@ typedef struct {
   const az_wall_data_t *data;
   az_vector_t position;
   double angle;
+  double flare; // from 0.0 (nothing) to 1.0 (was just now hit)
 } az_wall_t;
 
 /*===========================================================================*/
@@ -67,6 +77,10 @@ const az_wall_data_t *az_get_wall_data(int index);
 int az_wall_data_index(const az_wall_data_t *data);
 
 /*===========================================================================*/
+
+// Determine if the specified circle overlaps any part of the wall.
+bool az_circle_touches_wall(
+    const az_wall_t *wall, double radius, az_vector_t center);
 
 // Determine if a ray, travelling delta from start, will hit the wall.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)

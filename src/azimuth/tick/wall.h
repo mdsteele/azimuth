@@ -18,15 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_H_
-#define AZIMUTH_TICK_BADDIE_H_
+#ifndef AZIMUTH_TICK_WALL_H_
+#define AZIMUTH_TICK_WALL_H_
 
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_baddies(az_space_state_t *state, double time);
+void az_tick_walls(az_space_state_t *state, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_H_
+#endif // AZIMUTH_TICK_WALL_H_

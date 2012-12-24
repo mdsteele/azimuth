@@ -93,6 +93,7 @@ void az_init_wall_drawing(void) {
 /*===========================================================================*/
 
 void az_draw_wall(const az_wall_t *wall) {
+  assert(wall->kind != AZ_WALL_NOTHING);
   const GLuint display_list =
     wall_display_lists_start + az_wall_data_index(wall->data);
   assert(glIsList(display_list));
@@ -100,6 +101,39 @@ void az_draw_wall(const az_wall_t *wall) {
     glTranslated(wall->position.x, wall->position.y, 0);
     glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
     glCallList(display_list);
+    if (wall->flare > 0.0) {
+      assert(wall->flare <= 1.0);
+      assert(wall->kind != AZ_WALL_INDESTRUCTIBLE);
+      switch (wall->kind) {
+        case AZ_WALL_NOTHING:
+        case AZ_WALL_INDESTRUCTIBLE:
+          AZ_ASSERT_UNREACHABLE();
+        case AZ_WALL_DESTRUCTIBLE_CHARGED:
+          glColor4f(0.5, 0.5, 0.5, 0.75 * wall->flare);
+          break;
+        case AZ_WALL_DESTRUCTIBLE_ROCKET:
+          glColor4f(0.5, 0, 0, 0.75 * wall->flare);
+          break;
+        case AZ_WALL_DESTRUCTIBLE_HYPER_ROCKET:
+          glColor4f(0.5, 0, 0.5, 0.75 * wall->flare);
+          break;
+        case AZ_WALL_DESTRUCTIBLE_BOMB:
+          glColor4f(0, 0, 0.5, 0.75 * wall->flare);
+          break;
+        case AZ_WALL_DESTRUCTIBLE_MEGA_BOMB:
+          glColor4f(0, 0.5, 0.5, 0.75 * wall->flare);
+          break;
+        case AZ_WALL_DESTRUCTIBLE_CPLUS:
+          glColor4f(0, 0.5, 0, 0.75 * wall->flare);
+          break;
+      }
+      glBegin(GL_TRIANGLE_FAN); {
+        const az_polygon_t polygon = wall->data->polygon;
+        for (int i = 0; i < polygon.num_vertices; ++i) {
+          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+        }
+      } glEnd();
+    }
   } glPopMatrix();
 }
 

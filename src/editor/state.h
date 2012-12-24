@@ -66,7 +66,7 @@ typedef struct {
 
 typedef struct {
   bool selected;
-  az_wall_t spec;
+  az_wall_spec_t spec;
 } az_editor_wall_t;
 
 typedef struct {
@@ -98,6 +98,7 @@ typedef struct {
     az_door_kind_t door_kind;
     az_node_kind_t node_kind;
     az_upgrade_t upgrade_kind;
+    az_wall_kind_t wall_kind;
     int wall_data_index;
   } brush;
   az_room_key_t current_room;

@@ -30,7 +30,8 @@
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
 #include "azimuth/tick/ship.h"
-#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
+#include "azimuth/tick/wall.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -165,6 +166,15 @@ static void tick_timer(az_timer_t *timer, double time) {
   timer->time_remaining = fmax(0.0, timer->time_remaining - time);
 }
 
+static void tick_pickups_walls_doors_projectiles_and_baddies(
+    az_space_state_t *state, double time) {
+  az_tick_pickups(state, time);
+  az_tick_walls(state, time);
+  az_tick_doors(state, time);
+  az_tick_projectiles(state, time);
+  az_tick_baddies(state, time);
+}
+
 void az_tick_space_state(az_space_state_t *state, double time) {
   // If we're pausing or unpausing, nothing else should happen.
   if (state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING) {
@@ -183,28 +193,19 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   az_tick_particles(state, time);
   switch (state->mode) {
     case AZ_MODE_NORMAL:
-      az_tick_pickups(state, time);
-      az_tick_doors(state, time);
-      az_tick_projectiles(state, time);
-      az_tick_baddies(state, time);
+      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
       az_tick_ship(state, time);
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
       if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
-        az_tick_pickups(state, time);
-        az_tick_doors(state, time);
-        az_tick_projectiles(state, time);
-        az_tick_baddies(state, time);
+        tick_pickups_walls_doors_projectiles_and_baddies(state, time);
         az_tick_ship(state, time);
       }
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
-      az_tick_pickups(state, time);
-      az_tick_doors(state, time);
-      az_tick_projectiles(state, time);
-      az_tick_baddies(state, time);
+      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
       break;
     case AZ_MODE_PAUSING:
     case AZ_MODE_RESUMING:

@@ -51,6 +51,13 @@ typedef struct {
 } az_node_spec_t;
 
 typedef struct {
+  az_wall_kind_t kind;
+  const az_wall_data_t *data;
+  az_vector_t position;
+  double angle;
+} az_wall_spec_t;
+
+typedef struct {
   az_room_key_t key;
   az_camera_bounds_t camera_bounds;
   int num_baddies;
@@ -60,7 +67,7 @@ typedef struct {
   int num_nodes;
   az_node_spec_t *nodes;
   int num_walls;
-  az_wall_t *walls;
+  az_wall_spec_t *walls;
 } az_room_t;
 
 // Attempt to open the file located at the given path and load room data from

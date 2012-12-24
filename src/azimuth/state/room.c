@@ -75,7 +75,7 @@ static void parse_room_header(az_load_room_t *loader) {
   if (num_walls < 0 || num_walls > AZ_MAX_NUM_WALLS) FAIL();
   loader->num_walls = num_walls;
   loader->room->num_walls = 0;
-  loader->room->walls = AZ_ALLOC(num_walls, az_wall_t);
+  loader->room->walls = AZ_ALLOC(num_walls, az_wall_spec_t);
 }
 
 static void parse_baddie_directive(az_load_room_t *loader) {
@@ -129,13 +129,14 @@ static void parse_node_directive(az_load_room_t *loader) {
 
 static void parse_wall_directive(az_load_room_t *loader) {
   if (loader->room->num_walls >= loader->num_walls) FAIL();
-  int index;
+  int kind, index;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf\n",
-             &index, &x, &y, &angle) < 4) FAIL();
+  if (fscanf(loader->file, "%d d%d x%lf y%lf a%lf\n",
+             &kind, &index, &x, &y, &angle) < 5) FAIL();
+  if (kind <= 0 || index > AZ_NUM_WALL_KINDS) FAIL();
   if (index < 0 || index >= AZ_NUM_WALL_DATAS) FAIL();
-  az_wall_t *wall = &loader->room->walls[loader->room->num_walls];
-  wall->kind = AZ_WALL_NORMAL;
+  az_wall_spec_t *wall = &loader->room->walls[loader->room->num_walls];
+  wall->kind = (az_wall_kind_t)kind;
   wall->data = az_get_wall_data(index);
   wall->position = (az_vector_t){x, y};
   wall->angle = angle;
@@ -196,9 +197,10 @@ static bool write_room(const az_room_t *room, FILE *file) {
         room->camera_bounds.min_theta, room->camera_bounds.theta_span,
         room->num_baddies, room->num_doors, room->num_nodes, room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
-    const az_wall_t *wall = &room->walls[i];
-    WRITE("W%d x%.02f y%.02f a%f\n", az_wall_data_index(wall->data),
-          wall->position.x, wall->position.y, wall->angle);
+    const az_wall_spec_t *wall = &room->walls[i];
+    WRITE("W%d d%d x%.02f y%.02f a%f\n", (int)wall->kind,
+          az_wall_data_index(wall->data), wall->position.x, wall->position.y,
+          wall->angle);
   }
   for (int i = 0; i < room->num_doors; ++i) {
     const az_door_spec_t *door = &room->doors[i];
