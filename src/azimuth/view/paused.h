@@ -29,7 +29,7 @@
 typedef struct {
   const az_planet_t *planet;
   az_player_t *player;
-  // FIXME more fields
+  // TODO more fields
 } az_paused_state_t;
 
 void az_paused_draw_screen(az_paused_state_t *state);

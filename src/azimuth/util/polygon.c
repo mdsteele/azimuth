@@ -421,6 +421,95 @@ bool az_circle_hits_polygon_trans(
 
 /*===========================================================================*/
 
+bool az_arc_ray_hits_circle(
+    double circle_radius, az_vector_t circle_center, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  // If the point is already inside the circle, we're immediately done.
+  if (az_vwithin(start, circle_center, circle_radius)) {
+    if (point_out != NULL) *point_out = start;
+    if (normal_out != NULL) *normal_out = az_vsub(start, circle_center);
+    return true;
+  }
+  // Otherwise, if the ray isn't going to move at all, we're done.
+  else if (spin_angle == 0.0) return false;
+
+  // Calculate our starting positions relative to spin_center.
+  const az_vector_t rel_center = az_vsub(circle_center, spin_center);
+  const double circle_dist = az_vnorm(rel_center);
+  const az_vector_t rel_start = az_vsub(start, spin_center);
+  const double spin_radius = az_vnorm(rel_start);
+
+  // If the ray wouldn't hit the circle at any angle, we're done.
+  if (fabs(circle_dist - spin_radius) > circle_radius) return false;
+  const double start_theta = az_vtheta(rel_start);
+
+  // Next we need to determine the earliest angle at which the ray will impact
+  // the circle.  Derivation:
+  //   Let cr = circle_radius
+  //       sr = spin_radius
+  //       (rx, ry) = rel_center
+  //       t = start_theta + angle
+  //   Our goal is to solve for `angle`.
+  //   We set the distance between the ray and the circle center equal to the
+  //   circle radius, and start solving for t:
+  //     cr^2 = (sr*cos(t) - rx)^2 + (sr*sin(t) - ry)^2
+  //     cr^2 = sr^2*cos^2(t) - 2*rx*sr*cos(t) + rx^2 +
+  //            sr^2*sin^2(t) - 2*ry*sr*sin(t) + ry^2
+  //   Factor and apply identity cos^2(t) + sin^2(t) = 1 to get:
+  //     cr^2 = sr^2 + rx^2 + ry^2 - 2*sr*(rx*cos(t) + ry*sin(t))
+  //     rx*cos(t) + ry*sin(t) = (sr^2 + rx^2 + ry^2 - cr^2) / (2 * sr)
+  //   Next, pause for a moment and let s = atan2(rx, ry) (n.b. note the
+  //   flipped arguments to atan2!) and cd = circle_dist, yielding:
+  //     rx*cos(t) + ry*sin(t) = cd * (sin(s)*cos(t) + cos(s)*sin(t))
+  //   Apply identity sin(s)*cos(t) + cos(s)*sin(t) = sin(s + t) to get:
+  //     rx*cos(t) + ry*sin(t) = cd * sin(s + t)
+  //   Substitute that in above and get:
+  //     cd * sin(s + t) = (sr^2 + rx^2 + ry^2 - cr^2) / (2 * sr)
+  //     sin(s + t) = (sr^2 + cd^2 - cr^2) / (2 * sr * cd)
+  //     angle = asin((sr^2 + cd^2 - cr^2) / (2 * sr * cd)) - s - start_theta
+  //   Done.  Now we just need to check both possible values of the arcsine.
+  const double s = atan2(rel_center.x, rel_center.y); // n.b. x before y here
+  // We know from checking above that 1) we didn't start within the circle, but
+  // 2) we will hit the circle at some point (though possibly not within
+  // spin_angle).  These facts imply that neither start nor circle_center can
+  // be equal to spin_center, and therefore that spin_radius and circle_dist
+  // are both nonzero.  This is good, because we'll be dividing by them soon.
+  assert(spin_radius > 0.0);
+  assert(circle_dist > 0.0);
+  // Calculate the arcsine from the above equation, sanity-checking the range
+  // of the sine first (it's guaranteed to be within range, but that fact may
+  // not be obvious, hence the assertion).
+  const double sine =
+    (spin_radius*spin_radius + circle_dist*circle_dist -
+     circle_radius*circle_radius) / (2.0 * spin_radius * circle_dist);
+  assert(-1.0 <= sine && sine <= 1.0);
+  const double arcsine = asin(sine);
+  // The asin function will give us one possible value, but really there are
+  // two possible values (since we can hit either of two sides of the circle).
+  // So calculate the two values for `angle` (modulo multiples of 2pi):
+  const double angle1 = arcsine - s - start_theta;
+  const double angle2 = AZ_PI - arcsine - s - start_theta;
+  // Pick the first angle at which we hit the circle (which depends on the sign
+  // of spin_angle):
+  const double angle =
+    (spin_angle > 0.0 ?
+     fmin(az_mod2pi_nonneg(angle1), az_mod2pi_nonneg(angle2)) :
+     fmax(az_mod2pi_nonpos(angle1), az_mod2pi_nonpos(angle2)));
+  // If the angle is within spin_angle (note that the two will have the same
+  // sign), then we hit the circle, otherwise we don't.
+  if (fabs(angle) > fabs(spin_angle)) return false;
+  if (point_out != NULL || normal_out != NULL) {
+    const az_vector_t point =
+      az_vadd(spin_center, az_vpolar(spin_radius, start_theta + angle));
+    if (point_out != NULL) *point_out = point;
+    if (normal_out != NULL) *normal_out = az_vsub(point, circle_center);
+  }
+  return true;
+}
+
+/*===========================================================================*/
+
 // This function works much the same as az_polygons_collide, but assumes that
 // s_polygon is at the origin, unrotated.  az_polygons_collide is then
 // implemented in terms of this function.

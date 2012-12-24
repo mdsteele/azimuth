@@ -81,13 +81,13 @@ bool az_circle_touches_polygon_trans(
 bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
                                  az_vector_t center, double radius);
 
-// The following functions each determine if a ray, travelling delta form
+// The following functions each determine if a ray, travelling delta from
 // start, will ever intersect a particular shape (depending on the function).
-// If it does, the function stores in *pos_out the first position of the circle
-// at which it touches the shape (if pos_out is non-NULL) and in *impact_out
-// the point of intersection (if impact_out is non-NULL).  No guarantees are
-// made about the length of the normal vector, and in particular it may be
-// zero (if there is no well-defined normal for the collision).
+// If it does, the function stores in *point_out the point at which it touches
+// the shape (if point_out is non-NULL) and a vector normal to the shape at the
+// impact point in *normal_out (if normal_out is non-NULL).  No guarantees are
+// made about the length of the normal vector, and in particular it may be zero
+// (if there is no well-defined normal for the collision).
 
 // Determine if the ray will hit the given circle.
 bool az_ray_hits_circle(double radius, az_vector_t center,
@@ -110,7 +110,7 @@ bool az_ray_hits_polygon_trans(az_polygon_t polygon,
 /*===========================================================================*/
 
 // The following functions each determine if a circle with the specified
-// radius, travelling delta form start, will ever intersect a particular shape
+// radius, travelling delta from start, will ever intersect a particular shape
 // (depending on the function).  If it does, the function stores in *pos_out
 // the first position of the circle at which it touches the shape (if pos_out
 // is non-NULL) and in *impact_out the point of intersection (if impact_out is
@@ -148,6 +148,23 @@ bool az_circle_hits_polygon_trans(
     az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
     double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
+
+/*===========================================================================*/
+
+// The following functions each determine if a circular ray, travelling from
+// start around spin_center by spin_angle radians, will ever intersect a
+// particular shape (depending on the function).  If it does, the function
+// stores in *pos_out the first position of the ray at which it touches the
+// shape (if pos_out is non-NULL) and in *impact_out the point of intersection
+// (if impact_out is non-NULL).  No guarantees are made about the length of the
+// normal vector, and in particular it may be zero (if there is no well-defined
+// normal for the collision).
+
+// Determine if the circular ray will hit the given circle.
+bool az_arc_ray_hits_circle(
+    double circle_radius, az_vector_t circle_center, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *point_out, az_vector_t *normal_out);
 
 /*===========================================================================*/
 

@@ -28,13 +28,9 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
-
-static double mod2pi_nonneg(double theta) {
-  const double theta2 = az_mod2pi(theta);
-  return (theta2 < 0.0 ? theta2 + AZ_TWO_PI : theta2);
-}
 
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
   glNewList(list, GL_COMPILE); {
@@ -62,13 +58,13 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
           const double bezel = 18.0;
           const double td = az_vtheta(az_vsub(d, c));
           const double tb = az_vtheta(az_vsub(b, c));
-          const double ttc = 0.5 * mod2pi_nonneg(tb - td);
+          const double ttc = 0.5 * az_mod2pi_nonneg(tb - td);
           az_vector_t dd =
             az_vadd(c, az_vpolar(bezel / sin(ttc), td + ttc));
           glVertex2d(dd.x, dd.y);
           const double ta = az_vtheta(az_vsub(a, b));
           const double tc = az_vtheta(az_vsub(c, b));
-          const double ttb = 0.5 * mod2pi_nonneg(ta - tc);
+          const double ttb = 0.5 * az_mod2pi_nonneg(ta - tc);
           az_vector_t aa =
             az_vadd(b, az_vpolar(bezel / sin(ttb), tc + ttb));
           glVertex2d(aa.x, aa.y);

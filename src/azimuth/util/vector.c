@@ -154,6 +154,16 @@ double az_mod2pi(double theta) {
   return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);
 }
 
+double az_mod2pi_nonneg(double theta) {
+  assert(isfinite(theta));
+  return theta - AZ_TWO_PI * floor(theta / AZ_TWO_PI);
+}
+
+double az_mod2pi_nonpos(double theta) {
+  assert(isfinite(theta));
+  return theta - AZ_TWO_PI * ceil(theta / AZ_TWO_PI);
+}
+
 double az_angle_towards(double theta, double delta, double goal) {
   const double difference = az_mod2pi(theta - goal);
   return az_mod2pi(difference < 0.0 ?

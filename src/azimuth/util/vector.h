@@ -111,6 +111,10 @@ int az_modulo(int a, int b);
 // Add or subtract a multiple of 2pi from the given number so that the result
 // is between -pi and pi.
 double az_mod2pi(double theta);
+// Like az_mod2pi, but make the result be between 0 and 2pi.
+double az_mod2pi_nonneg(double theta);
+// Like az_mod2pi, but make the result be between -2pi and 0.
+double az_mod2pi_nonpos(double theta);
 
 // Add or subtract `delta` from the absolute angle `theta` to move it towards
 // the absolute angle `goal`, but don't overshoot if the two angles are within

@@ -47,6 +47,20 @@ void test_mod2pi(void) {
     EXPECT_APPROX(sin(t), sin(t2));
     EXPECT_APPROX(cos(t), cos(t2));
   }
+  for (double t = -20.0; t < 20.0; t += 0.1) {
+    const double t2 = az_mod2pi_nonneg(t);
+    EXPECT_TRUE(t2 >= 0.0);
+    EXPECT_TRUE(t2 <= AZ_TWO_PI);
+    EXPECT_APPROX(sin(t), sin(t2));
+    EXPECT_APPROX(cos(t), cos(t2));
+  }
+  for (double t = -20.0; t < 20.0; t += 0.1) {
+    const double t2 = az_mod2pi_nonpos(t);
+    EXPECT_TRUE(t2 >= -AZ_TWO_PI);
+    EXPECT_TRUE(t2 <= 0.0);
+    EXPECT_APPROX(sin(t), sin(t2));
+    EXPECT_APPROX(cos(t), cos(t2));
+  }
 }
 
 void test_vector_polar(void) {

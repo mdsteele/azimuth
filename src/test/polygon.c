@@ -28,14 +28,16 @@
 
 #define NULL_POLYGON ((az_polygon_t){ .num_vertices = 0 })
 
-static az_vector_t triangle_vertices[3] = {{-3, -3}, {2, 0}, {1, 4}};
+static const az_vector_t triangle_vertices[3] = {{-3, -3}, {2, 0}, {1, 4}};
 
-static az_vector_t concave_hexagon_vertices[6] = {
+static const az_vector_t concave_hexagon_vertices[6] = {
   {2, -3}, {2, 2}, {-2, 3}, {-2, -3}, {0, -1}, {1, -1}
 };
 
-static az_vector_t square_vertices[5] =
+static const az_vector_t square_vertices[5] =
   {{1, 1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+
+static const az_vector_t nix = {99999, 99999};
 
 /*===========================================================================*/
 
@@ -163,7 +165,6 @@ void test_ray_hits_bounding_circle(void) {
 }
 
 void test_ray_hits_circle(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;
 
   // Check az_ray_hits_circle works with NULLs for point_out and normal_out:
@@ -181,7 +182,6 @@ void test_ray_hits_circle(void) {
 }
 
 void test_ray_hits_polygon(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
@@ -240,7 +240,6 @@ void test_ray_hits_polygon(void) {
 }
 
 void test_ray_hits_polygon_trans(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t intersect = nix, normal = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
@@ -255,7 +254,6 @@ void test_ray_hits_polygon_trans(void) {
 /*===========================================================================*/
 
 void test_circle_hits_point(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
 
   // Check az_circle_hits_point works with NULLs for pos_out and impact_out:
@@ -297,7 +295,6 @@ void test_circle_hits_point(void) {
 }
 
 void test_circle_hits_circle(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
 
   // Check az_circle_hits_point works with NULLs for pos_out and impact_out:
@@ -331,7 +328,6 @@ void test_circle_hits_circle(void) {
 }
 
 void test_circle_hits_line(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
 
   // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
@@ -373,7 +369,6 @@ void test_circle_hits_line(void) {
 }
 
 void test_circle_hits_line_segment(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
 
   // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
@@ -417,7 +412,6 @@ void test_circle_hits_line_segment(void) {
 }
 
 void test_circle_hits_polygon(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
@@ -476,7 +470,6 @@ void test_circle_hits_polygon(void) {
 }
 
 void test_circle_hits_polygon_trans(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
@@ -489,8 +482,66 @@ void test_circle_hits_polygon_trans(void) {
 
 /*===========================================================================*/
 
+void test_arc_ray_hits_circle(void) {
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_arc_ray_hits_circle works with NULLs:
+  EXPECT_TRUE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
+      AZ_DEG2RAD(-135), NULL, NULL));
+
+  // Simple case, hitting (with negative spin_angle):
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
+      AZ_DEG2RAD(-135), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){5, 1}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){0, 1}), az_vunit(normal));
+
+  // Simple case, stopping short (with negative spin_angle):
+  intersect = normal = nix;
+  EXPECT_FALSE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
+      AZ_DEG2RAD(-89), &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Simple case, hitting (with positive spin_angle):
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){2, 0}, (az_vector_t){2, -3},
+      AZ_DEG2RAD(315), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){5, -3}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){0, -1}), az_vunit(normal));
+
+  // Simple case, stopping short (with positive spin_angle):
+  intersect = normal = nix;
+  EXPECT_FALSE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){2, 0}, (az_vector_t){2, -3},
+      AZ_DEG2RAD(269), &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Ray goes completely around circle:
+  intersect = normal = nix;
+  EXPECT_FALSE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){9, 5}, (az_vector_t){4, 0},
+      AZ_DEG2RAD(400), &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Ray starts inside circle:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_circle(
+      2.0, (az_vector_t){5, -1}, (az_vector_t){4, 0}, (az_vector_t){1, 1},
+      AZ_DEG2RAD(400), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){4, 0}), intersect);
+  EXPECT_VAPPROX(((az_vector_t){-1, 1}), normal);
+}
+
+/*===========================================================================*/
+
 void test_polygons_collide(void) {
-  const az_vector_t nix = {99999, 99999};
   az_vector_t pos = nix, impact = nix, normal = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);

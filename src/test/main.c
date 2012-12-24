@@ -25,6 +25,7 @@
 int main(int argc, char **argv) {
   az_init_random();
 
+  RUN_TEST(test_arc_ray_hits_circle);
   RUN_TEST(test_circle_hits_circle);
   RUN_TEST(test_circle_hits_line);
   RUN_TEST(test_circle_hits_line_segment);
