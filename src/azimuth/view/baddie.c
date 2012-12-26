@@ -51,15 +51,15 @@ static void draw_atom_electron(double radius, az_vector_t position,
   } glPopMatrix();
 }
 
-static void draw_spiner_spine(void) {
+static void draw_spiner_spine(double flare, double frozen) {
   glBegin(GL_TRIANGLE_STRIP); {
-    glColor4f(0, 0.3, 0, 0);
+    glColor4f(0.5 * flare, 0.3, 0, 0);
     glVertex2d(-3, 3);
-    glColor3f(0.6, 0.7, 0.6);
+    glColor3f(0.6 + 0.4 * flare, 0.7, 0.6);
     glVertex2d(5, 0);
-    glColor3f(0.6, 0.7, 0);
+    glColor3f(0.6 + 0.4 * flare, 0.7, frozen);
     glVertex2d(-5, 0);
-    glColor4f(0, 0.3, 0, 0);
+    glColor4f(0 * flare, 0.3, 0, 0);
     glVertex2d(-3, -3);
   } glEnd();
 }
@@ -221,11 +221,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_SPINER:
       if (baddie->cooldown < 1.0) {
-        for (int i = 0; i <= 360; i += 45) {
+        for (int i = 0; i < 360; i += 45) {
           glPushMatrix(); {
             glRotated(i, 0, 0, 1);
             glTranslated(18.0 - 8.0 * baddie->cooldown, 0, 0);
-            draw_spiner_spine();
+            draw_spiner_spine(0, frozen);
           } glPopMatrix();
         }
       }
@@ -240,18 +240,18 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
-      for (int i = 0; i <= 360; i += 45) {
+      for (int i = 0; i < 360; i += 45) {
         glPushMatrix(); {
           glRotated(i + 22.5, 0, 0, 1);
           glTranslated(16 + 0.5 * az_clock_zigzag(6, 5, clock), 0, 0);
-          draw_spiner_spine();
+          draw_spiner_spine(0, frozen);
         } glPopMatrix();
       }
-      for (int i = 0; i <= 360; i += 45) {
+      for (int i = 0; i < 360; i += 45) {
         glPushMatrix(); {
           glRotated(i + 11.25, 0, 0, 1);
           glTranslated(8 + 0.5 * az_clock_zigzag(6, 7, clock), 0, 0);
-          draw_spiner_spine();
+          draw_spiner_spine(0, frozen);
         } glPopMatrix();
       }
       break;
@@ -352,6 +352,22 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           } glEnd();
         }
       } glPopMatrix();
+      break;
+    case AZ_BAD_SPINE_MINE:
+      for (int i = 0; i < 18; ++i) {
+        glPushMatrix(); {
+          glRotated(i * 20, 0, 0, 1);
+          glTranslated(7.5 + 0.5 * az_clock_zigzag(6, 3, clock + i * 7), 0, 0);
+          draw_spiner_spine(flare, frozen);
+        } glPopMatrix();
+      }
+      for (int i = 0; i < 9; ++i) {
+        glPushMatrix(); {
+          glRotated(i * 40 + 30, 0, 0, 1);
+          glTranslated(4 + 0.5 * az_clock_zigzag(7, 3, clock - i * 13), 0, 0);
+          draw_spiner_spine(flare, frozen);
+        } glPopMatrix();
+      }
       break;
   }
 }

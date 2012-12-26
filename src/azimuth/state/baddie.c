@@ -146,6 +146,11 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 8.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(nightbug_vertices) }
+  },
+  [AZ_BAD_SPINE_MINE] = {
+    .max_health = 5.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .main_body = { .bounding_radius = 9.0 }
   }
 };
 
