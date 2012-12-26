@@ -572,6 +572,31 @@ void test_arc_ray_hits_line(void) {
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
 }
 
+void test_arc_ray_hits_line_segment(void) {
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_arc_ray_hits_line_segment works with NULLs:
+  EXPECT_TRUE(az_arc_ray_hits_line_segment(
+      (az_vector_t){1, 6}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL));
+
+  // Ray hits line segment:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_line_segment(
+      (az_vector_t){1, 6}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){1, 5}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Ray would hit infinite line, but misses line segment:
+  intersect = normal = nix;
+  EXPECT_FALSE(az_arc_ray_hits_line_segment(
+      (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){3, 1},
+      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+}
+
 /*===========================================================================*/
 
 void test_arc_circle_hits_point(void) {
@@ -639,6 +664,39 @@ void test_arc_circle_hits_line(void) {
       (az_vector_t){10, 0}, AZ_DEG2RAD(-400), &pos, &impact));
   EXPECT_VAPPROX(nix, pos);
   EXPECT_VAPPROX(nix, impact);
+}
+
+void test_arc_circle_hits_line_segment(void) {
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_arc_circle_hits_line_segment works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_line_segment(
+      (az_vector_t){-2, 0}, (az_vector_t){-2, -2}, 3.0, (az_vector_t){3, -3},
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL));
+
+  // Circle hits line segment in the middle:
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_line_segment(
+      (az_vector_t){-2, 0}, (az_vector_t){-2, -2}, 3.0, (az_vector_t){3, -3},
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){1, -1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-2, -1}), impact);
+
+  // Circle would hit infinite line, but misses line segment:
+  pos = impact = nix;
+  EXPECT_FALSE(az_arc_circle_hits_line_segment(
+      (az_vector_t){-2, 70}, (az_vector_t){-2, 90}, 3.0, (az_vector_t){3, -3},
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+
+  // Circle hits one end of the line segment:
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_line_segment(
+      (az_vector_t){1, 0}, (az_vector_t){2, 0}, sqrt(2), (az_vector_t){3, 3},
+      (az_vector_t){2, 2}, AZ_DEG2RAD(-100), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){2, 0}), impact);
 }
 
 /*===========================================================================*/

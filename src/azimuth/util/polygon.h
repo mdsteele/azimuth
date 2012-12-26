@@ -173,6 +173,13 @@ bool az_arc_ray_hits_line(
     az_vector_t spin_center, double spin_angle,
     az_vector_t *point_out, az_vector_t *normal_out);
 
+// Determine if the circular ray will hit the finite line segment between p1
+// and p2.
+bool az_arc_ray_hits_line_segment(
+    az_vector_t p1, az_vector_t p2, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *point_out, az_vector_t *normal_out);
+
 /*===========================================================================*/
 
 // The following functions each determine if a circle, travelling in a circular
@@ -197,6 +204,12 @@ bool az_arc_circle_hits_circle(
 // Determine if the circle will hit the infinite line passing through p1 and
 // p2.
 bool az_arc_circle_hits_line(
+    az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will hit the finite line segment between p1 and p2.
+bool az_arc_circle_hits_line_segment(
     az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
     az_vector_t *pos_out, az_vector_t *impact_out);

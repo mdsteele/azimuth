@@ -27,9 +27,11 @@ int main(int argc, char **argv) {
 
   RUN_TEST(test_arc_circle_hits_circle);
   RUN_TEST(test_arc_circle_hits_line);
+  RUN_TEST(test_arc_circle_hits_line_segment);
   RUN_TEST(test_arc_circle_hits_point);
   RUN_TEST(test_arc_ray_hits_circle);
   RUN_TEST(test_arc_ray_hits_line);
+  RUN_TEST(test_arc_ray_hits_line_segment);
   RUN_TEST(test_circle_hits_circle);
   RUN_TEST(test_circle_hits_line);
   RUN_TEST(test_circle_hits_line_segment);
