@@ -536,7 +536,109 @@ void test_arc_ray_hits_circle(void) {
       2.0, (az_vector_t){5, -1}, (az_vector_t){4, 0}, (az_vector_t){1, 1},
       AZ_DEG2RAD(400), &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){4, 0}), intersect);
-  EXPECT_VAPPROX(((az_vector_t){-1, 1}), normal);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
+
+  // Ray hits circle diagonally:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_circle(
+      sqrt(2), (az_vector_t){1, 1}, (az_vector_t){4, 2}, (az_vector_t){3, 1},
+      AZ_DEG2RAD(400), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 1}), az_vunit(normal));
+}
+
+void test_arc_ray_hits_line(void) {
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_arc_ray_hits_line works with NULLs:
+  EXPECT_TRUE(az_arc_ray_hits_line(
+      (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL));
+
+  // Ray hits line:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_line(
+      (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){1, 5}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Ray hits line:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_line(
+      (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){3, 1},
+      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+}
+
+/*===========================================================================*/
+
+void test_arc_circle_hits_point(void) {
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_arc_circle_hits_point works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){3, 5}, (az_vector_t){3, 3},
+      AZ_DEG2RAD(-270), NULL, NULL));
+
+  // Check case where circle hits point dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_point(
+      (az_vector_t){1, 1}, 2.0, (az_vector_t){3, 5}, (az_vector_t){3, 3},
+      AZ_DEG2RAD(-270), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+}
+
+void test_arc_circle_hits_circle(void) {
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_arc_circle_hits_circle works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_circle(
+      0.5, (az_vector_t){0.5, 1}, 2.0, (az_vector_t){3, 5},
+      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), NULL, NULL));
+
+  // Check case where circle hits circle dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_circle(
+      0.5, (az_vector_t){0.5, 1}, 2.0, (az_vector_t){3, 5},
+      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+}
+
+void test_arc_circle_hits_line(void) {
+  az_vector_t pos = nix, impact = nix;
+
+  // Check az_arc_circle_hits_line works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_line(
+      (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){3, -3},
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL));
+
+  // Check case where circle hits line dead-on.
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_line(
+      (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){3, -3},
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){1, -1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-2, -1}), impact);
+
+  // Check case where circle hits line obliquely.
+  pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_line(
+      (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){11, -5},
+      (az_vector_t){6, 0}, AZ_DEG2RAD(-170), &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){1, -5}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-2, -5}), impact);
+
+  // Check case where circle can't hit line.
+  pos = impact = nix;
+  EXPECT_FALSE(az_arc_circle_hits_line(
+      (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){15, -5},
+      (az_vector_t){10, 0}, AZ_DEG2RAD(-400), &pos, &impact));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
 }
 
 /*===========================================================================*/

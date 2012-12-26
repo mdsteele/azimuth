@@ -20,11 +20,23 @@
 #include "azimuth/util/polygon.h"
 
 #include <assert.h>
-#include <math.h> // for INFINITY and isfinite
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h> // for NULL
 
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+static bool solve_quadratic(double a, double b, double c,
+                            double *t1, double *t2) {
+  const double discriminant = b * b - 4.0 * a * c;
+  if (discriminant < 0.0) return false;
+  const double root = sqrt(discriminant);
+  *t1 = (-b + root) / (2.0 * a);
+  *t2 = (-b - root) / (2.0 * a);
+  return true;
+}
 
 /*===========================================================================*/
 
@@ -264,19 +276,14 @@ bool az_circle_hits_point(
     return true;
   }
   // Set up a quadratic equation modeling when the circle will hit the point
-  // (assuming it travels t*delta from start at time t).
+  // (assuming it travels t*delta from start at time t).  If there is no
+  // solution, the circle misses the point; otherwise, we still need to check
+  // if the solution is in range.
   const az_vector_t sdelta = az_vsub(start, point);
-  const double a = az_vdot(delta, delta);
-  const double b = 2.0 * az_vdot(sdelta, delta);
-  const double c = az_vdot(sdelta, sdelta) - radius * radius;
-  const double discriminant = b * b - 4.0 * a * c;
-  // If the discriminant is negative, there is no solution, so the circle
-  // misses the point.
-  if (discriminant < 0) return false;
-  // Otherwise, there's a solution, but we need to check if it's in range.
-  const double root = sqrt(discriminant);
-  const double t1 = (-b + root) / (2.0 * a);
-  const double t2 = (-b - root) / (2.0 * a);
+  double t1, t2;
+  if (!solve_quadratic(az_vdot(delta, delta), 2.0 * az_vdot(sdelta, delta),
+                       az_vdot(sdelta, sdelta) - radius * radius,
+                       &t1, &t2)) return false;
   const double t = (0.0 <= t1 && (t1 <= t2 || t2 < 0.0) ? t1 : t2);
   if (0.0 <= t && t <= 1.0) {
     if (pos_out != NULL) *pos_out = az_vadd(start, az_vmul(delta, t));
@@ -505,6 +512,114 @@ bool az_arc_ray_hits_circle(
     if (point_out != NULL) *point_out = point;
     if (normal_out != NULL) *normal_out = az_vsub(point, circle_center);
   }
+  return true;
+}
+
+bool az_arc_ray_hits_line(
+    az_vector_t p1, az_vector_t p2, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  // Calculate start, and the line, relative to spin_center.  We will use
+  // parametric form for the line; it is the locus of points p0 + t * delta for
+  // all values of t.
+  const az_vector_t p0 = az_vsub(p1, spin_center);
+  const az_vector_t delta = az_vsub(p2, p1);
+  const az_vector_t rel_start = az_vsub(start, spin_center);
+  // Next we need to calculate the two points on the circle in which the ray
+  // travels that intersect the line.  Derivation:
+  //   Let sr = spin_radius (that is, vnorm(rel_start))
+  //       (x0, y0) = p0
+  //       (dx, dy) = delta
+  //   Given a point on the line determined by t, we set the distance between
+  //   that point and the origin (i.e. spin_center) equal to the spin_radius.
+  //   Then we solve for t:
+  //     sr^2 = (x0 + dx*t)^2 + (y0 + dy*t)^2
+  //     sr^2 = x0^2 + 2*x0*dx*t + dx^2*t^2 + y0^2 + 2*y0*dy*t + dy^2*t^2
+  //     0 = (dx^2 + dy^2)*t^2 + (2*x0*dx + 2*y0*dy)*t + x0^2 + y0^2 - sr^2
+  //   This is a simple quadratic equation.  If there is no solution, that
+  //   means that the ray can never hit the line, and we are done.
+  double t1, t2;
+  if (!solve_quadratic(az_vdot(delta, delta), 2.0 * az_vdot(p0, delta),
+                       az_vdot(p0, p0) - az_vdot(rel_start, rel_start),
+                       &t1, &t2)) return false;
+  // We now know the two points on the line that intersect the ray's circle.
+  // Next we find the ray angles that correspond to those two points:
+  const double start_theta = az_vtheta(rel_start);
+  const double angle1 =
+    az_vtheta(az_vadd(p0, az_vmul(delta, t1))) - start_theta;
+  const double angle2 =
+    az_vtheta(az_vadd(p0, az_vmul(delta, t2))) - start_theta;
+  // Pick the first angle at which we hit the circle (which depends on the sign
+  // of spin_angle):
+  const double angle =
+    (spin_angle > 0.0 ?
+     fmin(az_mod2pi_nonneg(angle1), az_mod2pi_nonneg(angle2)) :
+     fmax(az_mod2pi_nonpos(angle1), az_mod2pi_nonpos(angle2)));
+  // If the angle is within spin_angle (note that the two will have the same
+  // sign), then we hit the circle, otherwise we don't.
+  if (fabs(angle) > fabs(spin_angle)) return false;
+  if (point_out != NULL) {
+    *point_out = az_vadd(spin_center,
+                         az_vrotate(az_vsub(start, spin_center), angle));
+  }
+  if (normal_out != NULL) {
+    *normal_out = az_vflatten(az_vsub(start, p0), delta);
+  }
+  return true;
+}
+
+//===========================================================================//
+
+bool az_arc_circle_hits_point(
+    az_vector_t point, double radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  az_vector_t pos;
+  if (!az_arc_ray_hits_circle(radius, point, start, spin_center, spin_angle,
+                              &pos, impact_out)) return false;
+  if (pos_out != NULL) *pos_out = pos;
+  if (impact_out != NULL) *impact_out = az_vsub(pos, *impact_out);
+  return true;
+}
+
+bool az_arc_circle_hits_circle(
+    double sradius, az_vector_t center, double mradius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  az_vector_t pos;
+  if (!az_arc_ray_hits_circle(sradius + mradius, center, start, spin_center,
+                              spin_angle, &pos, impact_out)) return false;
+  if (pos_out != NULL) *pos_out = pos;
+  if (impact_out != NULL) {
+    *impact_out = az_vsub(pos, az_vwithlen(*impact_out, mradius));
+  }
+  return true;
+}
+
+bool az_arc_circle_hits_line(
+    az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out) {
+  // If the circle is already touching the line, we're immediately done.
+  if (az_circle_touches_line(p1, p2, circle_radius, start)) {
+    if (pos_out != NULL) *pos_out = start;
+    if (impact_out != NULL) {
+      *impact_out =
+        az_vadd(start, az_vflatten(az_vsub(p1, start), az_vsub(p1, p2)));
+    }
+    return true;
+  }
+  // Otherwise, move the line towards the circle center by circle_radius, and
+  // then pretend the circle is a ray to find the impact point.
+  const az_vector_t normal =
+    az_vwithlen(az_vflatten(az_vsub(start, p1),
+                            az_vsub(p2, p1)), circle_radius);
+  az_vector_t pos;
+  if (!az_arc_ray_hits_line(
+          az_vadd(normal, p1), az_vadd(normal, p2), start, spin_center,
+          spin_angle, &pos, NULL)) return false;
+  if (pos_out != NULL) *pos_out = pos;
+  if (impact_out != NULL) *impact_out = az_vsub(pos, normal);
   return true;
 }
 

@@ -154,17 +154,52 @@ bool az_circle_hits_polygon_trans(
 // The following functions each determine if a circular ray, travelling from
 // start around spin_center by spin_angle radians, will ever intersect a
 // particular shape (depending on the function).  If it does, the function
-// stores in *pos_out the first position of the ray at which it touches the
-// shape (if pos_out is non-NULL) and in *impact_out the point of intersection
-// (if impact_out is non-NULL).  No guarantees are made about the length of the
-// normal vector, and in particular it may be zero (if there is no well-defined
-// normal for the collision).
+// stores in *point_out the point at which it touches the shape (if point_out
+// is non-NULL) and a vector normal to the shape at the impact point in
+// *normal_out (if normal_out is non-NULL).  No guarantees are made about the
+// length of the normal vector, and in particular it may be zero (if there is
+// no well-defined normal for the collision).
 
 // Determine if the circular ray will hit the given circle.
 bool az_arc_ray_hits_circle(
     double circle_radius, az_vector_t circle_center, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
     az_vector_t *point_out, az_vector_t *normal_out);
+
+// Determine if the circular ray will hit the infinite line passing through p1
+// and p2.
+bool az_arc_ray_hits_line(
+    az_vector_t p1, az_vector_t p2, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *point_out, az_vector_t *normal_out);
+
+/*===========================================================================*/
+
+// The following functions each determine if a circle, travelling in a circular
+// path from start around spin_center by spin_angle radians, will ever
+// intersect a particular shape (depending on the function).  If it does, the
+// function stores in *pos_out the first position of the circle at which it
+// touches the shape (if pos_out is non-NULL) and in *impact_out the point of
+// intersection (if impact_out is non-NULL).
+
+// Determine if the circle will hit the given point.
+bool az_arc_circle_hits_point(
+    az_vector_t point, double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will hit the given circle.
+bool az_arc_circle_hits_circle(
+    double sradius, az_vector_t center, double mradius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out);
+
+// Determine if the circle will hit the infinite line passing through p1 and
+// p2.
+bool az_arc_circle_hits_line(
+    az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    az_vector_t *pos_out, az_vector_t *impact_out);
 
 /*===========================================================================*/
 
