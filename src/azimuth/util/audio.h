@@ -56,7 +56,8 @@ typedef enum {
   AZ_SND_FIRE_HYPER_ROCKET,
   AZ_SND_HIT_WALL,
   AZ_SND_PICKUP_ORDNANCE,
-  AZ_SND_PICKUP_SHIELDS
+  AZ_SND_PICKUP_SHIELDS,
+  AZ_SND_TRACTOR_BEAM
 } az_sound_key_t;
 
 // A soundboard keeps track of what sounds/music we want to play next.  It will

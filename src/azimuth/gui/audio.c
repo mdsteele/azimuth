@@ -181,7 +181,7 @@ typedef struct {
   // rather than constantly having to explicitly specify it as 1.0), and
   // second, we use a volume range of -1 to 1 instead of 0 to 1 (again so that
   // we can usually leave it at zero, rather than explicitly specifying 0.5).
-  enum { SQUARE, SAWTOOTH, TRIANGLE, SINE, NOISE } wave_kind;
+  enum { SQUARE, SAWTOOTH, TRIANGLE, SINE, WOBBLE, NOISE } wave_kind;
   float env_attack, env_sustain, env_punch, env_decay;
   float start_freq, freq_limit, freq_slide, freq_delta_slide;
   float vibrato_depth, vibrato_speed;
@@ -259,13 +259,13 @@ static az_sound_entry_t sound_entries[] = {
     .square_duty = 0.40368, .duty_sweep = 0.0140844583511
   },
   [AZ_SND_DOOR_CLOSE] = {
-    .wave_kind = SINE,
+    .wave_kind = WOBBLE,
     .env_sustain = 0.352112680674, .env_decay = 0.12622,
     .start_freq = 0.401408463717, .freq_slide = -0.197183,
     .square_duty = 0.53694, .volume_adjust = -0.5
   },
   [AZ_SND_DOOR_OPEN] = {
-    .wave_kind = SINE,
+    .wave_kind = WOBBLE,
     .env_sustain = 0.352112680674, .env_decay = 0.12622,
     .start_freq = 0.246478870511, .freq_slide = 0.197183,
     .square_duty = 0.53694, .volume_adjust = -0.5
@@ -308,7 +308,7 @@ static az_sound_entry_t sound_entries[] = {
     .vibrato_depth = 0.281690150499, .vibrato_speed = 0.12924,
   },
   [AZ_SND_FIRE_GUN_FREEZE] = {
-    .wave_kind = SINE,
+    .wave_kind = WOBBLE,
     .env_sustain = 0.13848, .env_punch = 0.12036, .env_decay = 0.21536,
     .start_freq = 0.9788732, .freq_limit = 0.32917, .freq_slide = -0.22554,
     .square_duty = 0.46895, .duty_sweep = 0.1842,
@@ -358,6 +358,10 @@ static az_sound_entry_t sound_entries[] = {
     .env_sustain = 0.1376, .env_decay = 0.288732379675,
     .start_freq = 0.225352108479, .freq_slide = 0.2832,
     .repeat_speed = 0.542253494263
+  },
+  [AZ_SND_TRACTOR_BEAM] = {
+    .wave_kind = WOBBLE, .env_sustain = 1.0, .start_freq = 0.18,
+    .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.5
   }
 };
 
@@ -600,6 +604,10 @@ static void synth_sound_wav(const az_sound_entry_t *entry) {
           break;
         case SINE:
           sample = (float)sin(fp * AZ_TWO_PI);
+          break;
+        case WOBBLE:
+          sample = (float)(0.5 * (cos(fp * AZ_TWO_PI) +
+                                  sin(2.0 * fp * AZ_TWO_PI)));
           break;
         case NOISE:
           sample = synth.noise_buffer[synth.phase * 32 / synth.period];

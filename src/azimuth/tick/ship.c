@@ -890,6 +890,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     assert(tractor_node->kind == AZ_NODE_TRACTOR);
     ship->velocity = az_vflatten(ship->velocity,
         az_vsub(ship->position, tractor_node->position));
+    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
   }
 
   fire_weapons(state, time);
