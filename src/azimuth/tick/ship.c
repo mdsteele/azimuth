@@ -49,6 +49,8 @@
 #define AZ_SHIP_SHIELD_FLARE_TIME 0.5
 // The radius of the ship for purposes of collisions with e.g. walls:
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
+// Wall elasticity for closed doors:
+#define AZ_DOOR_ELASTICITY 0.5
 
 static void recharge_ship_energy(az_player_t *player, double time) {
   const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
@@ -82,6 +84,39 @@ static void on_ship_hit_wall(az_space_state_t *state,
   ship->velocity = az_vsub(ship->velocity,
                            az_vmul(az_vproj(ship->velocity, impact_normal),
                                    1.0 + elasticity));
+  // Damage the ship.
+  az_damage_ship(state, impact_damage_coeff * old_speed_fraction);
+  // Put a particle at the impact point.
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = (az_color_t){255, 255, 255, 255};
+    particle->position = impact_point;
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.3;
+    particle->param1 = 10;
+  }
+  az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
+}
+
+static void on_ship_arc_hit_wall(
+    az_space_state_t *state, double elasticity, double impact_damage_coeff,
+    az_vector_t spin_center, double spin_angle, az_vector_t impact_normal) {
+  az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
+  const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
+  // Push the ship slightly away from the impact point (so that we're
+  // hopefully no longer in contact with the wall).
+  const double dtheta = -copysign(0.0001, spin_angle);
+  ship->position =
+    az_vadd(spin_center,
+            az_vrotate(az_vsub(ship->position, spin_center), dtheta));
+  ship->velocity = az_vrotate(ship->velocity, dtheta);
+  ship->angle = az_mod2pi(ship->angle + dtheta);
+  // Bounce the ship off the wall.
+  const double old_speed_fraction =
+    az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED;
+  ship->velocity = az_vmul(ship->velocity, -elasticity);
   // Damage the ship.
   az_damage_ship(state, impact_damage_coeff * old_speed_fraction);
   // Put a particle at the impact point.
@@ -658,6 +693,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
     // TODO: check for wall/baddie impacts
     assert(tractor_node != NULL);
     assert(tractor_node->kind == AZ_NODE_TRACTOR);
+
+    // Calculate the angle, dtheta, that the ship will swing if not obstructed.
     const az_vector_t delta = az_vsub(ship->position, tractor_node->position);
     assert(az_dapprox(0.0, az_vdot(ship->velocity, delta)));
     assert(az_dapprox(ship->tractor_beam.distance, az_vnorm(delta)));
@@ -665,10 +702,47 @@ void az_tick_ship(az_space_state_t *state, double time) {
     const double dtheta =
       time * invdist *
       az_vdot(ship->velocity, az_vrot90ccw(az_vmul(delta, invdist)));
-    ship->position = az_vadd(az_vrotate(delta, dtheta),
-                             tractor_node->position);
-    ship->velocity = az_vrotate(ship->velocity, dtheta);
-    ship->angle = az_mod2pi(ship->angle + dtheta);
+
+    // Figure out what, if anything, the ship hits:
+    az_impact_t impact;
+    az_arc_circle_impact(
+        state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
+        tractor_node->position, dtheta, AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
+
+    // Move the ship:
+    ship->position = impact.position;
+    ship->velocity = az_vrotate(ship->velocity, impact.angle);
+    ship->angle = az_mod2pi(ship->angle + impact.angle);
+
+    // Resolve the collision (if any):
+    switch (impact.type) {
+      case AZ_IMP_NOTHING: break;
+      case AZ_IMP_BADDIE:
+        // TODO: make these parameters depend on baddie
+        on_ship_arc_hit_wall(
+            state, 0.1,
+            (impact.target.baddie.baddie->frozen > 0.0 ? 0.0 : 10.0),
+            tractor_node->position, impact.angle, impact.normal);
+        ship->tractor_beam.active = false;
+        tractor_node = NULL;
+        break;
+      case AZ_IMP_DOOR_INSIDE:
+        on_ship_enter_door(state, impact.target.door);
+        ship->tractor_beam.active = false;
+        tractor_node = NULL;
+        break;
+      case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
+      case AZ_IMP_DOOR_OUTSIDE:
+        on_ship_arc_hit_wall(state, AZ_DOOR_ELASTICITY, 0,
+            tractor_node->position, impact.angle, impact.normal);
+        break;
+      case AZ_IMP_WALL:
+        on_ship_arc_hit_wall(
+            state, impact.target.wall->data->elasticity,
+            impact.target.wall->data->impact_damage_coeff,
+            tractor_node->position, impact.angle, impact.normal);
+        break;
+    }
   } else {
     assert(tractor_node == NULL);
 
@@ -695,7 +769,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
         on_ship_enter_door(state, impact.target.door);
         break;
       case AZ_IMP_DOOR_OUTSIDE:
-        on_ship_hit_wall(state, 0.5, 0.0, impact.normal);
+        on_ship_hit_wall(state, AZ_DOOR_ELASTICITY, 0, impact.normal);
         break;
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
       case AZ_IMP_WALL:

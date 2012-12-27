@@ -124,6 +124,12 @@ bool az_circle_hits_baddie(
     az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out,
     const az_component_data_t **component_out);
 
+bool az_arc_circle_hits_baddie(
+    const az_baddie_t *baddie, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out,
+    const az_component_data_t **component_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_BADDIE_H_

@@ -96,6 +96,21 @@ bool az_circle_hits_door_outside(
                                        pos_out, impact_out));
 }
 
+bool az_arc_circle_hits_door_outside(
+    const az_door_t *door, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind == AZ_DOOR_PASSAGE || door->is_open) return false;
+  return (az_arc_ray_might_hit_bounding_circle(
+              start, spin_center, spin_angle, door->position,
+              AZ_DOOR_BOUNDING_RADIUS + circle_radius) &&
+          az_arc_circle_hits_polygon_trans(
+              closed_door_polygon, door->position, door->angle,
+              circle_radius, start, spin_center, spin_angle,
+              angle_out, pos_out, impact_out));
+}
+
 /*===========================================================================*/
 
 static const az_vector_t entrance_vertices[] = {
@@ -127,6 +142,21 @@ bool az_circle_hits_door_inside(
           az_circle_hits_polygon_trans(entrance_polygon, door->position,
                                        door->angle, radius, start, delta,
                                        pos_out, impact_out));
+}
+
+bool az_arc_circle_hits_door_inside(
+    const az_door_t *door, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (door->kind != AZ_DOOR_PASSAGE && !door->is_open) return false;
+  return (az_arc_ray_might_hit_bounding_circle(
+              start, spin_center, spin_angle, door->position,
+              AZ_DOOR_BOUNDING_RADIUS + circle_radius) &&
+          az_arc_circle_hits_polygon_trans(
+              entrance_polygon, door->position, door->angle,
+              circle_radius, start, spin_center, spin_angle,
+              angle_out, pos_out, impact_out));
 }
 
 /*===========================================================================*/

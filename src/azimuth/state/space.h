@@ -175,18 +175,26 @@ typedef struct {
     az_door_t *door;
     az_wall_t *wall;
   } target;
+  double angle; // only used for the az_arc_*_impact functions
   az_vector_t position;
+  // Normal vector.  For ray impacts, the length is not guaranteed, but for
+  // circle impacts it will point from position to the point of contact.
   az_vector_t normal;
 } az_impact_t;
 
-void az_ray_impact(az_space_state_t *state, az_vector_t start,
-                   az_vector_t delta, az_impact_flags_t skip_types,
-                   az_uid_t skip_uid, az_impact_t *impact_out);
+void az_ray_impact(
+    az_space_state_t *state, az_vector_t start, az_vector_t delta,
+    az_impact_flags_t skip_types, az_uid_t skip_uid, az_impact_t *impact_out);
 
-void az_circle_impact(az_space_state_t *state, double radius,
-                      az_vector_t start, az_vector_t delta,
-                      az_impact_flags_t skip_types, az_uid_t skip_uid,
-                      az_impact_t *impact_out);
+void az_circle_impact(
+    az_space_state_t *state, double circle_radius,
+    az_vector_t start, az_vector_t delta,
+    az_impact_flags_t skip_types, az_uid_t skip_uid, az_impact_t *impact_out);
+
+void az_arc_circle_impact(
+    az_space_state_t *state, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    az_impact_flags_t skip_types, az_uid_t skip_uid, az_impact_t *impact_out);
 
 /*===========================================================================*/
 

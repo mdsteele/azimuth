@@ -75,6 +75,11 @@ bool az_circle_hits_ship(const az_ship_t *ship, double radius,
                          az_vector_t start, az_vector_t delta,
                          az_vector_t *point_out, az_vector_t *impact_out);
 
+bool az_arc_circle_hits_ship(
+    const az_ship_t *ship, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_SHIP_H_

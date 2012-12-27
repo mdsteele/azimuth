@@ -59,6 +59,8 @@ typedef struct {
 
 extern const double AZ_DOOR_BOUNDING_RADIUS;
 
+/*===========================================================================*/
+
 // Determine if the specified circle overlaps any part of the door exterior.
 bool az_circle_touches_door_outside(
     const az_door_t *door, double radius, az_vector_t center);
@@ -80,6 +82,13 @@ bool az_circle_hits_door_outside(
     const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
 
+bool az_arc_circle_hits_door_outside(
+    const az_door_t *door, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out);
+
+/*===========================================================================*/
+
 // Determine if a ray, travelling delta from start, will hit the interior of
 // the door (this is possible only for open doors).  If it does, stores the
 // intersection point in *point_out (if point_out is non-NULL) and the normal
@@ -96,6 +105,11 @@ bool az_ray_hits_door_inside(
 bool az_circle_hits_door_inside(
     const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
+
+bool az_arc_circle_hits_door_inside(
+    const az_door_t *door, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out);
 
 /*===========================================================================*/
 

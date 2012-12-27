@@ -98,6 +98,11 @@ bool az_circle_hits_wall(
     const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
 
+bool az_arc_circle_hits_wall(
+    const az_wall_t *wall, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_WALL_H_

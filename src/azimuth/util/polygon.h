@@ -151,6 +151,14 @@ bool az_circle_hits_polygon_trans(
 
 /*===========================================================================*/
 
+// Determine if a circular ray, travelling from start around spin_center by
+// spin_angle radians, might possibly ever pass within the specified circle.
+// False positives are possible, but this function is relatively cheap to call,
+// and if it returns false then the ray definitely won't hit the circle.
+bool az_arc_ray_might_hit_bounding_circle(
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    az_vector_t circle_center, double circle_radius);
+
 // The following functions each determine if a circular ray, travelling from
 // start around spin_center by spin_angle radians, will ever intersect a
 // particular shape (depending on the function).  If it does, the function

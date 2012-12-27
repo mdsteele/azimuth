@@ -428,6 +428,16 @@ bool az_circle_hits_polygon_trans(
 
 /*===========================================================================*/
 
+bool az_arc_ray_might_hit_bounding_circle(
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    az_vector_t circle_center, double circle_radius) {
+  // For now, just give a perfect answer.  If this turns out to be too
+  // expensive, we can always rewrite this function to be more heuristic (at
+  // the cost of some false positives).
+  return az_arc_ray_hits_circle(circle_radius, circle_center, start,
+                                spin_center, spin_angle, NULL, NULL, NULL);
+}
+
 bool az_arc_ray_hits_circle(
     double circle_radius, az_vector_t circle_center,
     az_vector_t start, az_vector_t spin_center, double spin_angle,

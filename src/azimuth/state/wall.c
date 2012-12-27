@@ -122,4 +122,18 @@ bool az_circle_hits_wall(
                                        pos_out, impact_out));
 }
 
+bool az_arc_circle_hits_wall(
+    const az_wall_t *wall, double circle_radius,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  assert(wall->kind != AZ_WALL_NOTHING);
+  return (az_arc_ray_might_hit_bounding_circle(
+              start, spin_center, spin_angle, wall->position,
+              wall->data->bounding_radius + circle_radius) &&
+          az_arc_circle_hits_polygon_trans(
+              wall->data->polygon, wall->position, wall->angle,
+              circle_radius, start, spin_center, spin_angle,
+              angle_out, pos_out, impact_out));
+}
+
 /*===========================================================================*/
