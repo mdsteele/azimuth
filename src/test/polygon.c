@@ -483,220 +483,379 @@ void test_circle_hits_polygon_trans(void) {
 /*===========================================================================*/
 
 void test_arc_ray_hits_circle(void) {
+  double angle = 99999;
   az_vector_t intersect = nix, normal = nix;
 
   // Check az_arc_ray_hits_circle works with NULLs:
   EXPECT_TRUE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
-      AZ_DEG2RAD(-135), NULL, NULL));
+      AZ_DEG2RAD(-135), NULL, NULL, NULL));
 
   // Simple case, hitting (with negative spin_angle):
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
-      AZ_DEG2RAD(-135), &intersect, &normal));
+      AZ_DEG2RAD(-135), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(-90), angle);
   EXPECT_VAPPROX(((az_vector_t){5, 1}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){0, 1}), az_vunit(normal));
 
   // Simple case, stopping short (with negative spin_angle):
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_FALSE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){2, 4}, (az_vector_t){2, 1},
-      AZ_DEG2RAD(-89), &intersect, &normal));
+      AZ_DEG2RAD(-89), &angle, &intersect, &normal));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, intersect);
   EXPECT_VAPPROX(nix, normal);
 
   // Simple case, hitting (with positive spin_angle):
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){2, 0}, (az_vector_t){2, -3},
-      AZ_DEG2RAD(315), &intersect, &normal));
+      AZ_DEG2RAD(315), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(270), angle);
   EXPECT_VAPPROX(((az_vector_t){5, -3}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){0, -1}), az_vunit(normal));
 
   // Simple case, stopping short (with positive spin_angle):
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_FALSE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){2, 0}, (az_vector_t){2, -3},
-      AZ_DEG2RAD(269), &intersect, &normal));
+      AZ_DEG2RAD(269), &angle, &intersect, &normal));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, intersect);
   EXPECT_VAPPROX(nix, normal);
 
   // Ray goes completely around circle:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_FALSE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){9, 5}, (az_vector_t){4, 0},
-      AZ_DEG2RAD(400), &intersect, &normal));
+      AZ_DEG2RAD(400), &angle, &intersect, &normal));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, intersect);
   EXPECT_VAPPROX(nix, normal);
 
   // Ray starts inside circle:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_circle(
       2.0, (az_vector_t){5, -1}, (az_vector_t){4, 0}, (az_vector_t){1, 1},
-      AZ_DEG2RAD(400), &intersect, &normal));
+      AZ_DEG2RAD(400), &angle, &intersect, &normal));
+  EXPECT_APPROX(0, angle);
   EXPECT_VAPPROX(((az_vector_t){4, 0}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
 
   // Ray hits circle diagonally:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_circle(
       sqrt(2), (az_vector_t){1, 1}, (az_vector_t){4, 2}, (az_vector_t){3, 1},
-      AZ_DEG2RAD(400), &intersect, &normal));
+      AZ_DEG2RAD(400), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){2, 2}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 1}), az_vunit(normal));
 }
 
 void test_arc_ray_hits_line(void) {
+  double angle = 99999;
   az_vector_t intersect = nix, normal = nix;
 
   // Check az_arc_ray_hits_line works with NULLs:
   EXPECT_TRUE(az_arc_ray_hits_line(
       (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
-      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL));
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL, NULL));
 
   // Ray hits line:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_line(
       (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
-      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &intersect, &normal));
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, 5}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
 
   // Ray hits line:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_line(
       (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){3, 1},
-      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &intersect, &normal));
+      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, 1}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
 }
 
 void test_arc_ray_hits_line_segment(void) {
+  double angle = 99999;
   az_vector_t intersect = nix, normal = nix;
 
   // Check az_arc_ray_hits_line_segment works with NULLs:
   EXPECT_TRUE(az_arc_ray_hits_line_segment(
       (az_vector_t){1, 6}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
-      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL));
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), NULL, NULL, NULL));
 
   // Ray hits line segment:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_TRUE(az_arc_ray_hits_line_segment(
       (az_vector_t){1, 6}, (az_vector_t){1, 4}, (az_vector_t){5, 1},
-      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &intersect, &normal));
+      (az_vector_t){1, 1}, AZ_DEG2RAD(170), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, 5}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
 
   // Ray would hit infinite line, but misses line segment:
-  intersect = normal = nix;
+  angle = 99999; intersect = normal = nix;
   EXPECT_FALSE(az_arc_ray_hits_line_segment(
       (az_vector_t){1, 3}, (az_vector_t){1, 4}, (az_vector_t){3, 1},
-      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &intersect, &normal));
+      (az_vector_t){2, 0}, AZ_DEG2RAD(170), &angle, &intersect, &normal));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, intersect);
   EXPECT_VAPPROX(nix, normal);
+}
+
+void test_arc_ray_hits_polygon(void) {
+  double angle = 99999;
+  az_vector_t intersect = nix, normal = nix;
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+
+  // Check az_arc_ray_hits_polygon works with NULLs:
+  EXPECT_TRUE(az_arc_ray_hits_polygon(
+      square, (az_vector_t){4, 4.5}, (az_vector_t){1, 3.5}, AZ_DEG2RAD(-170),
+      NULL, NULL, NULL));
+
+  // Ray hits polygon:
+  angle = 99999; intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_polygon(
+      square, (az_vector_t){4, 3.5}, (az_vector_t){1, 3.5}, AZ_DEG2RAD(-170),
+      &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(-90), angle);
+  EXPECT_VAPPROX(((az_vector_t){1, 0.5}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Ray stops short of polygon:
+  angle = 99999; intersect = normal = nix;
+  EXPECT_FALSE(az_arc_ray_hits_polygon(
+      square, (az_vector_t){4, 3.5}, (az_vector_t){1, 3.5}, AZ_DEG2RAD(-89),
+      &angle, &intersect, &normal));
+  EXPECT_APPROX(99999, angle);
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Ray starts in polygon:
+  angle = 99999; intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_polygon(
+      square, (az_vector_t){0.5, -0.5}, (az_vector_t){1, 3.5},
+      AZ_DEG2RAD(-170), &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(0), angle);
+  EXPECT_VAPPROX(((az_vector_t){0.5, -0.5}), intersect);
+  EXPECT_VAPPROX(AZ_VZERO, normal);
+}
+
+void test_arc_ray_hits_polygon_trans(void) {
+  double angle = 99999;
+  az_vector_t intersect = nix, normal = nix;
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+
+  // Check az_arc_ray_hits_polygon_trans works with NULLs:
+  EXPECT_TRUE(az_arc_ray_hits_polygon_trans(
+      square, (az_vector_t){-2, 1}, AZ_DEG2RAD(45),
+      (az_vector_t){sqrt(2)/2, 3 + sqrt(2)/2},
+      (az_vector_t){sqrt(2)/2, 1 + sqrt(2)/2}, AZ_DEG2RAD(100),
+      NULL, NULL, NULL));
+
+  // Ray hits polygon:
+  angle = 99999; intersect = normal = nix;
+  EXPECT_TRUE(az_arc_ray_hits_polygon_trans(
+      square, (az_vector_t){-2, 1}, AZ_DEG2RAD(45),
+      (az_vector_t){sqrt(2)/2, 3 + sqrt(2)/2},
+      (az_vector_t){sqrt(2)/2, 1 + sqrt(2)/2}, AZ_DEG2RAD(100),
+      &angle, &intersect, &normal));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
+  EXPECT_VAPPROX(((az_vector_t){-2 + sqrt(2)/2, 1 + sqrt(2)/2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 1}), az_vunit(normal));
 }
 
 /*===========================================================================*/
 
 void test_arc_circle_hits_point(void) {
+  double angle = 99999;
   az_vector_t pos = nix, impact = nix;
 
   // Check az_arc_circle_hits_point works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){3, 5}, (az_vector_t){3, 3},
-      AZ_DEG2RAD(-270), NULL, NULL));
+      AZ_DEG2RAD(-270), NULL, NULL, NULL));
 
   // Check case where circle hits point dead-on.
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){3, 5}, (az_vector_t){3, 3},
-      AZ_DEG2RAD(-270), &pos, &impact));
+      AZ_DEG2RAD(-270), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(-180), angle);
   EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
   EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
 }
 
 void test_arc_circle_hits_circle(void) {
+  double angle = 99999;
   az_vector_t pos = nix, impact = nix;
 
   // Check az_arc_circle_hits_circle works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_circle(
       0.5, (az_vector_t){0.5, 1}, 2.0, (az_vector_t){3, 5},
-      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), NULL, NULL));
+      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), NULL, NULL, NULL));
 
   // Check case where circle hits circle dead-on.
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_circle(
       0.5, (az_vector_t){0.5, 1}, 2.0, (az_vector_t){3, 5},
-      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), &pos, &impact));
+      (az_vector_t){3, 3}, AZ_DEG2RAD(-270), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(-180), angle);
   EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
   EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
 }
 
 void test_arc_circle_hits_line(void) {
+  double angle = 99999;
   az_vector_t pos = nix, impact = nix;
 
   // Check az_arc_circle_hits_line works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_line(
       (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){3, -3},
-      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL));
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL, NULL));
 
   // Check case where circle hits line dead-on.
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_line(
       (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){3, -3},
-      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, -1}), pos);
   EXPECT_VAPPROX(((az_vector_t){-2, -1}), impact);
 
   // Check case where circle hits line obliquely.
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_line(
       (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){11, -5},
-      (az_vector_t){6, 0}, AZ_DEG2RAD(-170), &pos, &impact));
+      (az_vector_t){6, 0}, AZ_DEG2RAD(-170), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(-90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, -5}), pos);
   EXPECT_VAPPROX(((az_vector_t){-2, -5}), impact);
 
   // Check case where circle can't hit line.
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_FALSE(az_arc_circle_hits_line(
       (az_vector_t){-2, 7}, (az_vector_t){-2, 9}, 3.0, (az_vector_t){15, -5},
-      (az_vector_t){10, 0}, AZ_DEG2RAD(-400), &pos, &impact));
+      (az_vector_t){10, 0}, AZ_DEG2RAD(-400), &angle, &pos, &impact));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, pos);
   EXPECT_VAPPROX(nix, impact);
 }
 
 void test_arc_circle_hits_line_segment(void) {
+  double angle = 99999;
   az_vector_t pos = nix, impact = nix;
 
   // Check az_arc_circle_hits_line_segment works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_line_segment(
       (az_vector_t){-2, 0}, (az_vector_t){-2, -2}, 3.0, (az_vector_t){3, -3},
-      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL));
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), NULL, NULL, NULL));
 
   // Circle hits line segment in the middle:
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_line_segment(
       (az_vector_t){-2, 0}, (az_vector_t){-2, -2}, 3.0, (az_vector_t){3, -3},
-      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){1, -1}), pos);
   EXPECT_VAPPROX(((az_vector_t){-2, -1}), impact);
 
   // Circle would hit infinite line, but misses line segment:
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_FALSE(az_arc_circle_hits_line_segment(
       (az_vector_t){-2, 70}, (az_vector_t){-2, 90}, 3.0, (az_vector_t){3, -3},
-      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &pos, &impact));
+      (az_vector_t){1, -3}, AZ_DEG2RAD(170), &angle, &pos, &impact));
+  EXPECT_APPROX(99999, angle);
   EXPECT_VAPPROX(nix, pos);
   EXPECT_VAPPROX(nix, impact);
 
   // Circle hits one end of the line segment:
-  pos = impact = nix;
+  angle = 99999; pos = impact = nix;
   EXPECT_TRUE(az_arc_circle_hits_line_segment(
       (az_vector_t){1, 0}, (az_vector_t){2, 0}, sqrt(2), (az_vector_t){3, 3},
-      (az_vector_t){2, 2}, AZ_DEG2RAD(-100), &pos, &impact));
+      (az_vector_t){2, 2}, AZ_DEG2RAD(-100), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(-90), angle);
   EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
   EXPECT_VAPPROX(((az_vector_t){2, 0}), impact);
+}
+
+void test_arc_circle_hits_polygon(void) {
+  double angle = 99999;
+  az_vector_t pos = nix, impact = nix;
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+
+  // Check az_arc_circle_hits_polygon works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_polygon(
+      square, 2.0, (az_vector_t){-5, -8}, (az_vector_t){-5, -3},
+      AZ_DEG2RAD(100), NULL, NULL, NULL));
+
+  // Circle hits polygon on side:
+  angle = 99999; pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_polygon(
+      square, 2.0, (az_vector_t){-5, -8}, (az_vector_t){-5, -3},
+      AZ_DEG2RAD(100), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
+  EXPECT_VAPPROX(((az_vector_t){0, -3}), pos);
+  EXPECT_VAPPROX(((az_vector_t){0, -1}), impact);
+
+  // Circle hits polygon on corner:
+  angle = 99999; pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_polygon(
+      square, sqrt(2), (az_vector_t){4, 2}, (az_vector_t){3, 1},
+      AZ_DEG2RAD(100), &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+
+  // Circle stops short of polygon:
+  angle = 99999; pos = impact = nix;
+  EXPECT_FALSE(az_arc_circle_hits_polygon(
+      square, sqrt(2), (az_vector_t){4, 2}, (az_vector_t){3, 1},
+      AZ_DEG2RAD(89), &angle, &pos, &impact));
+  EXPECT_APPROX(99999, angle);
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, impact);
+
+  // Circle starts overlapped with polygon:
+  angle = 99999; pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_polygon(
+      square, 1.5, (az_vector_t){2, 2}, (az_vector_t){3, 1},
+      AZ_DEG2RAD(89), &angle, &pos, &impact));
+  EXPECT_APPROX(0, angle);
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), pos);
+  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+}
+
+void test_arc_circle_hits_polygon_trans(void) {
+  double angle = 99999;
+  az_vector_t pos = nix, impact = nix;
+  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
+
+  // Check az_arc_circle_hits_polygon_trans works with NULLs:
+  EXPECT_TRUE(az_arc_circle_hits_polygon_trans(
+      square, (az_vector_t){-2, 1}, AZ_DEG2RAD(45),
+      1.0, (az_vector_t){4 + sqrt(2), -4},
+      (az_vector_t){-1 + sqrt(2), -4}, AZ_DEG2RAD(100),
+      NULL, NULL, NULL));
+
+  // Circle hits polygon:
+  angle = 99999; pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_polygon_trans(
+      square, (az_vector_t){-2, 1}, AZ_DEG2RAD(45),
+      1.0, (az_vector_t){4 + sqrt(2), -4},
+      (az_vector_t){-1 + sqrt(2), -4}, AZ_DEG2RAD(100),
+      &angle, &pos, &impact));
+  EXPECT_APPROX(AZ_DEG2RAD(90), angle);
+  EXPECT_VAPPROX(((az_vector_t){-1 + sqrt(2), 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-2 + sqrt(2), 1}), impact);
 }
 
 /*===========================================================================*/

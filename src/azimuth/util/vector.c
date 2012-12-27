@@ -33,7 +33,7 @@ static bool vfinite(az_vector_t v) {
 
 bool az_vnonzero(az_vector_t v) {
   assert(vfinite(v));
-  return (v.x != 0.0 && v.y != 0.0);
+  return (v.x != 0.0 || v.y != 0.0);
 }
 
 az_vector_t az_vpolar(double magnitude, double theta) {
@@ -103,9 +103,11 @@ double az_vnorm(az_vector_t v) {
 
 az_vector_t az_vunit(az_vector_t v) {
   assert(vfinite(v));
-  const double norm = az_vnorm(v);
-  assert(norm > 0.0);
-  return az_vdiv(v, norm);
+  if (az_vnonzero(v)) {
+    const double norm = az_vnorm(v);
+    assert(norm > 0.0);
+    return az_vdiv(v, norm);
+  } else return (az_vector_t){1.0, 0.0};
 }
 
 az_vector_t az_vwithlen(az_vector_t v, double length) {

@@ -81,8 +81,9 @@ az_vector_t az_vrot90ccw(az_vector_t v);
 
 // Get the length of the vector.
 double az_vnorm(az_vector_t v);
-// Return a unit vector with the same direction as the given vector.  The
-// vector must be nonzero.
+// Return a unit vector with the same direction as the given vector.  If the
+// vector is zero, returns a unit vector along the x-axis (so that az_vtheta
+// returns zero for both vectors).
 az_vector_t az_vunit(az_vector_t v);
 // Return a vector with the same direction as the given vector, but with the
 // given new length.  The input vector is permitted to be zero, but in that
@@ -92,7 +93,7 @@ az_vector_t az_vwithlen(az_vector_t v, double length);
 // length equal to the min of `max_length` and the input vector's length.
 az_vector_t az_vcaplen(az_vector_t v, double max_length);
 
-// Get the polar theta angle of the vector.
+// Get the polar theta angle of the vector.  Returns zero for the zero vector.
 double az_vtheta(az_vector_t v);
 
 // Get the distance between two vectors.

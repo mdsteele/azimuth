@@ -429,11 +429,12 @@ bool az_circle_hits_polygon_trans(
 /*===========================================================================*/
 
 bool az_arc_ray_hits_circle(
-    double circle_radius, az_vector_t circle_center, az_vector_t start,
-    az_vector_t spin_center, double spin_angle,
-    az_vector_t *point_out, az_vector_t *normal_out) {
+    double circle_radius, az_vector_t circle_center,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *point_out, az_vector_t *normal_out) {
   // If the point is already inside the circle, we're immediately done.
   if (az_vwithin(start, circle_center, circle_radius)) {
+    if (angle_out != NULL) *angle_out = 0.0;
     if (point_out != NULL) *point_out = start;
     if (normal_out != NULL) *normal_out = az_vsub(start, circle_center);
     return true;
@@ -506,6 +507,7 @@ bool az_arc_ray_hits_circle(
   // If the angle is within spin_angle (note that the two will have the same
   // sign), then we hit the circle, otherwise we don't.
   if (fabs(angle) > fabs(spin_angle)) return false;
+  if (angle_out != NULL) *angle_out = angle;
   if (point_out != NULL || normal_out != NULL) {
     const az_vector_t point =
       az_vadd(spin_center, az_vpolar(spin_radius, start_theta + angle));
@@ -516,9 +518,9 @@ bool az_arc_ray_hits_circle(
 }
 
 bool az_arc_ray_hits_line(
-    az_vector_t p1, az_vector_t p2, az_vector_t start,
-    az_vector_t spin_center, double spin_angle,
-    az_vector_t *point_out, az_vector_t *normal_out) {
+    az_vector_t p1, az_vector_t p2,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *point_out, az_vector_t *normal_out) {
   // Calculate start, and the line, relative to spin_center.  We will use
   // parametric form for the line; it is the locus of points p0 + t * delta for
   // all values of t.
@@ -558,6 +560,7 @@ bool az_arc_ray_hits_line(
   // If the angle is within spin_angle (note that the two will have the same
   // sign), then we hit the circle, otherwise we don't.
   if (fabs(angle) > fabs(spin_angle)) return false;
+  if (angle_out != NULL) *angle_out = angle;
   if (point_out != NULL) {
     *point_out = az_vadd(spin_center,
                          az_vrotate(az_vsub(start, spin_center), angle));
@@ -569,17 +572,62 @@ bool az_arc_ray_hits_line(
 }
 
 bool az_arc_ray_hits_line_segment(
-    az_vector_t p1, az_vector_t p2, az_vector_t start,
-    az_vector_t spin_center, double spin_angle,
-    az_vector_t *point_out, az_vector_t *normal_out) {
+    az_vector_t p1, az_vector_t p2,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *point_out, az_vector_t *normal_out) {
+  double angle;
   az_vector_t point, normal;
   if (!az_arc_ray_hits_line(p1, p2, start, spin_center, spin_angle,
-                            &point, &normal)) return false;
+                            &angle, &point, &normal)) return false;
   const az_vector_t seg = az_vsub(p2, p1);
   if (az_vdot(seg, az_vsub(point, p1)) < 0.0 ||
       az_vdot(seg, az_vsub(point, p2)) > 0.0) return false;
+  if (angle_out != NULL) *angle_out = angle;
   if (point_out != NULL) *point_out = point;
   if (normal_out != NULL) *normal_out = normal;
+  return true;
+}
+
+bool az_arc_ray_hits_polygon(
+    az_polygon_t polygon,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *point_out, az_vector_t *normal_out) {
+  // If the point is already inside the polygon, we're immediately done.
+  if (az_polygon_contains(polygon, start)) {
+    if (angle_out != NULL) *angle_out = 0.0;
+    if (point_out != NULL) *point_out = start;
+    if (normal_out != NULL) *normal_out = AZ_VZERO;
+    return true;
+  }
+  // Check if the ray hits any edges of the polygon.
+  bool hit = false;
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (az_arc_ray_hits_line_segment(
+            polygon.vertices[i], polygon.vertices[j], start, spin_center,
+            spin_angle, &spin_angle, point_out, normal_out)) {
+      hit = true;
+    }
+  }
+  // Return the final answer.
+  if (hit && angle_out != NULL) *angle_out = spin_angle;
+  return hit;
+}
+
+bool az_arc_ray_hits_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    az_vector_t start, az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *point_out, az_vector_t *normal_out) {
+  if (!az_arc_ray_hits_polygon(polygon,
+          az_vrotate(az_vsub(start, polygon_position), -polygon_angle),
+          az_vrotate(az_vsub(spin_center, polygon_position), -polygon_angle),
+          spin_angle, angle_out, point_out, normal_out)) return false;
+  if (point_out != NULL) {
+      *point_out = az_vadd(az_vrotate(*point_out, polygon_angle),
+                           polygon_position);
+  }
+  if (normal_out != NULL) {
+    *normal_out = az_vrotate(*normal_out, polygon_angle);
+  }
   return true;
 }
 
@@ -588,11 +636,11 @@ bool az_arc_ray_hits_line_segment(
 bool az_arc_circle_hits_point(
     az_vector_t point, double radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(radius >= 0.0);
   az_vector_t pos;
   if (!az_arc_ray_hits_circle(radius, point, start, spin_center, spin_angle,
-                              &pos, impact_out)) return false;
+                              angle_out, &pos, impact_out)) return false;
   if (pos_out != NULL) *pos_out = pos;
   if (impact_out != NULL) *impact_out = az_vsub(pos, *impact_out);
   return true;
@@ -601,12 +649,13 @@ bool az_arc_circle_hits_point(
 bool az_arc_circle_hits_circle(
     double sradius, az_vector_t center, double mradius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(sradius >= 0.0);
   assert(mradius >= 0.0);
   az_vector_t pos;
-  if (!az_arc_ray_hits_circle(sradius + mradius, center, start, spin_center,
-                              spin_angle, &pos, impact_out)) return false;
+  if (!az_arc_ray_hits_circle(
+          sradius + mradius, center, start, spin_center, spin_angle,
+          angle_out, &pos, impact_out)) return false;
   if (pos_out != NULL) *pos_out = pos;
   if (impact_out != NULL) {
     *impact_out = az_vsub(pos, az_vwithlen(*impact_out, mradius));
@@ -617,10 +666,11 @@ bool az_arc_circle_hits_circle(
 bool az_arc_circle_hits_line(
     az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(circle_radius >= 0.0);
   // If the circle is already touching the line, we're immediately done.
   if (az_circle_touches_line(p1, p2, circle_radius, start)) {
+    if (angle_out != NULL) *angle_out = 0.0;
     if (pos_out != NULL) *pos_out = start;
     if (impact_out != NULL) {
       *impact_out =
@@ -636,7 +686,7 @@ bool az_arc_circle_hits_line(
   az_vector_t pos;
   if (!az_arc_ray_hits_line(
           az_vadd(normal, p1), az_vadd(normal, p2), start, spin_center,
-          spin_angle, &pos, NULL)) return false;
+          spin_angle, angle_out, &pos, NULL)) return false;
   if (pos_out != NULL) *pos_out = pos;
   if (impact_out != NULL) *impact_out = az_vsub(pos, normal);
   return true;
@@ -645,14 +695,17 @@ bool az_arc_circle_hits_line(
 static bool arc_circle_hits_line_segment_internal(
     az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
   assert(circle_radius >= 0.0);
+  double angle;
   az_vector_t pos, impact;
-  if (!az_arc_circle_hits_line(p1, p2, circle_radius, start, spin_center,
-                               spin_angle, &pos, &impact)) return false;
+  if (!az_arc_circle_hits_line(
+          p1, p2, circle_radius, start, spin_center, spin_angle,
+          &angle, &pos, &impact)) return false;
   const az_vector_t seg = az_vsub(p2, p1);
   if (az_vdot(seg, az_vsub(pos, p1)) < 0.0 ||
       az_vdot(seg, az_vsub(pos, p2)) > 0.0) return false;
+  if (angle_out != NULL) *angle_out = angle;
   if (pos_out != NULL) *pos_out = pos;
   if (impact_out != NULL) *impact_out = impact;
   return true;
@@ -661,16 +714,62 @@ static bool arc_circle_hits_line_segment_internal(
 bool az_arc_circle_hits_line_segment(
     az_vector_t p1, az_vector_t p2, double circle_radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
   return (arc_circle_hits_line_segment_internal(
               p1, p2, circle_radius, start, spin_center, spin_angle,
-              pos_out, impact_out) ||
+              angle_out, pos_out, impact_out) ||
           az_arc_circle_hits_point(
               p1, circle_radius, start, spin_center, spin_angle,
-              pos_out, impact_out) ||
+              angle_out, pos_out, impact_out) ||
           az_arc_circle_hits_point(
               p2, circle_radius, start, spin_center, spin_angle,
-              pos_out, impact_out));
+              angle_out, pos_out, impact_out));
+}
+
+bool az_arc_circle_hits_polygon(
+    az_polygon_t polygon, double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  bool hit = false;
+  // Check if the circle hits any corners of the polygon.
+  for (int i = 0; i < polygon.num_vertices; ++i) {
+    if (az_arc_circle_hits_point(
+            polygon.vertices[i], circle_radius, start, spin_center, spin_angle,
+            &spin_angle, pos_out, impact_out)) {
+      hit = true;
+    }
+  }
+  // Check if the circle hits any edges of the polygon.
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (arc_circle_hits_line_segment_internal(
+            polygon.vertices[i], polygon.vertices[j], circle_radius, start,
+            spin_center, spin_angle, &spin_angle, pos_out, impact_out)) {
+      hit = true;
+    }
+  }
+  // Return the final answer.
+  if (hit && angle_out != NULL) *angle_out = spin_angle;
+  return hit;
+}
+
+bool az_arc_circle_hits_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    double circle_radius, az_vector_t start,
+    az_vector_t spin_center, double spin_angle,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  if (!az_arc_circle_hits_polygon(
+          polygon, circle_radius,
+          az_vrotate(az_vsub(start, polygon_position), -polygon_angle),
+          az_vrotate(az_vsub(spin_center, polygon_position), -polygon_angle),
+          spin_angle, angle_out, pos_out, impact_out)) return false;
+  if (pos_out != NULL) {
+    *pos_out = az_vadd(az_vrotate(*pos_out, polygon_angle), polygon_position);
+  }
+  if (impact_out != NULL) {
+    *impact_out =
+      az_vadd(az_vrotate(*impact_out, polygon_angle), polygon_position);
+  }
+  return true;
 }
 
 /*===========================================================================*/

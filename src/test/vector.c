@@ -80,10 +80,12 @@ void test_vector_rotate(void) {
 }
 
 void test_vunit(void) {
+  EXPECT_APPROX(1.0, az_vnorm(az_vunit(AZ_VZERO)));
+  EXPECT_APPROX(az_vtheta(AZ_VZERO), az_vtheta(az_vunit(AZ_VZERO)));
   for (int i = 0; i < 1000; ++i) {
     const az_vector_t vec = {az_random(-1.5, 1.5), az_random(-1.5, 1.5)};
-    if (vec.x == 0.0 && vec.y == 0.0) continue;
     ASSERT_APPROX(1.0, az_vnorm(az_vunit(vec)));
+    ASSERT_APPROX(az_vtheta(vec), az_vtheta(az_vunit(vec)));
   }
 }
 
