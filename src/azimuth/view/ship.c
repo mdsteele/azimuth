@@ -79,7 +79,7 @@ void az_draw_ship(az_space_state_t* state) {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
     // Exhaust:
-    if (controls->up && !controls->down) {
+    if (controls->up_held && !controls->down_held) {
       double zig = az_clock_zigzag(10, 1, state->clock);
       // For forward thrusters:
       if (!controls->burn_held) {
@@ -215,6 +215,20 @@ void az_draw_ship(az_space_state_t* state) {
       glColor3f(0, 0.5, 0.5); // dim cyan
       glVertex2d(15, -2);
     } glEnd();
+
+    // C-plus blink:
+    if (ship->cplus.state == AZ_CPLUS_READY) {
+      assert(ship->cplus.charge > 0.0);
+      assert(ship->cplus.charge <= 1.0);
+      glColor4f(0, 1, 0, (az_clock_mod(2, 3, state->clock) ? 0.25 : 0.5) *
+                (1.0 - pow(ship->cplus.charge, 4.0)));
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++ i) {
+          glVertex2d(AZ_SHIP_POLYGON.vertices[i].x,
+                     AZ_SHIP_POLYGON.vertices[i].y);
+        }
+      } glEnd();
+    }
 
     // Shield flare:
     if (ship->shield_flare > 0.0) {

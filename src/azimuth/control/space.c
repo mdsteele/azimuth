@@ -95,11 +95,10 @@ static bool save_current_game(az_saved_games_t *saved_games) {
 }
 
 static void update_controls(void) {
-  state.ship.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
-  state.ship.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
-  state.ship.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
-  state.ship.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
-
+  state.ship.controls.up_held = az_is_key_held(AZ_KEY_UP_ARROW);
+  state.ship.controls.down_held = az_is_key_held(AZ_KEY_DOWN_ARROW);
+  state.ship.controls.left_held = az_is_key_held(AZ_KEY_LEFT_ARROW);
+  state.ship.controls.right_held = az_is_key_held(AZ_KEY_RIGHT_ARROW);
   state.ship.controls.fire_held = az_is_key_held(AZ_KEY_V);
   state.ship.controls.ordn_held = az_is_key_held(AZ_KEY_C);
   state.ship.controls.util_held = az_is_key_held(AZ_KEY_X);
@@ -175,6 +174,12 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
             case AZ_KEY_RETURN:
               state.mode = AZ_MODE_PAUSING;
               state.mode_data.pause.progress = 0.0;
+              break;
+            case AZ_KEY_UP_ARROW:
+              state.ship.controls.up_pressed = true;
+              break;
+            case AZ_KEY_DOWN_ARROW:
+              state.ship.controls.down_pressed = true;
               break;
             case AZ_KEY_V: state.ship.controls.fire_pressed = true; break;
             case AZ_KEY_X: state.ship.controls.util_pressed = true; break;

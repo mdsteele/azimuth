@@ -31,50 +31,12 @@
 
 /*===========================================================================*/
 
-#define AZ_DMGF_WALL_FLARE (AZ_DMGF_CHARGED | AZ_DMGF_ROCKET | \
-    AZ_DMGF_HYPER_ROCKET | AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB | AZ_DMGF_CPLUS)
-
 static void try_open_door(az_space_state_t *state, az_door_t *door,
                           az_damage_flags_t damage_kind) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (az_can_open_door(door->kind, damage_kind) && !door->is_open) {
     door->is_open = true;
     az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
-  }
-}
-
-static void try_break_wall(az_space_state_t *state, az_wall_t *wall,
-                           az_damage_flags_t damage_kind) {
-  assert(wall->kind != AZ_WALL_NOTHING);
-  if ((damage_kind & AZ_DMGF_WALL_FLARE) == 0) return;
-  az_damage_flags_t vulnerability = 0;
-  switch (wall->kind) {
-    case AZ_WALL_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_WALL_INDESTRUCTIBLE: return;
-    case AZ_WALL_DESTRUCTIBLE_CHARGED:
-      vulnerability = AZ_DMGF_CHARGED;
-      break;
-    case AZ_WALL_DESTRUCTIBLE_ROCKET:
-      vulnerability = AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET;
-      break;
-    case AZ_WALL_DESTRUCTIBLE_HYPER_ROCKET:
-      vulnerability = AZ_DMGF_HYPER_ROCKET;
-      break;
-    case AZ_WALL_DESTRUCTIBLE_BOMB:
-      vulnerability = AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB;
-      break;
-    case AZ_WALL_DESTRUCTIBLE_MEGA_BOMB:
-      vulnerability = AZ_DMGF_MEGA_BOMB;
-      break;
-    case AZ_WALL_DESTRUCTIBLE_CPLUS:
-      vulnerability = AZ_DMGF_CPLUS;
-      break;
-  }
-  if ((damage_kind & vulnerability) != 0) {
-    wall->kind = AZ_WALL_NOTHING;
-    // TODO add particles
-  } else {
-    wall->flare = 1.0;
   }
 }
 
@@ -118,7 +80,7 @@ static void on_projectile_impact(az_space_state_t *state,
         if (wall->kind == AZ_WALL_NOTHING) continue;
         if (wall->kind == AZ_WALL_INDESTRUCTIBLE) continue;
         if (az_circle_touches_wall(wall, radius, proj->position)) {
-          try_break_wall(state, wall, proj->data->damage_kind);
+          az_try_break_wall(state, wall, proj->data->damage_kind);
         }
       }
     }
@@ -399,7 +361,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_DOOR_INSIDE:
     case AZ_IMP_WALL:
-      try_break_wall(state, impact.target.wall, proj->data->damage_kind);
+      az_try_break_wall(state, impact.target.wall, proj->data->damage_kind);
       on_projectile_hit_wall(state, proj, impact.normal);
       break;
   }

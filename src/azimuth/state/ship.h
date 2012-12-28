@@ -31,10 +31,13 @@
 /*===========================================================================*/
 
 typedef struct {
-  bool up, down, left, right;
-  bool fire_pressed, fire_held;
+  bool up_held, up_pressed;
+  bool down_held, down_pressed;
+  bool left_held;
+  bool right_held;
+  bool fire_held, fire_pressed;
   bool ordn_held;
-  bool util_pressed, util_held;
+  bool util_held, util_pressed;
   bool burn_held;
 } az_controls_t;
 
@@ -47,6 +50,11 @@ typedef struct {
   double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double ordn_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
+  struct {
+    enum { AZ_CPLUS_INACTIVE = 0, AZ_CPLUS_READY, AZ_CPLUS_ACTIVE } state;
+    double charge; // from 0.0 (uncharged) to 1.0 (fully charged)
+    double tap_time; // seconds left for second tap of key double-tap
+  } cplus;
   struct {
     bool active;
     az_uid_t node_uid;

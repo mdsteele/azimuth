@@ -36,6 +36,7 @@
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+// Constants:
 
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 0.6
@@ -51,6 +52,17 @@
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 // Wall elasticity for closed doors:
 #define AZ_DOOR_ELASTICITY 0.5
+// The max time, in seconds, between key taps to count as a double-tap:
+#define AZ_DOUBLE_TAP_TIME 0.3
+// The time needed to charge up the C-plus drive, in seconds:
+#define AZ_CPLUS_CHARGE_TIME 2.0
+// How long the C-plus drive stays ready once charged, in seconds:
+#define AZ_CPLUS_DECAY_TIME 3.5
+// Energy consumed by the C-plus drive per second while active:
+#define AZ_CPLUS_POWER_COST 100.0
+
+/*===========================================================================*/
+// Basics:
 
 static void recharge_ship_energy(az_player_t *player, double time) {
   const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
@@ -60,76 +72,6 @@ static void recharge_ship_energy(az_player_t *player, double time) {
      AZ_QUANTUM_REACTOR_RECHARGE_RATE : 0.0);
   player->energy = fmin(player->max_energy,
                         player->energy + recharge_rate * time);
-}
-
-static void on_ship_enter_door(az_space_state_t *state, az_door_t *door) {
-  state->mode = AZ_MODE_DOORWAY;
-  state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
-  state->mode_data.doorway.progress = 0.0;
-  state->mode_data.doorway.door = door;
-}
-
-static void on_ship_hit_wall(az_space_state_t *state,
-                             double elasticity, double impact_damage_coeff,
-                             az_vector_t impact_normal) {
-  az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
-  const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
-  // Push the ship slightly away from the impact point (so that we're
-  // hopefully no longer in contact with the wall).
-  ship->position = az_vadd(ship->position, az_vwithlen(impact_normal, 0.5));
-  // Bounce the ship off the wall.
-  const double old_speed_fraction =
-    az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED;
-  ship->velocity = az_vsub(ship->velocity,
-                           az_vmul(az_vproj(ship->velocity, impact_normal),
-                                   1.0 + elasticity));
-  // Damage the ship.
-  az_damage_ship(state, impact_damage_coeff * old_speed_fraction);
-  // Put a particle at the impact point.
-  az_particle_t *particle;
-  if (az_insert_particle(state, &particle)) {
-    particle->kind = AZ_PAR_BOOM;
-    particle->color = (az_color_t){255, 255, 255, 255};
-    particle->position = impact_point;
-    particle->velocity = AZ_VZERO;
-    particle->lifetime = 0.3;
-    particle->param1 = 10;
-  }
-  az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
-}
-
-static void on_ship_arc_hit_wall(
-    az_space_state_t *state, double elasticity, double impact_damage_coeff,
-    az_vector_t spin_center, double spin_angle, az_vector_t impact_normal) {
-  az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
-  const az_vector_t impact_point = az_vsub(ship->position, impact_normal);
-  // Push the ship slightly away from the impact point (so that we're
-  // hopefully no longer in contact with the wall).
-  const double dtheta = -copysign(0.0001, spin_angle);
-  ship->position =
-    az_vadd(spin_center,
-            az_vrotate(az_vsub(ship->position, spin_center), dtheta));
-  ship->velocity = az_vrotate(ship->velocity, dtheta);
-  ship->angle = az_mod2pi(ship->angle + dtheta);
-  // Bounce the ship off the wall.
-  const double old_speed_fraction =
-    az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED;
-  ship->velocity = az_vmul(ship->velocity, -elasticity);
-  // Damage the ship.
-  az_damage_ship(state, impact_damage_coeff * old_speed_fraction);
-  // Put a particle at the impact point.
-  az_particle_t *particle;
-  if (az_insert_particle(state, &particle)) {
-    particle->kind = AZ_PAR_BOOM;
-    particle->color = (az_color_t){255, 255, 255, 255};
-    particle->position = impact_point;
-    particle->velocity = AZ_VZERO;
-    particle->lifetime = 0.3;
-    particle->param1 = 10;
-  }
-  az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
 }
 
 static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
@@ -173,6 +115,120 @@ static void apply_drag_to_ship(az_ship_t *ship, double time) {
 }
 
 /*===========================================================================*/
+// Impacts:
+
+static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
+                           const az_node_t *tractor_node) {
+  az_ship_t *ship = &state->ship;
+
+  // Move the ship:
+  ship->position = impact->position;
+  if (tractor_node != NULL) {
+    ship->velocity = az_vrotate(ship->velocity, impact->angle);
+    ship->angle = az_mod2pi(ship->angle + impact->angle);
+  }
+
+  // Resolve the collision (if any):
+  bool bounce_ship = false;
+  double elasticity, damage;
+  switch (impact->type) {
+    case AZ_IMP_NOTHING: break;
+    case AZ_IMP_BADDIE:
+      if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
+          az_try_damage_baddie(
+              state, impact->target.baddie.baddie,
+              impact->target.baddie.component, AZ_DMGF_CPLUS,
+              impact->target.baddie.baddie->data->max_health)) {
+        assert(impact->target.baddie.baddie->kind == AZ_BAD_NOTHING);
+      } else {
+        ship->tractor_beam.active = false;
+        bounce_ship = true;
+        // TODO: make these parameters depend on baddie
+        damage = 5.0;
+        elasticity = 0.5;
+      }
+      break;
+    case AZ_IMP_DOOR_INSIDE:
+      ship->tractor_beam.active = false;
+      state->mode = AZ_MODE_DOORWAY;
+      state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
+      state->mode_data.doorway.progress = 0.0;
+      state->mode_data.doorway.door = impact->target.door;
+      break;
+    case AZ_IMP_DOOR_OUTSIDE:
+      bounce_ship = true;
+      elasticity = AZ_DOOR_ELASTICITY;
+      damage = 0.0;
+      break;
+    case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
+    case AZ_IMP_WALL:
+      // If C-plus is active, maybe we can just bust right through the wall.
+      // Otherwise, the ship hits the wall and bounces off.
+      if (!(ship->cplus.state == AZ_CPLUS_ACTIVE &&
+            az_try_break_wall(state, impact->target.wall, AZ_DMGF_CPLUS))) {
+        bounce_ship = true;
+        elasticity = impact->target.wall->data->elasticity;
+        damage = (ship->cplus.state == AZ_CPLUS_ACTIVE ? 0.0 :
+                  impact->target.wall->data->impact_damage_coeff *
+                  az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED);
+      }
+      break;
+  }
+
+  // The rest of this function only applies if the ship is going to bounce off
+  // whatever it hit.
+  if (!bounce_ship) return;
+
+  // Push the ship slightly away from the impact point (so that we're
+  // hopefully no longer in contact with whatever we hit).
+  if (tractor_node == NULL) {
+    ship->position = az_vadd(ship->position, az_vwithlen(impact->normal, 0.5));
+  } else {
+    const double dtheta = -copysign(0.0001, impact->angle);
+    ship->position =
+      az_vadd(tractor_node->position,
+              az_vrotate(az_vsub(ship->position, tractor_node->position),
+                         dtheta));
+    ship->velocity = az_vrotate(ship->velocity, dtheta);
+    ship->angle = az_mod2pi(ship->angle + dtheta);
+  }
+
+  // Bounce the ship off the object.
+  if (tractor_node == NULL) {
+    ship->velocity =
+      az_vsub(ship->velocity, az_vmul(az_vproj(ship->velocity, impact->normal),
+                                      1.0 + elasticity));
+  } else {
+    ship->velocity = az_vmul(ship->velocity, -elasticity);
+  }
+
+  // Update C-plus drive status.
+  if (state->ship.cplus.state == AZ_CPLUS_INACTIVE) {
+    if (state->ship.cplus.charge == 1.0) {
+      state->ship.cplus.state = AZ_CPLUS_READY;
+    } else state->ship.cplus.charge = 0.0;
+  } else if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
+    state->ship.cplus.state = AZ_CPLUS_INACTIVE;
+  }
+
+  // Put a particle at the impact point and play a sound.
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = (az_color_t){255, 255, 255, 255};
+    particle->position = az_vsub(ship->position, impact->normal);
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.3;
+    particle->param1 = 10;
+  }
+  az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
+
+  // Damage the ship.
+  az_damage_ship(state, damage);
+}
+
+/*===========================================================================*/
+// Weapons:
 
 static void fire_gun_multi(az_space_state_t *state, double energy_mult,
                            az_proj_kind_t kind, int num_shots, double dtheta,
@@ -658,6 +714,148 @@ static void fire_weapons(az_space_state_t *state, double time) {
 }
 
 /*===========================================================================*/
+// Engines:
+
+static void apply_cplus_drive(az_space_state_t *state, double time) {
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
+  az_controls_t *controls = &ship->controls;
+
+  if (!az_has_upgrade(player, AZ_UPG_CPLUS_DRIVE)) {
+    assert(ship->cplus.state == AZ_CPLUS_INACTIVE);
+    assert(ship->cplus.charge == 0.0);
+    assert(ship->cplus.tap_time == 0.0);
+  } else {
+    switch (ship->cplus.state) {
+      case AZ_CPLUS_INACTIVE:
+        assert(ship->cplus.charge >= 0.0);
+        assert(ship->cplus.charge <= 1.0);
+        assert(ship->cplus.tap_time == 0.0);
+        if (controls->left_held || controls->right_held ||
+            controls->down_held || !controls->up_held) {
+          if (ship->cplus.charge == 1.0) {
+            ship->cplus.state = AZ_CPLUS_READY;
+          } else ship->cplus.charge = 0.0;
+        } else {
+          ship->cplus.charge = fmin(1.0, ship->cplus.charge +
+                                    time / AZ_CPLUS_CHARGE_TIME);
+          if (ship->cplus.charge >= 0.5) {
+            az_particle_t *particle;
+            if (az_insert_particle(state, &particle)) {
+              particle->kind = AZ_PAR_BOOM;
+              if (ship->cplus.charge == 1.0) {
+                particle->color = (az_color_t){64, 255, 64, 255};
+              } else {
+                particle->color = (az_color_t){128, 128, 128,
+                    255 * (ship->cplus.charge - 0.25)};
+              }
+              particle->position =
+                az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
+              particle->velocity = AZ_VZERO;
+              particle->lifetime = 0.3;
+              particle->param1 = 10;
+            }
+          }
+        }
+        break;
+      case AZ_CPLUS_READY:
+        assert(ship->cplus.charge > 0.0);
+        assert(ship->cplus.charge <= 1.0);
+        assert(ship->cplus.tap_time >= 0.0);
+        assert(ship->cplus.tap_time <= 1.0);
+        ship->cplus.charge = fmax(0.0, ship->cplus.charge -
+                                  time / AZ_CPLUS_DECAY_TIME);
+        if (ship->cplus.charge == 0.0) {
+          ship->cplus.state = AZ_CPLUS_INACTIVE;
+          ship->cplus.tap_time = 0.0;
+        } else {
+          ship->cplus.tap_time = fmax(0.0, ship->cplus.tap_time - time);
+          if (controls->up_pressed) {
+            if (ship->cplus.tap_time > 0.0) {
+              ship->cplus.state = AZ_CPLUS_ACTIVE;
+              ship->cplus.charge = 0.0;
+              ship->cplus.tap_time = 0.0;
+            } else ship->cplus.tap_time = AZ_DOUBLE_TAP_TIME;
+          }
+        }
+        break;
+      case AZ_CPLUS_ACTIVE:
+        assert(ship->cplus.charge == 0.0);
+        assert(ship->cplus.tap_time == 0.0);
+        const double energy_cost = AZ_CPLUS_POWER_COST * time;
+        if (controls->down_held || !controls->up_held ||
+            player->energy < energy_cost) {
+          ship->cplus.state = AZ_CPLUS_INACTIVE;
+        } else {
+          player->energy -= energy_cost;
+          ship->velocity = az_vpolar(1000.0, ship->angle);
+          az_particle_t *particle;
+          if (az_insert_particle(state, &particle)) {
+            particle->kind = AZ_PAR_BOOM;
+            particle->color = (az_color_t){64, 255, 64, 255};
+            particle->position =
+              az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
+            particle->velocity = AZ_VZERO;
+            particle->lifetime = 0.3;
+            particle->param1 = 20;
+          }
+        }
+        break;
+    }
+  }
+  controls->up_pressed = false;
+}
+
+static void apply_ship_thrusters(az_ship_t *ship, double time) {
+  if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
+  const az_player_t *player = &ship->player;
+  const az_controls_t *controls = &ship->controls;
+  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
+  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
+  // Turning left:
+  if (controls->left_held && !controls->right_held) {
+    if (!controls->burn_held) {
+      ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time);
+    } else if (has_lateral) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(impulse / 2,
+                                         ship->angle - AZ_HALF_PI));
+    }
+  }
+  // Turning right:
+  if (controls->right_held && !controls->left_held) {
+    if (!controls->burn_held) {
+      ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time);
+    } else if (has_lateral) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(impulse / 2,
+                                         ship->angle + AZ_HALF_PI));
+    }
+  }
+  // Forward thrust:
+  if (controls->up_held && !controls->down_held) {
+    if (!controls->burn_held) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(impulse, ship->angle));
+    } else if (has_lateral) {
+      ship->velocity = az_vadd(ship->velocity,
+                               az_vpolar(-impulse/2, ship->angle));
+    }
+  }
+  // Retro thrusters:
+  if (controls->down_held && !controls->up_held &&
+      az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
+    const double speed = az_vnorm(ship->velocity);
+    if (speed <= impulse) {
+      ship->velocity = AZ_VZERO;
+    } else {
+      ship->velocity = az_vmul(ship->velocity, (speed - impulse) / speed);
+    }
+  }
+}
+
+/*===========================================================================*/
+// Complete tick function:
 
 void az_tick_ship(az_space_state_t *state, double time) {
   if (state->mode == AZ_MODE_GAME_OVER) return;
@@ -671,8 +869,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
   ship->shield_flare =
     fmax(0.0, ship->shield_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
 
-  // Recharge energy, but only if we're not currently firing a beam gun.
-  if (!(controls->fire_held &&
+  // Recharge energy, but only if we're not currently firing a beam gun or
+  // using the C-plus drive.
+  if (ship->cplus.state != AZ_CPLUS_ACTIVE &&
+      !(controls->fire_held &&
         (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM))) {
     recharge_ship_energy(player, time);
   }
@@ -708,87 +908,27 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_arc_circle_impact(
         state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
         tractor_node->position, dtheta, AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
-
-    // Move the ship:
-    ship->position = impact.position;
-    ship->velocity = az_vrotate(ship->velocity, impact.angle);
-    ship->angle = az_mod2pi(ship->angle + impact.angle);
-
-    // Resolve the collision (if any):
-    switch (impact.type) {
-      case AZ_IMP_NOTHING: break;
-      case AZ_IMP_BADDIE:
-        // TODO: make these parameters depend on baddie
-        on_ship_arc_hit_wall(
-            state, 0.1,
-            (impact.target.baddie.baddie->frozen > 0.0 ? 0.0 : 10.0),
-            tractor_node->position, impact.angle, impact.normal);
-        ship->tractor_beam.active = false;
-        tractor_node = NULL;
-        break;
-      case AZ_IMP_DOOR_INSIDE:
-        on_ship_enter_door(state, impact.target.door);
-        ship->tractor_beam.active = false;
-        tractor_node = NULL;
-        break;
-      case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
-      case AZ_IMP_DOOR_OUTSIDE:
-        on_ship_arc_hit_wall(state, AZ_DOOR_ELASTICITY, 0,
-            tractor_node->position, impact.angle, impact.normal);
-        break;
-      case AZ_IMP_WALL:
-        on_ship_arc_hit_wall(
-            state, impact.target.wall->data->elasticity,
-            impact.target.wall->data->impact_damage_coeff,
-            tractor_node->position, impact.angle, impact.normal);
-        break;
-    }
+    on_ship_impact(state, &impact, tractor_node);
+    if (!ship->tractor_beam.active) tractor_node = NULL;
   } else {
     assert(tractor_node == NULL);
-
     // Figure out what, if anything, the ship hits:
     az_impact_t impact;
-    az_circle_impact(state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
-                     az_vmul(ship->velocity, time), AZ_IMPF_SHIP, AZ_SHIP_UID,
-                     &impact);
-
-    // Move the ship:
-    ship->position = impact.position;
-
-    // Resolve the collision (if any):
-    switch (impact.type) {
-      case AZ_IMP_NOTHING: break;
-      case AZ_IMP_BADDIE:
-        // TODO: make these parameters depend on baddie
-        on_ship_hit_wall(
-            state, 0.1,
-            (impact.target.baddie.baddie->frozen > 0.0 ? 0.0 : 10.0),
-            impact.normal);
-        break;
-      case AZ_IMP_DOOR_INSIDE:
-        on_ship_enter_door(state, impact.target.door);
-        break;
-      case AZ_IMP_DOOR_OUTSIDE:
-        on_ship_hit_wall(state, AZ_DOOR_ELASTICITY, 0, impact.normal);
-        break;
-      case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
-      case AZ_IMP_WALL:
-        on_ship_hit_wall(state, impact.target.wall->data->elasticity,
-                         impact.target.wall->data->impact_damage_coeff,
-                         impact.normal);
-        break;
-    }
+    az_circle_impact(
+        state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
+        az_vmul(ship->velocity, time), AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
+    on_ship_impact(state, &impact, NULL);
   }
 
   // If we press the util key while near a save point, initiate saving.
-  if (controls->util_pressed) {
-    controls->util_pressed = false;
+  if (controls->util_pressed && state->mode == AZ_MODE_NORMAL) {
     const az_node_t *node = choose_nearby_node(state);
     // TODO: Handle other kinds of node actions (e.g. refill/comm nodes)
     if (node != NULL && node->kind == AZ_NODE_SAVE_POINT) {
       state->mode = AZ_MODE_SAVING;
     }
   }
+  controls->util_pressed = false;
 
   // Check if we hit an upgrade.
   if (state->mode == AZ_MODE_NORMAL) {
@@ -812,55 +952,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // onwards if we're still in normal mode.
   if (state->mode != AZ_MODE_NORMAL) return;
 
+  // Apply various forces:
   apply_gravity_to_ship(ship, time);
-
-  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
-  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
-
-  // Turning left:
-  if (controls->left && !controls->right) {
-    if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time);
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse / 2,
-                                         ship->angle - AZ_HALF_PI));
-    }
-  }
-
-  // Turning right:
-  if (controls->right && !controls->left) {
-    if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time);
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse / 2,
-                                         ship->angle + AZ_HALF_PI));
-    }
-  }
-
-  // Forward thrust:
-  if (controls->up && !controls->down) {
-    if (!controls->burn_held) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse, ship->angle));
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(-impulse/2, ship->angle));
-    }
-  }
-
-  // Retro thrusters:
-  if (controls->down && !controls->up &&
-      az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
-    const double speed = az_vnorm(ship->velocity);
-    if (speed <= impulse) {
-      ship->velocity = AZ_VZERO;
-    } else {
-      ship->velocity = az_vmul(ship->velocity, (speed - impulse) / speed);
-    }
-  }
-
+  apply_cplus_drive(state, time);
+  apply_ship_thrusters(ship, time);
   apply_drag_to_ship(ship, time);
 
   // Activate tractor beam if necessary:
@@ -891,7 +986,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     ship->velocity = az_vflatten(ship->velocity,
         az_vsub(ship->position, tractor_node->position));
     az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
-  }
+  } else assert(tractor_node == NULL);
 
   fire_weapons(state, time);
 }

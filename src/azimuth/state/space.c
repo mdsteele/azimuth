@@ -227,15 +227,16 @@ void az_damage_ship(az_space_state_t *state, double damage) {
 // The level of health at or below which a baddie can be frozen.
 #define AZ_BADDIE_FREEZE_THRESHOLD 4.0
 
-void az_try_damage_baddie(
+bool az_try_damage_baddie(
     az_space_state_t *state, az_baddie_t *baddie,
     const az_component_data_t *component, az_damage_flags_t damage_kind,
     double damage_amount) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   assert(baddie->health > 0.0);
   assert(damage_amount >= 0.0);
+
   // If the damage is zero, we can quit early.
-  if (damage_amount <= 0.0) return;
+  if (damage_amount <= 0.0) return false;
 
   // Determine if the baddie is susceptible to this kind of damage; if not,
   // quit early.
@@ -243,7 +244,7 @@ void az_try_damage_baddie(
     az_damage_flags_t modified_damage_kind = damage_kind;
     modified_damage_kind &= ~AZ_DMGF_FREEZE;
     if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-    if (!(modified_damage_kind & ~(component->immunities))) return;
+    if (!(modified_damage_kind & ~(component->immunities))) return false;
   }
 
   // Damage the baddie.
@@ -264,6 +265,44 @@ void az_try_damage_baddie(
            !(component->immunities & AZ_DMGF_FREEZE) &&
            baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
     baddie->frozen = 1.0;
+  }
+  return true;
+}
+
+bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
+                       az_damage_flags_t damage_kind) {
+  assert(wall->kind != AZ_WALL_NOTHING);
+  if ((damage_kind & AZ_DMGF_WALL_FLARE) == 0) return false;
+  az_damage_flags_t vulnerability = 0;
+  switch (wall->kind) {
+    case AZ_WALL_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_WALL_INDESTRUCTIBLE: return false;
+    case AZ_WALL_DESTRUCTIBLE_CHARGED:
+      vulnerability = AZ_DMGF_CHARGED;
+      break;
+    case AZ_WALL_DESTRUCTIBLE_ROCKET:
+      vulnerability = AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET;
+      break;
+    case AZ_WALL_DESTRUCTIBLE_HYPER_ROCKET:
+      vulnerability = AZ_DMGF_HYPER_ROCKET;
+      break;
+    case AZ_WALL_DESTRUCTIBLE_BOMB:
+      vulnerability = AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB;
+      break;
+    case AZ_WALL_DESTRUCTIBLE_MEGA_BOMB:
+      vulnerability = AZ_DMGF_MEGA_BOMB;
+      break;
+    case AZ_WALL_DESTRUCTIBLE_CPLUS:
+      vulnerability = AZ_DMGF_CPLUS;
+      break;
+  }
+  if ((damage_kind & vulnerability) != 0) {
+    wall->kind = AZ_WALL_NOTHING;
+    // TODO add particles
+    return true;
+  } else {
+    wall->flare = 1.0;
+    return false;
   }
 }
 
