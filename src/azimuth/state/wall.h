@@ -78,6 +78,9 @@ int az_wall_data_index(const az_wall_data_t *data);
 
 /*===========================================================================*/
 
+// Determine if the specified point overlaps the wall.
+bool az_point_touches_wall(const az_wall_t *wall, az_vector_t point);
+
 // Determine if the specified circle overlaps any part of the wall.
 bool az_circle_touches_wall(
     const az_wall_t *wall, double radius, az_vector_t center);

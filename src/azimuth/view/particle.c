@@ -88,6 +88,22 @@ static void draw_particle(const az_particle_t *particle) {
         }
       } glEnd();
       break;
+    case AZ_PAR_SHARD:
+      glScaled(particle->param1, particle->param1, 1.0);
+      glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0.0, 0.0, 1.0);
+      glBegin(GL_TRIANGLES); {
+        az_color_t color = particle->color;
+        const double alpha = 1.0 - particle->age / particle->lifetime;
+        with_color_alpha(color, alpha);
+        glVertex2d(2, 3);
+        color.r *= 0.6; color.g *= 0.6; color.b *= 0.6;
+        with_color_alpha(color, alpha);
+        glVertex2d(-2, 4);
+        color.r *= 0.6; color.g *= 0.6; color.b *= 0.6;
+        with_color_alpha(color, alpha);
+        glVertex2d(0, -4);
+      } glEnd();
+      break;
   }
 }
 

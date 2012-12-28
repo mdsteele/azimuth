@@ -195,33 +195,59 @@ static void add_random_pickup(az_space_state_t *state,
 /*===========================================================================*/
 
 void az_damage_ship(az_space_state_t *state, double damage) {
-  assert(az_ship_is_present(&state->ship));
+  az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
   assert(damage >= 0.0);
+  // If no damage is being dealt, do nothing (don't even flare the shields).
   if (damage <= 0.0) return;
-  state->ship.shield_flare = 1.0;
-  state->ship.player.shields -= damage;
-  if (state->ship.player.shields <= 0.0) {
-    state->ship.player.shields = 0.0;
-    // Put us into game-over mode:
-    state->mode = AZ_MODE_GAME_OVER;
-    state->mode_data.game_over.step = AZ_GOS_ASPLODE;
-    state->mode_data.game_over.progress = 0.0;
-    // Add particles for ship debris:
-    az_particle_t *particle;
-    if (az_insert_particle(state, &particle)) {
-      particle->kind = AZ_PAR_BOOM;
-      particle->color = AZ_WHITE;
-      particle->position = state->ship.position;
-      particle->velocity = AZ_VZERO;
-      particle->lifetime = 0.5;
-      particle->param1 = 30;
-    }
-    for (int i = 0; i < 20; ++i) {
-      az_add_speck(state, AZ_WHITE, 2.0, state->ship.position,
-                   az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
-    }
-    az_play_sound(&state->soundboard, AZ_SND_EXPLODE_SHIP);
+  ship->shield_flare = 1.0;
+  // If the ship can survive the damage, reduce shields and we're done.
+  if (ship->player.shields > damage) {
+    ship->player.shields -= damage;
+    return;
   }
+  // Otherwise, the ship will be destroyed.
+  // Add particles for ship debris:
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = AZ_WHITE;
+    particle->position = ship->position;
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.5;
+    particle->param1 = 30;
+  }
+  const double radius = 20.0;
+  for (double y = -radius; y <= radius; y += 4.0) {
+    for (double x = -radius; x <= radius; x += 3.0) {
+      const az_vector_t pos = {x + ship->position.x + az_random(-2.0, 2.0),
+                               y + ship->position.y + az_random(-2.0, 2.0)};
+      if (az_point_touches_ship(ship, pos) &&
+          az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_SHARD;
+        particle->color = (az_color_t){160, 160, 160, 255};
+        particle->position = pos;
+        particle->velocity = az_vmul(az_vsub(pos, ship->position), 5.0);
+        particle->velocity.x += az_random(-50.0, 50.0);
+        particle->velocity.y += az_random(-50.0, 50.0);
+        particle->angle = az_random(0.0, AZ_TWO_PI);
+        particle->lifetime = az_random(0.5, 1.0);
+        particle->param1 = az_random(0.5, 1.5);
+        particle->param2 = az_random(-10.0, 10.0);
+      }
+    }
+  }
+  for (int i = 0; i < 20; ++i) {
+    az_add_speck(state, AZ_WHITE, 2.0, ship->position,
+                 az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
+  }
+  az_play_sound(&state->soundboard, AZ_SND_EXPLODE_SHIP);
+  // Destroy the ship:
+  ship->player.shields = 0.0;
+  // Put us into game-over mode:
+  state->mode = AZ_MODE_GAME_OVER;
+  state->mode_data.game_over.step = AZ_GOS_ASPLODE;
+  state->mode_data.game_over.progress = 0.0;
 }
 
 // The level of health at or below which a baddie can be frozen.
@@ -272,7 +298,10 @@ bool az_try_damage_baddie(
 bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
                        az_damage_flags_t damage_kind) {
   assert(wall->kind != AZ_WALL_NOTHING);
+  // If the damage kind can't destroy any kind of wall, then we quit early
+  // (without even flaring the wall).
   if ((damage_kind & AZ_DMGF_WALL_FLARE) == 0) return false;
+  // Determine what kind of damage this wall is vulnerable to.
   az_damage_flags_t vulnerability = 0;
   switch (wall->kind) {
     case AZ_WALL_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -296,11 +325,37 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
       vulnerability = AZ_DMGF_CPLUS;
       break;
   }
+  // If the wall is vulnerable to the damage being dealt, destroy the wall.
   if ((damage_kind & vulnerability) != 0) {
+    // Place particles for wall debris.
+    const double radius = wall->data->bounding_radius;
+    az_particle_t *particle;
+    for (double y = -radius; y <= radius; y += 10.0) {
+      for (double x = -radius; x <= radius; x += 10.0) {
+        const az_vector_t pos = {x + wall->position.x + az_random(-5.0, 5.0),
+                                 y + wall->position.y + az_random(-5.0, 5.0)};
+        if (az_point_touches_wall(wall, pos) &&
+            az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_SHARD;
+          particle->color = wall->data->color;
+          particle->position = pos;
+          particle->velocity = az_vmul(az_vsub(pos, wall->position), 2.0);
+          particle->velocity.x += az_random(-50.0, 50.0);
+          particle->velocity.y += az_random(-50.0, 50.0);
+          particle->angle = az_random(0.0, AZ_TWO_PI);
+          particle->lifetime = az_random(0.5, 1.0);
+          particle->param1 = az_random(1.0, 3.0);
+          particle->param2 = az_random(-10.0, 10.0);
+        }
+      }
+    }
+    // Remove the wall.
     wall->kind = AZ_WALL_NOTHING;
-    // TODO add particles
     return true;
-  } else {
+  }
+  // Otherwise, flare the wall (to make visible to the player what kind of
+  // damage would be able to destroy this wall).
+  else {
     wall->flare = 1.0;
     return false;
   }

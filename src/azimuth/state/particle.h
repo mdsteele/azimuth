@@ -37,7 +37,9 @@ typedef enum {
   // BEAM: A beam.  param1=length, param2=width/2
   AZ_PAR_BEAM,
   // EMBER: A shrinking glowball.  param1=radius
-  AZ_PAR_EMBER
+  AZ_PAR_EMBER,
+  // SHARD: A trianglar shard of metal/rock.
+  AZ_PAR_SHARD
 } az_particle_kind_t;
 
 typedef struct {

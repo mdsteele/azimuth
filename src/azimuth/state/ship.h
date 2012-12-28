@@ -67,6 +67,11 @@ const extern az_polygon_t AZ_SHIP_POLYGON;
 // Return true if the ship is present (i.e. not destroyed), false otherwise.
 bool az_ship_is_present(const az_ship_t *ship);
 
+/*===========================================================================*/
+
+// Determine if the specified point overlaps the ship.
+bool az_point_touches_ship(const az_ship_t *ship, az_vector_t point);
+
 // Determine if a ray, travelling delta from start, will hit the ship.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
 // and the normal vector in *normal_out (if normal_out is non-NULL).
