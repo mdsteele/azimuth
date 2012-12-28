@@ -167,6 +167,10 @@ typedef uint_fast16_t az_damage_flags_t;
 
 /*===========================================================================*/
 
+// How low the player's shields need to be to play a warning klaxon:
+#define AZ_SHIELDS_LOW_THRESHOLD 50.0
+#define AZ_SHIELDS_VERY_LOW_THRESHOLD 25.0
+
 typedef int az_room_key_t;
 typedef int az_flag_t;
 

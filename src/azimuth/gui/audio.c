@@ -347,6 +347,20 @@ static az_sound_entry_t sound_entries[] = {
     .env_sustain = 0.03245, .env_decay = 0.10518,
     .start_freq = 0.43334, .freq_slide = -0.57352
   },
+  [AZ_SND_KLAXON] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.4507, .start_freq = 0.32394,
+    .freq_slide = 0.112676, .freq_delta_slide = -0.197183,
+    .square_duty = 0.873239, .phaser_offset = 0.40845,
+    .volume_adjust = -0.24
+  },
+  [AZ_SND_KLAXON_DIRE] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.4507, .start_freq = 0.32394,
+    .freq_slide = 0.212676, .freq_delta_slide = -0.197183,
+    .square_duty = 0.873239, .phaser_offset = 0.40845,
+    .volume_adjust = -0.19
+  },
   [AZ_SND_PICKUP_ORDNANCE] = {
     .wave_kind = SQUARE,
     .env_sustain = 0.17572, .env_decay = 0.2746479,

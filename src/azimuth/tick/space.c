@@ -176,6 +176,13 @@ static void tick_pickups_walls_doors_projectiles_and_baddies(
 }
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  if (az_ship_is_present(&state->ship) &&
+      state->ship.player.shields <= AZ_SHIELDS_LOW_THRESHOLD) {
+    az_loop_sound(&state->soundboard,
+                  (state->ship.player.shields > AZ_SHIELDS_VERY_LOW_THRESHOLD ?
+                   AZ_SND_KLAXON : AZ_SND_KLAXON_DIRE));
+  }
+
   // If we're pausing or unpausing, nothing else should happen.
   if (state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING) {
     tick_pause_resume_mode(state, time);

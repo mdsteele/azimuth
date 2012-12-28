@@ -56,7 +56,8 @@ static void draw_hud_bar(int left, int top, double cur, double max) {
   glEnd();
 }
 
-static void draw_hud_shields_energy(const az_player_t *player) {
+static void draw_hud_shields_energy(const az_player_t *player,
+                                    az_clock_t clock) {
   const int max_power = (player->max_shields > player->max_energy ?
                          player->max_shields : player->max_energy);
   const int height = 25 + 2 * HUD_PADDING;
@@ -79,7 +80,12 @@ static void draw_hud_shields_energy(const az_player_t *player) {
     az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "SHIELD");
     az_draw_string(8, AZ_ALIGN_LEFT, 0, 16, "ENERGY");
 
-    glColor3f(0, 0.75, 0.75); // cyan
+    if (player->shields <= AZ_SHIELDS_VERY_LOW_THRESHOLD) {
+      if (az_clock_mod(2, 3, clock)) glColor3f(1, 0, 0);
+      else glColor3f(0.2, 0, 0);
+    } else if (player->shields <= AZ_SHIELDS_LOW_THRESHOLD) {
+      glColor3f(0.5 + 0.1 * az_clock_zigzag(6, 5, clock), 0, 0);
+    } else glColor3f(0, 0.75, 0.75); // cyan
     draw_hud_bar(50, 0, player->shields, player->max_shields);
     glColor3f(0.75, 0, 0.75); // magenta
     draw_hud_bar(50, 15, player->energy, player->max_energy);
@@ -368,7 +374,7 @@ void az_draw_hud(const az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
   const az_player_t *player = &ship->player;
-  draw_hud_shields_energy(player);
+  draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);
   // TODO: draw boss health bar, when relevant
   draw_hud_message(&state->message);
