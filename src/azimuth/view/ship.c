@@ -78,143 +78,148 @@ void az_draw_ship(az_space_state_t* state) {
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
-    // Exhaust:
-    if (controls->up_held && !controls->down_held) {
-      double zig = az_clock_zigzag(10, 1, state->clock);
-      // For forward thrusters:
-      if (!controls->burn_held) {
-        // From port engine:
-        glBegin(GL_TRIANGLE_STRIP); {
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(-10, 12);
-          glColor4f(1, 0.75, 0, 0.9); // orange
-          glVertex2d(-10, 9);
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(-20 - zig, 9);
-          glVertex2d(-10, 7);
-        } glEnd();
-        // From starboard engine:
-        glBegin(GL_TRIANGLE_STRIP); {
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(-10, -12);
-          glColor4f(1, 0.75, 0, 0.9); // orange
-          glVertex2d(-10, -9);
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(-20 - zig, -9);
-          glVertex2d(-10, -7);
-        } glEnd();
-      }
-      // For reverse thrusters:
-      else {
-        // From port engine:
-        glBegin(GL_TRIANGLE_STRIP); {
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(6, 12);
-          glColor4f(1, 0.75, 0, 0.9); // orange
-          glVertex2d(6, 9);
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(16 + zig, 9);
-          glVertex2d(6, 7);
-        } glEnd();
-        // From starboard engine:
-        glBegin(GL_TRIANGLE_STRIP); {
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(6, -12);
-          glColor4f(1, 0.75, 0, 0.9); // orange
-          glVertex2d(6, -9);
-          glColor4f(1, 0.5, 0, 0); // transparent orange
-          glVertex2d(16 + zig, -9);
-          glVertex2d(6, -7);
-        } glEnd();
-      }
-    }
-    // Ordnance charge:
-    if (ship->ordn_charge > 0.0) {
-      assert(ship->ordn_charge <= 1.0);
-      glPushMatrix(); {
-        glTranslated(20, 0, 0);
-        const double mid_radius = ship->ordn_charge *
-          (4.0 + 0.6 * az_clock_zigzag(10, 1, state->clock));
-        const int offset = 6 * az_clock_mod(60, 1, state->clock);
-        glBegin(GL_TRIANGLE_FAN); {
-          if (ship->ordn_charge >= 1.0) glColor4f(1, 1, 0.25, 0.7);
-          else glColor4f(1, 0.25, 0.25, 0.7);
-          glVertex2d(0, 0);
-          glColor4f(1, 1, 1, 0.0);
-          for (int i = 0; i <= 8; ++i) {
-            const double radius = (i % 2 ? 0.5 * mid_radius : 2 * mid_radius);
-            const double theta = AZ_DEG2RAD(45 * i + offset) - ship->angle;
-            glVertex2d(radius * cos(theta), radius * sin(theta));
-          }
-        } glEnd();
-      } glPopMatrix();
-    }
-    // Gun charge:
-    if (ship->gun_charge > 0.0) {
-      assert(ship->gun_charge <= 1.0);
-      glPushMatrix(); {
-        glTranslated(20, 0, 0);
-        const double radius = ship->gun_charge *
-          (7.0 + 0.3 * az_clock_zigzag(10, 1, state->clock));
-        const int offset = 6 * az_clock_mod(60, 1, state->clock);
-        for (int n = 0; n < 2; ++n) {
-          glBegin(GL_TRIANGLE_FAN); {
-            if (ship->gun_charge >= 1.0) glColor4f(1, 1, 0.5, 0.4);
-            else glColor4f(1, 0.5, 0.5, 0.4);
-            glVertex2d(0, 0);
-            glColor4f(1, 1, 1, 0.0);
-            for (int i = 0; i <= 360; i += 60) {
-              const double degrees = (n == 0 ? i + offset : i - offset);
-              glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
-                         radius * sin(AZ_DEG2RAD(degrees)));
-            }
+
+    if (ship->temp_invincibility <= 0.0 ||
+        az_clock_mod(4, 1, state->clock) != 0) {
+      // Exhaust:
+      if (controls->up_held && !controls->down_held) {
+        double zig = az_clock_zigzag(10, 1, state->clock);
+        // For forward thrusters:
+        if (!controls->burn_held) {
+          // From port engine:
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(-10, 12);
+            glColor4f(1, 0.75, 0, 0.9); // orange
+            glVertex2d(-10, 9);
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(-20 - zig, 9);
+            glVertex2d(-10, 7);
+          } glEnd();
+          // From starboard engine:
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(-10, -12);
+            glColor4f(1, 0.75, 0, 0.9); // orange
+            glVertex2d(-10, -9);
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(-20 - zig, -9);
+            glVertex2d(-10, -7);
           } glEnd();
         }
-      } glPopMatrix();
+        // For reverse thrusters:
+        else {
+          // From port engine:
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(6, 12);
+            glColor4f(1, 0.75, 0, 0.9); // orange
+            glVertex2d(6, 9);
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(16 + zig, 9);
+            glVertex2d(6, 7);
+          } glEnd();
+          // From starboard engine:
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(6, -12);
+            glColor4f(1, 0.75, 0, 0.9); // orange
+            glVertex2d(6, -9);
+            glColor4f(1, 0.5, 0, 0); // transparent orange
+            glVertex2d(16 + zig, -9);
+            glVertex2d(6, -7);
+          } glEnd();
+        }
+      }
+      // Ordnance charge:
+      if (ship->ordn_charge > 0.0) {
+        assert(ship->ordn_charge <= 1.0);
+        glPushMatrix(); {
+          glTranslated(20, 0, 0);
+          const double mid_radius = ship->ordn_charge *
+            (4.0 + 0.6 * az_clock_zigzag(10, 1, state->clock));
+          const int offset = 6 * az_clock_mod(60, 1, state->clock);
+          glBegin(GL_TRIANGLE_FAN); {
+            if (ship->ordn_charge >= 1.0) glColor4f(1, 1, 0.25, 0.7);
+            else glColor4f(1, 0.25, 0.25, 0.7);
+            glVertex2d(0, 0);
+            glColor4f(1, 1, 1, 0.0);
+            for (int i = 0; i <= 8; ++i) {
+              const double radius =
+                (i % 2 ? 0.5 * mid_radius : 2.0 * mid_radius);
+              const double theta = AZ_DEG2RAD(45 * i + offset) - ship->angle;
+              glVertex2d(radius * cos(theta), radius * sin(theta));
+            }
+          } glEnd();
+        } glPopMatrix();
+      }
+      // Gun charge:
+      if (ship->gun_charge > 0.0) {
+        assert(ship->gun_charge <= 1.0);
+        glPushMatrix(); {
+          glTranslated(20, 0, 0);
+          const double radius = ship->gun_charge *
+            (7.0 + 0.3 * az_clock_zigzag(10, 1, state->clock));
+          const int offset = 6 * az_clock_mod(60, 1, state->clock);
+          for (int n = 0; n < 2; ++n) {
+            glBegin(GL_TRIANGLE_FAN); {
+              if (ship->gun_charge >= 1.0) glColor4f(1, 1, 0.5, 0.4);
+              else glColor4f(1, 0.5, 0.5, 0.4);
+              glVertex2d(0, 0);
+              glColor4f(1, 1, 1, 0.0);
+              for (int i = 0; i <= 360; i += 60) {
+                const double degrees = (n == 0 ? i + offset : i - offset);
+                glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
+                           radius * sin(AZ_DEG2RAD(degrees)));
+              }
+            } glEnd();
+          }
+        } glPopMatrix();
+      }
+      // Engines:
+      glBegin(GL_QUADS); {
+        // Struts:
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2d( 1,  9);
+        glVertex2d(-7,  9);
+        glVertex2d(-7, -9);
+        glVertex2d( 1, -9);
+        // Port engine:
+        glVertex2d(-10,  12);
+        glVertex2d(  6,  12);
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2d(  8,   7);
+        glVertex2d(-11,   7);
+        // Starboard engine:
+        glVertex2d(  8,  -7);
+        glVertex2d(-11,  -7);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2d(-10, -12);
+        glVertex2d(  6, -12);
+      } glEnd();
+      // Main body:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2d( 15,  4);
+        glVertex2d(-14,  4);
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2d( 20,  0);
+        glVertex2d(-14,  0);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2d( 15, -4);
+        glVertex2d(-14, -4);
+      } glEnd();
+      // Windshield:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0, 0.5, 0.5); // dim cyan
+        glVertex2d(14,  2);
+        glColor3f(0, 1, 1); // cyan
+        glVertex2d(18,  0);
+        glVertex2d(12,  0);
+        glColor3f(0, 0.5, 0.5); // dim cyan
+        glVertex2d(15, -2);
+      } glEnd();
     }
-    // Engines:
-    glBegin(GL_QUADS); {
-      // Struts:
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( 1,  9);
-      glVertex2d(-7,  9);
-      glVertex2d(-7, -9);
-      glVertex2d( 1, -9);
-      // Port engine:
-      glVertex2d(-10,  12);
-      glVertex2d(  6,  12);
-      glColor3f(0.75, 0.75, 0.75); // light gray
-      glVertex2d(  8,   7);
-      glVertex2d(-11,   7);
-      // Starboard engine:
-      glVertex2d(  8,  -7);
-      glVertex2d(-11,  -7);
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d(-10, -12);
-      glVertex2d(  6, -12);
-    } glEnd();
-    // Main body:
-    glBegin(GL_QUAD_STRIP); {
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( 15,  4);
-      glVertex2d(-14,  4);
-      glColor3f(0.75, 0.75, 0.75); // light gray
-      glVertex2d( 20,  0);
-      glVertex2d(-14,  0);
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2d( 15, -4);
-      glVertex2d(-14, -4);
-    } glEnd();
-    // Windshield:
-    glBegin(GL_TRIANGLE_STRIP); {
-      glColor3f(0, 0.5, 0.5); // dim cyan
-      glVertex2d(14,  2);
-      glColor3f(0, 1, 1); // cyan
-      glVertex2d(18,  0);
-      glVertex2d(12,  0);
-      glColor3f(0, 0.5, 0.5); // dim cyan
-      glVertex2d(15, -2);
-    } glEnd();
 
     // C-plus blink:
     if (ship->cplus.state == AZ_CPLUS_READY) {

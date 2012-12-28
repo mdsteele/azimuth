@@ -164,10 +164,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
 
   // Apply velocity.
   if (az_vnonzero(baddie->velocity)) {
+    az_impact_flags_t impact_flags = AZ_IMPF_BADDIE;
+    if (state->ship.temp_invincibility > 0.0) impact_flags |= AZ_IMPF_SHIP;
     az_impact_t impact;
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
                      baddie->position, az_vmul(baddie->velocity, time),
-                     AZ_IMPF_BADDIE, baddie->uid, &impact);
+                     impact_flags, baddie->uid, &impact);
     baddie->position = impact.position;
     if (impact.type != AZ_IMP_NOTHING) {
       // Push the baddie slightly away from the impact point (so that we're
@@ -180,7 +182,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                 az_vmul(az_vproj(baddie->velocity, impact.normal), 1.5));
       // If we hit the ship, damage the ship.
       if (impact.type == AZ_IMP_SHIP) {
-        // TODO damage ship
+        az_damage_ship(state, baddie->data->main_body.impact_damage, true);
+        // TODO apply force to the ship to push it away
       }
     }
   }

@@ -194,13 +194,15 @@ static void add_random_pickup(az_space_state_t *state,
 
 /*===========================================================================*/
 
-void az_damage_ship(az_space_state_t *state, double damage) {
+void az_damage_ship(az_space_state_t *state, double damage,
+                    bool induce_temp_invincibility) {
   az_ship_t *ship = &state->ship;
   assert(az_ship_is_present(ship));
   assert(damage >= 0.0);
   // If no damage is being dealt, do nothing (don't even flare the shields).
-  if (damage <= 0.0) return;
+  if (damage <= 0.0 || ship->temp_invincibility > 0.0) return;
   ship->shield_flare = 1.0;
+  if (induce_temp_invincibility) ship->temp_invincibility = 1.0;
   // If the ship can survive the damage, reduce shields and we're done.
   if (ship->player.shields > damage) {
     ship->player.shields -= damage;

@@ -50,6 +50,7 @@ typedef struct {
   double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double ordn_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
+  double temp_invincibility; // seconds
   struct {
     enum { AZ_CPLUS_INACTIVE = 0, AZ_CPLUS_READY, AZ_CPLUS_ACTIVE } state;
     double charge; // from 0.0 (uncharged) to 1.0 (fully charged)

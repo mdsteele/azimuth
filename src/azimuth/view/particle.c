@@ -47,9 +47,6 @@ static void draw_particle(const az_particle_t *particle) {
         glVertex2d(0, 0);
       } glEnd();
       break;
-    case AZ_PAR_SEGMENT:
-      // TODO
-      break;
     case AZ_PAR_BOOM:
       glBegin(GL_TRIANGLE_FAN); {
         with_color_alpha(particle->color, 0);

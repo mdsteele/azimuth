@@ -137,7 +137,8 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 
 // Reduce the ship's shields by the given amount.  If this is enough to destroy
 // the ship, change to game-over mode.
-void az_damage_ship(az_space_state_t *state, double damage);
+void az_damage_ship(az_space_state_t *state, double damage,
+                    bool induce_temp_invincibility);
 
 // Reduce the baddie's health by the given amount, if the baddie is susceptible
 // to the given kind of damage.  Return true iff any damage was dealt.  If this

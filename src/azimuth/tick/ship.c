@@ -143,9 +143,11 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       } else {
         ship->tractor_beam.active = false;
         bounce_ship = true;
-        // TODO: make these parameters depend on baddie
-        damage = 5.0;
+        damage = impact->target.baddie.component->impact_damage;
         elasticity = 0.5;
+        if (damage > 0.0 && az_vnonzero(ship->velocity)) {
+          elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+        }
       }
       break;
     case AZ_IMP_DOOR_INSIDE:
@@ -224,7 +226,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
 
   // Damage the ship.
-  az_damage_ship(state, damage);
+  az_damage_ship(state, damage, impact->type == AZ_IMP_BADDIE);
 }
 
 /*===========================================================================*/
@@ -868,6 +870,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   assert(ship->shield_flare <= 1.0);
   ship->shield_flare =
     fmax(0.0, ship->shield_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
+  ship->temp_invincibility = fmax(0.0, ship->temp_invincibility - time);
 
   // Recharge energy, but only if we're not currently firing a beam gun or
   // using the C-plus drive.
@@ -889,6 +892,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Apply velocity.  If the tractor beam is active, that implies angular
   // motion (around the locked-onto node); otherwise, linear motion.
+  az_impact_flags_t impact_flags = AZ_IMPF_SHIP;
+  if (ship->temp_invincibility > 0.0) impact_flags |= AZ_IMPF_BADDIE;
   if (ship->tractor_beam.active) {
     // TODO: check for wall/baddie impacts
     assert(tractor_node != NULL);
@@ -907,7 +912,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_impact_t impact;
     az_arc_circle_impact(
         state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
-        tractor_node->position, dtheta, AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
+        tractor_node->position, dtheta, impact_flags, AZ_SHIP_UID, &impact);
     on_ship_impact(state, &impact, tractor_node);
     if (!ship->tractor_beam.active) tractor_node = NULL;
   } else {
@@ -916,7 +921,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     az_impact_t impact;
     az_circle_impact(
         state, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
-        az_vmul(ship->velocity, time), AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
+        az_vmul(ship->velocity, time), impact_flags, AZ_SHIP_UID, &impact);
     on_ship_impact(state, &impact, NULL);
   }
 

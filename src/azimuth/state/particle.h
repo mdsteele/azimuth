@@ -30,8 +30,6 @@ typedef enum {
   AZ_PAR_NOTHING = 0,
   // SPECK: A single point.
   AZ_PAR_SPECK,
-  // SEGMENT: A spinning line segment.  param1=radius, param2=turnrate
-  AZ_PAR_SEGMENT,
   // BOOM: An explosion.  param1=radius
   AZ_PAR_BOOM,
   // BEAM: A beam.  param1=length, param2=width/2

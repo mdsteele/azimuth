@@ -47,7 +47,7 @@ static const az_vector_t turret_cannon_vertices[] = {
 };
 static az_component_data_t turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = AZ_DMGF_NORMAL }
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
 };
 
 static const az_vector_t zipper_vertices[] = {
@@ -56,11 +56,14 @@ static const az_vector_t zipper_vertices[] = {
 
 static az_component_data_t atom_components[] = {
   { .init_position = {20, 0},
-    .bounding_radius = 6.3, .immunities = ~AZ_DMGF_PIERCE },
+    .bounding_radius = 6.3, .immunities = ~AZ_DMGF_PIERCE,
+    .impact_damage = 15.0 },
   { .init_position = {-1.675, -4.977}, .init_angle = AZ_DEG2RAD(100),
-    .bounding_radius = 6.5, .immunities = ~AZ_DMGF_PIERCE },
+    .bounding_radius = 6.5, .immunities = ~AZ_DMGF_PIERCE,
+    .impact_damage = 15.0 },
   { .init_position = {8.212, 16.96}, .init_angle = AZ_DEG2RAD(200),
-    .bounding_radius = 6.7, .immunities = ~AZ_DMGF_PIERCE }
+    .bounding_radius = 6.7, .immunities = ~AZ_DMGF_PIERCE,
+    .impact_damage = 15.0 }
 };
 
 static const az_vector_t box_vertices[] = {
@@ -89,7 +92,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .main_body = { .polygon = AZ_INIT_POLYGON(lump_vertices) }
+    .main_body = { .polygon = AZ_INIT_POLYGON(lump_vertices),
+                   .impact_damage = 10.0 }
   },
   [AZ_BAD_TURRET] = {
     .overall_bounding_radius = 30.5,
@@ -97,60 +101,63 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = AZ_DMGF_NORMAL },
+                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(turret_components)
   },
   [AZ_BAD_ZIPPER] = {
     .max_health = 20.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices) }
+    .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
+                   .impact_damage = 10.0 }
   },
   [AZ_BAD_BOUNCER] = {
     .max_health = 5.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .bounding_radius = 15.0 }
+    .main_body = { .bounding_radius = 15.0, .impact_damage = 10.0 }
   },
   [AZ_BAD_ATOM] = {
     .overall_bounding_radius = 40.0,
     .max_health = 15.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .bounding_radius = 10.0 },
+    .main_body = { .bounding_radius = 10.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(atom_components)
   },
   [AZ_BAD_SPINER] = {
     .max_health = 10.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .bounding_radius = 18.0 }
+    .main_body = { .bounding_radius = 18.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BOX] = {
     .max_health = 10.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
-                   .immunities = AZ_DMGF_FREEZE }
+                   .immunities = AZ_DMGF_FREEZE, .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_BOX] = {
     .max_health = 20.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
+                                  AZ_DMGF_FREEZE | AZ_DMGF_PIERCE),
+                   .impact_damage = 0.0 }
   },
   [AZ_BAD_CLAM] = {
     .overall_bounding_radius = 30.0,
     .max_health = 6.0,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .bounding_radius = 8.0 },
+    .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(clam_components)
   },
   [AZ_BAD_NIGHTBUG] = {
     .max_health = 8.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .main_body = { .polygon = AZ_INIT_POLYGON(nightbug_vertices) }
+    .main_body = { .polygon = AZ_INIT_POLYGON(nightbug_vertices),
+                   .impact_damage = 10.0 }
   },
   [AZ_BAD_SPINE_MINE] = {
     .max_health = 5.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .main_body = { .bounding_radius = 9.0 }
+    .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
   }
 };
 
