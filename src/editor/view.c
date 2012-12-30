@@ -32,6 +32,7 @@
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/door.h"
+#include "azimuth/view/gravfield.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/wall.h"
@@ -121,6 +122,9 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
 }
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
+  AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
+    az_draw_gravfield(&editor_gravfield->spec, state->total_time);
+  }
   AZ_LIST_LOOP(editor_wall, room->walls) {
     az_wall_t real_wall;
     real_wall.kind = editor_wall->spec.kind;
@@ -216,6 +220,17 @@ static void draw_camera_view(az_editor_state_t *state) {
     draw_selection_circle(wall->spec.position, wall->spec.angle,
                           wall->spec.data->bounding_radius);
   }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    if (gravfield->spec.kind == AZ_GRAV_TRAPEZOID) {
+      draw_selection_circle(gravfield->spec.position, gravfield->spec.angle,
+                            gravfield->spec.size.trapezoid.semilength);
+    } else {
+      draw_selection_circle(gravfield->spec.position, gravfield->spec.angle,
+                            gravfield->spec.size.sector.inner_radius +
+                            gravfield->spec.size.sector.thickness);
+    }
+  }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
     draw_selection_circle(node->spec.position, node->spec.angle,
@@ -269,6 +284,10 @@ static void draw_hud(az_editor_state_t* state) {
     case AZ_TOOL_DOOR:
       tool_name = "DOOR";
       glColor3f(0, 1, 0);
+      break;
+    case AZ_TOOL_GRAVFIELD:
+      tool_name = "GRAVFIELD";
+      glColor3f(0, 0.5, 0.5);
       break;
     case AZ_TOOL_NODE:
       tool_name = "NODE";

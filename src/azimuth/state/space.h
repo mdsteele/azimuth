@@ -27,6 +27,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/camera.h"
 #include "azimuth/state/door.h"
+#include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h"
 #include "azimuth/state/particle.h"
 #include "azimuth/state/pickup.h"
@@ -98,6 +99,7 @@ typedef struct {
   // Space objects (these all get cleared out when we exit a room):
   az_baddie_t baddies[100];
   az_door_t doors[20];
+  az_gravfield_t gravfields[50];
   az_node_t nodes[50];
   az_particle_t particles[500];
   az_pickup_t pickups[100];
@@ -119,6 +121,9 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room);
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
 
 bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
+
+bool az_insert_gravfield(az_space_state_t *state,
+                         az_gravfield_t **gravfield_out);
 
 bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
                     az_node_t **node_out);

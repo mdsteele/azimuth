@@ -34,6 +34,7 @@
 // TODO: move these elsewhere
 #define AZ_MAX_NUM_BADDIES 192
 #define AZ_MAX_NUM_DOORS 20
+#define AZ_MAX_NUM_GRAVFIELDS 50
 #define AZ_MAX_NUM_NODES 50
 #define AZ_MAX_NUM_WALLS 250
 
@@ -41,18 +42,19 @@ typedef struct {
   FILE *file;
   bool success;
   jmp_buf jump;
-  int num_baddies, num_doors, num_nodes, num_walls;
+  int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
   az_room_t *room;
 } az_load_room_t;
 
 #define FAIL() longjmp(loader->jump, 1)
 
 static void parse_room_header(az_load_room_t *loader) {
-  int room_num, num_baddies, num_doors, num_nodes, num_walls;
+  int room_num, num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
   double min_r, r_span, min_theta, theta_span;
-  if (fscanf(loader->file, "!R%d c(%lf,%lf,%lf,%lf) b%d d%d n%d w%d\n",
+  if (fscanf(loader->file, "!R%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
              &room_num, &min_r, &r_span, &min_theta, &theta_span,
-             &num_baddies, &num_doors, &num_nodes, &num_walls) < 9) FAIL();
+             &num_baddies, &num_doors, &num_gravfields, &num_nodes,
+             &num_walls) < 10) FAIL();
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
   if (min_r < 0.0 || r_span < 0.0 || theta_span < 0.0) FAIL();
@@ -68,6 +70,10 @@ static void parse_room_header(az_load_room_t *loader) {
   loader->num_doors = num_doors;
   loader->room->num_doors = 0;
   loader->room->doors = AZ_ALLOC(num_doors, az_door_spec_t);
+  if (num_gravfields < 0 || num_gravfields > AZ_MAX_NUM_GRAVFIELDS) FAIL();
+  loader->num_gravfields = num_gravfields;
+  loader->room->num_gravfields = 0;
+  loader->room->gravfields = AZ_ALLOC(num_gravfields, az_gravfield_t);
   if (num_nodes < 0 || num_nodes > AZ_MAX_NUM_NODES) FAIL();
   loader->num_nodes = num_nodes;
   loader->room->num_nodes = 0;
@@ -106,6 +112,30 @@ static void parse_door_directive(az_load_room_t *loader) {
   door->angle = angle;
   door->destination = (az_room_key_t)destination;
   ++loader->room->num_doors;
+}
+
+static void parse_gravfield_directive(az_load_room_t *loader) {
+  if (loader->room->num_gravfields >= loader->num_gravfields) FAIL();
+  int index;
+  double x, y, angle, strength, semilength, front_offset,
+         front_semiwidth, rear_semiwidth;
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf s%lf l%lf o%lf f%lf r%lf\n",
+             &index, &x, &y, &angle, &strength, &semilength, &front_offset,
+             &front_semiwidth, &rear_semiwidth) < 9) FAIL();
+  if (index <= 0 || index > AZ_NUM_GRAVFIELD_KINDS) FAIL();
+  if (strength == 0.0 || semilength <= 0.0 ||
+      front_semiwidth < 0.0 || rear_semiwidth < 0.0) FAIL();
+  az_gravfield_t *gravfield =
+    &loader->room->gravfields[loader->room->num_gravfields];
+  gravfield->kind = (az_gravfield_kind_t)index;
+  gravfield->position = (az_vector_t){x, y};
+  gravfield->angle = angle;
+  gravfield->strength = strength;
+  gravfield->size.trapezoid.semilength = semilength;
+  gravfield->size.trapezoid.front_offset = front_offset;
+  gravfield->size.trapezoid.front_semiwidth = front_semiwidth;
+  gravfield->size.trapezoid.rear_semiwidth = rear_semiwidth;
+  ++loader->room->num_gravfields;
 }
 
 static void parse_node_directive(az_load_room_t *loader) {
@@ -147,6 +177,7 @@ static bool parse_directive(az_load_room_t *loader) {
   switch (fgetc(loader->file)) {
     case 'B': parse_baddie_directive(loader); return true;
     case 'D': parse_door_directive(loader); return true;
+    case 'G': parse_gravfield_directive(loader); return true;
     case 'N': parse_node_directive(loader); return true;
     case 'W': parse_wall_directive(loader); return true;
     case EOF: return false;
@@ -192,10 +223,11 @@ bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("!R%d c(%.02f,%.02f,%f,%f) b%d d%d n%d w%d\n", room->key,
+  WRITE("!R%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n", room->key,
         room->camera_bounds.min_r, room->camera_bounds.r_span,
         room->camera_bounds.min_theta, room->camera_bounds.theta_span,
-        room->num_baddies, room->num_doors, room->num_nodes, room->num_walls);
+        room->num_baddies, room->num_doors, room->num_gravfields,
+        room->num_nodes, room->num_walls);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_spec_t *wall = &room->walls[i];
     WRITE("W%d d%d x%.02f y%.02f a%f\n", (int)wall->kind,
@@ -206,6 +238,16 @@ static bool write_room(const az_room_t *room, FILE *file) {
     const az_door_spec_t *door = &room->doors[i];
     WRITE("D%d x%.02f y%.02f a%f r%d\n", (int)door->kind,
           door->position.x, door->position.y, door->angle, door->destination);
+  }
+  for (int i = 0; i < room->num_gravfields; ++i) {
+    const az_gravfield_t *gravfield = &room->gravfields[i];
+    WRITE("G%d x%.02f y%.02f a%f s%.02f l%.02f o%.02f f%.02f r%.02f\n",
+          (int)gravfield->kind, gravfield->position.x, gravfield->position.y,
+          gravfield->angle, gravfield->strength,
+          gravfield->size.trapezoid.semilength,
+          gravfield->size.trapezoid.front_offset,
+          gravfield->size.trapezoid.front_semiwidth,
+          gravfield->size.trapezoid.rear_semiwidth);
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];

@@ -29,6 +29,7 @@
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/door.h"
+#include "azimuth/view/gravfield.h"
 #include "azimuth/view/hud.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/particle.h"
@@ -69,6 +70,7 @@ static double mode_fade_alpha(az_space_state_t *state) {
 }
 
 static void draw_camera_view(az_space_state_t *state) {
+  az_draw_gravfields(state);
   az_draw_walls(state);
   az_draw_nodes(state);
   az_draw_pickups(state);

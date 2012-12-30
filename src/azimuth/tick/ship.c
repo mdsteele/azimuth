@@ -30,6 +30,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/gravfield.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
@@ -89,16 +90,17 @@ static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
   return best_node;
 }
 
-static void apply_gravity_to_ship(az_ship_t *ship, double time) {
-  // Gravity works as follows.  By the spherical shell theorem, the force of
-  // gravity on the ship (while inside the planetoid) varies linearly with the
-  // distance from the planetoid's center, so the change in velocity is time *
-  // surface_gravity * vnorm(position) / planetoid_radius.  However, we should
-  // then multiply this scalar by the unit vector pointing from the ship
-  // towards the core, which is -position/vnorm(position).  The vnorm(position)
-  // factors cancel and we end up with what we have here.
-  ship->velocity = az_vadd(ship->velocity,
-      az_vmul(ship->position, -time *
+static void apply_gravity_to_ship(az_space_state_t *state, double time) {
+  az_tick_gravfields(state, time);
+  // Planetary gravity works as follows.  By the spherical shell theorem, the
+  // force of gravity on the ship (while inside the planetoid) varies linearly
+  // with the distance from the planetoid's center, so the change in velocity
+  // is time * surface_gravity * vnorm(position) / planetoid_radius.  However,
+  // we should then multiply this scalar by the unit vector pointing from the
+  // ship towards the core, which is -position/vnorm(position).  The
+  // vnorm(position) factors cancel and we end up with what we have here.
+  state->ship.velocity = az_vadd(state->ship.velocity,
+      az_vmul(state->ship.position, -time *
               (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
 }
 
@@ -958,7 +960,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (state->mode != AZ_MODE_NORMAL) return;
 
   // Apply various forces:
-  apply_gravity_to_ship(ship, time);
+  apply_gravity_to_ship(state, time);
   apply_cplus_drive(state, time);
   apply_ship_thrusters(ship, time);
   apply_drag_to_ship(ship, time);

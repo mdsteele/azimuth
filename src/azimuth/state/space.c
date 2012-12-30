@@ -33,6 +33,9 @@
 void az_clear_space(az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) baddie->kind = AZ_BAD_NOTHING;
   AZ_ARRAY_LOOP(door, state->doors) door->kind = AZ_DOOR_NOTHING;
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    gravfield->kind = AZ_GRAV_NOTHING;
+  }
   AZ_ARRAY_LOOP(node, state->nodes) node->kind = AZ_NODE_NOTHING;
   AZ_ARRAY_LOOP(particle, state->particles) particle->kind = AZ_PAR_NOTHING;
   AZ_ARRAY_LOOP(pickup, state->pickups) pickup->kind = AZ_PUP_NOTHING;
@@ -41,16 +44,6 @@ void az_clear_space(az_space_state_t *state) {
 }
 
 void az_enter_room(az_space_state_t *state, const az_room_t *room) {
-  for (int i = 0; i < room->num_walls; ++i) {
-    az_wall_t *wall;
-    if (az_insert_wall(state, &wall)) {
-      const az_wall_spec_t *spec = &room->walls[i];
-      wall->kind = spec->kind;
-      wall->data = spec->data;
-      wall->position = spec->position;
-      wall->angle = spec->angle;
-    }
-  }
   for (int i = 0; i < room->num_baddies; ++i) {
     az_baddie_t *baddie;
     if (az_insert_baddie(state, &baddie)) {
@@ -68,6 +61,12 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       door->destination = spec->destination;
     }
   }
+  for (int i = 0; i < room->num_gravfields; ++i) {
+    az_gravfield_t *gravfield;
+    if (az_insert_gravfield(state, &gravfield)) {
+      *gravfield = room->gravfields[i];
+    }
+  }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *spec = &room->nodes[i];
     if (spec->kind == AZ_NODE_UPGRADE &&
@@ -78,6 +77,16 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       node->position = spec->position;
       node->angle = spec->angle;
       node->upgrade = spec->upgrade;
+    }
+  }
+  for (int i = 0; i < room->num_walls; ++i) {
+    az_wall_t *wall;
+    if (az_insert_wall(state, &wall)) {
+      const az_wall_spec_t *spec = &room->walls[i];
+      wall->kind = spec->kind;
+      wall->data = spec->data;
+      wall->position = spec->position;
+      wall->angle = spec->angle;
     }
   }
 }
@@ -99,6 +108,17 @@ bool az_insert_door(az_space_state_t *state, az_door_t **door_out) {
       door->is_open = false;
       door->openness = 0.0;
       *door_out = door;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool az_insert_gravfield(az_space_state_t *state,
+                         az_gravfield_t **gravfield_out) {
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (gravfield->kind == AZ_GRAV_NOTHING) {
+      *gravfield_out = gravfield;
       return true;
     }
   }

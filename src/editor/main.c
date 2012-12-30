@@ -55,6 +55,7 @@ static void add_new_room(void) {
   };
   AZ_LIST_INIT(room->baddies, 5);
   AZ_LIST_INIT(room->doors, 5);
+  AZ_LIST_INIT(room->gravfields, 5);
   AZ_LIST_INIT(room->nodes, 5);
   AZ_LIST_INIT(room->walls, 5);
   state.current_room = room_key;
@@ -62,41 +63,16 @@ static void add_new_room(void) {
 }
 
 static void center_camera_on_current_room(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  double min_x = INFINITY, max_x = -INFINITY;
-  double min_y = INFINITY, max_y = -INFINITY;
-  AZ_LIST_LOOP(baddie, room->baddies) {
-    min_x = fmin(min_x, baddie->spec.position.x);
-    max_x = fmax(max_x, baddie->spec.position.x);
-    min_y = fmin(min_y, baddie->spec.position.y);
-    max_y = fmax(max_y, baddie->spec.position.y);
-  }
-  AZ_LIST_LOOP(door, room->doors) {
-    min_x = fmin(min_x, door->spec.position.x);
-    max_x = fmax(max_x, door->spec.position.x);
-    min_y = fmin(min_y, door->spec.position.y);
-    max_y = fmax(max_y, door->spec.position.y);
-  }
-  AZ_LIST_LOOP(node, room->nodes) {
-    min_x = fmin(min_x, node->spec.position.x);
-    max_x = fmax(max_x, node->spec.position.x);
-    min_y = fmin(min_y, node->spec.position.y);
-    max_y = fmax(max_y, node->spec.position.y);
-  }
-  AZ_LIST_LOOP(wall, room->walls) {
-    min_x = fmin(min_x, wall->spec.position.x);
-    max_x = fmax(max_x, wall->spec.position.x);
-    min_y = fmin(min_y, wall->spec.position.y);
-    max_y = fmax(max_y, wall->spec.position.y);
-  }
-  if (min_x > max_x) return;
-  else assert(min_y <= max_y);
-  state.camera = (az_vector_t){(min_x + max_x) * 0.5, (min_y + max_y) * 0.5};
+  const az_camera_bounds_t *bounds =
+    &AZ_LIST_GET(state.planet.rooms, state.current_room)->camera_bounds;
+  state.camera = az_vpolar(bounds->min_r + 0.5 * bounds->r_span,
+                           bounds->min_theta + 0.5 * bounds->theta_span);
 }
 
 static void select_all(az_editor_room_t *room, bool selected) {
   AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = selected;
   AZ_LIST_LOOP(door, room->doors) door->selected = selected;
+  AZ_LIST_LOOP(gravfield, room->gravfields) gravfield->selected = selected;
   AZ_LIST_LOOP(node, room->nodes) node->selected = selected;
   AZ_LIST_LOOP(wall, room->walls) wall->selected = selected;
 }
@@ -128,6 +104,12 @@ static void do_save(void) {
     for (int i = 0; i < room->num_doors; ++i) {
       room->doors[i] = AZ_LIST_GET(eroom->doors, i)->spec;
     }
+    // Convert gravfields:
+    room->num_gravfields = AZ_LIST_SIZE(eroom->gravfields);
+    room->gravfields = AZ_ALLOC(room->num_gravfields, az_gravfield_t);
+    for (int i = 0; i < room->num_gravfields; ++i) {
+      room->gravfields[i] = AZ_LIST_GET(eroom->gravfields, i)->spec;
+    }
     // Convert nodes:
     room->num_nodes = AZ_LIST_SIZE(eroom->nodes);
     room->nodes = AZ_ALLOC(room->num_nodes, az_node_spec_t);
@@ -155,6 +137,15 @@ static void do_select(int x, int y, bool multi) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   double best_dist = INFINITY;
+  az_editor_gravfield_t *best_gravfield = NULL;
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    double dist = az_vdist(pt, gravfield->spec.position);
+    if (az_point_within_gravfield(&gravfield->spec, pt) &&
+        dist < best_dist) {
+      best_dist = dist;
+      best_gravfield = gravfield;
+    }
+  }
   az_editor_wall_t *best_wall = NULL;
   AZ_LIST_LOOP(wall, room->walls) {
     double dist = az_vdist(pt, wall->spec.position);
@@ -230,6 +221,15 @@ static void do_select(int x, int y, bool multi) {
     state.brush.angle = best_wall->spec.angle;
     state.brush.wall_kind = best_wall->spec.kind;
     state.brush.wall_data_index = az_wall_data_index(best_wall->spec.data);
+  } else if (best_gravfield != NULL) {
+    if (multi) {
+      best_gravfield->selected = !best_gravfield->selected;
+    } else if (!best_gravfield->selected) {
+      select_all(room, false);
+      best_gravfield->selected = true;
+    }
+    state.brush.angle = best_gravfield->spec.angle;
+    state.brush.gravfield_kind = best_gravfield->spec.kind;
   } else if (!multi) {
     select_all(room, false);
   }
@@ -248,6 +248,11 @@ static void do_move(int x, int y, int dx, int dy) {
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.position = az_vadd(door->spec.position, delta);
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    gravfield->spec.position = az_vadd(gravfield->spec.position, delta);
     state.unsaved = true;
   }
   AZ_LIST_LOOP(node, room->nodes) {
@@ -293,6 +298,9 @@ static void do_mass_move(int x, int y, int dx, int dy) {
   AZ_LIST_LOOP(door, room->doors) {
     door->spec.position = az_vadd(door->spec.position, delta);
   }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    gravfield->spec.position = az_vadd(gravfield->spec.position, delta);
+  }
   AZ_LIST_LOOP(node, room->nodes) {
     node->spec.position = az_vadd(node->spec.position, delta);
   }
@@ -320,6 +328,14 @@ static void do_rotate(int x, int y, int dx, int dy) {
       az_mod2pi(door->spec.angle +
                 az_vtheta(az_vsub(pt1, door->spec.position)) -
                 az_vtheta(az_vsub(pt0, door->spec.position)));
+    state.unsaved = true;
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    gravfield->spec.angle = state.brush.angle =
+      az_mod2pi(gravfield->spec.angle +
+                az_vtheta(az_vsub(pt1, gravfield->spec.position)) -
+                az_vtheta(az_vsub(pt0, gravfield->spec.position)));
     state.unsaved = true;
   }
   AZ_LIST_LOOP(node, room->nodes) {
@@ -354,6 +370,10 @@ static void do_mass_rotate(int x, int y, int dx, int dy) {
   AZ_LIST_LOOP(door, room->doors) {
     door->spec.position = az_vrotate(door->spec.position, dtheta);
     door->spec.angle = az_mod2pi(door->spec.angle + dtheta);
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    gravfield->spec.position = az_vrotate(gravfield->spec.position, dtheta);
+    gravfield->spec.angle = az_mod2pi(gravfield->spec.angle + dtheta);
   }
   AZ_LIST_LOOP(node, room->nodes) {
     node->spec.position = az_vrotate(node->spec.position, dtheta);
@@ -423,6 +443,23 @@ static void do_add_door(int x, int y) {
   state.unsaved = true;
 }
 
+static void do_add_gravfield(int x, int y) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  select_all(room, false);
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  az_editor_gravfield_t *gravfield = AZ_LIST_ADD(room->gravfields);
+  gravfield->selected = true;
+  gravfield->spec.kind = state.brush.gravfield_kind;
+  gravfield->spec.position = pt;
+  gravfield->spec.angle = state.brush.angle;
+  gravfield->spec.strength = 100.0;
+  gravfield->spec.size.trapezoid.semilength = 100.0;
+  gravfield->spec.size.trapezoid.front_offset = 0.0;
+  gravfield->spec.size.trapezoid.front_semiwidth = 50.0;
+  gravfield->spec.size.trapezoid.rear_semiwidth = 100.0;
+  state.unsaved = true;
+}
+
 static void do_add_node(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
@@ -472,6 +509,16 @@ static void do_remove(void) {
     AZ_LIST_DESTROY(temp_doors);
   }
   {
+    AZ_LIST_DECLARE(az_editor_gravfield_t, temp_gravfields);
+    AZ_LIST_INIT(temp_gravfields, 2);
+    AZ_LIST_LOOP(gravfield, room->gravfields) {
+      if (!gravfield->selected) *AZ_LIST_ADD(temp_gravfields) = *gravfield;
+      else state.unsaved = true;
+    }
+    AZ_LIST_SWAP(temp_gravfields, room->gravfields);
+    AZ_LIST_DESTROY(temp_gravfields);
+  }
+  {
     AZ_LIST_DECLARE(az_editor_node_t, temp_nodes);
     AZ_LIST_INIT(temp_nodes, 2);
     AZ_LIST_LOOP(node, room->nodes) {
@@ -511,6 +558,15 @@ static void do_change_data(int delta, bool secondary) {
     state.brush.door_kind = new_kind;
     state.unsaved = true;
   }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    const az_gravfield_kind_t new_kind =
+      az_modulo((int)gravfield->spec.kind - 1 + delta,
+                AZ_NUM_GRAVFIELD_KINDS) + 1;
+    gravfield->spec.kind = new_kind;
+    state.brush.gravfield_kind = new_kind;
+    state.unsaved = true;
+  }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
     if (node->spec.kind == AZ_NODE_UPGRADE && secondary) {
@@ -539,6 +595,53 @@ static void do_change_data(int delta, bool secondary) {
       wall->spec.data = az_get_wall_data(new_index);
       state.brush.wall_data_index = new_index;
     }
+    state.unsaved = true;
+  }
+}
+
+static void begin_edit_gravfield(void) {
+  assert(state.text.action == AZ_ETA_NOTHING);
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_gravfield_t *gravfield = NULL;
+  AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
+    if (editor_gravfield->selected) {
+      gravfield = &editor_gravfield->spec;
+      break;
+    }
+  }
+  if (gravfield == NULL) return;
+  const int length =
+    snprintf(state.text.buffer, AZ_ARRAY_SIZE(state.text.buffer),
+             "s%.02f l%.02f o%.02f f%.02f r%.02f", gravfield->strength,
+             gravfield->size.trapezoid.semilength,
+             gravfield->size.trapezoid.front_offset,
+             gravfield->size.trapezoid.front_semiwidth,
+             gravfield->size.trapezoid.rear_semiwidth);
+  state.text.length = az_imin(length, AZ_ARRAY_SIZE(state.text.buffer));
+  state.text.action = AZ_ETA_EDIT_GRAVFIELD;
+}
+
+static void try_edit_gravfield(void) {
+  assert(state.text.action == AZ_ETA_EDIT_GRAVFIELD);
+  assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
+  state.text.buffer[state.text.length] = '\0';
+  double strength, semilength, front_offset, front_semiwidth, rear_semiwidth;
+  int count;
+  if (sscanf(state.text.buffer, "s%lf l%lf o%lf f%lf r%lf%n", &strength,
+             &semilength, &front_offset, &front_semiwidth, &rear_semiwidth,
+             &count) < 5) return;
+  if (count != state.text.length) return;
+  if (strength == 0.0 || semilength <= 0.0 ||
+      front_semiwidth < 0.0 || rear_semiwidth < 0.0) return;
+  state.text.action = AZ_ETA_NOTHING;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    gravfield->spec.strength = strength;
+    gravfield->spec.size.trapezoid.semilength = semilength;
+    gravfield->spec.size.trapezoid.front_offset = front_offset;
+    gravfield->spec.size.trapezoid.front_semiwidth = front_semiwidth;
+    gravfield->spec.size.trapezoid.rear_semiwidth = rear_semiwidth;
     state.unsaved = true;
   }
 }
@@ -610,7 +713,7 @@ static void event_loop(void) {
     state.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
     state.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
 
-    az_tick_editor_state(&state);
+    az_tick_editor_state(&state, 1.0/60.0);
     az_start_screen_redraw(); {
       az_editor_draw_screen(&state);
     } az_finish_screen_redraw();
@@ -623,6 +726,7 @@ static void event_loop(void) {
             if (event.key.name == AZ_KEY_RETURN) {
               switch (state.text.action) {
                 case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
+                case AZ_ETA_EDIT_GRAVFIELD: try_edit_gravfield(); break;
                 case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
                 case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
               }
@@ -680,6 +784,10 @@ static void event_loop(void) {
                 if (event.key.shift) begin_set_door_dest();
                 else state.tool = AZ_TOOL_DOOR;
                 break;
+              case AZ_KEY_E:
+                if (event.key.command) begin_edit_gravfield();
+                break;
+              case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
               case AZ_KEY_M:
                 if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
                 else state.tool = AZ_TOOL_MOVE;
@@ -720,6 +828,9 @@ static void event_loop(void) {
             case AZ_TOOL_DOOR:
               do_add_door(event.mouse.x, event.mouse.y);
               break;
+            case AZ_TOOL_GRAVFIELD:
+              do_add_gravfield(event.mouse.x, event.mouse.y);
+              break;
             case AZ_TOOL_NODE:
               do_add_node(event.mouse.x, event.mouse.y);
               break;
@@ -737,6 +848,7 @@ static void event_loop(void) {
               case AZ_TOOL_MOVE:
               case AZ_TOOL_BADDIE:
               case AZ_TOOL_DOOR:
+              case AZ_TOOL_GRAVFIELD:
               case AZ_TOOL_NODE:
               case AZ_TOOL_WALL:
                 do_move(event.mouse.x, event.mouse.y,
@@ -771,6 +883,7 @@ static bool load_and_init_state(void) {
   state.zoom_level = 1.0;
   state.brush.baddie_kind = AZ_BAD_LUMP;
   state.brush.door_kind = AZ_DOOR_NORMAL;
+  state.brush.gravfield_kind = AZ_GRAV_TRAPEZOID;
   state.brush.node_kind = AZ_NODE_TRACTOR;
   state.brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
   state.brush.wall_kind = AZ_WALL_INDESTRUCTIBLE;
@@ -796,6 +909,11 @@ static bool load_and_init_state(void) {
       az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
       door->spec = room->doors[i];
     }
+    AZ_LIST_INIT(eroom->gravfields, room->num_gravfields);
+    for (int i = 0; i < room->num_gravfields; ++i) {
+      az_editor_gravfield_t *gravfield = AZ_LIST_ADD(eroom->gravfields);
+      gravfield->spec = room->gravfields[i];
+    }
     AZ_LIST_INIT(eroom->nodes, room->num_nodes);
     for (int i = 0; i < room->num_nodes; ++i) {
       az_editor_node_t *node = AZ_LIST_ADD(eroom->nodes);
@@ -818,6 +936,8 @@ static void destroy_state(void) {
   AZ_LIST_LOOP(room, state.planet.rooms) {
     AZ_LIST_DESTROY(room->baddies);
     AZ_LIST_DESTROY(room->doors);
+    AZ_LIST_DESTROY(room->gravfields);
+    AZ_LIST_DESTROY(room->nodes);
     AZ_LIST_DESTROY(room->walls);
   }
   AZ_LIST_DESTROY(state.planet.rooms);

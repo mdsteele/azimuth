@@ -17,56 +17,54 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "editor/state.h"
+#pragma once
+#ifndef AZIMUTH_STATE_GRAVFIELD_H_
+#define AZIMUTH_STATE_GRAVFIELD_H_
+
+#include <stdbool.h>
 
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-void az_tick_editor_state(az_editor_state_t *state, double time) {
-  ++state->clock;
-  state->total_time += time;
-  const double scroll_speed = 300.0 * state->zoom_level * time;
-  const double spin_radius = 80.0 * state->zoom_level;
+// The number of different gravfield kinds there are, not counting
+// AZ_GRAV_NOTHING:
+#define AZ_NUM_GRAVFIELD_KINDS 3
 
-  if (state->controls.up && !state->controls.down) {
-    if (state->spin_camera) {
-      state->camera = az_vadd(state->camera,
-                              az_vpolar(scroll_speed,
-                                        az_vtheta(state->camera)));
-    } else {
-      state->camera.y += scroll_speed;
-    }
-  }
-  if (state->controls.down && !state->controls.up) {
-    if (state->spin_camera) {
-      if (az_vnorm(state->camera) <= scroll_speed) {
-        state->camera = az_vpolar(0.0001, az_vtheta(state->camera));
-      } else {
-        state->camera = az_vsub(state->camera,
-                                az_vpolar(scroll_speed,
-                                          az_vtheta(state->camera)));
-      }
-    } else {
-      state->camera.y -= scroll_speed;
-    }
-  }
-  if (state->controls.left && !state->controls.right) {
-    if (state->spin_camera) {
-      state->camera = az_vrotate(state->camera, scroll_speed /
-                                 (spin_radius + az_vnorm(state->camera)));
-    } else {
-      state->camera.x -= scroll_speed;
-    }
-  }
-  if (state->controls.right && !state->controls.left) {
-    if (state->spin_camera) {
-      state->camera = az_vrotate(state->camera, -scroll_speed /
-                                 (spin_radius + az_vnorm(state->camera)));
-    } else {
-      state->camera.x += scroll_speed;
-    }
-  }
-}
+typedef enum {
+  AZ_GRAV_NOTHING = 0,
+  AZ_GRAV_TRAPEZOID,
+  AZ_GRAV_SECTOR_PULL,
+  AZ_GRAV_SECTOR_SPIN
+} az_gravfield_kind_t;
+
+typedef struct {
+  az_gravfield_kind_t kind; // if AZ_GRAV_NOTHING, this gravfield isn't present
+  az_vector_t position;
+  double angle;
+  double strength; // negative to reverse direction; must be nonzero
+  union {
+    struct {
+      double semilength;
+      double front_offset;
+      double front_semiwidth;
+      double rear_semiwidth;
+    } trapezoid;
+    struct {
+      double ignored;
+      double sweep_degrees; // interior angle; 0 is equivalent to 360
+      double inner_radius;
+      double thickness;
+    } sector;
+  } size;
+
+} az_gravfield_t;
+
+double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield);
+
+bool az_point_within_gravfield(const az_gravfield_t *gravfield,
+                               az_vector_t point);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_STATE_GRAVFIELD_H_

@@ -24,6 +24,7 @@
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/camera.h" // for az_camera_bounds_t
 #include "azimuth/state/door.h" // for az_door_kind_t
+#include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h" // for az_node_kind_t
 #include "azimuth/state/player.h" // for az_room_key_t and az_upgrade_t
 #include "azimuth/state/wall.h"
@@ -64,6 +65,8 @@ typedef struct {
   az_baddie_spec_t *baddies;
   int num_doors;
   az_door_spec_t *doors;
+  int num_gravfields;
+  az_gravfield_t *gravfields;
   int num_nodes;
   az_node_spec_t *nodes;
   int num_walls;
