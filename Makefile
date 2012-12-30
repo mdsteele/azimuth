@@ -54,14 +54,12 @@ ifeq "$(OS_NAME)" "Darwin"
                   -framework SDL -framework SDL_mixer
   TEST_LIBFLAGS =
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
-                    $(OBJDIR)/azimuth/system/misc_posix.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
   MAIN_LIBFLAGS = -lGL -lSDL -lSDL_mixer
   TEST_LIBFLAGS = -lm
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/misc_posix.o \
-                    $(OBJDIR)/azimuth/system/resource_linux.o
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
   ALL_TARGETS += linux_app
 endif
 

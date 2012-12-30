@@ -26,7 +26,6 @@
 #include <SDL/SDL.h>
 
 #include "azimuth/gui/screen.h"
-#include "azimuth/system/misc.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 
 /*===========================================================================*/
@@ -157,7 +156,7 @@ static void pause_until_refocus(void) {
         default: continue;
       }
     }
-    az_sleep_millis(100);
+    SDL_Delay(100);
   }
 }
 
