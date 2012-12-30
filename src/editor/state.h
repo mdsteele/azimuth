@@ -97,6 +97,7 @@ typedef struct {
   } controls;
   struct {
     az_editor_text_action_t action; // if AZ_ETA_NOTHING, text box inactive
+    int cursor;
     int length;
     char buffer[100];
   } text;
@@ -121,6 +122,10 @@ typedef struct {
 } az_editor_state_t;
 
 void az_tick_editor_state(az_editor_state_t *state, double time);
+
+void az_init_editor_text(
+    az_editor_state_t *state, az_editor_text_action_t action,
+    const char *format, ...) __attribute__((__format__(__printf__,3,4)));
 
 /*===========================================================================*/
 

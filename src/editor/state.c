@@ -19,6 +19,10 @@
 
 #include "editor/state.h"
 
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -67,6 +71,21 @@ void az_tick_editor_state(az_editor_state_t *state, double time) {
       state->camera.x += scroll_speed;
     }
   }
+}
+
+void az_init_editor_text(
+    az_editor_state_t *state, az_editor_text_action_t action,
+    const char *format, ...) {
+  assert(state->text.action == AZ_ETA_NOTHING);
+  va_list args;
+  va_start(args, format);
+  const int length =
+    vsnprintf(state->text.buffer, AZ_ARRAY_SIZE(state->text.buffer),
+              format, args);
+  va_end(args);
+  state->text.length = state->text.cursor =
+    az_imin(length, AZ_ARRAY_SIZE(state->text.buffer));
+  state->text.action = action;
 }
 
 /*===========================================================================*/

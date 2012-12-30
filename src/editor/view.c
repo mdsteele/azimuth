@@ -346,7 +346,7 @@ static void draw_hud(az_editor_state_t* state) {
     if (az_clock_mod(2, 16, state->clock) != 0) {
       glColor3f(1, 0, 0); // red
       glBegin(GL_LINES); {
-        const double x = 9.5 + 16 * state->text.length;
+        const double x = 9.5 + 16 * state->text.cursor;
         glVertex2d(x, top + 3);
         glVertex2d(x, bottom - 3);
       } glEnd();

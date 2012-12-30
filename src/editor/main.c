@@ -600,7 +600,6 @@ static void do_change_data(int delta, bool secondary) {
 }
 
 static void begin_edit_gravfield(void) {
-  assert(state.text.action == AZ_ETA_NOTHING);
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   az_gravfield_t *gravfield = NULL;
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
@@ -610,21 +609,18 @@ static void begin_edit_gravfield(void) {
     }
   }
   if (gravfield == NULL) return;
-  const int length =
-    snprintf(state.text.buffer, AZ_ARRAY_SIZE(state.text.buffer),
-             "s%.02f l%.02f o%.02f f%.02f r%.02f", gravfield->strength,
-             gravfield->size.trapezoid.semilength,
-             gravfield->size.trapezoid.front_offset,
-             gravfield->size.trapezoid.front_semiwidth,
-             gravfield->size.trapezoid.rear_semiwidth);
-  state.text.length = az_imin(length, AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.action = AZ_ETA_EDIT_GRAVFIELD;
+  az_init_editor_text(
+      &state, AZ_ETA_EDIT_GRAVFIELD, "s%.02f l%.02f o%.02f f%.02f r%.02f",
+      gravfield->strength, gravfield->size.trapezoid.semilength,
+      gravfield->size.trapezoid.front_offset,
+      gravfield->size.trapezoid.front_semiwidth,
+      gravfield->size.trapezoid.rear_semiwidth);
 }
 
 static void try_edit_gravfield(void) {
   assert(state.text.action == AZ_ETA_EDIT_GRAVFIELD);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.buffer[state.text.length] = '\0';
+  assert(state.text.buffer[state.text.length] == '\0');
   double strength, semilength, front_offset, front_semiwidth, rear_semiwidth;
   int count;
   if (sscanf(state.text.buffer, "s%lf l%lf o%lf f%lf r%lf%n", &strength,
@@ -647,18 +643,14 @@ static void try_edit_gravfield(void) {
 }
 
 static void begin_set_current_room(void) {
-  assert(state.text.action == AZ_ETA_NOTHING);
-  const int length =
-    snprintf(state.text.buffer, AZ_ARRAY_SIZE(state.text.buffer),
-             "%03d", state.current_room);
-  state.text.length = az_imin(length, AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.action = AZ_ETA_SET_CURRENT_ROOM;
+  az_init_editor_text(&state, AZ_ETA_SET_CURRENT_ROOM, "%03d",
+                      state.current_room);
 }
 
 static void try_set_current_room(void) {
   assert(state.text.action == AZ_ETA_SET_CURRENT_ROOM);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.buffer[state.text.length] = '\0';
+  assert(state.text.buffer[state.text.length] == '\0');
   az_room_key_t key;
   int count;
   if (sscanf(state.text.buffer, "%d%n", &key, &count) < 1) return;
@@ -670,7 +662,6 @@ static void try_set_current_room(void) {
 }
 
 static void begin_set_door_dest(void) {
-  assert(state.text.action == AZ_ETA_NOTHING);
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   bool any_doors = false;
   az_room_key_t key = 0;
@@ -682,16 +673,13 @@ static void begin_set_door_dest(void) {
     }
   }
   if (!any_doors) return;
-  const int length =
-    snprintf(state.text.buffer, AZ_ARRAY_SIZE(state.text.buffer), "%03d", key);
-  state.text.length = az_imin(length, AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.action = AZ_ETA_SET_DOOR_DEST;
+  az_init_editor_text(&state, AZ_ETA_SET_DOOR_DEST, "%03d", key);
 }
 
 static void try_set_door_dest(void) {
   assert(state.text.action == AZ_ETA_SET_DOOR_DEST);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
-  state.text.buffer[state.text.length] = '\0';
+  assert(state.text.buffer[state.text.length] == '\0');
   az_room_key_t key;
   int count;
   if (sscanf(state.text.buffer, "%d%n", &key, &count) < 1) return;
@@ -708,10 +696,15 @@ static void try_set_door_dest(void) {
 
 static void event_loop(void) {
   while (true) {
-    state.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
-    state.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
-    state.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
-    state.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
+    if (state.text.action == AZ_ETA_NOTHING) {
+      state.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
+      state.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
+      state.controls.left = az_is_key_held(AZ_KEY_LEFT_ARROW);
+      state.controls.right = az_is_key_held(AZ_KEY_RIGHT_ARROW);
+    } else {
+      state.controls.up = state.controls.down = state.controls.left =
+        state.controls.right = false;
+    }
 
     az_tick_editor_state(&state, 1.0/60.0);
     az_start_screen_redraw(); {
@@ -722,95 +715,119 @@ static void event_loop(void) {
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
+          // If we're editing text, handle key events specially.
           if (state.text.action != AZ_ETA_NOTHING) {
-            if (event.key.name == AZ_KEY_RETURN) {
-              switch (state.text.action) {
-                case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
-                case AZ_ETA_EDIT_GRAVFIELD: try_edit_gravfield(); break;
-                case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
-                case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
-              }
-            } else if (event.key.name == AZ_KEY_ESCAPE) {
-              state.text.action = AZ_ETA_NOTHING;
-            } else if (event.key.name == AZ_KEY_BACKSPACE) {
-              if (state.text.length > 0) {
-                --state.text.length;
-              }
-            } else if (event.key.character >= ' ' &&
-                       event.key.character < '\x7f') {
+            if (event.key.character >= ' ' &&
+                event.key.character < '\x7f') {
               if (state.text.length < AZ_ARRAY_SIZE(state.text.buffer) - 1) {
-                state.text.buffer[state.text.length++] = event.key.character;
+                memmove(state.text.buffer + state.text.cursor + 1,
+                        state.text.buffer + state.text.cursor,
+                        state.text.length - state.text.cursor + 1);
+                ++state.text.length;
+                state.text.buffer[state.text.cursor++] = event.key.character;
               }
+              break;
             }
-          } else {
             switch (event.key.name) {
-              case AZ_KEY_1: state.zoom_level = 1.0; break;
-              case AZ_KEY_2:
-                state.zoom_level = (event.key.shift ? 0.7 : 1.4);
-                break;
-              case AZ_KEY_3:
-                state.zoom_level = (event.key.shift ? 0.5 : 2.0);
-                break;
-              case AZ_KEY_4:
-                state.zoom_level = (event.key.shift ? 0.35 : 2.8);
-                break;
-              case AZ_KEY_5:
-                state.zoom_level = (event.key.shift ? 0.25 : 4.0);
-                break;
-              case AZ_KEY_6:
-                state.zoom_level = (event.key.shift ? 0.18 : 5.6);
-                break;
-              case AZ_KEY_7:
-                state.zoom_level = (event.key.shift ? 0.125 : 8.0);
-                break;
-              case AZ_KEY_8:
-                state.zoom_level = (event.key.shift ? 0.0884 : 11.3);
-                break;
-              case AZ_KEY_9:
-                state.zoom_level = (event.key.shift ? 0.0625 : 16.0);
-                break;
-              case AZ_KEY_0:
-                state.zoom_level = (event.key.shift ? 0.0442 : 22.6);
-                break;
-              case AZ_KEY_A:
-                if (event.key.command) {
-                  select_all(AZ_LIST_GET(state.planet.rooms,
-                                         state.current_room), true);
+              case AZ_KEY_RETURN:
+                switch (state.text.action) {
+                  case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
+                  case AZ_ETA_EDIT_GRAVFIELD: try_edit_gravfield(); break;
+                  case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
+                  case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
                 }
                 break;
-              case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
-              case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
-              case AZ_KEY_D:
-                if (event.key.shift) begin_set_door_dest();
-                else state.tool = AZ_TOOL_DOOR;
+              case AZ_KEY_ESCAPE:
+                state.text.action = AZ_ETA_NOTHING;
                 break;
-              case AZ_KEY_E:
-                if (event.key.command) begin_edit_gravfield();
+              case AZ_KEY_BACKSPACE:
+                if (state.text.cursor > 0) {
+                  memmove(state.text.buffer + state.text.cursor - 1,
+                          state.text.buffer + state.text.cursor,
+                          state.text.length - state.text.cursor + 1);
+                  --state.text.cursor;
+                  --state.text.length;
+                }
                 break;
-              case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
-              case AZ_KEY_M:
-                if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
-                else state.tool = AZ_TOOL_MOVE;
+              case AZ_KEY_LEFT_ARROW:
+                state.text.cursor = az_imax(state.text.cursor - 1, 0);
                 break;
-              case AZ_KEY_N:
-                if (event.key.command) add_new_room();
-                else state.tool = AZ_TOOL_NODE;
+              case AZ_KEY_RIGHT_ARROW:
+                state.text.cursor = az_imin(state.text.cursor + 1,
+                                            state.text.length);
                 break;
-              case AZ_KEY_O: do_change_data(1, event.key.shift); break;
-              case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
-              case AZ_KEY_R:
-                if (event.key.command) begin_set_current_room();
-                else if (event.key.shift) state.tool = AZ_TOOL_MASS_ROTATE;
-                else state.tool = AZ_TOOL_ROTATE;
-                break;
-              case AZ_KEY_S:
-                if (event.key.command) do_save();
-                else state.spin_camera = !state.spin_camera;
-                break;
-              case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
-              case AZ_KEY_BACKSPACE: do_remove(); break;
               default: break;
             }
+            break;
+          }
+          // Otherwise, we're not editing text, so handle key events normally.
+          switch (event.key.name) {
+            case AZ_KEY_1: state.zoom_level = 1.0; break;
+            case AZ_KEY_2:
+              state.zoom_level = (event.key.shift ? 0.7 : 1.4);
+              break;
+            case AZ_KEY_3:
+              state.zoom_level = (event.key.shift ? 0.5 : 2.0);
+              break;
+            case AZ_KEY_4:
+              state.zoom_level = (event.key.shift ? 0.35 : 2.8);
+              break;
+            case AZ_KEY_5:
+              state.zoom_level = (event.key.shift ? 0.25 : 4.0);
+              break;
+            case AZ_KEY_6:
+              state.zoom_level = (event.key.shift ? 0.18 : 5.6);
+              break;
+            case AZ_KEY_7:
+              state.zoom_level = (event.key.shift ? 0.125 : 8.0);
+              break;
+            case AZ_KEY_8:
+              state.zoom_level = (event.key.shift ? 0.0884 : 11.3);
+              break;
+            case AZ_KEY_9:
+              state.zoom_level = (event.key.shift ? 0.0625 : 16.0);
+              break;
+            case AZ_KEY_0:
+              state.zoom_level = (event.key.shift ? 0.0442 : 22.6);
+              break;
+            case AZ_KEY_A:
+              if (event.key.command) {
+                select_all(AZ_LIST_GET(state.planet.rooms,
+                                       state.current_room), true);
+              }
+              break;
+            case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
+            case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
+            case AZ_KEY_D:
+              if (event.key.shift) begin_set_door_dest();
+              else state.tool = AZ_TOOL_DOOR;
+              break;
+            case AZ_KEY_E:
+              if (event.key.command) begin_edit_gravfield();
+              break;
+            case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
+            case AZ_KEY_M:
+              if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
+              else state.tool = AZ_TOOL_MOVE;
+              break;
+            case AZ_KEY_N:
+              if (event.key.command) add_new_room();
+              else state.tool = AZ_TOOL_NODE;
+              break;
+            case AZ_KEY_O: do_change_data(1, event.key.shift); break;
+            case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
+            case AZ_KEY_R:
+              if (event.key.command) begin_set_current_room();
+              else if (event.key.shift) state.tool = AZ_TOOL_MASS_ROTATE;
+              else state.tool = AZ_TOOL_ROTATE;
+              break;
+            case AZ_KEY_S:
+              if (event.key.command) do_save();
+              else state.spin_camera = !state.spin_camera;
+              break;
+            case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
+            case AZ_KEY_BACKSPACE: do_remove(); break;
+            default: break;
           }
           break;
         case AZ_EVENT_MOUSE_DOWN:
