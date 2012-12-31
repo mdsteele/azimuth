@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h> // for memmove
 
 #include "azimuth/util/misc.h" // for AZ_FATAL
 

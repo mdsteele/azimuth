@@ -22,7 +22,8 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // for free
+#include <string.h> // for strlen
 
 #include "azimuth/constants.h"
 #include "azimuth/state/room.h"

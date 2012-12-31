@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdlib.h> // for NULL
+#include <stddef.h> // for NULL
 #include <string.h> // for memset
 
 #include "azimuth/state/pickup.h" // for AZ_PUPF_* macros

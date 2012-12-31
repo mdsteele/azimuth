@@ -18,7 +18,7 @@
 =============================================================================*/
 
 #include <math.h>
-#include <stdlib.h> // for NULL
+#include <stddef.h> // for NULL
 
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"

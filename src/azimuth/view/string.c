@@ -21,6 +21,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h> // for strlen
 
 #include <GL/gl.h>
 

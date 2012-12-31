@@ -21,7 +21,7 @@
 #ifndef AZIMUTH_VIEW_STRING_H_
 #define AZIMUTH_VIEW_STRING_H_
 
-#include <string.h> // for size_t
+#include <stddef.h> // for size_t
 
 #include "azimuth/util/vector.h"
 

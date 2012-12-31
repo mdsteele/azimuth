@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h> // for sprintf
+#include <string.h>
 
 #include "azimuth/control/paused.h"
 #include "azimuth/gui/audio.h"

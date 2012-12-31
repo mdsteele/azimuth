@@ -21,7 +21,7 @@
 #ifndef EDITOR_LIST_H_
 #define EDITOR_LIST_H_
 
-#include <string.h> // for size_t
+#include <stddef.h> // for size_t
 
 /*===========================================================================*/
 

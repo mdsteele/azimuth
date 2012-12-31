@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdlib.h> // for NULL
+#include <stddef.h> // for NULL
 
 #include "azimuth/constants.h"
 #include "azimuth/state/door.h"

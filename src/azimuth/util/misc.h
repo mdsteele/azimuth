@@ -21,7 +21,7 @@
 #ifndef AZIMUTH_UTIL_MISC_H_
 #define AZIMUTH_UTIL_MISC_H_
 
-#include <string.h> // for size_t
+#include <stddef.h> // for size_t
 
 /*===========================================================================*/
 
