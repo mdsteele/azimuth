@@ -29,10 +29,24 @@
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
+#include "azimuth/tick/script.h"
 #include "azimuth/tick/ship.h"
 #include "azimuth/tick/wall.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+void az_after_entering_room(az_space_state_t *state) {
+  az_set_room_visited(&state->ship.player, state->ship.player.current_room);
+  const az_room_t *room =
+    &state->planet->rooms[state->ship.player.current_room];
+  state->camera.center =
+    az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
+  // TODO: choose music based on what zone we're in
+  az_change_music(&state->soundboard, AZ_MUS_CNIDAM_ZONE);
+  az_run_script(state, room->on_start);
+}
 
 /*===========================================================================*/
 
@@ -58,9 +72,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
         az_clear_space(state);
         assert(0 <= key && key < state->planet->num_rooms);
         az_enter_room(state, &state->planet->rooms[key]);
-        // Record that we are now in the new room.
         state->ship.player.current_room = key;
-        az_set_room_visited(&state->ship.player, key);
         // Pick a door to exit out of.
         double best_dist = INFINITY;
         az_door_t *exit = NULL;
@@ -83,6 +95,8 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
           exit->is_open = false;
           state->mode_data.doorway.door = exit;
         }
+        // Record that we are now in the new room.
+        az_after_entering_room(state);
       }
       break;
     case AZ_DWS_SHIFT:

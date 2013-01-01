@@ -140,6 +140,28 @@ void az_set_room_visited(az_player_t *player, az_room_key_t room) {
 
 /*===========================================================================*/
 
+#define AZ_MAX_NUM_FLAGS 64
+
+bool az_test_flag(const az_player_t *player, az_flag_t flag) {
+  const unsigned int index = (unsigned int)flag;
+  assert(index < AZ_MAX_NUM_FLAGS);
+  return (bool)(player->flags & (UINT64_C(1) << index));
+}
+
+void az_set_flag(az_player_t *player, az_flag_t flag) {
+  const unsigned int index = (unsigned int)flag;
+  assert(index < AZ_MAX_NUM_FLAGS);
+  player->flags |= (UINT64_C(1) << index);
+}
+
+void az_clear_flag(az_player_t *player, az_flag_t flag) {
+  const unsigned int index = (unsigned int)flag;
+  assert(index < AZ_MAX_NUM_FLAGS);
+  player->flags &= ~(UINT64_C(1) << index);
+}
+
+/*===========================================================================*/
+
 void az_select_gun(az_player_t *player, az_gun_t gun) {
   assert(player->gun1 != AZ_GUN_NONE ||
          (player->gun2 == AZ_GUN_NONE && !player->next_gun));

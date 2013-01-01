@@ -27,6 +27,7 @@
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h" // for az_node_kind_t
 #include "azimuth/state/player.h" // for az_room_key_t and az_upgrade_t
+#include "azimuth/state/script.h"
 #include "azimuth/state/wall.h"
 
 /*===========================================================================*/
@@ -61,6 +62,8 @@ typedef struct {
 typedef struct {
   az_room_key_t key;
   az_camera_bounds_t camera_bounds;
+  const az_script_t *on_start; // may be NULL
+  // Initial room objects:
   int num_baddies;
   az_baddie_spec_t *baddies;
   int num_doors;

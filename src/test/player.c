@@ -78,4 +78,26 @@ void test_player_set_room_visited(void) {
   EXPECT_TRUE(az_test_room_visited(&player, 150));
 }
 
+void test_player_flags(void) {
+  az_player_t player = {.max_shields = 100};
+  EXPECT_FALSE(az_test_flag(&player, 6));
+  EXPECT_FALSE(az_test_flag(&player, 47));
+
+  az_set_flag(&player, 6);
+  EXPECT_TRUE(az_test_flag(&player, 6));
+  EXPECT_FALSE(az_test_flag(&player, 47));
+
+  az_set_flag(&player, 47);
+  EXPECT_TRUE(az_test_flag(&player, 6));
+  EXPECT_TRUE(az_test_flag(&player, 47));
+
+  az_clear_flag(&player, 6);
+  EXPECT_FALSE(az_test_flag(&player, 6));
+  EXPECT_TRUE(az_test_flag(&player, 47));
+
+  az_clear_flag(&player, 47);
+  EXPECT_FALSE(az_test_flag(&player, 6));
+  EXPECT_FALSE(az_test_flag(&player, 47));
+}
+
 /*===========================================================================*/

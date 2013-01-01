@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> // for EXIT_FAILURE and EXIT_SUCCESS
+#include <string.h> // for strcmp
 
 #include "azimuth/util/vector.h" // for az_dapprox
 
@@ -81,6 +82,24 @@ bool _expect_vapprox(az_vector_t expected, az_vector_t actual,
   test_failure();
   printf(" \x1b[1;31mFAILED:\x1b[m %s\n  (%.20g, %.20g) vs. (%.20g, %.20g)\n",
          message, expected.x, expected.y, actual.x, actual.y);
+  return false;
+}
+
+bool _expect_int_eq(int expected, int actual, const char *message) {
+  if (expected == actual) return true;
+  test_failure();
+  printf(" \x1b[1;31mFAILED:\x1b[m %s\n  %d vs. %d\n",
+         message, expected, actual);
+  return false;
+}
+
+bool _expect_string_eq(const char *expected, const char *actual,
+                       const char *message) {
+  if (strcmp(expected, actual) == 0) return true;
+  test_failure();
+  printf(" \x1b[1;31mFAILED:\x1b[m %s\n"
+         "  Expected: \"%s\"\n  Actual:   \"%s\"\n",
+         message, expected, actual);
   return false;
 }
 

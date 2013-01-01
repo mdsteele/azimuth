@@ -18,21 +18,19 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_SPACE_H_
-#define AZIMUTH_TICK_SPACE_H_
+#ifndef AZIMUTH_TICK_SCRIPT_H_
+#define AZIMUTH_TICK_SCRIPT_H_
 
+#include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-// Call this just after entering a room.  The state should already have been
-// filled with the room contents and the ship should be in position.  This
-// takes care of recording the room on the minimap, adjusting the camera,
-// setting the music, and running the room script (if any).
-void az_after_entering_room(az_space_state_t *state);
-
-void az_tick_space_state(az_space_state_t *state, double time);
+// Execute the script and modify the space state accordingly.  As a
+// convenience, the script argument is permitted to be NULL, in which case this
+// function simply returns immediately with no effect.
+void az_run_script(az_space_state_t *state, const az_script_t *script);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_SPACE_H_
+#endif // AZIMUTH_TICK_SCRIPT_H_

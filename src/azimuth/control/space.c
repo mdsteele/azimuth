@@ -73,13 +73,7 @@ static void begin_saved_game(const az_planet_t *planet,
     state.ship.angle = planet->start_angle;
   }
 
-  state.ship.velocity = AZ_VZERO;
-  const az_room_t *room = &planet->rooms[state.ship.player.current_room];
-  state.camera.center =
-    az_clamp_to_bounds(&room->camera_bounds, state.ship.position);
-
-  // TODO: choose music based on what zone we're in
-  az_change_music(&state.soundboard, AZ_MUS_CNIDAM_ZONE);
+  az_after_entering_room(&state);
 }
 
 static bool save_current_game(az_saved_games_t *saved_games) {

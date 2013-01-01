@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_convex_polygon_contains);
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
+  RUN_TEST(test_player_flags);
   RUN_TEST(test_player_give_upgrade);
   RUN_TEST(test_player_set_room_visited);
   RUN_TEST(test_polygon_contains);
@@ -61,6 +62,8 @@ int main(int argc, char **argv) {
   RUN_TEST(test_ray_hits_circle);
   RUN_TEST(test_ray_hits_polygon);
   RUN_TEST(test_ray_hits_polygon_trans);
+  RUN_TEST(test_script_print);
+  RUN_TEST(test_script_scan);
   RUN_TEST(test_uids);
   RUN_TEST(test_vcaplen);
   RUN_TEST(test_vector_polar);

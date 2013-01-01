@@ -39,6 +39,12 @@
 #define EXPECT_VAPPROX(expected, actual) \
   _expect_vapprox(expected, actual, #expected " == " #actual)
 
+#define EXPECT_INT_EQ(expected, actual) \
+  _expect_int_eq(expected, actual, #expected " == " #actual)
+
+#define EXPECT_STRING_EQ(expected, actual) \
+  _expect_string_eq(expected, actual, #actual)
+
 #define ASSERT_TRUE(condition) do { \
     if (!_expect_true(condition, #condition)) return; \
   } while (false)
@@ -64,6 +70,11 @@ bool _expect_approx(double expected, double actual, const char *message);
 
 bool _expect_vapprox(az_vector_t expected, az_vector_t actual,
                      const char *message);
+
+bool _expect_int_eq(int expected, int actual, const char *message);
+
+bool _expect_string_eq(const char *expected, const char *actual,
+                       const char *message);
 
 /*===========================================================================*/
 

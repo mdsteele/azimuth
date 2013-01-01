@@ -18,21 +18,59 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_SPACE_H_
-#define AZIMUTH_TICK_SPACE_H_
+#ifndef AZIMUTH_STATE_SCRIPT_H_
+#define AZIMUTH_STATE_SCRIPT_H_
 
-#include "azimuth/state/space.h"
-
-/*===========================================================================*/
-
-// Call this just after entering a room.  The state should already have been
-// filled with the room contents and the ship should be in position.  This
-// takes care of recording the room on the minimap, adjusting the camera,
-// setting the music, and running the room script (if any).
-void az_after_entering_room(az_space_state_t *state);
-
-void az_tick_space_state(az_space_state_t *state, double time);
+#include <stdbool.h>
+#include <stdio.h> // for FILE
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_SPACE_H_
+typedef enum {
+  AZ_OP_NOP = 0, // does nothing
+  // Stack manipulation:
+  AZ_OP_PUSH, // push i onto the stack
+  // Branches:
+  AZ_OP_BEQZ, // pop top, add i to PC if it is zero
+  AZ_OP_BNEZ, // pop top, add i to PC if it is not zero
+  AZ_OP_JUMP, // add i to PC
+  // Flags:
+  AZ_OP_TEST, // push 1 if flag i is set, else 0
+  AZ_OP_SET, // set flag i
+  AZ_OP_CLR, // clear flag i
+  // Baddies:
+  AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
+  // Termination:
+  AZ_OP_STOP, // halt script successfully
+  AZ_OP_ERROR // halt script and printf execution state
+} az_opcode_t;
+
+const char *az_opcode_name(az_opcode_t opcode);
+
+/*===========================================================================*/
+
+typedef struct {
+  az_opcode_t opcode;
+  double immediate;
+} az_instruction_t;
+
+typedef struct {
+  int num_instructions;
+  az_instruction_t *instructions;
+} az_script_t;
+
+// Serialize the script to a string or file and return true, or return false on
+// error.
+bool az_fprint_script(const az_script_t *script, FILE *file);
+bool az_sprint_script(const az_script_t *script, char *buffer, int length);
+
+// Parse and allocate script and return true, or return false on error.
+bool az_fscan_script(FILE *file, az_script_t *script_out);
+bool az_sscan_script(const char *string, int length, az_script_t *script_out);
+
+// Delete the data array owned by a script (but not the script object itself).
+void az_destroy_script(az_script_t *script);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_STATE_SCRIPT_H_
