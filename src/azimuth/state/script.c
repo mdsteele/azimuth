@@ -40,6 +40,9 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SET:    return "SET";
     case AZ_OP_CLR:    return "CLR";
     case AZ_OP_BAD:    return "BAD";
+    case AZ_OP_UNBAD:  return "UNBAD";
+    case AZ_OP_LOCK:   return "LOCK";
+    case AZ_OP_UNLOCK: return "UNLOCK";
     case AZ_OP_STOP:   return "STOP";
     case AZ_OP_ERROR:  return "ERROR";
   }

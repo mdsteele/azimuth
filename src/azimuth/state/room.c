@@ -86,31 +86,35 @@ static void parse_room_header(az_load_room_t *loader) {
 
 static void parse_baddie_directive(az_load_room_t *loader) {
   if (loader->room->num_baddies >= loader->num_baddies) FAIL();
-  int index;
+  int index, uuid_slot;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf\n",
-             &index, &x, &y, &angle) < 4) FAIL();
-  if (index <= 0 || index > AZ_NUM_BADDIE_KINDS) FAIL();
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf u%d\n",
+             &index, &x, &y, &angle, &uuid_slot) < 5) FAIL();
+  if (index <= 0 || index > AZ_NUM_BADDIE_KINDS ||
+      uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_baddie_spec_t *baddie = &loader->room->baddies[loader->room->num_baddies];
   baddie->kind = (az_baddie_kind_t)index;
   baddie->position = (az_vector_t){x, y};
   baddie->angle = angle;
+  baddie->uuid_slot = uuid_slot;
   ++loader->room->num_baddies;
 }
 
 static void parse_door_directive(az_load_room_t *loader) {
   if (loader->room->num_doors >= loader->num_doors) FAIL();
-  int index, destination;
+  int index, destination, uuid_slot;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf r%d\n",
-             &index, &x, &y, &angle, &destination) < 5) FAIL();
-  if (index <= 0 || index > AZ_NUM_DOOR_KINDS) FAIL();
-  if (destination < 0 || destination >= AZ_MAX_NUM_ROOMS) FAIL();
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf r%d u%d\n",
+             &index, &x, &y, &angle, &destination, &uuid_slot) < 6) FAIL();
+  if (index <= 0 || index > AZ_NUM_DOOR_KINDS ||
+      destination < 0 || destination >= AZ_MAX_NUM_ROOMS ||
+      uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_door_spec_t *door = &loader->room->doors[loader->room->num_doors];
   door->kind = (az_door_kind_t)index;
   door->position = (az_vector_t){x, y};
   door->angle = angle;
   door->destination = (az_room_key_t)destination;
+  door->uuid_slot = uuid_slot;
   ++loader->room->num_doors;
 }
 
@@ -187,10 +191,11 @@ static bool parse_directive(az_load_room_t *loader) {
 }
 
 static void validate_room(az_load_room_t *loader) {
-  if (loader->room->num_baddies != loader->num_baddies) FAIL();
-  if (loader->room->num_doors != loader->num_doors) FAIL();
-  if (loader->room->num_nodes != loader->num_nodes) FAIL();
-  if (loader->room->num_walls != loader->num_walls) FAIL();
+  if (loader->room->num_baddies != loader->num_baddies ||
+      loader->room->num_doors != loader->num_doors ||
+      loader->room->num_gravfields != loader->num_gravfields ||
+      loader->room->num_nodes != loader->num_nodes ||
+      loader->room->num_walls != loader->num_walls) FAIL();
 }
 
 #undef FAIL
@@ -236,8 +241,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_doors; ++i) {
     const az_door_spec_t *door = &room->doors[i];
-    WRITE("D%d x%.02f y%.02f a%f r%d\n", (int)door->kind,
-          door->position.x, door->position.y, door->angle, door->destination);
+    WRITE("D%d x%.02f y%.02f a%f r%d u%d\n", (int)door->kind,
+          door->position.x, door->position.y, door->angle, door->destination,
+          door->uuid_slot);
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
     const az_gravfield_t *gravfield = &room->gravfields[i];
@@ -260,8 +266,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];
-    WRITE("B%d x%.02f y%.02f a%f\n", (int)baddie->kind,
-          baddie->position.x, baddie->position.y, baddie->angle);
+    WRITE("B%d x%.02f y%.02f a%f u%d\n", (int)baddie->kind,
+          baddie->position.x, baddie->position.y, baddie->angle,
+          baddie->uuid_slot);
   }
   return true;
 }

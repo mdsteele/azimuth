@@ -32,10 +32,14 @@
 
 /*===========================================================================*/
 
+// The size of the UUID table:
+#define AZ_NUM_UUID_SLOTS 20
+
 typedef struct {
   az_baddie_kind_t kind;
   az_vector_t position;
   double angle;
+  int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
 } az_baddie_spec_t;
 
 typedef struct {
@@ -43,6 +47,7 @@ typedef struct {
   az_vector_t position;
   double angle;
   az_room_key_t destination;
+  int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
 } az_door_spec_t;
 
 typedef struct {

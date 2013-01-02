@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/player.h" // for az_damage_flags_t and az_room_key_t
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -50,6 +51,7 @@ bool az_can_open_door(az_door_kind_t door_kind, az_damage_flags_t damage_kind);
 
 typedef struct {
   az_door_kind_t kind; // if AZ_DOOR_NOTHING, this door is not present
+  az_uid_t uid;
   az_vector_t position;
   double angle;
   az_room_key_t destination;

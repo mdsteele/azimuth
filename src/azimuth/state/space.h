@@ -105,6 +105,7 @@ typedef struct {
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
   az_wall_t walls[250];
+  az_uuid_t uuids[AZ_NUM_UUID_SLOTS];
 } az_space_state_t;
 
 /*===========================================================================*/
@@ -118,8 +119,12 @@ void az_clear_space(az_space_state_t *state);
 // any changes to the ship or any other fields.
 void az_enter_room(az_space_state_t *state, const az_room_t *room);
 
+bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
+                      az_baddie_t **baddie_out);
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
 
+bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
+                    az_door_t **door_out);
 bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
 
 bool az_insert_gravfield(az_space_state_t *state,

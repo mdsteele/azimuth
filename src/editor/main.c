@@ -694,6 +694,55 @@ static void try_set_door_dest(void) {
   }
 }
 
+static void begin_set_uuid_slot(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  int uuid_slot = -1;
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) uuid_slot = baddie->spec.uuid_slot;
+  }
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->selected) uuid_slot = door->spec.uuid_slot;
+  }
+  if (uuid_slot < 0) return;
+  az_init_editor_text(&state, AZ_ETA_SET_UUID_SLOT, "%d", uuid_slot);
+}
+
+static void try_set_uuid_slot(void) {
+  assert(state.text.action == AZ_ETA_SET_UUID_SLOT);
+  assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
+  assert(state.text.buffer[state.text.length] == '\0');
+  int uuid_slot = 0;
+  if (state.text.length > 0) {
+    int count;
+    if (sscanf(state.text.buffer, "%d%n", &uuid_slot, &count) < 1) return;
+    if (count != state.text.length) return;
+  }
+  if (uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) return;
+  state.text.action = AZ_ETA_NOTHING;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  // Remove other uses of this UUID slot:
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->spec.uuid_slot == uuid_slot) baddie->spec.uuid_slot = 0;
+  }
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->spec.uuid_slot == uuid_slot) door->spec.uuid_slot = 0;
+  }
+  state.unsaved = true;
+  // Set the UUID slot for a single object:
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) {
+      baddie->spec.uuid_slot = uuid_slot;
+      return;
+    }
+  }
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->selected) {
+      door->spec.uuid_slot = uuid_slot;
+      return;
+    }
+  }
+}
+
 static void event_loop(void) {
   while (true) {
     if (state.text.action == AZ_ETA_NOTHING) {
@@ -735,6 +784,7 @@ static void event_loop(void) {
                   case AZ_ETA_EDIT_GRAVFIELD: try_edit_gravfield(); break;
                   case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
                   case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
+                  case AZ_ETA_SET_UUID_SLOT: try_set_uuid_slot(); break;
                 }
                 break;
               case AZ_KEY_ESCAPE:
@@ -799,7 +849,7 @@ static void event_loop(void) {
             case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
             case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
             case AZ_KEY_D:
-              if (event.key.shift) begin_set_door_dest();
+              if (event.key.command) begin_set_door_dest();
               else state.tool = AZ_TOOL_DOOR;
               break;
             case AZ_KEY_E:
@@ -824,6 +874,9 @@ static void event_loop(void) {
             case AZ_KEY_S:
               if (event.key.command) do_save();
               else state.spin_camera = !state.spin_camera;
+              break;
+            case AZ_KEY_U:
+              if (event.key.command) begin_set_uuid_slot();
               break;
             case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
             case AZ_KEY_BACKSPACE: do_remove(); break;

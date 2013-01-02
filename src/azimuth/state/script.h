@@ -40,6 +40,10 @@ typedef enum {
   AZ_OP_CLR, // clear flag i
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
+  AZ_OP_UNBAD, // remove baddie i
+  // Doors:
+  AZ_OP_LOCK, // close and lock door i
+  AZ_OP_UNLOCK, // unlock (but do not open) door i
   // Termination:
   AZ_OP_STOP, // halt script successfully
   AZ_OP_ERROR // halt script and printf execution state

@@ -75,6 +75,15 @@ static void print_error(const char *msg, const az_script_t *script,
     pc = new_pc - 1; \
   } while (0)
 
+#define GET_UID(uuid_type, uid_out) do { \
+    const int slot = (int)ins.immediate; \
+    const az_uuid_t uuid = state->uuids[slot - 1]; \
+    if (slot < 1 || slot > AZ_NUM_UUID_SLOTS || uuid.type != (uuid_type)) { \
+      SCRIPT_ERROR("invalid uuid"); \
+    } \
+    *(uid_out) = uuid.uid; \
+  } while (0)
+
 void az_run_script(az_space_state_t *state, const az_script_t *script) {
   assert(state != NULL);
   if (script == NULL || script->num_instructions == 0) return;
@@ -134,6 +143,44 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
           az_baddie_t *baddie;
           if (az_insert_baddie(state, &baddie)) {
             az_init_baddie(baddie, kind, (az_vector_t){x, y}, angle);
+          }
+        }
+        break;
+      case AZ_OP_UNBAD:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_BADDIE, &uid);
+          az_baddie_t *baddie;
+          if (az_lookup_baddie(state, uid, &baddie)) {
+            baddie->kind = AZ_BAD_NOTHING;
+          }
+        }
+        break;
+      // Doors:
+      case AZ_OP_LOCK:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_DOOR, &uid);
+          az_door_t *door;
+          if (az_lookup_door(state, uid, &door)) {
+            if (door->kind == AZ_DOOR_PASSAGE) {
+              SCRIPT_ERROR("cannot lock passage");
+            }
+            door->kind = AZ_DOOR_LOCKED;
+            door->is_open = false;
+          }
+        }
+        break;
+      case AZ_OP_UNLOCK:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_DOOR, &uid);
+          az_door_t *door;
+          if (az_lookup_door(state, uid, &door)) {
+            if (door->kind == AZ_DOOR_PASSAGE) {
+              SCRIPT_ERROR("cannot unlock passage");
+            }
+            door->kind = AZ_DOOR_NORMAL;
           }
         }
         break;

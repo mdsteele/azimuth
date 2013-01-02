@@ -49,4 +49,21 @@ int az_uid_index(az_uid_t uid);
 
 /*===========================================================================*/
 
+// A UUID pairs a UID with a tag indicating which object type the UID
+// corresponds to.  A UUID uniquely identifies a single space object.
+
+typedef enum {
+  AZ_UUID_NOTHING = 0,
+  AZ_UUID_BADDIE,
+  AZ_UUID_DOOR,
+  AZ_UUID_NODE
+} az_uuid_type_t;
+
+typedef struct {
+  az_uuid_type_t type;
+  az_uid_t uid;
+} az_uuid_t;
+
+/*===========================================================================*/
+
 #endif // AZIMUTH_STATE_UID_H_

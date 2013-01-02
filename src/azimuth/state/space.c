@@ -41,6 +41,17 @@ void az_clear_space(az_space_state_t *state) {
   AZ_ARRAY_LOOP(pickup, state->pickups) pickup->kind = AZ_PUP_NOTHING;
   AZ_ARRAY_LOOP(proj, state->projectiles) proj->kind = AZ_PROJ_NOTHING;
   AZ_ARRAY_LOOP(wall, state->walls) wall->kind = AZ_WALL_NOTHING;
+  AZ_ARRAY_LOOP(uuid, state->uuids) uuid->type = AZ_UUID_NOTHING;
+}
+
+static void put_uuid(az_space_state_t *state, int slot,
+                     az_uuid_type_t type, az_uid_t uid) {
+  if (slot != 0) {
+    assert(slot >= 1);
+    assert(slot <= AZ_ARRAY_SIZE(state->uuids));
+    state->uuids[slot - 1].type = type;
+    state->uuids[slot - 1].uid = uid;
+  }
 }
 
 void az_enter_room(az_space_state_t *state, const az_room_t *room) {
@@ -49,6 +60,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     if (az_insert_baddie(state, &baddie)) {
       const az_baddie_spec_t *spec = &room->baddies[i];
       az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
+      put_uuid(state, spec->uuid_slot, AZ_UUID_BADDIE, baddie->uid);
     }
   }
   for (int i = 0; i < room->num_doors; ++i) {
@@ -59,6 +71,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       door->position = spec->position;
       door->angle = spec->angle;
       door->destination = spec->destination;
+      put_uuid(state, spec->uuid_slot, AZ_UUID_DOOR, door->uid);
     }
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
@@ -91,6 +104,18 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   }
 }
 
+bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
+                      az_baddie_t **baddie_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->baddies));
+  az_baddie_t *baddie = &state->baddies[index];
+  if (baddie->uid == uid) {
+    *baddie_out = baddie;
+    return true;
+  }
+  return false;
+}
+
 bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
@@ -102,9 +127,22 @@ bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {
   return false;
 }
 
+bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
+                    az_door_t **door_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->doors));
+  az_door_t *door = &state->doors[index];
+  if (door->uid == uid) {
+    *door_out = door;
+    return true;
+  }
+  return false;
+}
+
 bool az_insert_door(az_space_state_t *state, az_door_t **door_out) {
   AZ_ARRAY_LOOP(door, state->doors) {
     if (door->kind == AZ_DOOR_NOTHING) {
+      az_assign_uid(door - state->doors, &door->uid);
       door->is_open = false;
       door->openness = 0.0;
       *door_out = door;

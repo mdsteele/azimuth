@@ -48,7 +48,8 @@ typedef enum {
   AZ_ETA_NOTHING = 0,
   AZ_ETA_EDIT_GRAVFIELD,
   AZ_ETA_SET_CURRENT_ROOM,
-  AZ_ETA_SET_DOOR_DEST
+  AZ_ETA_SET_DOOR_DEST,
+  AZ_ETA_SET_UUID_SLOT
 } az_editor_text_action_t;
 
 typedef struct {
