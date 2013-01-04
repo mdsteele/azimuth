@@ -47,6 +47,7 @@ typedef enum {
 typedef enum {
   AZ_ETA_NOTHING = 0,
   AZ_ETA_EDIT_GRAVFIELD,
+  AZ_ETA_EDIT_SCRIPT,
   AZ_ETA_SET_CURRENT_ROOM,
   AZ_ETA_SET_DOOR_DEST,
   AZ_ETA_SET_UUID_SLOT
@@ -123,11 +124,26 @@ typedef struct {
   } planet;
 } az_editor_state_t;
 
+/*===========================================================================*/
+
+// Load and initialize the editor state from disk.  Return false on failure.
+bool az_load_editor_state(az_editor_state_t *state);
+
+// Save the editor state to disk.  Return false on failure, otherwise set
+// state->unsaved to false and return true.
+bool az_save_editor_state(az_editor_state_t *state);
+
 void az_tick_editor_state(az_editor_state_t *state, double time);
 
 void az_init_editor_text(
     az_editor_state_t *state, az_editor_text_action_t action,
     const char *format, ...) __attribute__((__format__(__printf__,3,4)));
+
+void az_center_editor_camera_on_current_room(az_editor_state_t *state);
+
+// Delete the data arrays owned by the editor state (but not the state object
+// itself).
+void az_destroy_editor_state(az_editor_state_t *state);
 
 /*===========================================================================*/
 

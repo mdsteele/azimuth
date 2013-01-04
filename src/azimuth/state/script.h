@@ -63,8 +63,9 @@ typedef struct {
   az_instruction_t *instructions;
 } az_script_t;
 
-// Serialize the script to a string or file and return true, or return false on
-// error.
+// Serialize the script to a file or string and return true, or return false on
+// error (e.g. file I/O fails, or the string buffer isn't large enough).  In
+// the string case, the buffer will be NUL-terminated.
 bool az_fprint_script(const az_script_t *script, FILE *file);
 bool az_sprint_script(const az_script_t *script, char *buffer, int length);
 
