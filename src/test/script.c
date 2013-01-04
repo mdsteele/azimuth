@@ -42,26 +42,26 @@ void test_script_print(void) {
 }
 
 void test_script_scan(void) {
-  az_script_t script = {0};
-  ASSERT_TRUE(az_sscan_script(script_string, sizeof(script_string), &script));
-  EXPECT_INT_EQ(4, script.num_instructions);
-  if (script.num_instructions >= 1) {
-    EXPECT_INT_EQ(AZ_OP_PUSH, script.instructions[0].opcode);
-    EXPECT_APPROX(-23.5, script.instructions[0].immediate);
+  az_script_t *script = az_sscan_script(script_string, sizeof(script_string));
+  ASSERT_TRUE(script != NULL);
+  EXPECT_INT_EQ(4, script->num_instructions);
+  if (script->num_instructions >= 1) {
+    EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[0].opcode);
+    EXPECT_APPROX(-23.5, script->instructions[0].immediate);
   }
-  if (script.num_instructions >= 2) {
-    EXPECT_INT_EQ(AZ_OP_NOP, script.instructions[1].opcode);
-    EXPECT_APPROX(0, script.instructions[1].immediate);
+  if (script->num_instructions >= 2) {
+    EXPECT_INT_EQ(AZ_OP_NOP, script->instructions[1].opcode);
+    EXPECT_APPROX(0, script->instructions[1].immediate);
   }
-  if (script.num_instructions >= 3) {
-    EXPECT_INT_EQ(AZ_OP_BEQZ, script.instructions[2].opcode);
-    EXPECT_APPROX(1, script.instructions[2].immediate);
+  if (script->num_instructions >= 3) {
+    EXPECT_INT_EQ(AZ_OP_BEQZ, script->instructions[2].opcode);
+    EXPECT_APPROX(1, script->instructions[2].immediate);
   }
-  if (script.num_instructions >= 4) {
-    EXPECT_INT_EQ(AZ_OP_STOP, script.instructions[3].opcode);
-    EXPECT_APPROX(0, script.instructions[3].immediate);
+  if (script->num_instructions >= 4) {
+    EXPECT_INT_EQ(AZ_OP_STOP, script->instructions[3].opcode);
+    EXPECT_APPROX(0, script->instructions[3].immediate);
   }
-  az_destroy_script(&script);
+  az_free_script(script);
 }
 
 /*===========================================================================*/

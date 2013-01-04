@@ -30,6 +30,7 @@
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
+#include "azimuth/state/script.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h" // for az_init_random
@@ -41,6 +42,16 @@
 /*===========================================================================*/
 
 static az_editor_state_t state;
+
+static az_script_t *clone_script(const az_script_t *script) {
+  if (script == NULL) return NULL;
+  az_script_t *clone = AZ_ALLOC(1, az_script_t);
+  clone->num_instructions = script->num_instructions;
+  clone->instructions = AZ_ALLOC(clone->num_instructions, az_instruction_t);
+  memcpy(clone->instructions, script->instructions,
+         clone->num_instructions * sizeof(az_instruction_t));
+  return clone;
+}
 
 static void add_new_room(void) {
   const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
@@ -92,6 +103,7 @@ static void do_save(void) {
     az_editor_room_t *eroom = AZ_LIST_GET(state.planet.rooms, key);
     az_room_t *room = &planet.rooms[key];
     room->camera_bounds = eroom->camera_bounds;
+    room->on_start = clone_script(eroom->on_start);
     // Convert baddies:
     room->num_baddies = AZ_LIST_SIZE(eroom->baddies);
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
@@ -969,6 +981,7 @@ static bool load_and_init_state(void) {
     const az_room_t *room = &planet.rooms[key];
     az_editor_room_t *eroom = AZ_LIST_ADD(state.planet.rooms);
     eroom->camera_bounds = room->camera_bounds;
+    eroom->on_start = clone_script(room->on_start);
     AZ_LIST_INIT(eroom->baddies, room->num_baddies);
     for (int i = 0; i < room->num_baddies; ++i) {
       az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
@@ -1004,6 +1017,7 @@ static bool load_and_init_state(void) {
 
 static void destroy_state(void) {
   AZ_LIST_LOOP(room, state.planet.rooms) {
+    az_free_script(room->on_start);
     AZ_LIST_DESTROY(room->baddies);
     AZ_LIST_DESTROY(room->doors);
     AZ_LIST_DESTROY(room->gravfields);

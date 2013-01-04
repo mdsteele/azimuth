@@ -64,10 +64,11 @@ typedef struct {
   double angle;
 } az_wall_spec_t;
 
+// Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
   az_room_key_t key;
   az_camera_bounds_t camera_bounds;
-  const az_script_t *on_start; // may be NULL
+  az_script_t *on_start; // NULL if no script
   // Initial room objects:
   int num_baddies;
   az_baddie_spec_t *baddies;

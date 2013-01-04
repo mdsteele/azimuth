@@ -48,10 +48,30 @@ typedef struct {
 
 #define FAIL() longjmp(loader->jump, 1)
 
+// Read the next non-whitespace character.  If it is '$', return true; if it is
+// '!' or if we reach EOF, return false; otherwise, fail parsing.
+static bool scan_to_script(az_load_room_t *loader) {
+  char ch;
+  if (fscanf(loader->file, " %c", &ch) < 1) return false;
+  else if (ch == '!') return false;
+  else if (ch == '$') return true;
+  else FAIL();
+}
+
+static az_script_t *maybe_parse_script(az_load_room_t *loader, char ch) {
+  if (!scan_to_script(loader)) return NULL;
+  if (fgetc(loader->file) != ch) FAIL();
+  if (fgetc(loader->file) != ':') FAIL();
+  az_script_t *script = az_fscan_script(loader->file);
+  if (script == NULL) FAIL();
+  if (scan_to_script(loader)) FAIL();
+  return script;
+}
+
 static void parse_room_header(az_load_room_t *loader) {
   int room_num, num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
   double min_r, r_span, min_theta, theta_span;
-  if (fscanf(loader->file, "!R%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
+  if (fscanf(loader->file, "@R%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
              &room_num, &min_r, &r_span, &min_theta, &theta_span,
              &num_baddies, &num_doors, &num_gravfields, &num_nodes,
              &num_walls) < 10) FAIL();
@@ -82,6 +102,7 @@ static void parse_room_header(az_load_room_t *loader) {
   loader->num_walls = num_walls;
   loader->room->num_walls = 0;
   loader->room->walls = AZ_ALLOC(num_walls, az_wall_spec_t);
+  loader->room->on_start = maybe_parse_script(loader, 's');
 }
 
 static void parse_baddie_directive(az_load_room_t *loader) {
@@ -98,6 +119,7 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   baddie->angle = angle;
   baddie->uuid_slot = uuid_slot;
   ++loader->room->num_baddies;
+  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_door_directive(az_load_room_t *loader) {
@@ -116,6 +138,7 @@ static void parse_door_directive(az_load_room_t *loader) {
   door->destination = (az_room_key_t)destination;
   door->uuid_slot = uuid_slot;
   ++loader->room->num_doors;
+  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_gravfield_directive(az_load_room_t *loader) {
@@ -140,6 +163,7 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   gravfield->size.trapezoid.front_semiwidth = front_semiwidth;
   gravfield->size.trapezoid.rear_semiwidth = rear_semiwidth;
   ++loader->room->num_gravfields;
+  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_node_directive(az_load_room_t *loader) {
@@ -159,6 +183,7 @@ static void parse_node_directive(az_load_room_t *loader) {
   node->angle = angle;
   node->upgrade = (az_upgrade_t)upgrade;
   ++loader->room->num_nodes;
+  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_wall_directive(az_load_room_t *loader) {
@@ -175,6 +200,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
   wall->position = (az_vector_t){x, y};
   wall->angle = angle;
   ++loader->room->num_walls;
+  if (scan_to_script(loader)) FAIL();
 }
 
 static bool parse_directive(az_load_room_t *loader) {
@@ -215,7 +241,7 @@ bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
   assert(room_out != NULL);
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
-  az_load_room_t loader = { .file = file, .room = room_out, .success = false};
+  az_load_room_t loader = {.file = file, .room = room_out, .success = false};
   parse_room(&loader);
   fclose(file);
   return loader.success;
@@ -223,31 +249,41 @@ bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
 
 /*===========================================================================*/
 
-#define WRITE(...) do {                               \
+#define WRITE(...) do { \
     if (fprintf(file, __VA_ARGS__) < 0) return false; \
   } while (false)
 
+#define WRITE_SCRIPT(ch, script) do { \
+    const az_script_t *script_ptr = (script); \
+    if (script_ptr != NULL) { \
+      WRITE("$%c:", (ch)); \
+      if (!az_fprint_script(script_ptr, file)) return false; \
+      WRITE("\n"); \
+    } \
+  } while (false)
+
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("!R%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n", room->key,
+  WRITE("@R%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n", room->key,
         room->camera_bounds.min_r, room->camera_bounds.r_span,
         room->camera_bounds.min_theta, room->camera_bounds.theta_span,
         room->num_baddies, room->num_doors, room->num_gravfields,
         room->num_nodes, room->num_walls);
+  WRITE_SCRIPT('s', room->on_start);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_spec_t *wall = &room->walls[i];
-    WRITE("W%d d%d x%.02f y%.02f a%f\n", (int)wall->kind,
+    WRITE("!W%d d%d x%.02f y%.02f a%f\n", (int)wall->kind,
           az_wall_data_index(wall->data), wall->position.x, wall->position.y,
           wall->angle);
   }
   for (int i = 0; i < room->num_doors; ++i) {
     const az_door_spec_t *door = &room->doors[i];
-    WRITE("D%d x%.02f y%.02f a%f r%d u%d\n", (int)door->kind,
+    WRITE("!D%d x%.02f y%.02f a%f r%d u%d\n", (int)door->kind,
           door->position.x, door->position.y, door->angle, door->destination,
           door->uuid_slot);
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
     const az_gravfield_t *gravfield = &room->gravfields[i];
-    WRITE("G%d x%.02f y%.02f a%f s%.02f l%.02f o%.02f f%.02f r%.02f\n",
+    WRITE("!G%d x%.02f y%.02f a%f s%.02f l%.02f o%.02f f%.02f r%.02f\n",
           (int)gravfield->kind, gravfield->position.x, gravfield->position.y,
           gravfield->angle, gravfield->strength,
           gravfield->size.trapezoid.semilength,
@@ -257,7 +293,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
-    WRITE("N%d x%.02f y%.02f a%f", (int)node->kind,
+    WRITE("!N%d x%.02f y%.02f a%f", (int)node->kind,
           node->position.x, node->position.y, node->angle);
     if (node->kind == AZ_NODE_UPGRADE) {
       WRITE(" u%d", (int)node->upgrade);
@@ -266,7 +302,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];
-    WRITE("B%d x%.02f y%.02f a%f u%d\n", (int)baddie->kind,
+    WRITE("!B%d x%.02f y%.02f a%f u%d\n", (int)baddie->kind,
           baddie->position.x, baddie->position.y, baddie->angle,
           baddie->uuid_slot);
   }
@@ -287,6 +323,9 @@ bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
 
 void az_destroy_room(az_room_t *room) {
   assert(room != NULL);
+
+  az_free_script(room->on_start);
+  room->on_start = NULL;
 
   room->num_baddies = 0;
   free(room->baddies);

@@ -68,12 +68,12 @@ typedef struct {
 bool az_fprint_script(const az_script_t *script, FILE *file);
 bool az_sprint_script(const az_script_t *script, char *buffer, int length);
 
-// Parse and allocate script and return true, or return false on error.
-bool az_fscan_script(FILE *file, az_script_t *script_out);
-bool az_sscan_script(const char *string, int length, az_script_t *script_out);
+// Parse, allocate, and return the script, or return NULL on error.
+az_script_t *az_fscan_script(FILE *file);
+az_script_t *az_sscan_script(const char *string, int length);
 
-// Delete the data array owned by a script (but not the script object itself).
-void az_destroy_script(az_script_t *script);
+// Free the script object and its data array.  Does nothing if given NULL.
+void az_free_script(az_script_t *script);
 
 /*===========================================================================*/
 

@@ -97,42 +97,41 @@ bool az_sprint_script(const az_script_t *script, char *buffer, int length) {
 
 /*===========================================================================*/
 
-bool az_fscan_script(FILE *file, az_script_t *script_out) {
-  assert(script_out != NULL);
-  assert(script_out->instructions == NULL);
+az_script_t *az_fscan_script(FILE *file) {
   fpos_t pos;
-  if (fgetpos(file, &pos) != 0) return false;
+  if (fgetpos(file, &pos) != 0) return NULL;
   int num_instructions = 1;
   for (bool finished = false; !finished;) {
     switch (fgetc(file)) {
-      case EOF: return false;
+      case EOF: return NULL;
       case ',': ++num_instructions; break;
       case ';': finished = true; break;
       default: break;
     }
   }
-  if (fsetpos(file, &pos) != 0) return false;
+  if (fsetpos(file, &pos) != 0) return NULL;
   az_instruction_t *instructions =
     AZ_ALLOC(num_instructions, az_instruction_t);
-
   for (int i = 0; i < num_instructions; ++i) {
     char name[12];
     if (fscanf(file, "%11[A-Z]%lf", name,
-               &instructions[i].immediate) == 0) return false;
-    if (!opcode_for_name(name, &instructions[i].opcode)) return false;
-    if (fgetc(file) != (i == num_instructions - 1 ? ';' : ',')) return false;
+               &instructions[i].immediate) == 0 ||
+        !opcode_for_name(name, &instructions[i].opcode) ||
+        fgetc(file) != (i == num_instructions - 1 ? ';' : ',')) {
+      free(instructions);
+      return NULL;
+    }
   }
-  script_out->num_instructions = num_instructions;
-  script_out->instructions = instructions;
-  return true;
+  az_script_t *script = AZ_ALLOC(1, az_script_t);
+  script->num_instructions = num_instructions;
+  script->instructions = instructions;
+  return script;
 }
 
-bool az_sscan_script(const char *string, int length, az_script_t *script_out) {
-  assert(script_out != NULL);
-  assert(script_out->instructions == NULL);
+az_script_t *az_sscan_script(const char *string, int length) {
   int num_instructions = 1;
   for (int i = 0;; ++i) {
-    if (i >= length) return false;
+    if (i >= length) return NULL;
     else if (string[i] == ';') break;
     else if (string[i] == ',') ++num_instructions;
   }
@@ -143,26 +142,31 @@ bool az_sscan_script(const char *string, int length, az_script_t *script_out) {
     int num_read;
     char name[12];
     if (sscanf(string + index, "%11[A-Z]%n%lf%n", name, &num_read,
-               &instructions[i].immediate, &num_read) == 0) return false;
+               &instructions[i].immediate, &num_read) == 0) {
+      free(instructions);
+      return NULL;
+    }
     index += num_read;
     assert(index <= length);
     if (index >= length ||
-        string[index++] != (i == num_instructions - 1 ? ';' : ',')) {
-      return false;
+        string[index++] != (i == num_instructions - 1 ? ';' : ',') ||
+        !opcode_for_name(name, &instructions[i].opcode)) {
+      free(instructions);
+      return NULL;
     }
-    if (!opcode_for_name(name, &instructions[i].opcode)) return false;
   }
-  script_out->num_instructions = num_instructions;
-  script_out->instructions = instructions;
-  return true;
+  az_script_t *script = AZ_ALLOC(1, az_script_t);
+  script->num_instructions = num_instructions;
+  script->instructions = instructions;
+  return script;
 }
 
 /*===========================================================================*/
 
-void az_destroy_script(az_script_t *script) {
+void az_free_script(az_script_t *script) {
+  if (script == NULL) return;
   free(script->instructions);
-  script->num_instructions = 0;
-  script->instructions = NULL;
+  free(script);
 }
 
 /*===========================================================================*/

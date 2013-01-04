@@ -79,6 +79,7 @@ typedef struct {
 
 typedef struct {
   az_camera_bounds_t camera_bounds;
+  az_script_t *on_start;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
   AZ_LIST_DECLARE(az_editor_door_t, doors);
   AZ_LIST_DECLARE(az_editor_gravfield_t, gravfields);
