@@ -583,8 +583,12 @@ static void try_edit_gravfield(void) {
 static void begin_edit_script(void) {
   assert(state.text.action == AZ_ETA_NOTHING);
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  if (room->on_start != NULL) {
-    if (az_sprint_script(room->on_start, state.text.buffer,
+  const az_script_t *script = room->on_start;
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->selected) script = door->spec.on_open;
+  }
+  if (script != NULL) {
+    if (az_sprint_script(script, state.text.buffer,
                          AZ_ARRAY_SIZE(state.text.buffer))) {
       state.text.length = state.text.cursor = strlen(state.text.buffer);
       state.text.action = AZ_ETA_EDIT_SCRIPT;
@@ -606,9 +610,13 @@ static void try_edit_script(void) {
     script = az_sscan_script(state.text.buffer, state.text.length);
     if (script == NULL) return;
   }
+  az_script_t **dest = &room->on_start;
+  AZ_LIST_LOOP(door, room->doors) {
+    if (door->selected) dest = &door->spec.on_open;
+  }
   state.text.action = AZ_ETA_NOTHING;
-  az_free_script(room->on_start);
-  room->on_start = script;
+  az_free_script(*dest);
+  *dest = script;
   state.unsaved = true;
 }
 
@@ -864,6 +872,7 @@ static void event_loop(void) {
           }
           break;
         case AZ_EVENT_MOUSE_DOWN:
+          if (state.text.action != AZ_ETA_NOTHING) break;
           switch (state.tool) {
             case AZ_TOOL_MOVE:
             case AZ_TOOL_ROTATE:
@@ -893,6 +902,7 @@ static void event_loop(void) {
           }
           break;
         case AZ_EVENT_MOUSE_MOVE:
+          if (state.text.action != AZ_ETA_NOTHING) break;
           if (event.mouse.pressed) {
             switch (state.tool) {
               case AZ_TOOL_MOVE:

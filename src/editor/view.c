@@ -126,21 +126,23 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_draw_gravfield(&editor_gravfield->spec, state->total_time);
   }
   AZ_LIST_LOOP(editor_wall, room->walls) {
-    az_wall_t real_wall;
-    real_wall.kind = editor_wall->spec.kind;
-    real_wall.data = editor_wall->spec.data;
-    real_wall.position = editor_wall->spec.position;
-    real_wall.angle = editor_wall->spec.angle;
-    real_wall.flare = (real_wall.kind == AZ_WALL_INDESTRUCTIBLE ? 0.0 :
-                       0.5 + 0.01 * az_clock_zigzag(50, 1, state->clock));
+    const az_wall_t real_wall = {
+      .kind = editor_wall->spec.kind,
+      .data = editor_wall->spec.data,
+      .position = editor_wall->spec.position,
+      .angle = editor_wall->spec.angle,
+      .flare = (editor_wall->spec.kind == AZ_WALL_INDESTRUCTIBLE ? 0.0 :
+                0.5 + 0.01 * az_clock_zigzag(50, 1, state->clock))
+    };
     az_draw_wall(&real_wall);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    az_node_t real_node;
-    real_node.kind = editor_node->spec.kind;
-    real_node.position = editor_node->spec.position;
-    real_node.angle = editor_node->spec.angle;
-    real_node.upgrade = editor_node->spec.upgrade;
+    const az_node_t real_node = {
+      .kind = editor_node->spec.kind,
+      .position = editor_node->spec.position,
+      .angle = editor_node->spec.angle,
+      .upgrade = editor_node->spec.upgrade
+    };
     az_draw_node(&real_node, state->clock);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
@@ -164,16 +166,21 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     }
   }
   AZ_LIST_LOOP(editor_door, room->doors) {
-    az_door_t real_door;
-    real_door.kind = editor_door->spec.kind;
-    real_door.position = editor_door->spec.position;
-    real_door.angle = editor_door->spec.angle;
+    const az_door_t real_door = {
+      .kind = editor_door->spec.kind,
+      .position = editor_door->spec.position,
+      .angle = editor_door->spec.angle
+    };
     az_draw_door(&real_door);
     glPushMatrix(); {
       camera_to_screen_orient(state, real_door.position);
       glColor3f(0, 0, 1); // blue
       az_draw_printf(16, AZ_ALIGN_CENTER, 0, -7, "%03d",
                      editor_door->spec.destination);
+      if (editor_door->spec.on_open != NULL) {
+        glColor3f(0.75, 0, 1); // purple
+        az_draw_string(8, AZ_ALIGN_CENTER, 0, -15, "$");
+      }
       if (editor_door->spec.uuid_slot != 0) {
         glColor3f(1, 0, 0); // red
         az_draw_printf(8, AZ_ALIGN_CENTER, 0, 8, "%02d",
@@ -271,6 +278,11 @@ static void draw_hud(az_editor_state_t* state) {
   // Draw the room name:
   glColor3f(1, 1, 1); // white
   az_draw_printf(8, AZ_ALIGN_LEFT, 20, 5, "[Room %03d]", state->current_room);
+  if (AZ_LIST_GET(state->planet.rooms,
+                  state->current_room)->on_start != NULL) {
+    glColor3f(0.75, 0, 1); // purple
+    az_draw_string(8, AZ_ALIGN_LEFT, 100, 5, "$");
+  }
 
   // Draw the tool name:
   const char *tool_name = "???";

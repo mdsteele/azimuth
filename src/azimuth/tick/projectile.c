@@ -26,6 +26,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/tick/pickup.h" // for az_add_random_pickup
+#include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 
@@ -37,6 +38,7 @@ static void try_open_door(az_space_state_t *state, az_door_t *door,
   if (az_can_open_door(door->kind, damage_kind) && !door->is_open) {
     door->is_open = true;
     az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
+    az_run_script(state, door->on_open);
   }
 }
 

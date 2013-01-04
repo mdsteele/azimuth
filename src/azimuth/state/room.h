@@ -44,6 +44,7 @@ typedef struct {
 
 typedef struct {
   az_door_kind_t kind;
+  az_script_t *on_open; // owned; NULL if no script
   az_vector_t position;
   double angle;
   az_room_key_t destination;

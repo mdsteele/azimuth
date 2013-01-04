@@ -72,6 +72,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     for (int i = 0; i < room->num_doors; ++i) {
       az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
       door->spec = room->doors[i];
+      door->spec.on_open = clone_script(door->spec.on_open);
     }
     AZ_LIST_INIT(eroom->gravfields, room->num_gravfields);
     for (int i = 0; i < room->num_gravfields; ++i) {
@@ -123,6 +124,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
     room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
     for (int i = 0; i < room->num_doors; ++i) {
       room->doors[i] = AZ_LIST_GET(eroom->doors, i)->spec;
+      room->doors[i].on_open = clone_script(room->doors[i].on_open);
     }
     // Convert gravfields:
     room->num_gravfields = AZ_LIST_SIZE(eroom->gravfields);
@@ -225,6 +227,7 @@ void az_destroy_editor_state(az_editor_state_t *state) {
   AZ_LIST_LOOP(room, state->planet.rooms) {
     az_free_script(room->on_start);
     AZ_LIST_DESTROY(room->baddies);
+    AZ_LIST_LOOP(door, room->doors) az_free_script(door->spec.on_open);
     AZ_LIST_DESTROY(room->doors);
     AZ_LIST_DESTROY(room->gravfields);
     AZ_LIST_DESTROY(room->nodes);

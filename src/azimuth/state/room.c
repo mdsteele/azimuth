@@ -137,8 +137,8 @@ static void parse_door_directive(az_load_room_t *loader) {
   door->angle = angle;
   door->destination = (az_room_key_t)destination;
   door->uuid_slot = uuid_slot;
+  door->on_open = maybe_parse_script(loader, 'o');
   ++loader->room->num_doors;
-  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_gravfield_directive(az_load_room_t *loader) {
@@ -280,6 +280,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
     WRITE("!D%d x%.02f y%.02f a%f r%d u%d\n", (int)door->kind,
           door->position.x, door->position.y, door->angle, door->destination,
           door->uuid_slot);
+    WRITE_SCRIPT('o', door->on_open);
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
     const az_gravfield_t *gravfield = &room->gravfields[i];

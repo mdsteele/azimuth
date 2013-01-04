@@ -68,6 +68,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     if (az_insert_door(state, &door)) {
       const az_door_spec_t *spec = &room->doors[i];
       door->kind = spec->kind;
+      door->on_open = spec->on_open;
       door->position = spec->position;
       door->angle = spec->angle;
       door->destination = spec->destination;
