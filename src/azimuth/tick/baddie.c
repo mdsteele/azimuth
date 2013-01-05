@@ -25,9 +25,61 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+// The level of health at or below which a baddie can be frozen.
+#define AZ_BADDIE_FREEZE_THRESHOLD 4.0
+
+bool az_try_damage_baddie(
+    az_space_state_t *state, az_baddie_t *baddie,
+    const az_component_data_t *component, az_damage_flags_t damage_kind,
+    double damage_amount) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  assert(baddie->health > 0.0);
+  assert(damage_amount >= 0.0);
+
+  // If the damage is zero, we can quit early.
+  if (damage_amount <= 0.0) return false;
+
+  // Determine if the baddie is susceptible to this kind of damage; if not,
+  // quit early.
+  {
+    az_damage_flags_t modified_damage_kind = damage_kind;
+    modified_damage_kind &= ~AZ_DMGF_FREEZE;
+    if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
+    if (!(modified_damage_kind & ~(component->immunities))) return false;
+  }
+
+  // Damage the baddie.
+  baddie->armor_flare = 1.0;
+  baddie->health -= damage_amount;
+
+  // If this was enough to kill the baddie, remove it and add debris/pickups in
+  // its place.
+  if (baddie->health <= 0.0) {
+    // TODO add baddie debris
+    az_add_random_pickup(state, baddie->data->potential_pickups,
+                         baddie->position);
+    const az_script_t *script = baddie->on_kill;
+    // Remove the baddie.  After this point, we can no longer use the baddie
+    // object.
+    baddie->kind = AZ_BAD_NOTHING;
+    az_run_script(state, script);
+  }
+  // Otherwise, if this was enough to freeze the baddie, and the damage kind
+  // includes AZ_DMGF_FREEZE, freeze the baddie.
+  else if ((damage_kind & AZ_DMGF_FREEZE) &&
+           !(component->immunities & AZ_DMGF_FREEZE) &&
+           baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
+    baddie->frozen = 1.0;
+  }
+  return true;
+}
 
 /*===========================================================================*/
 

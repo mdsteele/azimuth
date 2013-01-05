@@ -30,6 +30,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/baddie.h" // for az_try_damage_baddie
 #include "azimuth/tick/gravfield.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"

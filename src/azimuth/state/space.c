@@ -60,6 +60,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     if (az_insert_baddie(state, &baddie)) {
       const az_baddie_spec_t *spec = &room->baddies[i];
       az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
+      baddie->on_kill = spec->on_kill;
       put_uuid(state, spec->uuid_slot, AZ_UUID_BADDIE, baddie->uid);
     }
   }
@@ -235,9 +236,9 @@ bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
   return false;
 }
 
-static void add_random_pickup(az_space_state_t *state,
-                              az_pickup_flags_t potential_pickups,
-                              az_vector_t position) {
+void az_add_random_pickup(az_space_state_t *state,
+                          az_pickup_flags_t potential_pickups,
+                          az_vector_t position) {
   const az_pickup_kind_t kind =
     az_choose_random_pickup_kind(&state->ship.player, potential_pickups);
   if (kind == AZ_PUP_NOTHING) return;
@@ -309,51 +310,6 @@ void az_damage_ship(az_space_state_t *state, double damage,
   state->mode = AZ_MODE_GAME_OVER;
   state->mode_data.game_over.step = AZ_GOS_ASPLODE;
   state->mode_data.game_over.progress = 0.0;
-}
-
-// The level of health at or below which a baddie can be frozen.
-#define AZ_BADDIE_FREEZE_THRESHOLD 4.0
-
-bool az_try_damage_baddie(
-    az_space_state_t *state, az_baddie_t *baddie,
-    const az_component_data_t *component, az_damage_flags_t damage_kind,
-    double damage_amount) {
-  assert(baddie->kind != AZ_BAD_NOTHING);
-  assert(baddie->health > 0.0);
-  assert(damage_amount >= 0.0);
-
-  // If the damage is zero, we can quit early.
-  if (damage_amount <= 0.0) return false;
-
-  // Determine if the baddie is susceptible to this kind of damage; if not,
-  // quit early.
-  {
-    az_damage_flags_t modified_damage_kind = damage_kind;
-    modified_damage_kind &= ~AZ_DMGF_FREEZE;
-    if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-    if (!(modified_damage_kind & ~(component->immunities))) return false;
-  }
-
-  // Damage the baddie.
-  baddie->armor_flare = 1.0;
-  baddie->health -= damage_amount;
-
-  // If this was enough to kill the baddie, remove it and add debris/pickups in
-  // its place.
-  if (baddie->health <= 0.0) {
-    baddie->kind = AZ_BAD_NOTHING;
-    // TODO add baddie debris
-    add_random_pickup(state, baddie->data->potential_pickups,
-                      baddie->position);
-  }
-  // Otherwise, if this was enough to freeze the baddie, and the damage kind
-  // includes AZ_DMGF_FREEZE, freeze the baddie.
-  else if ((damage_kind & AZ_DMGF_FREEZE) &&
-           !(component->immunities & AZ_DMGF_FREEZE) &&
-           baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
-    baddie->frozen = 1.0;
-  }
-  return true;
 }
 
 bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,

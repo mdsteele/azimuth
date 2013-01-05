@@ -118,8 +118,8 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   baddie->position = (az_vector_t){x, y};
   baddie->angle = angle;
   baddie->uuid_slot = uuid_slot;
+  baddie->on_kill = maybe_parse_script(loader, 'k');
   ++loader->room->num_baddies;
-  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_door_directive(az_load_room_t *loader) {
@@ -253,13 +253,17 @@ bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
     if (fprintf(file, __VA_ARGS__) < 0) return false; \
   } while (false)
 
+static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
+  if (script != NULL) {
+    WRITE("$%c:", ch);
+    if (!az_fprint_script(script, file)) return false;
+    WRITE("\n");
+  }
+  return true;
+}
+
 #define WRITE_SCRIPT(ch, script) do { \
-    const az_script_t *script_ptr = (script); \
-    if (script_ptr != NULL) { \
-      WRITE("$%c:", (ch)); \
-      if (!az_fprint_script(script_ptr, file)) return false; \
-      WRITE("\n"); \
-    } \
+    if (!try_write_script(ch, script, file)) return false; \
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
@@ -306,6 +310,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
     WRITE("!B%d x%.02f y%.02f a%f u%d\n", (int)baddie->kind,
           baddie->position.x, baddie->position.y, baddie->angle,
           baddie->uuid_slot);
+    WRITE_SCRIPT('k', baddie->on_kill);
   }
   return true;
 }

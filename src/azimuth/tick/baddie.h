@@ -25,6 +25,15 @@
 
 /*===========================================================================*/
 
+// Reduce the baddie's health by the given amount, if the baddie is susceptible
+// to the given kind of damage.  Return true iff any damage was dealt.  If this
+// is enough to destroy the baddie, remove it and add particles/pickups in its
+// place.  If the the given damage kind includes AZ_DMGF_FREEZE, this may
+// freeze the baddie.
+bool az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
+                          const az_component_data_t *component,
+                          az_damage_flags_t damage_kind, double damage_amount);
+
 void az_tick_baddies(az_space_state_t *state, double time);
 
 /*===========================================================================*/

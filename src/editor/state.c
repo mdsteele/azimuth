@@ -67,6 +67,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     for (int i = 0; i < room->num_baddies; ++i) {
       az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
       baddie->spec = room->baddies[i];
+      baddie->spec.on_kill = clone_script(baddie->spec.on_kill);
     }
     AZ_LIST_INIT(eroom->doors, room->num_doors);
     for (int i = 0; i < room->num_doors; ++i) {
@@ -118,6 +119,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
     for (int i = 0; i < room->num_baddies; ++i) {
       room->baddies[i] = AZ_LIST_GET(eroom->baddies, i)->spec;
+      room->baddies[i].on_kill = clone_script(room->baddies[i].on_kill);
     }
     // Convert doors:
     room->num_doors = AZ_LIST_SIZE(eroom->doors);
@@ -226,6 +228,7 @@ void az_center_editor_camera_on_current_room(az_editor_state_t *state) {
 void az_destroy_editor_state(az_editor_state_t *state) {
   AZ_LIST_LOOP(room, state->planet.rooms) {
     az_free_script(room->on_start);
+    AZ_LIST_LOOP(baddie, room->baddies) az_free_script(baddie->spec.on_kill);
     AZ_LIST_DESTROY(room->baddies);
     AZ_LIST_LOOP(door, room->doors) az_free_script(door->spec.on_open);
     AZ_LIST_DESTROY(room->doors);

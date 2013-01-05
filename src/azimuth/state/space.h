@@ -143,21 +143,16 @@ bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
 
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 
+void az_add_random_pickup(az_space_state_t *state,
+                          az_pickup_flags_t potential_pickups,
+                          az_vector_t position);
+
 /*===========================================================================*/
 
 // Reduce the ship's shields by the given amount.  If this is enough to destroy
 // the ship, change to game-over mode.
 void az_damage_ship(az_space_state_t *state, double damage,
                     bool induce_temp_invincibility);
-
-// Reduce the baddie's health by the given amount, if the baddie is susceptible
-// to the given kind of damage.  Return true iff any damage was dealt.  If this
-// is enough to destroy the baddie, remove it and add particles/pickups in its
-// place.  If the the given damage kind includes AZ_DMGF_FREEZE, this may
-// freeze the baddie.
-bool az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                          const az_component_data_t *component,
-                          az_damage_flags_t damage_kind, double damage_amount);
 
 // Try to destroy the wall with the given kind of damage, and return true iff
 // the wall was destroyed.

@@ -584,6 +584,9 @@ static void begin_edit_script(void) {
   assert(state.text.action == AZ_ETA_NOTHING);
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_script_t *script = room->on_start;
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) script = baddie->spec.on_kill;
+  }
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) script = door->spec.on_open;
   }
@@ -611,6 +614,9 @@ static void try_edit_script(void) {
     if (script == NULL) return;
   }
   az_script_t **dest = &room->on_start;
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) dest = &baddie->spec.on_kill;
+  }
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) dest = &door->spec.on_open;
   }
@@ -696,17 +702,19 @@ static void try_set_uuid_slot(void) {
     if (count != state.text.length) return;
   }
   if (uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) return;
-  state.text.action = AZ_ETA_NOTHING;
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  // Remove other uses of this UUID slot:
-  AZ_LIST_LOOP(baddie, room->baddies) {
-    if (baddie->spec.uuid_slot == uuid_slot) baddie->spec.uuid_slot = 0;
+  // Make sure this UUID slot isn't in use.
+  if (uuid_slot != 0) {
+    AZ_LIST_LOOP(baddie, room->baddies) {
+      if (baddie->spec.uuid_slot == uuid_slot) return;
+    }
+    AZ_LIST_LOOP(door, room->doors) {
+      if (door->spec.uuid_slot == uuid_slot) return;
+    }
   }
-  AZ_LIST_LOOP(door, room->doors) {
-    if (door->spec.uuid_slot == uuid_slot) door->spec.uuid_slot = 0;
-  }
+  state.text.action = AZ_ETA_NOTHING;
   state.unsaved = true;
-  // Set the UUID slot for a single object:
+  // Set the UUID slot for a single object.
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) {
       baddie->spec.uuid_slot = uuid_slot;

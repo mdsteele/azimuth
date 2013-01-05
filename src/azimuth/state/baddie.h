@@ -23,6 +23,7 @@
 
 #include "azimuth/state/pickup.h" // for az_pickup_flags_t
 #include "azimuth/state/player.h" // for az_damage_kinds_t
+#include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -76,6 +77,7 @@ typedef struct {
   az_baddie_kind_t kind; // if AZ_BAD_NOTHING, this baddie is not present
   const az_baddie_data_t *data;
   az_uid_t uid;
+  const az_script_t *on_kill; // not owned; NULL if no script
   az_vector_t position;
   az_vector_t velocity;
   double angle;

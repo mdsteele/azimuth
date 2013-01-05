@@ -20,12 +20,12 @@
 #include "azimuth/tick/projectile.h"
 
 #include <assert.h>
-#include <math.h> // for INFINITY
+#include <math.h>
 
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
-#include "azimuth/tick/pickup.h" // for az_add_random_pickup
+#include "azimuth/tick/baddie.h" // for az_try_damage_baddie
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"

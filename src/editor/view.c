@@ -151,17 +151,29 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
     az_draw_baddie(&real_baddie, state->clock);
-    if (editor_baddie->spec.uuid_slot != 0) {
+    if (editor_baddie->spec.on_kill != NULL ||
+        editor_baddie->spec.uuid_slot != 0) {
       glPushMatrix(); {
         camera_to_screen_orient(state, real_baddie.position);
-        glColor3f(1, 0, 0); // red
-        glBegin(GL_QUADS); {
-          glVertex2d(9, -4); glVertex2d(-9, -4);
-          glVertex2d(-9, 5); glVertex2d(9, 5);
-        } glEnd();
-        glColor3f(0, 0, 0); // black
-        az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%02d",
-                     editor_baddie->spec.uuid_slot);
+        if (editor_baddie->spec.on_kill != NULL) {
+          glColor3f(0.75, 0, 1); // purple
+          glBegin(GL_QUADS); {
+            glVertex2d(5, -9); glVertex2d(-5, -9);
+            glVertex2d(-5, 0); glVertex2d(5, 0);
+          } glEnd();
+          glColor3f(0, 0, 0); // black
+          az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
+        }
+        if (editor_baddie->spec.uuid_slot != 0) {
+          glColor3f(1, 0, 0); // red
+          glBegin(GL_QUADS); {
+            glVertex2d(9, 0); glVertex2d(-9, 0);
+            glVertex2d(-9, 9); glVertex2d(9, 9);
+          } glEnd();
+          glColor3f(0, 0, 0); // black
+          az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d",
+                         editor_baddie->spec.uuid_slot);
+        }
       } glPopMatrix();
     }
   }
