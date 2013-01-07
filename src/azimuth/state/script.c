@@ -31,24 +31,24 @@
 
 const char *az_opcode_name(az_opcode_t opcode) {
   switch (opcode) {
-    case AZ_OP_NOP:    return "NOP";
-    case AZ_OP_PUSH:   return "PUSH";
-    case AZ_OP_ADD:    return "ADD";
-    case AZ_OP_ADDI:   return "ADDI";
-    case AZ_OP_BEQZ:   return "BEQZ";
-    case AZ_OP_BNEZ:   return "BNEZ";
-    case AZ_OP_JUMP:   return "JUMP";
-    case AZ_OP_TEST:   return "TEST";
-    case AZ_OP_SET:    return "SET";
-    case AZ_OP_CLR:    return "CLR";
-    case AZ_OP_BAD:    return "BAD";
-    case AZ_OP_UNBAD:  return "UNBAD";
-    case AZ_OP_LOCK:   return "LOCK";
-    case AZ_OP_UNLOCK: return "UNLOCK";
-    case AZ_OP_GETGS:  return "GETGS";
-    case AZ_OP_SETGS:  return "SETGS";
-    case AZ_OP_STOP:   return "STOP";
-    case AZ_OP_ERROR:  return "ERROR";
+    case AZ_OP_NOP:    return "nop";
+    case AZ_OP_PUSH:   return "push";
+    case AZ_OP_ADD:    return "add";
+    case AZ_OP_ADDI:   return "addi";
+    case AZ_OP_BEQZ:   return "beqz";
+    case AZ_OP_BNEZ:   return "bnez";
+    case AZ_OP_JUMP:   return "jump";
+    case AZ_OP_TEST:   return "test";
+    case AZ_OP_SET:    return "set";
+    case AZ_OP_CLR:    return "clr";
+    case AZ_OP_BAD:    return "bad";
+    case AZ_OP_UNBAD:  return "unbad";
+    case AZ_OP_LOCK:   return "lock";
+    case AZ_OP_UNLOCK: return "unlock";
+    case AZ_OP_GETGS:  return "getgs";
+    case AZ_OP_SETGS:  return "setgs";
+    case AZ_OP_STOP:   return "stop";
+    case AZ_OP_ERROR:  return "error";
   }
   AZ_ASSERT_UNREACHABLE();
 }
@@ -118,7 +118,7 @@ az_script_t *az_fscan_script(FILE *file) {
     AZ_ALLOC(num_instructions, az_instruction_t);
   for (int i = 0; i < num_instructions; ++i) {
     char name[12];
-    if (fscanf(file, "%11[A-Z]%lf", name,
+    if (fscanf(file, "%11[a-z]%lf", name,
                &instructions[i].immediate) == 0 ||
         !opcode_for_name(name, &instructions[i].opcode) ||
         fgetc(file) != (i == num_instructions - 1 ? ';' : ',')) {
@@ -145,7 +145,7 @@ az_script_t *az_sscan_script(const char *string, int length) {
   for (int i = 0; i < num_instructions; ++i) {
     int num_read;
     char name[12];
-    if (sscanf(string + index, "%11[A-Z]%n%lf%n", name, &num_read,
+    if (sscanf(string + index, "%11[a-z]%n%lf%n", name, &num_read,
                &instructions[i].immediate, &num_read) == 0) {
       free(instructions);
       return NULL;

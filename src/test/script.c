@@ -25,7 +25,7 @@
 
 /*===========================================================================*/
 
-static const char script_string[] = "PUSH-23.5,NOP,BEQZ1,STOP;";
+static const char script_string[] = "push-23.5,nop,beqz1,stop;";
 
 void test_script_print(void) {
   az_instruction_t instructions[] = {
