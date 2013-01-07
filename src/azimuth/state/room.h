@@ -53,6 +53,15 @@ typedef struct {
 } az_door_spec_t;
 
 typedef struct {
+  az_gravfield_kind_t kind;
+  az_vector_t position;
+  double angle;
+  double strength;
+  az_gravfield_size_t size;
+  int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
+} az_gravfield_spec_t;
+
+typedef struct {
   az_node_kind_t kind;
   az_vector_t position;
   double angle;
@@ -77,7 +86,7 @@ typedef struct {
   int num_doors;
   az_door_spec_t *doors;
   int num_gravfields;
-  az_gravfield_t *gravfields;
+  az_gravfield_spec_t *gravfields;
   int num_nodes;
   az_node_spec_t *nodes;
   int num_walls;

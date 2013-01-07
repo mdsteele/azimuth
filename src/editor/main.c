@@ -78,8 +78,15 @@ static void do_select(int x, int y, bool multi) {
   az_editor_gravfield_t *best_gravfield = NULL;
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     double dist = az_vdist(pt, gravfield->spec.position);
-    if (az_point_within_gravfield(&gravfield->spec, pt) &&
-        dist < best_dist) {
+    if (dist >= best_dist) continue;
+    const az_gravfield_t real_gravfield = {
+      .kind = gravfield->spec.kind,
+      .position = gravfield->spec.position,
+      .angle = gravfield->spec.angle,
+      .strength = gravfield->spec.strength,
+      .size = gravfield->spec.size
+    };
+    if (az_point_within_gravfield(&real_gravfield, pt)) {
       best_dist = dist;
       best_gravfield = gravfield;
     }
@@ -391,10 +398,10 @@ static void do_add_gravfield(int x, int y) {
   gravfield->spec.position = pt;
   gravfield->spec.angle = state.brush.angle;
   gravfield->spec.strength = 100.0;
-  gravfield->spec.size.trapezoid.semilength = 100.0;
   gravfield->spec.size.trapezoid.front_offset = 0.0;
   gravfield->spec.size.trapezoid.front_semiwidth = 50.0;
   gravfield->spec.size.trapezoid.rear_semiwidth = 100.0;
+  gravfield->spec.size.trapezoid.semilength = 100.0;
   state.unsaved = true;
 }
 
@@ -539,7 +546,7 @@ static void do_change_data(int delta, bool secondary) {
 
 static void begin_edit_gravfield(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_gravfield_t *gravfield = NULL;
+  az_gravfield_spec_t *gravfield = NULL;
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
     if (editor_gravfield->selected) {
       gravfield = &editor_gravfield->spec;
@@ -572,10 +579,10 @@ static void try_edit_gravfield(void) {
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
     gravfield->spec.strength = strength;
-    gravfield->spec.size.trapezoid.semilength = semilength;
     gravfield->spec.size.trapezoid.front_offset = front_offset;
     gravfield->spec.size.trapezoid.front_semiwidth = front_semiwidth;
     gravfield->spec.size.trapezoid.rear_semiwidth = rear_semiwidth;
+    gravfield->spec.size.trapezoid.semilength = semilength;
     state.unsaved = true;
   }
 }
@@ -687,6 +694,9 @@ static void begin_set_uuid_slot(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) uuid_slot = door->spec.uuid_slot;
   }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (gravfield->selected) uuid_slot = gravfield->spec.uuid_slot;
+  }
   if (uuid_slot < 0) return;
   az_init_editor_text(&state, AZ_ETA_SET_UUID_SLOT, "%d", uuid_slot);
 }
@@ -711,6 +721,9 @@ static void try_set_uuid_slot(void) {
     AZ_LIST_LOOP(door, room->doors) {
       if (door->spec.uuid_slot == uuid_slot) return;
     }
+    AZ_LIST_LOOP(gravfield, room->gravfields) {
+      if (gravfield->spec.uuid_slot == uuid_slot) return;
+    }
   }
   state.text.action = AZ_ETA_NOTHING;
   state.unsaved = true;
@@ -724,6 +737,12 @@ static void try_set_uuid_slot(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) {
       door->spec.uuid_slot = uuid_slot;
+      return;
+    }
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (gravfield->selected) {
+      gravfield->spec.uuid_slot = uuid_slot;
       return;
     }
   }

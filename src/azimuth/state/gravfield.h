@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -38,26 +39,27 @@ typedef enum {
   AZ_GRAV_SECTOR_SPIN
 } az_gravfield_kind_t;
 
+typedef union {
+  struct {
+    double front_offset;
+    double front_semiwidth;
+    double rear_semiwidth;
+    double semilength;
+  } trapezoid;
+  struct {
+    double sweep_degrees; // interior angle; 0 is equivalent to 360
+    double inner_radius;
+    double thickness;
+  } sector;
+} az_gravfield_size_t;
+
 typedef struct {
   az_gravfield_kind_t kind; // if AZ_GRAV_NOTHING, this gravfield isn't present
+  az_uid_t uid;
   az_vector_t position;
   double angle;
   double strength; // negative to reverse direction; must be nonzero
-  union {
-    struct {
-      double semilength;
-      double front_offset;
-      double front_semiwidth;
-      double rear_semiwidth;
-    } trapezoid;
-    struct {
-      double ignored;
-      double sweep_degrees; // interior angle; 0 is equivalent to 360
-      double inner_radius;
-      double thickness;
-    } sector;
-  } size;
-
+  az_gravfield_size_t size;
 } az_gravfield_t;
 
 double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield);

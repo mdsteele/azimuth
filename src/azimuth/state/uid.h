@@ -56,6 +56,7 @@ typedef enum {
   AZ_UUID_NOTHING = 0,
   AZ_UUID_BADDIE,
   AZ_UUID_DOOR,
+  AZ_UUID_GRAVFIELD,
   AZ_UUID_NODE
 } az_uuid_type_t;
 

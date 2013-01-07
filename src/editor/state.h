@@ -65,7 +65,7 @@ typedef struct {
 
 typedef struct {
   bool selected;
-  az_gravfield_t spec;
+  az_gravfield_spec_t spec;
 } az_editor_gravfield_t;
 
 typedef struct {

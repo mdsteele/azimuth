@@ -30,6 +30,9 @@ typedef enum {
   AZ_OP_NOP = 0, // does nothing
   // Stack manipulation:
   AZ_OP_PUSH, // push i onto the stack
+  // Arithmetic:
+  AZ_OP_ADD, // pop top two, push (a + b)
+  AZ_OP_ADDI, // pop top, push a + i
   // Branches:
   AZ_OP_BEQZ, // pop top, add i to PC if it is zero
   AZ_OP_BNEZ, // pop top, add i to PC if it is not zero
@@ -44,6 +47,9 @@ typedef enum {
   // Doors:
   AZ_OP_LOCK, // close and lock door i
   AZ_OP_UNLOCK, // unlock (but do not open) door i
+  // Gravfields:
+  AZ_OP_GETGS, // push strength of gravfield i
+  AZ_OP_SETGS, // pop top, set strength of gravfield i to a
   // Termination:
   AZ_OP_STOP, // halt script successfully
   AZ_OP_ERROR // halt script and printf execution state

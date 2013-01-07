@@ -79,7 +79,13 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   for (int i = 0; i < room->num_gravfields; ++i) {
     az_gravfield_t *gravfield;
     if (az_insert_gravfield(state, &gravfield)) {
-      *gravfield = room->gravfields[i];
+      const az_gravfield_spec_t *spec = &room->gravfields[i];
+      gravfield->kind = spec->kind;
+      gravfield->position = spec->position;
+      gravfield->angle = spec->angle;
+      gravfield->strength = spec->strength;
+      gravfield->size = spec->size;
+      put_uuid(state, spec->uuid_slot, AZ_UUID_GRAVFIELD, gravfield->uid);
     }
   }
   for (int i = 0; i < room->num_nodes; ++i) {
@@ -154,10 +160,23 @@ bool az_insert_door(az_space_state_t *state, az_door_t **door_out) {
   return false;
 }
 
+bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
+                         az_gravfield_t **gravfield_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->gravfields));
+  az_gravfield_t *gravfield = &state->gravfields[index];
+  if (gravfield->uid == uid) {
+    *gravfield_out = gravfield;
+    return true;
+  }
+  return false;
+}
+
 bool az_insert_gravfield(az_space_state_t *state,
                          az_gravfield_t **gravfield_out) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) {
+      az_assign_uid(gravfield - state->gravfields, &gravfield->uid);
       *gravfield_out = gravfield;
       return true;
     }

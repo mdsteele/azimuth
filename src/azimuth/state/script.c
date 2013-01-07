@@ -33,6 +33,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
   switch (opcode) {
     case AZ_OP_NOP:    return "NOP";
     case AZ_OP_PUSH:   return "PUSH";
+    case AZ_OP_ADD:    return "ADD";
+    case AZ_OP_ADDI:   return "ADDI";
     case AZ_OP_BEQZ:   return "BEQZ";
     case AZ_OP_BNEZ:   return "BNEZ";
     case AZ_OP_JUMP:   return "JUMP";
@@ -43,6 +45,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_UNBAD:  return "UNBAD";
     case AZ_OP_LOCK:   return "LOCK";
     case AZ_OP_UNLOCK: return "UNLOCK";
+    case AZ_OP_GETGS:  return "GETGS";
+    case AZ_OP_SETGS:  return "SETGS";
     case AZ_OP_STOP:   return "STOP";
     case AZ_OP_ERROR:  return "ERROR";
   }

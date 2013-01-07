@@ -123,7 +123,14 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
-    az_draw_gravfield(&editor_gravfield->spec, state->total_time);
+    const az_gravfield_t real_gravfield = {
+      .kind = editor_gravfield->spec.kind,
+      .position = editor_gravfield->spec.position,
+      .angle = editor_gravfield->spec.angle,
+      .strength = editor_gravfield->spec.strength,
+      .size = editor_gravfield->spec.size
+    };
+    az_draw_gravfield(&real_gravfield, state->total_time);
   }
   AZ_LIST_LOOP(editor_wall, room->walls) {
     const az_wall_t real_wall = {

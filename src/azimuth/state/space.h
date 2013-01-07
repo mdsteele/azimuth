@@ -127,6 +127,8 @@ bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
                     az_door_t **door_out);
 bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
 
+bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
+                         az_gravfield_t **gravfield_out);
 bool az_insert_gravfield(az_space_state_t *state,
                          az_gravfield_t **gravfield_out);
 

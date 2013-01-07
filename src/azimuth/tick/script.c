@@ -20,6 +20,7 @@
 #include "azimuth/tick/script.h"
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "azimuth/state/script.h"
@@ -31,6 +32,15 @@
 // How many instructions a script is allowed to execute before we terminate it
 // with an error (to avoid infinite loops).
 #define AZ_MAX_SCRIPT_STEPS 100
+
+// COUNT_ARGS(...) expands to the number of arguments passed to it (as long as
+// that number is between 1 and 8, inclusive).
+#define COUNT_ARGS(...) SELECT_9TH(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, unused)
+#define SELECT_9TH(a1, a2, a3, a4, a5, a6, a7, a8, a9, ...) a9
+AZ_STATIC_ASSERT(COUNT_ARGS(a) == 1);
+AZ_STATIC_ASSERT(COUNT_ARGS(a,b) == 2);
+AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c) == 3);
+AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c,d,e,f,g,h) == 8);
 
 #ifdef NDEBUG
 #define SCRIPT_ERROR(msg) do { return; } while (0)
@@ -55,17 +65,39 @@ static void print_error(const char *msg, const az_script_t *script,
 
 #endif // NDEBUG
 
+/*===========================================================================*/
+
+// STACK_PUSH(value) pushes a single value onto the stack.
 #define STACK_PUSH(v) do { \
     if (stack_size < AZ_ARRAY_SIZE(stack)) { \
       stack[stack_size++] = (double)(v); \
     } else SCRIPT_ERROR("stack overflow"); \
   } while (0)
 
-#define STACK_POP(p) do { \
-    if (stack_size > 0) { \
-      *(p) = stack[--stack_size]; \
+/*===========================================================================*/
+
+// STACK_POP(...) takes from 1 to 8 double* args; it pops that many values off
+// the stack (or errors on underflow), and assigns them to the pointers.  The
+// top of the stack will be stored to the rightmost pointer passed, and so on.
+#define STACK_POP(...) do { \
+    if (stack_size >= COUNT_ARGS(__VA_ARGS__)) { \
+      do_stack_pop(stack, &stack_size, COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
     } else SCRIPT_ERROR("stack underflow"); \
   } while (0)
+
+static void do_stack_pop(double *stack, int *stack_size, int num_args, ...) {
+  assert(*stack_size >= num_args);
+  *stack_size -= num_args;
+  va_list args;
+  va_start(args, num_args);
+  for (int i = 0; i < num_args; ++i) {
+    double *ptr = va_arg(args, double *);
+    *ptr = stack[*stack_size + i];
+  }
+  va_end(args);
+}
+
+/*===========================================================================*/
 
 #define DO_JUMP() do { \
     const int new_pc = pc + (int)ins.immediate; \
@@ -83,6 +115,8 @@ static void print_error(const char *msg, const az_script_t *script,
     } \
     *(uid_out) = uuid.uid; \
   } while (0)
+
+/*===========================================================================*/
 
 void az_run_script(az_space_state_t *state, const az_script_t *script) {
   assert(state != NULL);
@@ -102,6 +136,21 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
       case AZ_OP_NOP: break;
       // Stack manipulation:
       case AZ_OP_PUSH: STACK_PUSH(ins.immediate); break;
+      // Arithmetic:
+      case AZ_OP_ADD:
+        {
+          double a, b;
+          STACK_POP(&a, &b);
+          STACK_PUSH(a + b);
+        }
+        break;
+      case AZ_OP_ADDI:
+        {
+          double a;
+          STACK_POP(&a);
+          STACK_PUSH(a + ins.immediate);
+        }
+        break;
       // Branches:
       case AZ_OP_BEQZ:
         {
@@ -135,7 +184,7 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
       case AZ_OP_BAD:
         {
           double k, x, y, angle;
-          STACK_POP(&angle); STACK_POP(&y); STACK_POP(&x); STACK_POP(&k);
+          STACK_POP(&k, &x, &y, &angle);
           int kind = (int)k;
           if (kind < 1 || kind >= AZ_NUM_BADDIE_KINDS) {
             SCRIPT_ERROR("invalid baddie kind");
@@ -181,6 +230,28 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
               SCRIPT_ERROR("cannot unlock passage");
             }
             door->kind = AZ_DOOR_NORMAL;
+          }
+        }
+        break;
+      // Gravfields:
+      case AZ_OP_GETGS:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_GRAVFIELD, &uid);
+          az_gravfield_t *gravfield;
+          STACK_PUSH(az_lookup_gravfield(state, uid, &gravfield) ?
+                     gravfield->strength : 0);
+        }
+        break;
+      case AZ_OP_SETGS:
+        {
+          double value;
+          STACK_POP(&value);
+          az_uid_t uid;
+          GET_UID(AZ_UUID_GRAVFIELD, &uid);
+          az_gravfield_t *gravfield;
+          if (az_lookup_gravfield(state, uid, &gravfield)) {
+            gravfield->strength = value;
           }
         }
         break;

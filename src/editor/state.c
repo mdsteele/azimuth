@@ -130,7 +130,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
     }
     // Convert gravfields:
     room->num_gravfields = AZ_LIST_SIZE(eroom->gravfields);
-    room->gravfields = AZ_ALLOC(room->num_gravfields, az_gravfield_t);
+    room->gravfields = AZ_ALLOC(room->num_gravfields, az_gravfield_spec_t);
     for (int i = 0; i < room->num_gravfields; ++i) {
       room->gravfields[i] = AZ_LIST_GET(eroom->gravfields, i)->spec;
     }

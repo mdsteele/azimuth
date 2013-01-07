@@ -93,7 +93,7 @@ static void parse_room_header(az_load_room_t *loader) {
   if (num_gravfields < 0 || num_gravfields > AZ_MAX_NUM_GRAVFIELDS) FAIL();
   loader->num_gravfields = num_gravfields;
   loader->room->num_gravfields = 0;
-  loader->room->gravfields = AZ_ALLOC(num_gravfields, az_gravfield_t);
+  loader->room->gravfields = AZ_ALLOC(num_gravfields, az_gravfield_spec_t);
   if (num_nodes < 0 || num_nodes > AZ_MAX_NUM_NODES) FAIL();
   loader->num_nodes = num_nodes;
   loader->room->num_nodes = 0;
@@ -143,25 +143,36 @@ static void parse_door_directive(az_load_room_t *loader) {
 
 static void parse_gravfield_directive(az_load_room_t *loader) {
   if (loader->room->num_gravfields >= loader->num_gravfields) FAIL();
-  int index;
-  double x, y, angle, strength, semilength, front_offset,
-         front_semiwidth, rear_semiwidth;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf s%lf l%lf o%lf f%lf r%lf\n",
-             &index, &x, &y, &angle, &strength, &semilength, &front_offset,
-             &front_semiwidth, &rear_semiwidth) < 9) FAIL();
-  if (index <= 0 || index > AZ_NUM_GRAVFIELD_KINDS) FAIL();
-  if (strength == 0.0 || semilength <= 0.0 ||
-      front_semiwidth < 0.0 || rear_semiwidth < 0.0) FAIL();
-  az_gravfield_t *gravfield =
+  int index, uuid_slot;
+  double x, y, angle, strength;
+  if (fscanf(loader->file, "%d x%lf y%lf a%lf s%lf ",
+             &index, &x, &y, &angle, &strength) < 5) FAIL();
+  if (index <= 0 || index > AZ_NUM_GRAVFIELD_KINDS || strength == 0.0) FAIL();
+  az_gravfield_spec_t *gravfield =
     &loader->room->gravfields[loader->room->num_gravfields];
   gravfield->kind = (az_gravfield_kind_t)index;
   gravfield->position = (az_vector_t){x, y};
   gravfield->angle = angle;
   gravfield->strength = strength;
-  gravfield->size.trapezoid.semilength = semilength;
-  gravfield->size.trapezoid.front_offset = front_offset;
-  gravfield->size.trapezoid.front_semiwidth = front_semiwidth;
-  gravfield->size.trapezoid.rear_semiwidth = rear_semiwidth;
+  if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
+    double front_offset, front_semiwidth, rear_semiwidth, semilength;
+    if (fscanf(loader->file, "o%lf f%lf r%lf l%lf", &front_offset,
+               &front_semiwidth, &rear_semiwidth, &semilength) < 4) FAIL();
+    if (semilength <= 0.0) FAIL();
+    gravfield->size.trapezoid.semilength = semilength;
+    gravfield->size.trapezoid.front_offset = front_offset;
+    gravfield->size.trapezoid.front_semiwidth = front_semiwidth;
+    gravfield->size.trapezoid.rear_semiwidth = rear_semiwidth;
+  } else {
+    double sweep_degrees, inner_radius, thickness;
+    if (fscanf(loader->file, "w%lf i%lf t%lf", &sweep_degrees,
+               &inner_radius, &thickness) < 3) FAIL();
+    gravfield->size.sector.sweep_degrees = sweep_degrees;
+    gravfield->size.sector.inner_radius = inner_radius;
+    gravfield->size.sector.thickness = thickness;
+  }
+  if (fscanf(loader->file, " u%d\n", &uuid_slot) < 1) FAIL();
+  gravfield->uuid_slot = uuid_slot;
   ++loader->room->num_gravfields;
   if (scan_to_script(loader)) FAIL();
 }
@@ -287,14 +298,22 @@ static bool write_room(const az_room_t *room, FILE *file) {
     WRITE_SCRIPT('o', door->on_open);
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
-    const az_gravfield_t *gravfield = &room->gravfields[i];
-    WRITE("!G%d x%.02f y%.02f a%f s%.02f l%.02f o%.02f f%.02f r%.02f\n",
+    const az_gravfield_spec_t *gravfield = &room->gravfields[i];
+    WRITE("!G%d x%.02f y%.02f a%f s%.02f ",
           (int)gravfield->kind, gravfield->position.x, gravfield->position.y,
-          gravfield->angle, gravfield->strength,
-          gravfield->size.trapezoid.semilength,
-          gravfield->size.trapezoid.front_offset,
-          gravfield->size.trapezoid.front_semiwidth,
-          gravfield->size.trapezoid.rear_semiwidth);
+          gravfield->angle, gravfield->strength);
+    if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
+      WRITE("o%.02f f%.02f r%.02f l%.02f",
+            gravfield->size.trapezoid.front_offset,
+            gravfield->size.trapezoid.front_semiwidth,
+            gravfield->size.trapezoid.rear_semiwidth,
+            gravfield->size.trapezoid.semilength);
+    } else {
+      WRITE("w%.02f i%.02f t%.02f", gravfield->size.sector.sweep_degrees,
+            gravfield->size.sector.inner_radius,
+            gravfield->size.sector.thickness);
+    }
+    WRITE(" u%d\n", gravfield->uuid_slot);
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
