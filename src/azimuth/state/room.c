@@ -186,7 +186,7 @@ static void parse_node_directive(az_load_room_t *loader) {
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   if (kind == AZ_NODE_UPGRADE) {
     if (fscanf(loader->file, " u%d\n", &upgrade) < 1) FAIL();
-    if (upgrade <= 0 || upgrade >= AZ_NUM_UPGRADES) FAIL();
+    if (upgrade < 0 || upgrade >= AZ_NUM_UPGRADES) FAIL();
   } else (void)fscanf(loader->file, "\n");
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
   node->kind = (az_node_kind_t)kind;

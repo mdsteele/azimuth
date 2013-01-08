@@ -19,6 +19,7 @@
 
 #include "azimuth/view/node.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -33,6 +34,22 @@
 static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
   const int frame = az_clock_mod(4, 10, clock);
   switch (upgrade) {
+    case AZ_UPG_GUN_CHARGE:
+      for (int n = 0; n < 2; ++n) {
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(1, 1, 0.5, 0.7);
+          glVertex2d(0, 0);
+          glColor4f(1, 1, 1, 0.0);
+          for (int i = 0; i <= 360; i += 60) {
+            const double radius = 13.0;
+            const int offset = 15 * frame;
+            const double degrees = (n == 0 ? i + offset : i - offset);
+            glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
+                       radius * sin(AZ_DEG2RAD(degrees)));
+          }
+        } glEnd();
+      }
+      break;
     case AZ_UPG_GUN_FREEZE:
       glBegin(GL_TRIANGLES); {
         const double radius = 12.0;
@@ -52,18 +69,40 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       break;
     case AZ_UPG_GUN_TRIPLE:
       glBegin(GL_QUADS); {
-        glColor3f(0, 1, 0);
+        glColor3f((frame == 1), 1, (frame == 1));
         glVertex2d(2, 11); glVertex2d(-2, 11);
         glColor4f(0, 1, 0, 0.125);
         glVertex2d(-2, -12); glVertex2d(2, -12);
-        glColor3f(0, 1, 0);
+        glColor3f((frame == 2), 1, (frame == 2));
         glVertex2d(12, 9); glVertex2d(8, 9);
         glColor4f(0, 1, 0, 0.125);
         glVertex2d(2, -12); glVertex2d(5, -12);
-        glColor3f(0, 1, 0);
+        glColor3f((frame == 3), 1, (frame == 3));
         glVertex2d(-8, 9); glVertex2d(-12, 9);
         glColor4f(0, 1, 0, 0.125);
         glVertex2d(-5, -11); glVertex2d(-2, -11);
+      } glEnd();
+      break;
+    case AZ_UPG_GUN_PHASE:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0.5, 0, 0);
+        glVertex2d(-10, -10);
+        glColor3f(1, 1, 0.5);
+        const double radius = 10.0 + 4.5 * frame;
+        for (int i = 15; i <= 75; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)) - 12,
+                     radius * sin(AZ_DEG2RAD(i)) - 12);
+        }
+      } glEnd();
+      break;
+    case AZ_UPG_GUN_BEAM:
+      glBegin(GL_QUAD_STRIP); {
+        glColor4f(1, 0, 0, 0.2 * (frame == 3 ? 1 : frame));
+        glVertex2i(-12,  -6); glVertex2i( 6, 12);
+        glColor3f(1, 0.2, 0.2);
+        glVertex2i(-12, -12); glVertex2i(12, 12);
+        glColor4f(1, 0, 0, 0.2 * (frame == 3 ? 1 : frame));
+        glVertex2i( -6, -12); glVertex2i(12,  6);
       } glEnd();
       break;
     case AZ_UPG_ROCKET_AMMO_00:
@@ -112,6 +151,72 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2i(x + 4, -10);
         glVertex2i(x + 4, -2);
         glVertex2i(x, -2);
+      } glEnd();
+      break;
+    case AZ_UPG_HYPER_ROCKETS:
+      glColor3f(0.5, 0, 0.5); // dark magenta
+      glBegin(GL_QUADS); {
+        const int x = -8 + 3 * frame;
+        glVertex2i(x, (frame >= 2 ? -9 : -10));
+        glVertex2i(x + 4, (frame >= 2 ? -10 : -9));
+        glVertex2i(x + 4, (frame >= 2 ? -3 : -1));
+        glVertex2i(x, (frame >= 2 ? -1 : -3));
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(-4, -8);
+        glVertex2i(-4, 1);
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, -9);
+        glVertex2i(0, 10);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(4, -8);
+        glVertex2i(4, 1);
+      } glEnd();
+      glColor3f(0.6, 0, 0.6); // dark magenta
+      glBegin(GL_QUADS); {
+        const int x = 4 - 3 * frame;
+        glVertex2i(x, (frame < 2 ? -9 : -10));
+        glVertex2i(x + 4, (frame < 2 ? -10 : -9));
+        glVertex2i(x + 4, (frame < 2 ? -3 : -1));
+        glVertex2i(x, (frame < 2 ? -1 : -3));
+      } glEnd();
+      break;
+    case AZ_UPG_BOMB_AMMO_00:
+    case AZ_UPG_BOMB_AMMO_01:
+    case AZ_UPG_BOMB_AMMO_02:
+    case AZ_UPG_BOMB_AMMO_03:
+    case AZ_UPG_BOMB_AMMO_04:
+    case AZ_UPG_BOMB_AMMO_05:
+    case AZ_UPG_BOMB_AMMO_06:
+    case AZ_UPG_BOMB_AMMO_07:
+    case AZ_UPG_BOMB_AMMO_08:
+    case AZ_UPG_BOMB_AMMO_09:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, 0);
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          const double radius = 8;
+          const double theta = AZ_DEG2RAD(i - 30 * frame);
+          if (blue) glColor3f(0, 0, 0.75); // blue
+          else glColor3f(0.5, 0.5, 0.5); // gray
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
+    case AZ_UPG_MEGA_BOMBS:
+      glBegin(GL_TRIANGLE_FAN); {
+        if (frame == 0) glColor3f(1, 1, 0.5); // yellow
+        else glColor3f(0.5, 0.5, 0.5); // gray
+        glVertex2i(0, 0);
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          const double radius = 9;
+          const double theta = AZ_DEG2RAD(i + 30 * frame);
+          if (blue) glColor3f(0, 0.5, 0.75); // cyan
+          else if (frame == 0) glColor3f(0.75, 0.75, 0.25); // yellow
+          else glColor3f(0.25, 0.25, 0.25); // dark gray
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
       } glEnd();
       break;
     // TODO: Draw other upgrade icons.
@@ -173,6 +278,7 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
 }
 
 void az_draw_node(const az_node_t *node, az_clock_t clock) {
+  assert(node->kind != AZ_NODE_NOTHING);
   glPushMatrix(); {
     glTranslated(node->position.x, node->position.y, 0);
     glRotated(AZ_RAD2DEG(node->angle), 0, 0, 1);
