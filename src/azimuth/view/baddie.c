@@ -140,6 +140,18 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_TURRET:
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = 0; i <= 360; i += 60) {
+          glColor3f(0.35 + 0.15 * flare - 0.15 * frozen,
+                    0.35 - 0.15 * flare - 0.15 * frozen,
+                    0.35 - 0.15 * flare + 0.15 * frozen);
+          glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
+          glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
+                    0.25 - 0.1 * flare - 0.1 * frozen,
+                    0.25 - 0.1 * flare + 0.1 * frozen);
+          glVertex2d(20 * cos(AZ_DEG2RAD(i)), 20 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
       glPushMatrix(); {
         glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
         glBegin(GL_QUAD_STRIP); {
@@ -157,12 +169,24 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2d(30, -5);
         } glEnd();
       } glPopMatrix();
-      glColor3f(0.5 + 0.5 * flare, 0.5, 0.5 + 0.5 * frozen); // gray
+      glColor3f(0.6 + 0.4 * flare - 0.3 * frozen,
+                0.6 - 0.3 * flare - 0.3 * frozen,
+                0.6 - 0.3 * flare + 0.4 * frozen); // gray
       glBegin(GL_POLYGON); {
-        const double radius = 20;
-        for (int i = 0; i <= 6; ++i) {
-          glVertex2d(radius * cos(i * AZ_PI / 3.0),
-                     radius * sin(i * AZ_PI / 3.0));
+        for (int i = 0; i <= 360; i += 60) {
+          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = 0; i <= 360; i += 60) {
+          glColor3f(0.5 + 0.25 * flare - 0.25 * frozen,
+                    0.5 - 0.25 * flare - 0.25 * frozen,
+                    0.5 - 0.25 * flare + 0.25 * frozen);
+          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+          glColor3f(0.35 + 0.15 * flare - 0.15 * frozen,
+                    0.35 - 0.15 * flare - 0.15 * frozen,
+                    0.35 - 0.15 * flare + 0.15 * frozen);
+          glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
       break;
