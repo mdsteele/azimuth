@@ -579,7 +579,8 @@ static void button_on_click(az_title_state_t *state, az_button_id_t button_id,
 void az_title_on_click(az_title_state_t *state, int x, int y) {
   if (state->mode == AZ_TMODE_NORMAL) {
     for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
-      if (point_in_save_slot_erase(i, x, y)) {
+      if (state->saved_games->games[i].present &&
+          point_in_save_slot_erase(i, x, y)) {
         state->slots[i].erase_hover_pulse = HOVER_PULSE_CLICK;
         state->mode = AZ_TMODE_ERASING;
         state->mode_data.erasing.slot_index = i;
