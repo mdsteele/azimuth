@@ -25,14 +25,15 @@
 
 /*===========================================================================*/
 
-static const char script_string[] = "push-23.5,nop,beqz1,stop;";
+static const char script_string[] = "push-23.5,nop,beqz1,stop,push0;";
 
 void test_script_print(void) {
   az_instruction_t instructions[] = {
     { .opcode = AZ_OP_PUSH, .immediate = -23.5 },
-    { .opcode = AZ_OP_NOP },
+    { .opcode = AZ_OP_NOP, .immediate = 1 },
     { .opcode = AZ_OP_BEQZ, .immediate = 1 },
-    { .opcode = AZ_OP_STOP }
+    { .opcode = AZ_OP_STOP },
+    { .opcode = AZ_OP_PUSH }
   };
   az_script_t script = { .num_instructions = AZ_ARRAY_SIZE(instructions),
                          .instructions = instructions };
@@ -44,7 +45,7 @@ void test_script_print(void) {
 void test_script_scan(void) {
   az_script_t *script = az_sscan_script(script_string, sizeof(script_string));
   ASSERT_TRUE(script != NULL);
-  EXPECT_INT_EQ(4, script->num_instructions);
+  EXPECT_INT_EQ(5, script->num_instructions);
   if (script->num_instructions >= 1) {
     EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[0].opcode);
     EXPECT_APPROX(-23.5, script->instructions[0].immediate);
@@ -60,6 +61,10 @@ void test_script_scan(void) {
   if (script->num_instructions >= 4) {
     EXPECT_INT_EQ(AZ_OP_STOP, script->instructions[3].opcode);
     EXPECT_APPROX(0, script->instructions[3].immediate);
+  }
+  if (script->num_instructions >= 5) {
+    EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[4].opcode);
+    EXPECT_APPROX(0.0, script->instructions[4].immediate);
   }
   az_free_script(script);
 }

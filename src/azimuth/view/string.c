@@ -33,8 +33,8 @@
 
 static struct {
   GLenum mode;
-  size_t num_points;
-  az_vector_t points[8];
+  int num_points;
+  struct { GLfloat x, y; } points[8];
 } char_specs[] = {
   ['!'] = {GL_LINES, 4, {{2,0}, {2,3}, {2,5}, {2,6}}},
   ['"'] = {GL_LINES, 4, {{1,0}, {1,3}, {4,0}, {4,3}}},
@@ -153,12 +153,11 @@ static struct {
 static void draw_char(int c) {
   if (c >= 0 && c < AZ_ARRAY_SIZE(char_specs) &&
       char_specs[c].num_points > 0) {
-    glBegin(char_specs[c].mode);
-    const az_vector_t *points = char_specs[c].points;
-    for (int i = 0; i < char_specs[c].num_points; ++i) {
-      glVertex2d(points[i].x, points[i].y);
-    }
-    glEnd();
+    glBegin(char_specs[c].mode); {
+      for (int i = 0; i < char_specs[c].num_points; ++i) {
+        glVertex2f(char_specs[c].points[i].x, char_specs[c].points[i].y);
+      }
+    } glEnd();
   }
 }
 

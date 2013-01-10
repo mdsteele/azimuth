@@ -33,6 +33,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
   switch (opcode) {
     case AZ_OP_NOP:    return "nop";
     case AZ_OP_PUSH:   return "push";
+    case AZ_OP_POP:    return "pop";
     case AZ_OP_ADD:    return "add";
     case AZ_OP_ADDI:   return "addi";
     case AZ_OP_BEQZ:   return "beqz";
@@ -63,6 +64,34 @@ static bool opcode_for_name(const char *name, az_opcode_t *opcode_out) {
   return false;
 }
 
+static bool should_print_immediate(az_instruction_t ins) {
+  switch (ins.opcode) {
+    case AZ_OP_NOP:
+    case AZ_OP_ADD:
+    case AZ_OP_BAD:
+    case AZ_OP_STOP:
+    case AZ_OP_ERROR:
+      return false;
+    case AZ_OP_POP:
+      return (ins.immediate != 0.0);
+    case AZ_OP_PUSH:
+    case AZ_OP_ADDI:
+    case AZ_OP_BEQZ:
+    case AZ_OP_BNEZ:
+    case AZ_OP_JUMP:
+    case AZ_OP_TEST:
+    case AZ_OP_SET:
+    case AZ_OP_CLR:
+    case AZ_OP_UNBAD:
+    case AZ_OP_LOCK:
+    case AZ_OP_UNLOCK:
+    case AZ_OP_GETGS:
+    case AZ_OP_SETGS:
+      return true;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
+
 /*===========================================================================*/
 
 bool az_fprint_script(const az_script_t *script, FILE *file) {
@@ -70,7 +99,7 @@ bool az_fprint_script(const az_script_t *script, FILE *file) {
   for (int i = 0; i < num_instructions; ++i) {
     const az_instruction_t ins = script->instructions[i];
     if (fputs(az_opcode_name(ins.opcode), file) < 0) return false;
-    if (ins.immediate != 0.0) {
+    if (should_print_immediate(ins)) {
       if (fprintf(file, "%.12g", ins.immediate) < 0) return false;
     }
     if (fputc((i == num_instructions - 1 ? ';' : ','), file) < 0) return false;
@@ -86,7 +115,7 @@ bool az_sprint_script(const az_script_t *script, char *buffer, int length) {
     written += snprintf(buffer + written, length - written, "%s",
                         az_opcode_name(ins.opcode));
     if (written >= length) return false;
-    if (ins.immediate != 0.0) {
+    if (should_print_immediate(ins)) {
       written += snprintf(buffer + written, length - written, "%.12g",
                           ins.immediate);
       if (written >= length) return false;

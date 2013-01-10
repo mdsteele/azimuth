@@ -30,6 +30,7 @@ typedef enum {
   AZ_OP_NOP = 0, // does nothing
   // Stack manipulation:
   AZ_OP_PUSH, // push i onto the stack
+  AZ_OP_POP, // pop i values from the stack (minimum of 1)
   // Arithmetic:
   AZ_OP_ADD, // pop top two, push (a + b)
   AZ_OP_ADDI, // pop top, push a + i

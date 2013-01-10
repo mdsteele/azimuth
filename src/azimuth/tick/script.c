@@ -26,6 +26,7 @@
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
@@ -135,7 +136,16 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
     switch (ins.opcode) {
       case AZ_OP_NOP: break;
       // Stack manipulation:
-      case AZ_OP_PUSH: STACK_PUSH(ins.immediate); break;
+      case AZ_OP_PUSH:
+        STACK_PUSH(ins.immediate);
+        break;
+      case AZ_OP_POP:
+        {
+          int num = az_imax(1, (int)ins.immediate);
+          if (stack_size < num) SCRIPT_ERROR("stack underflow");
+          stack_size -= num;
+        }
+        break;
       // Arithmetic:
       case AZ_OP_ADD:
         {
