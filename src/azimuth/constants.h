@@ -50,7 +50,7 @@
 // The maximum number of rooms allowed in the game scenario:
 #define AZ_MAX_NUM_ROOMS 192
 // The radius of the planetoid in which the game takes place, in pixels:
-#define AZ_PLANETOID_RADIUS 100000.0
+#define AZ_PLANETOID_RADIUS 50000.0
 // The acceleration due to gravity at the surface of the planetoid, in
 // pixels/second^2:
 #define AZ_PLANETOID_SURFACE_GRAVITY 1.6

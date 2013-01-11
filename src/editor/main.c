@@ -826,31 +826,31 @@ static void event_loop(void) {
           switch (event.key.name) {
             case AZ_KEY_1: state.zoom_level = 1.0; break;
             case AZ_KEY_2:
-              state.zoom_level = (event.key.shift ? 0.7 : 1.4);
+              state.zoom_level = pow(2, (event.key.shift ? -0.5 : 0.5));
               break;
             case AZ_KEY_3:
-              state.zoom_level = (event.key.shift ? 0.5 : 2.0);
+              state.zoom_level = pow(2, (event.key.shift ? -1 : 1));
               break;
             case AZ_KEY_4:
-              state.zoom_level = (event.key.shift ? 0.35 : 2.8);
+              state.zoom_level = pow(2, (event.key.shift ? -1.5 : 1.5));
               break;
             case AZ_KEY_5:
-              state.zoom_level = (event.key.shift ? 0.25 : 4.0);
+              state.zoom_level = pow(2, (event.key.shift ? -2 : 2));
               break;
             case AZ_KEY_6:
-              state.zoom_level = (event.key.shift ? 0.18 : 5.6);
+              state.zoom_level = pow(2, (event.key.shift ? -2.5 : 3));
               break;
             case AZ_KEY_7:
-              state.zoom_level = (event.key.shift ? 0.125 : 8.0);
+              state.zoom_level = pow(2, (event.key.shift ? -3 : 4));
               break;
             case AZ_KEY_8:
-              state.zoom_level = (event.key.shift ? 0.0884 : 11.3);
+              state.zoom_level = pow(2, (event.key.shift ? -3.5 : 5));
               break;
             case AZ_KEY_9:
-              state.zoom_level = (event.key.shift ? 0.0625 : 16.0);
+              state.zoom_level = pow(2, (event.key.shift ? -4 : 6));
               break;
             case AZ_KEY_0:
-              state.zoom_level = (event.key.shift ? 0.0442 : 22.6);
+              state.zoom_level = pow(2, (event.key.shift ? -4.5 : 7));
               break;
             case AZ_KEY_A:
               if (event.key.command) {

@@ -42,11 +42,16 @@
 /*===========================================================================*/
 
 static void arc_vertices(double r, double start_theta, double end_theta) {
-  const double step = fmin(0.1, (end_theta - start_theta) * 0.05);
+  const double diff = end_theta - start_theta;
+  const double step = copysign(fmin(0.1, fabs(diff) * 0.05), diff);
   for (double theta = start_theta;
        (theta < end_theta) == (start_theta < end_theta); theta += step) {
     glVertex2d(r * cos(theta), r * sin(theta));
   }
+}
+
+static void circle_vertices(double r) {
+  arc_vertices(r, 0, AZ_TWO_PI);
 }
 
 // Draw the bounds of where the camera center is allowed to be within the given
@@ -72,13 +77,25 @@ static void draw_camera_center_bounds(const az_editor_room_t *room) {
 // given room.
 static void draw_camera_edge_bounds(const az_editor_room_t *room) {
   const az_camera_bounds_t *bounds = &room->camera_bounds;
+  glColor4f(1, 1, 1, 0.5); // white tint
+  if (bounds->theta_span >= 6.28) {
+    glBegin(GL_LINE_LOOP); {
+      circle_vertices(hypot(AZ_SCREEN_WIDTH/2,
+          bounds->min_r + bounds->r_span + AZ_SCREEN_HEIGHT/2));
+    } glEnd();
+    if (bounds->min_r > AZ_SCREEN_HEIGHT/2) {
+      glBegin(GL_LINE_LOOP); {
+        circle_vertices(bounds->min_r - AZ_SCREEN_HEIGHT/2);
+      } glEnd();
+    }
+    return;
+  }
   double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
   double r_span = bounds->r_span + AZ_SCREEN_HEIGHT;
   if (min_r < 0.0) {
     r_span += min_r;
     min_r = 0.0;
   }
-  glColor4f(1, 1, 1, 0.5); // white tint
   glBegin(GL_LINE_LOOP); {
     const double max_r = min_r + r_span;
     const double min_theta = bounds->min_theta;
@@ -209,6 +226,43 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   }
 }
 
+static void draw_room_minimap(az_editor_state_t *state,
+                              az_editor_room_t *room, az_room_key_t key) {
+  draw_camera_edge_bounds(room);
+  if (state->zoom_level < 64.0) {
+    AZ_LIST_LOOP(editor_door, room->doors) {
+      switch (editor_door->spec.kind) {
+        case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
+        case AZ_DOOR_NORMAL: glColor3f(1, 1, 1); break;
+        case AZ_DOOR_LOCKED: glColor3f(0.5, 0.5, 0.5); break;
+        case AZ_DOOR_ROCKET: glColor3f(1, 0, 0); break;
+        case AZ_DOOR_HYPER_ROCKET: glColor3f(1, 0, 1); break;
+        case AZ_DOOR_BOMB: glColor3f(0, 0, 1); break;
+        case AZ_DOOR_MEGA_BOMB: glColor3f(0, 1, 1); break;
+        case AZ_DOOR_PASSAGE: glColor3f(0, 1, 0); break;
+      }
+      glPushMatrix(); {
+        glTranslated(editor_door->spec.position.x,
+                     editor_door->spec.position.y, 0);
+        glBegin(GL_POLYGON); {
+          circle_vertices(AZ_DOOR_BOUNDING_RADIUS);
+        } glEnd();
+      } glPopMatrix();
+    }
+  }
+  if (state->zoom_level < 32.0) {
+    glPushMatrix(); {
+      az_camera_bounds_t *bounds = &room->camera_bounds;
+      camera_to_screen_orient(state, az_vpolar(
+          bounds->min_r + 0.5 * bounds->r_span,
+          bounds->min_theta + 0.5 * bounds->theta_span));
+      glScaled(state->zoom_level, state->zoom_level, 1);
+      glColor3f(1, 0, 0); // red
+      az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%03d", key);
+    } glPopMatrix();
+  }
+}
+
 static void draw_selection_circle(az_vector_t position, double angle,
                                   double radius) {
   glPushMatrix(); {
@@ -226,10 +280,17 @@ static void draw_selection_circle(az_vector_t position, double angle,
 }
 
 static void draw_camera_view(az_editor_state_t *state) {
+  glColor3f(1, 1, 0); // yellow
+  glBegin(GL_LINE_LOOP); {
+    circle_vertices(AZ_PLANETOID_RADIUS);
+  } glEnd();
+
   // Draw other rooms:
   for (int i = 0; i < AZ_LIST_SIZE(state->planet.rooms); ++i) {
     if (i == state->current_room) continue;
-    draw_room(state, AZ_LIST_GET(state->planet.rooms, i));
+    az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms, i);
+    if (state->zoom_level < 8.0) draw_room(state, room);
+    else draw_room_minimap(state, room, i);
   }
 
   // Fade out other rooms:
