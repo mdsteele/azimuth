@@ -373,7 +373,7 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
         if (az_point_touches_wall(wall, pos) &&
             az_insert_particle(state, &particle)) {
           particle->kind = AZ_PAR_SHARD;
-          particle->color = wall->data->color;
+          particle->color = wall->data->color1;
           particle->position = pos;
           particle->velocity = az_vmul(az_vsub(pos, wall->position), 2.0);
           particle->velocity.x += az_random(-50.0, 50.0);

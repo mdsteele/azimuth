@@ -34,15 +34,18 @@
 
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
   glNewList(list, GL_COMPILE); {
-    glColor3f(0, 0, 0);
-    glBegin(GL_TRIANGLE_FAN); {
-      for (int i = 0; i < data->polygon.num_vertices; ++i) {
-        glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
-      }
-    } glEnd();
+    if (data->color2.a != 0) {
+      glColor4ub(data->color2.r, data->color2.g,
+                 data->color2.b, data->color2.a);
+      glBegin(GL_TRIANGLE_FAN); {
+        for (int i = 0; i < data->polygon.num_vertices; ++i) {
+          glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
+        }
+      } glEnd();
+    }
 
     {
-      az_color_t c1 = data->color;
+      az_color_t c1 = data->color1;
       az_color_t c2 = c1; c2.a = 0;
       const int n = data->polygon.num_vertices;
       for (int i = 0; i < n; ++i) {
@@ -55,7 +58,7 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
           glVertex2d(b.x, b.y);
           glVertex2d(c.x, c.y);
           glColor4ub(c2.r, c2.g, c2.b, c2.a);
-          const double bezel = 18.0;
+          const double bezel = data->bezel;
           const double td = az_vtheta(az_vsub(d, c));
           const double tb = az_vtheta(az_vsub(b, c));
           const double ttc = 0.5 * az_mod2pi_nonneg(tb - td);

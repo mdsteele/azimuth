@@ -47,7 +47,8 @@ typedef struct {
   double elasticity; // the coefficiant of restitution when ship hits the wall
   double impact_damage_coeff;
   double bounding_radius;
-  az_color_t color;
+  az_color_t color1, color2;
+  float bezel;
   az_polygon_t polygon;
 } az_wall_data_t;
 

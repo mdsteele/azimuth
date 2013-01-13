@@ -402,7 +402,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         break;
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
       case AZ_IMP_WALL:
-        hit_color = impact.target.wall->data->color;
+        hit_color = impact.target.wall->data->color1;
         break;
     }
     if (did_hit) {

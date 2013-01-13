@@ -39,22 +39,54 @@ static az_vector_t wall_vertices_2[] = {
   {10, -25}, {60, -25}, {60, 25}, {-10.710678, 25},
   {-60.710678, -25}, {-25.355339, -60.355339}
 };
+static az_vector_t wall_vertices_3[] = {
+  {-20, -8}, {15, -10}, {25, 0}, {15, 10}, {-20, 8}
+};
+static az_vector_t wall_vertices_4[] = {
+  {-30, -10}, {15, -15}, {35, 0}, {15, 15}, {-30, 10}
+};
+static az_vector_t wall_vertices_5[] = {
+  {31, 10}, {33, 30}, {20, 43}, {-2, 44}, {-7, 42}, {-30, 30}, {-48, 30},
+  {-59, 0}, {-41, -34}, {-28, -35}, {-20, -29}, {-5, -42}, {4, -42}, {19, -27},
+  {35, -28}, {40, 0}
+};
 
 static az_wall_data_t wall_datas[] = {
   [0] = {
-    .color = {255, 255, 0, 255},
+    .bezel = 18.0,
+    .color1 = {255, 255, 0, 255}, .color2 = {64, 64, 0, 255},
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   },
   [1] = {
-    .color = {0, 255, 255, 255},
+    .bezel = 18.0,
+    .color1 = {0, 255, 255, 255}, .color2 = {0, 32, 64, 255},
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_1)
   },
   [2] = {
-    .color = {255, 255, 0, 255},
+    .bezel = 18.0,
+    .color1 = {255, 255, 0, 255}, .color2 = {64, 64, 0, 255},
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  [3] = {
+    .bezel = 8.0,
+    .color1 = {0, 32, 32, 255}, .color2 = {0, 255, 255, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 10.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_3)
+  },
+  [4] = {
+    .bezel = 10.0,
+    .color1 = {0, 32, 32, 255}, .color2 = {0, 255, 255, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 10.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_4)
+  },
+  [5] = {
+    .bezel = 12.0,
+    .color1 = {128, 0, 64, 255}, .color2 = {32, 0, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_5)
   }
 };
 
@@ -67,6 +99,7 @@ static bool wall_data_initialized = false;
 void az_init_wall_datas(void) {
   assert(!wall_data_initialized);
   AZ_ARRAY_LOOP(data, wall_datas) {
+    assert(data->polygon.num_vertices >= 3);
     double radius = 0.0;
     for (int i = 0; i < data->polygon.num_vertices; ++i) {
       radius = fmax(radius, az_vnorm(data->polygon.vertices[i]));

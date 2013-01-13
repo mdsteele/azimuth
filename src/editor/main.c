@@ -255,50 +255,76 @@ static void do_mass_move(int x, int y, int dx, int dy) {
   state.unsaved = true;
 }
 
+static void rotate_around(az_vector_t *vec, az_vector_t around, double theta) {
+   *vec = az_vadd(around, az_vrotate(az_vsub(*vec, around), theta));
+}
+
 static void do_rotate(int x, int y, int dx, int dy) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
+  az_vector_t center = {0, 0};
+  int count = 0;
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
-    baddie->spec.angle = state.brush.angle =
-      az_mod2pi(baddie->spec.angle +
-                az_vtheta(az_vsub(pt1, baddie->spec.position)) -
-                az_vtheta(az_vsub(pt0, baddie->spec.position)));
-    state.unsaved = true;
+    center = az_vadd(center, baddie->spec.position);
+    ++count;
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
-    door->spec.angle = state.brush.angle =
-      az_mod2pi(door->spec.angle +
-                az_vtheta(az_vsub(pt1, door->spec.position)) -
-                az_vtheta(az_vsub(pt0, door->spec.position)));
-    state.unsaved = true;
+    center = az_vadd(center, door->spec.position);
+    ++count;
   }
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
-    gravfield->spec.angle = state.brush.angle =
-      az_mod2pi(gravfield->spec.angle +
-                az_vtheta(az_vsub(pt1, gravfield->spec.position)) -
-                az_vtheta(az_vsub(pt0, gravfield->spec.position)));
-    state.unsaved = true;
+    center = az_vadd(center, gravfield->spec.position);
+    ++count;
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
-    node->spec.angle = state.brush.angle =
-      az_mod2pi(node->spec.angle +
-                az_vtheta(az_vsub(pt1, node->spec.position)) -
-                az_vtheta(az_vsub(pt0, node->spec.position)));
-    state.unsaved = true;
+    center = az_vadd(center, node->spec.position);
+    ++count;
   }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
-    wall->spec.angle = state.brush.angle =
-      az_mod2pi(wall->spec.angle +
-                az_vtheta(az_vsub(pt1, wall->spec.position)) -
-                az_vtheta(az_vsub(pt0, wall->spec.position)));
-    state.unsaved = true;
+    center = az_vadd(center, wall->spec.position);
+    ++count;
   }
+  if (count <= 0) return;
+  center = az_vdiv(center, count);
+  const double dtheta =
+    az_vtheta(az_vsub(pt1, center)) - az_vtheta(az_vsub(pt0, center));
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (!baddie->selected) continue;
+    rotate_around(&baddie->spec.position, center, dtheta);
+    baddie->spec.angle = state.brush.angle =
+      az_mod2pi(baddie->spec.angle + dtheta);
+  }
+  AZ_LIST_LOOP(door, room->doors) {
+    if (!door->selected) continue;
+    rotate_around(&door->spec.position, center, dtheta);
+    door->spec.angle = state.brush.angle =
+      az_mod2pi(door->spec.angle + dtheta);
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    rotate_around(&gravfield->spec.position, center, dtheta);
+    gravfield->spec.angle = state.brush.angle =
+      az_mod2pi(gravfield->spec.angle + dtheta);
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected) continue;
+    rotate_around(&node->spec.position, center, dtheta);
+    node->spec.angle = state.brush.angle =
+      az_mod2pi(node->spec.angle + dtheta);
+  }
+  AZ_LIST_LOOP(wall, room->walls) {
+    if (!wall->selected) continue;
+    rotate_around(&wall->spec.position, center, dtheta);
+    wall->spec.angle = state.brush.angle =
+      az_mod2pi(wall->spec.angle + dtheta);
+  }
+  state.unsaved = true;
 }
 
 static void do_mass_rotate(int x, int y, int dx, int dy) {
