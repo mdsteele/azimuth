@@ -65,7 +65,9 @@ void *_az_list_add(int *num, int *max, void **items, size_t item_size) {
   assert(old_num < *max);
   // Increment the size of the list and return a pointer to the new item.
   ++(*num);
-  return (char *)(*items) + old_num * item_size;
+  void *item = (char *)(*items) + old_num * item_size;
+  memset(item, 0, item_size);
+  return item;
 }
 
 void _az_list_remove(int *num, int *max, void **items, size_t item_size,

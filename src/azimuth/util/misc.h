@@ -34,6 +34,11 @@
   for (__typeof__(&*(array)) var_name = (array); \
        var_name != (array) + AZ_ARRAY_SIZE(array); ++var_name)
 
+// Zero the memory of a statically-sized array.
+#define AZ_ZERO_ARRAY(array) \
+  _az_zero_array(array, AZ_ARRAY_SIZE(array), sizeof(array[0]))
+void _az_zero_array(void *ptr, size_t n, size_t size);
+
 // Signal a fatal error and exit the program.
 #define AZ_FATAL(...) _az_fatal(__func__, __VA_ARGS__)
 void _az_fatal(const char *funcname, const char *format, ...)

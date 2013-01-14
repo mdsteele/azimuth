@@ -46,6 +46,7 @@ static az_editor_state_t state;
 static void add_new_room(void) {
   const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
   az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);
+  assert(room->on_start == NULL);
   const double current_r = az_vnorm(state.camera);
   const double theta_span = 200.0 / (80.0 + current_r);
   room->camera_bounds = (az_camera_bounds_t){
@@ -54,11 +55,6 @@ static void add_new_room(void) {
     .min_theta = az_mod2pi(az_vtheta(state.camera) - 0.5 * theta_span),
     .theta_span = theta_span
   };
-  AZ_LIST_INIT(room->baddies, 5);
-  AZ_LIST_INIT(room->doors, 5);
-  AZ_LIST_INIT(room->gravfields, 5);
-  AZ_LIST_INIT(room->nodes, 5);
-  AZ_LIST_INIT(room->walls, 5);
   state.current_room = room_key;
   state.unsaved = true;
 }

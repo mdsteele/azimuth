@@ -25,6 +25,7 @@
 int main(int argc, char **argv) {
   az_init_random();
 
+  RUN_TEST(test_alloc);
   RUN_TEST(test_arc_circle_hits_circle);
   RUN_TEST(test_arc_circle_hits_line);
   RUN_TEST(test_arc_circle_hits_line_segment);
@@ -36,6 +37,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_arc_ray_hits_line_segment);
   RUN_TEST(test_arc_ray_hits_polygon);
   RUN_TEST(test_arc_ray_hits_polygon_trans);
+  RUN_TEST(test_array_size);
   RUN_TEST(test_circle_hits_circle);
   RUN_TEST(test_circle_hits_line);
   RUN_TEST(test_circle_hits_line_segment);
@@ -70,6 +72,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_vector_rotate);
   RUN_TEST(test_vunit);
   RUN_TEST(test_vwithlen);
+  RUN_TEST(test_zero_array);
 
   return final_test_summary();
 }

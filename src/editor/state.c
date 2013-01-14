@@ -99,8 +99,10 @@ bool az_load_editor_state(az_editor_state_t *state) {
 }
 
 bool az_save_editor_state(az_editor_state_t *state) {
+  assert(state != NULL);
   // Convert planet:
   const int num_rooms = AZ_LIST_SIZE(state->planet.rooms);
+  assert(num_rooms >= 0);
   az_planet_t planet = {
     .start_room = state->planet.start_room,
     .start_position = state->planet.start_position,

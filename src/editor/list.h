@@ -47,9 +47,9 @@
   ((__typeof__((list).items)) \
    _az_list_get((list).num, (list).items, sizeof((list).items[0]), (index)))
 
-// Add an item to the end of a list, returning a pointer to the new
-// (uninitialized) item.  The list's memory will first be reallocated if it is
-// currently at maximum capacity.
+// Add an item to the end of a list, returning a pointer to the new (zeroed)
+// item.  The list's memory will first be reallocated if it is currently at
+// maximum capacity.
 #define AZ_LIST_ADD(list) \
   ((__typeof__((list).items)) \
    _az_list_add(&(list).num, &(list).max, (void **)&(list).items, \
@@ -70,9 +70,9 @@
        var_name != (list).items + (list).num; ++var_name)
 
 // Swap the contents of two lists.  The two lists must have the same type.
-#define AZ_LIST_SWAP(list1, list2) do {                                 \
+#define AZ_LIST_SWAP(list1, list2) do { \
     if (0) (list1).items = (list2).items; /*warn if lists aren't same type*/ \
-    _az_list_swap(&(list1).num, &(list1).max, (void **)&(list1).items,  \
+    _az_list_swap(&(list1).num, &(list1).max, (void **)&(list1).items, \
                   &(list2).num, &(list2).max, (void **)&(list2).items); \
   } while (0)
 

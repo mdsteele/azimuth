@@ -31,17 +31,15 @@
 /*===========================================================================*/
 
 void az_clear_space(az_space_state_t *state) {
-  AZ_ARRAY_LOOP(baddie, state->baddies) baddie->kind = AZ_BAD_NOTHING;
-  AZ_ARRAY_LOOP(door, state->doors) door->kind = AZ_DOOR_NOTHING;
-  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
-    gravfield->kind = AZ_GRAV_NOTHING;
-  }
-  AZ_ARRAY_LOOP(node, state->nodes) node->kind = AZ_NODE_NOTHING;
-  AZ_ARRAY_LOOP(particle, state->particles) particle->kind = AZ_PAR_NOTHING;
-  AZ_ARRAY_LOOP(pickup, state->pickups) pickup->kind = AZ_PUP_NOTHING;
-  AZ_ARRAY_LOOP(proj, state->projectiles) proj->kind = AZ_PROJ_NOTHING;
-  AZ_ARRAY_LOOP(wall, state->walls) wall->kind = AZ_WALL_NOTHING;
-  AZ_ARRAY_LOOP(uuid, state->uuids) uuid->type = AZ_UUID_NOTHING;
+  AZ_ZERO_ARRAY(state->baddies);
+  AZ_ZERO_ARRAY(state->doors);
+  AZ_ZERO_ARRAY(state->gravfields);
+  AZ_ZERO_ARRAY(state->nodes);
+  AZ_ZERO_ARRAY(state->particles);
+  AZ_ZERO_ARRAY(state->pickups);
+  AZ_ZERO_ARRAY(state->projectiles);
+  AZ_ZERO_ARRAY(state->walls);
+  AZ_ZERO_ARRAY(state->uuids);
 }
 
 static void put_uuid(az_space_state_t *state, int slot,
