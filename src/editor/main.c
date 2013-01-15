@@ -566,6 +566,34 @@ static void do_change_data(int delta, bool secondary) {
   }
 }
 
+static void auto_set_door_dest(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(door, room->doors) {
+    if (!door->selected) continue;
+    az_editor_door_t *closest_door = NULL;
+    az_room_key_t target = state.current_room;
+    double best_dist = 200.0;
+    AZ_LIST_LOOP(other_room, state.planet.rooms) {
+      const az_room_key_t key = other_room - state.planet.rooms.items;
+      if (key == state.current_room) continue;
+      AZ_LIST_LOOP(other_door, other_room->doors) {
+        const double dist =
+          az_vdist(other_door->spec.position, door->spec.position);
+        if (dist < best_dist) {
+          closest_door = other_door;
+          target = key;
+          best_dist = dist;
+        }
+      }
+    }
+    if (closest_door != NULL) {
+      door->spec.destination = target;
+      closest_door->spec.destination = state.current_room;
+      state.unsaved = true;
+    }
+  }
+}
+
 static void begin_edit_gravfield(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   az_gravfield_spec_t *gravfield = NULL;
@@ -883,8 +911,10 @@ static void event_loop(void) {
             case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
             case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
             case AZ_KEY_D:
-              if (event.key.command) begin_set_door_dest();
-              else state.tool = AZ_TOOL_DOOR;
+              if (event.key.command) {
+                if (event.key.shift) auto_set_door_dest();
+                else begin_set_door_dest();
+              } else state.tool = AZ_TOOL_DOOR;
               break;
             case AZ_KEY_E:
               if (event.key.command) begin_edit_gravfield();

@@ -53,7 +53,7 @@
 #define AZ_PLANETOID_RADIUS 50000.0
 // The acceleration due to gravity at the surface of the planetoid, in
 // pixels/second^2:
-#define AZ_PLANETOID_SURFACE_GRAVITY 1.6
+#define AZ_PLANETOID_SURFACE_GRAVITY 16.0
 
 /*===========================================================================*/
 // Player:
