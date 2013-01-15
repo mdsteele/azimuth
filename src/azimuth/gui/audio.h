@@ -25,14 +25,22 @@
 
 /*===========================================================================*/
 
-// Initialize our audio system (once the GUI has been initialized).  This is
-// called by az_init_gui, and should not be called from elsewhere.
-void az_init_audio_mixer(void);
-
 // Call this once per frame to update our audio system.  The audio system must
 // be initialized first (by calling az_init_gui, which will in turn call
 // az_init_audio_mixer above).
 void az_tick_audio_mixer(az_soundboard_t *soundboard);
+
+/*===========================================================================*/
+
+// Initialize our audio system (once the GUI has been initialized).  This is
+// called by az_init_gui, and should not be called from elsewhere.
+void az_init_audio_mixer(void);
+
+// Pause and unpause all audio (sounds and music).  These are automatically
+// called from event.c and screen.c when the app goes out/in of focus, and
+// should not be called from elsewhere.
+void az_pause_all_audio(void);
+void az_unpause_all_audio(void);
 
 /*===========================================================================*/
 

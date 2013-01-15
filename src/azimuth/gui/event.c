@@ -25,6 +25,7 @@
 
 #include <SDL/SDL.h>
 
+#include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 
@@ -141,6 +142,7 @@ static az_key_name_t sdl_key_to_az_key(SDLKey key) {
 }
 
 static void pause_until_refocus(void) {
+  az_pause_all_audio();
   SDL_Event sdl_event;
   while (true) {
     while (SDL_PollEvent(&sdl_event)) {
@@ -148,6 +150,7 @@ static void pause_until_refocus(void) {
         case SDL_ACTIVEEVENT:
           if (sdl_event.active.gain == 1 &&
               (sdl_event.active.state & SDL_APPINPUTFOCUS)) {
+            az_unpause_all_audio();
             return;
           }
           continue;

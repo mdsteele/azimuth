@@ -759,6 +759,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 // Audio system:
 
 static bool audio_mixer_initialized = false;
+static bool audio_mixer_paused = false;
 
 static void shut_down_audio_mixer(void) {
   free_all_sounds();
@@ -783,9 +784,26 @@ void az_init_audio_mixer(void) {
 
 void az_tick_audio_mixer(az_soundboard_t *soundboard) {
   assert(audio_mixer_initialized);
+  assert(!audio_mixer_paused);
   tick_music(soundboard);
   tick_sounds(soundboard);
   memset(soundboard, 0, sizeof(*soundboard));
+}
+
+void az_pause_all_audio(void) {
+  if (!audio_mixer_initialized) return;
+  assert(!audio_mixer_paused);
+  Mix_Pause(-1); // pause all (non-music) channels
+  Mix_PauseMusic();
+  audio_mixer_paused = true;
+}
+
+void az_unpause_all_audio(void) {
+  if (!audio_mixer_initialized) return;
+  assert(audio_mixer_paused);
+  Mix_Resume(-1); // unpause all (non-music) channels
+  Mix_ResumeMusic();
+  audio_mixer_paused = false;
 }
 
 /*===========================================================================*/

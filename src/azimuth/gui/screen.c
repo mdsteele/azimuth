@@ -26,7 +26,7 @@
 #include <SDL/SDL.h>
 
 #include "azimuth/constants.h"
-#include "azimuth/gui/audio.h" // for az_init_audio_mixer
+#include "azimuth/gui/audio.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/
@@ -82,6 +82,7 @@ void az_set_fullscreen(bool fullscreen) {
   assert(sdl_initialized);
   if (display_initialized && fullscreen == currently_fullscreen) return;
   currently_fullscreen = fullscreen;
+  az_pause_all_audio();
   // Enable OpenGL double-buffering:
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   // Enable vsync:
@@ -140,6 +141,7 @@ void az_set_fullscreen(bool fullscreen) {
   }
 
   display_initialized = true;
+  az_unpause_all_audio();
 }
 
 void az_start_screen_redraw(void) {
