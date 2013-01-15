@@ -203,7 +203,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
   double x, y, angle;
   if (fscanf(loader->file, "%d d%d x%lf y%lf a%lf\n",
              &kind, &index, &x, &y, &angle) < 5) FAIL();
-  if (kind <= 0 || index > AZ_NUM_WALL_KINDS) FAIL();
+  if (kind <= 0 || kind > AZ_NUM_WALL_KINDS) FAIL();
   if (index < 0 || index >= AZ_NUM_WALL_DATAS) FAIL();
   az_wall_spec_t *wall = &loader->room->walls[loader->room->num_walls];
   wall->kind = (az_wall_kind_t)kind;

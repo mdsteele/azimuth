@@ -32,47 +32,91 @@
 
 /*===========================================================================*/
 
+static void draw_bezel(double bezel, az_color_t color1, az_color_t color2,
+                       az_polygon_t polygon) {
+  // Draw background color:
+  if (color2.a != 0) {
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    glBegin(GL_TRIANGLE_FAN); {
+      for (int i = 0; i < polygon.num_vertices; ++i) {
+        glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+      }
+    } glEnd();
+  }
+  // Draw bezel:
+  az_color_t c1 = color1;
+  az_color_t c2 = c1; c2.a = 0;
+  const int n = polygon.num_vertices;
+  for (int i = 0; i < n; ++i) {
+    az_vector_t a = polygon.vertices[i];
+    az_vector_t b = polygon.vertices[(i + 1) % n];
+    az_vector_t c = polygon.vertices[(i + 2) % n];
+    az_vector_t d = polygon.vertices[(i + 3) % n];
+    glBegin(GL_QUADS); {
+      glColor4ub(c1.r, c1.g, c1.b, c1.a);
+      glVertex2d(b.x, b.y);
+      glVertex2d(c.x, c.y);
+      glColor4ub(c2.r, c2.g, c2.b, c2.a);
+      const double td = az_vtheta(az_vsub(d, c));
+      const double tb = az_vtheta(az_vsub(b, c));
+      const double ttc = 0.5 * az_mod2pi_nonneg(tb - td);
+      az_vector_t dd =
+        az_vadd(c, az_vpolar(bezel / sin(ttc), td + ttc));
+      glVertex2d(dd.x, dd.y);
+      const double ta = az_vtheta(az_vsub(a, b));
+      const double tc = az_vtheta(az_vsub(c, b));
+      const double ttb = 0.5 * az_mod2pi_nonneg(ta - tc);
+      az_vector_t aa =
+        az_vadd(b, az_vpolar(bezel / sin(ttb), tc + ttb));
+      glVertex2d(aa.x, aa.y);
+    } glEnd();
+  }
+}
+
+static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
+                        az_polygon_t polygon) {
+  glBegin(GL_QUADS); {
+    assert(polygon.num_vertices >= 3);
+    const float top = polygon.vertices[1].y;
+    const float bottom = polygon.vertices[polygon.num_vertices - 1].y;
+    const float right = polygon.vertices[1].x;
+    const float left = polygon.vertices[2].x;
+    // Struts:
+    const float breadth = top - bottom;
+    const float strut = bezel * 0.66666;
+    for (float x = left; x < right - breadth; x += breadth - strut) {
+      for (int j = 0; j < 2; ++j) {
+        const float y1 = (j ? bottom : top);
+        const float y2 = (j ? top : bottom);
+        glColor4ub(color1.r, color1.g, color1.b, color1.a);
+        glVertex2f(x, y1); glVertex2f(x + breadth, y2);
+        glColor4ub(color2.r, color2.g, color2.b, color2.a);
+        glVertex2f(x + breadth + strut, y2); glVertex2f(x + strut, y1);
+      }
+    }
+    // Edges:
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2f(left, top); glVertex2f(right, top);
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    glVertex2f(right, top - bezel); glVertex2f(left, top - bezel);
+    glVertex2f(left, bottom); glVertex2f(right, bottom);
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2f(right, bottom + bezel); glVertex2f(left, bottom + bezel);
+  } glEnd();
+}
+
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
   glNewList(list, GL_COMPILE); {
-    if (data->color2.a != 0) {
-      glColor4ub(data->color2.r, data->color2.g,
-                 data->color2.b, data->color2.a);
-      glBegin(GL_TRIANGLE_FAN); {
-        for (int i = 0; i < data->polygon.num_vertices; ++i) {
-          glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
-        }
-      } glEnd();
-    }
-
-    {
-      az_color_t c1 = data->color1;
-      az_color_t c2 = c1; c2.a = 0;
-      const int n = data->polygon.num_vertices;
-      for (int i = 0; i < n; ++i) {
-        az_vector_t a = data->polygon.vertices[i];
-        az_vector_t b = data->polygon.vertices[(i + 1) % n];
-        az_vector_t c = data->polygon.vertices[(i + 2) % n];
-        az_vector_t d = data->polygon.vertices[(i + 3) % n];
-        glBegin(GL_QUADS); {
-          glColor4ub(c1.r, c1.g, c1.b, c1.a);
-          glVertex2d(b.x, b.y);
-          glVertex2d(c.x, c.y);
-          glColor4ub(c2.r, c2.g, c2.b, c2.a);
-          const double bezel = data->bezel;
-          const double td = az_vtheta(az_vsub(d, c));
-          const double tb = az_vtheta(az_vsub(b, c));
-          const double ttc = 0.5 * az_mod2pi_nonneg(tb - td);
-          az_vector_t dd =
-            az_vadd(c, az_vpolar(bezel / sin(ttc), td + ttc));
-          glVertex2d(dd.x, dd.y);
-          const double ta = az_vtheta(az_vsub(a, b));
-          const double tc = az_vtheta(az_vsub(c, b));
-          const double ttb = 0.5 * az_mod2pi_nonneg(ta - tc);
-          az_vector_t aa =
-            az_vadd(b, az_vpolar(bezel / sin(ttb), tc + ttb));
-          glVertex2d(aa.x, aa.y);
-        } glEnd();
-      }
+    switch (data->style) {
+      case AZ_WSTY_BEZEL_12:
+        draw_bezel(data->bezel, data->color1, data->color2, data->polygon);
+        break;
+      case AZ_WSTY_BEZEL_21:
+        draw_bezel(data->bezel, data->color2, data->color1, data->polygon);
+        break;
+      case AZ_WSTY_GIRDER:
+        draw_girder(data->bezel, data->color1, data->color2, data->polygon);
+        break;
     }
   } glEndList();
 }

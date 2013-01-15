@@ -43,12 +43,19 @@ typedef enum {
   AZ_WALL_DESTRUCTIBLE_CPLUS
 } az_wall_kind_t;
 
+typedef enum {
+  AZ_WSTY_BEZEL_12,
+  AZ_WSTY_BEZEL_21,
+  AZ_WSTY_GIRDER
+} az_wall_style_t;
+
 typedef struct {
+  az_wall_style_t style;
+  float bezel;
+  az_color_t color1, color2;
   double elasticity; // the coefficiant of restitution when ship hits the wall
   double impact_damage_coeff;
   double bounding_radius;
-  az_color_t color1, color2;
-  float bezel;
   az_polygon_t polygon;
 } az_wall_data_t;
 
