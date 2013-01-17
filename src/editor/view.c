@@ -294,17 +294,19 @@ static void draw_camera_view(az_editor_state_t *state) {
   }
 
   // Fade out other rooms:
-  glPushMatrix(); {
-    camera_to_screen_orient(state, state->camera);
-    glScaled(state->zoom_level, state->zoom_level, 1);
-    glColor4f(0, 0, 0, 0.75); // black tint
-    glBegin(GL_QUADS); {
-      glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
-      glVertex2i(-AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
-      glVertex2i(-AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
-      glVertex2i( AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
-    } glEnd();
-  } glPopMatrix();
+  if (state->zoom_level < 8.0) {
+    glPushMatrix(); {
+      camera_to_screen_orient(state, state->camera);
+      glScaled(state->zoom_level, state->zoom_level, 1);
+      glColor4f(0, 0, 0, 0.75); // black tint
+      glBegin(GL_QUADS); {
+        glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+        glVertex2i(-AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+        glVertex2i(-AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+        glVertex2i( AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+      } glEnd();
+    } glPopMatrix();
+  }
 
   // Draw current room:
   az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
@@ -314,7 +316,7 @@ static void draw_camera_view(az_editor_state_t *state) {
   // Draw the camera bounds, and a dot for the camera center.
   draw_camera_center_bounds(room);
   draw_camera_edge_bounds(room);
-  glColor4f(1, 0, 0, 0.5); // red tint
+  glColor4f(1, 0, 0, 0.75); // red tint
   glBegin(GL_POINTS); {
     glVertex2d(state->camera.x, state->camera.y);
   } glEnd();
