@@ -49,6 +49,9 @@ static az_component_data_t turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
     .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
 };
+static az_component_data_t broken_turret_components[] = {
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 5.0 }
+};
 
 static const az_vector_t zipper_vertices[] = {
   {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
@@ -158,6 +161,15 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 5.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
+  },
+  [AZ_BAD_BROKEN_TURRET] = {
+    .overall_bounding_radius = 30.5,
+    .max_health = 5.0,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
+                          AZ_PUPF_ROCKETS),
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .impact_damage = 5.0 },
+    DECL_COMPONENTS(broken_turret_components)
   }
 };
 

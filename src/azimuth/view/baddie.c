@@ -140,6 +140,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_TURRET:
+    case AZ_BAD_BROKEN_TURRET:
       glBegin(GL_QUAD_STRIP); {
         for (int i = 0; i <= 360; i += 60) {
           glColor3f(0.35 + 0.15 * flare - 0.15 * frozen,

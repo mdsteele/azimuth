@@ -363,6 +363,58 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->kind = AZ_BAD_NOTHING;
       }
       break;
+    case AZ_BAD_BROKEN_TURRET:
+      if (baddie->state == 2) {
+        baddie->components[0].angle -= 5.0 * time;
+        if (baddie->components[0].angle <= -1.0) {
+          baddie->components[0].angle = -1.0;
+          baddie->state = 0;
+        }
+      } else if (baddie->state == 1) {
+        baddie->components[0].angle += 5.0 * time;
+        if (baddie->components[0].angle >= 1.0) {
+          baddie->components[0].angle = 1.0;
+          baddie->state = 0;
+        }
+      } else {
+        assert(baddie->state == 0);
+        // Try to aim gun (but sometimes twitch randomly):
+        const int aim = az_randint(-1, 1);
+        baddie->components[0].angle = fmax(-1.0, fmin(1.0, az_mod2pi(
+            (aim == 0 ?
+             az_angle_towards(
+                baddie->angle + baddie->components[0].angle, 2 * time,
+                az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+               baddie->angle :
+             baddie->components[0].angle + aim * 2 * time))));
+        // Fire:
+        if (baddie->cooldown <= 0.0 &&
+            angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                                 AZ_DEG2RAD(6)) &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+                          baddie->components[0].angle, 0.0);
+          baddie->cooldown = 1.0;
+        }
+        // Randomly go crazy:
+        if (az_random(0.0, 2.5) < time) {
+          baddie->state = az_randint(1, 2);
+          const az_vector_t spark_start =
+            az_vadd(baddie->position,
+                    az_vpolar(20, baddie->angle +
+                              baddie->components[0].angle));
+          const double spark_angle =
+            baddie->angle + baddie->components[0].angle +
+            (baddie->state == 1 ? -AZ_DEG2RAD(65) : AZ_DEG2RAD(65));
+          for (int i = 0; i < 8; ++i) {
+            const double theta =
+              spark_angle + az_random(-AZ_DEG2RAD(25), AZ_DEG2RAD(25));
+            az_add_speck(state, (az_color_t){255, 200, 100, 255}, 4.0,
+                         spark_start, az_vpolar(az_random(10, 70), theta));
+          }
+        }
+      }
+      break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:
       // Do nothing.
