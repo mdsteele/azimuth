@@ -82,7 +82,8 @@ static void on_projectile_impact(az_space_state_t *state,
         if (wall->kind == AZ_WALL_NOTHING) continue;
         if (wall->kind == AZ_WALL_INDESTRUCTIBLE) continue;
         if (az_circle_touches_wall(wall, radius, proj->position)) {
-          az_try_break_wall(state, wall, proj->data->damage_kind);
+          az_try_break_wall(state, wall, proj->data->damage_kind,
+                            proj->position);
         }
       }
     }
@@ -363,7 +364,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_DOOR_INSIDE:
     case AZ_IMP_WALL:
-      az_try_break_wall(state, impact.target.wall, proj->data->damage_kind);
+      az_try_break_wall(state, impact.target.wall, proj->data->damage_kind,
+                        proj->position);
       on_projectile_hit_wall(state, proj, impact.normal);
       break;
   }

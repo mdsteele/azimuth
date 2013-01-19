@@ -330,7 +330,8 @@ void az_damage_ship(az_space_state_t *state, double damage,
 }
 
 bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
-                       az_damage_flags_t damage_kind) {
+                       az_damage_flags_t damage_kind,
+                       az_vector_t impact_point) {
   assert(wall->kind != AZ_WALL_NOTHING);
   // If the damage kind can't destroy any kind of wall, then we quit early
   // (without even flaring the wall).
@@ -363,9 +364,10 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
   if ((damage_kind & vulnerability) != 0) {
     // Place particles for wall debris.
     const double radius = wall->data->bounding_radius;
+    const double step = 3.0 + radius / 10.0;
     az_particle_t *particle;
-    for (double y = -radius; y <= radius; y += 10.0) {
-      for (double x = -radius; x <= radius; x += 10.0) {
+    for (double y = -radius; y <= radius; y += step) {
+      for (double x = -radius; x <= radius; x += step) {
         const az_vector_t pos = {x + wall->position.x + az_random(-5.0, 5.0),
                                  y + wall->position.y + az_random(-5.0, 5.0)};
         if (az_point_touches_wall(wall, pos) &&
@@ -373,12 +375,14 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
           particle->kind = AZ_PAR_SHARD;
           particle->color = wall->data->color1;
           particle->position = pos;
-          particle->velocity = az_vmul(az_vsub(pos, wall->position), 2.0);
-          particle->velocity.x += az_random(-50.0, 50.0);
-          particle->velocity.y += az_random(-50.0, 50.0);
+          particle->velocity =
+            az_vwithlen(az_vsub(pos, impact_point),
+                        az_vdist(pos, wall->position) * 2.5);
+          particle->velocity.x += az_random(-radius, radius);
+          particle->velocity.y += az_random(-radius, radius);
           particle->angle = az_random(0.0, AZ_TWO_PI);
           particle->lifetime = az_random(0.5, 1.0);
-          particle->param1 = az_random(1.0, 3.0);
+          particle->param1 = az_random(1.0, 3.0) * (radius / 75.0);
           particle->param2 = az_random(-10.0, 10.0);
         }
       }

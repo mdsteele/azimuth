@@ -159,7 +159,8 @@ void az_damage_ship(az_space_state_t *state, double damage,
 // Try to destroy the wall with the given kind of damage, and return true iff
 // the wall was destroyed.
 bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
-                       az_damage_flags_t damage_kind);
+                       az_damage_flags_t damage_kind,
+                       az_vector_t impact_point);
 
 /*===========================================================================*/
 

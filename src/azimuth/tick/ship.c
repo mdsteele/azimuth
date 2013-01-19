@@ -170,7 +170,8 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       // If C-plus is active, maybe we can just bust right through the wall.
       // Otherwise, the ship hits the wall and bounces off.
       if (!(ship->cplus.state == AZ_CPLUS_ACTIVE &&
-            az_try_break_wall(state, impact->target.wall, AZ_DMGF_CPLUS))) {
+            az_try_break_wall(state, impact->target.wall, AZ_DMGF_CPLUS,
+                              ship->position))) {
         bounce_ship = true;
         elasticity = impact->target.wall->data->elasticity;
         damage = (ship->cplus.state == AZ_CPLUS_ACTIVE ? 0.0 :
