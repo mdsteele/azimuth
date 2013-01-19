@@ -98,8 +98,8 @@ void _az_list_remove(int *num, int *max, void **items, size_t item_size,
 
 void _az_list_swap(int *num1, int *max1, void **items1,
                    int *num2, int *max2, void **items2) {
-  int temp_num = *num1;
-  int temp_max = *max1;
+  const int temp_num = *num1;
+  const int temp_max = *max1;
   void *temp_items = *items1;
   *num1 = *num2;
   *max1 = *max2;
@@ -107,6 +107,22 @@ void _az_list_swap(int *num1, int *max1, void **items1,
   *num2 = temp_num;
   *max2 = temp_max;
   *items2 = temp_items;
+}
+
+void _az_list_concat(int *num1, int *max1, void **items1,
+                     int num2, const void *items2, size_t item_size) {
+  assert(*items1 != items2);
+  const int old_num1 = *num1;
+  const int new_num1 = old_num1 + num2;
+  if (new_num1 > *max1) {
+    void *new_items1 = realloc(*items1, new_num1 * item_size);
+    if (new_items1 == NULL) AZ_FATAL("Out of memory.\n");
+    *items1 = new_items1;
+    *max1 = new_num1;
+  }
+  assert(*max1 >= new_num1);
+  *num1 = new_num1;
+  memcpy((char *)(*items1) + old_num1 * item_size, items2, num2 * item_size);
 }
 
 /*===========================================================================*/

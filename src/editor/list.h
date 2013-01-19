@@ -76,6 +76,15 @@
                   &(list2).num, &(list2).max, (void **)&(list2).items); \
   } while (0)
 
+// Modify list1 by copying the contents of list2 and adding them to the end of
+// list1.  The two lists must have the same type, and must not be the same
+// list.
+#define AZ_LIST_CONCAT(list1, list2) do { \
+    if (0) (list1).items = (list2).items; /*warn if lists aren't same type*/ \
+    _az_list_concat(&(list1).num, &(list1).max, (void **)&(list1).items, \
+                    (list2).num, (list2).items, sizeof((list1).items[0])); \
+  } while (0)
+
 /*===========================================================================*/
 
 // Private functions.  Use the above macros instead of these directly.
@@ -88,6 +97,8 @@ void _az_list_remove(int *num, int *max, void **items, size_t item_size,
                      void *item);
 void _az_list_swap(int *num1, int *max1, void **items1,
                    int *num2, int *max2, void **items2);
+void _az_list_concat(int *num1, int *max1, void **items1,
+                     int num2, const void *items2, size_t item_size);
 
 /*===========================================================================*/
 

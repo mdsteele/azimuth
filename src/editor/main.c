@@ -455,57 +455,52 @@ static void do_add_wall(int x, int y) {
 
 static void do_remove(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  {
-    AZ_LIST_DECLARE(az_editor_baddie_t, temp_baddies);
-    AZ_LIST_INIT(temp_baddies, 2);
-    AZ_LIST_LOOP(baddie, room->baddies) {
-      if (!baddie->selected) *AZ_LIST_ADD(temp_baddies) = *baddie;
-      else state.unsaved = true;
-    }
-    AZ_LIST_SWAP(temp_baddies, room->baddies);
-    AZ_LIST_DESTROY(temp_baddies);
-  }
-  {
-    AZ_LIST_DECLARE(az_editor_door_t, temp_doors);
-    AZ_LIST_INIT(temp_doors, 2);
-    AZ_LIST_LOOP(door, room->doors) {
-      if (!door->selected) *AZ_LIST_ADD(temp_doors) = *door;
-      else state.unsaved = true;
-    }
-    AZ_LIST_SWAP(temp_doors, room->doors);
-    AZ_LIST_DESTROY(temp_doors);
-  }
-  {
-    AZ_LIST_DECLARE(az_editor_gravfield_t, temp_gravfields);
-    AZ_LIST_INIT(temp_gravfields, 2);
-    AZ_LIST_LOOP(gravfield, room->gravfields) {
-      if (!gravfield->selected) *AZ_LIST_ADD(temp_gravfields) = *gravfield;
-      else state.unsaved = true;
-    }
-    AZ_LIST_SWAP(temp_gravfields, room->gravfields);
-    AZ_LIST_DESTROY(temp_gravfields);
-  }
-  {
-    AZ_LIST_DECLARE(az_editor_node_t, temp_nodes);
-    AZ_LIST_INIT(temp_nodes, 2);
-    AZ_LIST_LOOP(node, room->nodes) {
-      if (!node->selected) *AZ_LIST_ADD(temp_nodes) = *node;
-      else state.unsaved = true;
-    }
-    AZ_LIST_SWAP(temp_nodes, room->nodes);
-    AZ_LIST_DESTROY(temp_nodes);
-  }
-  {
-    AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
-    AZ_LIST_INIT(temp_walls, 2);
-    AZ_LIST_LOOP(wall, room->walls) {
-      if (!wall->selected) *AZ_LIST_ADD(temp_walls) = *wall;
-      else state.unsaved = true;
-    }
-    AZ_LIST_SWAP(temp_walls, room->walls);
-    AZ_LIST_DESTROY(temp_walls);
-  }
+#define REMOVE(obj) do { \
+    AZ_LIST_DECLARE(az_editor_##obj##_t, temp_##obj##s); \
+    AZ_LIST_INIT(temp_##obj##s, 2); \
+    AZ_LIST_LOOP(obj, room->obj##s) { \
+      if (!obj->selected) *AZ_LIST_ADD(temp_##obj##s) = *obj; \
+      else state.unsaved = true; \
+    } \
+    AZ_LIST_SWAP(temp_##obj##s, room->obj##s); \
+    AZ_LIST_DESTROY(temp_##obj##s); \
+  } while (0)
+
+  REMOVE(baddie);
+  REMOVE(door);
+  REMOVE(gravfield);
+  REMOVE(node);
+  REMOVE(wall);
+#undef REMOVE
 }
+
+static void do_partition(bool front) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+#define PARTITION(obj) do { \
+    AZ_LIST_DECLARE(az_editor_##obj##_t, back_##obj##s); \
+    AZ_LIST_INIT(back_##obj##s, 2); \
+    AZ_LIST_DECLARE(az_editor_##obj##_t, front_##obj##s); \
+    AZ_LIST_INIT(front_##obj##s, 2); \
+    AZ_LIST_LOOP(obj, room->obj##s) { \
+      if (obj->selected == front) *AZ_LIST_ADD(front_##obj##s) = *obj; \
+      else *AZ_LIST_ADD(back_##obj##s) = *obj; \
+    } \
+    AZ_LIST_SWAP(back_##obj##s, room->obj##s); \
+    AZ_LIST_CONCAT(room->obj##s, front_##obj##s); \
+    AZ_LIST_DESTROY(back_##obj##s); \
+    AZ_LIST_DESTROY(front_##obj##s); \
+  } while (0)
+
+  PARTITION(baddie);
+  PARTITION(door);
+  PARTITION(gravfield);
+  PARTITION(node);
+  PARTITION(wall);
+#undef PARTITION
+  state.unsaved = true;
+}
+static void do_move_to_back(void) { do_partition(false); }
+static void do_move_to_front(void) { do_partition(true); }
 
 static void do_change_data(int delta, bool secondary) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
@@ -908,7 +903,10 @@ static void event_loop(void) {
                                        state.current_room), true);
               }
               break;
-            case AZ_KEY_B: state.tool = AZ_TOOL_BADDIE; break;
+            case AZ_KEY_B:
+              if (event.key.shift) do_move_to_back();
+              else state.tool = AZ_TOOL_BADDIE;
+              break;
             case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
             case AZ_KEY_D:
               if (event.key.command) {
@@ -918,6 +916,9 @@ static void event_loop(void) {
               break;
             case AZ_KEY_E:
               if (event.key.command) begin_edit_gravfield();
+              break;
+            case AZ_KEY_F:
+              if (event.key.shift) do_move_to_front();
               break;
             case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
             case AZ_KEY_M:
