@@ -91,6 +91,13 @@ static const az_vector_t nightbug_vertices[] = {
   {17, 0}, {9, 10}, {-11, 5}, {-11, -5}, {9, -10}
 };
 
+static const az_vector_t zenith_core_vertices[] = {
+  { 120, 0}, { 84.852813742385706,  84.852813742385706},
+  {0,  120}, {-84.852813742385706,  84.852813742385706},
+  {-120, 0}, {-84.852813742385706, -84.852813742385706},
+  {0, -120}, { 84.852813742385706, -84.852813742385706}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -170,6 +177,12 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 5.0 },
     DECL_COMPONENTS(broken_turret_components)
+  },
+  [AZ_BAD_ZENITH_CORE] = {
+    .max_health = 1000.0, .potential_pickups = AZ_PUPF_NOTHING,
+    .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
+                   .impact_damage = 0.0 }
   }
 };
 
@@ -246,8 +259,6 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle) {
   assert(kind != AZ_BAD_NOTHING);
   const az_uid_t uid = baddie->uid;
-  assert(uid != AZ_NULL_UID);
-  assert(uid != AZ_SHIP_UID);
   memset(baddie, 0, sizeof(*baddie));
   baddie->kind = kind;
   baddie->data = az_get_baddie_data(kind);

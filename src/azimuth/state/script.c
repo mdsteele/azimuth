@@ -44,6 +44,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_CLR:    return "clr";
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_UNBAD:  return "unbad";
+    case AZ_OP_BOSS:   return "boss";
     case AZ_OP_LOCK:   return "lock";
     case AZ_OP_UNLOCK: return "unlock";
     case AZ_OP_GETGS:  return "getgs";
@@ -72,6 +73,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_STOP:
     case AZ_OP_ERROR:
       return false;
+    case AZ_OP_BOSS:
     case AZ_OP_POP:
       return (ins.immediate != 0.0);
     case AZ_OP_PUSH:

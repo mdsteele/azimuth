@@ -394,6 +394,15 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glPopMatrix();
       }
       break;
+    case AZ_BAD_ZENITH_CORE:
+      glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
+      glBegin(GL_POLYGON); {
+        az_polygon_t polygon = baddie->data->main_body.polygon;
+        for (int i = 0; i < polygon.num_vertices; ++i) {
+          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+        }
+      } glEnd();
+      break;
   }
 }
 

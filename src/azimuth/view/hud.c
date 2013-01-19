@@ -34,8 +34,8 @@
 
 /*===========================================================================*/
 
-#define HUD_MARGIN 5
-#define HUD_PADDING 5
+#define HUD_MARGIN 2
+#define HUD_PADDING 4
 #define HUD_BAR_HEIGHT 9
 
 static void draw_hud_bar(int left, int top, double cur, double max) {
@@ -64,7 +64,7 @@ static void draw_hud_shields_energy(const az_player_t *player,
   const int width = 50 + 2 * HUD_PADDING + max_power;
 
   glPushMatrix(); {
-    glTranslated(HUD_MARGIN, HUD_MARGIN, 0);
+    glTranslatef(HUD_MARGIN, HUD_MARGIN, 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
     glBegin(GL_QUADS);
@@ -74,7 +74,7 @@ static void draw_hud_shields_energy(const az_player_t *player,
     glVertex2i(width, 0);
     glEnd();
 
-    glTranslated(HUD_PADDING, HUD_PADDING, 0);
+    glTranslatef(HUD_PADDING, HUD_PADDING, 0);
 
     glColor3f(1, 1, 1); // white
     az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "SHIELD");
@@ -172,7 +172,7 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   const int height = 25 + 2 * HUD_PADDING;
   const int width = 115 + 2 * HUD_PADDING;
   glPushMatrix(); {
-    glTranslated(AZ_SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
+    glTranslatef(AZ_SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
     glBegin(GL_QUADS);
@@ -182,7 +182,7 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
     glVertex2i(width, 0);
     glEnd();
 
-    glTranslated(HUD_PADDING, HUD_PADDING, 0);
+    glTranslatef(HUD_PADDING, HUD_PADDING, 0);
 
     draw_hud_gun_name(0, 0, player->gun1);
     draw_hud_gun_name(0, 15, player->gun2);
@@ -195,12 +195,44 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
 
 /*===========================================================================*/
 
+#define BOSS_BAR_WIDTH 400
+
+static void draw_hud_boss_health(az_space_state_t *state) {
+  az_baddie_t *baddie;
+  if (az_lookup_baddie(state, state->boss_uid, &baddie)) {
+    glPushMatrix(); {
+      glTranslatef(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN -
+                   2 * HUD_PADDING - 10, 0);
+
+      const int height = 10 + 2 * HUD_PADDING;
+      const int width = 2 * HUD_PADDING + 35 + BOSS_BAR_WIDTH;
+      glColor4f(0, 0, 0, 0.75); // tinted-black
+      glBegin(GL_QUADS);
+      glVertex2i(0, 0);
+      glVertex2i(0, height);
+      glVertex2i(width, height);
+      glVertex2i(width, 0);
+      glEnd();
+
+      glTranslatef(HUD_PADDING, HUD_PADDING, 0);
+
+      glColor3f(1, 1, 1); // white
+      az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "BOSS");
+      assert(baddie->health > 0.0);
+      assert(baddie->data->max_health > 0.0);
+      glColor3f(1, 0.25, 0); // red-orange
+      draw_hud_bar(35, 0, (baddie->health / baddie->data->max_health) *
+                   BOSS_BAR_WIDTH, BOSS_BAR_WIDTH);
+    } glPopMatrix();
+  }
+}
+
 static void draw_hud_message(const az_message_t *message) {
   if (message->time_remaining <= 0.0) return;
   glPushMatrix(); {
     const int width = 2 * HUD_PADDING + message->length * 8;
     const int height = 2 * HUD_PADDING + 8;
-    glTranslated(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN - height, 0);
+    glTranslatef(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN - height, 0);
     const double fade_time = 0.8; // seconds
     const double alpha = (message->time_remaining >= fade_time ? 1.0 :
                           message->time_remaining / fade_time);
@@ -231,7 +263,7 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
     const int yend = AZ_SCREEN_HEIGHT - HUD_MARGIN - height;
     const double speed = 150.0; // pixels per second
     const double offset = fmax(0.0, timer->active_for - 2.5) * speed;
-    glTranslated(az_imin(xend, xstart + offset),
+    glTranslatef(az_imin(xend, xstart + offset),
                  az_imin(yend, ystart + offset), 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
@@ -404,13 +436,13 @@ static void draw_upgrade_box(const az_space_state_t *state) {
 
 /*===========================================================================*/
 
-void az_draw_hud(const az_space_state_t *state) {
+void az_draw_hud(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
   const az_player_t *player = &ship->player;
   draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);
-  // TODO: draw boss health bar, when relevant
+  draw_hud_boss_health(state);
   draw_hud_message(&state->message);
   draw_hud_timer(&state->timer, state->clock);
   if (state->mode == AZ_MODE_UPGRADE) {

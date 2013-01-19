@@ -215,6 +215,13 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
           }
         }
         break;
+      case AZ_OP_BOSS:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_BADDIE, &uid);
+          state->boss_uid = uid;
+        }
+        break;
       // Doors:
       case AZ_OP_LOCK:
         {

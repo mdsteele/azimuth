@@ -97,6 +97,7 @@ typedef struct {
   } mode_data;
 
   // Space objects (these all get cleared out when we exit a room):
+  az_uid_t boss_uid;
   az_baddie_t baddies[100];
   az_door_t doors[20];
   az_gravfield_t gravfields[50];

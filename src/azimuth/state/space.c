@@ -31,6 +31,7 @@
 /*===========================================================================*/
 
 void az_clear_space(az_space_state_t *state) {
+  state->boss_uid = AZ_NULL_UID;
   AZ_ZERO_ARRAY(state->baddies);
   AZ_ZERO_ARRAY(state->doors);
   AZ_ZERO_ARRAY(state->gravfields);
@@ -115,7 +116,7 @@ bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
   const int index = az_uid_index(uid);
   assert(0 <= index && index < AZ_ARRAY_SIZE(state->baddies));
   az_baddie_t *baddie = &state->baddies[index];
-  if (baddie->uid == uid) {
+  if (baddie->kind != AZ_BAD_NOTHING && baddie->uid == uid) {
     *baddie_out = baddie;
     return true;
   }
@@ -138,7 +139,7 @@ bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
   const int index = az_uid_index(uid);
   assert(0 <= index && index < AZ_ARRAY_SIZE(state->doors));
   az_door_t *door = &state->doors[index];
-  if (door->uid == uid) {
+  if (door->kind != AZ_DOOR_NOTHING && door->uid == uid) {
     *door_out = door;
     return true;
   }
@@ -163,7 +164,7 @@ bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
   const int index = az_uid_index(uid);
   assert(0 <= index && index < AZ_ARRAY_SIZE(state->gravfields));
   az_gravfield_t *gravfield = &state->gravfields[index];
-  if (gravfield->uid == uid) {
+  if (gravfield->kind != AZ_GRAV_NOTHING && gravfield->uid == uid) {
     *gravfield_out = gravfield;
     return true;
   }
@@ -187,7 +188,7 @@ bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
   const int index = az_uid_index(uid);
   assert(0 <= index && index < AZ_ARRAY_SIZE(state->nodes));
   az_node_t *node = &state->nodes[index];
-  if (node->uid == uid) {
+  if (node->kind != AZ_NODE_NOTHING && node->uid == uid) {
     *node_out = node;
     return true;
   }

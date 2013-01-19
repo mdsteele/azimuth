@@ -415,6 +415,66 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_ZENITH_CORE:
+      // Lie dormant for 31 seconds.
+      if (baddie->state == 0) {
+        baddie->state = 1;
+        baddie->cooldown = 31.0;
+      }
+      if (baddie->cooldown <= 0.0) {
+        // Turn towards the ship.
+        baddie->angle = az_angle_towards(
+            baddie->angle, AZ_DEG2RAD(30) * time,
+            az_vtheta(az_vsub(state->ship.position, baddie->position)));
+        // Fire a beam, piercing through the ship and other baddies.
+        const az_vector_t beam_start =
+          az_vadd(baddie->position, az_vpolar(120, baddie->angle));
+        az_impact_t impact;
+        az_ray_impact(state, beam_start, az_vpolar(1000, baddie->angle),
+                      (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+        const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
+        const double beam_damage = 100.0 * time;
+        // Damage the ship and any baddies within the beam.
+        if (az_ship_is_present(&state->ship) &&
+            az_ray_hits_ship(&state->ship, beam_start, beam_delta,
+                             NULL, NULL)) {
+          az_damage_ship(state, beam_damage, false);
+          az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
+          az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
+        }
+        AZ_ARRAY_LOOP(other, state->baddies) {
+          if (other->kind == AZ_BAD_NOTHING || other == baddie) continue;
+          const az_component_data_t *component;
+          if (az_ray_hits_baddie(other, beam_start, beam_delta,
+                                 NULL, NULL, &component)) {
+            az_try_damage_baddie(state, other, component, AZ_DMGF_PIERCE,
+                                 beam_damage);
+          }
+        }
+        // Add particles for the beam.
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_BEAM;
+          particle->color = (az_color_t){
+            (az_clock_mod(6, 1, state->clock) < 3 ? 255 : 64),
+            (az_clock_mod(6, 1, state->clock + 2) < 3 ? 255 : 64),
+            (az_clock_mod(6, 1, state->clock + 4) < 3 ? 255 : 64), 192};
+          particle->position = beam_start;
+          particle->velocity = AZ_VZERO;
+          particle->angle = baddie->angle;
+          particle->lifetime = 0.0;
+          particle->param1 =
+            az_vnorm(az_vsub(impact.position, particle->position));
+          particle->param2 = 6 + az_clock_zigzag(6, 1, state->clock);
+          for (int i = 0; i < 5; ++i) {
+            az_add_speck(state, particle->color, 1.0, impact.position,
+                         az_vpolar(az_random(20.0, 70.0),
+                                   az_vtheta(impact.normal) +
+                                   az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+          }
+        }
+      }
+      break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:
       // Do nothing.

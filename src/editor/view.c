@@ -170,7 +170,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_draw_node(&real_node, state->clock);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
-    az_baddie_t real_baddie;
+    az_baddie_t real_baddie = {0};
     az_init_baddie(&real_baddie, editor_baddie->spec.kind,
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
