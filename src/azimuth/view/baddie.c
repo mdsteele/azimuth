@@ -33,6 +33,53 @@
 
 /*===========================================================================*/
 
+static az_color_t color3(float r, float g, float b) {
+  return (az_color_t){r * 255, g * 255, b * 255, 255};
+}
+
+static void az_gl_color(az_color_t color) {
+  glColor4ub(color.r, color.g, color.b, color.a);
+}
+
+static void draw_turret(const az_baddie_t *baddie,
+                        az_color_t far_edge, az_color_t mid_edge,
+                        az_color_t near_edge, az_color_t center,
+                        az_color_t gun_edge, az_color_t gun_middle) {
+  glBegin(GL_QUAD_STRIP); {
+    for (int i = 0; i <= 360; i += 60) {
+      az_gl_color(mid_edge);
+      glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
+      az_gl_color(far_edge);
+      glVertex2d(20 * cos(AZ_DEG2RAD(i)), 20 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glPushMatrix(); {
+    glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
+    glBegin(GL_QUAD_STRIP); {
+      az_gl_color(gun_edge);
+      glVertex2f( 0,  5); glVertex2f(30,  5);
+      az_gl_color(gun_middle);
+      glVertex2f( 0,  0); glVertex2f(30,  0);
+      az_gl_color(gun_edge);
+      glVertex2f( 0, -5); glVertex2f(30, -5);
+    } glEnd();
+  } glPopMatrix();
+  az_gl_color(center);
+  glBegin(GL_POLYGON); {
+    for (int i = 0; i <= 360; i += 60) {
+      glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    for (int i = 0; i <= 360; i += 60) {
+      az_gl_color(near_edge);
+      glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+      az_gl_color(mid_edge);
+      glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
 static void draw_atom_electron(double radius, az_vector_t position,
                                double angle) {
   const double cmult = 1.0 + 0.2 * sin(angle);
@@ -54,13 +101,13 @@ static void draw_atom_electron(double radius, az_vector_t position,
 static void draw_spiner_spine(double flare, double frozen) {
   glBegin(GL_TRIANGLE_STRIP); {
     glColor4f(0.5 * flare, 0.3, 0, 0);
-    glVertex2d(-3, 3);
+    glVertex2f(-3, 3);
     glColor3f(0.6 + 0.4 * flare, 0.7, 0.6);
-    glVertex2d(5, 0);
+    glVertex2f(5, 0);
     glColor3f(0.6 + 0.4 * flare, 0.7, frozen);
-    glVertex2d(-5, 0);
+    glVertex2f(-5, 0);
     glColor4f(0 * flare, 0.3, 0, 0);
-    glVertex2d(-3, -3);
+    glVertex2f(-3, -3);
   } glEnd();
 }
 
@@ -68,65 +115,44 @@ static void draw_box(bool armored, double flare) {
   glBegin(GL_QUADS); {
     if (armored) glColor3f(0.45, 0.45 - 0.3 * flare, 0.65 - 0.3 * flare);
     else glColor3f(0.65, 0.65 - 0.3 * flare, 0.65 - 0.3 * flare); // light gray
-    glVertex2d(10, 7);
-    glVertex2d(-10, 7);
-    glVertex2d(-10, -7);
-    glVertex2d(10, -7);
+    glVertex2f(10, 7); glVertex2f(-10, 7);
+    glVertex2f(-10, -7); glVertex2f(10, -7);
 
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(11, 13);
-    glVertex2d(-11, 13);
+    glVertex2f(11, 13); glVertex2f(-11, 13);
     if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
     else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
-    glVertex2d(-10, 7);
-    glVertex2d(10, 7);
+    glVertex2f(-10, 7); glVertex2f(10, 7);
 
-    glVertex2d(-10, -7);
-    glVertex2d(-10, 7);
+    glVertex2f(-10, -7); glVertex2f(-10, 7);
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(-16, 8);
-    glVertex2d(-16, -8);
+    glVertex2f(-16, 8); glVertex2f(-16, -8);
 
-    glVertex2d(16, -8);
-    glVertex2d(16, 8);
+    glVertex2f(16, -8); glVertex2f(16, 8);
     if (armored) glColor3f(0.4, 0.4 - 0.3 * flare, 0.6 - 0.3 * flare);
     else glColor3f(0.6, 0.6 - 0.3 * flare, 0.6 - 0.3 * flare); // gray
-    glVertex2d(10, 7);
-    glVertex2d(10, -7);
+    glVertex2f(10, 7); glVertex2f(10, -7);
 
-    glVertex2d(10, -7);
-    glVertex2d(-10, -7);
+    glVertex2f(10, -7); glVertex2f(-10, -7);
     glColor3f(0.2, 0.2, 0.2); // dark gray
-    glVertex2d(-11, -13);
-    glVertex2d(11, -13);
+    glVertex2f(-11, -13); glVertex2f(11, -13);
   } glEnd();
   glBegin(GL_TRIANGLES); {
     glColor3f(0.3, 0.3 - 0.2 * flare, 0.3 - 0.2 * flare); // dark gray
-    glVertex2d(10, 7);
-    glVertex2d(11, 13);
-    glVertex2d(16, 8);
-
-    glVertex2d(-10, 7);
-    glVertex2d(-11, 13);
-    glVertex2d(-16, 8);
-
-    glVertex2d(-10, -7);
-    glVertex2d(-16, -8);
-    glVertex2d(-11, -13);
-
-    glVertex2d(10, -7);
-    glVertex2d(11, -13);
-    glVertex2d(16, -8);
+    glVertex2f( 10,  7); glVertex2f( 11,  13); glVertex2f( 16,   8);
+    glVertex2f(-10,  7); glVertex2f(-11,  13); glVertex2f(-16,   8);
+    glVertex2f(-10, -7); glVertex2f(-16,  -8); glVertex2f(-11, -13);
+    glVertex2f( 10, -7); glVertex2f( 11, -13); glVertex2f( 16,  -8);
   } glEnd();
 }
 
 /*===========================================================================*/
 
 static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
-  const double flare = baddie->armor_flare;
-  const double frozen = (baddie->frozen <= 0.0 ? 0.0 :
-                         baddie->frozen >= 0.2 ? 0.5 + 0.5 * baddie->frozen :
-                         az_clock_mod(3, 2, clock) < 2 ? 0.6 : 0.0);
+  const float flare = baddie->armor_flare;
+  const float frozen = (baddie->frozen <= 0.0 ? 0.0 :
+                        baddie->frozen >= 0.2 ? 0.5 + 0.5 * baddie->frozen :
+                        az_clock_mod(3, 2, clock) < 2 ? 0.6 : 0.0);
   if (baddie->frozen > 0.0) clock = 0;
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -140,56 +166,21 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_TURRET:
-    case AZ_BAD_BROKEN_TURRET:
-      glBegin(GL_QUAD_STRIP); {
-        for (int i = 0; i <= 360; i += 60) {
-          glColor3f(0.35 + 0.15 * flare - 0.15 * frozen,
-                    0.35 - 0.15 * flare - 0.15 * frozen,
-                    0.35 - 0.15 * flare + 0.15 * frozen);
-          glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
-          glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
-                    0.25 - 0.1 * flare - 0.1 * frozen,
-                    0.25 - 0.1 * flare + 0.1 * frozen);
-          glVertex2d(20 * cos(AZ_DEG2RAD(i)), 20 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glPushMatrix(); {
-        glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
-        glBegin(GL_QUAD_STRIP); {
-          glColor3f(0.25 + 0.25 * flare, 0.25,
-                    0.25 + 0.25 * frozen); // dark gray
-          glVertex2d( 0,  5);
-          glVertex2d(30,  5);
-          glColor3f(0.75 + 0.25 * flare, 0.75,
-                    0.75 + 0.25 * frozen); // light gray
-          glVertex2d( 0,  0);
-          glVertex2d(30,  0);
-          glColor3f(0.25 + 0.25 * flare, 0.25,
-                    0.25 + 0.25 * frozen); // dark gray
-          glVertex2d( 0, -5);
-          glVertex2d(30, -5);
-        } glEnd();
-      } glPopMatrix();
-      glColor3f(0.6 + 0.4 * flare - 0.3 * frozen,
-                0.6 - 0.3 * flare - 0.3 * frozen,
-                0.6 - 0.3 * flare + 0.4 * frozen); // gray
-      glBegin(GL_POLYGON); {
-        for (int i = 0; i <= 360; i += 60) {
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        for (int i = 0; i <= 360; i += 60) {
-          glColor3f(0.5 + 0.25 * flare - 0.25 * frozen,
-                    0.5 - 0.25 * flare - 0.25 * frozen,
-                    0.5 - 0.25 * flare + 0.25 * frozen);
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
-          glColor3f(0.35 + 0.15 * flare - 0.15 * frozen,
-                    0.35 - 0.15 * flare - 0.15 * frozen,
-                    0.35 - 0.15 * flare + 0.15 * frozen);
-          glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
+      draw_turret(baddie,
+          color3(0.25 + 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare + 0.1 * frozen),
+          color3(0.35 + 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare + 0.15 * frozen),
+          color3(0.5 + 0.25 * flare - 0.25 * frozen,
+                 0.5 - 0.25 * flare - 0.25 * frozen,
+                 0.5 - 0.25 * flare + 0.25 * frozen),
+          color3(0.6 + 0.4 * flare - 0.3 * frozen,
+                 0.6 - 0.3 * flare - 0.3 * frozen,
+                 0.6 - 0.3 * flare + 0.4 * frozen),
+          color3(0.25 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen),
+          color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
       break;
     case AZ_BAD_ZIPPER:
       glColor3f(flare, 1 - fmax(flare, 0.5 * frozen),
@@ -206,7 +197,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         const unsigned int zig = az_clock_zigzag(15, 1, clock);
         glColor3f(1 - 0.75 * frozen, 0.25 + 0.01 * zig + 0.5 * flare,
                   0.25 + 0.75 * frozen); // red
-        glVertex2d(0, 0);
+        glVertex2f(0, 0);
         glColor3f(0.25 + 0.02 * zig - 0.25 * frozen, 0.5 * flare,
                   0.25 * frozen); // dark red
         for (int i = 0; i <= 360; i += 15) {
@@ -215,10 +206,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(0.5, 0.25, 1);
-        glVertex2d(0, 7);
+        glVertex2f(0, 7);
         glColor4f(0.5, 0.25, 1, 0);
-        glVertex2d(3, 2); glVertex2d(3, 12); glVertex2d(-3, 12);
-        glVertex2d(-3, 2); glVertex2d(3, 2);
+        glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
+        glVertex2f(-3, 2); glVertex2f(3, 2);
       } glEnd();
       break;
     case AZ_BAD_ATOM:
@@ -230,7 +221,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       }
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(flare, 1 - 0.5 * flare, frozen); // green
-        glVertex2d(-2, 2);
+        glVertex2f(-2, 2);
         glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.1 + 0.4 * frozen);
         const double radius = baddie->data->main_body.bounding_radius;
         for (int i = 0; i <= 360; i += 15) {
@@ -256,7 +247,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       }
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(1 - frozen, 1 - 0.5 * flare, frozen); // yellow
-        glVertex2d(-2, 2);
+        glVertex2f(-2, 2);
         glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
         for (int i = 0; i <= 360; i += 15) {
           double radius = baddie->data->main_body.bounding_radius +
@@ -307,7 +298,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           az_polygon_t polygon = baddie->data->components[i].polygon;
           glBegin(GL_TRIANGLE_FAN); {
             glColor3f(0.75, 0.25, 1);
-            glVertex2d(0, 0);
+            glVertex2f(0, 0);
             glColor3f(0.2 + 0.4 * flare, 0.2 - 0.3 * flare, 0.2 - 0.3 * flare);
             for (int i = 0; i < polygon.num_vertices; ++i) {
               glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
@@ -325,7 +316,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       }
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(0.5, 0.4, 0.3, 0);
-        glVertex2d(-4, 0);
+        glVertex2f(-4, 0);
         for (int i = 135; i <= 225; i += 15) {
           if (i == 225) glColor4f(0.5, 0.4, 0.3, 0);
           glVertex2d(15 * cos(AZ_DEG2RAD(i)), 13 * sin(AZ_DEG2RAD(i)));
@@ -339,14 +330,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         assert(0.0 <= invis && invis <= 1.0);
         glBegin(GL_TRIANGLES); {
           glColor4f(0.25, 0.12, frozen, invis); // dark brown
-          glVertex2d(-16, 0);
+          glVertex2f(-16, 0);
           glColor4f(0.5, 0.2, frozen, invis * invis); // reddish-brown
-          glVertex2d(12, 6);
-          glVertex2d(12, -6);
+          glVertex2f(12, 6);
+          glVertex2f(12, -6);
         } glEnd();
         glBegin(GL_TRIANGLE_FAN); {
           glColor4f(0.8, 0.4, 0.1 + 0.9 * frozen, invis); // light red-brown
-          glVertex2d(10, 0);
+          glVertex2f(10, 0);
           glColor4f(0.5, 0.2, frozen, invis * invis); // reddish-brown
           for (int i = -90; i <= 90; i += 30) {
             glVertex2d(10 + 7 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
@@ -356,24 +347,24 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           if (i == 1) glScaled(1, -1, 1);
           glColor4f(0.25, 0.12, 0.5 * frozen, invis); // dark brown
           glBegin(GL_TRIANGLES); {
-            const double zig = 0.5 * az_clock_zigzag(8, 3, clock) - 2.0;
+            const GLfloat zig = 0.5f * az_clock_zigzag(8, 3, clock) - 2.0f;
             for (int j = 0; j < 3; ++j) {
-              glVertex2d(12 - 7 * j, 7 - j);
-              glVertex2d(5 - 7 * j, 7 - j);
-              glVertex2d(3.0 - 7 * j + ((j + i) % 2 ? zig : -zig), 15 - j);
+              glVertex2f(12 - 7 * j, 7 - j);
+              glVertex2f(5 - 7 * j, 7 - j);
+              glVertex2f(3 - 7 * j + ((j + i) % 2 ? zig : -zig), 15 - j);
             }
           } glEnd();
           glBegin(GL_TRIANGLE_FAN); {
             glColor4f(0.75 + 0.25 * flare - 0.75 * frozen, 0.5, frozen,
                       fmax(0.08, invis)); // yellow-brown
-            glVertex2d(6, 4);
+            glVertex2f(6, 4);
             glColor4f(0.4 + 0.4 * flare - 0.4 * frozen, 0.2, frozen,
                       fmax(0.08, invis * invis * invis)); // brown
-            const double zig = 0.3 * az_clock_zigzag(5, 2, clock);
-            glVertex2d(10, 0.25); glVertex2d(13, 3);
-            glVertex2d(12, 7); glVertex2d(10, 10);
-            glVertex2d(-5, 8 + zig); glVertex2d(-12, 4 + zig);
-            glVertex2d(-10, 0.5 + zig); glVertex2d(10, 0.25);
+            const GLfloat zig = 0.3f * az_clock_zigzag(5, 2, clock);
+            glVertex2f(10, 0.25); glVertex2f(13, 3);
+            glVertex2f(12, 7); glVertex2f(10, 10);
+            glVertex2f(-5, 8 + zig); glVertex2f(-12, 4 + zig);
+            glVertex2f(-10, 0.5 + zig); glVertex2f(10, 0.25);
           } glEnd();
         }
       } glPopMatrix();
@@ -394,6 +385,23 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glPopMatrix();
       }
       break;
+    case AZ_BAD_BROKEN_TURRET:
+      draw_turret(baddie,
+          color3(0.30 + 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare - 0.1 * frozen,
+                 0.20 - 0.1 * flare + 0.1 * frozen),
+          color3(0.40 + 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare - 0.15 * frozen,
+                 0.30 - 0.15 * flare + 0.15 * frozen),
+          color3(0.55 + 0.25 * flare - 0.25 * frozen,
+                 0.50 - 0.25 * flare - 0.25 * frozen,
+                 0.45 - 0.25 * flare + 0.25 * frozen),
+          color3(0.60 + 0.40 * flare - 0.30 * frozen,
+                 0.55 - 0.25 * flare - 0.25 * frozen,
+                 0.50 - 0.30 * flare + 0.40 * frozen),
+          color3(0.30 + 0.25 * flare, 0.25, 0.20 + 0.25 * frozen),
+          color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
+      break;
     case AZ_BAD_ZENITH_CORE:
       glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
@@ -402,6 +410,23 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
         }
       } glEnd();
+      break;
+    case AZ_BAD_ARMORED_TURRET:
+      draw_turret(baddie,
+          color3(0.20 + 0.1 * flare - 0.1 * frozen,
+                 0.20 - 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare + 0.1 * frozen),
+          color3(0.30 + 0.15 * flare - 0.15 * frozen,
+                 0.30 - 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare + 0.15 * frozen),
+          color3(0.4 + 0.25 * flare - 0.25 * frozen,
+                 0.4 - 0.20 * flare - 0.20 * frozen,
+                 0.5 - 0.25 * flare + 0.25 * frozen),
+          color3(0.5 + 0.4 * flare - 0.3 * frozen,
+                 0.5 - 0.2 * flare - 0.2 * frozen,
+                 0.6 - 0.3 * flare + 0.4 * frozen),
+          color3(0.2 + 0.25 * flare, 0.2, 0.25 + 0.25 * frozen),
+          color3(0.6 + 0.25 * flare, 0.6, 0.75 + 0.25 * frozen));
       break;
   }
 }

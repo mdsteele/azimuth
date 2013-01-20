@@ -247,6 +247,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       baddie->angle = az_mod2pi(baddie->angle + 3.0 * time);
       break;
     case AZ_BAD_TURRET:
+    case AZ_BAD_ARMORED_TURRET:
       // Aim gun:
       baddie->components[0].angle =
         fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
