@@ -261,7 +261,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           has_line_of_sight_to_ship(state, baddie)) {
         fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
                         baddie->components[0].angle, 0.0);
-        baddie->cooldown = 0.5;
+        baddie->cooldown = 1.5;
       }
       break;
     case AZ_BAD_ZIPPER:
