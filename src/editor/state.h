@@ -116,6 +116,7 @@ typedef struct {
     az_upgrade_t upgrade_kind;
     az_wall_kind_t wall_kind;
     int wall_data_index;
+    int zone_index;
   } brush;
   az_room_key_t current_room;
   struct {

@@ -47,6 +47,7 @@ static void add_new_room(void) {
   const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
   az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);
   assert(room->on_start == NULL);
+  room->zone_index = state.brush.zone_index;
   const double current_r = az_vnorm(state.camera);
   const double theta_span = 200.0 / (80.0 + current_r);
   room->camera_bounds = (az_camera_bounds_t){
@@ -561,6 +562,14 @@ static void do_change_data(int delta, bool secondary) {
   }
 }
 
+static void do_change_zone(int delta) {
+  state.brush.zone_index = az_modulo(state.brush.zone_index + delta,
+                                     AZ_LIST_SIZE(state.planet.zones));
+  AZ_LIST_GET(state.planet.rooms, state.current_room)->zone_index =
+    state.brush.zone_index;
+  state.unsaved = true;
+}
+
 static void auto_set_door_dest(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   AZ_LIST_LOOP(door, room->doors) {
@@ -694,6 +703,7 @@ static void try_set_current_room(void) {
   if (key < 0 || key >= AZ_LIST_SIZE(state.planet.rooms)) return;
   state.text.action = AZ_ETA_NOTHING;
   state.current_room = key;
+  state.brush.zone_index = AZ_LIST_GET(state.planet.rooms, key)->zone_index;
   az_center_editor_camera_on_current_room(&state);
 }
 
@@ -947,6 +957,7 @@ static void event_loop(void) {
               if (event.key.command) begin_set_uuid_slot();
               break;
             case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
+            case AZ_KEY_Z: do_change_zone(event.key.shift ? -1 : 1); break;
             case AZ_KEY_BACKSPACE: do_remove(); break;
             default: break;
           }

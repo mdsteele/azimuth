@@ -257,7 +257,9 @@ static void draw_room_minimap(az_editor_state_t *state,
           bounds->min_r + 0.5 * bounds->r_span,
           bounds->min_theta + 0.5 * bounds->theta_span));
       glScaled(state->zoom_level, state->zoom_level, 1);
-      glColor3f(1, 0, 0); // red
+      const az_color_t color =
+        AZ_LIST_GET(state->planet.zones, room->zone_index)->color;
+      glColor3ub(color.r, color.g, color.b);
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%03d", key);
     } glPopMatrix();
   }
