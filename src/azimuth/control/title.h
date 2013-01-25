@@ -30,7 +30,8 @@ typedef struct {
   int slot_index;
 } az_title_action_t;
 
-az_title_action_t az_title_event_loop(az_saved_games_t *saved_games);
+az_title_action_t az_title_event_loop(const az_planet_t *planet,
+                                      az_saved_games_t *saved_games);
 
 /*===========================================================================*/
 

@@ -82,7 +82,8 @@ int main(int argc, char **argv) {
     switch (controller) {
       case AZ_CONTROLLER_TITLE:
         {
-          const az_title_action_t action = az_title_event_loop(&saved_games);
+          const az_title_action_t action =
+            az_title_event_loop(&planet, &saved_games);
           switch (action.kind) {
             case AZ_TA_QUIT:
               return EXIT_SUCCESS;

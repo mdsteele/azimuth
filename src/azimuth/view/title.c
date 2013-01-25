@@ -257,15 +257,19 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
     // Otherwise, draw save file info:
     else {
       const az_player_t *player = &saved_game->player;
-      // Draw the name of the zone the player is in for this save file:
-      // TODO don't hardcode name/color for this
-      if (active) glColor3f(1, 1, 0); // yellow
-      else glColor3f(0.3, 0.3, 0); // dark yellow
-      az_draw_string(8, AZ_ALIGN_LEFT, 6, 24, "Nandiar");
 
+      // Draw the name of the zone the player is in for this save file:
+      const az_room_t *room = &state->planet->rooms[player->current_room];
+      assert(0 <= room->zone_index);
+      assert(room->zone_index < state->planet->num_zones);
+      const az_zone_t *zone = &state->planet->zones[room->zone_index];
+      if (active) glColor3ub(zone->color.r, zone->color.g, zone->color.b);
+      else glColor3ub(zone->color.r / 3, zone->color.g / 3, zone->color.b / 3);
+      az_draw_string(8, AZ_ALIGN_LEFT, 6, 24, zone->name);
+
+      // Draw the elapsed time of this save file, as "hours:minutes":
       if (active) glColor3f(1, 1, 1); // white
       else glColor3f(0.25, 0.25, 0.25); // dark gray
-      // Draw the elapsed time of this save file, as "hours:minutes":
       assert(player->total_time >= 0.0);
       const int seconds = floor(player->total_time);
       az_draw_printf(8, AZ_ALIGN_RIGHT, SAVE_SLOT_WIDTH - 6, 24, "%d:%02d",

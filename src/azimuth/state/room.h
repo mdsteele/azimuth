@@ -78,6 +78,7 @@ typedef struct {
 // Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
   az_room_key_t key;
+  int zone_index;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start; // NULL if no script
   // Initial room objects:

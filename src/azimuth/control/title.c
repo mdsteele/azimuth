@@ -41,9 +41,11 @@ static void erase_saved_game(az_saved_games_t *saved_games, int index) {
   (void)az_save_games_to_file(saved_games, path_buffer);
 }
 
-az_title_action_t az_title_event_loop(az_saved_games_t *saved_games) {
+az_title_action_t az_title_event_loop(const az_planet_t *planet,
+                                      az_saved_games_t *saved_games) {
   static az_title_state_t state;
   memset(&state, 0, sizeof(state));
+  state.planet = planet;
   state.saved_games = saved_games;
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
 

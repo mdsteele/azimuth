@@ -41,6 +41,7 @@ typedef struct {
 } az_title_button_t;
 
 typedef struct {
+  const az_planet_t *planet;
   const az_saved_games_t *saved_games;
   az_clock_t clock;
   az_soundboard_t soundboard;

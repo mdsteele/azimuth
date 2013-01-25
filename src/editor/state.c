@@ -57,34 +57,49 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->current_room = state->planet.start_room = planet.start_room;
   state->planet.start_position = planet.start_position;
   state->planet.start_angle = planet.start_angle;
+  // Convert zones:
+  AZ_LIST_INIT(state->planet.zones, planet.num_zones);
+  for (int i = 0; i < planet.num_zones; ++i) {
+    az_zone_t *zone = AZ_LIST_ADD(state->planet.zones);
+    *zone = planet.zones[i];
+    zone->name = AZ_ALLOC(strlen(planet.zones[i].name + 1), char);
+    strcpy(zone->name, planet.zones[i].name);
+  }
+  // Convert rooms:
   AZ_LIST_INIT(state->planet.rooms, planet.num_rooms);
   for (az_room_key_t key = 0; key < planet.num_rooms; ++key) {
     const az_room_t *room = &planet.rooms[key];
     az_editor_room_t *eroom = AZ_LIST_ADD(state->planet.rooms);
+    eroom->zone_index = room->zone_index;
     eroom->camera_bounds = room->camera_bounds;
     eroom->on_start = clone_script(room->on_start);
+    // Convert baddies:
     AZ_LIST_INIT(eroom->baddies, room->num_baddies);
     for (int i = 0; i < room->num_baddies; ++i) {
       az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
       baddie->spec = room->baddies[i];
       baddie->spec.on_kill = clone_script(baddie->spec.on_kill);
     }
+    // Convert doors:
     AZ_LIST_INIT(eroom->doors, room->num_doors);
     for (int i = 0; i < room->num_doors; ++i) {
       az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
       door->spec = room->doors[i];
       door->spec.on_open = clone_script(door->spec.on_open);
     }
+    // Convert gravfields:
     AZ_LIST_INIT(eroom->gravfields, room->num_gravfields);
     for (int i = 0; i < room->num_gravfields; ++i) {
       az_editor_gravfield_t *gravfield = AZ_LIST_ADD(eroom->gravfields);
       gravfield->spec = room->gravfields[i];
     }
+    // Convert nodes:
     AZ_LIST_INIT(eroom->nodes, room->num_nodes);
     for (int i = 0; i < room->num_nodes; ++i) {
       az_editor_node_t *node = AZ_LIST_ADD(eroom->nodes);
       node->spec = room->nodes[i];
     }
+    // Convert walls:
     AZ_LIST_INIT(eroom->walls, room->num_walls);
     for (int i = 0; i < room->num_walls; ++i) {
       az_editor_wall_t *wall = AZ_LIST_ADD(eroom->walls);
@@ -101,19 +116,30 @@ bool az_load_editor_state(az_editor_state_t *state) {
 bool az_save_editor_state(az_editor_state_t *state) {
   assert(state != NULL);
   // Convert planet:
+  const int num_zones = AZ_LIST_SIZE(state->planet.zones);
   const int num_rooms = AZ_LIST_SIZE(state->planet.rooms);
   assert(num_rooms >= 0);
   az_planet_t planet = {
     .start_room = state->planet.start_room,
     .start_position = state->planet.start_position,
     .start_angle = state->planet.start_angle,
+    .num_zones = num_zones,
+    .zones = AZ_ALLOC(num_zones, az_zone_t),
     .num_rooms = num_rooms,
     .rooms = AZ_ALLOC(num_rooms, az_room_t)
   };
+  // Convert zones:
+  for (int i = 0; i < num_zones; ++i) {
+    az_zone_t *zone = AZ_LIST_GET(state->planet.zones, i);
+    planet.zones[i] = *zone;
+    planet.zones[i].name = AZ_ALLOC(strlen(zone->name) + 1, char);
+    strcpy(planet.zones[i].name, zone->name);
+  }
   // Convert rooms:
   for (az_room_key_t key = 0; key < num_rooms; ++key) {
     az_editor_room_t *eroom = AZ_LIST_GET(state->planet.rooms, key);
     az_room_t *room = &planet.rooms[key];
+    room->zone_index = eroom->zone_index;
     room->camera_bounds = eroom->camera_bounds;
     room->on_start = clone_script(eroom->on_start);
     // Convert baddies:

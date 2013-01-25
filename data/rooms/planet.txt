@@ -1,1 +1,9 @@
-!P r23 s6 x0.00 y49700.00 a-1.570796
+@P z8 r23 s6 x0.00 y49700.00 a-1.570796
+!Z"Colony" c(192,96,0) m1
+!Z"Filimun" c(255,0,255) m1
+!Z"Cnidam" c(0,255,255) m1
+!Z"Nandiar" c(255,255,0) m1
+!Z"Voquan" c(0,255,0) m1
+!Z"Barrag" c(0,0,255) m1
+!Z"Sarvari" c(255,0,0) m1
+!Z"Core" c(128,128,128) m1

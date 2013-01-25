@@ -57,6 +57,8 @@ static struct {
   [AZ_MUS_ZENITH_CORE] = { .filename = "zenith-core.mp3" }
 };
 
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(music_entries) == AZ_NUM_MUSIC_KEYS);
+
 static void load_all_music(void) {
   const char *resource_dir = az_get_resource_directory();
   char path_buffer[strlen(resource_dir) + 50u];

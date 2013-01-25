@@ -20,39 +20,129 @@
 #include "azimuth/state/planet.h"
 
 #include <assert.h>
+#include <setjmp.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h> // for free
-#include <string.h> // for strlen
+#include <stdlib.h>
+#include <string.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/room.h"
-#include "azimuth/util/misc.h" // for AZ_ALLOC
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-static bool parse_planet_header(FILE *file, az_planet_t *planet_out) {
-  int num_rooms, start_room_num;
-  double start_x, start_y, start_angle;
-  if (fscanf(file, "!P r%d s%d x%lf y%lf a%lf\n", &num_rooms, &start_room_num,
-             &start_x, &start_y, &start_angle) < 5) return false;
-  if (fgetc(file) != EOF) return false;
-  if (num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS) return false;
-  if (start_room_num < 0 || start_room_num >= num_rooms) return false;
-  planet_out->num_rooms = num_rooms;
-  planet_out->rooms = AZ_ALLOC(num_rooms, az_room_t);
-  planet_out->start_room = start_room_num;
-  planet_out->start_position = (az_vector_t){.x = start_x, .y = start_y};
-  planet_out->start_angle = start_angle;
-  return true;
+typedef struct {
+  FILE *file;
+  bool success;
+  jmp_buf jump;
+  int num_zones;
+  az_planet_t *planet;
+} az_load_planet_t;
+
+#define FAIL() longjmp(loader->jump, 1)
+
+// Read the next non-whitespace character.  If it is '!' or if we reach EOF,
+// do nothing more; otherwise, fail parsing.
+static void scan_to_bang(az_load_planet_t *loader) {
+  char ch;
+  if (fscanf(loader->file, " %c", &ch) < 1) return;
+  if (ch != '!') FAIL();
 }
 
-static bool load_planet_header(const char *filepath, az_planet_t *planet_out) {
+static char *scan_string(az_load_planet_t *loader) {
+  if (fgetc(loader->file) != '"') FAIL();
+  fpos_t pos;
+  if (fgetpos(loader->file, &pos) != 0) FAIL();
+  size_t length = 0;
+  while (true) {
+    int ch = fgetc(loader->file);
+    if (ch == EOF) FAIL();
+    else if (ch == '"') break;
+    ++length;
+  }
+  if (fsetpos(loader->file, &pos) != 0) FAIL();
+  char *string = AZ_ALLOC(length + 1, char);
+  for (size_t i = 0; i < length; ++i) {
+    string[i] = fgetc(loader->file);
+  }
+  assert(string[length] == '\0');
+  if (fgetc(loader->file) != '"') {
+    free(string);
+    FAIL();
+  }
+  return string;
+}
+
+static void parse_planet_header(az_load_planet_t *loader) {
+  int num_zones, num_rooms, start_room_num;
+  double start_x, start_y, start_angle;
+  if (fscanf(loader->file, "@P z%d r%d s%d x%lf y%lf a%lf\n",
+             &num_zones, &num_rooms, &start_room_num,
+             &start_x, &start_y, &start_angle) < 6) FAIL();
+  if (num_zones < 1 || num_zones > num_rooms ||
+      num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
+      start_room_num < 0 || start_room_num >= num_rooms) FAIL();
+  loader->num_zones = num_zones;
+  loader->planet->num_zones = 0;
+  loader->planet->zones = AZ_ALLOC(num_zones, az_zone_t);
+  loader->planet->num_rooms = num_rooms;
+  loader->planet->rooms = AZ_ALLOC(num_rooms, az_room_t);
+  loader->planet->start_room = start_room_num;
+  loader->planet->start_position = (az_vector_t){.x = start_x, .y = start_y};
+  loader->planet->start_angle = start_angle;
+  scan_to_bang(loader);
+}
+
+static void parse_zone_directive(az_load_planet_t *loader) {
+  if (loader->planet->num_zones >= loader->num_zones) FAIL();
+  az_zone_t *zone = &loader->planet->zones[loader->planet->num_zones];
+  zone->name = scan_string(loader);
+  int red, green, blue, music;
+  if (fscanf(loader->file, " c(%d,%d,%d) m%d\n",
+             &red, &green, &blue, &music) < 4) FAIL();
+  if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 ||
+      blue > 255 || music < 0 || music >= AZ_NUM_MUSIC_KEYS) FAIL();
+  zone->color = (az_color_t){red, green, blue, 255};
+  zone->music = (az_music_key_t)music;
+  ++loader->planet->num_zones;
+  scan_to_bang(loader);
+}
+
+static bool parse_directive(az_load_planet_t *loader) {
+  switch (fgetc(loader->file)) {
+    case 'Z': parse_zone_directive(loader); return true;
+    case EOF: return false;
+    default: FAIL();
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
+
+static void validate_planet_basis(az_load_planet_t *loader) {
+  if (loader->planet->num_zones != loader->num_zones) FAIL();
+}
+
+#undef FAIL
+
+static void parse_planet_basis(az_load_planet_t *loader) {
+  if (setjmp(loader->jump) != 0) {
+    az_destroy_planet(loader->planet);
+    return;
+  }
+  parse_planet_header(loader);
+  while (parse_directive(loader));
+  validate_planet_basis(loader);
+  loader->success = true;
+}
+
+static bool load_planet_basis(const char *filepath, az_planet_t *planet_out) {
+  assert(planet_out != NULL);
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
-  const bool success = parse_planet_header(file, planet_out);
+  az_load_planet_t loader = {.file = file, .planet = planet_out};
+  parse_planet_basis(&loader);
   fclose(file);
-  return success;
+  return loader.success;
 }
 
 bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
@@ -60,14 +150,15 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   assert(planet_out != NULL);
   const size_t dirlen = strlen(resource_dir);
   char path_buffer[dirlen + 20u];
+  memset(planet_out, 0, sizeof(*planet_out));
 
   sprintf(path_buffer, "%s/rooms/planet.txt", resource_dir);
-  if (!load_planet_header(path_buffer, planet_out)) return false;
+  if (!load_planet_basis(path_buffer, planet_out)) return false;
 
   for (int i = 0; i < planet_out->num_rooms; ++i) {
     sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, i);
-    if (!az_load_room_from_file(path_buffer, &planet_out->rooms[i])) {
-      planet_out->num_rooms = i;
+    if (!az_load_room_from_file(path_buffer, &planet_out->rooms[i]) ||
+        planet_out->rooms[i].zone_index >= planet_out->num_zones) {
       az_destroy_planet(planet_out);
       return false;
     }
@@ -78,13 +169,26 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
 
 /*===========================================================================*/
 
+#define WRITE(...) do { \
+    if (fprintf(file, __VA_ARGS__) < 0) return false; \
+  } while (false)
+
 static bool write_planet_header(const az_planet_t *planet, FILE *file) {
-  if (fprintf(file, "!P r%d s%d x%.02f y%.02f a%f\n",
-              planet->num_rooms, planet->start_room,
-              planet->start_position.x, planet->start_position.y,
-              planet->start_angle) < 0) return false;
+  WRITE("@P z%d r%d s%d x%.02f y%.02f a%f\n",
+        planet->num_zones, planet->num_rooms, planet->start_room,
+        planet->start_position.x, planet->start_position.y,
+        planet->start_angle);
+  for (int i = 0; i < planet->num_zones; ++i) {
+    const az_zone_t *zone = &planet->zones[i];
+    assert(strchr(zone->name, '"') == NULL);
+    WRITE("!Z\"%s\" c(%d,%d,%d) m%d\n", zone->name,
+          (int)zone->color.r, (int)zone->color.g, (int)zone->color.b,
+          (int)zone->music);
+  }
   return true;
 }
+
+#undef WRITE
 
 static bool save_planet_header(const az_planet_t *planet,
                                const char *filepath) {
@@ -114,12 +218,15 @@ bool az_save_planet(const az_planet_t *planet, const char *resource_dir) {
 
 void az_destroy_planet(az_planet_t *planet) {
   assert(planet != NULL);
+  for (int i = 0; i < planet->num_zones; ++i) {
+    free(planet->zones[i].name);
+  }
+  free(planet->zones);
   for (int i = 0; i < planet->num_rooms; ++i) {
     az_destroy_room(&planet->rooms[i]);
   }
   free(planet->rooms);
-  planet->num_rooms = 0;
-  planet->rooms = NULL;
+  memset(planet, 0, sizeof(*planet));
 }
 
 /*===========================================================================*/

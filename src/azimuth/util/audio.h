@@ -25,6 +25,9 @@
 
 /*===========================================================================*/
 
+// The number of different music keys there are:
+#define AZ_NUM_MUSIC_KEYS 3
+
 typedef enum {
   AZ_MUS_TITLE,
   AZ_MUS_CNIDAM_ZONE,

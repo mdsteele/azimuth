@@ -357,14 +357,20 @@ static void draw_camera_view(az_editor_state_t *state) {
 }
 
 static void draw_hud(az_editor_state_t* state) {
+  const az_editor_room_t *room =
+    AZ_LIST_GET(state->planet.rooms, state->current_room);
   // Draw the room name:
   glColor3f(1, 1, 1); // white
   az_draw_printf(8, AZ_ALIGN_LEFT, 20, 5, "[Room %03d]", state->current_room);
-  if (AZ_LIST_GET(state->planet.rooms,
-                  state->current_room)->on_start != NULL) {
+  if (room->on_start != NULL) {
     glColor3f(0.75, 0, 1); // purple
     az_draw_string(8, AZ_ALIGN_LEFT, 100, 5, "$");
   }
+
+  // Draw the zone name:
+  const az_zone_t *zone = AZ_LIST_GET(state->planet.zones, room->zone_index);
+  glColor3ub(zone->color.r, zone->color.g, zone->color.b);
+  az_draw_string(8, AZ_ALIGN_LEFT, 150, 5, zone->name);
 
   // Draw the tool name:
   const char *tool_name = "???";

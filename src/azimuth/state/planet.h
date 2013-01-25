@@ -25,13 +25,22 @@
 
 #include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/room.h"
+#include "azimuth/util/audio.h" // for az_music_key_t
 
 /*===========================================================================*/
+
+typedef struct {
+  char *name; // NUL-terminated; owned by zone object
+  az_color_t color;
+  az_music_key_t music;
+} az_zone_t;
 
 typedef struct {
   az_room_key_t start_room;
   az_vector_t start_position;
   double start_angle;
+  int num_zones;
+  az_zone_t *zones;
   int num_rooms;
   az_room_t *rooms;
 } az_planet_t;

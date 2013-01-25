@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/clock.h"
@@ -79,6 +80,7 @@ typedef struct {
 } az_editor_wall_t;
 
 typedef struct {
+  int zone_index;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);
@@ -120,6 +122,7 @@ typedef struct {
     az_room_key_t start_room;
     az_vector_t start_position;
     double start_angle;
+    AZ_LIST_DECLARE(az_zone_t, zones);
     AZ_LIST_DECLARE(az_editor_room_t, rooms);
   } planet;
 } az_editor_state_t;

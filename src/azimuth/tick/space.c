@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "azimuth/state/planet.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h"
 #include "azimuth/tick/camera.h"
@@ -41,10 +42,11 @@ void az_after_entering_room(az_space_state_t *state) {
   az_set_room_visited(&state->ship.player, state->ship.player.current_room);
   const az_room_t *room =
     &state->planet->rooms[state->ship.player.current_room];
+  assert(0 <= room->zone_index && room->zone_index < state->planet->num_zones);
+  const az_zone_t *zone = &state->planet->zones[room->zone_index];
   state->camera.center =
     az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
-  // TODO: choose music based on what zone we're in
-  az_change_music(&state->soundboard, AZ_MUS_CNIDAM_ZONE);
+  az_change_music(&state->soundboard, zone->music);
   az_run_script(state, room->on_start);
 }
 

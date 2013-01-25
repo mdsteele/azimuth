@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/wall.h"
@@ -69,14 +70,17 @@ static az_script_t *maybe_parse_script(az_load_room_t *loader, char ch) {
 }
 
 static void parse_room_header(az_load_room_t *loader) {
-  int room_num, num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
+  int room_num, zone_index;
   double min_r, r_span, min_theta, theta_span;
-  if (fscanf(loader->file, "@R%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
-             &room_num, &min_r, &r_span, &min_theta, &theta_span,
+  int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
+  if (fscanf(loader->file, "@R%d z%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
+             &room_num, &zone_index, &min_r, &r_span, &min_theta, &theta_span,
              &num_baddies, &num_doors, &num_gravfields, &num_nodes,
-             &num_walls) < 10) FAIL();
+             &num_walls) < 11) FAIL();
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
+  if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
+  loader->room->zone_index = zone_index;
   if (min_r < 0.0 || r_span < 0.0 || theta_span < 0.0) FAIL();
   loader->room->camera_bounds.min_r = min_r;
   loader->room->camera_bounds.r_span = r_span;
@@ -250,6 +254,7 @@ static void parse_room(az_load_room_t *loader) {
 
 bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
   assert(room_out != NULL);
+  memset(room_out, 0, sizeof(*room_out));
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
   az_load_room_t loader = {.file = file, .room = room_out, .success = false};
@@ -278,7 +283,8 @@ static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("@R%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n", room->key,
+  WRITE("@R%d z%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n",
+        room->key, room->zone_index,
         room->camera_bounds.min_r, room->camera_bounds.r_span,
         room->camera_bounds.min_theta, room->camera_bounds.theta_span,
         room->num_baddies, room->num_doors, room->num_gravfields,
@@ -348,25 +354,12 @@ bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
 
 void az_destroy_room(az_room_t *room) {
   assert(room != NULL);
-
   az_free_script(room->on_start);
-  room->on_start = NULL;
-
-  room->num_baddies = 0;
   free(room->baddies);
-  room->baddies = NULL;
-
-  room->num_doors = 0;
   free(room->doors);
-  room->doors = NULL;
-
-  room->num_nodes = 0;
   free(room->nodes);
-  room->nodes = NULL;
-
-  room->num_walls = 0;
   free(room->walls);
-  room->walls = NULL;
+  memset(room, 0, sizeof(*room));
 }
 
 /*===========================================================================*/
