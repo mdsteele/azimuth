@@ -62,7 +62,35 @@ bool az_try_damage_baddie(
   // If this was enough to kill the baddie, remove it and add debris/pickups in
   // its place.
   if (baddie->health <= 0.0) {
-    // TODO add baddie debris
+    // Add particles for baddie debris:
+    const double radius = baddie->data->overall_bounding_radius;
+    const double step = 3.0 + radius / 20.0;
+    for (double y = -radius; y <= radius; y += step) {
+      for (double x = -radius; x <= radius; x += step) {
+        const az_vector_t pos = {x + baddie->position.x + az_random(-3, 3),
+                                 y + baddie->position.y + az_random(-3, 3)};
+        az_particle_t *particle;
+        if (az_point_touches_baddie(baddie, pos) &&
+            az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_SHARD;
+          particle->color = baddie->data->color;
+          particle->position = pos;
+          particle->velocity = az_vmul(az_vsub(pos, baddie->position), 5.0);
+          particle->velocity.x += az_random(-radius, radius);
+          particle->velocity.y += az_random(-radius, radius);
+          particle->angle = az_random(0.0, AZ_TWO_PI);
+          particle->lifetime = az_random(0.5, 1.0);
+          particle->param1 = az_random(1.0, 3.0) *
+            (baddie->data->main_body.bounding_radius / 40.0);
+          particle->param2 = az_random(-10.0, 10.0);
+        }
+      }
+    }
+    for (int i = 0; i < 20; ++i) {
+      az_add_speck(state, AZ_WHITE, 2.0, baddie->position,
+                   az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
+    }
+
     az_add_random_pickup(state, baddie->data->potential_pickups,
                          baddie->position);
     const az_script_t *script = baddie->on_kill;

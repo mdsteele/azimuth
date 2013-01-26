@@ -105,6 +105,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .color = {255, 0, 255, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(lump_vertices),
                    .impact_damage = 10.0 }
   },
@@ -112,41 +113,44 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 12.0, .overall_bounding_radius = 30.5,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
+    .color = {160, 160, 160, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(turret_components)
   },
   [AZ_BAD_ZIPPER] = {
     .max_health = 20.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = AZ_PUPF_ALL, .color = {0, 255, 0, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_BOUNCER] = {
     .max_health = 5.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = AZ_PUPF_ALL, .color = {255, 0, 0, 255},
     .main_body = { .bounding_radius = 15.0, .impact_damage = 10.0 }
   },
   [AZ_BAD_ATOM] = {
     .max_health = 15.0, .overall_bounding_radius = 40.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = AZ_PUPF_ALL, .color = {64, 192, 64, 255},
     .main_body = { .bounding_radius = 10.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(atom_components)
   },
   [AZ_BAD_SPINER] = {
     .max_health = 10.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = AZ_PUPF_ALL, .color = {128, 255, 0, 255},
     .main_body = { .bounding_radius = 18.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BOX] = {
     .max_health = 10.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
+    .color = {160, 160, 160, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = AZ_DMGF_FREEZE, .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_BOX] = {
     .max_health = 20.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .color = {80, 80, 160, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_FREEZE | AZ_DMGF_PIERCE),
@@ -154,38 +158,40 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_CLAM] = {
     .max_health = 6.0, .overall_bounding_radius = 30.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = AZ_PUPF_ALL, .color = {128, 0, 255, 255},
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(clam_components)
   },
   [AZ_BAD_NIGHTBUG] = {
     .max_health = 8.0,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {192, 96, 0, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(nightbug_vertices),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_SPINE_MINE] = {
     .max_health = 5.0,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {128, 255, 0, 255},
     .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BROKEN_TURRET] = {
     .max_health = 5.0, .overall_bounding_radius = 30.5,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
+    .color = {160, 160, 160, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 5.0 },
     DECL_COMPONENTS(broken_turret_components)
   },
   [AZ_BAD_ZENITH_CORE] = {
     .max_health = 1000.0, .potential_pickups = AZ_PUPF_NOTHING,
+    .color = {255, 0, 255, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_TURRET] = {
     .max_health = 12.0, .overall_bounding_radius = 30.5,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {80, 80, 160, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(armored_turret_components)
@@ -277,6 +283,51 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
     baddie->components[i].position = baddie->data->components[i].init_position;
     baddie->components[i].angle = baddie->data->components[i].init_angle;
   }
+}
+
+/*===========================================================================*/
+
+static bool point_touches_component(
+    const az_component_data_t *component, az_vector_t point) {
+  if (component->polygon.num_vertices > 0) {
+    return (az_vwithin(point, AZ_VZERO, component->bounding_radius) &&
+            az_polygon_contains(component->polygon, point));
+  } else {
+    return az_vwithin(point, AZ_VZERO, component->bounding_radius);
+  }
+}
+
+bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  const az_baddie_data_t *data = baddie->data;
+
+  // Common case: if point definitely doesn't touch baddie, return early.
+  if (!az_vwithin(point, baddie->position, data->overall_bounding_radius)) {
+    return false;
+  }
+
+  // Calculate point relative to the positioning of the baddie.
+  const az_vector_t rel_point =
+    az_vrotate(az_vsub(point, baddie->position), -baddie->angle);
+
+  // Check if we hit the main body of the baddie.
+  if (point_touches_component(&data->main_body, rel_point)) {
+    return true;
+  }
+
+  // Now check if we hit any of the baddie's components.
+  for (int i = 0; i < data->num_components; ++i) {
+    assert(i < AZ_ARRAY_SIZE(baddie->components));
+    const az_component_data_t *component = &data->components[i];
+    const az_vector_t rel_rel_point =
+      az_vrotate(az_vsub(rel_point, baddie->components[i].position),
+                 -baddie->components[i].angle);
+    if (point_touches_component(component, rel_rel_point)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /*===========================================================================*/

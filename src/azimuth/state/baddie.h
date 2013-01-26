@@ -25,6 +25,7 @@
 #include "azimuth/state/player.h" // for az_damage_kinds_t
 #include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/util/color.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
@@ -64,6 +65,7 @@ typedef struct {
   double overall_bounding_radius;
   double max_health;
   az_pickup_flags_t potential_pickups;
+  az_color_t color;
   az_component_data_t main_body;
   int num_components;
   const az_component_data_t *components; // array of length num_components
@@ -110,6 +112,9 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle);
 
 /*===========================================================================*/
+
+// Determine if the specified point overlaps the baddie.
+bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point);
 
 // Determine if a ray, travelling delta from start, will hit the baddie.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
