@@ -17,37 +17,24 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_PARTICLE_H_
-#define AZIMUTH_STATE_PARTICLE_H_
+#include "azimuth/tick/speck.h"
 
-#include "azimuth/util/color.h"
-#include "azimuth/util/vector.h"
-
-/*===========================================================================*/
-
-typedef enum {
-  AZ_PAR_NOTHING = 0,
-  // BOOM: An explosion.  param1=radius
-  AZ_PAR_BOOM,
-  // BEAM: A beam.  param1=length, param2=width/2
-  AZ_PAR_BEAM,
-  // EMBER: A shrinking glowball.  param1=radius
-  AZ_PAR_EMBER,
-  // SHARD: A trianglar shard of metal/rock.
-  AZ_PAR_SHARD
-} az_particle_kind_t;
-
-typedef struct {
-  az_particle_kind_t kind; // if AZ_PAR_NOTHING, this particle is not present
-  az_color_t color;
-  az_vector_t position;
-  az_vector_t velocity;
-  double angle;
-  double age, lifetime; // seconds
-  double param1, param2; // meaning depends on kind
-} az_particle_t;
+#include "azimuth/state/space.h"
+#include "azimuth/state/speck.h"
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PARTICLE_H_
+void az_tick_specks(az_space_state_t *state, double time) {
+  AZ_ARRAY_LOOP(speck, state->specks) {
+    if (speck->kind == AZ_SPECK_NOTHING) continue;
+    speck->age += time;
+    if (speck->age > speck->lifetime) {
+      speck->kind = AZ_SPECK_NOTHING;
+      continue;
+    }
+    speck->position = az_vadd(speck->position, az_vmul(speck->velocity, time));
+  }
+}
+
+/*===========================================================================*/

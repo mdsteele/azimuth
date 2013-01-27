@@ -32,6 +32,7 @@
 #include "azimuth/tick/projectile.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/tick/ship.h"
+#include "azimuth/tick/speck.h"
 #include "azimuth/tick/wall.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
@@ -214,6 +215,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   state->ship.player.total_time += time;
   ++state->clock;
   az_tick_particles(state, time);
+  az_tick_specks(state, time);
   switch (state->mode) {
     case AZ_MODE_NORMAL:
       tick_pickups_walls_doors_projectiles_and_baddies(state, time);

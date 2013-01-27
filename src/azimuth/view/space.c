@@ -35,8 +35,9 @@
 #include "azimuth/view/particle.h"
 #include "azimuth/view/pickup.h"
 #include "azimuth/view/projectile.h"
-#include "azimuth/view/wall.h"
 #include "azimuth/view/ship.h"
+#include "azimuth/view/speck.h"
+#include "azimuth/view/wall.h"
 
 /*===========================================================================*/
 
@@ -79,6 +80,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_ship(state);
   az_draw_particles(state);
   az_draw_doors(state);
+  az_draw_specks(state);
 }
 
 void az_space_draw_screen(az_space_state_t *state) {

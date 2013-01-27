@@ -40,13 +40,6 @@ static void draw_particle(const az_particle_t *particle) {
   assert(particle->age <= particle->lifetime);
   switch (particle->kind) {
     case AZ_PAR_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_PAR_SPECK:
-      glBegin(GL_POINTS); {
-        const double ratio = particle->age / particle->lifetime;
-        with_color_alpha(particle->color, 1 - ratio);
-        glVertex2d(0, 0);
-      } glEnd();
-      break;
     case AZ_PAR_BOOM:
       glBegin(GL_TRIANGLE_FAN); {
         with_color_alpha(particle->color, 0);

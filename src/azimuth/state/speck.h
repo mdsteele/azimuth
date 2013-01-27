@@ -18,8 +18,8 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_PARTICLE_H_
-#define AZIMUTH_STATE_PARTICLE_H_
+#ifndef AZIMUTH_STATE_SPECK_H_
+#define AZIMUTH_STATE_SPECK_H_
 
 #include "azimuth/util/color.h"
 #include "azimuth/util/vector.h"
@@ -27,27 +27,18 @@
 /*===========================================================================*/
 
 typedef enum {
-  AZ_PAR_NOTHING = 0,
-  // BOOM: An explosion.  param1=radius
-  AZ_PAR_BOOM,
-  // BEAM: A beam.  param1=length, param2=width/2
-  AZ_PAR_BEAM,
-  // EMBER: A shrinking glowball.  param1=radius
-  AZ_PAR_EMBER,
-  // SHARD: A trianglar shard of metal/rock.
-  AZ_PAR_SHARD
-} az_particle_kind_t;
+  AZ_SPECK_NOTHING = 0,
+  AZ_SPECK_NORMAL
+} az_speck_kind_t;
 
 typedef struct {
-  az_particle_kind_t kind; // if AZ_PAR_NOTHING, this particle is not present
+  az_speck_kind_t kind; // if AZ_SPECK_NOTHING, this speck is not present
   az_color_t color;
   az_vector_t position;
   az_vector_t velocity;
-  double angle;
   double age, lifetime; // seconds
-  double param1, param2; // meaning depends on kind
-} az_particle_t;
+} az_speck_t;
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PARTICLE_H_
+#endif // AZIMUTH_STATE_SPECK_H_

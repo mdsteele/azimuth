@@ -36,6 +36,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/ship.h"
+#include "azimuth/state/speck.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/audio.h"
@@ -105,6 +106,7 @@ typedef struct {
   az_particle_t particles[500];
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
+  az_speck_t specks[750];
   az_wall_t walls[250];
   az_uuid_t uuids[AZ_NUM_UUID_SLOTS];
 } az_space_state_t;
