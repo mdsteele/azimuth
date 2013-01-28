@@ -131,13 +131,10 @@ static bool has_line_of_sight_to_ship(az_space_state_t *state,
 static void fire_projectile(az_space_state_t *state, az_baddie_t *baddie,
                             az_proj_kind_t kind, double forward,
                             double firing_angle, double proj_angle_offset) {
-  az_projectile_t *proj;
-  if (az_insert_projectile(state, &proj)) {
-    const double theta = firing_angle + baddie->angle;
-    az_init_projectile(proj, kind, true,
-                       az_vadd(baddie->position, az_vpolar(forward, theta)),
-                       theta + proj_angle_offset);
-  }
+  const double theta = firing_angle + baddie->angle;
+  az_add_projectile(state, kind, true,
+                    az_vadd(baddie->position, az_vpolar(forward, theta)),
+                    theta + proj_angle_offset);
 }
 
 static az_vector_t force_field(

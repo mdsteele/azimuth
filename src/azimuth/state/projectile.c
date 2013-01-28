@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h> // for memset
 
 #include "azimuth/util/misc.h"
 
@@ -320,6 +321,7 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
                         bool fired_by_enemy, az_vector_t position,
                         double angle) {
   assert(kind != AZ_PROJ_NOTHING);
+  memset(proj, 0, sizeof(*proj));
   proj->kind = kind;
   const int data_index = (int)kind;
   assert(0 <= data_index && data_index < AZ_ARRAY_SIZE(proj_data));
@@ -328,7 +330,6 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
   proj->position = position;
   proj->velocity = az_vpolar(proj->data->speed, angle);
   proj->angle = angle;
-  proj->age = 0.0;
   proj->last_hit_uid = AZ_NULL_UID;
 }
 

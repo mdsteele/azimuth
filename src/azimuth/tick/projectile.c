@@ -98,15 +98,12 @@ static void on_projectile_impact(az_space_state_t *state,
     const double mid_theta = az_vtheta(normal);
     for (int i = -2; i <= 2; ++i) {
       const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random(-.5, .5));
-      az_projectile_t *shrapnel;
-      if (az_insert_projectile(state, &shrapnel)) {
-        az_init_projectile(shrapnel, proj->data->shrapnel_kind, false,
-                           az_vadd(proj->position, az_vpolar(0.1, theta)),
-                           theta);
-        if (!(shrapnel->data->properties & AZ_PROJF_HOMING)) {
-          shrapnel->velocity =
-            az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
-        }
+      az_projectile_t *shrapnel = az_add_projectile(
+          state, proj->data->shrapnel_kind, false,
+          az_vadd(proj->position, az_vpolar(0.1, theta)), theta);
+      if (shrapnel != NULL &&
+          !(shrapnel->data->properties & AZ_PROJF_HOMING)) {
+        shrapnel->velocity = az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
       }
     }
   }
@@ -323,14 +320,11 @@ static void projectile_special_logic(az_space_state_t *state,
         if (proj->age > threshold && proj->age - time <= threshold) {
           const double offset = 24 * i;
           for (int j = (i == 0); j <= 1; ++j) {
-            az_projectile_t *missile;
-            if (az_insert_projectile(state, &missile)) {
-              az_init_projectile(
-                  missile, AZ_PROJ_MISSILE_TRIPLE, proj->fired_by_enemy,
-                  az_vadd(proj->position, az_vpolar((j ? offset : -offset),
-                                                    proj->angle + AZ_HALF_PI)),
-                  proj->angle);
-            }
+            az_add_projectile(
+                state, AZ_PROJ_MISSILE_TRIPLE, proj->fired_by_enemy,
+                az_vadd(proj->position, az_vpolar((j ? offset : -offset),
+                                                  proj->angle + AZ_HALF_PI)),
+                proj->angle);
           }
         }
       }

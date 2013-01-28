@@ -234,17 +234,16 @@ void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
   }
 }
 
-bool az_insert_projectile(az_space_state_t *state,
-                          az_projectile_t **proj_out) {
+az_projectile_t *az_add_projectile(
+    az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
+    az_vector_t position, double angle) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) {
-      proj->age = 0.0;
-      proj->param = 0.0;
-      *proj_out = proj;
-      return true;
+      az_init_projectile(proj, kind, fired_by_enemy, position, angle);
+      return proj;
     }
   }
-  return false;
+  return NULL;
 }
 
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {

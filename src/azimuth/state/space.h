@@ -144,7 +144,11 @@ bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
 void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
                   az_vector_t position, az_vector_t velocity);
 
-bool az_insert_projectile(az_space_state_t *state, az_projectile_t **proj_out);
+// Add a new projectile object and return a pointer to it, or return NULL if
+// the projectile array is full.
+az_projectile_t *az_add_projectile(
+    az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
+    az_vector_t position, double angle);
 
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 
