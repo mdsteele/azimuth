@@ -76,8 +76,9 @@ static void draw_camera_center_bounds(const az_editor_room_t *room) {
 // Draw the (approximate) bounds of what the camera can actually see within the
 // given room.
 static void draw_camera_edge_bounds(const az_editor_room_t *room) {
+  if (room->selected) glColor3f(0, 1, 0); // green
+  else glColor3f(0.75, 0.75, 0.75); // white
   const az_camera_bounds_t *bounds = &room->camera_bounds;
-  glColor4f(1, 1, 1, 0.5); // white tint
   if (bounds->theta_span >= 6.28) {
     glBegin(GL_LINE_LOOP); {
       circle_vertices(hypot(AZ_SCREEN_WIDTH/2,
@@ -229,6 +230,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
 static void draw_room_minimap(az_editor_state_t *state,
                               az_editor_room_t *room, az_room_key_t key) {
   draw_camera_edge_bounds(room);
+  // Draw doors (schematically):
   if (state->zoom_level < 64.0) {
     AZ_LIST_LOOP(editor_door, room->doors) {
       switch (editor_door->spec.kind) {
@@ -250,6 +252,7 @@ static void draw_room_minimap(az_editor_state_t *state,
       } glPopMatrix();
     }
   }
+  // Draw room number:
   if (state->zoom_level < 32.0) {
     glPushMatrix(); {
       az_camera_bounds_t *bounds = &room->camera_bounds;
@@ -291,12 +294,14 @@ static void draw_camera_view(az_editor_state_t *state) {
   for (int i = 0; i < AZ_LIST_SIZE(state->planet.rooms); ++i) {
     if (i == state->current_room) continue;
     az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms, i);
-    if (state->zoom_level < 8.0) draw_room(state, room);
-    else draw_room_minimap(state, room, i);
+    if (!az_editor_is_in_minimap_mode(state)) {
+      draw_room(state, room);
+      if (room->selected) draw_camera_edge_bounds(room);
+    } else draw_room_minimap(state, room, i);
   }
 
   // Fade out other rooms:
-  if (state->zoom_level < 8.0) {
+  if (!az_editor_is_in_minimap_mode(state)) {
     glPushMatrix(); {
       camera_to_screen_orient(state, state->camera);
       glScaled(state->zoom_level, state->zoom_level, 1);
@@ -313,7 +318,8 @@ static void draw_camera_view(az_editor_state_t *state) {
   // Draw current room:
   az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
                                        state->current_room);
-  draw_room(state, room);
+  if (!az_editor_is_in_minimap_mode(state)) draw_room(state, room);
+  else draw_room_minimap(state, room, state->current_room);
 
   // Draw the camera bounds, and a dot for the camera center.
   draw_camera_center_bounds(room);

@@ -109,6 +109,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
 
   az_destroy_planet(&planet);
 
+  AZ_LIST_GET(state->planet.rooms, state->current_room)->selected = true;
   az_center_editor_camera_on_current_room(state);
   return true;
 }
@@ -244,6 +245,10 @@ void az_init_editor_text(
   state->text.length = state->text.cursor =
     az_imin(length, AZ_ARRAY_SIZE(state->text.buffer));
   state->text.action = action;
+}
+
+bool az_editor_is_in_minimap_mode(const az_editor_state_t *state) {
+  return state->zoom_level >= 8.0;
 }
 
 void az_center_editor_camera_on_current_room(az_editor_state_t *state) {

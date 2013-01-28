@@ -43,10 +43,42 @@
 
 static az_editor_state_t state;
 
+static void deselect_all_rooms(void) {
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    room->selected = false;
+  }
+}
+
+static void do_select_room(int x, int y, bool multi) {
+  const az_vector_t pt = az_pixel_to_position(&state, x, y);
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    az_camera_bounds_t *bounds = &room->camera_bounds;
+    const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+    const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
+    const double theta_extra =
+      asin(fmin(1.0, AZ_SCREEN_WIDTH / (2.0 * bounds->min_r)));
+    const double theta_span = bounds->theta_span + 2.0 * theta_extra;
+    const double min_theta = bounds->min_theta - theta_extra;
+    if (!az_vwithin(pt, AZ_VZERO, min_r) && az_vwithin(pt, AZ_VZERO, max_r) &&
+        az_mod2pi_nonneg(az_vtheta(pt) - min_theta) <= theta_span) {
+      if (multi) {
+        room->selected = !room->selected;
+      } else if (!room->selected) {
+        deselect_all_rooms();
+        room->selected = true;
+      }
+      return;
+    }
+  }
+  deselect_all_rooms();
+}
+
 static void add_new_room(void) {
+  deselect_all_rooms();
   const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
   az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);
   assert(room->on_start == NULL);
+  room->selected = true;
   room->zone_index = state.brush.zone_index;
   const double current_r = az_vnorm(state.camera);
   const double theta_span = 200.0 / (80.0 + current_r);
@@ -210,44 +242,60 @@ static void do_move(int x, int y, int dx, int dy) {
 }
 
 static void do_mass_move(int x, int y, int dx, int dy) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_camera_bounds_t *camera_bounds = &room->camera_bounds;
+  az_vector_t mass_center = AZ_VZERO;
+  int room_count = 0;
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    if (!room->selected) continue;
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
+    mass_center = az_vadd(mass_center, az_vpolar(
+        bounds->min_r + 0.5 * bounds->r_span,
+        bounds->min_theta + 0.5 * bounds->theta_span));
+    ++room_count;
+  }
+  if (room_count == 0) return;
   const az_vector_t normal =
-    az_vpolar(1.0, camera_bounds->min_theta + 0.5 * camera_bounds->theta_span);
+    az_vwithlen(az_vdiv(mass_center, room_count), 1.0);
   const double dr =
     az_vdot(az_vsub(az_pixel_to_position(&state, x, y),
                     az_pixel_to_position(&state, x - dx, y - dy)), normal);
-  // Change camera bounds:
-  const double r1 = camera_bounds->min_r + 0.5 * camera_bounds->r_span;
-  assert(r1 >= 0.0);
-  camera_bounds->min_r = fmax(0.0, camera_bounds->min_r + dr);
-  const double r2 = camera_bounds->min_r + 0.5 * camera_bounds->r_span;
-  assert(r2 >= 0.0);
-  if (r2 > 0.0) {
-    const double new_span =
-      2.0 * atan(tan(0.5 * camera_bounds->theta_span) * r1 / r2);
-    camera_bounds->min_theta =
-      az_mod2pi(camera_bounds->min_theta -
-                0.5 * (new_span - camera_bounds->theta_span));
-    camera_bounds->theta_span = new_span;
-  }
-  assert(camera_bounds->theta_span >= 0.0);
-  // Move objects in the room:
-  const az_vector_t delta = az_vmul(normal, dr);
-  AZ_LIST_LOOP(baddie, room->baddies) {
-    baddie->spec.position = az_vadd(baddie->spec.position, delta);
-  }
-  AZ_LIST_LOOP(door, room->doors) {
-    door->spec.position = az_vadd(door->spec.position, delta);
-  }
-  AZ_LIST_LOOP(gravfield, room->gravfields) {
-    gravfield->spec.position = az_vadd(gravfield->spec.position, delta);
-  }
-  AZ_LIST_LOOP(node, room->nodes) {
-    node->spec.position = az_vadd(node->spec.position, delta);
-  }
-  AZ_LIST_LOOP(wall, room->walls) {
-    wall->spec.position = az_vadd(wall->spec.position, delta);
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    if (!room->selected) continue;
+    az_camera_bounds_t *camera_bounds = &room->camera_bounds;
+    // Move objects in the room:
+    const az_vector_t delta = az_vmul(normal, dr);
+    AZ_LIST_LOOP(baddie, room->baddies) {
+      baddie->spec.position = az_vadd(baddie->spec.position, delta);
+    }
+    AZ_LIST_LOOP(door, room->doors) {
+      door->spec.position = az_vadd(door->spec.position, delta);
+    }
+    AZ_LIST_LOOP(gravfield, room->gravfields) {
+      gravfield->spec.position = az_vadd(gravfield->spec.position, delta);
+    }
+    AZ_LIST_LOOP(node, room->nodes) {
+      node->spec.position = az_vadd(node->spec.position, delta);
+    }
+    AZ_LIST_LOOP(wall, room->walls) {
+      wall->spec.position = az_vadd(wall->spec.position, delta);
+    }
+    // Change camera bounds:
+    const double r1 = camera_bounds->min_r + 0.5 * camera_bounds->r_span;
+    assert(r1 >= 0.0);
+    camera_bounds->min_r = fmax(0.0, camera_bounds->min_r + dr);
+    const double r2 = camera_bounds->min_r + 0.5 * camera_bounds->r_span;
+    assert(r2 >= 0.0);
+    if (r2 > 0.0) {
+      const double old_mid_theta =
+        camera_bounds->min_theta + 0.5 * camera_bounds->theta_span;
+      const az_vector_t old_center = az_vpolar(r1, old_mid_theta);
+      const az_vector_t new_center = az_vadd(old_center, delta);
+      const double new_mid_theta = az_vtheta(new_center);
+      const double new_span =
+        2.0 * atan(tan(0.5 * camera_bounds->theta_span) * r1 / r2);
+      camera_bounds->min_theta = az_mod2pi(new_mid_theta - 0.5 * new_span);
+      camera_bounds->theta_span = new_span;
+    }
+    assert(camera_bounds->theta_span >= 0.0);
   }
   state.unsaved = true;
 }
@@ -291,67 +339,47 @@ static void do_rotate(int x, int y, int dx, int dy) {
   center = az_vdiv(center, count);
   const double dtheta =
     az_vtheta(az_vsub(pt1, center)) - az_vtheta(az_vsub(pt0, center));
-  AZ_LIST_LOOP(baddie, room->baddies) {
-    if (!baddie->selected) continue;
-    rotate_around(&baddie->spec.position, center, dtheta);
-    baddie->spec.angle = state.brush.angle =
-      az_mod2pi(baddie->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(door, room->doors) {
-    if (!door->selected) continue;
-    rotate_around(&door->spec.position, center, dtheta);
-    door->spec.angle = state.brush.angle =
-      az_mod2pi(door->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(gravfield, room->gravfields) {
-    if (!gravfield->selected) continue;
-    rotate_around(&gravfield->spec.position, center, dtheta);
-    gravfield->spec.angle = state.brush.angle =
-      az_mod2pi(gravfield->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(node, room->nodes) {
-    if (!node->selected) continue;
-    rotate_around(&node->spec.position, center, dtheta);
-    node->spec.angle = state.brush.angle =
-      az_mod2pi(node->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(wall, room->walls) {
-    if (!wall->selected) continue;
-    rotate_around(&wall->spec.position, center, dtheta);
-    wall->spec.angle = state.brush.angle =
-      az_mod2pi(wall->spec.angle + dtheta);
-  }
+#define ROTATE(obj) do { \
+    AZ_LIST_LOOP(obj, room->obj##s) { \
+      if (!obj->selected) continue; \
+      rotate_around(&obj->spec.position, center, dtheta); \
+      obj->spec.angle = state.brush.angle = \
+        az_mod2pi(obj->spec.angle + dtheta); \
+    } \
+  } while (0)
+
+  ROTATE(baddie);
+  ROTATE(door);
+  ROTATE(gravfield);
+  ROTATE(node);
+  ROTATE(wall);
+#undef ROTATE
   state.unsaved = true;
 }
 
 static void do_mass_rotate(int x, int y, int dx, int dy) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   const double dtheta =
     az_mod2pi(az_vtheta(az_pixel_to_position(&state, x, y)) -
               az_vtheta(az_pixel_to_position(&state, x - dx, y - dy)));
-  room->camera_bounds.min_theta =
-    az_mod2pi(room->camera_bounds.min_theta + dtheta);
-  AZ_LIST_LOOP(baddie, room->baddies) {
-    baddie->spec.position = az_vrotate(baddie->spec.position, dtheta);
-    baddie->spec.angle = az_mod2pi(baddie->spec.angle + dtheta);
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    if (!room->selected) continue;
+    room->camera_bounds.min_theta =
+      az_mod2pi(room->camera_bounds.min_theta + dtheta);
+#define ROTATE(obj) do { \
+      AZ_LIST_LOOP(obj, room->obj##s) { \
+        obj->spec.position = az_vrotate(obj->spec.position, dtheta); \
+        obj->spec.angle = az_mod2pi(obj->spec.angle + dtheta); \
+      } \
+    } while (0)
+
+    ROTATE(baddie);
+    ROTATE(door);
+    ROTATE(gravfield);
+    ROTATE(node);
+    ROTATE(wall);
+#undef ROTATE
+    state.unsaved = true;
   }
-  AZ_LIST_LOOP(door, room->doors) {
-    door->spec.position = az_vrotate(door->spec.position, dtheta);
-    door->spec.angle = az_mod2pi(door->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(gravfield, room->gravfields) {
-    gravfield->spec.position = az_vrotate(gravfield->spec.position, dtheta);
-    gravfield->spec.angle = az_mod2pi(gravfield->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(node, room->nodes) {
-    node->spec.position = az_vrotate(node->spec.position, dtheta);
-    node->spec.angle = az_mod2pi(node->spec.angle + dtheta);
-  }
-  AZ_LIST_LOOP(wall, room->walls) {
-    wall->spec.position = az_vrotate(wall->spec.position, dtheta);
-    wall->spec.angle = az_mod2pi(wall->spec.angle + dtheta);
-  }
-  state.unsaved = true;
 }
 
 static void do_set_camera_bounds(int x, int y) {
@@ -703,8 +731,11 @@ static void try_set_current_room(void) {
   if (key < 0 || key >= AZ_LIST_SIZE(state.planet.rooms)) return;
   state.text.action = AZ_ETA_NOTHING;
   state.current_room = key;
-  state.brush.zone_index = AZ_LIST_GET(state.planet.rooms, key)->zone_index;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, key);
+  state.brush.zone_index = room->zone_index;
   az_center_editor_camera_on_current_room(&state);
+  deselect_all_rooms();
+  room->selected = true;
 }
 
 static void begin_set_door_dest(void) {
@@ -969,6 +1000,11 @@ static void event_loop(void) {
             case AZ_TOOL_ROTATE:
               do_select(event.mouse.x, event.mouse.y, az_is_shift_key_held());
               break;
+            case AZ_TOOL_MASS_MOVE:
+            case AZ_TOOL_MASS_ROTATE:
+              do_select_room(event.mouse.x, event.mouse.y,
+                             az_is_shift_key_held());
+              break;
             case AZ_TOOL_CAMERA:
               do_set_camera_bounds(event.mouse.x, event.mouse.y);
               break;
@@ -986,9 +1022,6 @@ static void event_loop(void) {
               break;
             case AZ_TOOL_WALL:
               do_add_wall(event.mouse.x, event.mouse.y);
-              break;
-            case AZ_TOOL_MASS_MOVE:
-            case AZ_TOOL_MASS_ROTATE:
               break;
           }
           break;

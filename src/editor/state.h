@@ -80,6 +80,7 @@ typedef struct {
 } az_editor_wall_t;
 
 typedef struct {
+  bool selected;
   int zone_index;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
@@ -142,6 +143,8 @@ void az_tick_editor_state(az_editor_state_t *state, double time);
 void az_init_editor_text(
     az_editor_state_t *state, az_editor_text_action_t action,
     const char *format, ...) __attribute__((__format__(__printf__,3,4)));
+
+bool az_editor_is_in_minimap_mode(const az_editor_state_t *state);
 
 void az_center_editor_camera_on_current_room(az_editor_state_t *state);
 
