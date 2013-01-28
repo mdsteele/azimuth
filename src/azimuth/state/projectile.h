@@ -69,6 +69,7 @@ typedef enum {
   AZ_PROJ_MISSILE_BARRAGE,
   AZ_PROJ_MISSILE_TRIPLE,
   AZ_PROJ_MISSILE_HOMING,
+  AZ_PROJ_MISSILE_PHASE,
   AZ_PROJ_BOMB,
   AZ_PROJ_MEGA_BOMB,
   // Baddie-only projectiles:
@@ -108,6 +109,7 @@ typedef struct {
   az_vector_t velocity;
   double angle;
   double age; // seconds
+  double param; // the meaning of this is projectile-kind-specific
   // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
   // gun), this records the UID of the last baddie hit.  The projectile cannot
   // immediately hit this same baddie again.  This can also be AZ_SHIP_UID if

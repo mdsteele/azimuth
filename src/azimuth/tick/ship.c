@@ -532,6 +532,8 @@ static void fire_weapons(az_space_state_t *state, double time) {
   if (ship->gun_charge > 0.0 && !controls->fire_held) {
     assert(player->gun1 == AZ_GUN_CHARGE);
     if (ship->gun_charge >= 1.0) {
+      // If the hyper rockets are also fully charged (and if the ship has
+      // enough rocket ammo), fire off a charge/rocket combo.
       if (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
           player->ordnance == AZ_ORDN_ROCKETS &&
           player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
@@ -552,13 +554,26 @@ static void fire_weapons(az_space_state_t *state, double time) {
             fire_gun_multi(state, 0.0, AZ_PROJ_MISSILE_HOMING,
                            3, AZ_DEG2RAD(20), 0, AZ_SND_FIRE_HYPER_ROCKET);
             break;
-          case AZ_GUN_PHASE: break; // TODO
+          case AZ_GUN_PHASE:
+            for (int param = -1; param <= 1; param += 2) {
+              az_projectile_t *proj;
+              if (az_insert_projectile(state, &proj)) {
+                az_init_projectile(
+                    proj, AZ_PROJ_MISSILE_PHASE, false,
+                    az_vadd(ship->position, az_vpolar(18, ship->angle)),
+                    ship->angle);
+                proj->param = param;
+              }
+            }
+            break;
           case AZ_GUN_BURST: break; // TODO
           case AZ_GUN_PIERCE: break; // TODO
           case AZ_GUN_BEAM: break; // TODO
         }
         ship->ordn_charge = 0.0;
-      } else {
+      }
+      // Otherwise, fire a charged shot (no rockets).
+      else {
         switch (player->gun2) {
           case AZ_GUN_NONE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,

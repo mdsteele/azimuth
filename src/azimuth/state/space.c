@@ -239,6 +239,7 @@ bool az_insert_projectile(az_space_state_t *state,
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) {
       proj->age = 0.0;
+      proj->param = 0.0;
       *proj_out = proj;
       return true;
     }

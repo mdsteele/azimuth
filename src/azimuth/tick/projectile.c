@@ -148,6 +148,7 @@ static void on_projectile_impact(az_space_state_t *state,
       break;
     case AZ_PROJ_HYPER_ROCKET:
     case AZ_PROJ_MISSILE_FREEZE:
+    case AZ_PROJ_MISSILE_PHASE:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
@@ -339,6 +340,11 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_MISSILE_HOMING:
       leave_missile_trail(state, proj, time, (az_color_t){0, 64, 255, 255});
+    case AZ_PROJ_MISSILE_PHASE:
+      leave_missile_trail(state, proj, time, (az_color_t){192, 192, 64, 255});
+      proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+            proj->param * proj->data->speed * cos(30.0 * proj->age)},
+        proj->angle);
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
