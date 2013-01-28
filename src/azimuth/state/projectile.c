@@ -71,76 +71,73 @@ static const az_proj_data_t proj_data[] = {
     .speed = 500.0,
     .lifetime = 3.0,
     .impact_damage = 0.5,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_CHARGED_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,
     .impact_damage = 2.5,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_FREEZE_HOMING] = {
     .speed = 500.0,
     .lifetime = 3.0,
     .impact_damage = 0.5,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_TRIPLE_HOMING] = {
     .speed = 500.0,
     .lifetime = 3.0,
     .impact_damage = 0.4,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.1,
-    .phased = true
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
     .speed = 800.0,
     .lifetime = 3.0,
     .impact_damage = 10.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
-    .phased = true,
-    .piercing = true
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_FREEZE_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.1,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
-    .phased = true
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_TRIPLE_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.08,
-    .phased = true
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_HOMING_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.05,
-    .homing = true,
-    .phased = true
+    .properties = AZ_PROJF_HOMING | AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_PHASE_BURST] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.1,
     .shrapnel_kind = AZ_PROJ_GUN_PHASE,
-    .phased = true
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.2,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .phased = true,
-    .piercing = true
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_BURST] = {
     .speed = 900.0,
@@ -173,7 +170,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 3.0,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .piercing = true
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_SHRAPNEL] = {
     .speed = 500.0,
@@ -190,43 +187,42 @@ static const az_proj_data_t proj_data[] = {
     .speed = 400.0,
     .lifetime = 1.1,
     .impact_damage = 0.5,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_PIERCE] = {
     .speed = 700.0,
     .lifetime = 2.0,
     .impact_damage = 2.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .piercing = true
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_CHARGED_PIERCE] = {
     .speed = 800.0,
     .lifetime = 2.0,
     .impact_damage = 10.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
-    .piercing = true
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_FREEZE_PIERCE] = {
     .speed = 700.0,
     .lifetime = 2.0,
     .impact_damage = 2.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE | AZ_DMGF_PIERCE,
-    .piercing = true
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_TRIPLE_PIERCE] = {
     .speed = 700.0,
     .lifetime = 2.0,
     .impact_damage = 1.6,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .piercing = true
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_HOMING_PIERCE] = {
     .speed = 600.0,
     .lifetime = 3.0,
     .impact_damage = 1.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .homing = true,
-    .piercing = true
+    .properties = AZ_PROJF_HOMING | AZ_PROJF_PIERCING
   },
   [AZ_PROJ_ROCKET] = {
     .speed = 1000.0,
@@ -255,6 +251,19 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 4.0,
     .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_ROCKET
   },
+  [AZ_PROJ_MISSILE_BARRAGE] = {
+    .lifetime = 0.27,
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_MISSILE_TRIPLE] = {
+    .speed = 1000.0,
+    .lifetime = 3.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 25.0,
+    .impact_shake = 0.75,
+    .damage_kind = AZ_DMGF_ROCKET
+  },
   [AZ_PROJ_MISSILE_HOMING] = {
     .speed = 800.0,
     .lifetime = 3.0,
@@ -263,10 +272,9 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 20.0,
     .impact_shake = 0.75,
     .damage_kind = AZ_DMGF_ROCKET,
-    .homing = true
+    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_BOMB] = {
-    .speed = 0.0,
     .lifetime = 1.5,
     .splash_damage = 25.0,
     .splash_radius = 60.0,
@@ -274,12 +282,12 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_BOMB
   },
   [AZ_PROJ_MEGA_BOMB] = {
-    .speed = 0.0,
     .lifetime = 3.0,
     .splash_damage = 75.0,
     .splash_radius = 200.0,
     .impact_shake = 3.0,
-    .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB
+    .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_FIREBALL_FAST] = {
     .speed = 550.0,

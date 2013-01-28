@@ -103,7 +103,7 @@ static void on_projectile_impact(az_space_state_t *state,
         az_init_projectile(shrapnel, proj->data->shrapnel_kind, false,
                            az_vadd(proj->position, az_vpolar(0.1, theta)),
                            theta);
-        if (!shrapnel->data->homing) {
+        if (!(shrapnel->data->properties & AZ_PROJF_HOMING)) {
           shrapnel->velocity =
             az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
         }
@@ -142,6 +142,7 @@ static void on_projectile_impact(az_space_state_t *state,
   // Play sound.
   switch (proj->kind) {
     case AZ_PROJ_ROCKET:
+    case AZ_PROJ_MISSILE_TRIPLE:
     case AZ_PROJ_MISSILE_HOMING:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
       break;
@@ -189,7 +190,7 @@ static void on_projectile_hit_target(
   }
   // Remove the projectile (unless it's piercing, in which case it should
   // continue on beyond this target).
-  if (!proj->data->piercing) {
+  if (!(proj->data->properties & AZ_PROJF_PIERCING)) {
     proj->kind = AZ_PROJ_NOTHING;
   }
 }
@@ -222,7 +223,7 @@ static void on_projectile_hit_ship(
 static void projectile_home_in(az_space_state_t *state,
                                az_projectile_t *proj,
                                double time) {
-  assert(proj->data->homing);
+  assert(proj->data->properties & AZ_PROJF_HOMING);
   const double proj_angle = az_vtheta(proj->velocity);
   // First, figure out what position we're homing in on.
   az_vector_t goal = state->ship.position;
@@ -315,6 +316,27 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_MISSILE_FREEZE:
       leave_missile_trail(state, proj, time, (az_color_t){0, 192, 255, 255});
       break;
+    case AZ_PROJ_MISSILE_BARRAGE:
+      for (int i = 0; i < 4; ++i) {
+        const double threshold = 0.33 * proj->data->lifetime * i;
+        if (proj->age > threshold && proj->age - time <= threshold) {
+          const double offset = 24 * i;
+          for (int j = (i == 0); j <= 1; ++j) {
+            az_projectile_t *missile;
+            if (az_insert_projectile(state, &missile)) {
+              az_init_projectile(
+                  missile, AZ_PROJ_MISSILE_TRIPLE, proj->fired_by_enemy,
+                  az_vadd(proj->position, az_vpolar((j ? offset : -offset),
+                                                    proj->angle + AZ_HALF_PI)),
+                  proj->angle);
+            }
+          }
+        }
+      }
+      break;
+    case AZ_PROJ_MISSILE_TRIPLE:
+      leave_missile_trail(state, proj, time, (az_color_t){0, 255, 0, 255});
+      break;
     case AZ_PROJ_MISSILE_HOMING:
       leave_missile_trail(state, proj, time, (az_color_t){0, 64, 255, 255});
       break;
@@ -363,12 +385,18 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   }
 
   // Figure out what, if anything, the projectile hits:
-  az_impact_flags_t skip_types =
-    (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
-  if (proj->data->phased) skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
-  az_impact_t impact;
-  az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
-                skip_types, proj->last_hit_uid, &impact);
+  az_impact_t impact = {.type = AZ_IMP_NOTHING};
+  if (proj->data->properties & AZ_PROJF_NO_HIT) {
+    impact.position = az_vadd(proj->position, az_vmul(proj->velocity, time));
+  } else {
+    az_impact_flags_t skip_types =
+      (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
+    if (proj->data->properties & AZ_PROJF_PHASED) {
+      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
+    }
+    az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
+                  skip_types, proj->last_hit_uid, &impact);
+  }
 
   // Move the projectile:
   proj->position = impact.position;
@@ -376,7 +404,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Resolve the impact (if any):
   switch (impact.type) {
     case AZ_IMP_NOTHING:
-      if (proj->data->homing) {
+      if (proj->data->properties & AZ_PROJF_HOMING) {
         projectile_home_in(state, proj, time);
       }
       break;

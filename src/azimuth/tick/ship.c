@@ -544,7 +544,10 @@ static void fire_weapons(az_space_state_t *state, double time) {
             fire_gun_single(state, 0.0, AZ_PROJ_MISSILE_FREEZE,
                             AZ_SND_FIRE_HYPER_ROCKET);
             break;
-          case AZ_GUN_TRIPLE: break; // TODO
+          case AZ_GUN_TRIPLE:
+            fire_gun_single(state, 0.0, AZ_PROJ_MISSILE_BARRAGE,
+                            AZ_SND_FIRE_HYPER_ROCKET);
+            break;
           case AZ_GUN_HOMING:
             fire_gun_multi(state, 0.0, AZ_PROJ_MISSILE_HOMING,
                            3, AZ_DEG2RAD(20), 0, AZ_SND_FIRE_HYPER_ROCKET);
