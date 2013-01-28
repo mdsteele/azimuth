@@ -555,8 +555,12 @@ static void fire_weapons(az_space_state_t *state, double time) {
                   ship->angle);
               if (proj != NULL) proj->param = param;
             }
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
             break;
-          case AZ_GUN_BURST: break; // TODO
+          case AZ_GUN_BURST:
+            fire_one_projectile(state, AZ_PROJ_MISSILE_BURST,
+                                AZ_SND_FIRE_HYPER_ROCKET);
+            break;
           case AZ_GUN_PIERCE: break; // TODO
           case AZ_GUN_BEAM: break; // TODO
         }

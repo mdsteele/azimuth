@@ -340,6 +340,24 @@ static void projectile_special_logic(az_space_state_t *state,
             proj->param * proj->data->speed * cos(30.0 * proj->age)},
         proj->angle);
       break;
+    case AZ_PROJ_MISSILE_BURST:
+      leave_missile_trail(state, proj, time, (az_color_t){192, 96, 0, 255});
+      {
+        az_impact_t impact;
+        az_ray_impact(
+            state, proj->position, az_vwithlen(proj->velocity, 100.0),
+            (AZ_IMPF_SHIP | AZ_IMPF_BADDIE), AZ_SHIP_UID, &impact);
+        if (impact.type != AZ_IMP_NOTHING) {
+          for (int i = 0; i < 360; i += 40) {
+            az_add_projectile(
+                state, AZ_PROJ_ROCKET, proj->fired_by_enemy, proj->position,
+                az_mod2pi(proj->angle + AZ_DEG2RAD(i)));
+          }
+          proj->kind = AZ_PROJ_NOTHING;
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+        }
+      }
+      break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
       if (proj->age >= proj->data->lifetime) {

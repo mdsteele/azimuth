@@ -242,6 +242,9 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_MISSILE_PHASE:
       draw_rocket(proj, clock, (az_color_t){192, 192, 0, 255});
       break;
+    case AZ_PROJ_MISSILE_BURST:
+      draw_rocket(proj, clock, (az_color_t){192, 96, 0, 255});
+      break;
     case AZ_PROJ_BOMB:
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(0.75, 0.75, 0.75); // light gray
