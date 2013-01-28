@@ -246,6 +246,25 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 4.0,
     .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
   },
+  [AZ_PROJ_MISSILE_FREEZE] = {
+    .speed = 1000.0,
+    .lifetime = 3.0,
+    .impact_damage = 25.0,
+    .splash_damage = 3.0,
+    .splash_radius = 200.0,
+    .impact_shake = 4.0,
+    .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_ROCKET
+  },
+  [AZ_PROJ_MISSILE_HOMING] = {
+    .speed = 800.0,
+    .lifetime = 3.0,
+    .impact_damage = 4.0,
+    .splash_damage = 4.0,
+    .splash_radius = 20.0,
+    .impact_shake = 0.75,
+    .damage_kind = AZ_DMGF_ROCKET,
+    .homing = true
+  },
   [AZ_PROJ_BOMB] = {
     .speed = 0.0,
     .lifetime = 1.5,

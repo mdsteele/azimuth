@@ -65,6 +65,10 @@ static void on_projectile_impact(az_space_state_t *state,
         az_try_damage_baddie(state, baddie, &baddie->data->main_body,
                              proj->data->damage_kind,
                              proj->data->splash_damage);
+        if (proj->kind == AZ_PROJ_MISSILE_FREEZE &&
+            !(baddie->data->main_body.immunities & AZ_DMGF_FREEZE)) {
+          baddie->frozen = 1.0;
+        }
       }
     }
     // Open doors that are within the blast.
@@ -138,9 +142,11 @@ static void on_projectile_impact(az_space_state_t *state,
   // Play sound.
   switch (proj->kind) {
     case AZ_PROJ_ROCKET:
+    case AZ_PROJ_MISSILE_HOMING:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
       break;
     case AZ_PROJ_HYPER_ROCKET:
+    case AZ_PROJ_MISSILE_FREEZE:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
@@ -245,11 +251,30 @@ static void projectile_home_in(az_space_state_t *state,
   proj->angle = new_angle;
 }
 
+static void leave_missile_trail(az_space_state_t *state,
+                                az_projectile_t *proj,
+                                double time, az_color_t color) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  const double per_second = 20.0;
+  if (ceil(per_second * proj->age) > ceil(per_second * (proj->age - time))) {
+    az_particle_t *particle;
+    if (az_insert_particle(state, &particle)) {
+      particle->kind = AZ_PAR_BOOM;
+      particle->color = color;
+      particle->position = proj->position;
+      particle->velocity = AZ_VZERO;
+      particle->lifetime = 0.5;
+      particle->param1 = 10.0;
+    }
+  }
+}
+
 // Called after aging the projectile, but before doing anything else (including
 // removing it if it is past its lifetime).
 static void projectile_special_logic(az_space_state_t *state,
                                      az_projectile_t *proj,
                                      double time) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
   // The projectile still hasn't hit anything.  Apply kind-specific logic to
   // the projectile (e.g. homing projectiles will home in).
   switch (proj->kind) {
@@ -286,6 +311,12 @@ static void projectile_special_logic(az_space_state_t *state,
                      az_vrotate(az_vmul(proj->velocity, -az_random(0, 0.3)),
                                 (az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)))));
       }
+      break;
+    case AZ_PROJ_MISSILE_FREEZE:
+      leave_missile_trail(state, proj, time, (az_color_t){0, 192, 255, 255});
+      break;
+    case AZ_PROJ_MISSILE_HOMING:
+      leave_missile_trail(state, proj, time, (az_color_t){0, 64, 255, 255});
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:

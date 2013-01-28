@@ -30,6 +30,37 @@
 
 /*===========================================================================*/
 
+static void draw_rocket(const az_projectile_t* proj, az_clock_t clock,
+                        az_color_t color) {
+  glColor3ub(color.r, color.g, color.b);
+  glBegin(GL_QUADS); {
+    const int y = 2 - az_clock_mod(6, 2, clock);
+    glVertex2i(-11, y);
+    glVertex2i(-11, y + 2);
+    glVertex2i(-4, y + 2);
+    glVertex2i(-4, y);
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.25, 0.25, 0.25); // dark gray
+    glVertex2i(-9, -2);
+    glVertex2i(2, -2);
+    glColor3f(0.75, 0.75, 0.75); // light gray
+    glVertex2i(-9, 0);
+    glVertex2i(4, 0);
+    glColor3f(0.25, 0.25, 0.25); // dark gray
+    glVertex2i(-9, 2);
+    glVertex2i(2, 2);
+  } glEnd();
+  glColor3ub(color.r, color.g, color.b);
+  glBegin(GL_QUADS); {
+    const int y = -4 + az_clock_mod(6, 2, clock);
+    glVertex2i(-11, y);
+    glVertex2i(-11, y + 2);
+    glVertex2i(-4, y + 2);
+    glVertex2i(-4, y);
+  } glEnd();
+}
+
 static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   switch (proj->kind) {
     case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -38,36 +69,36 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
-        glVertex2d( 0.0,  0.0);
-        glVertex2d( 2.0,  0.0);
-        glVertex2d( 1.5,  1.5);
-        glVertex2d( 0.0,  2.0);
-        glVertex2d(-1.5,  1.5);
+        glVertex2f( 0.0,  0.0);
+        glVertex2f( 2.0,  0.0);
+        glVertex2f( 1.5,  1.5);
+        glVertex2f( 0.0,  2.0);
+        glVertex2f(-1.5,  1.5);
         glColor4f(1, 1, 1, 0); // transparent white
-        glVertex2d(-10.,  0.0);
+        glVertex2f(-10.,  0.0);
         glColor3f(1, 1, 1); // white
-        glVertex2d(-1.5, -1.5);
-        glVertex2d( 0.0, -2.0);
-        glVertex2d( 1.5, -1.5);
-        glVertex2d( 2.0,  0.0);
+        glVertex2f(-1.5, -1.5);
+        glVertex2f( 0.0, -2.0);
+        glVertex2f( 1.5, -1.5);
+        glVertex2f( 2.0,  0.0);
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_NORMAL:
     case AZ_PROJ_GUN_CHARGED_TRIPLE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
-        glVertex2d( 0.0,  0.0);
-        glVertex2d( 4.0,  0.0);
-        glVertex2d( 3.0,  3.0);
-        glVertex2d( 0.0,  4.0);
-        glVertex2d(-3.0,  3.0);
+        glVertex2f( 0.0,  0.0);
+        glVertex2f( 4.0,  0.0);
+        glVertex2f( 3.0,  3.0);
+        glVertex2f( 0.0,  4.0);
+        glVertex2f(-3.0,  3.0);
         glColor4f(1, 1, 1, 0); // transparent white
-        glVertex2d(-20.,  0.0);
+        glVertex2f(-20.,  0.0);
         glColor3f(1, 1, 1); // white
-        glVertex2d(-3.0, -3.0);
-        glVertex2d( 0.0, -4.0);
-        glVertex2d( 3.0, -3.0);
-        glVertex2d( 4.0,  0.0);
+        glVertex2f(-3.0, -3.0);
+        glVertex2f( 0.0, -4.0);
+        glVertex2f( 3.0, -3.0);
+        glVertex2f( 4.0,  0.0);
       } glEnd();
       break;
     case AZ_PROJ_GUN_FREEZE:
@@ -77,7 +108,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(0.5, 1, 1, 0.75); // cyan
-        glVertex2d(0, 0);
+        glVertex2f(0, 0);
         for (int i = 0; i <= 12; ++i) {
           if (i % 2) glColor4f(0.5, 0.5, 1, 0.75); // blue
           else glColor4f(0.5, 1, 1, 0.75); // cyan
@@ -94,17 +125,17 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_HOMING_SHRAPNEL:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0, 1); // blue
-        glVertex2d(4, 0);
-        glVertex2d(-4, 2);
-        glVertex2d(-4, -2);
+        glVertex2f(4, 0);
+        glVertex2f(-4, 2);
+        glVertex2f(-4, -2);
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0, 1); // blue
-        glVertex2d(8, 0);
-        glVertex2d(-8, 4);
-        glVertex2d(-8, -4);
+        glVertex2f(8, 0);
+        glVertex2f(-8, 4);
+        glVertex2f(-8, -4);
       } glEnd();
       break;
     case AZ_PROJ_GUN_PHASE:
@@ -137,8 +168,8 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       glBegin(GL_QUADS); {
         if (az_clock_mod(2, 2, clock)) glColor3f(1, 1, 0);
         else glColor3f(1, 0, 1);
-        glVertex2d(2, -2);
-        glVertex2d(2, 2);
+        glVertex2f(2, -2);
+        glVertex2f(2, 2);
         if (az_clock_mod(2, 2, clock)) glColor4f(1, 1, 0, 0);
         else glColor4f(1, 0, 1, 0);
         glVertex2d(-18 - 400 * proj->age, 2);
@@ -154,14 +185,14 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glRotated(10 * az_clock_mod(36, 1, clock), 0, 0, 1);
         glColor3f(0.75, 0.5, 0.25); // brown
         glBegin(GL_QUADS); {
-          glVertex2d(5, 0);
-          glVertex2d(2, 3);
-          glVertex2d(-1, 0);
-          glVertex2d(2, -3);
-          glVertex2d(-5, 0);
-          glVertex2d(-2, -3);
-          glVertex2d(1, 0);
-          glVertex2d(-2, 3);
+          glVertex2f(5, 0);
+          glVertex2f(2, 3);
+          glVertex2f(-1, 0);
+          glVertex2f(2, -3);
+          glVertex2f(-5, 0);
+          glVertex2f(-2, -3);
+          glVertex2f(1, 0);
+          glVertex2f(-2, 3);
         } glEnd();
       } glPopMatrix();
       break;
@@ -177,52 +208,32 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
           (proj->kind == AZ_PROJ_GUN_FREEZE_PIERCE ? 0.8 : 0.0);
         glBegin(GL_TRIANGLE_FAN); {
           glColor4f(red, green, 1, 0.75); // magenta
-          glVertex2d(2, 0);
+          glVertex2f(2, 0);
           glColor4f(red, green, 1, 0); // transparent magenta
-          glVertex2d(0, 4);
-          glVertex2d(-50, 0);
-          glVertex2d(0, -4);
+          glVertex2f(0, 4);
+          glVertex2f(-50, 0);
+          glVertex2f(0, -4);
         } glEnd();
         glBegin(GL_TRIANGLE_FAN); {
-          glVertex2d(-2, 0);
+          glVertex2f(-2, 0);
           glColor4f(red, green, 1, 0.75); // magenta
-          glVertex2d(-6, 8);
-          glVertex2d(2, 0);
-          glVertex2d(-6, -8);
+          glVertex2f(-6, 8);
+          glVertex2f(2, 0);
+          glVertex2f(-6, -8);
         } glEnd();
       }
       break;
     case AZ_PROJ_ROCKET:
+      draw_rocket(proj, clock, (az_color_t){128, 0, 0, 255});
+      break;
     case AZ_PROJ_HYPER_ROCKET:
-      if (proj->kind == AZ_PROJ_ROCKET) glColor3f(0.5, 0, 0); // dark red
-      else glColor3f(0.75, 0, 0.75); // magenta
-      glBegin(GL_QUADS); {
-        const int y = 2 - az_clock_mod(6, 2, clock);
-        glVertex2i(-11, y);
-        glVertex2i(-11, y + 2);
-        glVertex2i(-4, y + 2);
-        glVertex2i(-4, y);
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(-9, -2);
-        glVertex2i(2, -2);
-        glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2i(-9, 0);
-        glVertex2i(4, 0);
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(-9, 2);
-        glVertex2i(2, 2);
-      } glEnd();
-      if (proj->kind == AZ_PROJ_ROCKET) glColor3f(0.5, 0, 0); // dark red
-      else glColor3f(0.75, 0, 0.75); // magenta
-      glBegin(GL_QUADS); {
-        const int y = -4 + az_clock_mod(6, 2, clock);
-        glVertex2i(-11, y);
-        glVertex2i(-11, y + 2);
-        glVertex2i(-4, y + 2);
-        glVertex2i(-4, y);
-      } glEnd();
+      draw_rocket(proj, clock, (az_color_t){192, 0, 192, 255});
+      break;
+    case AZ_PROJ_MISSILE_FREEZE:
+      draw_rocket(proj, clock, (az_color_t){0, 192, 192, 255});
+      break;
+    case AZ_PROJ_MISSILE_HOMING:
+      draw_rocket(proj, clock, (az_color_t){0, 0, 255, 255});
       break;
     case AZ_PROJ_BOMB:
       glBegin(GL_TRIANGLE_FAN); {
@@ -271,13 +282,13 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_SPINE:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0, 0.3, 0);
-        glVertex2d(-3, 3);
+        glVertex2f(-3, 3);
         glColor3f(0.6, 0.7, 0.6);
-        glVertex2d(5, 0);
+        glVertex2f(5, 0);
         glColor3f(0.6, 0.7, 0);
-        glVertex2d(-5, 0);
+        glVertex2f(-5, 0);
         glColor3f(0, 0.3, 0);
-        glVertex2d(-3, -3);
+        glVertex2f(-3, -3);
       } glEnd();
       break;
   }
