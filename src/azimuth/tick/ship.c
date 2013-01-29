@@ -132,10 +132,9 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   }
 
   // Resolve the collision (if any):
-  bool bounce_ship = false;
-  double elasticity, damage;
+  double damage = 0.0, elasticity = 0.0;
   switch (impact->type) {
-    case AZ_IMP_NOTHING: break;
+    case AZ_IMP_NOTHING: return;
     case AZ_IMP_BADDIE:
       if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
           az_try_damage_baddie(
@@ -143,13 +142,15 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
               impact->target.baddie.component, AZ_DMGF_CPLUS,
               impact->target.baddie.baddie->data->max_health)) {
         assert(impact->target.baddie.baddie->kind == AZ_BAD_NOTHING);
+        return;
       } else {
-        ship->tractor_beam.active = false;
-        bounce_ship = true;
-        damage = impact->target.baddie.component->impact_damage;
         elasticity = 0.5;
-        if (damage > 0.0 && az_vnonzero(ship->velocity)) {
-          elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+        if (impact->target.baddie.baddie->frozen == 0.0) {
+          ship->tractor_beam.active = false;
+          damage = impact->target.baddie.component->impact_damage;
+          if (damage > 0.0 && az_vnonzero(ship->velocity)) {
+            elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+          }
         }
       }
       break;
@@ -159,20 +160,19 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
       state->mode_data.doorway.progress = 0.0;
       state->mode_data.doorway.door = impact->target.door;
-      break;
+      return;
     case AZ_IMP_DOOR_OUTSIDE:
-      bounce_ship = true;
       elasticity = AZ_DOOR_ELASTICITY;
-      damage = 0.0;
       break;
     case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
     case AZ_IMP_WALL:
       // If C-plus is active, maybe we can just bust right through the wall.
       // Otherwise, the ship hits the wall and bounces off.
-      if (!(ship->cplus.state == AZ_CPLUS_ACTIVE &&
-            az_try_break_wall(state, impact->target.wall, AZ_DMGF_CPLUS,
-                              ship->position))) {
-        bounce_ship = true;
+      if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
+          az_try_break_wall(state, impact->target.wall, AZ_DMGF_CPLUS,
+                            ship->position)) {
+        return;
+      } else {
         elasticity = impact->target.wall->data->elasticity;
         damage = (ship->cplus.state == AZ_CPLUS_ACTIVE ? 0.0 :
                   impact->target.wall->data->impact_damage_coeff *
@@ -180,10 +180,6 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       }
       break;
   }
-
-  // The rest of this function only applies if the ship is going to bounce off
-  // whatever it hit.
-  if (!bounce_ship) return;
 
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with whatever we hit).
