@@ -186,16 +186,14 @@ static void drift_towards_ship(
 }
 
 static void fly_towards_ship(
-    az_space_state_t *state, az_baddie_t *baddie, double time) {
-  const double turn_rate = 3.0;
-  const double lateral_decel_rate = 20.0;
-  const double max_speed = 40.0;
-  const double forward_accel = 100.0;
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double turn_rate, double max_speed, double forward_accel,
+    double lateral_decel_rate, double attack_range) {
   const double backward_accel = 80.0;
   const az_vector_t drift =
     (baddie->cooldown > 1.0 ?
      force_field(state, baddie, -100.0, 0.0, 500.0, 100.0, 200.0) :
-     force_field(state, baddie, 100.0, 100.0, 1000.0, 100.0, 200.0));
+     force_field(state, baddie, 100.0, attack_range, 1000.0, 100.0, 200.0));
   const double goal_theta =
     az_vtheta(baddie->cooldown <= 0.0 &&
               az_vwithin(baddie->position, state->ship.position, 120.0) ?
@@ -354,7 +352,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_NIGHTBUG:
-      fly_towards_ship(state, baddie, time);
+      fly_towards_ship(state, baddie, time, 3.0, 40.0, 100.0, 20.0, 100.0);
       if (baddie->state == 0) {
         baddie->param = fmax(0.0, baddie->param - time / 3.5);
         if (baddie->cooldown < 0.5 &&
@@ -499,6 +497,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                                    az_random(-AZ_HALF_PI, AZ_HALF_PI)));
           }
         }
+      }
+      break;
+    case AZ_BAD_DRAGONFLY:
+      fly_towards_ship(state, baddie, time, 5.0, 300.0, 300.0, 200.0, 0.0);
+      if (az_ship_is_present(&state->ship) &&
+          state->ship.temp_invincibility > 0.0) {
+        baddie->cooldown = 2.0;
       }
       break;
     case AZ_BAD_BOX:

@@ -428,6 +428,49 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.2 + 0.25 * flare, 0.2, 0.25 + 0.25 * frozen),
           color3(0.6 + 0.25 * flare, 0.6, 0.75 + 0.25 * frozen));
       break;
+    case AZ_BAD_DRAGONFLY:
+      // Antennae:
+      glColor3f(0.5, 0.25, 0.25);
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(23, 4); glVertex2f(16, 0); glVertex2f(23, -4);
+      } glEnd();
+      // Body:
+      for (int i = -1; i <= 1; i += 2) {
+        glBegin(GL_QUAD_STRIP); {
+          for (int x = 20; x >= -15; x -= 5) {
+            if (x % 2) glColor3f(1 - frozen, 0.5 - 0.5 * flare, frozen);
+            else glColor3f(1 - frozen, 0.25, frozen);
+            const double y = i * 4.0 * (1 - pow(0.05 * x, 4) + 0.025 * x);
+            glVertex2d(x, 0);
+            glColor3f(0.4 + 0.4 * flare, 0, frozen);
+            glVertex2d(x, y);
+          }
+        } glEnd();
+      }
+      // Wings:
+      for (int i = 0; i < 2; ++i) {
+        for (double j = -1.1; j < 2.0; j += 3.0) {
+          glPushMatrix(); {
+            glTranslatef(5, 0, 0);
+            glRotated(j * 6.0 * (1 + az_clock_zigzag(4, 1, clock)),
+                      0, 0, 1);
+            glBegin(GL_QUAD_STRIP); {
+              glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
+              glVertex2f(-2.5, 0);
+              glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
+                        1 - flare, 0.35);
+              glVertex2f(2.5, 0);
+              glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
+              glVertex2f(-4.5, 18);
+              glColor4f(flare, 1 - flare, 1 - flare, 0.35);
+              glVertex2f(4.5, 18);
+              glVertex2f(-1, 21); glVertex2f(1, 21);
+            } glEnd();
+          } glPopMatrix();
+        }
+        glScalef(1, -1, 1);
+      }
+      break;
   }
 }
 

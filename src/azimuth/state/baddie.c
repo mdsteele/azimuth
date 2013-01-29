@@ -94,6 +94,11 @@ static const az_vector_t nightbug_vertices[] = {
   {17, 0}, {9, 10}, {-11, 5}, {-11, -5}, {9, -10}
 };
 
+static const az_vector_t flyer_vertices[] = {
+  {20, 2}, {10, 5}, {4, 10}, {0, 5}, {-15, 1},
+  {-15, -1}, {0, -5}, {4, -10}, {10, -5}, {20, -2}
+};
+
 static const az_vector_t zenith_core_vertices[] = {
   { 120, 0}, { 84.852813742385706,  84.852813742385706},
   {0,  120}, {-84.852813742385706,  84.852813742385706},
@@ -195,6 +200,14 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(armored_turret_components)
+  },
+  [AZ_BAD_DRAGONFLY] = {
+    .max_health = 8.0,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
+                          AZ_PUPF_MEDIUM_SHIELDS),
+    .color = {255, 64, 0, 255},
+    .main_body = { .polygon = AZ_INIT_POLYGON(flyer_vertices),
+                   .impact_damage = 8.0 }
   }
 };
 
