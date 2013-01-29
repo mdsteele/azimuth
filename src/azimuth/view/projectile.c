@@ -227,6 +227,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       draw_rocket(proj, clock, (az_color_t){128, 0, 0, 255});
       break;
     case AZ_PROJ_HYPER_ROCKET:
+    case AZ_PROJ_MISSILE_PIERCE:
       draw_rocket(proj, clock, (az_color_t){192, 0, 192, 255});
       break;
     case AZ_PROJ_MISSILE_FREEZE:

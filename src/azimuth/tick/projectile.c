@@ -146,6 +146,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_HYPER_ROCKET:
     case AZ_PROJ_MISSILE_FREEZE:
     case AZ_PROJ_MISSILE_PHASE:
+    case AZ_PROJ_MISSILE_PIERCE:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
@@ -357,6 +358,9 @@ static void projectile_special_logic(az_space_state_t *state,
           az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
         }
       }
+      break;
+    case AZ_PROJ_MISSILE_PIERCE:
+      leave_missile_trail(state, proj, time, (az_color_t){255, 0, 255, 255});
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
