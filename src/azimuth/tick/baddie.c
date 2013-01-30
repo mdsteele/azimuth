@@ -62,6 +62,7 @@ bool az_try_damage_baddie(
   // If this was enough to kill the baddie, remove it and add debris/pickups in
   // its place.
   if (baddie->health <= 0.0) {
+    az_play_sound(&state->soundboard, baddie->data->death_sound);
     // Add particles for baddie debris:
     const double radius = baddie->data->overall_bounding_radius;
     const double step = 3.0 + radius / 20.0;

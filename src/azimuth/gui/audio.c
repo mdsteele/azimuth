@@ -349,6 +349,39 @@ static az_sound_entry_t sound_entries[] = {
     .env_sustain = 0.03245, .env_decay = 0.10518,
     .start_freq = 0.43334, .freq_slide = -0.57352
   },
+  [AZ_SND_KILL_ATOM] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.211267605424, .env_punch = 0.405718,
+    .env_decay = 0.605633795261, .start_freq = 0.7841117,
+    .freq_slide = -0.236357, .freq_delta_slide = -0.9898345,
+    .vibrato_depth = 0.04728087, .vibrato_speed = -0.4434,
+    .arp_mod = 0.6122, .arp_speed = 0.2002,
+    .square_duty = -0.3186, .duty_sweep = -0.4922905,
+    .repeat_speed = 0.4604,
+    .phaser_offset = 0.6059253, .phaser_sweep = -0.3536932,
+    .lpf_cutoff = 0.982626, .lpf_ramp = 0.2353423, .lpf_resonance = 0.8618,
+    .volume_adjust = 0.8
+  },
+  [AZ_SND_KILL_DRAGONFLY] = {
+    .wave_kind = SQUARE,
+    .env_attack = 0.03548157, .env_sustain = 0.378881,
+    .env_punch = 0.3252649, .env_decay = -0.36613,
+    .start_freq = 0.05789758,
+    .freq_slide = 0.5313399, .freq_delta_slide = -0.1058238,
+    .vibrato_depth = 0.9644304, .vibrato_speed = 0.9172,
+    .arp_mod = 0.00940001, .arp_speed = 0.281,
+    .square_duty = -0.1706, .duty_sweep = 0.585956,
+    .repeat_speed = 0.8049999,
+    .phaser_offset = -0.5914348, .phaser_sweep = -0.8174004,
+    .lpf_cutoff = 0.8984792, .lpf_ramp = 0.3468362, .lpf_resonance = -0.007,
+    .hpf_cutoff = 0.1794088, .hpf_ramp = -0.1530325,
+    .volume_adjust = 0.3
+  },
+  [AZ_SND_KILL_TURRET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.10687, .env_punch = 0.24554, .env_decay = 0.463,
+    .start_freq = 0.0972442, .freq_slide = 0.05804, .repeat_speed = 0.56475,
+  },
   [AZ_SND_KLAXON] = {
     .wave_kind = SQUARE,
     .env_sustain = 0.4507, .start_freq = 0.32394,

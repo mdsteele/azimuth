@@ -25,6 +25,7 @@
 #include "azimuth/state/player.h" // for az_damage_kinds_t
 #include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -67,6 +68,7 @@ typedef struct {
   double max_health;
   az_pickup_flags_t potential_pickups;
   az_color_t color;
+  az_sound_key_t death_sound;
   az_component_data_t main_body;
   int num_components;
   const az_component_data_t *components; // array of length num_components
