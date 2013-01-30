@@ -39,6 +39,10 @@ void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds) {
 
 void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
   if (soundboard->num_oneshots < AZ_ARRAY_SIZE(soundboard->oneshots)) {
+    // Don't start the same sound more than once in the same frame.
+    for (int i = 0; i < soundboard->num_oneshots; ++i) {
+      if (soundboard->oneshots[i] == sound) return;
+    }
     soundboard->oneshots[soundboard->num_oneshots] = sound;
     ++soundboard->num_oneshots;
   }

@@ -366,6 +366,7 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
   }
   // If the wall is vulnerable to the damage being dealt, destroy the wall.
   if ((damage_kind & vulnerability) != 0) {
+    az_play_sound(&state->soundboard, AZ_SND_KILL_TURRET);
     // Place particles for wall debris.
     const double radius = wall->data->bounding_radius;
     const double step = 3.0 + radius / 10.0;
