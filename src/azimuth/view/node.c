@@ -95,6 +95,27 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_UPG_GUN_BURST:
+      glColor3f(1, 0.8, 0.75);
+      glBegin(GL_QUADS); {
+        for (int i = 10; i < 370; i += 45) {
+          const az_vector_t vec = az_vpolar(1 + 3 * frame, AZ_DEG2RAD(i));
+          glVertex2d(vec.x + 2, vec.y); glVertex2d(vec.x, vec.y + 2);
+          glVertex2d(vec.x - 2, vec.y); glVertex2d(vec.x, vec.y - 2);
+        }
+      } glEnd();
+      glPushMatrix(); {
+        glRotatef(45 * frame, 0, 0, 1);
+        glBegin(GL_QUADS); {
+          glColor3f(0.75, 0.5, 0.25); // brown
+          glVertex2f( 2.6, -4); glVertex2f( 6.6, 0); glVertex2f( 2.6,  4);
+          glColor3f(0.5, 0.25, 0); // dark brown
+          glVertex2f(-1.3, 0); glVertex2f( 1.3, 0);
+          glColor3f(0.75, 0.5, 0.25); // brown
+          glVertex2f(-2.6,  4); glVertex2f(-6.6, 0); glVertex2f(-2.6, -4);
+        } glEnd();
+      } glPopMatrix();
+      break;
     case AZ_UPG_GUN_BEAM:
       glBegin(GL_QUAD_STRIP); {
         glColor4f(1, 0, 0, 0.2 * (frame == 3 ? 1 : frame));

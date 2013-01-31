@@ -182,17 +182,14 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_HOMING_BURST:
     case AZ_PROJ_GUN_BURST_PIERCE:
       glPushMatrix(); {
-        glRotated(10 * az_clock_mod(36, 1, clock), 0, 0, 1);
-        glColor3f(0.75, 0.5, 0.25); // brown
+        glRotated(720.0 * proj->age, 0, 0, 1);
         glBegin(GL_QUADS); {
-          glVertex2f(5, 0);
-          glVertex2f(2, 3);
-          glVertex2f(-1, 0);
-          glVertex2f(2, -3);
-          glVertex2f(-5, 0);
-          glVertex2f(-2, -3);
-          glVertex2f(1, 0);
-          glVertex2f(-2, 3);
+          glColor3f(0.75, 0.5, 0.25); // brown
+          glVertex2f( 2, -3); glVertex2f( 5, 0); glVertex2f( 2,  3);
+          glColor3f(0.5, 0.25, 0); // dark brown
+          glVertex2f(-1, 0); glVertex2f( 1, 0);
+          glColor3f(0.75, 0.5, 0.25); // brown
+          glVertex2f(-2,  3); glVertex2f(-5, 0); glVertex2f(-2, -3);
         } glEnd();
       } glPopMatrix();
       break;
