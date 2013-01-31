@@ -251,8 +251,9 @@ static void draw_hud_message(const az_message_t *message) {
   } glPopMatrix();
 }
 
-static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
-  if (!timer->is_active) return;
+static void draw_hud_countdown(const az_countdown_t *countdown,
+                               az_clock_t clock) {
+  if (!countdown->is_active) return;
   glPushMatrix(); {
     const int width = 2 * HUD_PADDING + 7 * 24;
     const int height = 2 * HUD_PADDING + 24;
@@ -262,7 +263,7 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
     const int xend = AZ_SCREEN_WIDTH - HUD_MARGIN - width;
     const int yend = AZ_SCREEN_HEIGHT - HUD_MARGIN - height;
     const double speed = 150.0; // pixels per second
-    const double offset = fmax(0.0, timer->active_for - 2.5) * speed;
+    const double offset = fmax(0.0, countdown->active_for - 2.5) * speed;
     glTranslatef(az_imin(xend, xstart + offset),
                  az_imin(yend, ystart + offset), 0);
 
@@ -274,16 +275,16 @@ static void draw_hud_timer(const az_timer_t *timer, az_clock_t clock) {
       glVertex2i(width, 0);
     } glEnd();
 
-    assert(timer->time_remaining >= 0.0);
-    if (timer->time_remaining >= 10.0) {
+    assert(countdown->time_remaining >= 0.0);
+    if (countdown->time_remaining >= 10.0) {
       glColor3f(1, 1, 1); // white
     } else {
       if (az_clock_mod(2, 3, clock) == 0) glColor3f(1, 1, 0); // yellow
       else glColor3f(1, 0, 0); // red
     }
-    const int minutes = az_imin(9, ((int)timer->time_remaining) / 60);
-    const int seconds = ((int)timer->time_remaining) % 60;
-    const int jiffies = ((int)(timer->time_remaining * 100)) % 100;
+    const int minutes = az_imin(9, ((int)countdown->time_remaining) / 60);
+    const int seconds = ((int)countdown->time_remaining) % 60;
+    const int jiffies = ((int)(countdown->time_remaining * 100)) % 100;
     az_draw_printf(24, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING,
                    "%d:%02d:%02d", minutes, seconds, jiffies);
   } glPopMatrix();
@@ -444,7 +445,7 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_weapons_selection(player);
   draw_hud_boss_health(state);
   draw_hud_message(&state->message);
-  draw_hud_timer(&state->timer, state->clock);
+  draw_hud_countdown(&state->countdown, state->clock);
   if (state->mode == AZ_MODE_UPGRADE) {
     draw_upgrade_box(state);
   }

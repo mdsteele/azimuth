@@ -35,6 +35,7 @@
 #include "azimuth/state/player.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/room.h"
+#include "azimuth/state/script.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/speck.h"
 #include "azimuth/state/uid.h"
@@ -55,7 +56,7 @@ typedef struct {
   bool is_active;
   double active_for;
   double time_remaining; // seconds
-} az_timer_t;
+} az_countdown_t;
 
 typedef struct {
   const az_planet_t *planet;
@@ -64,7 +65,7 @@ typedef struct {
   az_camera_t camera;
   az_ship_t ship;
   az_message_t message;
-  az_timer_t timer;
+  az_countdown_t countdown;
   az_soundboard_t soundboard;
 
   // Mode information:
@@ -107,6 +108,7 @@ typedef struct {
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
   az_speck_t specks[750];
+  az_timer_t timers[5];
   az_wall_t walls[250];
   az_uuid_t uuids[AZ_NUM_UUID_SLOTS];
 } az_space_state_t;

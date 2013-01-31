@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
@@ -44,24 +45,23 @@ AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c) == 3);
 AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c,d,e,f,g,h) == 8);
 
 #ifdef NDEBUG
-#define SCRIPT_ERROR(msg) do { return; } while (0)
+#define SCRIPT_ERROR(msg) do { goto halt; } while (0)
 #else
 
-static void print_error(const char *msg, const az_script_t *script,
-                        int pc, int stack_size, double *stack) {
+static void print_error(const char *msg, const az_script_vm_t *vm) {
   fprintf(stderr, "SCRIPT ERROR: %s\n  ", msg);
-  az_fprint_script(script, stderr);
-  fprintf(stderr, "\n  pc = %d\n  stack: ", pc);
-  for (int i = 0; i < stack_size; ++i) {
+  az_fprint_script(vm->script, stderr);
+  fprintf(stderr, "\n  pc = %d\n  stack: ", vm->pc);
+  for (int i = 0; i < vm->stack_size; ++i) {
     if (i != 0) fprintf(stderr, ", ");
-    fprintf(stderr, "%.12g", stack[i]);
+    fprintf(stderr, "%.12g", vm->stack[i]);
   }
   fputc('\n', stderr);
 }
 
 #define SCRIPT_ERROR(msg) do { \
-    print_error(msg, script, pc, stack_size, stack); \
-    return; \
+    print_error(msg, vm); \
+    goto halt; \
   } while (0)
 
 #endif // NDEBUG
@@ -70,8 +70,8 @@ static void print_error(const char *msg, const az_script_t *script,
 
 // STACK_PUSH(value) pushes a single value onto the stack.
 #define STACK_PUSH(v) do { \
-    if (stack_size < AZ_ARRAY_SIZE(stack)) { \
-      stack[stack_size++] = (double)(v); \
+    if (vm->stack_size < AZ_ARRAY_SIZE(vm->stack)) { \
+      vm->stack[vm->stack_size++] = (double)(v); \
     } else SCRIPT_ERROR("stack overflow"); \
   } while (0)
 
@@ -81,19 +81,19 @@ static void print_error(const char *msg, const az_script_t *script,
 // the stack (or errors on underflow), and assigns them to the pointers.  The
 // top of the stack will be stored to the rightmost pointer passed, and so on.
 #define STACK_POP(...) do { \
-    if (stack_size >= COUNT_ARGS(__VA_ARGS__)) { \
-      do_stack_pop(stack, &stack_size, COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
+    if (vm->stack_size >= COUNT_ARGS(__VA_ARGS__)) { \
+      do_stack_pop(vm, COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
     } else SCRIPT_ERROR("stack underflow"); \
   } while (0)
 
-static void do_stack_pop(double *stack, int *stack_size, int num_args, ...) {
-  assert(*stack_size >= num_args);
-  *stack_size -= num_args;
+static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
+  assert(vm->stack_size >= num_args);
+  vm->stack_size -= num_args;
   va_list args;
   va_start(args, num_args);
   for (int i = 0; i < num_args; ++i) {
     double *ptr = va_arg(args, double *);
-    *ptr = stack[*stack_size + i];
+    *ptr = vm->stack[vm->stack_size + i];
   }
   va_end(args);
 }
@@ -101,11 +101,11 @@ static void do_stack_pop(double *stack, int *stack_size, int num_args, ...) {
 /*===========================================================================*/
 
 #define DO_JUMP() do { \
-    const int new_pc = pc + (int)ins.immediate; \
-    if (new_pc < 0 || new_pc > script->num_instructions) { \
+    const int new_pc = vm->pc + (int)ins.immediate; \
+    if (new_pc < 0 || new_pc > vm->script->num_instructions) { \
       SCRIPT_ERROR("jump out of range"); \
     } \
-    pc = new_pc - 1; \
+    vm->pc = new_pc - 1; \
   } while (0)
 
 #define GET_UID(uuid_type, uid_out) do { \
@@ -119,20 +119,15 @@ static void do_stack_pop(double *stack, int *stack_size, int num_args, ...) {
 
 /*===========================================================================*/
 
-void az_run_script(az_space_state_t *state, const az_script_t *script) {
+static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
   assert(state != NULL);
-  if (script == NULL || script->num_instructions == 0) return;
-  else {
-    assert(script->num_instructions > 0);
-    assert(script->instructions != NULL);
-  }
+  assert(vm != NULL);
+  assert(vm->script != NULL);
+  assert(vm->script->instructions != NULL);
   int total_steps = 0;
-  int pc = 0;
-  int stack_size = 0;
-  static double stack[24];
-  while (pc < script->num_instructions) {
+  while (vm->pc < vm->script->num_instructions) {
     if (++total_steps > AZ_MAX_SCRIPT_STEPS) SCRIPT_ERROR("ran for too long");
-    az_instruction_t ins = script->instructions[pc];
+    az_instruction_t ins = vm->script->instructions[vm->pc];
     switch (ins.opcode) {
       case AZ_OP_NOP: break;
       // Stack manipulation:
@@ -142,8 +137,8 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
       case AZ_OP_POP:
         {
           int num = az_imax(1, (int)ins.immediate);
-          if (stack_size < num) SCRIPT_ERROR("stack underflow");
-          stack_size -= num;
+          if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
+          vm->stack_size -= num;
         }
         break;
       // Arithmetic:
@@ -273,12 +268,51 @@ void az_run_script(az_space_state_t *state, const az_script_t *script) {
         }
         break;
       // Termination:
-      case AZ_OP_STOP: return;
+      case AZ_OP_WAIT:
+        if (ins.immediate > 0.0) {
+          ++vm->pc;
+          const az_script_t *script = vm->script;
+          vm->script = NULL;
+          AZ_ARRAY_LOOP(timer, state->timers) {
+            if (timer->vm.script != NULL) continue;
+            memmove(&timer->vm, vm, sizeof(az_script_vm_t));
+            timer->time_remaining = ins.immediate;
+            timer->vm.script = script;
+            return;
+          }
+          SCRIPT_ERROR("too many timers");
+        }
+        break;
+      case AZ_OP_STOP: goto halt;
       case AZ_OP_ERROR: SCRIPT_ERROR("ERROR opcode");
     }
-    ++pc;
-    assert(pc >= 0);
-    assert(pc <= script->num_instructions);
+    ++vm->pc;
+    assert(vm->pc >= 0);
+    assert(vm->pc <= vm->script->num_instructions);
+  }
+ halt:
+  // Now that the script has completed, zero out the VM.  If the resumed script
+  // was a timer, this will have the effect of marking the timer as inactive.
+  memset(vm, 0, sizeof(*vm));
+}
+
+void az_run_script(az_space_state_t *state, const az_script_t *script) {
+  if (script == NULL || script->num_instructions == 0) return;
+  az_script_vm_t vm = { .script = script };
+  resume_script(state, &vm);
+}
+
+/*===========================================================================*/
+
+void az_tick_timers(az_space_state_t *state, double time) {
+  AZ_ARRAY_LOOP(timer, state->timers) {
+    if (timer->vm.script == NULL) continue;
+    assert(timer->time_remaining > 0.0);
+    timer->time_remaining -= time;
+    if (timer->time_remaining <= 0.0) {
+      timer->time_remaining = 0.0;
+      resume_script(state, &timer->vm);
+    }
   }
 }
 

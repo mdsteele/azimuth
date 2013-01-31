@@ -177,10 +177,10 @@ static void tick_message(az_message_t *message, double time) {
   message->time_remaining = fmax(0.0, message->time_remaining - time);
 }
 
-static void tick_timer(az_timer_t *timer, double time) {
-  if (!timer->is_active) return;
-  if (timer->active_for < 10.0) timer->active_for += time;
-  timer->time_remaining = fmax(0.0, timer->time_remaining - time);
+static void tick_countdown(az_countdown_t *countdown, double time) {
+  if (!countdown->is_active) return;
+  if (countdown->active_for < 10.0) countdown->active_for += time;
+  countdown->time_remaining = fmax(0.0, countdown->time_remaining - time);
 }
 
 static void tick_pickups_walls_doors_projectiles_and_baddies(
@@ -218,12 +218,14 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   az_tick_specks(state, time);
   switch (state->mode) {
     case AZ_MODE_NORMAL:
+      az_tick_timers(state, time);
       tick_pickups_walls_doors_projectiles_and_baddies(state, time);
       az_tick_ship(state, time);
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
       if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
+        az_tick_timers(state, time);
         tick_pickups_walls_doors_projectiles_and_baddies(state, time);
         az_tick_ship(state, time);
       }
@@ -244,7 +246,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   }
   az_tick_camera(state, time);
   tick_message(&state->message, time);
-  tick_timer(&state->timer, time);
+  tick_countdown(&state->countdown, time);
 }
 
 /*===========================================================================*/

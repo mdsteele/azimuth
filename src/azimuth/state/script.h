@@ -53,6 +53,7 @@ typedef enum {
   AZ_OP_GETGS, // push strength of gravfield i
   AZ_OP_SETGS, // pop top, set strength of gravfield i to a
   // Termination:
+  AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
   AZ_OP_STOP, // halt script successfully
   AZ_OP_ERROR // halt script and printf execution state
 } az_opcode_t;
@@ -70,6 +71,18 @@ typedef struct {
   int num_instructions;
   az_instruction_t *instructions;
 } az_script_t;
+
+typedef struct {
+  const az_script_t *script;
+  int pc;
+  int stack_size;
+  double stack[12];
+} az_script_vm_t;
+
+typedef struct {
+  double time_remaining;
+  az_script_vm_t vm; // if script is NULL, this timer is not present
+} az_timer_t;
 
 // Serialize the script to a file or string and return true, or return false on
 // error (e.g. file I/O fails, or the string buffer isn't large enough).  In

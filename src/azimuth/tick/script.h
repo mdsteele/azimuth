@@ -31,6 +31,8 @@
 // function simply returns immediately with no effect.
 void az_run_script(az_space_state_t *state, const az_script_t *script);
 
+void az_tick_timers(az_space_state_t *state, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_SCRIPT_H_

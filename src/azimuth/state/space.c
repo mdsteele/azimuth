@@ -40,6 +40,7 @@ void az_clear_space(az_space_state_t *state) {
   AZ_ZERO_ARRAY(state->pickups);
   AZ_ZERO_ARRAY(state->projectiles);
   AZ_ZERO_ARRAY(state->specks);
+  AZ_ZERO_ARRAY(state->timers);
   AZ_ZERO_ARRAY(state->walls);
   AZ_ZERO_ARRAY(state->uuids);
 }

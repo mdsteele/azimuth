@@ -49,6 +49,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_UNLOCK: return "unlock";
     case AZ_OP_GETGS:  return "getgs";
     case AZ_OP_SETGS:  return "setgs";
+    case AZ_OP_WAIT:   return "wait";
     case AZ_OP_STOP:   return "stop";
     case AZ_OP_ERROR:  return "error";
   }
@@ -89,6 +90,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_UNLOCK:
     case AZ_OP_GETGS:
     case AZ_OP_SETGS:
+    case AZ_OP_WAIT:
       return true;
   }
   AZ_ASSERT_UNREACHABLE();
