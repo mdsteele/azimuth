@@ -240,6 +240,25 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_UPG_QUANTUM_REACTOR:
+      for (int i = -1; i <= 1; i += 2) {
+        glPushMatrix(); {
+          glTranslatef(i * 2, i * 2, 0);
+          glRotatef(i * 45 * frame, 0, 0, 1);
+          glScalef(i, 1, 1);
+          glColor3f(0.5, 0.2, 1);
+          glBegin(GL_TRIANGLES); {
+            glVertex2f(-3, 6); glVertex2f(2, 4); glVertex2f(2, 8);
+            glVertex2f(3, -6); glVertex2f(-2, -4); glVertex2f(-2, -8);
+          } glEnd();
+          glColor3f(0.2, 0.5, 1);
+          glBegin(GL_POINTS); {
+            glVertex2f(5, 1); glVertex2f(4, 4);
+            glVertex2f(-5, -1); glVertex2f(-4, -4);
+          } glEnd();
+        } glPopMatrix();
+      }
+      break;
     // TODO: Draw other upgrade icons.
     default:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
@@ -251,6 +270,16 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
   }
+  glBegin(GL_QUADS); {
+    glColor4f(1, 1, 1, 0.25); glVertex2f(-12, 12);
+    glColor4f(1, 1, 1, 0.15); glVertex2f(-12, -12);
+    glColor4f(1, 1, 1, 0.1); glVertex2f(12, -12); glVertex2f(12, 12);
+  } glEnd();
+  glColor3f(1, az_clock_mod(2, 10, clock), 1);
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f( 14,  14); glVertex2f(-14, 14);
+    glVertex2f(-14, -14); glVertex2f(14, -14);
+  } glEnd();
 }
 
 static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
@@ -277,13 +306,6 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_NODE_UPGRADE:
-      glColor3f(1, az_clock_mod(2, 10, clock), 1);
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(14, 14);
-        glVertex2d(-14, 14);
-        glVertex2d(-14, -14);
-        glVertex2d(14, -14);
-      } glEnd();
       draw_upgrade_icon(node->upgrade, clock);
       break;
     // TODO: draw other kinds of nodes
