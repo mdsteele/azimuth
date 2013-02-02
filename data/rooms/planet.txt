@@ -1,4 +1,4 @@
-@P z8 r29 s6 x0.00 y49700.00 a-1.570796
+@P z8 r29 t3 s6 x0.00 y49700.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m1
 !Z"Cnidam" c(0,255,255) m1
@@ -7,3 +7,9 @@
 !Z"Barrag" c(0,0,255) m1
 !Z"Sarvari" c(255,0,0) m1
 !Z"Core" c(128,128,128) m1
+!T0"
+  Save Station"
+!T1"
+  Security Hall"
+!T2"
+  Auxiliary Power Station"

@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/wall.h"
@@ -124,6 +125,7 @@ typedef struct {
     az_room_key_t start_room;
     az_vector_t start_position;
     double start_angle;
+    AZ_LIST_DECLARE(az_text_t, texts);
     AZ_LIST_DECLARE(az_zone_t, zones);
     AZ_LIST_DECLARE(az_editor_room_t, rooms);
   } planet;

@@ -26,6 +26,7 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/camera.h"
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/door.h"
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h"
@@ -47,9 +48,8 @@
 /*===========================================================================*/
 
 typedef struct {
-  const char *string; // not necessarily NUL-terminated
-  unsigned int length; // length of string
   double time_remaining; // seconds
+  const az_text_t *text;
 } az_message_t;
 
 typedef struct {

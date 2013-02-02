@@ -29,28 +29,43 @@
 
 #define RUN_TEST(fn) do { extern void fn(void); _run_test(#fn, fn); } while (0)
 
+// Test that the condition is true.
 #define EXPECT_TRUE(condition) _expect_true(condition, #condition)
 
+// Test that the condition is false.
 #define EXPECT_FALSE(condition) EXPECT_TRUE(!(condition))
 
+// Test that the two doubles are (approximately) equal.
 #define EXPECT_APPROX(expected, actual) \
   _expect_approx(expected, actual, #expected " == " #actual)
 
+// Test that the two vectors are (approximately) equal.
 #define EXPECT_VAPPROX(expected, actual) \
   _expect_vapprox(expected, actual, #expected " == " #actual)
 
+// Test that the two ints are exactly equal.
 #define EXPECT_INT_EQ(expected, actual) \
   _expect_int_eq(expected, actual, #expected " == " #actual)
 
+// Test that the two NUL-terminated strings are exactly equal.
 #define EXPECT_STRING_EQ(expected, actual) \
   _expect_string_eq(expected, actual, #actual)
 
+// Test that the actual char-array (with explicit length) is equal to the
+// expected (NUL-terminated) string.
+#define EXPECT_STRING_N_EQ(expected, actual, actual_length) \
+  _expect_string_n_eq(expected, actual, actual_length, #actual)
+
+// Test that the condition is true, and return immediately if not.
 #define ASSERT_TRUE(condition) do { \
     if (!_expect_true(condition, #condition)) return; \
   } while (false)
 
+// Test that the condition is false, and return immediately if not.
 #define ASSERT_FALSE(condition) ASSERT_TRUE(!(condition))
 
+// Test that the two doubles are (approximately) equal, and return immediately
+// if not.
 #define ASSERT_APPROX(expected, actual) do { \
     if (!_expect_approx(expected, actual, #expected " == " #actual)) return; \
   } while (false)
@@ -75,6 +90,9 @@ bool _expect_int_eq(int expected, int actual, const char *message);
 
 bool _expect_string_eq(const char *expected, const char *actual,
                        const char *message);
+
+bool _expect_string_n_eq(const char *expected, const char *actual,
+                         int actual_length, const char *message);
 
 /*===========================================================================*/
 

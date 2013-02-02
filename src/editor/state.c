@@ -57,6 +57,11 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->current_room = state->planet.start_room = planet.start_room;
   state->planet.start_position = planet.start_position;
   state->planet.start_angle = planet.start_angle;
+  // Convert texts:
+  AZ_LIST_INIT(state->planet.texts, planet.num_texts);
+  for (int i = 0; i < planet.num_texts; ++i) {
+    az_clone_text(&planet.texts[i], AZ_LIST_ADD(state->planet.texts));
+  }
   // Convert zones:
   AZ_LIST_INIT(state->planet.zones, planet.num_zones);
   for (int i = 0; i < planet.num_zones; ++i) {
@@ -117,6 +122,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
 bool az_save_editor_state(az_editor_state_t *state) {
   assert(state != NULL);
   // Convert planet:
+  const int num_texts = AZ_LIST_SIZE(state->planet.texts);
   const int num_zones = AZ_LIST_SIZE(state->planet.zones);
   const int num_rooms = AZ_LIST_SIZE(state->planet.rooms);
   assert(num_rooms >= 0);
@@ -124,11 +130,17 @@ bool az_save_editor_state(az_editor_state_t *state) {
     .start_room = state->planet.start_room,
     .start_position = state->planet.start_position,
     .start_angle = state->planet.start_angle,
+    .num_texts = num_texts,
+    .texts = AZ_ALLOC(num_texts, az_text_t),
     .num_zones = num_zones,
     .zones = AZ_ALLOC(num_zones, az_zone_t),
     .num_rooms = num_rooms,
     .rooms = AZ_ALLOC(num_rooms, az_room_t)
   };
+  // Convert texts:
+  for (int i = 0; i < num_texts; ++i) {
+    az_clone_text(AZ_LIST_GET(state->planet.texts, i), &planet.texts[i]);
+  }
   // Convert zones:
   for (int i = 0; i < num_zones; ++i) {
     az_zone_t *zone = AZ_LIST_GET(state->planet.zones, i);

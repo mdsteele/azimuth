@@ -267,6 +267,22 @@ static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
+      // Messages:
+      case AZ_OP_MSG:
+        {
+          const int text_index = (int)ins.immediate;
+          if (text_index < 0 || text_index >= state->planet->num_texts) {
+            SCRIPT_ERROR("invalid text index");
+          }
+          const az_text_t *text = &state->planet->texts[text_index];
+          state->message.text = text;
+          state->message.time_remaining = 2.5;
+          for (int i = 0; i < text->num_lines; ++i) {
+            state->message.time_remaining +=
+              0.05 * text->lines[i].total_length;
+          }
+        }
+        break;
       // Termination:
       case AZ_OP_WAIT:
         if (ins.immediate > 0.0) {

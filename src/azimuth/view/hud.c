@@ -28,7 +28,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/clock.h"
-#include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/string.h"
 
@@ -228,26 +228,39 @@ static void draw_hud_boss_health(az_space_state_t *state) {
 }
 
 static void draw_hud_message(const az_message_t *message) {
-  if (message->time_remaining <= 0.0) return;
+  if (message->time_remaining <= 0.0) {
+    assert(message->text == NULL);
+    return;
+  }
+  assert(message->text != NULL);
+  assert(message->text->num_lines > 0);
   glPushMatrix(); {
-    const int width = 2 * HUD_PADDING + message->length * 8;
-    const int height = 2 * HUD_PADDING + 8;
-    glTranslatef(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN - height, 0);
-    const double fade_time = 0.8; // seconds
-    const double alpha = (message->time_remaining >= fade_time ? 1.0 :
-                          message->time_remaining / fade_time);
+    const int width = AZ_SCREEN_WIDTH - 20;
+    const int height = 6 + 20 * message->text->num_lines;
+    const double slide_time = 0.5; // seconds
+    const int top = AZ_SCREEN_HEIGHT -
+      (message->time_remaining >= slide_time ? height :
+       (int)((double)height * (message->time_remaining / slide_time)));
+    glTranslatef((AZ_SCREEN_WIDTH - width) / 2, top, 0);
 
-    glColor4f(0, 0, 0, 0.75 * alpha); // tinted-black
+    glColor4f(0.1, 0.1, 0.1, 0.9); // dark gray tint
     glBegin(GL_QUADS); {
-      glVertex2i(0, 0);
-      glVertex2i(0, height);
-      glVertex2i(width, height);
-      glVertex2i(width, 0);
+      glVertex2i(0, 0); glVertex2i(0, height);
+      glVertex2i(width, height); glVertex2i(width, 0);
     } glEnd();
 
-    glColor4f(1, 1, 1, alpha); // white
-    az_draw_chars(8, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING,
-                  message->string, message->length);
+    for (int i = 0; i < message->text->num_lines; ++i) {
+      const az_text_line_t *line = &message->text->lines[i];
+      int left = AZ_SCREEN_WIDTH / 2 - 8 * line->total_length;
+      for (int j = 0; j < line->num_fragments; ++j) {
+        const az_text_fragment_t *fragment = &line->fragments[j];
+        const az_color_t color = fragment->color;
+        glColor4ub(color.r, color.g, color.b, color.a);
+        az_draw_chars(16, AZ_ALIGN_LEFT, left, 6 + 20 * i,
+                      fragment->chars, fragment->length);
+        left += fragment->length * 16;
+      }
+    }
   } glPopMatrix();
 }
 

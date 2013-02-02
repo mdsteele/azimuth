@@ -174,7 +174,16 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
 }
 
 static void tick_message(az_message_t *message, double time) {
-  message->time_remaining = fmax(0.0, message->time_remaining - time);
+  if (message->time_remaining == 0.0) {
+    assert(message->text == NULL);
+  } else {
+    assert(message->time_remaining > 0.0);
+    message->time_remaining -= time;
+    if (message->time_remaining <= 0.0) {
+      message->time_remaining = 0.0;
+      message->text = NULL;
+    }
+  }
 }
 
 static void tick_countdown(az_countdown_t *countdown, double time) {

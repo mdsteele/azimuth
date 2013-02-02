@@ -103,4 +103,18 @@ bool _expect_string_eq(const char *expected, const char *actual,
   return false;
 }
 
+bool _expect_string_n_eq(const char *expected, const char *actual,
+                         int actual_length, const char *message) {
+  const int expected_length = strlen(expected);
+  if (expected_length == actual_length &&
+      strncmp(expected, actual, actual_length) == 0) return true;
+  test_failure();
+  printf(" \x1b[1;31mFAILED:\x1b[m %s\n"
+         "  Expected: \"%s\" (length = %d)\n"
+         "  Actual:   \"%.*s\" (length = %d)\n",
+         message, expected, expected_length,
+         actual_length, actual, actual_length);
+  return false;
+}
+
 /*===========================================================================*/

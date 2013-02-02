@@ -18,43 +18,60 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_PLANET_H_
-#define AZIMUTH_STATE_PLANET_H_
+#ifndef AZIMUTH_STATE_DIALOG_H_
+#define AZIMUTH_STATE_DIALOG_H_
 
 #include <stdbool.h>
+#include <stdio.h> // for FILE
 
-#include "azimuth/state/dialog.h"
-#include "azimuth/state/player.h" // for az_room_key_t
-#include "azimuth/state/room.h"
-#include "azimuth/util/audio.h" // for az_music_key_t
+#include "azimuth/util/color.h"
 
 /*===========================================================================*/
 
+// The number of different portraits there are, not counting AZ_POR_NOTHING:
+#define AZ_NUM_PORTRAITS 6
+
+typedef enum {
+  AZ_POR_NOTHING = 0,
+  AZ_POR_HOPPER,
+  AZ_POR_HQ,
+  AZ_POR_CPU_A,
+  AZ_POR_CPU_B,
+  AZ_POR_CPU_C,
+  AZ_POR_TRICHORD
+} az_portrait_t;
+
 typedef struct {
-  char *name; // NUL-terminated; owned by zone object
   az_color_t color;
-  az_music_key_t music;
-} az_zone_t;
+  int length;
+  char *chars; // not NUL-terminated; owned by text-fragment object
+} az_text_fragment_t;
 
 typedef struct {
-  az_room_key_t start_room;
-  az_vector_t start_position;
-  double start_angle;
-  int num_texts;
-  az_text_t *texts;
-  int num_zones;
-  az_zone_t *zones;
-  int num_rooms;
-  az_room_t *rooms;
-} az_planet_t;
+  int total_length; // sum of lengths of fragments
+  int num_fragments;
+  az_text_fragment_t *fragments;
+} az_text_line_t;
 
-bool az_load_planet(const char *resource_dir, az_planet_t *planet_out);
+typedef struct {
+  int num_lines;
+  az_text_line_t *lines;
+} az_text_t;
 
-bool az_save_planet(const az_planet_t *planet, const char *resource_dir);
+// Serialize the text to a file and  return true, or return false on error
+// (e.g. file I/O fails).
+bool az_fprint_text(const az_text_t *text, FILE *file);
 
-// Delete the data arrays owned by a planet (but not the planet object itself).
-void az_destroy_planet(az_planet_t *planet);
+// Parse the text and return true, or return false on error.
+bool az_sscan_text(const char *string, int length, az_text_t *text_out);
+
+// Make a deep copy of a text object (so that destroying one will not affect
+// the other).  The argument pointers must not be equal.
+void az_clone_text(const az_text_t *text, az_text_t *copy_out);
+
+// Delete the data arrays owned by a text (but not the text object itself).
+void az_destroy_text(az_text_t *text);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_PLANET_H_
+#endif // AZIMUTH_STATE_DIALOG_H_

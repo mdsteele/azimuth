@@ -28,6 +28,7 @@
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/save.h"
@@ -36,6 +37,32 @@
 #include "azimuth/tick/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/view/space.h"
+
+/*===========================================================================*/
+
+static az_text_fragment_t save_failed_fragments[] = {
+  {.color = {255, 255, 255, 255}, .length = 5, .chars = "Save "},
+  {.color = {255, 0, 0, 255}, .length = 6, .chars = "failed"},
+  {.color = {255, 255, 255, 255}, .length = 1, .chars = "."}
+};
+static az_text_line_t save_failed_lines[] = {
+  {.total_length = 12, .num_fragments = 3, .fragments = save_failed_fragments}
+};
+static const az_text_t save_failed_text = {
+  .num_lines = 1, .lines = save_failed_lines
+};
+
+static az_text_fragment_t save_success_fragments[] = {
+  {.color = {255, 255, 255, 255}, .length = 14, .chars = "Game has been "},
+  {.color = {0, 255, 0, 255}, .length = 5, .chars = "saved"},
+  {.color = {255, 255, 255, 255}, .length = 1, .chars = "."}
+};
+static az_text_line_t save_success_lines[] = {
+  {.total_length = 20, .num_fragments = 3, .fragments = save_success_fragments}
+};
+static const az_text_t save_success_text = {
+  .num_lines = 1, .lines = save_success_lines
+};
 
 /*===========================================================================*/
 
@@ -142,13 +169,8 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
       // If we need to save the game, do so.
       const bool ok = save_current_game(saved_games);
       state.message.time_remaining = 4.0;
-      if (ok) {
-        state.message.string = "Saved game.";
-        state.message.length = 11;
-      } else {
-        state.message.string = "Save failed.";
-        state.message.length = 12;
-      }
+      if (ok) state.message.text = &save_success_text;
+      else state.message.text = &save_failed_text;
       state.mode = AZ_MODE_NORMAL;
     }
 

@@ -52,6 +52,8 @@ typedef enum {
   // Gravfields:
   AZ_OP_GETGS, // push strength of gravfield i
   AZ_OP_SETGS, // pop top, set strength of gravfield i to a
+  // Messages:
+  AZ_OP_MSG, // display text i at bottom of screen
   // Termination:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
   AZ_OP_STOP, // halt script successfully
