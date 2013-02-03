@@ -25,13 +25,13 @@
 
 /*===========================================================================*/
 
-static const char text_string[] = "\n"
+static const char text_string1[] = "\n"
   "  This is a $Gtest$W.  However, $Xface42it is\n"
   "  $Ronly$W a test.";
 
-void test_text_scan(void) {
+void test_text_scan1(void) {
   az_text_t text;
-  ASSERT_TRUE(az_sscan_text(text_string, strlen(text_string), &text));
+  ASSERT_TRUE(az_sscan_text(text_string1, strlen(text_string1), &text));
   EXPECT_INT_EQ(2, text.num_lines);
   if (text.num_lines >= 1) {
     const az_text_line_t *line = &text.lines[0];
@@ -90,11 +90,62 @@ void test_text_scan(void) {
   EXPECT_TRUE(text.lines == NULL);
 }
 
+static const char text_string2[] = "\n"
+  "  This is $Calso a\n" // colors should persist across linebreaks
+  "  test$W, apparently.";
+
+void test_text_scan2(void) {
+  az_text_t text;
+  ASSERT_TRUE(az_sscan_text(text_string2, strlen(text_string2), &text));
+  EXPECT_INT_EQ(2, text.num_lines);
+  if (text.num_lines >= 1) {
+    const az_text_line_t *line = &text.lines[0];
+    EXPECT_INT_EQ(14, line->total_length);
+    EXPECT_INT_EQ(2, line->num_fragments);
+    if (line->num_fragments >= 1) {
+      const az_text_fragment_t *fragment = &line->fragments[0];
+      EXPECT_STRING_N_EQ("This is ", fragment->chars, fragment->length);
+      EXPECT_INT_EQ(255, fragment->color.r);
+      EXPECT_INT_EQ(255, fragment->color.g);
+      EXPECT_INT_EQ(255, fragment->color.b);
+    }
+    if (line->num_fragments >= 2) {
+      const az_text_fragment_t *fragment = &line->fragments[1];
+      EXPECT_STRING_N_EQ("also a", fragment->chars, fragment->length);
+      EXPECT_INT_EQ(0, fragment->color.r);
+      EXPECT_INT_EQ(255, fragment->color.g);
+      EXPECT_INT_EQ(255, fragment->color.b);
+    }
+  }
+  if (text.num_lines >= 2) {
+    const az_text_line_t *line = &text.lines[1];
+    EXPECT_INT_EQ(17, line->total_length);
+    EXPECT_INT_EQ(2, line->num_fragments);
+    if (line->num_fragments >= 1) {
+      const az_text_fragment_t *fragment = &line->fragments[0];
+      EXPECT_STRING_N_EQ("test", fragment->chars, fragment->length);
+      EXPECT_INT_EQ(0, fragment->color.r);
+      EXPECT_INT_EQ(255, fragment->color.g);
+      EXPECT_INT_EQ(255, fragment->color.b);
+    }
+    if (line->num_fragments >= 2) {
+      const az_text_fragment_t *fragment = &line->fragments[1];
+      EXPECT_STRING_N_EQ(", apparently.", fragment->chars, fragment->length);
+      EXPECT_INT_EQ(255, fragment->color.r);
+      EXPECT_INT_EQ(255, fragment->color.g);
+      EXPECT_INT_EQ(255, fragment->color.b);
+    }
+  }
+  az_destroy_text(&text);
+  EXPECT_INT_EQ(0, text.num_lines);
+  EXPECT_TRUE(text.lines == NULL);
+}
+
 // Test cloning a text object, and then test that we can destroy them
 // individually.
 void test_text_clone(void) {
   az_text_t text1 = {.num_lines = 0};
-  ASSERT_TRUE(az_sscan_text(text_string, strlen(text_string), &text1));
+  ASSERT_TRUE(az_sscan_text(text_string1, strlen(text_string1), &text1));
   EXPECT_INT_EQ(2, text1.num_lines);
   az_text_t text2 = {.num_lines = 0};
   az_clone_text(&text1, &text2);

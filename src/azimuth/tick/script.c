@@ -117,9 +117,30 @@ static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
     *(uid_out) = uuid.uid; \
   } while (0)
 
+static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
+                       az_script_vm_t *target_vm) {
+  assert(script != NULL);
+  assert(target_vm != NULL);
+  ++vm->pc;
+  vm->script = NULL;
+  memmove(target_vm, vm, sizeof(az_script_vm_t));
+  target_vm->script = script;
+}
+
+#define SUSPEND(script, target_vm) do { \
+    do_suspend(vm, (script), (target_vm)); \
+    return; \
+  } while (0)
+
 /*===========================================================================*/
 
-static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
+void az_run_script(az_space_state_t *state, const az_script_t *script) {
+  if (script == NULL || script->num_instructions == 0) return;
+  az_script_vm_t vm = { .script = script };
+  az_resume_script(state, &vm);
+}
+
+void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
   assert(state != NULL);
   assert(vm != NULL);
   assert(vm->script != NULL);
@@ -267,7 +288,7 @@ static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
-      // Messages:
+      // Messages/dialog:
       case AZ_OP_MSG:
         {
           const int text_index = (int)ins.immediate;
@@ -283,18 +304,74 @@ static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
+      case AZ_OP_DLOG:
+        if (state->mode == AZ_MODE_NORMAL) {
+          state->mode = AZ_MODE_DIALOG;
+          memset(&state->mode_data.dialog, 0, sizeof(state->mode_data.dialog));
+          state->mode_data.dialog.step = AZ_DLS_BEGIN;
+          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+        }
+        SCRIPT_ERROR("can't start dialog now");
+      case AZ_OP_TOP:
+        if (state->mode == AZ_MODE_DIALOG) {
+          state->mode_data.dialog.bottom_next = false;
+          const int portrait = (int)ins.immediate;
+          if (portrait < 0) {
+            state->mode_data.dialog.top = AZ_POR_NOTHING;
+          } else if (portrait > AZ_NUM_PORTRAITS) {
+            SCRIPT_ERROR("invalid portrait");
+          } else if (portrait > 0) {
+            state->mode_data.dialog.top = (az_portrait_t)portrait;
+          } else assert(portrait == 0);
+        } else SCRIPT_ERROR("not in dialog");
+        break;
+      case AZ_OP_BOT:
+        if (state->mode == AZ_MODE_DIALOG) {
+          state->mode_data.dialog.bottom_next = true;
+          const int portrait = (int)ins.immediate;
+          if (portrait < 0) {
+            state->mode_data.dialog.bottom = AZ_POR_NOTHING;
+          } else if (portrait > AZ_NUM_PORTRAITS) {
+            SCRIPT_ERROR("invalid portrait");
+          } else if (portrait > 0) {
+            state->mode_data.dialog.bottom = (az_portrait_t)portrait;
+          } else assert(portrait == 0);
+        } else SCRIPT_ERROR("not in dialog");
+        break;
+      case AZ_OP_TXT:
+        if (state->mode == AZ_MODE_DIALOG) {
+          const int text_index = (int)ins.immediate;
+          if (text_index < 0 || text_index >= state->planet->num_texts) {
+            SCRIPT_ERROR("invalid text index");
+          }
+          const az_text_t *text = &state->planet->texts[text_index];
+          state->mode_data.dialog.step = AZ_DLS_TALK;
+          state->mode_data.dialog.progress = 0.0;
+          state->mode_data.dialog.text = text;
+          state->mode_data.dialog.row = state->mode_data.dialog.col = 0;
+          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+        }
+        SCRIPT_ERROR("not in dialog");
+      case AZ_OP_DEND:
+        if (state->mode == AZ_MODE_DIALOG) {
+          state->mode_data.dialog.step = AZ_DLS_END;
+          state->mode_data.dialog.progress = 0.0;
+          state->mode_data.dialog.text = NULL;
+          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+        }
+        SCRIPT_ERROR("not in dialog");
       // Termination:
       case AZ_OP_WAIT:
+        if (state->mode == AZ_MODE_DIALOG) {
+          SCRIPT_ERROR("can't WAIT during dialog");
+        }
         if (ins.immediate > 0.0) {
-          ++vm->pc;
           const az_script_t *script = vm->script;
           vm->script = NULL;
           AZ_ARRAY_LOOP(timer, state->timers) {
             if (timer->vm.script != NULL) continue;
-            memmove(&timer->vm, vm, sizeof(az_script_vm_t));
             timer->time_remaining = ins.immediate;
-            timer->vm.script = script;
-            return;
+            SUSPEND(script, &timer->vm);
           }
           SCRIPT_ERROR("too many timers");
         }
@@ -306,16 +383,15 @@ static void resume_script(az_space_state_t *state, az_script_vm_t *vm) {
     assert(vm->pc >= 0);
     assert(vm->pc <= vm->script->num_instructions);
   }
+
  halt:
+  if (state->mode == AZ_MODE_DIALOG) {
+    memset(&state->mode_data.dialog, 0, sizeof(state->mode_data.dialog));
+    state->mode_data.dialog.step = AZ_DLS_END;
+  }
   // Now that the script has completed, zero out the VM.  If the resumed script
   // was a timer, this will have the effect of marking the timer as inactive.
   memset(vm, 0, sizeof(*vm));
-}
-
-void az_run_script(az_space_state_t *state, const az_script_t *script) {
-  if (script == NULL || script->num_instructions == 0) return;
-  az_script_vm_t vm = { .script = script };
-  resume_script(state, &vm);
 }
 
 /*===========================================================================*/
@@ -327,7 +403,7 @@ void az_tick_timers(az_space_state_t *state, double time) {
     timer->time_remaining -= time;
     if (timer->time_remaining <= 0.0) {
       timer->time_remaining = 0.0;
-      resume_script(state, &timer->vm);
+      az_resume_script(state, &timer->vm);
     }
   }
 }

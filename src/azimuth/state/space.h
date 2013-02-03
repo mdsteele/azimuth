@@ -70,7 +70,8 @@ typedef struct {
 
   // Mode information:
   enum {
-    AZ_MODE_NORMAL, // flying around; the normal mode of gameplay
+    AZ_MODE_NORMAL = 0, // flying around; the normal mode of gameplay
+    AZ_MODE_DIALOG, // engaged in story dialog
     AZ_MODE_DOORWAY, // waiting while we pass through a door
     AZ_MODE_GAME_OVER, // showing the game over animation
     AZ_MODE_PAUSING, // entering the pause screen
@@ -79,6 +80,15 @@ typedef struct {
     AZ_MODE_UPGRADE // receiving an upgrade
   } mode;
   union {
+    struct {
+      enum { AZ_DLS_BEGIN, AZ_DLS_TALK, AZ_DLS_PAUSE, AZ_DLS_END } step;
+      double progress; // 0.0 to 1.0
+      bool bottom_next;
+      az_portrait_t top, bottom;
+      const az_text_t *text;
+      int row, col;
+      az_script_vm_t vm;
+    } dialog;
     struct {
       enum { AZ_DWS_FADE_OUT, AZ_DWS_SHIFT, AZ_DWS_FADE_IN } step;
       double progress; // 0.0 to 1.0

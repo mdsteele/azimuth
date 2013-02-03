@@ -31,6 +31,9 @@
 // function simply returns immediately with no effect.
 void az_run_script(az_space_state_t *state, const az_script_t *script);
 
+// Resume executing the script and modify the space state accordingly.
+void az_resume_script(az_space_state_t *state, az_script_vm_t *vm);
+
 void az_tick_timers(az_space_state_t *state, double time);
 
 /*===========================================================================*/

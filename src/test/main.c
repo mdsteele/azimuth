@@ -67,7 +67,8 @@ int main(int argc, char **argv) {
   RUN_TEST(test_script_print);
   RUN_TEST(test_script_scan);
   RUN_TEST(test_text_clone);
-  RUN_TEST(test_text_scan);
+  RUN_TEST(test_text_scan1);
+  RUN_TEST(test_text_scan2);
   RUN_TEST(test_uids);
   RUN_TEST(test_vcaplen);
   RUN_TEST(test_vector_polar);

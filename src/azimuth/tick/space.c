@@ -53,6 +53,55 @@ void az_after_entering_room(az_space_state_t *state) {
 
 /*===========================================================================*/
 
+static void tick_dialog_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_DIALOG);
+  const double open_close_time = 0.5; // seconds
+  const double char_time = 0.03; // seconds
+  switch (state->mode_data.dialog.step) {
+    case AZ_DLS_BEGIN:
+      assert(state->mode_data.dialog.text == NULL);
+      assert(state->mode_data.dialog.vm.script != NULL);
+      state->mode_data.dialog.progress += time / open_close_time;
+      if (state->mode_data.dialog.progress >= 1.0) {
+        az_resume_script(state, &state->mode_data.dialog.vm);
+      }
+      break;
+    case AZ_DLS_TALK:
+      assert(state->mode_data.dialog.text != NULL);
+      assert(state->mode_data.dialog.vm.script != NULL);
+      state->mode_data.dialog.progress += time / char_time;
+      if (state->mode_data.dialog.progress >= 1.0) {
+        state->mode_data.dialog.progress = 0.0;
+        const az_text_t *text = state->mode_data.dialog.text;
+        ++state->mode_data.dialog.col;
+        if (state->mode_data.dialog.col >=
+            text->lines[state->mode_data.dialog.row].total_length) {
+          state->mode_data.dialog.col = 0;
+          ++state->mode_data.dialog.row;
+          if (state->mode_data.dialog.row >= text->num_lines) {
+            state->mode_data.dialog.step = AZ_DLS_PAUSE;
+          }
+        }
+      }
+      break;
+    case AZ_DLS_PAUSE:
+      assert(state->mode_data.dialog.text != NULL);
+      assert(state->mode_data.dialog.vm.script != NULL);
+      break;
+    case AZ_DLS_END:
+      assert(state->mode_data.dialog.text == NULL);
+      state->mode_data.dialog.progress += time / open_close_time;
+      if (state->mode_data.dialog.progress >= 1.0) {
+        if (state->mode_data.dialog.vm.script != NULL) {
+          az_script_vm_t vm = state->mode_data.dialog.vm;
+          state->mode = AZ_MODE_NORMAL;
+          az_resume_script(state, &vm);
+        } else state->mode = AZ_MODE_NORMAL;
+      }
+      break;
+  }
+}
+
 static void tick_doorway_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_DOORWAY);
   const double fade_time = 0.25; // seconds
@@ -173,6 +222,8 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
   }
 }
 
+/*===========================================================================*/
+
 static void tick_message(az_message_t *message, double time) {
   if (message->time_remaining == 0.0) {
     assert(message->text == NULL);
@@ -200,6 +251,8 @@ static void tick_pickups_walls_doors_projectiles_and_baddies(
   az_tick_projectiles(state, time);
   az_tick_baddies(state, time);
 }
+
+/*===========================================================================*/
 
 void az_tick_space_state(az_space_state_t *state, double time) {
   if (az_ship_is_present(&state->ship) &&
@@ -230,6 +283,9 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       az_tick_timers(state, time);
       tick_pickups_walls_doors_projectiles_and_baddies(state, time);
       az_tick_ship(state, time);
+      break;
+    case AZ_MODE_DIALOG:
+      tick_dialog_mode(state, time);
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);

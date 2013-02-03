@@ -34,6 +34,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/state/space.h"
 #include "azimuth/system/resource.h"
+#include "azimuth/tick/script.h"
 #include "azimuth/tick/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/view/space.h"
@@ -181,10 +182,24 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
         case AZ_EVENT_KEY_DOWN:
           // Ignore keystrokes if not in normal mode (except to dismiss
           // upgrade message box).
-          if (state.mode == AZ_MODE_UPGRADE &&
-              state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
-            state.mode_data.upgrade.step = AZ_UGS_CLOSE;
-            state.mode_data.upgrade.progress = 0.0;
+          if (state.mode == AZ_MODE_DIALOG) {
+            if (state.mode_data.dialog.step == AZ_DLS_TALK) {
+              state.mode_data.dialog.step = AZ_DLS_PAUSE;
+              state.mode_data.dialog.progress = 0.0;
+              state.mode_data.dialog.row =
+                state.mode_data.dialog.text->num_lines;
+              state.mode_data.dialog.col = 0;
+            } else if (state.mode_data.dialog.step == AZ_DLS_PAUSE &&
+                       event.key.name == AZ_KEY_RETURN) {
+              az_resume_script(&state, &state.mode_data.dialog.vm);
+            }
+            break;
+          } else if (state.mode == AZ_MODE_UPGRADE) {
+            if (state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
+              state.mode_data.upgrade.step = AZ_UGS_CLOSE;
+              state.mode_data.upgrade.progress = 0.0;
+            }
+            break;
           } else if (state.mode != AZ_MODE_NORMAL) break;
           // Handle the keystroke:
           switch (event.key.name) {

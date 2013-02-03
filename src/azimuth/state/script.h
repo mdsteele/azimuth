@@ -52,8 +52,13 @@ typedef enum {
   // Gravfields:
   AZ_OP_GETGS, // push strength of gravfield i
   AZ_OP_SETGS, // pop top, set strength of gravfield i to a
-  // Messages:
+  // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen
+  AZ_OP_DLOG, // begin dialog
+  AZ_OP_TOP, // set top speaker to portrait i
+  AZ_OP_BOT, // set bottom speaker to portrait i
+  AZ_OP_TXT, // have last set speaker (top or bottom) say string i
+  AZ_OP_DEND, // end dialog
   // Termination:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
   AZ_OP_STOP, // halt script successfully

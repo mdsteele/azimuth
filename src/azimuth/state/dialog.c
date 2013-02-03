@@ -107,6 +107,7 @@ bool az_sscan_text(const char *string, int length, az_text_t *text_out) {
   }
   // Construct lines:
   text_out->lines = AZ_ALLOC(text_out->num_lines, az_text_line_t);
+  az_color_t color = AZ_WHITE;
   for (int line_num = 0; line_num < text_out->num_lines; ++line_num) {
     az_text_line_t *line = &text_out->lines[line_num];
     // Skip leading whitespace:
@@ -123,7 +124,6 @@ bool az_sscan_text(const char *string, int length, az_text_t *text_out) {
     // Construct fragments:
     assert(line->total_length == 0);
     line->fragments = AZ_ALLOC(line->num_fragments, az_text_fragment_t);
-    az_color_t color = AZ_WHITE;
     for (int frag_num = 0; frag_num < line->num_fragments; ++frag_num) {
       assert(start < length);
       if (string[start] == '$') {

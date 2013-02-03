@@ -25,6 +25,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/clock.h"
@@ -305,16 +306,7 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
 
 /*===========================================================================*/
 
-#define UPGRADE_BOX_WIDTH 500
-#define UPGRADE_BOX_HEIGHT 94
-
-static void draw_upgrade_box_frame(double openness) {
-  assert(openness >= 0.0);
-  assert(openness <= 1.0);
-  const double width = sqrt(openness) * UPGRADE_BOX_WIDTH;
-  const double height = openness * openness * UPGRADE_BOX_HEIGHT;
-  const double left = 0.5 * (AZ_SCREEN_WIDTH - width);
-  const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
+static void draw_box(double left, double top, double width, double height) {
   glColor4f(0, 0, 0, 0.875); // black tint
   glBegin(GL_QUADS); {
     glVertex2d(left, top);
@@ -329,6 +321,160 @@ static void draw_upgrade_box_frame(double openness) {
     glVertex2d(left + width, top + height);
     glVertex2d(left, top + height);
   } glEnd();
+}
+
+/*===========================================================================*/
+
+#define DIALOG_BOX_WIDTH 404
+#define DIALOG_BOX_HEIGHT 100
+#define DIALOG_BOX_MARGIN 10
+#define PORTRAIT_BOX_WIDTH 150
+#define PORTRAIT_BOX_HEIGHT 150
+#define PORTRAIT_BOX_MARGIN 15
+#define DIALOG_HORZ_SPACING 20
+#define DIALOG_VERT_SPACING 50
+
+static void draw_dialog_frames(double openness) {
+  assert(openness >= 0.0);
+  assert(openness <= 1.0);
+  { // Portraits:
+    const double sw = 0.5 * PORTRAIT_BOX_WIDTH * openness;
+    const double sh = 0.5 * PORTRAIT_BOX_HEIGHT * openness;
+    // Top portrait:
+    const int tcx =
+      (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH) / 2;
+    const int tcy =
+      (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - PORTRAIT_BOX_HEIGHT) / 2;
+    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2);
+    // Bottom portrait:
+    const int bcx =
+      (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + DIALOG_BOX_WIDTH) / 2;
+    const int bcy =
+      (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + PORTRAIT_BOX_HEIGHT) / 2;
+    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2);
+  }
+  { // Dialog boxes:
+    const double sw = 0.5 * DIALOG_BOX_WIDTH * openness;
+    const double sh = 0.5 * DIALOG_BOX_HEIGHT * openness;
+    // Top dialog box:
+    const int tcx =
+      (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + PORTRAIT_BOX_WIDTH) / 2;
+    const int tcy =
+      (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - DIALOG_BOX_HEIGHT) / 2;
+    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2);
+    // Bottom dialog box:
+    const int bcx =
+      (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - PORTRAIT_BOX_WIDTH) / 2;
+    const int bcy =
+      (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + DIALOG_BOX_HEIGHT) / 2;
+    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2);
+  }
+}
+
+static void draw_dialog_text_line(const az_text_line_t *line, int num_chars) {
+  for (int i = 0, left = 0; i < line->num_fragments && num_chars > 0; ++i) {
+    const az_text_fragment_t *fragment = &line->fragments[i];
+    const az_color_t color = fragment->color;
+    glColor4ub(color.r, color.g, color.b, color.a);
+    az_draw_chars(8, AZ_ALIGN_LEFT, left, 0, fragment->chars,
+                  az_imin(fragment->length, num_chars));
+    left += 8 * fragment->length;
+    num_chars -= fragment->length;
+  }
+}
+
+static void draw_dialog_text(const az_space_state_t *state) {
+  assert(state->mode == AZ_MODE_DIALOG);
+  glPushMatrix(); {
+    if (!state->mode_data.dialog.bottom_next) {
+      glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH +
+                    PORTRAIT_BOX_WIDTH) / 2 + DIALOG_BOX_MARGIN,
+                   (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING) / 2 -
+                   DIALOG_BOX_HEIGHT + DIALOG_BOX_MARGIN, 0);
+    } else {
+      glTranslatef((AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH -
+                    PORTRAIT_BOX_WIDTH) / 2 + DIALOG_BOX_MARGIN,
+                   (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING) / 2 +
+                   DIALOG_BOX_MARGIN, 0);
+    }
+
+    if (state->mode_data.dialog.step == AZ_DLS_PAUSE) {
+      if (az_clock_mod(2, 15, state->clock)) glColor4f(0.5, 0.5, 0.5, 0.5);
+      else glColor4f(0.25, 0.75, 0.75, 0.5);
+      az_draw_string(8, AZ_ALIGN_RIGHT,
+                     DIALOG_BOX_WIDTH - 2 * DIALOG_BOX_MARGIN,
+                     DIALOG_BOX_HEIGHT - 2 * DIALOG_BOX_MARGIN - 8, "[ENTER]");
+    }
+
+    const az_text_t *text = state->mode_data.dialog.text;
+    for (int i = 0; i < state->mode_data.dialog.row; ++i) {
+      draw_dialog_text_line(&text->lines[i], text->lines[i].total_length);
+      glTranslatef(0, 12, 0);
+    }
+    if (state->mode_data.dialog.row < text->num_lines) {
+      draw_dialog_text_line(&text->lines[state->mode_data.dialog.row],
+                            state->mode_data.dialog.col);
+    }
+  } glPopMatrix();
+}
+
+static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom) {
+  glPushMatrix(); {
+    if (!is_bottom) {
+      glTranslatef((AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH -
+                    PORTRAIT_BOX_WIDTH) / 2 + PORTRAIT_BOX_MARGIN,
+                   (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING) / 2 -
+                   PORTRAIT_BOX_HEIGHT + PORTRAIT_BOX_MARGIN, 0);
+    } else {
+      glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + DIALOG_BOX_WIDTH -
+                    PORTRAIT_BOX_WIDTH) / 2 + PORTRAIT_BOX_MARGIN,
+                   (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING) / 2 +
+                   PORTRAIT_BOX_MARGIN, 0);
+    }
+    switch (portrait) {
+      case AZ_POR_NOTHING: break;
+      case AZ_POR_HOPPER: break; // TODO
+      case AZ_POR_HQ: break; // TODO
+      case AZ_POR_CPU_A: break; // TODO
+      case AZ_POR_CPU_B: break; // TODO
+      case AZ_POR_CPU_C: break; // TODO
+      case AZ_POR_TRICHORD: break; // TODO
+    }
+  } glPopMatrix();
+}
+
+static void draw_dialog(const az_space_state_t *state) {
+  assert(state->mode == AZ_MODE_DIALOG);
+  switch (state->mode_data.dialog.step) {
+    case AZ_DLS_BEGIN:
+      draw_dialog_frames(state->mode_data.dialog.progress);
+      break;
+    case AZ_DLS_TALK:
+    case AZ_DLS_PAUSE:
+      draw_dialog_frames(1.0);
+      draw_dialog_text(state);
+      draw_dialog_portrait(state->mode_data.dialog.top, false);
+      draw_dialog_portrait(state->mode_data.dialog.bottom, true);
+      break;
+    case AZ_DLS_END:
+      draw_dialog_frames(1.0 - state->mode_data.dialog.progress);
+      break;
+  }
+}
+
+/*===========================================================================*/
+
+#define UPGRADE_BOX_WIDTH 500
+#define UPGRADE_BOX_HEIGHT 94
+
+static void draw_upgrade_box_frame(double openness) {
+  assert(openness >= 0.0);
+  assert(openness <= 1.0);
+  const double width = sqrt(openness) * UPGRADE_BOX_WIDTH;
+  const double height = openness * openness * UPGRADE_BOX_HEIGHT;
+  const double left = 0.5 * (AZ_SCREEN_WIDTH - width);
+  const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
+  draw_box(left, top, width, height);
 }
 
 static void draw_upgrade_box_message(az_upgrade_t upgrade) {
@@ -459,7 +605,9 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_boss_health(state);
   draw_hud_message(&state->message);
   draw_hud_countdown(&state->countdown, state->clock);
-  if (state->mode == AZ_MODE_UPGRADE) {
+  if (state->mode == AZ_MODE_DIALOG) {
+    draw_dialog(state);
+  } else if (state->mode == AZ_MODE_UPGRADE) {
     draw_upgrade_box(state);
   }
 }
