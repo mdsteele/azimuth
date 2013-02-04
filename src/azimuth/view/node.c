@@ -308,8 +308,14 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
     case AZ_NODE_UPGRADE:
       draw_upgrade_icon(node->upgrade, clock);
       break;
-    // TODO: draw other kinds of nodes
-    default:
+    case AZ_NODE_REFILL:
+      glColor3f(1, 1, 1); // white
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(10, 0); glVertex2d(0, 10);
+        glVertex2d(-10, 0); glVertex2d(0, -10);
+      } glEnd();
+      break;
+    case AZ_NODE_COMM:
       glColor3f(1, 1, 1); // white
       glBegin(GL_LINE_LOOP); {
         glVertex2d(10, 0);

@@ -169,6 +169,18 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .upgrade = editor_node->spec.upgrade
     };
     az_draw_node(&real_node, state->clock);
+    if (editor_node->spec.on_use != NULL) {
+      glPushMatrix(); {
+        camera_to_screen_orient(state, real_node.position);
+        glColor3f(0.75, 0, 1); // purple
+        glBegin(GL_QUADS); {
+          glVertex2f(5, -9); glVertex2f(-5, -9);
+          glVertex2f(-5, 0); glVertex2f(5, 0);
+        } glEnd();
+        glColor3f(0, 0, 0); // black
+        az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
+      } glPopMatrix();
+    }
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
     az_baddie_t real_baddie = {0};
@@ -183,8 +195,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
         if (editor_baddie->spec.on_kill != NULL) {
           glColor3f(0.75, 0, 1); // purple
           glBegin(GL_QUADS); {
-            glVertex2d(5, -9); glVertex2d(-5, -9);
-            glVertex2d(-5, 0); glVertex2d(5, 0);
+            glVertex2f(5, -9); glVertex2f(-5, -9);
+            glVertex2f(-5, 0); glVertex2f(5, 0);
           } glEnd();
           glColor3f(0, 0, 0); // black
           az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
@@ -192,8 +204,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
         if (editor_baddie->spec.uuid_slot != 0) {
           glColor3f(1, 0, 0); // red
           glBegin(GL_QUADS); {
-            glVertex2d(9, 0); glVertex2d(-9, 0);
-            glVertex2d(-9, 9); glVertex2d(9, 9);
+            glVertex2f(9, 0); glVertex2f(-9, 0);
+            glVertex2f(-9, 9); glVertex2f(9, 9);
           } glEnd();
           glColor3f(0, 0, 0); // black
           az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d",
@@ -276,7 +288,7 @@ static void draw_selection_circle(az_vector_t position, double angle,
     glScaled(radius, radius, 1);
     glColor3f(1, 1, 1); // white
     glBegin(GL_LINE_STRIP); {
-      glVertex2d(0, 0);
+      glVertex2f(0, 0);
       for (int i = 0; i <= 36; ++i) {
         glVertex2d(cos(i * AZ_PI / 18.0), sin(i * AZ_PI / 18.0));
       }
@@ -440,31 +452,25 @@ static void draw_hud(az_editor_state_t* state) {
   if (state->unsaved) {
     glColor3f(1, 0.5, 0); // orange
     glBegin(GL_TRIANGLES); {
-      glVertex2d(5, 5);
-      glVertex2d(5, 15);
-      glVertex2d(15, 5);
+      glVertex2f(5, 5); glVertex2f(5, 15); glVertex2f(15, 5);
     } glEnd();
   }
 
   // Draw the text box:
   if (state->text.action != AZ_ETA_NOTHING) {
-    const double left = 5.5;
-    const double right = AZ_SCREEN_WIDTH - 5.5;
-    const double top = 20.5;
-    const double bottom = top + 22;
+    const GLfloat left = 5.5;
+    const GLfloat right = AZ_SCREEN_WIDTH - 5.5;
+    const GLfloat top = 20.5;
+    const GLfloat bottom = top + 22;
     glColor3f(0, 0, 0); // black
     glBegin(GL_QUADS); {
-      glVertex2d(left, top);
-      glVertex2d(left, bottom);
-      glVertex2d(right, bottom);
-      glVertex2d(right, top);
+      glVertex2f(left, top); glVertex2f(left, bottom);
+      glVertex2f(right, bottom); glVertex2f(right, top);
     } glEnd();
     glColor3f(0, 1, 1); // cyan
     glBegin(GL_LINE_LOOP); {
-      glVertex2d(left, top);
-      glVertex2d(left, bottom);
-      glVertex2d(right, bottom);
-      glVertex2d(right, top);
+      glVertex2f(left, top); glVertex2f(left, bottom);
+      glVertex2f(right, bottom); glVertex2f(right, top);
     } glEnd();
     glColor3f(1, 1, 1); // white
     az_draw_chars(16, AZ_ALIGN_LEFT, 9, 24, state->text.buffer,
@@ -472,9 +478,9 @@ static void draw_hud(az_editor_state_t* state) {
     if (az_clock_mod(2, 16, state->clock) != 0) {
       glColor3f(1, 0, 0); // red
       glBegin(GL_LINES); {
-        const double x = 9.5 + 16 * state->text.cursor;
-        glVertex2d(x, top + 3);
-        glVertex2d(x, bottom - 3);
+        const GLfloat x = 9.5 + 16 * state->text.cursor;
+        glVertex2f(x, top + 3);
+        glVertex2f(x, bottom - 3);
       } glEnd();
     }
   }

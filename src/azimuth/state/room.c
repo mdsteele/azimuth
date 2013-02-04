@@ -197,8 +197,8 @@ static void parse_node_directive(az_load_room_t *loader) {
   node->position = (az_vector_t){x, y};
   node->angle = angle;
   node->upgrade = (az_upgrade_t)upgrade;
+  node->on_use = maybe_parse_script(loader, 'u');
   ++loader->room->num_nodes;
-  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_wall_directive(az_load_room_t *loader) {
@@ -329,6 +329,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
       WRITE(" u%d", (int)node->upgrade);
     }
     WRITE("\n");
+    WRITE_SCRIPT('u', node->on_use);
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];

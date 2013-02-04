@@ -103,6 +103,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     for (int i = 0; i < room->num_nodes; ++i) {
       az_editor_node_t *node = AZ_LIST_ADD(eroom->nodes);
       node->spec = room->nodes[i];
+      node->spec.on_use = clone_script(node->spec.on_use);
     }
     // Convert walls:
     AZ_LIST_INIT(eroom->walls, room->num_walls);
@@ -180,6 +181,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
     room->nodes = AZ_ALLOC(room->num_nodes, az_node_spec_t);
     for (int i = 0; i < room->num_nodes; ++i) {
       room->nodes[i] = AZ_LIST_GET(eroom->nodes, i)->spec;
+      room->nodes[i].on_use = clone_script(room->nodes[i].on_use);
     }
     // Convert walls:
     room->num_walls = AZ_LIST_SIZE(eroom->walls);

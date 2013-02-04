@@ -96,6 +96,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     az_node_t *node;
     if (az_insert_node(state, &node)) {
       node->kind = spec->kind;
+      node->on_use = spec->on_use;
       node->position = spec->position;
       node->angle = spec->angle;
       node->upgrade = spec->upgrade;

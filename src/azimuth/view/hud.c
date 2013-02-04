@@ -325,8 +325,9 @@ static void draw_box(double left, double top, double width, double height) {
 
 /*===========================================================================*/
 
+#define TEXT_LINE_SPACING 12
 #define DIALOG_BOX_WIDTH 404
-#define DIALOG_BOX_HEIGHT 100
+#define DIALOG_BOX_HEIGHT 116
 #define DIALOG_BOX_MARGIN 10
 #define PORTRAIT_BOX_WIDTH 150
 #define PORTRAIT_BOX_HEIGHT 150
@@ -409,7 +410,7 @@ static void draw_dialog_text(const az_space_state_t *state) {
     const az_text_t *text = state->mode_data.dialog.text;
     for (int i = 0; i < state->mode_data.dialog.row; ++i) {
       draw_dialog_text_line(&text->lines[i], text->lines[i].total_length);
-      glTranslatef(0, 12, 0);
+      glTranslatef(0, TEXT_LINE_SPACING, 0);
     }
     if (state->mode_data.dialog.row < text->num_lines) {
       draw_dialog_text_line(&text->lines[state->mode_data.dialog.row],

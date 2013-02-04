@@ -22,6 +22,7 @@
 #define AZIMUTH_STATE_NODE_H_
 
 #include "azimuth/state/player.h" // for az_upgrade_t
+#include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
@@ -42,6 +43,7 @@ typedef enum {
 typedef struct {
   az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
   az_uid_t uid;
+  const az_script_t *on_use; // not owned; NULL if no script
   az_vector_t position;
   double angle;
   az_upgrade_t upgrade; // only used for AZ_NODE_UPGRADE nodes

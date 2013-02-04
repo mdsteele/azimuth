@@ -1,4 +1,4 @@
-@P z8 r29 t3 s6 x0.00 y49700.00 a-1.570796
+@P z8 r29 t17 s6 x0.00 y49700.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m1
 !Z"Cnidam" c(0,255,255) m1
@@ -13,3 +13,64 @@
   Security Hall"
 !T2"
   Auxiliary Power Station"
+!T3"
+  Repair Bay"
+!T4"
+  [Initializing systems].  Terminal online."
+!T5"
+  Finally, an uplink!  Computer, what happened
+  here?  Where is everyone?"
+!T6"
+  Query: Unknown.
+
+  Status: Automated emergency disaster-control
+  systems are active, although many of them have
+  been badly damaged.
+
+  No colonists are currently in the outer
+  habitation areas."
+!T7"
+  Then where are they?  Are they still alive?"
+!T8"
+  Scanning records...
+
+  Of 284 registered colonists on Zenith, 47 human
+  and 16 trichord fatalities have been reported in
+  the past 48 hours."
+!T9"
+  Dammit!  ...But most of them are still alive?
+  Where are they?"
+!T10"
+  ERR@@@##...unknown.  Earlier sensor reports
+  suggest that they retreated deeper within the
+  planetoid, into the Filimun region, following
+  the unknown disaster.  The Filimun entryway is
+  now sealed off with $Rblast doors$W from the inside.
+  However, due to subsequent systems damage, all
+  sensors and comms links from here to there are
+  currently cut off."
+!T11"
+  I've got to get down there and help the
+  survivors.  How can I get in?"
+!T12"
+  SeeeeCeCeCe&####...ERR/Restarting.  Checking
+  sensors.  $RBlast doors$W are in place and cannot be
+  unlocked from outside.  However, in an emergency
+  situation, they could likely be breached with
+  the $Rdefensive ordnance$W that is located in the
+  upper armory."
+!T13"
+  Okay, sounds good.  How do I get to the upper
+  armory from here?"
+!T14"
+  Routing...ERR%###SIGSEG.  Error.  Unable to
+  access the colony's interior map data storage at
+  this time, apparently due to the severe systems
+  damage.  The armory is located nearby the outer
+  habitation areas, beyond security doors whose
+  location data I cannot currently access.  But I
+  can unlock them remotely nonetheless."
+!T15"
+  Do it."
+!T16"
+  Armory security doors have been unlocked."

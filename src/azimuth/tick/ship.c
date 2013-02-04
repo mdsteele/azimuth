@@ -32,6 +32,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h" // for az_try_damage_baddie
 #include "azimuth/tick/gravfield.h"
+#include "azimuth/tick/script.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
@@ -80,8 +81,8 @@ static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
   const az_node_t *best_node = NULL;
   double best_dist = 50.0;
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING) continue;
-    if (node->kind == AZ_NODE_TRACTOR) continue;
+    if (node->kind == AZ_NODE_NOTHING || node->kind == AZ_NODE_TRACTOR ||
+        node->kind == AZ_NODE_UPGRADE) continue;
     const double dist = az_vdist(node->position, state->ship.position);
     if (dist <= best_dist) {
       best_dist = dist;
@@ -948,9 +949,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // If we press the util key while near a save point, initiate saving.
   if (controls->util_pressed && state->mode == AZ_MODE_NORMAL) {
     const az_node_t *node = choose_nearby_node(state);
-    // TODO: Handle other kinds of node actions (e.g. refill/comm nodes)
-    if (node != NULL && node->kind == AZ_NODE_SAVE_POINT) {
-      state->mode = AZ_MODE_SAVING;
+    if (node != NULL) {
+      if (node->kind == AZ_NODE_SAVE_POINT) {
+        state->mode = AZ_MODE_SAVING;
+      } else if (node->kind == AZ_NODE_REFILL) {
+        // TODO: implement refill nodes
+      }
+      az_run_script(state, node->on_use);
     }
   }
   controls->util_pressed = false;
@@ -965,8 +970,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
         state->mode_data.upgrade.step = AZ_UGS_OPEN;
         state->mode_data.upgrade.progress = 0.0;
         state->mode_data.upgrade.upgrade = node->upgrade;
+        const az_script_t *script = node->on_use;
         node->kind = AZ_NODE_NOTHING;
         az_give_upgrade(player, node->upgrade);
+        az_run_script(state, script);
         break;
       }
     }
@@ -1002,6 +1009,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
       ship->tractor_beam.node_uid = tractor_node->uid;
       ship->tractor_beam.distance = best_distance;
       controls->fire_pressed = false;
+      az_run_script(state, tractor_node->on_use);
     }
   }
   // Apply tractor beam's velocity changes:

@@ -679,6 +679,9 @@ static void begin_edit_script(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) script = door->spec.on_open;
   }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->selected) script = node->spec.on_use;
+  }
   if (script != NULL) {
     if (az_sprint_script(script, state.text.buffer,
                          AZ_ARRAY_SIZE(state.text.buffer))) {
@@ -708,6 +711,9 @@ static void try_edit_script(void) {
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) dest = &door->spec.on_open;
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->selected) dest = &node->spec.on_use;
   }
   state.text.action = AZ_ETA_NOTHING;
   az_free_script(*dest);
