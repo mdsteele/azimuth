@@ -44,7 +44,14 @@ typedef struct {
   az_planet_t *planet;
 } az_load_planet_t;
 
+#ifdef NDEBUG
 #define FAIL() longjmp(loader->jump, 1)
+#else
+#define FAIL() do{ \
+    fprintf(stderr, "planet.c: failure at line %d\n", __LINE__); \
+    longjmp(loader->jump, 1); \
+  } while (0)
+#endif // NDEBUG
 
 // Read the next non-whitespace character.  If it is '!' or if we reach EOF,
 // do nothing more; otherwise, fail parsing.

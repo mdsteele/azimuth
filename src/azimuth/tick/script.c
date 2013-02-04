@@ -312,33 +312,27 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           SUSPEND(vm->script, &state->mode_data.dialog.vm);
         }
         SCRIPT_ERROR("can't start dialog now");
-      case AZ_OP_TOP:
+      case AZ_OP_PT:
         if (state->mode == AZ_MODE_DIALOG) {
-          state->mode_data.dialog.bottom_next = false;
           const int portrait = (int)ins.immediate;
-          if (portrait < 0) {
-            state->mode_data.dialog.top = AZ_POR_NOTHING;
-          } else if (portrait > AZ_NUM_PORTRAITS) {
+          if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
-          } else if (portrait > 0) {
+          } else {
             state->mode_data.dialog.top = (az_portrait_t)portrait;
-          } else assert(portrait == 0);
+          }
         } else SCRIPT_ERROR("not in dialog");
         break;
-      case AZ_OP_BOT:
+      case AZ_OP_PB:
         if (state->mode == AZ_MODE_DIALOG) {
-          state->mode_data.dialog.bottom_next = true;
           const int portrait = (int)ins.immediate;
-          if (portrait < 0) {
-            state->mode_data.dialog.bottom = AZ_POR_NOTHING;
-          } else if (portrait > AZ_NUM_PORTRAITS) {
+          if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
-          } else if (portrait > 0) {
+          } else {
             state->mode_data.dialog.bottom = (az_portrait_t)portrait;
-          } else assert(portrait == 0);
+          }
         } else SCRIPT_ERROR("not in dialog");
         break;
-      case AZ_OP_TXT:
+      case AZ_OP_TT:
         if (state->mode == AZ_MODE_DIALOG) {
           const int text_index = (int)ins.immediate;
           if (text_index < 0 || text_index >= state->planet->num_texts) {
@@ -347,6 +341,22 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           const az_text_t *text = &state->planet->texts[text_index];
           state->mode_data.dialog.step = AZ_DLS_TALK;
           state->mode_data.dialog.progress = 0.0;
+          state->mode_data.dialog.bottom_next = false;
+          state->mode_data.dialog.text = text;
+          state->mode_data.dialog.row = state->mode_data.dialog.col = 0;
+          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+        }
+        SCRIPT_ERROR("not in dialog");
+      case AZ_OP_TB:
+        if (state->mode == AZ_MODE_DIALOG) {
+          const int text_index = (int)ins.immediate;
+          if (text_index < 0 || text_index >= state->planet->num_texts) {
+            SCRIPT_ERROR("invalid text index");
+          }
+          const az_text_t *text = &state->planet->texts[text_index];
+          state->mode_data.dialog.step = AZ_DLS_TALK;
+          state->mode_data.dialog.progress = 0.0;
+          state->mode_data.dialog.bottom_next = true;
           state->mode_data.dialog.text = text;
           state->mode_data.dialog.row = state->mode_data.dialog.col = 0;
           SUSPEND(vm->script, &state->mode_data.dialog.vm);

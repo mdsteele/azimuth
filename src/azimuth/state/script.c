@@ -51,9 +51,10 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SETGS:  return "setgs";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
-    case AZ_OP_TOP:    return "top";
-    case AZ_OP_BOT:    return "bot";
-    case AZ_OP_TXT:    return "txt";
+    case AZ_OP_PT:     return "pt";
+    case AZ_OP_PB:     return "pb";
+    case AZ_OP_TT:     return "tt";
+    case AZ_OP_TB:     return "tb";
     case AZ_OP_DEND:   return "dend";
     case AZ_OP_WAIT:   return "wait";
     case AZ_OP_STOP:   return "stop";
@@ -69,6 +70,9 @@ static bool opcode_for_name(const char *name, az_opcode_t *opcode_out) {
       return true;
     }
   }
+#ifndef NDEBUG
+  fprintf(stderr, "script.c: no such opcode: %s\n", name);
+#endif
   return false;
 }
 
@@ -84,8 +88,6 @@ static bool should_print_immediate(az_instruction_t ins) {
       return false;
     case AZ_OP_POP:
     case AZ_OP_BOSS:
-    case AZ_OP_TOP:
-    case AZ_OP_BOT:
       return (ins.immediate != 0.0);
     case AZ_OP_PUSH:
     case AZ_OP_ADDI:
@@ -101,7 +103,10 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GETGS:
     case AZ_OP_SETGS:
     case AZ_OP_MSG:
-    case AZ_OP_TXT:
+    case AZ_OP_PT:
+    case AZ_OP_PB:
+    case AZ_OP_TT:
+    case AZ_OP_TB:
     case AZ_OP_WAIT:
       return true;
   }

@@ -22,18 +22,18 @@
   here?  Where is everyone?"
 !T6"
   Query: Unknown.
-
+  
   Status: Automated emergency disaster-control
   systems are active, although many of them have
   been badly damaged.
-
+  
   No colonists are currently in the outer
   habitation areas."
 !T7"
   Then where are they?  Are they still alive?"
 !T8"
   Scanning records...
-
+  
   Of 284 registered colonists on Zenith, 47 human
   and 16 trichord fatalities have been reported in
   the past 48 hours."

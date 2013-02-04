@@ -55,9 +55,10 @@ typedef enum {
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen
   AZ_OP_DLOG, // begin dialog
-  AZ_OP_TOP, // set top speaker to portrait i
-  AZ_OP_BOT, // set bottom speaker to portrait i
-  AZ_OP_TXT, // have last set speaker (top or bottom) say string i
+  AZ_OP_PT, // set top speaker to portrait i
+  AZ_OP_PB, // set bottom speaker to portrait i
+  AZ_OP_TT, // have top speaker say text i
+  AZ_OP_TB, // have bottom speaker say text i
   AZ_OP_DEND, // end dialog
   // Termination:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds

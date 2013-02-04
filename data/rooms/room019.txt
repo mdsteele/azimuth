@@ -1,4 +1,4 @@
 @R0 z0 c(48251.67,0.39,1.615754,0.000012) b0 d1 g0 n1 w0
 !D1 x-2460.64 y48188.50 a0.048500 r20 u0
 !N5 x-2080.50 y48207.92 a-3.099722
-$u:dlog,top1,bot3,test2,bnez24,txt4,top,txt5,bot,txt6,top,txt7,bot,txt8,top,txt9,bot,txt10,top,txt11,bot,txt12,top,txt13,bot,txt14,top,txt15,bot,txt16,dend,set2;
+$u:dlog,pt1,pb3,test2,bnez13,tb4,tt5,tb6,tt7,tb8,tt9,tb10,tt11,tb12,tt13,tb14,tt15,tb16,dend,set2;

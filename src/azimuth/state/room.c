@@ -47,7 +47,14 @@ typedef struct {
   az_room_t *room;
 } az_load_room_t;
 
+#ifdef NDEBUG
 #define FAIL() longjmp(loader->jump, 1)
+#else
+#define FAIL() do{ \
+    fprintf(stderr, "room.c: failure at line %d\n", __LINE__); \
+    longjmp(loader->jump, 1); \
+  } while (0)
+#endif // NDEBUG
 
 // Read the next non-whitespace character.  If it is '$', return true; if it is
 // '!' or if we reach EOF, return false; otherwise, fail parsing.
