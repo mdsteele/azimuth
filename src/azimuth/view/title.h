@@ -29,22 +29,18 @@
 /*===========================================================================*/
 
 typedef struct {
-  enum { AZ_TSS_HOVER_NONE, AZ_TSS_HOVER_MAIN, AZ_TSS_HOVER_ERASE } hover;
-  az_clock_t hover_start;
-  double main_hover_pulse, erase_hover_pulse;
-} az_title_save_slot_t;
-
-typedef struct {
   bool hovering;
   az_clock_t hover_start;
   double hover_pulse;
 } az_title_button_t;
 
 typedef struct {
+  az_title_button_t main, erase;
+} az_title_save_slot_t;
+
+typedef struct {
+  az_title_button_t handle;
   bool grabbed;
-  bool hovering;
-  az_clock_t hover_start;
-  double hover_pulse;
   float value;
 } az_title_slider_t;
 

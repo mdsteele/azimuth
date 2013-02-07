@@ -200,8 +200,8 @@ static void draw_slider(const az_title_state_t *state,
     // Slider handle:
     glPushMatrix(); {
       glTranslatef(slider->value * SLIDER_WIDTH, 0, 0);
-      glColor4f(0.7f * slider->hover_pulse, slider->hover_pulse,
-                slider->hover_pulse, 0.7f);
+      const GLfloat pulse = slider->handle.hover_pulse;
+      glColor4f(0.7f * pulse, pulse, pulse, 0.7f);
       do_polygon(GL_POLYGON, slider_handle_polygon);
       glColor3f(0.75, 0.75, 0.75); // light gray
       do_polygon(GL_LINE_LOOP, slider_handle_polygon);
@@ -330,8 +330,8 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
       state->mode_data.starting.slot_index == index));
 
   // Draw slot frame and title:
-  glColor4f(0.7*slot->main_hover_pulse, slot->main_hover_pulse,
-            slot->main_hover_pulse, 0.7);
+  glColor4f(0.7*slot->main.hover_pulse, slot->main.hover_pulse,
+            slot->main.hover_pulse, 0.7);
   do_polygon(GL_TRIANGLE_FAN, save_slot_polygon);
   glColor3f(0.75, 0.75, 0.75); // light gray
   do_polygon(GL_LINE_LOOP, save_slot_polygon);
@@ -341,7 +341,7 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
 
   if (saved_game->present) {
     // Draw "ERASE" button:
-    glColor4f(slot->erase_hover_pulse, 0, 0, 0.7);
+    glColor4f(slot->erase.hover_pulse, 0, 0, 0.7);
     do_polygon(GL_POLYGON, save_slot_erase_polygon);
     glColor3f(0.75, 0.75, 0.75); // light gray
     do_polygon(GL_LINE_LOOP, save_slot_erase_polygon);
@@ -492,35 +492,17 @@ static void reset_button(az_title_button_t *button) {
 
 /*===========================================================================*/
 
-static void draw_bottom_button(const az_title_state_t *state,
-                               az_button_id_t button_id) {
+static void draw_bottom_button(
+    const az_title_state_t *state, const az_title_button_t *button,
+    az_button_id_t button_id, const char *label) {
   assert(button_id == AZ_BUTTON_PREFS || button_id == AZ_BUTTON_ABOUT ||
          button_id == AZ_BUTTON_QUIT);
   glPushMatrix(); {
     const az_vector_t topleft = bottom_button_topleft(button_id);
     glTranslated(topleft.x, topleft.y, 0);
-
-    const az_title_button_t *button;
-    const char *label;
-    switch (button_id) {
-      case AZ_BUTTON_PREFS:
-        button = &state->prefs_button;
-        label = "Prefs";
-        break;
-      case AZ_BUTTON_ABOUT:
-        button = &state->about_button;
-        label = "About";
-        break;
-      case AZ_BUTTON_QUIT:
-        button = &state->quit_button;
-        label = "Quit";
-        break;
-      default: AZ_ASSERT_UNREACHABLE();
-    }
-
     const bool active = button_is_active(state, button_id);
-    glColor4f(0.8 * button->hover_pulse, button->hover_pulse,
-              button->hover_pulse, 0.7);
+    const GLfloat pulse = button->hover_pulse;
+    glColor4f(0.8f * pulse, pulse, pulse, 0.7f);
     do_polygon(GL_POLYGON, button_polygon);
     glColor3f(0.75, 0.75, 0.75); // light gray
     do_polygon(GL_LINE_LOOP, button_polygon);
@@ -563,9 +545,9 @@ void az_title_draw_screen(const az_title_state_t *state) {
   }
 
   // Draw bottom three buttons:
-  draw_bottom_button(state, AZ_BUTTON_PREFS);
-  draw_bottom_button(state, AZ_BUTTON_ABOUT);
-  draw_bottom_button(state, AZ_BUTTON_QUIT);
+  draw_bottom_button(state, &state->prefs_button, AZ_BUTTON_PREFS, "Prefs");
+  draw_bottom_button(state, &state->about_button, AZ_BUTTON_ABOUT, "About");
+  draw_bottom_button(state, &state->quit_button, AZ_BUTTON_QUIT, "Quit");
 
   // Fade out screen:
   if (state->mode == AZ_TMODE_STARTING) {
@@ -595,35 +577,10 @@ static void tick_mode(az_title_state_t *state, double time) {
 #define HOVER_PULSE_CLICK 1.0
 #define HOVER_DECAY_TIME 0.7
 
-static void tick_save_slot(az_title_state_t *state, int index, double time) {
-  az_title_save_slot_t *slot = &state->slots[index];
-  // Main hover:
-  if (state->mode == AZ_TMODE_NORMAL && slot->hover == AZ_TSS_HOVER_MAIN) {
-    slot->main_hover_pulse = HOVER_PULSE_MIN +
-      (HOVER_PULSE_MAX - HOVER_PULSE_MIN) *
-      (double)az_clock_zigzag(HOVER_PULSE_FRAMES, 1,
-                              state->clock - slot->hover_start) /
-      (double)HOVER_PULSE_FRAMES;
-  } else {
-    slot->main_hover_pulse =
-      fmax(0.0, slot->main_hover_pulse - time / HOVER_DECAY_TIME);
-  }
-  // Erase hover:
-  if (state->mode == AZ_TMODE_NORMAL && slot->hover == AZ_TSS_HOVER_ERASE) {
-    slot->erase_hover_pulse = HOVER_PULSE_MIN +
-      (HOVER_PULSE_MAX - HOVER_PULSE_MIN) *
-      (double)az_clock_zigzag(HOVER_PULSE_FRAMES, 1,
-                              state->clock - slot->hover_start) /
-      (double)HOVER_PULSE_FRAMES;
-  } else {
-    slot->erase_hover_pulse =
-      fmax(0.0, slot->erase_hover_pulse - time / HOVER_DECAY_TIME);
-  }
-}
-
-static void tick_button(az_title_state_t *state, az_title_button_t *button,
-                        az_button_id_t button_id, double time) {
-  if (button_is_active(state, button_id) && button->hovering) {
+static void update_hover_pulse(
+    az_title_state_t *state, az_title_button_t *button, bool active,
+    double time) {
+  if (active && button->hovering) {
     if (button->hover_pulse > HOVER_PULSE_MAX) {
       button->hover_pulse -= time / HOVER_DECAY_TIME;
       if (button->hover_pulse <= HOVER_PULSE_MAX) {
@@ -643,33 +600,34 @@ static void tick_button(az_title_state_t *state, az_title_button_t *button,
   }
 }
 
+static void tick_button(az_title_state_t *state, az_title_button_t *button,
+                        az_button_id_t button_id, double time) {
+  update_hover_pulse(state, button, button_is_active(state, button_id), time);
+}
+
+static void tick_save_slot(az_title_state_t *state, int index, double time) {
+  az_title_save_slot_t *slot = &state->slots[index];
+  const bool active = (state->mode == AZ_TMODE_NORMAL);
+  update_hover_pulse(state, &slot->main, active, time);
+  update_hover_pulse(state, &slot->erase, active, time);
+}
+
 static void tick_slider(az_title_state_t *state, az_title_slider_t *slider,
                         az_slider_id_t slider_id, double time) {
   if (slider->grabbed) {
-    slider->hover_pulse = HOVER_PULSE_CLICK;
+    slider->handle.hover_pulse = HOVER_PULSE_CLICK;
     if (!az_is_mouse_held()) {
       slider->grabbed = false;
+      int x, y;
+      slider->handle.hovering = az_get_mouse_position(&x, &y) &&
+        point_in_slider_handle(state, slider_id, x, y);
       if (slider_id == AZ_SLIDER_SOUND) {
         az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
       }
     }
-  } else if (slider->hovering) {
-    if (slider->hover_pulse > HOVER_PULSE_MAX) {
-      slider->hover_pulse -= time / HOVER_DECAY_TIME;
-      if (slider->hover_pulse <= HOVER_PULSE_MAX) {
-        slider->hover_pulse = HOVER_PULSE_MAX;
-        slider->hover_start = state->clock;
-      }
-    } else {
-      slider->hover_pulse = HOVER_PULSE_MIN +
-        (HOVER_PULSE_MAX - HOVER_PULSE_MIN) *
-        (double)az_clock_zigzag(HOVER_PULSE_FRAMES, 1,
-                                state->clock - slider->hover_start) /
-        (double)HOVER_PULSE_FRAMES;
-    }
   } else {
-    slider->hover_pulse =
-      fmax(0.0, slider->hover_pulse - time / HOVER_DECAY_TIME);
+    update_hover_pulse(state, &slider->handle, state->mode == AZ_TMODE_PREFS,
+                       time);
   }
 }
 
@@ -693,10 +651,9 @@ void az_tick_title_state(az_title_state_t *state, double time) {
 
 /*===========================================================================*/
 
-static void button_on_hover(az_title_state_t *state, az_title_button_t *button,
-                            az_button_id_t button_id, int x, int y) {
-  if (button_is_active(state, button_id) &&
-      point_in_button(state, button_id, x, y)) {
+static void set_hovering(az_title_state_t *state, az_title_button_t *button,
+                         bool active, bool hovering) {
+  if (active && hovering) {
     if (!button->hovering) {
       button->hovering = true;
       button->hover_start = state->clock;
@@ -707,43 +664,31 @@ static void button_on_hover(az_title_state_t *state, az_title_button_t *button,
   }
 }
 
+static void button_on_hover(az_title_state_t *state, az_title_button_t *button,
+                            az_button_id_t button_id, int x, int y) {
+  set_hovering(state, button, button_is_active(state, button_id),
+               point_in_button(state, button_id, x, y));
+}
+
 static void slider_on_hover(az_title_state_t *state, az_title_slider_t *slider,
                             az_slider_id_t slider_id, int x, int y) {
   if (slider->grabbed) {
     const double rel_x = fmin(fmax(0.0, x - slider_midleft(slider_id).x),
                               SLIDER_WIDTH);
     slider->value = rel_x / SLIDER_WIDTH;
-  } else if (state->mode == AZ_TMODE_PREFS &&
-             point_in_slider_handle(state, slider_id, x, y)) {
-    if (!slider->hovering) {
-      slider->hovering = true;
-      slider->hover_start = state->clock;
-      slider->hover_pulse = HOVER_PULSE_MAX;
-    }
   } else {
-    slider->hovering = false;
+    set_hovering(state, &slider->handle, state->mode == AZ_TMODE_PREFS,
+                 point_in_slider_handle(state, slider_id, x, y));
   }
 }
 
 void az_title_on_hover(az_title_state_t *state, int x, int y) {
   for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
-    if (state->mode != AZ_TMODE_NORMAL) {
-      state->slots[i].hover = AZ_TSS_HOVER_NONE;
-    } else if (point_in_save_slot_erase(i, x, y)) {
-      if (state->slots[i].hover != AZ_TSS_HOVER_ERASE) {
-        state->slots[i].hover = AZ_TSS_HOVER_ERASE;
-        state->slots[i].hover_start = state->clock;
-        state->slots[i].erase_hover_pulse = HOVER_PULSE_MAX;
-      }
-    } else if (point_in_save_slot(i, x, y)) {
-      if (state->slots[i].hover != AZ_TSS_HOVER_MAIN) {
-        state->slots[i].hover = AZ_TSS_HOVER_MAIN;
-        state->slots[i].hover_start = state->clock;
-        state->slots[i].main_hover_pulse = HOVER_PULSE_MAX;
-      }
-    } else {
-      state->slots[i].hover = AZ_TSS_HOVER_NONE;
-    }
+    az_title_save_slot_t *slot = &state->slots[i];
+    set_hovering(state, &slot->main, state->mode == AZ_TMODE_NORMAL,
+                 point_in_save_slot(i, x, y));
+    set_hovering(state, &slot->erase, state->mode == AZ_TMODE_NORMAL,
+                 point_in_save_slot_erase(i, x, y));
   }
   button_on_hover(state, &state->prefs_button, AZ_BUTTON_PREFS, x, y);
   button_on_hover(state, &state->about_button, AZ_BUTTON_ABOUT, x, y);
@@ -792,7 +737,7 @@ static void slider_on_click(az_title_state_t *state, az_title_slider_t *slider,
   if (state->mode == AZ_TMODE_PREFS &&
       point_in_slider_handle(state, slider_id, x, y)) {
     slider->grabbed = true;
-    slider->hover_pulse = HOVER_PULSE_CLICK;
+    slider->handle.hover_pulse = HOVER_PULSE_CLICK;
   }
 }
 
@@ -801,14 +746,14 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
     for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
       if (state->saved_games->games[i].present &&
           point_in_save_slot_erase(i, x, y)) {
-        state->slots[i].erase_hover_pulse = HOVER_PULSE_CLICK;
+        state->slots[i].erase.hover_pulse = HOVER_PULSE_CLICK;
         state->mode = AZ_TMODE_ERASING;
         state->mode_data.erasing.slot_index = i;
         state->mode_data.erasing.do_erase = false;
         reset_button(&state->confirm_button);
         reset_button(&state->cancel_button);
       } else if (point_in_save_slot(i, x, y)) {
-        state->slots[i].main_hover_pulse = HOVER_PULSE_CLICK;
+        state->slots[i].main.hover_pulse = HOVER_PULSE_CLICK;
         state->mode = AZ_TMODE_STARTING;
         state->mode_data.starting.progress = 0.0;
         state->mode_data.starting.slot_index = i;
