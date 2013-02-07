@@ -28,6 +28,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/system/resource.h"
 #include "azimuth/util/audio.h"
+#include "azimuth/util/prefs.h"
 #include "azimuth/view/title.h"
 
 /*===========================================================================*/
@@ -41,13 +42,26 @@ static void erase_saved_game(az_saved_games_t *saved_games, int index) {
   (void)az_save_games_to_file(saved_games, path_buffer);
 }
 
-az_title_action_t az_title_event_loop(const az_planet_t *planet,
-                                      az_saved_games_t *saved_games) {
+static void save_preferences(const az_preferences_t *prefs) {
+  const char *data_dir = az_get_app_data_directory();
+  if (data_dir == NULL) return;
+  char path_buffer[strlen(data_dir) + 10u];
+  sprintf(path_buffer, "%s/prefs.txt", data_dir);
+  (void)az_save_prefs_to_file(prefs, path_buffer);
+}
+
+az_title_action_t az_title_event_loop(
+    const az_planet_t *planet, az_saved_games_t *saved_games,
+    az_preferences_t *prefs) {
   static az_title_state_t state;
   memset(&state, 0, sizeof(state));
   state.planet = planet;
   state.saved_games = saved_games;
+  state.music_slider.value = prefs->music_volume;
+  state.sound_slider.value = prefs->sound_volume;
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
+
+  bool prefs_changed = false;
 
   while (true) {
     // Tick the state and redraw the screen.
@@ -86,6 +100,23 @@ az_title_action_t az_title_event_loop(const az_planet_t *planet,
         state.mode_data.erasing.do_erase) {
       erase_saved_game(saved_games, state.mode_data.erasing.slot_index);
       state.mode = AZ_TMODE_NORMAL;
+    }
+
+    // Check if we need to change prefs.
+    if (prefs->music_volume != state.music_slider.value) {
+      prefs->music_volume = state.music_slider.value;
+      az_set_global_music_volume(prefs->music_volume);
+      prefs_changed = true;
+    }
+    if (prefs->sound_volume != state.sound_slider.value) {
+      prefs->sound_volume = state.sound_slider.value;
+      az_set_global_sound_volume(prefs->sound_volume);
+      prefs_changed = true;
+    }
+    if (prefs_changed && !state.music_slider.grabbed &&
+        !state.sound_slider.grabbed) {
+      save_preferences(prefs);
+      prefs_changed = false;
     }
   }
 }

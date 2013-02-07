@@ -41,6 +41,14 @@ typedef struct {
 } az_title_button_t;
 
 typedef struct {
+  bool grabbed;
+  bool hovering;
+  az_clock_t hover_start;
+  double hover_pulse;
+  float value;
+} az_title_slider_t;
+
+typedef struct {
   const az_planet_t *planet;
   const az_saved_games_t *saved_games;
   az_clock_t clock;
@@ -49,6 +57,7 @@ typedef struct {
   enum {
     // TODO intro sequence
     AZ_TMODE_NORMAL = 0,
+    AZ_TMODE_PREFS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_ERASING,
     AZ_TMODE_STARTING,
@@ -60,7 +69,9 @@ typedef struct {
   } mode_data;
 
   az_title_save_slot_t slots[AZ_NUM_SAVED_GAME_SLOTS];
-  az_title_button_t about_button, quit_button, confirm_button, cancel_button;
+  az_title_button_t confirm_button, cancel_button;
+  az_title_button_t prefs_button, about_button, quit_button;
+  az_title_slider_t music_slider, sound_slider;
 } az_title_state_t;
 
 void az_title_draw_screen(const az_title_state_t *state);

@@ -31,7 +31,7 @@
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
-#include "azimuth/util/vector.h" // for AZ_TWO_PI
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 // Constants:
@@ -815,6 +815,23 @@ void az_init_audio_mixer(void) {
   load_all_music();
   generate_all_sounds();
   audio_mixer_initialized = true;
+}
+
+static int to_sdl_volume(float volume) {
+  return az_imin(az_imax(0, (int)(volume * (float)MIX_MAX_VOLUME)),
+                 MIX_MAX_VOLUME);
+}
+
+void az_set_global_music_volume(float volume) {
+  assert(audio_mixer_initialized);
+  assert(!audio_mixer_paused);
+  Mix_VolumeMusic(to_sdl_volume(volume));
+}
+
+void az_set_global_sound_volume(float volume) {
+  assert(audio_mixer_initialized);
+  assert(!audio_mixer_paused);
+  Mix_Volume(-1, to_sdl_volume(volume));
 }
 
 void az_tick_audio_mixer(az_soundboard_t *soundboard) {

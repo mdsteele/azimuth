@@ -17,38 +17,56 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_GUI_AUDIO_H_
-#define AZIMUTH_GUI_AUDIO_H_
+#include "azimuth/util/prefs.h"
 
-#include "azimuth/util/audio.h"
-
-/*===========================================================================*/
-
-// Call this once per frame to update our audio system.  The audio system must
-// be initialized first (by calling az_init_gui, which will in turn call
-// az_init_audio_mixer above).
-void az_tick_audio_mixer(az_soundboard_t *soundboard);
-
-// Set the global volume for music or sound effects, respectively.  The
-// argument should be between 0.0 (silent) and 1.0 (full volume), inclusive.
-// The audio system must be initialized first (by calling az_init_gui, which
-// will in turn call az_init_audio_mixer above).
-void az_set_global_music_volume(float volume);
-void az_set_global_sound_volume(float volume);
+#include <assert.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 /*===========================================================================*/
 
-// Initialize our audio system (once the GUI has been initialized).  This is
-// called by az_init_gui, and should not be called from elsewhere.
-void az_init_audio_mixer(void);
-
-// Pause and unpause all audio (sounds and music).  These are automatically
-// called from event.c and screen.c when the app goes out/in of focus, and
-// should not be called from elsewhere.
-void az_pause_all_audio(void);
-void az_unpause_all_audio(void);
+void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
+  *prefs = (az_preferences_t){
+    .music_volume = 0.8,
+    .sound_volume = 0.8
+  };
+}
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_GUI_AUDIO_H_
+bool az_load_prefs_from_file(const char *filepath,
+                             az_preferences_t *prefs_out) {
+  assert(filepath != NULL);
+  assert(prefs_out != NULL);
+  memset(prefs_out, 0, sizeof(*prefs_out));
+  FILE *file = fopen(filepath, "r");
+  if (file == NULL) return false;
+  double music_volume, sound_volume;
+  const bool ok = (fscanf(
+      file, "@F mv=%lf sv=%lf\n",
+      &music_volume, &sound_volume) >= 2);
+  fclose(file);
+  if (!ok) return false;
+  prefs_out->music_volume = (float)fmin(fmax(0.0, music_volume), 1.0);
+  prefs_out->sound_volume = (float)fmin(fmax(0.0, sound_volume), 1.0);
+  return true;
+}
+
+/*===========================================================================*/
+
+bool az_save_prefs_to_file(const az_preferences_t *prefs,
+                           const char *filepath) {
+  assert(prefs != NULL);
+  assert(filepath != NULL);
+  FILE *file = fopen(filepath, "w");
+  if (file == NULL) return false;
+  const bool ok = (fprintf(
+      file, "@F mv=%.03f sv=%.03f\n",
+      (double)prefs->music_volume, (double)prefs->sound_volume) >= 0);
+  fclose(file);
+  return ok;
+}
+
+/*===========================================================================*/

@@ -26,6 +26,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/gui/event.h" // for az_is_mouse_held
 #include "azimuth/state/player.h"
 #include "azimuth/state/save.h"
 #include "azimuth/util/misc.h"
@@ -114,6 +115,119 @@ static void draw_background(const az_title_state_t *state) {
   // Draw game title:
   glColor3f(1, 1, 1); // white
   az_draw_string(80, AZ_ALIGN_CENTER, 320, 100, "Azimuth");
+}
+
+/*===========================================================================*/
+
+#define PREFS_BOX_TOP 260
+#define PREFS_BOX_WIDTH 512
+#define PREFS_BOX_HEIGHT 146
+
+#define SLIDER_WIDTH 300
+#define SLIDER_THICKNESS 10
+#define SLIDER_HANDLE_WIDTH 10
+#define SLIDER_HANDLE_HEIGHT 20
+
+typedef enum {
+  AZ_SLIDER_MUSIC = 0,
+  AZ_SLIDER_SOUND = 1
+} az_slider_id_t;
+
+static const az_vector_t slider_handle_vertices[] = {
+  {0, 0.5 * SLIDER_HANDLE_HEIGHT},
+  {-0.5 * SLIDER_HANDLE_WIDTH, 0.5 * SLIDER_HANDLE_HEIGHT - 5.0},
+  {-0.5 * SLIDER_HANDLE_WIDTH, -0.5 * SLIDER_HANDLE_HEIGHT + 5.0},
+  {0, -0.5 * SLIDER_HANDLE_HEIGHT},
+  {0.5 * SLIDER_HANDLE_WIDTH, -0.5 * SLIDER_HANDLE_HEIGHT + 5.0},
+  {0.5 * SLIDER_HANDLE_WIDTH, 0.5 * SLIDER_HANDLE_HEIGHT - 5.0}
+};
+static const az_polygon_t slider_handle_polygon =
+  AZ_INIT_POLYGON(slider_handle_vertices);
+
+static az_vector_t slider_midleft(az_slider_id_t slider_id) {
+  const double x = 0.5 * (AZ_SCREEN_WIDTH - SLIDER_WIDTH);
+  double y = PREFS_BOX_TOP + 50.0;
+  switch (slider_id) {
+    case AZ_SLIDER_MUSIC: break;
+    case AZ_SLIDER_SOUND: y += 50.0; break;
+  }
+  return (az_vector_t){x, y};
+}
+
+static const az_title_slider_t *get_slider(const az_title_state_t *state,
+                                           az_slider_id_t slider_id) {
+  switch (slider_id) {
+    case AZ_SLIDER_MUSIC: return &state->music_slider;
+    case AZ_SLIDER_SOUND: return &state->sound_slider;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
+
+static bool point_in_slider_handle(const az_title_state_t *state,
+                                   az_slider_id_t slider_id, int x, int y) {
+  az_vector_t pt = {x, y};
+  pt = az_vsub(pt, slider_midleft(slider_id));
+  pt.x -= get_slider(state, slider_id)->value * SLIDER_WIDTH;
+  return az_polygon_contains(slider_handle_polygon, pt);
+}
+
+static void draw_slider(const az_title_state_t *state,
+                        az_slider_id_t slider_id) {
+  const az_vector_t midleft = slider_midleft(slider_id);
+  glPushMatrix(); {
+    glTranslated(midleft.x, midleft.y, 0);
+    const az_title_slider_t *slider = get_slider(state, slider_id);
+    // Slider track:
+    glBegin(GL_QUADS); {
+      glColor3f(0.5, 0.5, 0.5); // gray
+      glVertex2f(0, -2); glVertex2f(SLIDER_WIDTH, -2);
+      glColor3f(0.25, 0.25, 0.25); // dark gray
+      glVertex2f(SLIDER_WIDTH, 2); glVertex2f(0, 2);
+    } glEnd();
+    // Label:
+    if (slider_id == AZ_SLIDER_MUSIC) glColor3f(0.75, 1, 1); // cyan
+    else glColor3f(1, 0.75, 1); // magenta
+    az_draw_string(8, AZ_ALIGN_RIGHT, -12, -4,
+                   (slider_id == AZ_SLIDER_MUSIC ? "Music" : "Sounds"));
+    // Numeric slider value:
+    glColor3f(sqrt(1.0 - slider->value), sqrt(slider->value), 0);
+    if (slider->value > 0) {
+      az_draw_printf(8, AZ_ALIGN_RIGHT, SLIDER_WIDTH + 42, -4,
+                     "%3d%%", 50 + (int)(100.0f * slider->value - 50.0f));
+    } else {
+      az_draw_string(8, AZ_ALIGN_RIGHT, SLIDER_WIDTH + 40, -4, "OFF");
+    }
+    // Slider handle:
+    glPushMatrix(); {
+      glTranslatef(slider->value * SLIDER_WIDTH, 0, 0);
+      glColor4f(0.7f * slider->hover_pulse, slider->hover_pulse,
+                slider->hover_pulse, 0.7f);
+      do_polygon(GL_POLYGON, slider_handle_polygon);
+      glColor3f(0.75, 0.75, 0.75); // light gray
+      do_polygon(GL_LINE_LOOP, slider_handle_polygon);
+    } glPopMatrix();
+  } glPopMatrix();
+}
+
+static const az_vector_t prefs_box_vertices[] = {
+  {0.5, 0.5}, {PREFS_BOX_WIDTH - 0.5, 0.5},
+  {PREFS_BOX_WIDTH - 0.5, PREFS_BOX_HEIGHT - 0.5},
+  {0.5, PREFS_BOX_HEIGHT - 0.5}
+};
+static const az_polygon_t prefs_box_polygon =
+  AZ_INIT_POLYGON(prefs_box_vertices);
+
+static void draw_prefs_box(const az_title_state_t *state) {
+  glPushMatrix(); {
+    glTranslated(0.5 * (AZ_SCREEN_WIDTH - PREFS_BOX_WIDTH), PREFS_BOX_TOP, 0);
+    glColor4f(0, 0, 0, 0.7); // black tint
+    do_polygon(GL_POLYGON, prefs_box_polygon);
+    glColor3f(0.75, 0.75, 0.75); // light gray
+    do_polygon(GL_LINE_LOOP, prefs_box_polygon);
+  } glPopMatrix();
+
+  draw_slider(state, AZ_SLIDER_MUSIC);
+  draw_slider(state, AZ_SLIDER_SOUND);
 }
 
 /*===========================================================================*/
@@ -303,11 +417,12 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
 
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 20
-#define BUTTON_SPACING 120
+#define BUTTON_SPACING 54
 
 typedef enum {
-  AZ_BUTTON_ABOUT,
-  AZ_BUTTON_QUIT,
+  AZ_BUTTON_PREFS = 0,
+  AZ_BUTTON_ABOUT = 1,
+  AZ_BUTTON_QUIT = 2,
   AZ_BUTTON_CONFIRM,
   AZ_BUTTON_CANCEL
 } az_button_id_t;
@@ -319,37 +434,48 @@ static const az_vector_t button_vertices[] = {
 };
 static const az_polygon_t button_polygon = AZ_INIT_POLYGON(button_vertices);
 
-static az_vector_t about_quit_button_topleft(bool is_quit) {
-  return (az_vector_t){
-    0.5 * (AZ_SCREEN_WIDTH - 2 * BUTTON_WIDTH - BUTTON_SPACING) +
-      (is_quit ? BUTTON_WIDTH + BUTTON_SPACING : 0),
-      SAVE_SLOTS_TOP + 2 * (SAVE_SLOT_HEIGHT + SAVE_SLOT_SPACING)};
+static az_vector_t bottom_button_topleft(az_button_id_t button_id) {
+  assert(button_id == AZ_BUTTON_PREFS || button_id == AZ_BUTTON_ABOUT ||
+         button_id == AZ_BUTTON_QUIT);
+  const double x =
+    0.5 * (AZ_SCREEN_WIDTH - 3 * BUTTON_WIDTH - 2 * BUTTON_SPACING) +
+    (int)button_id * (BUTTON_WIDTH + BUTTON_SPACING);
+  const double y = SAVE_SLOTS_TOP + 2 * (SAVE_SLOT_HEIGHT + SAVE_SLOT_SPACING);
+  return (az_vector_t){x, y};
 }
 
 static bool point_in_button(const az_title_state_t *state,
                             az_button_id_t button_id, int x, int y) {
   az_vector_t pt = {x, y};
-  if (button_id == AZ_BUTTON_ABOUT || button_id == AZ_BUTTON_QUIT) {
-    return az_polygon_contains(button_polygon,
-        az_vsub(pt, about_quit_button_topleft(button_id == AZ_BUTTON_QUIT)));
-  } else {
-    assert(button_id == AZ_BUTTON_CONFIRM || button_id == AZ_BUTTON_CANCEL);
-    if (state->mode != AZ_TMODE_ERASING) return false;
-    pt = az_vsub(pt, save_slot_topleft(state->mode_data.erasing.slot_index));
-    pt.y -= SAVE_SLOT_HEIGHT/2 + 14;
-    pt.x -= (button_id == AZ_BUTTON_CONFIRM ? SAVE_SLOT_WIDTH/4 :
-             3*SAVE_SLOT_WIDTH/4);
-    return (az_vnorm(pt) <= 24.0);
+  switch (button_id) {
+    case AZ_BUTTON_PREFS:
+    case AZ_BUTTON_ABOUT:
+    case AZ_BUTTON_QUIT:
+      return az_polygon_contains(button_polygon,
+          az_vsub(pt, bottom_button_topleft(button_id)));
+    case AZ_BUTTON_CONFIRM:
+    case AZ_BUTTON_CANCEL:
+      if (state->mode != AZ_TMODE_ERASING) return false;
+      pt = az_vsub(pt, save_slot_topleft(state->mode_data.erasing.slot_index));
+      pt.y -= SAVE_SLOT_HEIGHT/2 + 14;
+      pt.x -= (button_id == AZ_BUTTON_CONFIRM ? SAVE_SLOT_WIDTH/4 :
+               3*SAVE_SLOT_WIDTH/4);
+      return (az_vnorm(pt) <= 24.0);
   }
+  AZ_ASSERT_UNREACHABLE();
 }
 
 static bool button_is_active(const az_title_state_t *state,
                              az_button_id_t button_id) {
   switch (button_id) {
+    case AZ_BUTTON_PREFS:
     case AZ_BUTTON_ABOUT:
-      return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_ABOUT);
+      return (state->mode == AZ_TMODE_NORMAL ||
+              state->mode == AZ_TMODE_PREFS ||
+              state->mode == AZ_TMODE_ABOUT);
     case AZ_BUTTON_QUIT:
       return (state->mode == AZ_TMODE_NORMAL ||
+              state->mode == AZ_TMODE_PREFS ||
               state->mode == AZ_TMODE_ABOUT ||
               state->mode == AZ_TMODE_ERASING);
     case AZ_BUTTON_CONFIRM:
@@ -366,16 +492,33 @@ static void reset_button(az_title_button_t *button) {
 
 /*===========================================================================*/
 
-static void draw_about_quit_button(const az_title_state_t *state,
-                                   bool is_quit) {
+static void draw_bottom_button(const az_title_state_t *state,
+                               az_button_id_t button_id) {
+  assert(button_id == AZ_BUTTON_PREFS || button_id == AZ_BUTTON_ABOUT ||
+         button_id == AZ_BUTTON_QUIT);
   glPushMatrix(); {
-    const az_vector_t topleft = about_quit_button_topleft(is_quit);
+    const az_vector_t topleft = bottom_button_topleft(button_id);
     glTranslated(topleft.x, topleft.y, 0);
 
-    const az_title_button_t *button =
-      (is_quit ? &state->quit_button : &state->about_button);
-    const bool active =
-      button_is_active(state, is_quit ? AZ_BUTTON_QUIT : AZ_BUTTON_ABOUT);
+    const az_title_button_t *button;
+    const char *label;
+    switch (button_id) {
+      case AZ_BUTTON_PREFS:
+        button = &state->prefs_button;
+        label = "Prefs";
+        break;
+      case AZ_BUTTON_ABOUT:
+        button = &state->about_button;
+        label = "About";
+        break;
+      case AZ_BUTTON_QUIT:
+        button = &state->quit_button;
+        label = "Quit";
+        break;
+      default: AZ_ASSERT_UNREACHABLE();
+    }
+
+    const bool active = button_is_active(state, button_id);
     glColor4f(0.8 * button->hover_pulse, button->hover_pulse,
               button->hover_pulse, 0.7);
     do_polygon(GL_POLYGON, button_polygon);
@@ -384,13 +527,13 @@ static void draw_about_quit_button(const az_title_state_t *state,
     if (active) glColor3f(1, 1, 1); // white
     else glColor3f(0.25, 0.25, 0.25); // dark gray
     az_draw_string(8, AZ_ALIGN_CENTER, BUTTON_WIDTH/2, BUTTON_HEIGHT/2 - 4,
-                   (is_quit ? "Quit" : "About"));
+                   label);
   } glPopMatrix();
 }
 
 /*===========================================================================*/
 
-static void fade_screen_black(float alpha) {
+static void fade_screen_black(GLfloat alpha) {
   glColor4f(0, 0, 0, alpha);
   glBegin(GL_QUADS); {
     glVertex2i(0, 0);
@@ -405,7 +548,9 @@ void az_title_draw_screen(const az_title_state_t *state) {
   draw_background(state);
 
   // Draw save slots:
-  if (state->mode == AZ_TMODE_ABOUT) {
+  if (state->mode == AZ_TMODE_PREFS) {
+    draw_prefs_box(state);
+  } else if (state->mode == AZ_TMODE_ABOUT) {
     draw_about_box();
   } else {
     for (int i = 0; i < AZ_ARRAY_SIZE(state->saved_games->games); ++i) {
@@ -417,9 +562,10 @@ void az_title_draw_screen(const az_title_state_t *state) {
     }
   }
 
-  // Draw "About" and "Quit" buttons:
-  draw_about_quit_button(state, false);
-  draw_about_quit_button(state, true);
+  // Draw bottom three buttons:
+  draw_bottom_button(state, AZ_BUTTON_PREFS);
+  draw_bottom_button(state, AZ_BUTTON_ABOUT);
+  draw_bottom_button(state, AZ_BUTTON_QUIT);
 
   // Fade out screen:
   if (state->mode == AZ_TMODE_STARTING) {
@@ -497,6 +643,36 @@ static void tick_button(az_title_state_t *state, az_title_button_t *button,
   }
 }
 
+static void tick_slider(az_title_state_t *state, az_title_slider_t *slider,
+                        az_slider_id_t slider_id, double time) {
+  if (slider->grabbed) {
+    slider->hover_pulse = HOVER_PULSE_CLICK;
+    if (!az_is_mouse_held()) {
+      slider->grabbed = false;
+      if (slider_id == AZ_SLIDER_SOUND) {
+        az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
+      }
+    }
+  } else if (slider->hovering) {
+    if (slider->hover_pulse > HOVER_PULSE_MAX) {
+      slider->hover_pulse -= time / HOVER_DECAY_TIME;
+      if (slider->hover_pulse <= HOVER_PULSE_MAX) {
+        slider->hover_pulse = HOVER_PULSE_MAX;
+        slider->hover_start = state->clock;
+      }
+    } else {
+      slider->hover_pulse = HOVER_PULSE_MIN +
+        (HOVER_PULSE_MAX - HOVER_PULSE_MIN) *
+        (double)az_clock_zigzag(HOVER_PULSE_FRAMES, 1,
+                                state->clock - slider->hover_start) /
+        (double)HOVER_PULSE_FRAMES;
+    }
+  } else {
+    slider->hover_pulse =
+      fmax(0.0, slider->hover_pulse - time / HOVER_DECAY_TIME);
+  }
+}
+
 void az_tick_title_state(az_title_state_t *state, double time) {
   ++state->clock;
   tick_mode(state, time);
@@ -506,18 +682,21 @@ void az_tick_title_state(az_title_state_t *state, double time) {
       tick_save_slot(state, i, time);
     }
   }
+  tick_button(state, &state->prefs_button, AZ_BUTTON_PREFS, time);
   tick_button(state, &state->about_button, AZ_BUTTON_ABOUT, time);
   tick_button(state, &state->quit_button, AZ_BUTTON_QUIT, time);
   tick_button(state, &state->confirm_button, AZ_BUTTON_CONFIRM, time);
   tick_button(state, &state->cancel_button, AZ_BUTTON_CANCEL, time);
+  tick_slider(state, &state->music_slider, AZ_SLIDER_MUSIC, time);
+  tick_slider(state, &state->sound_slider, AZ_SLIDER_SOUND, time);
 }
 
 /*===========================================================================*/
 
 static void button_on_hover(az_title_state_t *state, az_title_button_t *button,
                             az_button_id_t button_id, int x, int y) {
-  const bool active = button_is_active(state, button_id);
-  if (active && point_in_button(state, button_id, x, y)) {
+  if (button_is_active(state, button_id) &&
+      point_in_button(state, button_id, x, y)) {
     if (!button->hovering) {
       button->hovering = true;
       button->hover_start = state->clock;
@@ -525,6 +704,24 @@ static void button_on_hover(az_title_state_t *state, az_title_button_t *button,
     }
   } else {
     button->hovering = false;
+  }
+}
+
+static void slider_on_hover(az_title_state_t *state, az_title_slider_t *slider,
+                            az_slider_id_t slider_id, int x, int y) {
+  if (slider->grabbed) {
+    const double rel_x = fmin(fmax(0.0, x - slider_midleft(slider_id).x),
+                              SLIDER_WIDTH);
+    slider->value = rel_x / SLIDER_WIDTH;
+  } else if (state->mode == AZ_TMODE_PREFS &&
+             point_in_slider_handle(state, slider_id, x, y)) {
+    if (!slider->hovering) {
+      slider->hovering = true;
+      slider->hover_start = state->clock;
+      slider->hover_pulse = HOVER_PULSE_MAX;
+    }
+  } else {
+    slider->hovering = false;
   }
 }
 
@@ -548,17 +745,27 @@ void az_title_on_hover(az_title_state_t *state, int x, int y) {
       state->slots[i].hover = AZ_TSS_HOVER_NONE;
     }
   }
+  button_on_hover(state, &state->prefs_button, AZ_BUTTON_PREFS, x, y);
   button_on_hover(state, &state->about_button, AZ_BUTTON_ABOUT, x, y);
   button_on_hover(state, &state->quit_button, AZ_BUTTON_QUIT, x, y);
   button_on_hover(state, &state->confirm_button, AZ_BUTTON_CONFIRM, x, y);
   button_on_hover(state, &state->cancel_button, AZ_BUTTON_CANCEL, x, y);
+  slider_on_hover(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
+  slider_on_hover(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
 }
+
+/*===========================================================================*/
 
 static void button_on_click(az_title_state_t *state, az_button_id_t button_id,
                             int x, int y) {
   if (button_is_active(state, button_id) &&
       point_in_button(state, button_id, x, y)) {
     switch (button_id) {
+      case AZ_BUTTON_PREFS:
+        state->prefs_button.hover_pulse = HOVER_PULSE_CLICK;
+        state->mode = (state->mode == AZ_TMODE_PREFS ? AZ_TMODE_NORMAL :
+                       AZ_TMODE_PREFS);
+        break;
       case AZ_BUTTON_ABOUT:
         state->about_button.hover_pulse = HOVER_PULSE_CLICK;
         state->mode = (state->mode == AZ_TMODE_ABOUT ? AZ_TMODE_NORMAL :
@@ -577,6 +784,15 @@ static void button_on_click(az_title_state_t *state, az_button_id_t button_id,
         state->mode = AZ_TMODE_NORMAL;
         break;
     }
+  }
+}
+
+static void slider_on_click(az_title_state_t *state, az_title_slider_t *slider,
+                            az_slider_id_t slider_id, int x, int y) {
+  if (state->mode == AZ_TMODE_PREFS &&
+      point_in_slider_handle(state, slider_id, x, y)) {
+    slider->grabbed = true;
+    slider->hover_pulse = HOVER_PULSE_CLICK;
   }
 }
 
@@ -600,10 +816,13 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
       }
     }
   }
+  button_on_click(state, AZ_BUTTON_PREFS, x, y);
   button_on_click(state, AZ_BUTTON_ABOUT, x, y);
   button_on_click(state, AZ_BUTTON_QUIT, x, y);
   button_on_click(state, AZ_BUTTON_CONFIRM, x, y);
   button_on_click(state, AZ_BUTTON_CANCEL, x, y);
+  slider_on_click(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
+  slider_on_click(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
 }
 
 /*===========================================================================*/

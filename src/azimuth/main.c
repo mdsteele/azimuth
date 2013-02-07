@@ -24,6 +24,7 @@
 
 #include "azimuth/control/space.h"
 #include "azimuth/control/title.h"
+#include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
 #include "azimuth/state/planet.h"
@@ -31,6 +32,7 @@
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/system/resource.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
+#include "azimuth/util/prefs.h"
 #include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
@@ -38,9 +40,9 @@
 
 static az_planet_t planet;
 static az_saved_games_t saved_games;
+static az_preferences_t preferences;
 
 static bool load_scenario(void) {
-  // Try to load the scenario data:
   const char *resource_dir = az_get_resource_directory();
   if (resource_dir == NULL) return false;
   if (!az_load_planet(resource_dir, &planet)) return false;
@@ -55,6 +57,18 @@ static void load_saved_games(void) {
   if (!az_load_games_from_file(&planet, path_buffer, &saved_games)) {
     az_reset_saved_games(&saved_games);
   }
+}
+
+static void load_preferences(void) {
+  const char *data_dir = az_get_app_data_directory();
+  if (data_dir == NULL) return;
+  char path_buffer[strlen(data_dir) + 11u];
+  sprintf(path_buffer, "%s/prefs.txt", data_dir);
+  if (!az_load_prefs_from_file(path_buffer, &preferences)) {
+    az_reset_prefs_to_defaults(&preferences);
+  }
+  az_set_global_music_volume(preferences.music_volume);
+  az_set_global_sound_volume(preferences.sound_volume);
 }
 
 typedef enum {
@@ -75,6 +89,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   load_saved_games();
+  load_preferences();
 
   az_controller_t controller = AZ_CONTROLLER_TITLE;
   int saved_game_slot_index = 0;
@@ -83,7 +98,7 @@ int main(int argc, char **argv) {
       case AZ_CONTROLLER_TITLE:
         {
           const az_title_action_t action =
-            az_title_event_loop(&planet, &saved_games);
+            az_title_event_loop(&planet, &saved_games, &preferences);
           switch (action.kind) {
             case AZ_TA_QUIT:
               return EXIT_SUCCESS;

@@ -18,37 +18,30 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_GUI_AUDIO_H_
-#define AZIMUTH_GUI_AUDIO_H_
+#ifndef AZIMUTH_UTIL_PREFS_H_
+#define AZIMUTH_UTIL_PREFS_H_
 
-#include "azimuth/util/audio.h"
-
-/*===========================================================================*/
-
-// Call this once per frame to update our audio system.  The audio system must
-// be initialized first (by calling az_init_gui, which will in turn call
-// az_init_audio_mixer above).
-void az_tick_audio_mixer(az_soundboard_t *soundboard);
-
-// Set the global volume for music or sound effects, respectively.  The
-// argument should be between 0.0 (silent) and 1.0 (full volume), inclusive.
-// The audio system must be initialized first (by calling az_init_gui, which
-// will in turn call az_init_audio_mixer above).
-void az_set_global_music_volume(float volume);
-void az_set_global_sound_volume(float volume);
+#include <stdbool.h>
 
 /*===========================================================================*/
 
-// Initialize our audio system (once the GUI has been initialized).  This is
-// called by az_init_gui, and should not be called from elsewhere.
-void az_init_audio_mixer(void);
+typedef struct {
+  float music_volume;
+  float sound_volume;
+} az_preferences_t;
 
-// Pause and unpause all audio (sounds and music).  These are automatically
-// called from event.c and screen.c when the app goes out/in of focus, and
-// should not be called from elsewhere.
-void az_pause_all_audio(void);
-void az_unpause_all_audio(void);
+void az_reset_prefs_to_defaults(az_preferences_t *prefs);
+
+// Attempt to open the file located at the given path and load preferences data
+// from it.  Returns true on success, false on failure.
+bool az_load_prefs_from_file(const char *filepath,
+                             az_preferences_t *prefs_out);
+
+// Attempt to save the given preferences to the file located at the given path.
+// Return true on success, or false on failure.
+bool az_save_prefs_to_file(const az_preferences_t *prefs,
+                           const char *filepath);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_GUI_AUDIO_H_
+#endif // AZIMUTH_UTIL_PREFS_H_

@@ -240,6 +240,10 @@ bool az_get_mouse_position(int *x, int *y) {
   return true;
 }
 
+bool az_is_mouse_held(void) {
+  return (bool)(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT));
+}
+
 bool az_is_key_held(az_key_name_t key) {
   assert(key != AZ_KEY_UNKNOWN);
   return (bool)SDL_GetKeyState(NULL)[az_key_to_sdl_key(key)];

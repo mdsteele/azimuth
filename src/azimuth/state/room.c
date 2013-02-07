@@ -349,6 +349,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
 }
 
 #undef WRITE
+#undef WRITE_SCRIPT
 
 bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
   FILE *file = fopen(filepath, "w");
