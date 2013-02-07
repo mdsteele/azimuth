@@ -46,7 +46,8 @@ typedef enum {
 typedef enum {
   AZ_WSTY_BEZEL_12,
   AZ_WSTY_BEZEL_21,
-  AZ_WSTY_GIRDER
+  AZ_WSTY_GIRDER,
+  AZ_WSTY_GIRDER_CAP
 } az_wall_style_t;
 
 typedef struct {

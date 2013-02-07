@@ -74,7 +74,7 @@ static void draw_bezel(double bezel, az_color_t color1, az_color_t color2,
 }
 
 static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
-                        az_polygon_t polygon) {
+                        az_polygon_t polygon, bool cap) {
   glBegin(GL_QUADS); {
     assert(polygon.num_vertices >= 3);
     const float top = polygon.vertices[1].y;
@@ -102,6 +102,12 @@ static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
     glVertex2f(left, bottom); glVertex2f(right, bottom);
     glColor4ub(color1.r, color1.g, color1.b, color1.a);
     glVertex2f(right, bottom + bezel); glVertex2f(left, bottom + bezel);
+    if (cap) {
+      glVertex2f(left, top); glVertex2f(left, bottom);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2f(left + bezel, bottom + bezel);
+      glVertex2f(left + bezel, top - bezel);
+    }
   } glEnd();
 }
 
@@ -115,7 +121,12 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         draw_bezel(data->bezel, data->color2, data->color1, data->polygon);
         break;
       case AZ_WSTY_GIRDER:
-        draw_girder(data->bezel, data->color1, data->color2, data->polygon);
+        draw_girder(data->bezel, data->color1, data->color2, data->polygon,
+                    false);
+        break;
+      case AZ_WSTY_GIRDER_CAP:
+        draw_girder(data->bezel, data->color1, data->color2, data->polygon,
+                    true);
         break;
     }
   } glEndList();

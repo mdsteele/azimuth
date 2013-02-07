@@ -59,6 +59,9 @@ static az_vector_t wall_vertices_girder_short[] = {
 static az_vector_t wall_vertices_girder_skinny[] = {
   {39, 0}, {59, 20}, {-59, 20}, {-39, 0}, {-59, -20}, {59, -20}
 };
+static az_vector_t wall_vertices_girder_skinny_capped[] = {
+  {39, 0}, {59, 20}, {-59, 20}, {-59, -20}, {59, -20}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -130,6 +133,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
     .elasticity = 0.5, .impact_damage_coeff = 1.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_skinny)
+  },
+  // Brown long capped girder:
+  [10] = {
+    .style = AZ_WSTY_GIRDER_CAP, .bezel = 4.7,
+    .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_girder_skinny_capped)
   }
 };
 
