@@ -471,6 +471,41 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glScalef(1, -1, 1);
       }
       break;
+    case AZ_BAD_CRAWLER:
+      // Feet:
+      glBegin(GL_QUADS); {
+        const GLfloat offset = 0.8f * (az_clock_zigzag(5, 5, clock) - 2.0f);
+        for (int i = 0; i < 4; ++i) {
+          glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
+          glVertex2f(0, 5); glVertex2f(0, -5);
+          const GLfloat x = (i == 0 || i == 3 ? -18.0f : -20.0f);
+          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
+          glVertex2f(x, y - 2);
+          glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
+          glVertex2f(x, y + 2);
+        }
+      } glEnd();
+      // Body:
+      glPushMatrix(); {
+        glTranslatef(-0.5f * az_clock_zigzag(5, 5, clock), 0, 0);
+        glColor3f(0.3f + 0.7f * flare, 0.2, 0.4 + 0.6f * frozen);
+        glBegin(GL_TRIANGLE_FAN); {
+          glVertex2f(-15.0f, az_clock_zigzag(9, 3, clock) - 4.0f);
+          for (int i = -120; i <= 120; i += 5) {
+            if (i % 3 == 0) {
+              glColor3f(0.2f + 0.6f * flare, 0, 0.3f + 0.6f * frozen);
+            } else glColor3f(0.4, 0, 0.2 + 0.6f * frozen);
+            const double rr = 1.0 +
+              0.1 * (sin(AZ_DEG2RAD(i) * 2500) +
+                     cos(AZ_DEG2RAD(i) * 777 *
+                         (1 + az_clock_zigzag(7, 12, clock)))) +
+              0.01 * az_clock_zigzag(10, 3, clock);
+            glVertex2d(15 * rr * cos(AZ_DEG2RAD(i)) - 3,
+                       17 * rr * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+      } glPopMatrix();
+      break;
   }
 }
 

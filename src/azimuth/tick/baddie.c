@@ -211,6 +211,31 @@ static void fly_towards_ship(
   baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
 }
 
+static void crawl_around(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    bool rightwards) {
+  const double accel = 100.0;
+  const double max_speed = 40.0;
+  // Adjust velocity in crawling direction.
+  const az_vector_t unit =
+    az_vpolar(1.0, baddie->angle + AZ_DEG2RAD(rightwards ? -115 : 115));
+  baddie->velocity = az_vadd(baddie->velocity, az_vmul(unit, accel * time));
+  const double drag_coeff = accel / (max_speed * max_speed);
+  const az_vector_t drag_force =
+    az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
+  baddie->velocity = az_vadd(baddie->velocity, az_vmul(drag_force, time));
+  // Rotate to point away from wall.
+  az_impact_t impact;
+  az_circle_impact(
+      state, baddie->data->main_body.bounding_radius, baddie->position,
+      az_vmul(unit, 100000.0), (AZ_IMPF_BADDIE | AZ_IMPF_SHIP),
+      baddie->uid, &impact);
+  if (impact.type != AZ_IMP_NOTHING) {
+    baddie->angle =
+      az_angle_towards(baddie->angle, 3.0 * time, az_vtheta(impact.normal));
+  }
+}
+
 /*===========================================================================*/
 
 // How long it takes a baddie's armor flare to die down, in seconds:
@@ -506,6 +531,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           state->ship.temp_invincibility > 0.0) {
         baddie->cooldown = 2.0;
       }
+      break;
+    case AZ_BAD_CRAWLER:
+      crawl_around(state, baddie, time, true);
       break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:

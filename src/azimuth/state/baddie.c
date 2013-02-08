@@ -94,16 +94,20 @@ static const az_vector_t nightbug_vertices[] = {
   {17, 0}, {9, 10}, {-11, 5}, {-11, -5}, {9, -10}
 };
 
-static const az_vector_t flyer_vertices[] = {
-  {20, 2}, {10, 5}, {4, 10}, {0, 5}, {-15, 1},
-  {-15, -1}, {0, -5}, {4, -10}, {10, -5}, {20, -2}
-};
-
 static const az_vector_t zenith_core_vertices[] = {
   { 120, 0}, { 84.852813742385706,  84.852813742385706},
   {0,  120}, {-84.852813742385706,  84.852813742385706},
   {-120, 0}, {-84.852813742385706, -84.852813742385706},
   {0, -120}, { 84.852813742385706, -84.852813742385706}
+};
+
+static const az_vector_t dragonfly_vertices[] = {
+  {20, 2}, {10, 5}, {4, 10}, {0, 5}, {-15, 1},
+  {-15, -1}, {0, -5}, {4, -10}, {10, -5}, {20, -2}
+};
+
+static const az_vector_t crawler_vertices[] = {
+  {10, -8}, {10, 8}, {-2, 18}, {-15, 10}, {-15, -10}, {-2, -18}
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -209,8 +213,15 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_MEDIUM_SHIELDS),
     .color = {255, 64, 0, 255}, .death_sound = AZ_SND_KILL_DRAGONFLY,
-    .main_body = { .polygon = AZ_INIT_POLYGON(flyer_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 8.0 }
+  },
+  [AZ_BAD_CRAWLER] = {
+    .max_health = 7.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {128, 0, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(crawler_vertices),
+                   .impact_damage = 10.0 }
   }
 };
 
