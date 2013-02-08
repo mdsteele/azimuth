@@ -52,8 +52,15 @@ static struct {
   const char *filename;
   Mix_Music *music; // may be NULL if music failed to load
 } music_entries[] = {
-  [AZ_MUS_TITLE] = { .filename = "title-screen.mp3" },
+  [AZ_MUS_TITLE] = { .filename = "title-screen.ogg" },
+  [AZ_MUS_COLONY_ZONE] = { .filename = "colony-zone.mp3" },
+  [AZ_MUS_FILIMUN_ZONE] = { .filename = "filimun-zone.ogg" },
   [AZ_MUS_CNIDAM_ZONE] = { .filename = "cnidam-zone.mp3" },
+  [AZ_MUS_NANDIAR_ZONE] = { .filename = "nandiar-zone.mp3" },
+  [AZ_MUS_VOQUAN_ZONE] = { .filename = "voquan-zone.ogg" },
+  [AZ_MUS_BARRAG_ZONE] = { .filename = "barrag-zone.ogg" },
+  [AZ_MUS_SARVARI_ZONE] = { .filename = "sarvari-zone.ogg" },
+  [AZ_MUS_CORE_ZONE] = { .filename = "core-zone.ogg" },
   [AZ_MUS_ZENITH_CORE] = { .filename = "zenith-core.mp3" }
 };
 
@@ -61,10 +68,11 @@ AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(music_entries) == AZ_NUM_MUSIC_KEYS);
 
 static void load_all_music(void) {
   const char *resource_dir = az_get_resource_directory();
-  char path_buffer[strlen(resource_dir) + 50u];
+  char path_buffer[strlen(resource_dir) + 48u];
   AZ_ARRAY_LOOP(entry, music_entries) {
     assert(entry->filename != NULL);
     assert(strlen(entry->filename) > 0);
+    assert(strlen(entry->filename) <= 40);
     sprintf(path_buffer, "%s/music/%s", resource_dir, entry->filename);
     entry->music = Mix_LoadMUS(path_buffer);
     if (entry->music == NULL) {
@@ -413,6 +421,8 @@ static az_sound_entry_t sound_entries[] = {
     .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.5
   }
 };
+
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(sound_entries) == AZ_NUM_SOUND_KEYS);
 
 static struct {
   // Fields for maintaining sfxr synth state:

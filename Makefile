@@ -100,6 +100,7 @@ EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES)) \
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 
 RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.mp3') \
+                  $(shell find $(DATADIR)/music -name '*.ogg') \
                   $(shell find $(DATADIR)/rooms -name '*.txt')
 
 #=============================================================================#

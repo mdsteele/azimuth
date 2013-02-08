@@ -26,6 +26,7 @@
 
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
@@ -370,6 +371,25 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           SUSPEND(vm->script, &state->mode_data.dialog.vm);
         }
         SCRIPT_ERROR("not in dialog");
+      // Music/sound:
+      case AZ_OP_MUS:
+        {
+          const int music_index = (int)ins.immediate;
+          if (music_index < 0 || music_index >= AZ_NUM_MUSIC_KEYS) {
+            SCRIPT_ERROR("invalid music index");
+          }
+          az_change_music(&state->soundboard, (az_music_key_t)music_index);
+        }
+        break;
+      case AZ_OP_SND:
+        {
+          const int sound_index = (int)ins.immediate;
+          if (sound_index < 0 || sound_index >= AZ_NUM_SOUND_KEYS) {
+            SCRIPT_ERROR("invalid sound index");
+          }
+          az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
+        }
+        break;
       // Termination:
       case AZ_OP_WAIT:
         if (state->mode == AZ_MODE_DIALOG) {

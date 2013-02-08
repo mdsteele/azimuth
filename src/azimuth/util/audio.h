@@ -26,13 +26,23 @@
 /*===========================================================================*/
 
 // The number of different music keys there are:
-#define AZ_NUM_MUSIC_KEYS 3
+#define AZ_NUM_MUSIC_KEYS 10
 
 typedef enum {
   AZ_MUS_TITLE,
+  AZ_MUS_COLONY_ZONE,
+  AZ_MUS_FILIMUN_ZONE,
   AZ_MUS_CNIDAM_ZONE,
+  AZ_MUS_NANDIAR_ZONE,
+  AZ_MUS_VOQUAN_ZONE,
+  AZ_MUS_BARRAG_ZONE,
+  AZ_MUS_SARVARI_ZONE,
+  AZ_MUS_CORE_ZONE,
   AZ_MUS_ZENITH_CORE
 } az_music_key_t;
+
+// The number of different sound keys there are:
+#define AZ_NUM_SOUND_KEYS 31
 
 typedef enum {
   AZ_SND_BEAM_FREEZE,

@@ -591,10 +591,10 @@ static void do_change_data(int delta, bool secondary) {
 }
 
 static void do_change_zone(int delta) {
-  state.brush.zone_index = az_modulo(state.brush.zone_index + delta,
-                                     AZ_LIST_SIZE(state.planet.zones));
-  AZ_LIST_GET(state.planet.rooms, state.current_room)->zone_index =
-    state.brush.zone_index;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  room->zone_index = az_modulo(room->zone_index + delta,
+                               AZ_LIST_SIZE(state.planet.zones));
+  state.brush.zone_index = room->zone_index;
   state.unsaved = true;
 }
 

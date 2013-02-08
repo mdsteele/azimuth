@@ -60,6 +60,9 @@ typedef enum {
   AZ_OP_TT, // have top speaker say text i
   AZ_OP_TB, // have bottom speaker say text i
   AZ_OP_DEND, // end dialog
+  // Music/sound:
+  AZ_OP_MUS, // start music i
+  AZ_OP_SND, // play sound i
   // Termination:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
   AZ_OP_STOP, // halt script successfully
