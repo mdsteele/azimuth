@@ -213,9 +213,7 @@ static void fly_towards_ship(
 
 static void crawl_around(
     az_space_state_t *state, az_baddie_t *baddie, double time,
-    bool rightwards) {
-  const double accel = 100.0;
-  const double max_speed = 40.0;
+    bool rightwards, double turn_rate, double max_speed, double accel) {
   // Adjust velocity in crawling direction.
   const az_vector_t unit =
     az_vpolar(1.0, baddie->angle + AZ_DEG2RAD(rightwards ? -115 : 115));
@@ -231,8 +229,8 @@ static void crawl_around(
       az_vmul(unit, 100000.0), (AZ_IMPF_BADDIE | AZ_IMPF_SHIP),
       baddie->uid, &impact);
   if (impact.type != AZ_IMP_NOTHING) {
-    baddie->angle =
-      az_angle_towards(baddie->angle, 3.0 * time, az_vtheta(impact.normal));
+    baddie->angle = az_angle_towards(baddie->angle, turn_rate * time,
+                                     az_vtheta(impact.normal));
   }
 }
 
@@ -533,7 +531,28 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_CRAWLER:
-      crawl_around(state, baddie, time, true);
+      crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
+      break;
+    case AZ_BAD_CRAWLING_TURRET:
+      crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+                   az_vcross(az_vsub(state->ship.position, baddie->position),
+                             az_vpolar(1.0, baddie->angle)) > 0.0,
+                   1.0, 20.0, 100.0);
+      // Aim gun:
+      baddie->components[0].angle =
+        fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(100) * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
+      // Fire:
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+                        baddie->components[0].angle, 0.0);
+        baddie->cooldown = 1.5;
+      }
       break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:

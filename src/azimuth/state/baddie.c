@@ -55,6 +55,9 @@ static az_component_data_t armored_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
     .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
 };
+static az_component_data_t crawling_turret_components[] = {
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 10.0 }
+};
 
 static const az_vector_t zipper_vertices[] = {
   {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
@@ -222,6 +225,14 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {128, 0, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(crawler_vertices),
                    .impact_damage = 10.0 }
+  },
+  [AZ_BAD_CRAWLING_TURRET] = {
+    .max_health = 12.0, .overall_bounding_radius = 30.5,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .impact_damage = 10.0 },
+    DECL_COMPONENTS(crawling_turret_components)
   }
 };
 

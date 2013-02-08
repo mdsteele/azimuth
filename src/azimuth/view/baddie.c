@@ -66,7 +66,7 @@ static void draw_turret(const az_baddie_t *baddie,
   } glPopMatrix();
   az_gl_color(center);
   glBegin(GL_POLYGON); {
-    for (int i = 0; i <= 360; i += 60) {
+    for (int i = 0; i < 360; i += 60) {
       glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
     }
   } glEnd();
@@ -165,6 +165,24 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_BAD_CRAWLING_TURRET:
+      glBegin(GL_QUADS); {
+        const int zig = az_clock_zigzag(5, 6, clock);
+        glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
+                  0.25 - 0.1 * flare - 0.1 * frozen,
+                  0.25 - 0.1 * flare + 0.1 * frozen);
+        glVertex2f(0, 10); glVertex2f(-21, -10 + zig);
+        glColor3f(0.4 + 0.25 * flare - 0.25 * frozen,
+                  0.4 - 0.25 * flare - 0.25 * frozen,
+                  0.4 - 0.25 * flare + 0.25 * frozen);
+        glVertex2f(-20, -20 + zig); glVertex2f(0, -10);
+        glVertex2f(0, 10); glVertex2f(-20, 20 - zig);
+        glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
+                  0.25 - 0.1 * flare - 0.1 * frozen,
+                  0.25 - 0.1 * flare + 0.1 * frozen);
+        glVertex2f(-21, 10 - zig); glVertex2f(0, -10);
+      } glEnd();
+      // fallthrough
     case AZ_BAD_TURRET:
       draw_turret(baddie,
           color3(0.25 + 0.1 * flare - 0.1 * frozen,
