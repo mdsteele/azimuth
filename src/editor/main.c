@@ -184,7 +184,8 @@ static void do_select(int x, int y, bool multi) {
     state.brush.node_kind = best_node->spec.kind;
     if (best_node->spec.kind == AZ_NODE_UPGRADE) {
       state.brush.upgrade_kind = best_node->spec.subkind.upgrade;
-    } else if (best_node->spec.kind == AZ_NODE_DOODAD) {
+    } else if (best_node->spec.kind == AZ_NODE_DOODAD_FG ||
+               best_node->spec.kind == AZ_NODE_DOODAD_BG) {
       state.brush.doodad_kind = best_node->spec.subkind.doodad;
     }
   } else if (best_wall != NULL) {
@@ -467,7 +468,8 @@ static void do_add_node(int x, int y) {
   node->spec.kind = state.brush.node_kind;
   if (state.brush.node_kind == AZ_NODE_UPGRADE) {
     node->spec.subkind.upgrade = state.brush.upgrade_kind;
-  } else if (state.brush.node_kind == AZ_NODE_DOODAD) {
+  } else if (state.brush.node_kind == AZ_NODE_DOODAD_FG ||
+             state.brush.node_kind == AZ_NODE_DOODAD_BG) {
     node->spec.subkind.doodad = state.brush.doodad_kind;
   }
   node->spec.position = pt;
@@ -571,7 +573,8 @@ static void do_change_data(int delta, bool secondary) {
         az_modulo((int)node->spec.subkind.upgrade + delta, AZ_NUM_UPGRADES);
       node->spec.subkind.upgrade = new_upgrade;
       state.brush.upgrade_kind = new_upgrade;
-    } else if (node->spec.kind == AZ_NODE_DOODAD && secondary) {
+    } else if ((node->spec.kind == AZ_NODE_DOODAD_FG ||
+                node->spec.kind == AZ_NODE_DOODAD_BG) && secondary) {
       const az_doodad_kind_t new_doodad =
         az_modulo((int)node->spec.subkind.doodad + delta, AZ_NUM_DOODAD_KINDS);
       node->spec.subkind.doodad = new_doodad;
@@ -583,7 +586,8 @@ static void do_change_data(int delta, bool secondary) {
       state.brush.node_kind = new_kind;
       if (new_kind == AZ_NODE_UPGRADE) {
         node->spec.subkind.upgrade = state.brush.upgrade_kind;
-      } else if (new_kind == AZ_NODE_DOODAD) {
+      } else if (new_kind == AZ_NODE_DOODAD_FG ||
+                 new_kind == AZ_NODE_DOODAD_BG) {
         node->spec.subkind.doodad = state.brush.doodad_kind;
       }
     }

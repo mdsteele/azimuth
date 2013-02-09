@@ -29,7 +29,7 @@
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 6
+#define AZ_NUM_NODE_KINDS 7
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
@@ -38,7 +38,8 @@ typedef enum {
   AZ_NODE_UPGRADE,
   AZ_NODE_REFILL,
   AZ_NODE_COMM,
-  AZ_NODE_DOODAD
+  AZ_NODE_DOODAD_FG,
+  AZ_NODE_DOODAD_BG
 } az_node_kind_t;
 
 // The number of different doodad kinds there are:

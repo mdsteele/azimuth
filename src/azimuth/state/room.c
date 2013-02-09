@@ -194,7 +194,8 @@ static void parse_node_directive(az_load_room_t *loader) {
   if (fscanf(loader->file, "%d", &kind) < 1) FAIL();
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
-  if (kind == AZ_NODE_UPGRADE || kind == AZ_NODE_DOODAD) {
+  if (kind == AZ_NODE_UPGRADE || kind == AZ_NODE_DOODAD_FG ||
+      kind == AZ_NODE_DOODAD_BG) {
     int subkind;
     if (fscanf(loader->file, "/%d", &subkind) < 1) FAIL();
     if (kind == AZ_NODE_UPGRADE) {
@@ -339,7 +340,8 @@ static bool write_room(const az_room_t *room, FILE *file) {
     WRITE("!N%d", (int)node->kind);
     if (node->kind == AZ_NODE_UPGRADE) {
       WRITE("/%d", (int)node->subkind.upgrade);
-    } else if (node->kind == AZ_NODE_DOODAD) {
+    } else if (node->kind == AZ_NODE_DOODAD_FG ||
+               node->kind == AZ_NODE_DOODAD_BG) {
       WRITE("/%d", (int)node->subkind.doodad);
     }
     WRITE(" x%.02f y%.02f a%f\n",

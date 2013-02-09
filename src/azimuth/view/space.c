@@ -71,18 +71,33 @@ static double mode_fade_alpha(az_space_state_t *state) {
   AZ_ASSERT_UNREACHABLE();
 }
 
+static void tint_screen(GLfloat alpha) {
+  glColor4f(0, 0, 0, alpha);
+  glBegin(GL_QUADS); {
+    glVertex2i(0, 0);
+    glVertex2i(0, AZ_SCREEN_HEIGHT);
+    glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+    glVertex2i(AZ_SCREEN_WIDTH, 0);
+  } glEnd();
+}
+
 static void draw_camera_view(az_space_state_t *state) {
-  az_draw_nodes_rear(state);
+  az_draw_background_nodes(state);
+  glPushMatrix(); {
+    glLoadIdentity();
+    tint_screen(0.5);
+  } glPopMatrix();
   az_draw_gravfields(state);
+  az_draw_upgrade_nodes(state);
   az_draw_walls(state);
-  az_draw_nodes_middle(state);
+  az_draw_middle_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
   az_draw_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
   az_draw_doors(state);
-  az_draw_nodes_front(state);
+  az_draw_foreground_nodes(state);
   az_draw_specks(state);
 }
 
@@ -115,15 +130,7 @@ void az_space_draw_screen(az_space_state_t *state) {
   } glPopMatrix();
 
   // Tint the camera view black (based on fade_alpha).
-  if (fade_alpha > 0.0) {
-    glColor4f(0, 0, 0, fade_alpha);
-    glBegin(GL_QUADS); {
-      glVertex2i(0, 0);
-      glVertex2i(0, AZ_SCREEN_HEIGHT);
-      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
-      glVertex2i(AZ_SCREEN_WIDTH, 0);
-    } glEnd();
-  }
+  if (fade_alpha > 0.0) tint_screen(fade_alpha);
 
   az_draw_hud(state);
 }

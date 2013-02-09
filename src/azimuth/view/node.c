@@ -431,7 +431,8 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
         glVertex2d(-10, -10);
       } glEnd();
       break;
-    case AZ_NODE_DOODAD:
+    case AZ_NODE_DOODAD_FG:
+    case AZ_NODE_DOODAD_BG:
       draw_doodad(node->subkind.doodad, clock);
       break;
   }
@@ -446,7 +447,15 @@ void az_draw_node(const az_node_t *node, az_clock_t clock) {
   } glPopMatrix();
 }
 
-void az_draw_nodes_rear(const az_space_state_t *state) {
+void az_draw_background_nodes(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind == AZ_NODE_DOODAD_BG) {
+      az_draw_node(node, state->clock);
+    }
+  }
+}
+
+void az_draw_upgrade_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
     if (node->kind == AZ_NODE_UPGRADE) {
       az_draw_node(node, state->clock);
@@ -454,17 +463,19 @@ void az_draw_nodes_rear(const az_space_state_t *state) {
   }
 }
 
-void az_draw_nodes_middle(const az_space_state_t *state) {
+void az_draw_middle_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING || node->kind == AZ_NODE_UPGRADE ||
-        node->kind == AZ_NODE_DOODAD) continue;
+    if (node->kind == AZ_NODE_NOTHING ||
+        node->kind == AZ_NODE_UPGRADE ||
+        node->kind == AZ_NODE_DOODAD_FG ||
+        node->kind == AZ_NODE_DOODAD_BG) continue;
     az_draw_node(node, state->clock);
   }
 }
 
-void az_draw_nodes_front(const az_space_state_t *state) {
+void az_draw_foreground_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_DOODAD) {
+    if (node->kind == AZ_NODE_DOODAD_FG) {
       az_draw_node(node, state->clock);
     }
   }

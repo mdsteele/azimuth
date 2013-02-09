@@ -32,9 +32,10 @@ void az_draw_node(const az_node_t *node, az_clock_t clock);
 
 // Draw all nodes in a paricular layer.  The GL matrix should be at the camera
 // position.
-void az_draw_nodes_rear(const az_space_state_t* state);
-void az_draw_nodes_middle(const az_space_state_t* state);
-void az_draw_nodes_front(const az_space_state_t* state);
+void az_draw_background_nodes(const az_space_state_t* state);
+void az_draw_upgrade_nodes(const az_space_state_t* state);
+void az_draw_middle_nodes(const az_space_state_t* state);
+void az_draw_foreground_nodes(const az_space_state_t* state);
 
 /*===========================================================================*/
 

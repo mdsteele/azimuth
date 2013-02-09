@@ -139,6 +139,19 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
   }
 }
 
+static void tint_screen(GLfloat alpha) {
+  glPushMatrix(); {
+    glLoadIdentity();
+    glColor4f(0, 0, 0, alpha);
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glVertex2i(AZ_SCREEN_WIDTH, 0);
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_node(const az_editor_state_t *state,
                       az_editor_node_t *editor_node) {
   const az_node_t real_node = {
@@ -163,6 +176,14 @@ static void draw_node(const az_editor_state_t *state,
 }
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
+  AZ_LIST_LOOP(editor_node, room->nodes) {
+    if (editor_node->spec.kind == AZ_NODE_DOODAD_BG) {
+      draw_node(state, editor_node);
+    }
+  }
+  if (room == AZ_LIST_GET(state->planet.rooms, state->current_room)) {
+    tint_screen(0.5);
+  }
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
     const az_gravfield_t real_gravfield = {
       .kind = editor_gravfield->spec.kind,
@@ -185,9 +206,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_draw_wall(&real_wall);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    if (editor_node->spec.kind != AZ_NODE_DOODAD) {
-      draw_node(state, editor_node);
-    }
+    if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||
+        editor_node->spec.kind == AZ_NODE_DOODAD_BG) continue;
+    draw_node(state, editor_node);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
     az_baddie_t real_baddie = {0};
@@ -245,7 +266,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     } glPopMatrix();
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    if (editor_node->spec.kind == AZ_NODE_DOODAD) {
+    if (editor_node->spec.kind == AZ_NODE_DOODAD_FG) {
       draw_node(state, editor_node);
     }
   }
@@ -326,17 +347,7 @@ static void draw_camera_view(az_editor_state_t *state) {
 
   // Fade out other rooms:
   if (!az_editor_is_in_minimap_mode(state)) {
-    glPushMatrix(); {
-      camera_to_screen_orient(state, state->camera);
-      glScaled(state->zoom_level, state->zoom_level, 1);
-      glColor4f(0, 0, 0, 0.75); // black tint
-      glBegin(GL_QUADS); {
-        glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
-        glVertex2i(-AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
-        glVertex2i(-AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
-        glVertex2i( AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
-      } glEnd();
-    } glPopMatrix();
+    tint_screen(0.5);
   }
 
   // Draw current room:
