@@ -282,6 +282,114 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
   } glEnd();
 }
 
+/*===========================================================================*/
+
+static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
+  assert(0 <= (int)doodad_kind && (int)doodad_kind < AZ_NUM_DOODAD_KINDS);
+  switch (doodad_kind) {
+    case AZ_DOOD_WARNING_LIGHT:
+      glPushMatrix(); {
+        glRotatef(-4.0f * az_clock_mod(90, 1, clock), 0, 0, 1);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.75, 0.75, 0.75);
+          glVertex2f(0, 0);
+          glColor3f(0.25, 0.25, 0.25);
+          for (int i = 0; i <= 360; i += 30) {
+            glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        for (int offset = 0; offset <= 180; offset += 180) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(1, 0, 0);
+            glVertex2f(0, 0);
+            for (int i = offset - 30; i <= offset + 30; i += 30) {
+              glVertex2d(3 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
+            }
+          } glEnd();
+        }
+        glBegin(GL_TRIANGLES); {
+          glColor4f(1, 0, 0, 0);
+          glVertex2f(69, -40); glVertex2f(69, 40);
+          glColor4f(1, 0, 0, 0.5);
+          glVertex2f(0, 0); glVertex2f(0, 0);
+          glColor4f(1, 0, 0, 0);
+          glVertex2f(-69, -40); glVertex2f(-69, 40);
+        } glEnd();
+      } glPopMatrix();
+      break;
+    case AZ_DOOD_PIPE_STRAIGHT:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-25, 5); glVertex2f(25, 5);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(-25, 0); glVertex2f(25, 0);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-25, -5); glVertex2f(25, -5);
+      } glEnd();
+      // Coupling:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(25, 6); glVertex2f(31, 6);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(25, 0); glVertex2f(31, 0);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(25, -6); glVertex2f(31, -6);
+      } glEnd();
+      break;
+    case AZ_DOOD_PIPE_CORNER:
+      for (int i = 180; i < 270; i += 30) {
+        glBegin(GL_QUAD_STRIP); {
+          const double c1 = cos(AZ_DEG2RAD(i));
+          const double s1 = sin(AZ_DEG2RAD(i));
+          const double c2 = cos(AZ_DEG2RAD(i + 30));
+          const double s2 = sin(AZ_DEG2RAD(i + 30));
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(3 * c1, 3 * s1); glVertex2d(3 * c2, 3 * s2);
+          glColor3f(0.65, 0.9, 0.65);
+          glVertex2d(8 * c1, 8 * s1); glVertex2d(8 * c2, 8 * s2);
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(13 * c1, 13 * s1); glVertex2d(13 * c2, 13 * s2);
+        } glEnd();
+      }
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(0, -3); glVertex2f(2, -3);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(0, -8); glVertex2f(2, -8);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(0, -13); glVertex2f(2, -13);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-3, 0); glVertex2f(-3, 2);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(-8, 0); glVertex2f(-8, 2);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-13, 0); glVertex2f(-13, 2);
+      } glEnd();
+      // Couplings:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(-2, 2); glVertex2f(-2, 8);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(-8, 2); glVertex2f(-8, 8);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(-14, 2); glVertex2f(-14, 8);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(2, -2); glVertex2f(8, -2);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(2, -8); glVertex2f(8, -8);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(2, -14); glVertex2f(8, -14);
+      } glEnd();
+      break;
+  }
+}
+
+/*===========================================================================*/
+
 static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
   switch (node->kind) {
     case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -306,7 +414,7 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_NODE_UPGRADE:
-      draw_upgrade_icon(node->upgrade, clock);
+      draw_upgrade_icon(node->subkind.upgrade, clock);
       break;
     case AZ_NODE_REFILL:
       glColor3f(1, 1, 1); // white
@@ -323,6 +431,9 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
         glVertex2d(-10, -10);
       } glEnd();
       break;
+    case AZ_NODE_DOODAD:
+      draw_doodad(node->subkind.doodad, clock);
+      break;
   }
 }
 
@@ -335,10 +446,27 @@ void az_draw_node(const az_node_t *node, az_clock_t clock) {
   } glPopMatrix();
 }
 
-void az_draw_nodes(const az_space_state_t *state) {
+void az_draw_nodes_rear(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING) continue;
+    if (node->kind == AZ_NODE_UPGRADE) {
+      az_draw_node(node, state->clock);
+    }
+  }
+}
+
+void az_draw_nodes_middle(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind == AZ_NODE_NOTHING || node->kind == AZ_NODE_UPGRADE ||
+        node->kind == AZ_NODE_DOODAD) continue;
     az_draw_node(node, state->clock);
+  }
+}
+
+void az_draw_nodes_front(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind == AZ_NODE_DOODAD) {
+      az_draw_node(node, state->clock);
+    }
   }
 }
 

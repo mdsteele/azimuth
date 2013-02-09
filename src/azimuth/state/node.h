@@ -29,7 +29,7 @@
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 5
+#define AZ_NUM_NODE_KINDS 6
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
@@ -37,16 +37,31 @@ typedef enum {
   AZ_NODE_TRACTOR,
   AZ_NODE_UPGRADE,
   AZ_NODE_REFILL,
-  AZ_NODE_COMM
+  AZ_NODE_COMM,
+  AZ_NODE_DOODAD
 } az_node_kind_t;
+
+// The number of different doodad kinds there are:
+#define AZ_NUM_DOODAD_KINDS 3
+
+typedef enum {
+  AZ_DOOD_WARNING_LIGHT,
+  AZ_DOOD_PIPE_STRAIGHT,
+  AZ_DOOD_PIPE_CORNER
+} az_doodad_kind_t;
+
+typedef union {
+  az_upgrade_t upgrade;
+  az_doodad_kind_t doodad;
+} az_node_subkind_t;
 
 typedef struct {
   az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
+  az_node_subkind_t subkind;
   az_uid_t uid;
   const az_script_t *on_use; // not owned; NULL if no script
   az_vector_t position;
   double angle;
-  az_upgrade_t upgrade; // only used for AZ_NODE_UPGRADE nodes
 } az_node_t;
 
 #define AZ_NODE_BOUNDING_RADIUS 50.0

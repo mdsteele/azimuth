@@ -63,10 +63,10 @@ typedef struct {
 
 typedef struct {
   az_node_kind_t kind;
+  az_node_subkind_t subkind;
   az_script_t *on_use; // owned; NULL if no script
   az_vector_t position;
   double angle;
-  az_upgrade_t upgrade; // only used for AZ_NODE_UPGRADE nodes
 } az_node_spec_t;
 
 typedef struct {

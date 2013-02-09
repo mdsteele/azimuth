@@ -139,6 +139,29 @@ static void camera_to_screen_orient(const az_editor_state_t *state,
   }
 }
 
+static void draw_node(const az_editor_state_t *state,
+                      az_editor_node_t *editor_node) {
+  const az_node_t real_node = {
+    .kind = editor_node->spec.kind,
+    .subkind = editor_node->spec.subkind,
+    .position = editor_node->spec.position,
+    .angle = editor_node->spec.angle
+  };
+  az_draw_node(&real_node, state->clock);
+  if (editor_node->spec.on_use != NULL) {
+    glPushMatrix(); {
+      camera_to_screen_orient(state, real_node.position);
+      glColor3f(0.75, 0, 1); // purple
+      glBegin(GL_QUADS); {
+        glVertex2f(5, -9); glVertex2f(-5, -9);
+        glVertex2f(-5, 0); glVertex2f(5, 0);
+      } glEnd();
+      glColor3f(0, 0, 0); // black
+      az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
+    } glPopMatrix();
+  }
+}
+
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
     const az_gravfield_t real_gravfield = {
@@ -162,24 +185,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_draw_wall(&real_wall);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    const az_node_t real_node = {
-      .kind = editor_node->spec.kind,
-      .position = editor_node->spec.position,
-      .angle = editor_node->spec.angle,
-      .upgrade = editor_node->spec.upgrade
-    };
-    az_draw_node(&real_node, state->clock);
-    if (editor_node->spec.on_use != NULL) {
-      glPushMatrix(); {
-        camera_to_screen_orient(state, real_node.position);
-        glColor3f(0.75, 0, 1); // purple
-        glBegin(GL_QUADS); {
-          glVertex2f(5, -9); glVertex2f(-5, -9);
-          glVertex2f(-5, 0); glVertex2f(5, 0);
-        } glEnd();
-        glColor3f(0, 0, 0); // black
-        az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
-      } glPopMatrix();
+    if (editor_node->spec.kind != AZ_NODE_DOODAD) {
+      draw_node(state, editor_node);
     }
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
@@ -236,6 +243,11 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
                      editor_door->spec.uuid_slot);
       }
     } glPopMatrix();
+  }
+  AZ_LIST_LOOP(editor_node, room->nodes) {
+    if (editor_node->spec.kind == AZ_NODE_DOODAD) {
+      draw_node(state, editor_node);
+    }
   }
 }
 

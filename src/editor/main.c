@@ -183,7 +183,9 @@ static void do_select(int x, int y, bool multi) {
     state.brush.angle = best_node->spec.angle;
     state.brush.node_kind = best_node->spec.kind;
     if (best_node->spec.kind == AZ_NODE_UPGRADE) {
-      state.brush.upgrade_kind = best_node->spec.upgrade;
+      state.brush.upgrade_kind = best_node->spec.subkind.upgrade;
+    } else if (best_node->spec.kind == AZ_NODE_DOODAD) {
+      state.brush.doodad_kind = best_node->spec.subkind.doodad;
     }
   } else if (best_wall != NULL) {
     if (multi) {
@@ -463,9 +465,13 @@ static void do_add_node(int x, int y) {
   az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
   node->selected = true;
   node->spec.kind = state.brush.node_kind;
+  if (state.brush.node_kind == AZ_NODE_UPGRADE) {
+    node->spec.subkind.upgrade = state.brush.upgrade_kind;
+  } else if (state.brush.node_kind == AZ_NODE_DOODAD) {
+    node->spec.subkind.doodad = state.brush.doodad_kind;
+  }
   node->spec.position = pt;
   node->spec.angle = state.brush.angle;
-  node->spec.upgrade = state.brush.upgrade_kind;
   state.unsaved = true;
 }
 
@@ -562,14 +568,24 @@ static void do_change_data(int delta, bool secondary) {
     if (!node->selected) continue;
     if (node->spec.kind == AZ_NODE_UPGRADE && secondary) {
       const az_upgrade_t new_upgrade =
-        az_modulo((int)node->spec.upgrade + delta, AZ_NUM_UPGRADES);
-      node->spec.upgrade = new_upgrade;
+        az_modulo((int)node->spec.subkind.upgrade + delta, AZ_NUM_UPGRADES);
+      node->spec.subkind.upgrade = new_upgrade;
       state.brush.upgrade_kind = new_upgrade;
+    } else if (node->spec.kind == AZ_NODE_DOODAD && secondary) {
+      const az_doodad_kind_t new_doodad =
+        az_modulo((int)node->spec.subkind.doodad + delta, AZ_NUM_DOODAD_KINDS);
+      node->spec.subkind.doodad = new_doodad;
+      state.brush.doodad_kind = new_doodad;
     } else {
       const az_node_kind_t new_kind =
         az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
       node->spec.kind = new_kind;
       state.brush.node_kind = new_kind;
+      if (new_kind == AZ_NODE_UPGRADE) {
+        node->spec.subkind.upgrade = state.brush.upgrade_kind;
+      } else if (new_kind == AZ_NODE_DOODAD) {
+        node->spec.subkind.doodad = state.brush.doodad_kind;
+      }
     }
     state.unsaved = true;
   }

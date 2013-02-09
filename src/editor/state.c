@@ -48,6 +48,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->brush.door_kind = AZ_DOOR_NORMAL;
   state->brush.gravfield_kind = AZ_GRAV_TRAPEZOID;
   state->brush.node_kind = AZ_NODE_TRACTOR;
+  state->brush.doodad_kind = AZ_DOOD_WARNING_LIGHT;
   state->brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
   state->brush.wall_kind = AZ_WALL_INDESTRUCTIBLE;
 

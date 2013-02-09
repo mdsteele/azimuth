@@ -72,15 +72,17 @@ static double mode_fade_alpha(az_space_state_t *state) {
 }
 
 static void draw_camera_view(az_space_state_t *state) {
+  az_draw_nodes_rear(state);
   az_draw_gravfields(state);
   az_draw_walls(state);
-  az_draw_nodes(state);
+  az_draw_nodes_middle(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
   az_draw_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
   az_draw_doors(state);
+  az_draw_nodes_front(state);
   az_draw_specks(state);
 }
 

@@ -190,20 +190,26 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
 
 static void parse_node_directive(az_load_room_t *loader) {
   if (loader->room->num_nodes >= loader->num_nodes) FAIL();
-  int kind, upgrade = 0;
-  double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf",
-             &kind, &x, &y, &angle) < 4) FAIL();
+  int kind;
+  if (fscanf(loader->file, "%d", &kind) < 1) FAIL();
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
-  if (kind == AZ_NODE_UPGRADE) {
-    if (fscanf(loader->file, " u%d\n", &upgrade) < 1) FAIL();
-    if (upgrade < 0 || upgrade >= AZ_NUM_UPGRADES) FAIL();
-  } else (void)fscanf(loader->file, "\n");
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
+  if (kind == AZ_NODE_UPGRADE || kind == AZ_NODE_DOODAD) {
+    int subkind;
+    if (fscanf(loader->file, "/%d", &subkind) < 1) FAIL();
+    if (kind == AZ_NODE_UPGRADE) {
+      if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
+      node->subkind.upgrade = (az_upgrade_t)subkind;
+    } else {
+      if (subkind < 0 || subkind >= AZ_NUM_DOODAD_KINDS) FAIL();
+      node->subkind.doodad = (az_doodad_kind_t)subkind;
+    }
+  }
+  double x, y, angle;
+  if (fscanf(loader->file, " x%lf y%lf a%lf", &x, &y, &angle) < 3) FAIL();
   node->kind = (az_node_kind_t)kind;
   node->position = (az_vector_t){x, y};
   node->angle = angle;
-  node->upgrade = (az_upgrade_t)upgrade;
   node->on_use = maybe_parse_script(loader, 'u');
   ++loader->room->num_nodes;
 }
@@ -330,12 +336,14 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
-    WRITE("!N%d x%.02f y%.02f a%f", (int)node->kind,
-          node->position.x, node->position.y, node->angle);
+    WRITE("!N%d", (int)node->kind);
     if (node->kind == AZ_NODE_UPGRADE) {
-      WRITE(" u%d", (int)node->upgrade);
+      WRITE("/%d", (int)node->subkind.upgrade);
+    } else if (node->kind == AZ_NODE_DOODAD) {
+      WRITE("/%d", (int)node->subkind.doodad);
     }
-    WRITE("\n");
+    WRITE(" x%.02f y%.02f a%f\n",
+          node->position.x, node->position.y, node->angle);
     WRITE_SCRIPT('u', node->on_use);
   }
   for (int i = 0; i < room->num_baddies; ++i) {
