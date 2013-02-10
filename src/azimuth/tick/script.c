@@ -36,15 +36,6 @@
 // with an error (to avoid infinite loops).
 #define AZ_MAX_SCRIPT_STEPS 100
 
-// COUNT_ARGS(...) expands to the number of arguments passed to it (as long as
-// that number is between 1 and 8, inclusive).
-#define COUNT_ARGS(...) SELECT_9TH(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1, unused)
-#define SELECT_9TH(a1, a2, a3, a4, a5, a6, a7, a8, a9, ...) a9
-AZ_STATIC_ASSERT(COUNT_ARGS(a) == 1);
-AZ_STATIC_ASSERT(COUNT_ARGS(a,b) == 2);
-AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c) == 3);
-AZ_STATIC_ASSERT(COUNT_ARGS(a,b,c,d,e,f,g,h) == 8);
-
 #ifdef NDEBUG
 #define SCRIPT_ERROR(msg) do { goto halt; } while (0)
 #else
@@ -82,8 +73,8 @@ static void print_error(const char *msg, const az_script_vm_t *vm) {
 // the stack (or errors on underflow), and assigns them to the pointers.  The
 // top of the stack will be stored to the rightmost pointer passed, and so on.
 #define STACK_POP(...) do { \
-    if (vm->stack_size >= COUNT_ARGS(__VA_ARGS__)) { \
-      do_stack_pop(vm, COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
+    if (vm->stack_size >= AZ_COUNT_ARGS(__VA_ARGS__)) { \
+      do_stack_pop(vm, AZ_COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
     } else SCRIPT_ERROR("stack underflow"); \
   } while (0)
 

@@ -53,6 +53,12 @@ typedef struct {
   } while (0)
 #endif // NDEBUG
 
+#define READ(...) do { \
+    if (fscanf(loader->file, __VA_ARGS__) < AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
+      FAIL(); \
+    } \
+  } while (false)
+
 // Read the next non-whitespace character.  If it is '!' or if we reach EOF,
 // do nothing more; otherwise, fail parsing.
 static void scan_to_bang(az_load_planet_t *loader) {
@@ -91,9 +97,9 @@ static char *scan_string(az_load_planet_t *loader) {
 static void parse_planet_header(az_load_planet_t *loader) {
   int num_zones, num_rooms, num_texts, start_room_num;
   double start_x, start_y, start_angle;
-  if (fscanf(loader->file, "@P z%d r%d t%d s%d x%lf y%lf a%lf\n",
-             &num_zones, &num_rooms, &num_texts, &start_room_num,
-             &start_x, &start_y, &start_angle) < 7) FAIL();
+  READ("@P z%d r%d t%d s%d x%lf y%lf a%lf\n",
+       &num_zones, &num_rooms, &num_texts, &start_room_num,
+       &start_x, &start_y, &start_angle);
   if (num_zones < 1 || num_zones > num_rooms ||
       num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
       num_texts < 0 || num_texts > AZ_MAX_NUM_TEXTS ||
@@ -115,7 +121,7 @@ static void parse_planet_header(az_load_planet_t *loader) {
 static void parse_text_directive(az_load_planet_t *loader) {
   if (loader->planet->num_texts >= loader->num_texts) FAIL();
   int text_index;
-  if (fscanf(loader->file, "%d", &text_index) < 1) FAIL();
+  READ("%d", &text_index);
   if (text_index != loader->planet->num_texts) FAIL();
   az_text_t *text = &loader->planet->texts[loader->planet->num_texts];
   char *string = scan_string(loader);
@@ -131,8 +137,7 @@ static void parse_zone_directive(az_load_planet_t *loader) {
   az_zone_t *zone = &loader->planet->zones[loader->planet->num_zones];
   zone->name = scan_string(loader);
   int red, green, blue, music;
-  if (fscanf(loader->file, " c(%d,%d,%d) m%d\n",
-             &red, &green, &blue, &music) < 4) FAIL();
+  READ(" c(%d,%d,%d) m%d\n", &red, &green, &blue, &music);
   if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 ||
       blue > 255 || music < 0 || music >= AZ_NUM_MUSIC_KEYS) FAIL();
   zone->color = (az_color_t){red, green, blue, 255};
@@ -156,6 +161,7 @@ static void validate_planet_basis(az_load_planet_t *loader) {
       loader->planet->num_texts != loader->num_texts) FAIL();
 }
 
+#undef READ
 #undef FAIL
 
 static void parse_planet_basis(az_load_planet_t *loader) {

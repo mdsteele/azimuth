@@ -56,6 +56,12 @@ typedef struct {
   } while (0)
 #endif // NDEBUG
 
+#define READ(...) do { \
+    if (fscanf(loader->file, __VA_ARGS__) < AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
+      FAIL(); \
+    } \
+  } while (false)
+
 // Read the next non-whitespace character.  If it is '$', return true; if it is
 // '!' or if we reach EOF, return false; otherwise, fail parsing.
 static bool scan_to_script(az_load_room_t *loader) {
@@ -80,10 +86,9 @@ static void parse_room_header(az_load_room_t *loader) {
   int room_num, zone_index;
   double min_r, r_span, min_theta, theta_span;
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
-  if (fscanf(loader->file, "@R%d z%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
-             &room_num, &zone_index, &min_r, &r_span, &min_theta, &theta_span,
-             &num_baddies, &num_doors, &num_gravfields, &num_nodes,
-             &num_walls) < 11) FAIL();
+  READ("@R%d z%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
+       &room_num, &zone_index, &min_r, &r_span, &min_theta, &theta_span,
+       &num_baddies, &num_doors, &num_gravfields, &num_nodes, &num_walls);
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
   if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ROOMS) FAIL();
   loader->room->key = room_num;
@@ -120,8 +125,7 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   if (loader->room->num_baddies >= loader->num_baddies) FAIL();
   int index, uuid_slot;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf u%d\n",
-             &index, &x, &y, &angle, &uuid_slot) < 5) FAIL();
+  READ("%d x%lf y%lf a%lf u%d\n", &index, &x, &y, &angle, &uuid_slot);
   if (index <= 0 || index > AZ_NUM_BADDIE_KINDS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_baddie_spec_t *baddie = &loader->room->baddies[loader->room->num_baddies];
@@ -137,8 +141,8 @@ static void parse_door_directive(az_load_room_t *loader) {
   if (loader->room->num_doors >= loader->num_doors) FAIL();
   int index, destination, uuid_slot;
   double x, y, angle;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf r%d u%d\n",
-             &index, &x, &y, &angle, &destination, &uuid_slot) < 6) FAIL();
+  READ("%d x%lf y%lf a%lf r%d u%d\n",
+       &index, &x, &y, &angle, &destination, &uuid_slot);
   if (index <= 0 || index > AZ_NUM_DOOR_KINDS ||
       destination < 0 || destination >= AZ_MAX_NUM_ROOMS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
@@ -156,8 +160,7 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   if (loader->room->num_gravfields >= loader->num_gravfields) FAIL();
   int index, uuid_slot;
   double x, y, angle, strength;
-  if (fscanf(loader->file, "%d x%lf y%lf a%lf s%lf ",
-             &index, &x, &y, &angle, &strength) < 5) FAIL();
+  READ("%d x%lf y%lf a%lf s%lf ", &index, &x, &y, &angle, &strength);
   if (index <= 0 || index > AZ_NUM_GRAVFIELD_KINDS || strength == 0.0) FAIL();
   az_gravfield_spec_t *gravfield =
     &loader->room->gravfields[loader->room->num_gravfields];
@@ -167,8 +170,8 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   gravfield->strength = strength;
   if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
     double front_offset, front_semiwidth, rear_semiwidth, semilength;
-    if (fscanf(loader->file, "o%lf f%lf r%lf l%lf", &front_offset,
-               &front_semiwidth, &rear_semiwidth, &semilength) < 4) FAIL();
+    READ("o%lf f%lf r%lf l%lf", &front_offset, &front_semiwidth,
+         &rear_semiwidth, &semilength);
     if (semilength <= 0.0) FAIL();
     gravfield->size.trapezoid.semilength = semilength;
     gravfield->size.trapezoid.front_offset = front_offset;
@@ -176,13 +179,12 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
     gravfield->size.trapezoid.rear_semiwidth = rear_semiwidth;
   } else {
     double sweep_degrees, inner_radius, thickness;
-    if (fscanf(loader->file, "w%lf i%lf t%lf", &sweep_degrees,
-               &inner_radius, &thickness) < 3) FAIL();
+    READ("w%lf i%lf t%lf", &sweep_degrees, &inner_radius, &thickness);
     gravfield->size.sector.sweep_degrees = sweep_degrees;
     gravfield->size.sector.inner_radius = inner_radius;
     gravfield->size.sector.thickness = thickness;
   }
-  if (fscanf(loader->file, " u%d\n", &uuid_slot) < 1) FAIL();
+  READ(" u%d\n", &uuid_slot);
   gravfield->uuid_slot = uuid_slot;
   ++loader->room->num_gravfields;
   if (scan_to_script(loader)) FAIL();
@@ -191,13 +193,13 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
 static void parse_node_directive(az_load_room_t *loader) {
   if (loader->room->num_nodes >= loader->num_nodes) FAIL();
   int kind;
-  if (fscanf(loader->file, "%d", &kind) < 1) FAIL();
+  READ("%d", &kind);
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
   if (kind == AZ_NODE_UPGRADE || kind == AZ_NODE_DOODAD_FG ||
       kind == AZ_NODE_DOODAD_BG) {
     int subkind;
-    if (fscanf(loader->file, "/%d", &subkind) < 1) FAIL();
+    READ("/%d", &subkind);
     if (kind == AZ_NODE_UPGRADE) {
       if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
       node->subkind.upgrade = (az_upgrade_t)subkind;
@@ -207,7 +209,7 @@ static void parse_node_directive(az_load_room_t *loader) {
     }
   }
   double x, y, angle;
-  if (fscanf(loader->file, " x%lf y%lf a%lf", &x, &y, &angle) < 3) FAIL();
+  READ(" x%lf y%lf a%lf", &x, &y, &angle);
   node->kind = (az_node_kind_t)kind;
   node->position = (az_vector_t){x, y};
   node->angle = angle;
@@ -219,8 +221,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
   if (loader->room->num_walls >= loader->num_walls) FAIL();
   int kind, index;
   double x, y, angle;
-  if (fscanf(loader->file, "%d d%d x%lf y%lf a%lf\n",
-             &kind, &index, &x, &y, &angle) < 5) FAIL();
+  READ("%d d%d x%lf y%lf a%lf\n", &kind, &index, &x, &y, &angle);
   if (kind <= 0 || kind > AZ_NUM_WALL_KINDS) FAIL();
   if (index < 0 || index >= AZ_NUM_WALL_DATAS) FAIL();
   az_wall_spec_t *wall = &loader->room->walls[loader->room->num_walls];
@@ -253,6 +254,7 @@ static void validate_room(az_load_room_t *loader) {
       loader->room->num_walls != loader->num_walls) FAIL();
 }
 
+#undef READ
 #undef FAIL
 
 static void parse_room(az_load_room_t *loader) {

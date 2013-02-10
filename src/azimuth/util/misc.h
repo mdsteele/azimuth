@@ -66,6 +66,14 @@ void *_az_alloc(const char *funcname, size_t n, size_t size)
 #define AZ_SA_JOIN(a, b) AZ_SA_JOIN2(a, b)
 #define AZ_SA_JOIN2(a, b) a##b
 
+// AZ_COUNT_ARGS(...) expands to the number of arguments passed to it (as long
+// as that number is between 1 and 15, inclusive).  Beware: it may silently
+// give the wrong result if given 0 arguments or more than 15 arguments.
+#define AZ_COUNT_ARGS(...) \
+  AZ_SELECT_16TH(__VA_ARGS__, 15, 14, 13, 12, 11, 10, \
+                 9, 8, 7, 6, 5, 4, 3, 2, 1, unused)
+#define AZ_SELECT_16TH(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, ...) p
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_MISC_H_

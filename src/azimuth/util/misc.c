@@ -47,4 +47,12 @@ void *_az_alloc(const char *funcname, size_t n, size_t size) {
   return ptr;
 }
 
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a) == 1);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b) == 2);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b,c) == 3);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b,c,d,e) == 5);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b,c,d,e,f,g,h) == 8);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b,c,d,e,f,g,h,i,j,k,l,m) == 13);
+AZ_STATIC_ASSERT(AZ_COUNT_ARGS(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o) == 15);
+
 /*===========================================================================*/
