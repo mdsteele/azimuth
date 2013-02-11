@@ -28,12 +28,13 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-static void draw_bezel(double bezel, az_color_t color1, az_color_t color2,
-                       az_polygon_t polygon) {
+static void draw_bezel(double bezel, bool alt, az_color_t color1,
+                       az_color_t color2, az_polygon_t polygon) {
   // Draw background color:
   if (color2.a != 0) {
     glColor4ub(color2.r, color2.g, color2.b, color2.a);
@@ -43,34 +44,74 @@ static void draw_bezel(double bezel, az_color_t color1, az_color_t color2,
       }
     } glEnd();
   }
-  // Draw bezel:
-  az_color_t c1 = color1;
-  az_color_t c2 = c1; c2.a = 0;
+  // Calculate bezel:
   const int n = polygon.num_vertices;
+  assert(n >= 3);
+  // Temporary table of ancillary info for each vertex:
+  struct {
+    az_vector_t unit;
+    double length;
+    bool done;
+  } vinfo[n];
+  // Populate vinfo table:
   for (int i = 0; i < n; ++i) {
-    az_vector_t a = polygon.vertices[i];
-    az_vector_t b = polygon.vertices[(i + 1) % n];
-    az_vector_t c = polygon.vertices[(i + 2) % n];
-    az_vector_t d = polygon.vertices[(i + 3) % n];
-    glBegin(GL_QUADS); {
-      glColor4ub(c1.r, c1.g, c1.b, c1.a);
-      glVertex2d(b.x, b.y);
-      glVertex2d(c.x, c.y);
-      glColor4ub(c2.r, c2.g, c2.b, c2.a);
-      const double td = az_vtheta(az_vsub(d, c));
-      const double tb = az_vtheta(az_vsub(b, c));
-      const double ttc = 0.5 * az_mod2pi_nonneg(tb - td);
-      az_vector_t dd =
-        az_vadd(c, az_vpolar(bezel / sin(ttc), td + ttc));
-      glVertex2d(dd.x, dd.y);
-      const double ta = az_vtheta(az_vsub(a, b));
-      const double tc = az_vtheta(az_vsub(c, b));
-      const double ttb = 0.5 * az_mod2pi_nonneg(ta - tc);
-      az_vector_t aa =
-        az_vadd(b, az_vpolar(bezel / sin(ttb), tc + ttb));
-      glVertex2d(aa.x, aa.y);
-    } glEnd();
+    const az_vector_t a = polygon.vertices[az_modulo(i - 1, n)];
+    const az_vector_t b = polygon.vertices[i];
+    const az_vector_t c = polygon.vertices[az_modulo(i + 1, n)];
+    const double ta = az_vtheta(az_vsub(a, b));
+    const double tc = az_vtheta(az_vsub(c, b));
+    const double tt = 0.5 * az_mod2pi_nonneg(ta - tc);
+    assert(0.0 < tt && tt < AZ_TWO_PI);
+    vinfo[i].unit = az_vpolar(1, tc + tt);
+    vinfo[i].length = (alt ? bezel : bezel / sin(tt));
+    vinfo[i].done = false;
   }
+  // Refine vinfo table, by repeatedly checking if the bezline of any vertices
+  // will intersect any other bezline, and if so, stopping it short.
+  for (int iteration = 0; iteration < n; ++iteration) {
+    double best_time = INFINITY;
+    int index_of_best = -1;
+    double length_for_best = 0.0;
+    for (int i = 0; i < n; ++i) {
+      if (vinfo[i].done) continue;
+      const az_vector_t vi = polygon.vertices[i];
+      for (int k = 0; k < n; ++k) {
+        if (k == i) continue;
+        const az_vector_t vk = polygon.vertices[k];
+        az_vector_t intersect;
+        if (az_ray_hits_line_segment(
+                vk, az_vadd(vk, az_vmul(vinfo[k].unit, vinfo[k].length + .01)),
+                vi, az_vmul(vinfo[i].unit, vinfo[i].length),
+                &intersect, NULL)) {
+          const double i_length = az_vdist(intersect, vi);
+          const double k_length = az_vdist(intersect, vk);
+          const double time = fmax(i_length, k_length);
+          if (time < best_time) {
+            best_time = time;
+            length_for_best = i_length;
+            index_of_best = i;
+          }
+        }
+      }
+    }
+    if (index_of_best < 0) break;
+    assert(!vinfo[index_of_best].done);
+    assert(length_for_best <= vinfo[index_of_best].length);
+    vinfo[index_of_best].length = length_for_best;
+    vinfo[index_of_best].done = true;
+  }
+  // Actually draw the quad strip:
+  glBegin(GL_QUAD_STRIP); {
+    for (int i = n - 1, i2 = 0; i < n; i = i2++) {
+      const az_vector_t b = polygon.vertices[i];
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(b.x, b.y);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      const az_vector_t bb =
+        az_vadd(b, az_vmul(vinfo[i].unit, vinfo[i].length));
+      glVertex2d(bb.x, bb.y);
+    }
+  } glEnd();
 }
 
 static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
@@ -111,14 +152,37 @@ static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
   } glEnd();
 }
 
+static void draw_trifan(az_color_t color1, az_color_t color2,
+                        az_polygon_t polygon) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2f(0, 0);
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    for (int i = polygon.num_vertices - 1, j = 0;
+         i < polygon.num_vertices; i = j++) {
+      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+    }
+  } glEnd();
+}
+
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
   glNewList(list, GL_COMPILE); {
     switch (data->style) {
       case AZ_WSTY_BEZEL_12:
-        draw_bezel(data->bezel, data->color1, data->color2, data->polygon);
+        draw_bezel(data->bezel, false, data->color1, data->color2,
+                   data->polygon);
         break;
       case AZ_WSTY_BEZEL_21:
-        draw_bezel(data->bezel, data->color2, data->color1, data->polygon);
+        draw_bezel(data->bezel, false, data->color2, data->color1,
+                   data->polygon);
+        break;
+      case AZ_WSTY_ALT_BEZEL_12:
+        draw_bezel(data->bezel, true, data->color1, data->color2,
+                   data->polygon);
+        break;
+      case AZ_WSTY_ALT_BEZEL_21:
+        draw_bezel(data->bezel, true, data->color2, data->color1,
+                   data->polygon);
         break;
       case AZ_WSTY_GIRDER:
         draw_girder(data->bezel, data->color1, data->color2, data->polygon,
@@ -127,6 +191,9 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
       case AZ_WSTY_GIRDER_CAP:
         draw_girder(data->bezel, data->color1, data->color2, data->polygon,
                     true);
+        break;
+      case AZ_WSTY_TRIFAN:
+        draw_trifan(data->color1, data->color2, data->polygon);
         break;
     }
   } glEndList();

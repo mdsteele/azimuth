@@ -181,6 +181,39 @@ void test_ray_hits_circle(void) {
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
 }
 
+void test_ray_hits_line_segment(void) {
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_ray_hits_line_segment works with NULLs:
+  EXPECT_TRUE(az_ray_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, (az_vector_t){6, -5},
+      (az_vector_t){0, 10}, NULL, NULL));
+
+  // Check case where ray hits line segment dead-on.
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, (az_vector_t){6, -5},
+      (az_vector_t){0, 10}, &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){6, 1}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){0, -1}), az_vunit(normal));
+
+  // Check case where ray would hit infinite line, but misses line segment.
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, (az_vector_t){16, -5},
+      (az_vector_t){0, 10}, &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Check case where ray would hit line segment, but stops short.
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_line_segment(
+      (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, (az_vector_t){6, -5},
+      (az_vector_t){0, 5}, &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+}
+
 void test_ray_hits_polygon(void) {
   az_vector_t intersect = nix, normal = nix;
   const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
@@ -371,7 +404,7 @@ void test_circle_hits_line(void) {
 void test_circle_hits_line_segment(void) {
   az_vector_t pos = nix, impact = nix;
 
-  // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
+  // Check az_circle_hits_line_segment works with NULLs:
   EXPECT_TRUE(az_circle_hits_line_segment(
       (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){6, -5},
       (az_vector_t){0, 10}, NULL, NULL));

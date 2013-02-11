@@ -62,6 +62,10 @@ static az_vector_t wall_vertices_girder_skinny[] = {
 static az_vector_t wall_vertices_girder_skinny_capped[] = {
   {39, 0}, {59, 20}, {-59, 20}, {-59, -20}, {59, -20}
 };
+static az_vector_t wall_vertices_11[] = {
+  {17, 4}, {23, 10}, {20, 21}, {8, 28}, {-2, 22}, {-20, 18}, {-20, 0},
+  {-27, -10}, {-19, -21}, {-3, -18}, {7, -26}, {16, -20}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -87,22 +91,22 @@ static az_wall_data_t wall_datas[] = {
   },
   // Small cyan crystal:
   [3] = {
-    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .style = AZ_WSTY_BEZEL_21, .bezel = 1000.0,
     .color2 = {0, 32, 32, 255}, .color1 = {0, 255, 255, 255},
     .elasticity = 0.3, .impact_damage_coeff = 10.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_3)
   },
   // Big cyan crystal:
   [4] = {
-    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .style = AZ_WSTY_BEZEL_21, .bezel = 1000.0,
     .color2 = {0, 32, 32, 255}, .color1 = {0, 255, 255, 255},
     .elasticity = 0.3, .impact_damage_coeff = 10.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_4)
   },
-  // Burgundy boulder:
+  // Gray/brown boulder:
   [5] = {
-    .style = AZ_WSTY_BEZEL_12, .bezel = 12.0,
-    .color1 = {128, 0, 64, 255}, .color2 = {32, 0, 16, 255},
+    .style = AZ_WSTY_ALT_BEZEL_21, .bezel = 25.0,
+    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_5)
   },
@@ -140,6 +144,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
     .elasticity = 0.5, .impact_damage_coeff = 1.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_skinny_capped)
+  },
+  // Small gray/brown boulder:
+  [11] = {
+    .style = AZ_WSTY_TRIFAN, .bezel = 900.0,
+    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_11)
   }
 };
 

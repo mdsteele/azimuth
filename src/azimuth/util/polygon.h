@@ -94,6 +94,11 @@ bool az_ray_hits_circle(double radius, az_vector_t center,
                         az_vector_t start, az_vector_t delta,
                         az_vector_t *point_out, az_vector_t *normal_out);
 
+// Determine if the ray will hit the finite line segment between p1 and p2.
+bool az_ray_hits_line_segment(
+    az_vector_t p1, az_vector_t p2, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
+
 // Determine if the ray will hit the given polygon.
 bool az_ray_hits_polygon(az_polygon_t polygon, az_vector_t start,
                          az_vector_t delta, az_vector_t *point_out,

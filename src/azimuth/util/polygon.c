@@ -167,6 +167,31 @@ bool az_ray_hits_circle(double radius, az_vector_t center,
   return true;
 }
 
+bool az_ray_hits_line_segment(
+    az_vector_t p1, az_vector_t p2, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  const az_vector_t edelta = az_vsub(p2, p1);
+  const double denom = az_vcross(delta, edelta);
+  // Make sure the line segment isn't parallel to the ray.
+  if (denom == 0.0) return false;
+  const az_vector_t rel = az_vsub(p1, start);
+  // Make sure that the ray hits the line between the two vertices.
+  const double u = az_vcross(rel, delta) / denom;
+  assert(isfinite(u));
+  if (u < 0.0 || u >= 1.0) return false;
+  // Make sure that the ray hits the line segment within the bounds of the ray.
+  const double t = az_vcross(rel, edelta) / denom;
+  assert(isfinite(t));
+  if (t < 0.0 || t > 1.0) return false;
+  if (point_out != NULL) {
+    *point_out = az_vadd(start, az_vmul(delta, t));
+  }
+  if (normal_out != NULL) {
+    *normal_out = az_vsub(az_vproj(delta, edelta), delta);
+  }
+  return true;
+}
+
 static bool ray_hits_polygon_internal(
     az_polygon_t polygon, az_vector_t start, az_vector_t delta,
     double *time_out, az_vector_t *normal_out) {
