@@ -95,11 +95,11 @@ static bool parse_saved_games(const az_planet_t *planet, FILE *file,
     switch (fgetc(file)) {
       case 'S':
         game->present = true;
-        parse_saved_game(planet, file, &game->player);
+        if (!parse_saved_game(planet, file, &game->player)) return false;
         break;
       case 'N':
         game->present = false;
-        (void)fscanf(file, "\n");
+        if (fscanf(file, "\n") < 0) return false;
         break;
       default: return false;
     }
