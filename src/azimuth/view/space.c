@@ -97,8 +97,8 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_ship(state);
   az_draw_particles(state);
   az_draw_doors(state);
-  az_draw_foreground_nodes(state);
   az_draw_specks(state);
+  az_draw_foreground_nodes(state);
 }
 
 void az_space_draw_screen(az_space_state_t *state) {

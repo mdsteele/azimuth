@@ -385,6 +385,49 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(2, -14); glVertex2f(8, -14);
       } glEnd();
       break;
+    case AZ_DOOD_PIPE_TEE:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(5, -10); glVertex2f(5, 10);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(0, -10); glVertex2f(0, 10);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-5, -10); glVertex2f(-5, 10);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(5, 5); glVertex2f(10, 5);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(0, 0); glVertex2f(10, 0);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(5, -5); glVertex2f(10, -5);
+      } glEnd();
+      // Couplings:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(6, 10); glVertex2f(6, 16);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(0, 10); glVertex2f(0, 16);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(-6, 10); glVertex2f(-6, 16);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(6, -10); glVertex2f(6, -16);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(0, -10); glVertex2f(0, -16);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(-6, -10); glVertex2f(-6, -16);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(10, 6); glVertex2f(16, 6);
+        glColor3f(0.75, 0.85, 0.75);
+        glVertex2f(10, 0); glVertex2f(16, 0);
+        glColor3f(0.2, 0.35, 0.2);
+        glVertex2f(10, -6); glVertex2f(16, -6);
+      } glEnd();
+      break;
   }
 }
 
