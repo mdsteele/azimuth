@@ -26,6 +26,7 @@
 #include "azimuth/state/dialog.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"

@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/misc.h"
 

@@ -26,7 +26,7 @@
 #include "azimuth/state/door.h" // for az_door_kind_t
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h" // for az_node_kind_t
-#include "azimuth/state/player.h" // for az_room_key_t and az_upgrade_t
+#include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/script.h"
 #include "azimuth/state/wall.h"
 

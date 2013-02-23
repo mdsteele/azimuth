@@ -40,6 +40,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/speck.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"

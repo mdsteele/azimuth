@@ -27,6 +27,7 @@
 
 #include "azimuth/state/node.h"
 #include "azimuth/state/space.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/

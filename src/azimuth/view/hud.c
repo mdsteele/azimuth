@@ -28,6 +28,7 @@
 #include "azimuth/state/dialog.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
@@ -479,34 +480,29 @@ static void draw_upgrade_box_frame(double openness) {
 }
 
 static void draw_upgrade_box_message(az_upgrade_t upgrade) {
-  const char *name = NULL, *line1 = NULL, *line2 = NULL;
+  const char *name = az_upgrade_name(upgrade);
+  const char *line1 = NULL, *line2 = NULL;
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
-      name = "CHARGE GUN";
       line1 = "Hold [V] to charge, release to fire.";
       break;
     case AZ_UPG_GUN_FREEZE:
-      name = "FREEZE GUN";
       line1 = "Shots can freeze enemies.";
       line2 = "Press [2] to select, press [V] to fire.";
       break;
     case AZ_UPG_GUN_TRIPLE:
-      name = "TRIPLE GUN";
       line1 = "Fires three shots at once.";
       line2 = "Press [3] to select, press [V] to fire.";
       break;
     case AZ_UPG_GUN_HOMING:
-      name = "HOMING GUN";
       line1 = "Shots will seek out enemies.";
       line2 = "Press [4] to select, press [V] to fire.";
       break;
     case AZ_UPG_GUN_PHASE:
-      name = "PHASE GUN";
       line1 = "Shots will pass through walls.";
       line2 = "Press [5] to select, press [V] to fire.";
       break;
     case AZ_UPG_GUN_BEAM:
-      name = "BEAM GUN";
       line1 = "Fires a continuous beam.";
       line2 = "Press [8] to select, press [V] to fire.";
       break;
@@ -530,12 +526,10 @@ static void draw_upgrade_box_message(az_upgrade_t upgrade) {
     case AZ_UPG_ROCKET_AMMO_17:
     case AZ_UPG_ROCKET_AMMO_18:
     case AZ_UPG_ROCKET_AMMO_19:
-      name = "ROCKETS";
       line1 = "Maximum rockets increased by 5.";
       line2 = "Press [9] to select, hold [C] and press [V] to fire.";
       break;
     case AZ_UPG_HYPER_ROCKETS:
-      name = "HYPER ROCKETS";
       line1 = "Press [9] to select rockets, hold [C] to charge,";
       line2 = "and press [V] to fire.  Uses 5 rockets.";
       break;
@@ -549,22 +543,18 @@ static void draw_upgrade_box_message(az_upgrade_t upgrade) {
     case AZ_UPG_BOMB_AMMO_07:
     case AZ_UPG_BOMB_AMMO_08:
     case AZ_UPG_BOMB_AMMO_09:
-      name = "BOMBS";
       line1 = "Maximum bombs increased by 3.";
       line2 = "Press [0] to select, hold [C] and press [V] to drop.";
       break;
     case AZ_UPG_MEGA_BOMBS:
-      name = "MEGA BOMBS";
       line1 = "Press [0] to select bombs, hold [C] to charge,";
       line2 = "and press [V] to drop.  Uses 5 bombs.";
       break;
     case AZ_UPG_REACTIVE_ARMOR:
-      name = "REACTIVE ARMOR";
       line1 = "All damage taken is reduced by half.";
       line2 = "Colliding with enemies will now damage them.";
       break;
     default:
-      name = "?????";
       line1 = "TODO describe other upgrades";
       break;
   }

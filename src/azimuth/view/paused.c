@@ -24,6 +24,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/state/player.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/string.h"
 
@@ -47,34 +48,7 @@ static void draw_upg_box(const az_player_t *player, double x, double y,
   glColor3f(0, 1, 1);
   draw_rect(x, y, 150, 15);
   if (!az_has_upgrade(player, upgrade)) return;
-  const char *name = NULL;
-  switch (upgrade) {
-    case AZ_UPG_HYPER_ROCKETS:      name = "HYPER ROCKETS";      break;
-    case AZ_UPG_MEGA_BOMBS:         name = "MEGA BOMBS";         break;
-    case AZ_UPG_HIGH_EXPLOSIVES:    name = "HIGH EXPLOSIVES";    break;
-    case AZ_UPG_ATTUNED_EXPLOSIVES: name = "ATTUNED EXPLOSIVES"; break;
-
-    case AZ_UPG_RETRO_THRUSTERS:   name = "RETRO THRUSTERS";   break;
-    case AZ_UPG_LATERAL_THRUSTERS: name = "LATERAL THRUSTERS"; break;
-    case AZ_UPG_CPLUS_DRIVE:       name = "C-PLUS DRIVE";      break;
-    case AZ_UPG_ORION_BOOSTER:     name = "ORION BOOSTER";     break;
-
-    case AZ_UPG_TRACTOR_BEAM: name = "TRACTOR BEAM"; break;
-    case AZ_UPG_INFRASCANNER: name = "INFRASCANNER"; break;
-
-    case AZ_UPG_HARDENED_ARMOR: name = "HARDENED ARMOR"; break;
-    case AZ_UPG_THERMAL_ARMOR:  name = "THERMAL ARMOR";  break;
-    case AZ_UPG_DYNAMIC_ARMOR:  name = "DYNAMIC ARMOR";  break;
-    case AZ_UPG_GRAVITIC_ARMOR: name = "GRAVITIC ARMOR"; break;
-    case AZ_UPG_REACTIVE_ARMOR: name = "REACTIVE ARMOR"; break;
-
-    case AZ_UPG_FUSION_REACTOR:  name = "FUSION REACTOR";  break;
-    case AZ_UPG_QUANTUM_REACTOR: name = "QUANTUM REACTOR"; break;
-
-    default: name = "???"; break;
-  }
-  assert(name != NULL);
-  az_draw_string(8, AZ_ALIGN_CENTER, x + 75, y + 4, name);
+  az_draw_string(8, AZ_ALIGN_CENTER, x + 75, y + 4, az_upgrade_name(upgrade));
 }
 
 static int round_towards_middle(double amount, double maximum) {

@@ -26,6 +26,7 @@
 
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/

@@ -21,9 +21,9 @@
 #ifndef AZIMUTH_STATE_NODE_H_
 #define AZIMUTH_STATE_NODE_H_
 
-#include "azimuth/state/player.h" // for az_upgrade_t
 #include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/

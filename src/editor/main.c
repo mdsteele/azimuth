@@ -31,6 +31,7 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/script.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h" // for az_init_random
