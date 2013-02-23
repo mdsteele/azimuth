@@ -107,7 +107,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   } else if (upgrade >= AZ_UPG_SHIELD_BATTERY_00 &&
              upgrade <= AZ_UPG_SHIELD_BATTERY_11) {
     assert(player->shields <= player->max_shields);
-    player->max_shields += AZ_SHILEDS_PER_BATTERY;
+    player->max_shields += AZ_SHIELDS_PER_BATTERY;
     player->shields = player->max_shields;
   }
 }

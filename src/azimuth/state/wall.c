@@ -66,6 +66,20 @@ static az_vector_t wall_vertices_11[] = {
   {17, 4}, {23, 10}, {20, 21}, {8, 28}, {-2, 22}, {-20, 18}, {-20, 0},
   {-27, -10}, {-19, -21}, {-3, -18}, {7, -26}, {16, -20}
 };
+static az_vector_t wall_vertices_12[] = {
+  {6, 36}, {-10, 42}, {-20, 38}, {-50, 35}, {-54, 5}, {-50, -30}, {-35, -37},
+  {-25, -32}, {-5, -41}, {25, -31}, {50, -34}, {53, -3}, {50, 35}, {32, 41}
+};
+static az_vector_t wall_vertices_13[] = {
+  {77, 20}, {81, 60}, {55, 86}, {11, 88}, {1, 84}, {-45, 60}, {-81, 60},
+  {-103, 0}, {-72, -65}, {-41, -70}, {-25, -64}, {5, -84}, {23, -84},
+  {53, -66}, {85, -56}, {95, -10}
+};
+static az_vector_t wall_vertices_14[] = {
+  {12, 36}, {-20, 42}, {-40, 38}, {-100, 35}, {-108, 5}, {-100, -30},
+  {-70, -37}, {-50, -32}, {-10, -41}, {50, -31}, {100, -34}, {106, -3},
+  {100, 35}, {64, 41}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -114,43 +128,64 @@ static az_wall_data_t wall_datas[] = {
   [6] = {
     .style = AZ_WSTY_GIRDER, .bezel = 7.0,
     .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
-    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long)
   },
   // Red long girder:
   [7] = {
     .style = AZ_WSTY_GIRDER, .bezel = 6.0,
     .color1 = {128, 32, 32, 255}, .color2 = {64, 0, 0, 255},
-    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long)
   },
   // Red short girder:
   [8] = {
     .style = AZ_WSTY_GIRDER, .bezel = 6.0,
     .color1 = {128, 32, 32, 255}, .color2 = {64, 0, 0, 255},
-    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_short)
   },
   // Brown long girder:
   [9] = {
     .style = AZ_WSTY_GIRDER, .bezel = 4.7,
     .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
-    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_skinny)
   },
   // Brown long capped girder:
   [10] = {
     .style = AZ_WSTY_GIRDER_CAP, .bezel = 4.7,
     .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
-    .elasticity = 0.5, .impact_damage_coeff = 1.0,
+    .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_skinny_capped)
   },
   // Small gray/brown boulder:
   [11] = {
     .style = AZ_WSTY_TRIFAN, .bezel = 900.0,
-    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {90, 80, 70, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_11)
+  },
+  // Gray/brown rock wall:
+  [12] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 25.0,
+    .color1 = {90, 80, 80, 255}, .color2 = {48, 32, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_12)
+  },
+  // Big gray/brown boulder:
+  [13] = {
+    .style = AZ_WSTY_ALT_BEZEL_21, .bezel = 40.0,
+    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_13)
+  },
+  // Long gray/brown rock wall:
+  [14] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 25.0,
+    .color1 = {90, 80, 80, 255}, .color2 = {48, 32, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_14)
   }
 };
 

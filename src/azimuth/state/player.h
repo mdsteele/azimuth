@@ -31,7 +31,7 @@
 #define AZ_ROCKETS_PER_AMMO_UPGRADE 5
 #define AZ_BOMBS_PER_AMMO_UPGRADE 3
 #define AZ_ENERGY_PER_CAPACITOR 50
-#define AZ_SHILEDS_PER_BATTERY 25
+#define AZ_SHIELDS_PER_BATTERY 25
 
 typedef enum {
   // Primary weapon:
