@@ -48,7 +48,27 @@ az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          return AZ_PA_RESUME; // TODO not for just any key
+          switch (event.key.name) {
+            case AZ_KEY_RETURN:
+            case AZ_KEY_ESCAPE:
+              return AZ_PA_RESUME;
+            case AZ_KEY_1: az_select_gun(state.player, AZ_GUN_CHARGE); break;
+            case AZ_KEY_2: az_select_gun(state.player, AZ_GUN_FREEZE); break;
+            case AZ_KEY_3: az_select_gun(state.player, AZ_GUN_TRIPLE); break;
+            case AZ_KEY_4: az_select_gun(state.player, AZ_GUN_HOMING); break;
+            case AZ_KEY_5: az_select_gun(state.player, AZ_GUN_PHASE);  break;
+            case AZ_KEY_6: az_select_gun(state.player, AZ_GUN_BURST);  break;
+            case AZ_KEY_7: az_select_gun(state.player, AZ_GUN_PIERCE); break;
+            case AZ_KEY_8: az_select_gun(state.player, AZ_GUN_BEAM);   break;
+            case AZ_KEY_9:
+              az_select_ordnance(state.player, AZ_ORDN_ROCKETS);
+              break;
+            case AZ_KEY_0:
+              az_select_ordnance(state.player, AZ_ORDN_BOMBS);
+              break;
+            default: break;
+          }
+          break;
         default: break;
       }
     }

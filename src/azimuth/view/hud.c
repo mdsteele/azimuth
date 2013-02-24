@@ -485,6 +485,7 @@ static void draw_upgrade_box_message(az_upgrade_t upgrade) {
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
       line1 = "Hold [V] to charge, release to fire.";
+      line2 = "Charged shots can destroy certain walls.";
       break;
     case AZ_UPG_GUN_FREEZE:
       line1 = "Shots can freeze enemies.";

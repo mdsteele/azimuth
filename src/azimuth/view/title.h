@@ -74,6 +74,10 @@ void az_title_draw_screen(const az_title_state_t *state);
 
 void az_tick_title_state(az_title_state_t *state, double time);
 
+// Put the UI into STARTING mode, to start the game for the given slot index.
+// The UI must currently be in NORMAL mode.
+void az_title_start_game(az_title_state_t *state, int slot_index);
+
 void az_title_on_hover(az_title_state_t *state, int x, int y);
 void az_title_on_click(az_title_state_t *state, int x, int y);
 

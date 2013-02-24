@@ -651,6 +651,17 @@ void az_tick_title_state(az_title_state_t *state, double time) {
 
 /*===========================================================================*/
 
+void az_title_start_game(az_title_state_t *state, int slot_index) {
+  assert(state->mode == AZ_TMODE_NORMAL);
+  state->slots[slot_index].main.hover_pulse = HOVER_PULSE_CLICK;
+  state->mode = AZ_TMODE_STARTING;
+  state->mode_data.starting.progress = 0.0;
+  state->mode_data.starting.slot_index = slot_index;
+  az_stop_music(&state->soundboard, STARTING_TIME);
+}
+
+/*===========================================================================*/
+
 static void set_hovering(az_title_state_t *state, az_title_button_t *button,
                          bool active, bool hovering) {
   if (active && hovering) {
@@ -753,11 +764,7 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
         reset_button(&state->confirm_button);
         reset_button(&state->cancel_button);
       } else if (point_in_save_slot(i, x, y)) {
-        state->slots[i].main.hover_pulse = HOVER_PULSE_CLICK;
-        state->mode = AZ_TMODE_STARTING;
-        state->mode_data.starting.progress = 0.0;
-        state->mode_data.starting.slot_index = i;
-        az_stop_music(&state->soundboard, STARTING_TIME);
+        az_title_start_game(state, i);
       }
     }
   }

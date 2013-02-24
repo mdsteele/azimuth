@@ -50,6 +50,12 @@ static void save_preferences(const az_preferences_t *prefs) {
   (void)az_save_prefs_to_file(prefs, path_buffer);
 }
 
+static void try_start_game(az_title_state_t *state, int slot_index) {
+  if (state->mode == AZ_TMODE_NORMAL) {
+    az_title_start_game(state, slot_index);
+  }
+}
+
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs) {
@@ -85,6 +91,17 @@ az_title_action_t az_title_event_loop(
     az_event_t event;
     while (az_poll_event(&event)) {
       switch (event.kind) {
+        case AZ_EVENT_KEY_DOWN:
+          switch (event.key.name) {
+            case AZ_KEY_1: try_start_game(&state, 0); break;
+            case AZ_KEY_2: try_start_game(&state, 1); break;
+            case AZ_KEY_3: try_start_game(&state, 2); break;
+            case AZ_KEY_4: try_start_game(&state, 3); break;
+            case AZ_KEY_5: try_start_game(&state, 4); break;
+            case AZ_KEY_6: try_start_game(&state, 5); break;
+            default: break;
+          }
+          break;
         case AZ_EVENT_MOUSE_DOWN:
           az_title_on_click(&state, event.mouse.x, event.mouse.y);
           break;

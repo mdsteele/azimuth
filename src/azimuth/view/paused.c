@@ -30,6 +30,11 @@
 
 /*===========================================================================*/
 
+static void set_weapon_box_color(bool selected) {
+  if (selected) glColor3f(1, 1, 1);
+  else glColor3f(1, 0, 1);
+}
+
 static void draw_rect(double x, double y, double w, double h) {
   x += 0.5;
   y += 0.5;
@@ -74,18 +79,23 @@ void az_paused_draw_screen(az_paused_state_t *state) {
   for (int i = 0; i < 8; ++i) {
     const int row = i / 4;
     const int col = i % 4;
+    const az_gun_t gun = AZ_GUN_CHARGE + i;
+    set_weapon_box_color(state->player->gun1 == gun ||
+                         state->player->gun2 == gun);
     draw_rect(185 + 70 * col, 26 + 20 * row, 60, 15);
     if (az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) {
       az_draw_string(8, AZ_ALIGN_CENTER, 215 + 70 * col, 30 + 20 * row,
-                     az_gun_name(AZ_GUN_CHARGE + i));
+                     az_gun_name(gun));
     }
   }
 
+  set_weapon_box_color(state->player->ordnance == AZ_ORDN_ROCKETS);
   draw_rect(470, 26, 150, 15);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 30, "ROCKETS:%3d/%-3d",
                    player->rockets, player->max_rockets);
   }
+  set_weapon_box_color(state->player->ordnance == AZ_ORDN_BOMBS);
   draw_rect(470, 46, 150, 15);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 50, "  BOMBS:%3d/%-3d",
