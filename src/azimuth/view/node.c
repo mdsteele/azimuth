@@ -260,6 +260,44 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         } glPopMatrix();
       }
       break;
+    case AZ_UPG_SHIELD_BATTERY_00:
+    case AZ_UPG_SHIELD_BATTERY_01:
+    case AZ_UPG_SHIELD_BATTERY_02:
+    case AZ_UPG_SHIELD_BATTERY_03:
+    case AZ_UPG_SHIELD_BATTERY_04:
+    case AZ_UPG_SHIELD_BATTERY_05:
+    case AZ_UPG_SHIELD_BATTERY_06:
+    case AZ_UPG_SHIELD_BATTERY_07:
+    case AZ_UPG_SHIELD_BATTERY_08:
+    case AZ_UPG_SHIELD_BATTERY_09:
+    case AZ_UPG_SHIELD_BATTERY_10:
+    case AZ_UPG_SHIELD_BATTERY_11:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(-7, 9); glVertex2f(7, 9);
+        glColor3f(0.45, 0.45, 0.45);
+        glVertex2f(-7, 0); glVertex2f(7, 0);
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(-7, -9); glVertex2f(7, -9);
+      } glEnd();
+      if (frame % 2) glColor3f(0, 1, 0);
+      else glColor3f(0, 0, 1);
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(4, 4); glVertex2f(-4, 4);
+        glVertex2f(-4, 0); glVertex2f(4, 0);
+        glVertex2f(4, -4); glVertex2f(-4, -4);
+      } glEnd();
+      for (int sign = -1; sign <= 1; sign += 2) {
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.15, 0.15, 0.15);
+          glVertex2i(11 * sign, 6); glVertex2i(7 * sign, 9);
+          glColor3f(0.35, 0.35, 0.35);
+          glVertex2i(11 * sign, 0); glVertex2i(7 * sign, 0);
+          glColor3f(0.15, 0.15, 0.15);
+          glVertex2i(11 * sign, -6); glVertex2i(7 * sign, -9);
+        } glEnd();
+      }
+      break;
     // TODO: Draw other upgrade icons.
     default:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
