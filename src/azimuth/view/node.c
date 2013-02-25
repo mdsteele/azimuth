@@ -32,6 +32,29 @@
 
 /*===========================================================================*/
 
+// Helper function for drawing upgrade icons for capacitors and shield
+// batteries.
+static void draw_tank(void) {
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.2, 0.2, 0.2);
+    glVertex2f(-7, 9); glVertex2f(7, 9);
+    glColor3f(0.45, 0.45, 0.45);
+    glVertex2f(-7, 0); glVertex2f(7, 0);
+    glColor3f(0.2, 0.2, 0.2);
+    glVertex2f(-7, -9); glVertex2f(7, -9);
+  } glEnd();
+  for (int sign = -1; sign <= 1; sign += 2) {
+    glBegin(GL_QUAD_STRIP); {
+      glColor3f(0.15, 0.15, 0.15);
+      glVertex2i(11 * sign, 6); glVertex2i(7 * sign, 9);
+      glColor3f(0.35, 0.35, 0.35);
+      glVertex2i(11 * sign, 0); glVertex2i(7 * sign, 0);
+      glColor3f(0.15, 0.15, 0.15);
+      glVertex2i(11 * sign, -6); glVertex2i(7 * sign, -9);
+    } glEnd();
+  }
+}
+
 static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
   const int frame = az_clock_mod(4, 10, clock);
   switch (upgrade) {
@@ -241,6 +264,24 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_UPG_CAPACITOR_00:
+    case AZ_UPG_CAPACITOR_01:
+    case AZ_UPG_CAPACITOR_02:
+    case AZ_UPG_CAPACITOR_03:
+    case AZ_UPG_CAPACITOR_04:
+    case AZ_UPG_CAPACITOR_05:
+      draw_tank();
+      if (frame % 2) glColor3f(0, 0, 0);
+      else glColor3f(0.5, 0, 0.5);
+      glBegin(GL_LINES); {
+        glVertex2f(-8, 0); glVertex2f(-2, 0);
+        glVertex2f(-2, -4); glVertex2f(-2, 4);
+        glVertex2f(3, 4); glVertex2f(1, 1);
+        glVertex2f(1, 1); glVertex2f(1, -1);
+        glVertex2f(1, -1); glVertex2f(3, -4);
+        glVertex2f(1, 0); glVertex2f(8, 0);
+      } glEnd();
+      break;
     case AZ_UPG_QUANTUM_REACTOR:
       for (int i = -1; i <= 1; i += 2) {
         glPushMatrix(); {
@@ -272,14 +313,7 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     case AZ_UPG_SHIELD_BATTERY_09:
     case AZ_UPG_SHIELD_BATTERY_10:
     case AZ_UPG_SHIELD_BATTERY_11:
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.2, 0.2, 0.2);
-        glVertex2f(-7, 9); glVertex2f(7, 9);
-        glColor3f(0.45, 0.45, 0.45);
-        glVertex2f(-7, 0); glVertex2f(7, 0);
-        glColor3f(0.2, 0.2, 0.2);
-        glVertex2f(-7, -9); glVertex2f(7, -9);
-      } glEnd();
+      draw_tank();
       if (frame % 2) glColor3f(0, 1, 0);
       else glColor3f(0, 0, 1);
       glBegin(GL_LINE_STRIP); {
@@ -287,16 +321,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(-4, 0); glVertex2f(4, 0);
         glVertex2f(4, -4); glVertex2f(-4, -4);
       } glEnd();
-      for (int sign = -1; sign <= 1; sign += 2) {
-        glBegin(GL_QUAD_STRIP); {
-          glColor3f(0.15, 0.15, 0.15);
-          glVertex2i(11 * sign, 6); glVertex2i(7 * sign, 9);
-          glColor3f(0.35, 0.35, 0.35);
-          glVertex2i(11 * sign, 0); glVertex2i(7 * sign, 0);
-          glColor3f(0.15, 0.15, 0.15);
-          glVertex2i(11 * sign, -6); glVertex2i(7 * sign, -9);
-        } glEnd();
-      }
       break;
     // TODO: Draw other upgrade icons.
     default:
