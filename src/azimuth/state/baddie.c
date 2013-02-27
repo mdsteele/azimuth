@@ -60,7 +60,8 @@ static az_component_data_t crawling_turret_components[] = {
 };
 
 static const az_vector_t zipper_vertices[] = {
-  {20, 0}, {5, 10}, {-15, 5}, {-15, -5}, {5, -10}
+  {20, 3}, {15, 6}, {10, 7}, {-10, 4}, {-15, 2},
+  {-15, -2}, {-10, -4}, {10, -7}, {15, -6}, {20, -3}
 };
 
 static az_component_data_t atom_components[] = {

@@ -201,14 +201,43 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
       break;
     case AZ_BAD_ZIPPER:
-      glColor3f(flare, 1 - fmax(flare, 0.5 * frozen),
-                0.25 + 0.75 * frozen); // green
-      glBegin(GL_POLYGON); {
-        az_polygon_t polygon = baddie->data->main_body.polygon;
-        for (int i = 0; i < polygon.num_vertices; ++i) {
-          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+      // Body:
+      for (int i = -1; i <= 1; i += 2) {
+        glBegin(GL_QUAD_STRIP); {
+          for (int x = 20; x >= -15; x -= 5) {
+            if (x % 2) glColor3f(0.5 + 0.5 * flare - 0.5 * frozen,
+                                 1 - flare, frozen);
+            else glColor3f(0.4 - 0.4 * frozen, 0.4, frozen);
+            const double y = i * 6.0 * (1 - pow(0.05 * x, 4) + 0.025 * x);
+            glVertex2d(x, 0);
+            glColor3f(0.4 * flare, 0.5, frozen);
+            glVertex2d(x, y);
+          }
+        } glEnd();
+      }
+      // Wings:
+      for (int i = 0; i < 2; ++i) {
+        for (double j = 1.8; j < 4.0; j += 2.0) {
+          glPushMatrix(); {
+            glTranslatef(10, 0, 0);
+            glRotated(j * 6.0 * (1 + az_clock_zigzag(4, 1, clock)),
+                      0, 0, 1);
+            glBegin(GL_QUAD_STRIP); {
+              glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
+              glVertex2f(-2.5, 0);
+              glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
+                        1 - flare, 0.35);
+              glVertex2f(2.5, 0);
+              glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
+              glVertex2f(-4.5, 18);
+              glColor4f(flare, 1 - flare, 1 - flare, 0.35);
+              glVertex2f(4.5, 18);
+              glVertex2f(-1, 21); glVertex2f(1, 21);
+            } glEnd();
+          } glPopMatrix();
         }
-      } glEnd();
+        glScalef(1, -1, 1);
+      }
       break;
     case AZ_BAD_BOUNCER:
       glBegin(GL_TRIANGLE_FAN); {
