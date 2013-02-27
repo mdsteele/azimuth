@@ -494,6 +494,39 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(10, -6); glVertex2f(16, -6);
       } glEnd();
       break;
+    case AZ_DOOD_MACHINE_FAN:
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = 45; i <= 405; i += 90) {
+          const double c = cos(AZ_DEG2RAD(i));
+          const double s = sin(AZ_DEG2RAD(i));
+          glColor3f(0.25, 0.25, 0.25); glVertex2d(45.25 * c, 45.25 * s);
+          glColor3f(0.15, 0.15, 0.15); glVertex2d(55 * c, 55 * s);
+        }
+      } glEnd();
+      glColor3f(0.28, 0.28, 0.28);
+      glBegin(GL_QUADS); {
+        glVertex2f( 32,  32); glVertex2f(-32,  32);
+        glVertex2f(-32, -32); glVertex2f( 32, -32);
+      } glEnd();
+      glColor3f(0.15, 0.15, 0.15);
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < 360; i += 15) {
+          glVertex2d(28 * cos(AZ_DEG2RAD(i)), 28 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glPushMatrix(); {
+        glRotatef(5.0f * az_clock_mod(72, 1, clock), 0, 0, 1);
+        for (int i = 0; i < 5; ++i) {
+          glRotatef(72, 0, 0, 1);
+          glBegin(GL_TRIANGLES); {
+            glColor3f(0.4, 0.4, 0.4);
+            glVertex2f(0, 0); glVertex2f(28, 0);
+            glColor3f(0.2, 0.2, 0.2);
+            glVertex2f(19, 19);
+          } glEnd();
+        }
+      } glPopMatrix();
+      break;
   }
 }
 
