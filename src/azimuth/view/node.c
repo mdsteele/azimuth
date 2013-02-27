@@ -199,33 +199,36 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_UPG_HYPER_ROCKETS:
-      glColor3f(0.5, 0, 0.5); // dark magenta
-      glBegin(GL_QUADS); {
-        const int x = -8 + 3 * frame;
-        glVertex2i(x, (frame >= 2 ? -9 : -10));
-        glVertex2i(x + 4, (frame >= 2 ? -10 : -9));
-        glVertex2i(x + 4, (frame >= 2 ? -3 : -1));
-        glVertex2i(x, (frame >= 2 ? -1 : -3));
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(-4, -8);
-        glVertex2i(-4, 1);
-        glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2i(0, -9);
-        glVertex2i(0, 10);
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(4, -8);
-        glVertex2i(4, 1);
-      } glEnd();
-      glColor3f(0.6, 0, 0.6); // dark magenta
-      glBegin(GL_QUADS); {
-        const int x = 4 - 3 * frame;
-        glVertex2i(x, (frame < 2 ? -9 : -10));
-        glVertex2i(x + 4, (frame < 2 ? -10 : -9));
-        glVertex2i(x + 4, (frame < 2 ? -3 : -1));
-        glVertex2i(x, (frame < 2 ? -1 : -3));
-      } glEnd();
+      glPushMatrix(); {
+        glRotatef(-90, 0, 0, 1);
+        glColor3f(0.5, 0, 0.5); // dark magenta
+        glBegin(GL_QUADS); {
+          const int x = -8 + 3 * frame;
+          glVertex2i(x, (frame >= 2 ? -9 : -10));
+          glVertex2i(x + 4, (frame >= 2 ? -10 : -9));
+          glVertex2i(x + 4, (frame >= 2 ? -3 : -1));
+          glVertex2i(x, (frame >= 2 ? -1 : -3));
+        } glEnd();
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.25, 0.25, 0.25); // dark gray
+          glVertex2i(-4, -8);
+          glVertex2i(-4, 1);
+          glColor3f(0.75, 0.75, 0.75); // light gray
+          glVertex2i(0, -9);
+          glVertex2i(0, 10);
+          glColor3f(0.25, 0.25, 0.25); // dark gray
+          glVertex2i(4, -8);
+          glVertex2i(4, 1);
+        } glEnd();
+        glColor3f(0.6, 0, 0.6); // dark magenta
+        glBegin(GL_QUADS); {
+          const int x = 4 - 3 * frame;
+          glVertex2i(x, (frame < 2 ? -9 : -10));
+          glVertex2i(x + 4, (frame < 2 ? -10 : -9));
+          glVertex2i(x + 4, (frame < 2 ? -3 : -1));
+          glVertex2i(x, (frame < 2 ? -1 : -3));
+        } glEnd();
+      } glPopMatrix();
       break;
     case AZ_UPG_BOMB_AMMO_00:
     case AZ_UPG_BOMB_AMMO_01:

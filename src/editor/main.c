@@ -386,6 +386,28 @@ static void do_mass_rotate(int x, int y, int dx, int dy) {
   }
 }
 
+static void do_rotate_align(bool to_camera) {
+  const double cam_up =
+    (state.spin_camera ? az_vtheta(state.camera) : AZ_HALF_PI);
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+#define ROTATE(obj) do { \
+    AZ_LIST_LOOP(obj, room->obj##s) { \
+      if (!obj->selected) continue; \
+      const double up = (to_camera ? cam_up : az_vtheta(obj->spec.position)); \
+      obj->spec.angle = az_mod2pi(up + AZ_HALF_PI * \
+          ceil(az_mod2pi_nonneg(obj->spec.angle - up + 0.001) / AZ_HALF_PI)); \
+      state.unsaved = true; \
+    } \
+  } while (0)
+
+  ROTATE(baddie);
+  ROTATE(door);
+  ROTATE(gravfield);
+  ROTATE(node);
+  ROTATE(wall);
+#undef ROTATE
+}
+
 static void do_set_camera_bounds(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   az_camera_bounds_t *bounds = &room->camera_bounds;
@@ -989,6 +1011,7 @@ static void event_loop(void) {
               if (event.key.shift) do_move_to_front();
               break;
             case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
+            case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:
               if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
               else state.tool = AZ_TOOL_MOVE;
