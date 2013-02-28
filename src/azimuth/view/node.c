@@ -32,6 +32,18 @@
 
 /*===========================================================================*/
 
+// Helper function for drawing upgrade icons for armor upgrades.
+static void draw_armor(void) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.75, 0.75, 0.75);
+    glVertex2f(0, 0);
+    glColor3f(0.15, 0.15, 0.15);
+    glVertex2f(0, -11); glVertex2f(11, 0);
+    glVertex2f(0, 11); glVertex2f(-11, 0);
+    glVertex2f(0, -11);
+  } glEnd();
+}
+
 // Helper function for drawing upgrade icons for capacitors and shield
 // batteries.
 static void draw_tank(void) {
@@ -265,6 +277,62 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           else glColor3f(0.25, 0.25, 0.25); // dark gray
           glVertex2d(radius * cos(theta), radius * sin(theta));
         }
+      } glEnd();
+      break;
+    case AZ_UPG_CPLUS_DRIVE:
+      glBegin(GL_TRIANGLES); {
+        for (int i = 1; i < 4; ++i) {
+          const float left = 5.0f * ((i + frame) % 4) - 10.0f;
+          glColor4f(0, 1, 0, 0.3f * i);
+          glVertex2f(left, 6); glVertex2f(left, -6);
+          glVertex2f(left + 6, 0);
+        }
+      } glEnd();
+      break;
+    case AZ_UPG_HARDENED_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(0, 0, 1);
+      else glColor3f(0.5, 0.25, 0);
+      glBegin(GL_LINES); {
+        glVertex2f(-6, -8); glVertex2f(-6, 8);
+        glVertex2f(-6, 0); glVertex2f(6, 0);
+        glVertex2f(6, -8); glVertex2f(6, 8);
+      } glEnd();
+      break;
+    case AZ_UPG_THERMAL_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(1, 0, 0);
+      else glColor3f(0, 1, 1);
+      glBegin(GL_LINES); {
+        glVertex2f(-6, 6); glVertex2f(6, 6);
+        glVertex2f(0, 6); glVertex2f(0, -7);
+      } glEnd();
+      break;
+    case AZ_UPG_GRAVITIC_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(0, 0, 1);
+      else glColor3f(0, 0.5, 1);
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(6, 7); glVertex2f(-6, 7); glVertex2f(-6, -7);
+        glVertex2f(6, -7); glVertex2f(6, 0); glVertex2f(0, 0);
+      } glEnd();
+      break;
+    case AZ_UPG_DYNAMIC_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(0, 1, 0);
+      else glColor3f(1, 1, 0);
+      glBegin(GL_LINE_LOOP); {
+        glVertex2f(-6, 7); glVertex2f(-6, -7); glVertex2f(2, -7);
+        glVertex2f(6, -3); glVertex2f(6, 3); glVertex2f(2, 7);
+      } glEnd();
+      break;
+    case AZ_UPG_REACTIVE_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(1, 1, 0);
+      else glColor3f(1, 0, 0);
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(-6, -7); glVertex2f(-6, 7); glVertex2f(6, 7);
+        glVertex2f(6, 0); glVertex2f(-6, 0); glVertex2f(6, -7);
       } glEnd();
       break;
     case AZ_UPG_CAPACITOR_00:
