@@ -765,19 +765,22 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
                                     time / AZ_CPLUS_CHARGE_TIME);
           if (ship->cplus.charge >= 0.5) {
             az_particle_t *particle;
-            if (az_insert_particle(state, &particle)) {
-              particle->kind = AZ_PAR_BOOM;
-              if (ship->cplus.charge == 1.0) {
-                particle->color = (az_color_t){64, 255, 64, 255};
-              } else {
-                particle->color = (az_color_t){128, 128, 128,
-                    255 * (ship->cplus.charge - 0.25)};
+            for (int offset = -30; offset <= 30; offset += 60) {
+              if (az_insert_particle(state, &particle)) {
+                particle->kind = AZ_PAR_EMBER;
+                if (ship->cplus.charge == 1.0) {
+                  particle->color = (az_color_t){64, 160, 64, 255};
+                } else {
+                  particle->color = (az_color_t){128, 128, 128,
+                      255 * (ship->cplus.charge - 0.25)};
+                }
+                particle->position =
+                  az_vadd(ship->position,
+                          az_vpolar(-17.0, ship->angle + AZ_DEG2RAD(offset)));
+                particle->velocity = AZ_VZERO;
+                particle->lifetime = 0.5;
+                particle->param1 = 8.0;
               }
-              particle->position =
-                az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
-              particle->velocity = AZ_VZERO;
-              particle->lifetime = 0.3;
-              particle->param1 = 10;
             }
           }
         }
@@ -815,7 +818,7 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
           ship->velocity = az_vpolar(1000.0, ship->angle);
           az_particle_t *particle;
           if (az_insert_particle(state, &particle)) {
-            particle->kind = AZ_PAR_BOOM;
+            particle->kind = AZ_PAR_EMBER;
             particle->color = (az_color_t){64, 255, 64, 255};
             particle->position =
               az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
