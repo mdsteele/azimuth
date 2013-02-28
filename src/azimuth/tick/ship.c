@@ -134,6 +134,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
 
   // Resolve the collision (if any):
   double damage = 0.0, elasticity = 0.0;
+  bool induce_temp_invincibility = false;
   switch (impact->type) {
     case AZ_IMP_NOTHING: return;
     case AZ_IMP_BADDIE:
@@ -149,8 +150,11 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         if (impact->target.baddie.baddie->frozen == 0.0) {
           ship->tractor_beam.active = false;
           damage = impact->target.baddie.component->impact_damage;
-          if (damage > 0.0 && az_vnonzero(ship->velocity)) {
-            elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+          if (damage > 0.0) {
+            induce_temp_invincibility = true;
+            if (az_vnonzero(ship->velocity)) {
+              elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+            }
           }
         }
       }
@@ -182,6 +186,18 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       break;
   }
 
+  // Update C-plus drive status.
+  if (state->ship.cplus.state == AZ_CPLUS_INACTIVE) {
+    if (state->ship.cplus.charge == 1.0) {
+      state->ship.cplus.state = AZ_CPLUS_READY;
+    } else state->ship.cplus.charge = 0.0;
+  } else if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
+    induce_temp_invincibility = true;
+    state->ship.cplus.state = AZ_CPLUS_INACTIVE;
+    ship->velocity = az_vmul(ship->velocity, 0.3);
+    az_play_sound(&state->soundboard, AZ_SND_CPLUS_IMPACT);
+  }
+
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with whatever we hit).
   if (tractor_node == NULL) {
@@ -205,15 +221,6 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     ship->velocity = az_vmul(ship->velocity, -elasticity);
   }
 
-  // Update C-plus drive status.
-  if (state->ship.cplus.state == AZ_CPLUS_INACTIVE) {
-    if (state->ship.cplus.charge == 1.0) {
-      state->ship.cplus.state = AZ_CPLUS_READY;
-    } else state->ship.cplus.charge = 0.0;
-  } else if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
-    state->ship.cplus.state = AZ_CPLUS_INACTIVE;
-  }
-
   // Put a particle at the impact point and play a sound.
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
@@ -227,7 +234,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
 
   // Damage the ship.
-  az_damage_ship(state, damage, impact->type == AZ_IMP_BADDIE);
+  az_damage_ship(state, damage, induce_temp_invincibility);
 }
 
 /*===========================================================================*/
@@ -761,8 +768,12 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
             ship->cplus.state = AZ_CPLUS_READY;
           } else ship->cplus.charge = 0.0;
         } else {
+          const double old_charge = ship->cplus.charge;
           ship->cplus.charge = fmin(1.0, ship->cplus.charge +
                                     time / AZ_CPLUS_CHARGE_TIME);
+          if (ship->cplus.charge >= 1.0 && old_charge < 1.0) {
+            az_play_sound(&state->soundboard, AZ_SND_CPLUS_CHARGED);
+          }
           if (ship->cplus.charge >= 0.5) {
             az_particle_t *particle;
             for (int offset = -30; offset <= 30; offset += 60) {
@@ -805,6 +816,7 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
             } else ship->cplus.tap_time = AZ_DOUBLE_TAP_TIME;
           }
         }
+        az_loop_sound(&state->soundboard, AZ_SND_CPLUS_READY);
         break;
       case AZ_CPLUS_ACTIVE:
         assert(ship->cplus.charge == 0.0);
@@ -826,6 +838,7 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
             particle->lifetime = 0.3;
             particle->param1 = 20;
           }
+          az_persist_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
         }
         break;
     }

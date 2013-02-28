@@ -268,6 +268,43 @@ static az_sound_entry_t sound_entries[] = {
     .freq_delta_slide = 0.056338,
     .square_duty = 0.40368, .duty_sweep = 0.0140844583511
   },
+  [AZ_SND_CPLUS_ACTIVE] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.2827, .env_punch = 0.61646, .env_decay = 1.0,
+    .start_freq = 0.443661957979, .freq_delta_slide = -0.25352114439,
+    .vibrato_depth = 0.27069, .vibrato_speed = 0.00366,
+    .arp_mod = 0.253521084785, .arp_speed = 0.65505,
+    .repeat_speed = 0.732394337654,
+    .phaser_offset = -0.04278001, .phaser_sweep = -0.112676084042
+  },
+  [AZ_SND_CPLUS_CHARGED] = {
+    .wave_kind = WOBBLE,
+    .env_sustain = 0.6126761, .env_punch = 0.08549776, .env_decay = 0.204225,
+    .start_freq = 0.84507, .freq_slide = 0.00128, .freq_delta_slide = 0.11465,
+    .vibrato_depth = 0.4195169, .vibrato_speed = -0.39,
+    .arp_mod = 0.1044, .arp_speed = -0.5518,
+    .square_duty = 0.189, .duty_sweep = 0.01924883,
+    .phaser_offset = -0.4636848, .phaser_sweep = 0.02882149,
+    .lpf_cutoff = 0.5151533, .lpf_ramp = 0.4815216, .lpf_resonance = 0.312,
+    .hpf_cutoff = 0.6101004, .hpf_ramp = -0.01561149, .volume_adjust = -0.222
+  },
+  [AZ_SND_CPLUS_IMPACT] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.33175, .env_punch = 0.53942, .env_decay = 0.788732409477,
+    .start_freq = 0.1128691, .freq_slide = 0.05820001,
+    .phaser_offset = 0.47598, .phaser_sweep = -0.25746
+  },
+  [AZ_SND_CPLUS_READY] = {
+    .wave_kind = TRIANGLE,
+    .env_sustain = 0.6, .env_punch = 0.1355418,
+    .start_freq = 0.5106531, .freq_delta_slide = 0.5334117,
+    .vibrato_depth = -0.0002874958, .vibrato_speed = -0.161,
+    .arp_mod = 0.9934, .arp_speed = -0.331,
+    .square_duty = 0.8678, .duty_sweep = 0.000924009, .repeat_speed = 0.663,
+    .phaser_offset = 0.0006630559, .phaser_sweep = -0.3438828,
+    .lpf_cutoff = 0.4502442, .lpf_resonance = -0.4142,
+    .hpf_cutoff = 0.0008809352, .hpf_ramp = -0.2542205, .volume_adjust = -0.5
+  },
   [AZ_SND_DOOR_CLOSE] = {
     .wave_kind = WOBBLE,
     .env_sustain = 0.352112680674, .env_decay = 0.12622,
