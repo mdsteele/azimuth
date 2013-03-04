@@ -25,6 +25,12 @@
 
 /*===========================================================================*/
 
+// If the given kind of damage is capable of opening the given door, open the
+// door, running the door's script if necessary and also playing a sound
+// effect.  Otherwise, do nothing.
+void az_try_open_door(az_space_state_t *state, az_door_t *door,
+                      az_damage_flags_t damage_kind);
+
 void az_tick_doors(az_space_state_t *state, double time);
 
 /*===========================================================================*/

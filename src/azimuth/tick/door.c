@@ -19,11 +19,26 @@
 
 #include "azimuth/tick/door.h"
 
+#include <assert.h>
 #include <math.h>
 
 #include "azimuth/state/door.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/script.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
+
+/*===========================================================================*/
+
+void az_try_open_door(az_space_state_t *state, az_door_t *door,
+                      az_damage_flags_t damage_kind) {
+  assert(door->kind != AZ_DOOR_NOTHING);
+  if (!door->is_open && az_can_open_door(door->kind, damage_kind)) {
+    door->is_open = true;
+    az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
+    az_run_script(state, door->on_open);
+  }
+}
 
 /*===========================================================================*/
 

@@ -26,21 +26,12 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/tick/baddie.h" // for az_try_damage_baddie
+#include "azimuth/tick/door.h" // for az_try_open_door
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 
 /*===========================================================================*/
-
-static void try_open_door(az_space_state_t *state, az_door_t *door,
-                          az_damage_flags_t damage_kind) {
-  assert(door->kind != AZ_DOOR_NOTHING);
-  if (az_can_open_door(door->kind, damage_kind) && !door->is_open) {
-    door->is_open = true;
-    az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
-    az_run_script(state, door->on_open);
-  }
-}
 
 // Common projectile impact code, called by both on_projectile_hit_wall and
 // on_projectile_hit_target.
@@ -76,7 +67,7 @@ static void on_projectile_impact(az_space_state_t *state,
       AZ_ARRAY_LOOP(door, state->doors) {
         if (door->kind == AZ_DOOR_NOTHING) continue;
         if (az_circle_touches_door_outside(door, radius, proj->position)) {
-          try_open_door(state, door, proj->data->damage_kind);
+          az_try_open_door(state, door, proj->data->damage_kind);
         }
       }
     }
@@ -159,20 +150,19 @@ static void on_projectile_impact(az_space_state_t *state,
   }
 }
 
-// Called when a projectile hits a wall or a door.  Note that phased
-// projectiles can't ever hit walls, but they _can_ hit doors.
+// Called when a projectile hits a wall or a door.  This should never be called
+// for phased projectiles.
 static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
+  assert(!(proj->data->properties & AZ_PROJF_PHASED));
   on_projectile_impact(state, proj, normal);
   // Shake the screen.
   const double shake = proj->data->impact_shake;
   if (shake > 0.0) {
     az_shake_camera(&state->camera, shake, shake * 0.75);
   }
-  // Remove the projectile.  Note that we don't often call
-  // on_projectile_hit_wall for phased projectiles, but when we do (e.g. for
-  // hitting closed doors) we still want to remove the projetile.
+  // Remove the projectile.
   proj->kind = AZ_PROJ_NOTHING;
 }
 
@@ -414,10 +404,25 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     az_impact_flags_t skip_types =
       (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
     if (proj->data->properties & AZ_PROJF_PHASED) {
-      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
+      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE | AZ_IMPF_DOOR_OUTSIDE;
     }
-    az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
-                  skip_types, proj->last_hit_uid, &impact);
+    const az_vector_t delta = az_vmul(proj->velocity, time);
+    az_ray_impact(state, proj->position, delta, skip_types, proj->last_hit_uid,
+                  &impact);
+
+    // If this is a phased projectile fired by the ship, also hit all doors
+    // along the way.
+    if (!proj->fired_by_enemy &&
+        (proj->data->properties & AZ_PROJF_PHASED)) {
+      assert(impact.type != AZ_IMP_DOOR_OUTSIDE);
+      AZ_ARRAY_LOOP(door, state->doors) {
+        if (door->kind == AZ_DOOR_NOTHING) continue;
+        if (az_ray_hits_door_outside(door, proj->position, delta,
+                                     NULL, NULL)) {
+          az_try_open_door(state, door, proj->data->damage_kind);
+        }
+      }
+    }
   }
 
   // Move the projectile:
@@ -439,7 +444,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       break;
     case AZ_IMP_DOOR_OUTSIDE:
       if (!proj->fired_by_enemy) {
-        try_open_door(state, impact.target.door, proj->data->damage_kind);
+        az_try_open_door(state, impact.target.door, proj->data->damage_kind);
       }
       on_projectile_hit_wall(state, proj, impact.normal);
       break;

@@ -31,6 +31,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h" // for az_try_damage_baddie
+#include "azimuth/tick/door.h" // for az_try_open_door
 #include "azimuth/tick/gravfield.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/util/color.h"
@@ -354,14 +355,25 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     az_impact_t impact;
     az_impact_flags_t skip_types = AZ_IMPF_SHIP;
     if (minor == AZ_GUN_PHASE) {
-      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE;
+      skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE | AZ_IMPF_DOOR_OUTSIDE;
     } else if (minor == AZ_GUN_PIERCE) skip_types |= AZ_IMPF_BADDIE;
     az_ray_impact(state, beam_start,
                   az_vpolar(2.5 * AZ_SCREEN_RADIUS, beam_angle),
                   skip_types, AZ_SHIP_UID, &impact);
 
-    // If this is a PIERCE beam, hit all baddies along the beam.
-    if (minor == AZ_GUN_PIERCE) {
+    // If this is a PHASE beam, hit all doors along the beam.
+    if (minor == AZ_GUN_PHASE) {
+      assert(impact.type != AZ_IMP_DOOR_OUTSIDE);
+      const az_vector_t delta = az_vsub(impact.position, beam_start);
+      AZ_ARRAY_LOOP(door, state->doors) {
+        if (door->kind == AZ_DOOR_NOTHING) continue;
+        if (az_ray_hits_door_outside(door, beam_start, delta, NULL, NULL)) {
+          az_try_open_door(state, door, damage_kind);
+        }
+      }
+    }
+    // Or, if this is a PIERCE beam, hit all baddies along the beam.
+    else if (minor == AZ_GUN_PIERCE) {
       assert(impact.type != AZ_IMP_BADDIE);
       const az_vector_t delta = az_vsub(impact.position, beam_start);
       AZ_ARRAY_LOOP(baddie, state->baddies) {
@@ -408,11 +420,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         break;
       case AZ_IMP_DOOR_INSIDE: did_hit = false; break;
       case AZ_IMP_DOOR_OUTSIDE:
-        assert(!impact.target.door->is_open);
-        if (az_can_open_door(impact.target.door->kind, damage_kind)) {
-          impact.target.door->is_open = true;
-          az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
-        }
+        az_try_open_door(state, impact.target.door, damage_kind);
         break;
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
       case AZ_IMP_WALL:
