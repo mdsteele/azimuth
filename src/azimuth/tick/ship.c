@@ -52,8 +52,6 @@
 #define AZ_BOMBS_PER_MEGA_BOMB 5
 // How long it takes the ship's shield flare to die down, in seconds:
 #define AZ_SHIP_SHIELD_FLARE_TIME 0.5
-// The radius of the ship for purposes of collisions with e.g. walls:
-#define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 // Wall elasticity for closed doors:
 #define AZ_DOOR_ELASTICITY 0.5
 // The max time, in seconds, between key taps to count as a double-tap:

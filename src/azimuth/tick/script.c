@@ -269,7 +269,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_UID(AZ_UUID_DOOR, &uid);
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE) {
+            if (door->kind == AZ_DOOR_PASSAGE ||
+                door->kind == AZ_DOOR_FORCEFIELD) {
               SCRIPT_ERROR("wrong door kind");
             }
             door->kind = AZ_DOOR_LOCKED;
@@ -286,7 +287,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_UID(AZ_UUID_DOOR, &uid);
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE) {
+            if (door->kind == AZ_DOOR_PASSAGE ||
+                door->kind == AZ_DOOR_FORCEFIELD) {
               SCRIPT_ERROR("wrong door kind");
             }
             door->kind = AZ_DOOR_NORMAL;

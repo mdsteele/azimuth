@@ -23,12 +23,13 @@
 
 #include "azimuth/state/door.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
 // Draw a single door.  The GL matrix should be at the camera position.
 // Passages _will_ be drawn (schematically).
-void az_draw_door(const az_door_t *door);
+void az_draw_door(const az_door_t *door, az_clock_t clock);
 
 // Draw all doors.  The GL matrix should be at the camera position.  Passages
 // will not be drawn (they are invisible).

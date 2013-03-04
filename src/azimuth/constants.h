@@ -79,6 +79,8 @@
 #define AZ_SHIP_BASE_RECHARGE_RATE 75.0
 // How fast the ship accelerates with normal thrusters, in pixels/second^2:
 #define AZ_SHIP_BASE_THRUST_ACCEL 500.0
+// The radius of the ship for purposes of collisions with e.g. walls:
+#define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 // How fast the ship can turn, in radians/second:
 #define AZ_SHIP_TURN_RATE 5.0
 // Max range of tractor beam, in pixels:

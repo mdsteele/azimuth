@@ -50,7 +50,17 @@ static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
   if (door->is_open) {
     door->openness = fmin(1.0, door->openness + delta);
   } else {
+    const double old_openness = door->openness;
     door->openness = fmax(0.0, door->openness - delta);
+    // Don't allow the door to completely close while the ship is still in it;
+    // if the reduction to door->openness we just made causes the door
+    // collision functions to count the ship as suddently now intersecting the
+    // door, then revert the change we just made to door->openness.
+    if (az_ship_is_present(&state->ship) &&
+        az_circle_touches_door_outside(door, AZ_SHIP_DEFLECTOR_RADIUS,
+                                       state->ship.position)) {
+      door->openness = old_openness;
+    }
   }
 }
 

@@ -248,12 +248,14 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .position = editor_door->spec.position,
       .angle = editor_door->spec.angle
     };
-    az_draw_door(&real_door);
+    az_draw_door(&real_door, state->clock);
     glPushMatrix(); {
       camera_to_screen_orient(state, real_door.position);
-      glColor3f(0, 0, 1); // blue
-      az_draw_printf(16, AZ_ALIGN_CENTER, 0, -7, "%03d",
-                     editor_door->spec.destination);
+      if (editor_door->spec.kind != AZ_DOOR_FORCEFIELD) {
+        glColor3f(0, 0, 1); // blue
+        az_draw_printf(16, AZ_ALIGN_CENTER, 0, -7, "%03d",
+                       editor_door->spec.destination);
+      }
       if (editor_door->spec.on_open != NULL) {
         glColor3f(0.75, 0, 1); // purple
         az_draw_string(8, AZ_ALIGN_CENTER, 0, -15, "$");
@@ -287,6 +289,7 @@ static void draw_room_minimap(az_editor_state_t *state,
         case AZ_DOOR_BOMB: glColor3f(0, 0, 1); break;
         case AZ_DOOR_MEGA_BOMB: glColor3f(0, 1, 1); break;
         case AZ_DOOR_PASSAGE: glColor3f(0, 1, 0); break;
+        case AZ_DOOR_FORCEFIELD: continue; // don't draw
       }
       glPushMatrix(); {
         glTranslated(editor_door->spec.position.x,
