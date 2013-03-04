@@ -22,6 +22,7 @@
 
 #include <SDL/SDL.h> // for main() renaming
 
+#include "azimuth/control/gameover.h"
 #include "azimuth/control/space.h"
 #include "azimuth/control/title.h"
 #include "azimuth/gui/audio.h"
@@ -121,8 +122,16 @@ int main(int argc, char **argv) {
         }
         break;
       case AZ_CONTROLLER_GAME_OVER:
-        // TODO: Implement a game over screen.
-        controller = AZ_CONTROLLER_TITLE;
+        switch (az_gameover_event_loop()) {
+          case AZ_GOA_TRY_AGAIN:
+            controller = AZ_CONTROLLER_SPACE;
+            break;
+          case AZ_GOA_RETURN_TO_TITLE:
+            controller = AZ_CONTROLLER_TITLE;
+            break;
+          case AZ_GOA_QUIT:
+            return EXIT_SUCCESS;
+        }
         break;
     }
   }
