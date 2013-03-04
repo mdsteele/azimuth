@@ -231,6 +231,38 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         break;
       // Doors:
+      case AZ_OP_OPEN:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_DOOR, &uid);
+          az_door_t *door;
+          if (az_lookup_door(state, uid, &door)) {
+            if (door->kind == AZ_DOOR_PASSAGE) {
+              SCRIPT_ERROR("wrong door kind");
+            }
+            if (!door->is_open) {
+              az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
+              door->is_open = true;
+            }
+          }
+        }
+        break;
+      case AZ_OP_CLOSE:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_DOOR, &uid);
+          az_door_t *door;
+          if (az_lookup_door(state, uid, &door)) {
+            if (door->kind == AZ_DOOR_PASSAGE) {
+              SCRIPT_ERROR("wrong door kind");
+            }
+            if (door->is_open) {
+              az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+              door->is_open = false;
+            }
+          }
+        }
+        break;
       case AZ_OP_LOCK:
         {
           az_uid_t uid;
@@ -238,10 +270,13 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
             if (door->kind == AZ_DOOR_PASSAGE) {
-              SCRIPT_ERROR("cannot lock passage");
+              SCRIPT_ERROR("wrong door kind");
             }
             door->kind = AZ_DOOR_LOCKED;
-            door->is_open = false;
+            if (door->is_open) {
+              az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+              door->is_open = false;
+            }
           }
         }
         break;
@@ -252,7 +287,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
             if (door->kind == AZ_DOOR_PASSAGE) {
-              SCRIPT_ERROR("cannot unlock passage");
+              SCRIPT_ERROR("wrong door kind");
             }
             door->kind = AZ_DOOR_NORMAL;
           }

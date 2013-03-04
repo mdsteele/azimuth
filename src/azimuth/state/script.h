@@ -47,6 +47,8 @@ typedef enum {
   AZ_OP_UNBAD, // remove baddie i
   AZ_OP_BOSS, // designate baddie i as the current boss
   // Doors:
+  AZ_OP_OPEN, // open door i (but don't run its script)
+  AZ_OP_CLOSE, // close door i
   AZ_OP_LOCK, // close and lock door i
   AZ_OP_UNLOCK, // unlock (but do not open) door i
   // Gravfields:
