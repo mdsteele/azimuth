@@ -70,18 +70,18 @@ bool az_circle_touches_door_outside(
     const az_door_t *door, double radius, az_vector_t center);
 
 // Determine if a ray, travelling delta from start, will hit the exterior of
-// the door (this is possible only for closed doors).  If it does, stores the
-// intersection point in *point_out (if point_out is non-NULL) and the normal
-// vector in *normal_out (if normal_out is non-NULL).
+// the door.  If it does, stores the intersection point in *point_out (if
+// point_out is non-NULL) and the normal vector in *normal_out (if normal_out
+// is non-NULL).
 bool az_ray_hits_door_outside(
     const az_door_t *door, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out);
 
 // Determine if a circle with the given radius, travelling delta from start,
-// will hit the exterior of the door (this is possible only for closed doors).
-// If it does, the function stores in *pos_out the earliest position of the
-// circle at which it touches the door (if pos_out is non-NULL) and in
-// *impact_out the point of intersection (if impact_out is non-NULL).
+// will hit the exterior of the door.  If it does, the function stores in
+// *pos_out the earliest position of the circle at which it touches the door
+// (if pos_out is non-NULL) and in *impact_out the point of intersection (if
+// impact_out is non-NULL).
 bool az_circle_hits_door_outside(
     const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out);
