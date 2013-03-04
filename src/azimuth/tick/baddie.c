@@ -189,12 +189,13 @@ static void drift_towards_ship(
 static void fly_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double turn_rate, double max_speed, double forward_accel,
-    double lateral_decel_rate, double attack_range) {
+    double lateral_decel_rate, double attack_range, double ship_coeff) {
   const double backward_accel = 80.0;
   const az_vector_t drift =
     (baddie->cooldown > 1.0 ?
      force_field(state, baddie, -100.0, 0.0, 500.0, 100.0, 200.0) :
-     force_field(state, baddie, 100.0, attack_range, 1000.0, 100.0, 200.0));
+     force_field(state, baddie, ship_coeff, attack_range, 1000.0, 100.0,
+                 200.0));
   const double goal_theta =
     az_vtheta(baddie->cooldown <= 0.0 &&
               az_vwithin(baddie->position, state->ship.position, 120.0) ?
@@ -376,7 +377,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_NIGHTBUG:
-      fly_towards_ship(state, baddie, time, 3.0, 40.0, 100.0, 20.0, 100.0);
+      fly_towards_ship(state, baddie, time,
+                       3.0, 40.0, 100.0, 20.0, 100.0, 100.0);
       if (baddie->state == 0) {
         baddie->param = fmax(0.0, baddie->param - time / 3.5);
         if (baddie->cooldown < 0.5 &&
@@ -524,7 +526,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_DRAGONFLY:
-      fly_towards_ship(state, baddie, time, 5.0, 300.0, 300.0, 200.0, 0.0);
+      fly_towards_ship(state, baddie, time,
+                       5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
       if (az_ship_is_present(&state->ship) &&
           state->ship.temp_invincibility > 0.0) {
         baddie->cooldown = 2.0;
@@ -552,6 +555,32 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
                         baddie->components[0].angle, 0.0);
         baddie->cooldown = 1.5;
+      }
+      break;
+    case AZ_BAD_STINGER:
+      // Fire (when the ship is behind us):
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI, 0.0);
+        baddie->cooldown = 0.5;
+      }
+      // Chase ship if state 0, flee in state 1:
+      fly_towards_ship(state, baddie, time, 8.0, 200.0, 300.0, 200.0,
+                       0.0, (baddie->state == 0 ? 100.0 : -100.0));
+      // Switch from state 0 to state 1 if we're close to the ship; switch from
+      // state 1 to state 0 if we're far from the ship.
+      if (baddie->state == 0) {
+        if (az_ship_is_present(&state->ship) &&
+            az_vwithin(state->ship.position, baddie->position, 200.0)) {
+          baddie->state = 1;
+        }
+      } else {
+        assert(baddie->state == 1);
+        if (!az_ship_is_present(&state->ship) ||
+            !az_vwithin(state->ship.position, baddie->position, 400.0)) {
+          baddie->state = 0;
+        }
       }
       break;
     case AZ_BAD_BOX:

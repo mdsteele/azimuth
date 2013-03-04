@@ -133,7 +133,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_ZIPPER] = {
     .max_health = 20.0, .potential_pickups = AZ_PUPF_ALL,
-    .color = {0, 255, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .color = {0, 255, 0, 255}, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
                    .impact_damage = 10.0 }
   },
@@ -234,6 +234,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(crawling_turret_components)
+  },
+  [AZ_BAD_STINGER] = {
+    .max_health = 8.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .color = {192, 192, 0, 255}, .death_sound = AZ_SND_KILL_DRAGONFLY,
+    .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
+                   .impact_damage = 5.0 }
   }
 };
 

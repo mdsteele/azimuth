@@ -329,6 +329,11 @@ static const az_proj_data_t proj_data[] = {
     .speed = 200.0,
     .lifetime = 4.0,
     .impact_damage = 8.0
+  },
+  [AZ_PROJ_STINGER] = {
+    .speed = 450.0,
+    .lifetime = 2.0,
+    .impact_damage = 6.0
   }
 };
 
