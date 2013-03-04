@@ -46,22 +46,22 @@ bool az_try_damage_baddie(
   // If the damage is zero, we can quit early.
   if (damage_amount <= 0.0) return false;
 
-  // Determine if the baddie is susceptible to this kind of damage; if not,
-  // quit early.
-  {
-    az_damage_flags_t modified_damage_kind = damage_kind;
-    modified_damage_kind &= ~AZ_DMGF_FREEZE;
-    if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-    if (!(modified_damage_kind & ~(component->immunities))) return false;
+  // Determine if the baddie is susceptible to this kind of damage; if so,
+  // damage the baddie.
+  bool damage_was_dealt = false;
+  az_damage_flags_t modified_damage_kind = damage_kind;
+  modified_damage_kind &= ~AZ_DMGF_FREEZE;
+  if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
+  if (modified_damage_kind & ~(component->immunities)) {
+    baddie->armor_flare = 1.0;
+    baddie->health -= damage_amount;
+    damage_was_dealt = true;
   }
-
-  // Damage the baddie.
-  baddie->armor_flare = 1.0;
-  baddie->health -= damage_amount;
 
   // If this was enough to kill the baddie, remove it and add debris/pickups in
   // its place.
   if (baddie->health <= 0.0) {
+    assert(damage_was_dealt);
     az_play_sound(&state->soundboard, baddie->data->death_sound);
     // Add particles for baddie debris:
     const double radius = baddie->data->overall_bounding_radius;
@@ -100,14 +100,18 @@ bool az_try_damage_baddie(
     baddie->kind = AZ_BAD_NOTHING;
     az_run_script(state, script);
   }
-  // Otherwise, if this was enough to freeze the baddie, and the damage kind
-  // includes AZ_DMGF_FREEZE, freeze the baddie.
+  // Otherwise, if (1) the damage kind includes AZ_DMGF_FREEZE, (2) the baddie
+  // is susceptible to being frozen, and (3) the baddie's health is low enough
+  // for it to be frozen, freeze the baddie (even if the baddie didn't actually
+  // take any damage from this hit).
   else if ((damage_kind & AZ_DMGF_FREEZE) &&
            !(component->immunities & AZ_DMGF_FREEZE) &&
-           baddie->health <= AZ_BADDIE_FREEZE_THRESHOLD) {
+           baddie->health <=
+           fmax(damage_amount, 1.0) * AZ_BADDIE_FREEZE_THRESHOLD) {
     baddie->frozen = 1.0;
   }
-  return true;
+
+  return damage_was_dealt;
 }
 
 /*===========================================================================*/
