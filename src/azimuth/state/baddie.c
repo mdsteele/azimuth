@@ -114,6 +114,13 @@ static const az_vector_t crawler_vertices[] = {
   {10, -8}, {10, 8}, {-2, 18}, {-15, 10}, {-15, -10}, {-2, -18}
 };
 
+static const az_vector_t beam_sensor_casing_vertices[] = {
+  {4, 0}, {10, 12}, {10, 20}, {-20, 20}, {-20, -20}, {10, -20}, {10, -12}
+};
+static az_component_data_t beam_sensor_components[] = {
+  { .polygon = AZ_INIT_POLYGON(beam_sensor_casing_vertices), .immunities = ~0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -241,6 +248,13 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {192, 192, 0, 255}, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 5.0 }
+  },
+  [AZ_BAD_BEAM_SENSOR] = {
+    .max_health = 1000000.0, .overall_bounding_radius = 30.0,
+    .potential_pickups = AZ_PUPF_NOTHING,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
+    DECL_COMPONENTS(beam_sensor_components)
   }
 };
 

@@ -596,6 +596,27 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glScalef(1, -1, 1);
       }
       break;
+    case AZ_BAD_BEAM_SENSOR:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.25 + 0.5 * flare, 0.5); // reddish
+        glVertex2f(8, 0);
+        glColor3f(0.25, 0.5 * flare, 0.5 * flare); // dark red
+        const double radius = baddie->data->main_body.bounding_radius;
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.5, 0.5, 0.5);
+        glVertex2f(-5, 0);
+        glColor3f(0.2, 0.2, 0.2);
+        const az_component_data_t *component = &baddie->data->components[0];
+        for (int i = 0, j = component->polygon.num_vertices; i >= 0; i = --j) {
+          const az_vector_t vertex = component->polygon.vertices[i];
+          glVertex2d(vertex.x, vertex.y);
+        }
+      } glEnd();
+      break;
   }
 }
 

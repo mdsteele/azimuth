@@ -501,8 +501,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           const az_component_data_t *component;
           if (az_ray_hits_baddie(other, beam_start, beam_delta,
                                  NULL, NULL, &component)) {
-            az_try_damage_baddie(state, other, component, AZ_DMGF_PIERCE,
-                                 beam_damage);
+            az_try_damage_baddie(state, other, component,
+                                 (AZ_DMGF_PIERCE | AZ_DMGF_BEAM), beam_damage);
           }
         }
         // Add particles for the beam.
@@ -586,6 +586,20 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->state = 0;
         }
       }
+      break;
+    case AZ_BAD_BEAM_SENSOR:
+      if (baddie->state == 0) {
+        if (baddie->health < baddie->data->max_health) {
+          baddie->state = 1;
+          az_run_script(state, baddie->on_kill);
+        }
+      } else {
+        assert(baddie->state == 1);
+        if (baddie->health >= baddie->data->max_health) {
+          baddie->state = 0;
+        }
+      }
+      baddie->health = fmax(baddie->health, baddie->data->max_health - 1);
       break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:

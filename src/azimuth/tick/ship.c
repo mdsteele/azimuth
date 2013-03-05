@@ -306,7 +306,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
   }
   ship->player.energy -= energy_cost;
 
-  az_damage_flags_t damage_kind = AZ_DMGF_NORMAL;
+  az_damage_flags_t damage_kind = AZ_DMGF_BEAM;
   if (minor == AZ_GUN_FREEZE) damage_kind |= AZ_DMGF_FREEZE;
   else if (minor == AZ_GUN_PIERCE) damage_kind |= AZ_DMGF_PIERCE;
 
