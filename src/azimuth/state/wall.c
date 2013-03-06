@@ -80,6 +80,12 @@ static az_vector_t wall_vertices_14[] = {
   {-70, -37}, {-50, -32}, {-10, -41}, {50, -31}, {100, -34}, {106, -3},
   {100, 35}, {64, 41}
 };
+static az_vector_t wall_vertices_18[] = {
+  {0, 30}, {-8, 28}, {0, -30}, {8, 28}
+};
+static az_vector_t wall_vertices_19[] = {
+  {0, 20}, {-6, 18}, {0, -20}, {6, 18}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -207,6 +213,20 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {90, 255, 255, 160}, .color2 = {16, 32, 48, 224},
     .elasticity = 0.2, .impact_damage_coeff = 5.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_11)
+  },
+  // Large icicle:
+  [18] = {
+    .style = AZ_WSTY_ALT_BEZEL_21, .bezel = 1000.0,
+    .color1 = {90, 255, 255, 120}, .color2 = {16, 32, 48, 168},
+    .elasticity = 0.2, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_18)
+  },
+  // Small icicle:
+  [19] = {
+    .style = AZ_WSTY_ALT_BEZEL_21, .bezel = 1000.0,
+    .color1 = {90, 255, 255, 120}, .color2 = {16, 32, 48, 168},
+    .elasticity = 0.2, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_19)
   }
 };
 
