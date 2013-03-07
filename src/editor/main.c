@@ -414,21 +414,37 @@ static void do_set_camera_bounds(int x, int y) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   const double new_r = az_vnorm(pt);
   const double new_theta = az_vtheta(pt);
+  const double threshold = 20.0 * state.zoom_level;
   // Update r-bounds:
   if (new_r < bounds->min_r + 0.5 * bounds->r_span) {
     bounds->r_span += bounds->min_r - new_r;
     bounds->min_r = new_r;
+    if (bounds->r_span <= threshold) {
+      bounds->min_r += bounds->r_span;
+      bounds->r_span = 0.0;
+    }
   } else {
     bounds->r_span = new_r - bounds->min_r;
+    if (bounds->r_span <= threshold) {
+      bounds->r_span = 0.0;
+    }
   }
   // Update theta-bounds:
   if (az_mod2pi(new_theta -
                 (bounds->min_theta + 0.5 * bounds->theta_span)) < 0.0) {
     bounds->theta_span += az_mod2pi(bounds->min_theta - new_theta);
     bounds->min_theta = new_theta;
+    if (bounds->theta_span < AZ_HALF_PI &&
+        new_r * sin(bounds->theta_span) <= threshold) {
+      bounds->min_theta = az_mod2pi(bounds->min_theta + bounds->theta_span);
+      bounds->theta_span = 0.0;
+    }
   } else {
-    bounds->theta_span = az_mod2pi(new_theta - bounds->min_theta);
-    if (bounds->theta_span < 0.0) bounds->theta_span += AZ_TWO_PI;
+    bounds->theta_span = az_mod2pi_nonneg(new_theta - bounds->min_theta);
+    if (bounds->theta_span < AZ_HALF_PI &&
+        new_r * sin(bounds->theta_span) <= threshold) {
+      bounds->theta_span = 0.0;
+    }
   }
   // Verify that the new camera bounds are still valid:
   assert(bounds->min_r >= 0.0);

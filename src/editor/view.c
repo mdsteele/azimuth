@@ -43,7 +43,9 @@
 
 static void arc_vertices(double r, double start_theta, double end_theta) {
   const double diff = end_theta - start_theta;
+  if (diff == 0.0) return;
   const double step = copysign(fmin(0.1, fabs(diff) * 0.05), diff);
+  assert(step != 0.0);
   for (double theta = start_theta;
        (theta < end_theta) == (start_theta < end_theta); theta += step) {
     glVertex2d(r * cos(theta), r * sin(theta));
