@@ -50,7 +50,8 @@ typedef struct {
 
 bool az_load_planet(const char *resource_dir, az_planet_t *planet_out);
 
-bool az_save_planet(const az_planet_t *planet, const char *resource_dir);
+bool az_save_planet(const az_planet_t *planet, const char *resource_dir,
+                    const az_room_key_t *rooms_to_save, int num_rooms_to_save);
 
 // Delete the data arrays owned by a planet (but not the planet object itself).
 void az_destroy_planet(az_planet_t *planet);

@@ -83,6 +83,7 @@ typedef struct {
 
 typedef struct {
   bool selected;
+  bool unsaved; // true if this room currently has unsaved changes
   int zone_index;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
@@ -96,7 +97,7 @@ typedef struct {
 typedef struct {
   az_clock_t clock;
   double total_time;
-  bool unsaved; // true if we currently have unsaved changes
+  bool unsaved; // true if _anything_ currently has unsaved changes
   bool spin_camera;
   az_vector_t camera;
   double zoom_level;

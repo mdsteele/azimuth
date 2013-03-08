@@ -251,15 +251,18 @@ static bool save_planet_header(const az_planet_t *planet,
   return success;
 }
 
-bool az_save_planet(const az_planet_t *planet, const char *resource_dir) {
+bool az_save_planet(
+    const az_planet_t *planet, const char *resource_dir,
+    const az_room_key_t *rooms_to_save, int num_rooms_to_save) {
   assert(planet != NULL);
   assert(resource_dir != NULL);
   const size_t dirlen = strlen(resource_dir);
   char path_buffer[dirlen + 20u];
 
-  for (int i = 0; i < planet->num_rooms; ++i) {
-    sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, i);
-    if (!az_save_room_to_file(&planet->rooms[i], path_buffer)) return false;
+  for (int i = 0; i < num_rooms_to_save; ++i) {
+    const int key = rooms_to_save[i];
+    sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, key);
+    if (!az_save_room_to_file(&planet->rooms[key], path_buffer)) return false;
   }
 
   sprintf(path_buffer, "%s/rooms/planet.txt", resource_dir);

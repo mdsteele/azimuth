@@ -516,8 +516,11 @@ static void draw_hud(az_editor_state_t* state) {
     glColor3f(1, 0.5, 0); // orange
     glBegin(GL_TRIANGLES); {
       glVertex2f(5, 5); glVertex2f(5, 15); glVertex2f(15, 5);
+      if (room->unsaved) {
+        glVertex2f(10, 10); glVertex2f(10, 15); glVertex2f(15, 10);
+      }
     } glEnd();
-  }
+  } else assert(!room->unsaved);
 
   // Draw the text box:
   if (state->text.action != AZ_ETA_NOTHING) {

@@ -44,6 +44,11 @@
 
 static az_editor_state_t state;
 
+static void set_room_unsaved(az_editor_room_t *room) {
+  room->unsaved = true;
+  state.unsaved = true;
+}
+
 static void deselect_all_rooms(void) {
   AZ_LIST_LOOP(room, state.planet.rooms) {
     room->selected = false;
@@ -90,7 +95,7 @@ static void add_new_room(void) {
     .theta_span = theta_span
   };
   state.current_room = room_key;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void select_all(az_editor_room_t *room, bool selected) {
@@ -221,27 +226,27 @@ static void do_move(int x, int y, int dx, int dy) {
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     baddie->spec.position = az_vadd(baddie->spec.position, delta);
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.position = az_vadd(door->spec.position, delta);
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
     gravfield->spec.position = az_vadd(gravfield->spec.position, delta);
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
     node->spec.position = az_vadd(node->spec.position, delta);
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
     wall->spec.position = az_vadd(wall->spec.position, delta);
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
 }
 
@@ -300,8 +305,8 @@ static void do_mass_move(int x, int y, int dx, int dy) {
       camera_bounds->theta_span = new_span;
     }
     assert(camera_bounds->theta_span >= 0.0);
+    set_room_unsaved(room);
   }
-  state.unsaved = true;
 }
 
 static void rotate_around(az_vector_t *vec, az_vector_t around, double theta) {
@@ -358,7 +363,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   ROTATE(node);
   ROTATE(wall);
 #undef ROTATE
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_mass_rotate(int x, int y, int dx, int dy) {
@@ -382,7 +387,7 @@ static void do_mass_rotate(int x, int y, int dx, int dy) {
     ROTATE(node);
     ROTATE(wall);
 #undef ROTATE
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
 }
 
@@ -396,7 +401,7 @@ static void do_rotate_align(bool to_camera) {
       const double up = (to_camera ? cam_up : az_vtheta(obj->spec.position)); \
       obj->spec.angle = az_mod2pi(up + AZ_HALF_PI * \
           ceil(az_mod2pi_nonneg(obj->spec.angle - up + 0.001) / AZ_HALF_PI)); \
-      state.unsaved = true; \
+      set_room_unsaved(room); \
     } \
   } while (0)
 
@@ -453,7 +458,7 @@ static void do_set_camera_bounds(int x, int y) {
   assert(bounds->min_theta <= AZ_PI);
   assert(bounds->theta_span >= 0.0);
   assert(bounds->theta_span <= AZ_TWO_PI);
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_add_baddie(int x, int y) {
@@ -465,7 +470,7 @@ static void do_add_baddie(int x, int y) {
   baddie->spec.kind = state.brush.baddie_kind;
   baddie->spec.position = pt;
   baddie->spec.angle = state.brush.angle;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_add_door(int x, int y) {
@@ -478,7 +483,7 @@ static void do_add_door(int x, int y) {
   door->spec.position = pt;
   door->spec.angle = state.brush.angle;
   door->spec.destination = state.current_room;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_add_gravfield(int x, int y) {
@@ -495,7 +500,7 @@ static void do_add_gravfield(int x, int y) {
   gravfield->spec.size.trapezoid.front_semiwidth = 50.0;
   gravfield->spec.size.trapezoid.rear_semiwidth = 100.0;
   gravfield->spec.size.trapezoid.semilength = 100.0;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_add_node(int x, int y) {
@@ -513,7 +518,7 @@ static void do_add_node(int x, int y) {
   }
   node->spec.position = pt;
   node->spec.angle = state.brush.angle;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_add_wall(int x, int y) {
@@ -526,7 +531,7 @@ static void do_add_wall(int x, int y) {
   wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
   wall->spec.position = pt;
   wall->spec.angle = state.brush.angle;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void do_remove(void) {
@@ -536,7 +541,7 @@ static void do_remove(void) {
     AZ_LIST_INIT(temp_##obj##s, 2); \
     AZ_LIST_LOOP(obj, room->obj##s) { \
       if (!obj->selected) *AZ_LIST_ADD(temp_##obj##s) = *obj; \
-      else state.unsaved = true; \
+      else set_room_unsaved(room); \
     } \
     AZ_LIST_SWAP(temp_##obj##s, room->obj##s); \
     AZ_LIST_DESTROY(temp_##obj##s); \
@@ -573,7 +578,7 @@ static void do_partition(bool front) {
   PARTITION(node);
   PARTITION(wall);
 #undef PARTITION
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 static void do_move_to_back(void) { do_partition(false); }
 static void do_move_to_front(void) { do_partition(true); }
@@ -586,7 +591,7 @@ static void do_change_data(int delta, bool secondary) {
       az_modulo((int)baddie->spec.kind - 1 + delta, AZ_NUM_BADDIE_KINDS) + 1;
     baddie->spec.kind = new_kind;
     state.brush.baddie_kind = new_kind;
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
@@ -594,7 +599,7 @@ static void do_change_data(int delta, bool secondary) {
       az_modulo((int)door->spec.kind - 1 + delta, AZ_NUM_DOOR_KINDS) + 1;
     door->spec.kind = new_kind;
     state.brush.door_kind = new_kind;
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
@@ -603,7 +608,7 @@ static void do_change_data(int delta, bool secondary) {
                 AZ_NUM_GRAVFIELD_KINDS) + 1;
     gravfield->spec.kind = new_kind;
     state.brush.gravfield_kind = new_kind;
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
@@ -630,7 +635,7 @@ static void do_change_data(int delta, bool secondary) {
         node->spec.subkind.doodad = state.brush.doodad_kind;
       }
     }
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
   AZ_LIST_LOOP(wall, room->walls) {
     if (!wall->selected) continue;
@@ -645,7 +650,7 @@ static void do_change_data(int delta, bool secondary) {
       wall->spec.data = az_get_wall_data(new_index);
       state.brush.wall_data_index = new_index;
     }
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
 }
 
@@ -654,7 +659,7 @@ static void do_change_zone(int delta) {
   room->zone_index = az_modulo(room->zone_index + delta,
                                AZ_LIST_SIZE(state.planet.zones));
   state.brush.zone_index = room->zone_index;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void auto_set_door_dest(void) {
@@ -680,7 +685,8 @@ static void auto_set_door_dest(void) {
     if (closest_door != NULL) {
       door->spec.destination = target;
       closest_door->spec.destination = state.current_room;
-      state.unsaved = true;
+      set_room_unsaved(room);
+      set_room_unsaved(AZ_LIST_GET(state.planet.rooms, target));
     }
   }
 }
@@ -724,7 +730,7 @@ static void try_edit_gravfield(void) {
     gravfield->spec.size.trapezoid.front_semiwidth = front_semiwidth;
     gravfield->spec.size.trapezoid.rear_semiwidth = rear_semiwidth;
     gravfield->spec.size.trapezoid.semilength = semilength;
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
 }
 
@@ -777,7 +783,7 @@ static void try_edit_script(void) {
   state.text.action = AZ_ETA_NOTHING;
   az_free_script(*dest);
   *dest = script;
-  state.unsaved = true;
+  set_room_unsaved(room);
 }
 
 static void begin_set_current_room(void) {
@@ -832,7 +838,7 @@ static void try_set_door_dest(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.destination = key;
-    state.unsaved = true;
+    set_room_unsaved(room);
   }
 }
 
@@ -877,7 +883,7 @@ static void try_set_uuid_slot(void) {
     }
   }
   state.text.action = AZ_ETA_NOTHING;
-  state.unsaved = true;
+  set_room_unsaved(room);
   // Set the UUID slot for a single object.
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) {

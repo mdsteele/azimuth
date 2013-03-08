@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "azimuth/state/planet.h"
@@ -123,6 +124,11 @@ bool az_load_editor_state(az_editor_state_t *state) {
 
 bool az_save_editor_state(az_editor_state_t *state) {
   assert(state != NULL);
+  // Count unsaved rooms:
+  int num_rooms_to_save = 0;
+  AZ_LIST_LOOP(room, state->planet.rooms) {
+    if (room->unsaved) ++num_rooms_to_save;
+  }
   // Convert planet:
   const int num_texts = AZ_LIST_SIZE(state->planet.texts);
   const int num_zones = AZ_LIST_SIZE(state->planet.zones);
@@ -151,8 +157,15 @@ bool az_save_editor_state(az_editor_state_t *state) {
     strcpy(planet.zones[i].name, zone->name);
   }
   // Convert rooms:
+  az_room_key_t *rooms_to_save = AZ_ALLOC(num_rooms_to_save, az_room_key_t);
+  int num_rooms_to_save_so_far = 0;
   for (az_room_key_t key = 0; key < num_rooms; ++key) {
     az_editor_room_t *eroom = AZ_LIST_GET(state->planet.rooms, key);
+    if (eroom->unsaved) {
+      assert(num_rooms_to_save_so_far < num_rooms_to_save);
+      rooms_to_save[num_rooms_to_save_so_far] = key;
+      ++num_rooms_to_save_so_far;
+    }
     az_room_t *room = &planet.rooms[key];
     room->zone_index = eroom->zone_index;
     room->camera_bounds = eroom->camera_bounds;
@@ -191,11 +204,17 @@ bool az_save_editor_state(az_editor_state_t *state) {
       room->walls[i] = AZ_LIST_GET(eroom->walls, i)->spec;
     }
   }
+  assert(num_rooms_to_save_so_far == num_rooms_to_save);
   // Write to disk:
-  const bool success = az_save_planet(&planet, "data");
+  const bool success =
+    az_save_planet(&planet, "data", rooms_to_save, num_rooms_to_save);
   // Clean up:
+  free(rooms_to_save);
   az_destroy_planet(&planet);
-  if (success) state->unsaved = false;
+  if (success) {
+    state->unsaved = false;
+    AZ_LIST_LOOP(room, state->planet.rooms) room->unsaved = false;
+  }
   return success;
 }
 
