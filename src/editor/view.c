@@ -309,6 +309,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
 
 static void draw_room_minimap(az_editor_state_t *state,
                               az_editor_room_t *room, az_room_key_t key) {
+  if (state->zoom_level >= 32.0) draw_zone_swatch(state, room);
+
   // Draw doors (schematically):
   if (state->zoom_level < 64.0) {
     AZ_LIST_LOOP(editor_door, room->doors) {
@@ -332,6 +334,9 @@ static void draw_room_minimap(az_editor_state_t *state,
       } glPopMatrix();
     }
   }
+
+  draw_camera_edge_bounds(room);
+
   // Draw room number:
   if (state->zoom_level < 32.0) {
     glPushMatrix(); {
@@ -345,9 +350,7 @@ static void draw_room_minimap(az_editor_state_t *state,
       glColor3ub(color.r, color.g, color.b);
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%03d", key);
     } glPopMatrix();
-  } else draw_zone_swatch(state, room);
-
-  draw_camera_edge_bounds(room);
+  }
 }
 
 static void draw_selection_circle(az_vector_t position, double angle,

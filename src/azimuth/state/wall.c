@@ -53,6 +53,9 @@ static az_vector_t wall_vertices_5[] = {
 static az_vector_t wall_vertices_girder_long[] = {
   {25, 0}, {50, 25}, {-50, 25}, {-25, 0}, {-50, -25}, {50, -25}
 };
+static az_vector_t wall_vertices_girder_long_capped[] = {
+  {25, 0}, {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
+};
 static az_vector_t wall_vertices_girder_short[] = {
   {2, 0}, {27, 25}, {-27, 25}, {-2, 0}, {-27, -25}, {27, -25}
 };
@@ -227,6 +230,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {90, 255, 255, 120}, .color2 = {16, 32, 48, 168},
     .elasticity = 0.2, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_19)
+  },
+  // Silver long capped girder:
+  [20] = {
+    .style = AZ_WSTY_GIRDER_CAP, .bezel = 7.0,
+    .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long_capped)
   }
 };
 
