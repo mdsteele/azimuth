@@ -55,10 +55,12 @@ static void draw_particle(const az_particle_t *particle) {
       break;
     case AZ_PAR_BEAM:
       glBegin(GL_QUAD_STRIP); {
+        const double alpha = (particle->lifetime <= 0.0 ? 1.0 :
+                              1.0 - particle->age / particle->lifetime);
         with_color_alpha(particle->color, 0);
         glVertex2d(0, particle->param2);
         glVertex2d(particle->param1, particle->param2);
-        with_color_alpha(particle->color, 1);
+        with_color_alpha(particle->color, alpha);
         glVertex2d(0, 0);
         glVertex2d(particle->param1, 0);
         with_color_alpha(particle->color, 0);

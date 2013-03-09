@@ -73,6 +73,7 @@ typedef enum {
   AZ_PROJ_MISSILE_PHASE,
   AZ_PROJ_MISSILE_BURST,
   AZ_PROJ_MISSILE_PIERCE,
+  AZ_PROJ_MISSILE_BEAM,
   AZ_PROJ_BOMB,
   AZ_PROJ_MEGA_BOMB,
   // Baddie-only projectiles:

@@ -246,6 +246,14 @@ static az_sound_entry_t sound_entries[] = {
     .arp_speed = -0.4154, .square_duty = -0.8286, .phaser_offset = -0.7323943,
     .volume_adjust = -0.462962989807
   },
+  [AZ_SND_CHARGED_MISSILE_BEAM] = {
+    .wave_kind = WOBBLE,
+    .env_decay = 0.563380300999,
+    .start_freq = 0.373239427805, .freq_slide = 0.1549295187,
+    .vibrato_depth = 0.760563373566, .vibrato_speed = 0.66197180748,
+    .phaser_offset = 0.718309879303, .phaser_sweep = 0.436619758606,
+    .lpf_cutoff = 0.6768399, .hpf_cutoff = 0.036
+  },
   [AZ_SND_CHARGED_ORDNANCE] = {
     .wave_kind = TRIANGLE,
     .env_sustain = 0.6,
@@ -379,6 +387,20 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.7278, .freq_limit = 0.29536, .freq_slide = -0.29848,
     .square_duty = 0.46265, .duty_sweep = -0.18305
   },
+  [AZ_SND_FIRE_HYPER_ROCKET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.3, .env_punch = 0.25, .env_decay = 0.5,
+    .start_freq = 0.2, .vibrato_depth = 0.5, .vibrato_speed = 0.75,
+    .repeat_speed = 0.55, .phaser_offset = 0.25, .phaser_sweep = -0.25
+  },
+  [AZ_SND_FIRE_MISSILE_BEAM] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.03084, .env_decay = 0.66197180748,
+    .start_freq = 0.929577469826, .freq_slide = -0.0140845179558,
+    .vibrato_depth = 0.704225361347, .vibrato_speed = 0.739436626434,
+    .phaser_offset = 0.352112650871, .phaser_sweep = 0.549295783043,
+    .volume_adjust = 0.4
+  },
   [AZ_SND_FIRE_ROCKET] = {
     .wave_kind = NOISE,
     .env_sustain = 0.39907, .env_punch = 0.65582, .env_decay = 0.39085,
@@ -386,13 +408,6 @@ static az_sound_entry_t sound_entries[] = {
     .vibrato_depth = 0.59703, .vibrato_speed = 0.03828,
     .phaser_offset = -0.09300001, .phaser_sweep = -0.19305,
     .volume_adjust = -0.42592590332
-  },
-  [AZ_SND_FIRE_HYPER_ROCKET] = {
-    .wave_kind = NOISE,
-    .env_sustain = 0.3, .env_punch = 0.25, .env_decay = 0.5,
-    .start_freq = 0.2, .vibrato_depth = 0.5, .vibrato_speed = 0.75,
-    .repeat_speed = 0.55,
-    .phaser_offset = 0.25, .phaser_sweep = -0.25
   },
   [AZ_SND_HIT_WALL] = {
     .wave_kind = NOISE,

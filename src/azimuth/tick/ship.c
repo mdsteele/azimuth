@@ -575,7 +575,10 @@ static void fire_weapons(az_space_state_t *state, double time) {
             fire_one_projectile(state, AZ_PROJ_MISSILE_PIERCE,
                                 AZ_SND_FIRE_HYPER_ROCKET);
             break;
-          case AZ_GUN_BEAM: break; // TODO
+          case AZ_GUN_BEAM:
+            fire_one_projectile(state, AZ_PROJ_MISSILE_BEAM,
+                                AZ_SND_CHARGED_MISSILE_BEAM);
+            break;
         }
         ship->ordn_charge = 0.0;
       }

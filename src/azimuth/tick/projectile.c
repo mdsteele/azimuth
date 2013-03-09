@@ -138,6 +138,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_MISSILE_FREEZE:
     case AZ_PROJ_MISSILE_PHASE:
     case AZ_PROJ_MISSILE_PIERCE:
+    case AZ_PROJ_MISSILE_BEAM:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
@@ -367,7 +368,8 @@ static void projectile_special_logic(az_space_state_t *state,
         az_ray_impact(
             state, proj->position, az_vwithlen(proj->velocity, 100.0),
             (AZ_IMPF_SHIP | AZ_IMPF_BADDIE), AZ_SHIP_UID, &impact);
-        if (impact.type != AZ_IMP_NOTHING) {
+        if (impact.type != AZ_IMP_NOTHING ||
+            proj->age >= proj->data->lifetime) {
           for (int i = 0; i < 360; i += 40) {
             az_add_projectile(
                 state, AZ_PROJ_ROCKET, proj->fired_by_enemy, proj->position,
@@ -380,6 +382,43 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_MISSILE_PIERCE:
       leave_missile_trail(state, proj, time, (az_color_t){255, 0, 255, 255});
+      break;
+    case AZ_PROJ_MISSILE_BEAM:
+      if (proj->age >= proj->data->lifetime) {
+        // Calculate the impact point, starting from the ship.
+        const az_vector_t beam_start =
+          az_vadd(state->ship.position, az_vpolar(20.0, state->ship.angle));
+        az_impact_t impact;
+        az_ray_impact(
+            state, beam_start, az_vpolar(1000.0, state->ship.angle),
+            AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
+        proj->position = impact.position;
+        // Explode at the impact point.
+        if (impact.type == AZ_IMP_BADDIE) {
+          on_projectile_hit_baddie(
+              state, proj, impact.target.baddie.baddie,
+              impact.target.baddie.component, impact.normal);
+        } else {
+          on_projectile_hit_wall(state, proj, impact.normal);
+        }
+        // Add a particle for the beam.
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_BEAM;
+          particle->color = (az_color_t){255, 64, 0, 192};
+          particle->position = beam_start;
+          particle->velocity = AZ_VZERO;
+          particle->angle = state->ship.angle;
+          particle->lifetime = 0.3;
+          particle->param1 = az_vdist(beam_start, impact.position);
+          particle->param2 = 5.0;
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_MISSILE_BEAM);
+      } else {
+        proj->position =
+          az_vadd(state->ship.position, az_vpolar(20.0, state->ship.angle));
+        proj->angle = az_mod2pi(proj->angle + 5.0 * time);
+      }
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:

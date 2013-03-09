@@ -255,6 +255,18 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_MISSILE_BURST:
       draw_rocket(proj, clock, (az_color_t){192, 96, 0, 255});
       break;
+    case AZ_PROJ_MISSILE_BEAM:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0, 0, 0.8);
+        glVertex2f(0, 0);
+        glColor4f(1, 0, 0, 0);
+        for (int i = 0; i <= 360; i += 45) {
+          const double radius = (i % 2 ? 30.0 : 10.0);
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)),
+                     radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_BOMB:
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(0.75, 0.75, 0.75); // light gray
