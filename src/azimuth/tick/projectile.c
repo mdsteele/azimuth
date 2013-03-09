@@ -289,6 +289,35 @@ static void projectile_special_logic(az_space_state_t *state,
       az_add_speck(state, (az_color_t){0, 0, 255, 255}, 0.2,
                    proj->position, AZ_VZERO);
       break;
+    case AZ_PROJ_GUN_CHARGED_BEAM:
+      {
+        const double radius =
+          proj->data->splash_radius * (proj->age / proj->data->lifetime);
+        // Destroy enemy projectiles within the blast:
+        AZ_ARRAY_LOOP(other_proj, state->projectiles) {
+          if (other_proj->kind == AZ_PROJ_NOTHING) continue;
+          if (other_proj->fired_by_enemy &&
+              !(other_proj->data->properties & AZ_PROJF_NO_HIT) &&
+              az_vwithin(other_proj->position, proj->position, radius)) {
+            az_add_speck(state, AZ_WHITE, 1.0, other_proj->position,
+                         other_proj->velocity);
+            other_proj->kind = AZ_PROJ_NOTHING;
+          }
+        }
+        // Damage enemies within the blast (over the lifetime of the blast):
+        AZ_ARRAY_LOOP(baddie, state->baddies) {
+          if (baddie->kind == AZ_PROJ_NOTHING) continue;
+          // TODO: This isn't a good condition on which to do splash damage.
+          if (az_vwithin(baddie->position, proj->position,
+                         radius + baddie->data->overall_bounding_radius)) {
+            az_try_damage_baddie(state, baddie, &baddie->data->main_body,
+                                 proj->data->damage_kind,
+                                 proj->data->splash_damage *
+                                 (time / proj->data->lifetime));
+          }
+        }
+      }
+      break;
     case AZ_PROJ_ROCKET:
       az_add_speck(state, (az_color_t){255, 255, 0, 255}, 1.0, proj->position,
                    az_vrotate(az_vmul(proj->velocity, -az_random(0, 0.3)),

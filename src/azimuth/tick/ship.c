@@ -612,7 +612,10 @@ static void fire_weapons(az_space_state_t *state, double time) {
             fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_PIERCE,
                                 AZ_SND_FIRE_GUN_PIERCE);
             break;
-          case AZ_GUN_BEAM: break; // TODO
+          case AZ_GUN_BEAM:
+            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_BEAM,
+                                AZ_SND_FIRE_GUN_CHARGED_BEAM);
+            break;
         }
       }
     }

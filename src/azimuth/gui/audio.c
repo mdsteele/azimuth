@@ -352,7 +352,13 @@ static az_sound_entry_t sound_entries[] = {
     .wave_kind = NOISE,
     .env_sustain = 0.852112650, .env_punch = 1.0, .env_decay = 0.767605662,
     .start_freq = 0.112676054239, .freq_slide = -0.0985915660858,
-    .vibrato_depth = 0.281690150499, .vibrato_speed = 0.12924,
+    .vibrato_depth = 0.281690150499, .vibrato_speed = 0.12924
+  },
+  [AZ_SND_FIRE_GUN_CHARGED_BEAM] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.36394, .env_decay = 0.274647891521,
+    .start_freq = 0.1338, .freq_slide = 0.2676, .freq_delta_slide = -0.140845,
+    .phaser_offset = -0.323943674564, .phaser_sweep = 0.436619758606
   },
   [AZ_SND_FIRE_GUN_FREEZE] = {
     .wave_kind = WOBBLE,
@@ -365,8 +371,7 @@ static az_sound_entry_t sound_entries[] = {
     .wave_kind = SINE,
     .env_sustain = 0.10346, .env_punch = 0.16836, .env_decay = 0.18956,
     .start_freq = 0.89034, .freq_limit = 0.08224, .freq_slide = -0.61922,
-    .square_duty = 0.2347, .duty_sweep = 0.0176,
-    .hpf_cutoff = 0.25965
+    .square_duty = 0.2347, .duty_sweep = 0.0176, .hpf_cutoff = 0.25965
   },
   [AZ_SND_FIRE_GUN_PIERCE] = {
     .wave_kind = SAWTOOTH,

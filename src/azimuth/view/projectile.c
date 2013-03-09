@@ -220,6 +220,18 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         } glEnd();
       }
       break;
+    case AZ_PROJ_GUN_CHARGED_BEAM:
+      glBegin(GL_TRIANGLE_FAN); {
+        const double ratio = proj->age / proj->data->lifetime;
+        const double radius = proj->data->splash_radius * ratio;
+        glColor4f(1, 0, 0, 0);
+        glVertex2f(0, 0);
+        glColor4f(1, 0, 0, 1 - ratio);
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_ROCKET:
       draw_rocket(proj, clock, (az_color_t){128, 0, 0, 255});
       break;

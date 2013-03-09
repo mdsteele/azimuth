@@ -225,6 +225,12 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_HOMING | AZ_PROJF_PIERCING
   },
+  [AZ_PROJ_GUN_CHARGED_BEAM] = {
+    .lifetime = 0.25,
+    .splash_radius = 150.0,
+    .splash_damage = 5.0,
+    .properties = AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_ROCKET] = {
     .speed = 1000.0,
     .lifetime = 3.0,
