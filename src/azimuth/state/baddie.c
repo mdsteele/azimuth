@@ -121,6 +121,54 @@ static az_component_data_t beam_sensor_components[] = {
   { .polygon = AZ_INIT_POLYGON(beam_sensor_casing_vertices), .immunities = ~0 }
 };
 
+static const az_vector_t rockwyrm_pincer1_vertices[] = {
+  {40, -10}, {20, -7}, {0, -12}, {-15, -12}, {-30, -6},
+  {-20,  18}, {0,  24}, {18,  20}, {30,  10}
+};
+static const az_vector_t rockwyrm_pincer2_vertices[] = {
+  {40,  10}, {20,  7}, {0,  12}, {-15,  12}, {-30,  6},
+  {-20, -18}, {0, -24}, {18, -20}, {30, -10}
+};
+static az_component_data_t rockwyrm_components[] = {
+  { .polygon = AZ_INIT_POLYGON(rockwyrm_pincer1_vertices),
+    .init_position = {-5,  10}, .immunities = ~0, .impact_damage = 8.0 },
+  { .polygon = AZ_INIT_POLYGON(rockwyrm_pincer2_vertices),
+    .init_position = {-5, -10}, .immunities = ~0, .impact_damage = 8.0 },
+  { .init_position = { -40, 0}, .bounding_radius = 29.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = { -80, 0}, .bounding_radius = 30.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-120, 0}, .bounding_radius = 30.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-160, 0}, .bounding_radius = 30.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-200, 0}, .bounding_radius = 29.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-240, 0}, .bounding_radius = 28.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-280, 0}, .bounding_radius = 28.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-320, 0}, .bounding_radius = 27.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-360, 0}, .bounding_radius = 26.0,
+    .immunities = ~0, .impact_damage = 3.0 },
+  { .init_position = {-400, 0}, .bounding_radius = 25.0,
+    .immunities = ~0, .impact_damage = 3.0 }
+};
+
+static az_component_data_t wyrmling_components[] = {
+  { .init_position = {-5, 0}, .init_angle = AZ_DEG2RAD(0),
+    .bounding_radius = 4.5, .impact_damage = 2.0 },
+  { .init_position = {-5, 5}, .init_angle = AZ_DEG2RAD(-90),
+    .bounding_radius = 4.5, .impact_damage = 2.0 },
+  { .init_position = { 0, 5}, .init_angle = AZ_DEG2RAD(180),
+    .bounding_radius = 4.0, .impact_damage = 2.0 },
+  { .init_position = { 5, 5}, .init_angle = AZ_DEG2RAD(180),
+    .bounding_radius = 3.5, .impact_damage = 2.0 },
+  { .init_position = { 5, 0}, .init_angle = AZ_DEG2RAD(90),
+    .bounding_radius = 3.0, .impact_damage = 2.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -208,7 +256,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000.0, .potential_pickups = AZ_PUPF_NOTHING,
     .color = {255, 0, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
-                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
+                                  AZ_DMGF_REACTIVE),
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_TURRET] = {
@@ -251,10 +300,31 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_BEAM_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
-    .potential_pickups = AZ_PUPF_NOTHING,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_components)
+  },
+  [AZ_BAD_ROCKWYRM] = {
+    .max_health = 150.0, .overall_bounding_radius = 500.0,
+    .color = {192, 255, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 24.0, .impact_damage = 5.0,
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
+                                  AZ_DMGF_REACTIVE) },
+    DECL_COMPONENTS(rockwyrm_components)
+  },
+  [AZ_BAD_WYRM_EGG] = {
+    .max_health = 2.0,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .color = {128, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 10.0 }
+  },
+  [AZ_BAD_WYRMLING] = {
+    .max_health = 0.1, .overall_bounding_radius = 30.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {192, 255, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 5.0, .impact_damage = 3.0,
+                   .immunities = AZ_DMGF_FREEZE },
+    DECL_COMPONENTS(wyrmling_components)
   }
 };
 
@@ -289,6 +359,7 @@ void az_init_baddie_datas(void) {
       skipped = true;
       continue;
     }
+    assert(data->num_components <= AZ_MAX_BADDIE_COMPONENTS);
     // Set bounding radius for all components.
     for (int i = 0; i < data->num_components; ++i) {
       // N.B. We need to cast away the const-ness of the data->components

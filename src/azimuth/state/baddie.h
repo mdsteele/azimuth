@@ -32,8 +32,11 @@
 
 /*===========================================================================*/
 
+// The maximum number of components that a baddie kind can have:
+#define AZ_MAX_BADDIE_COMPONENTS 12
+
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 19
+#define AZ_NUM_BADDIE_KINDS 22
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -55,7 +58,10 @@ typedef enum {
   AZ_BAD_CRAWLER,
   AZ_BAD_CRAWLING_TURRET,
   AZ_BAD_STINGER,
-  AZ_BAD_BEAM_SENSOR
+  AZ_BAD_BEAM_SENSOR,
+  AZ_BAD_ROCKWYRM,
+  AZ_BAD_WYRM_EGG,
+  AZ_BAD_WYRMLING
 } az_baddie_kind_t;
 
 typedef struct {
@@ -99,7 +105,7 @@ typedef struct {
   double cooldown; // time until baddie can attack again, in seconds
   double param; // the meaning of this is baddie-kind-specific
   int state; // the meaning of this is baddie-kind-specific
-  az_component_t components[4];
+  az_component_t components[AZ_MAX_BADDIE_COMPONENTS];
 } az_baddie_t;
 
 /*===========================================================================*/
