@@ -37,4 +37,4 @@ $s:boss1;
 !D2 x5278.63 y36863.47 a-0.147944 r31 u3
 !D7 x6204.97 y37011.55 a-1.735597 r30 u0
 !B20 x5667.46 y36915.07 a2.620526 u1
-$k:unlock2,unlock3;
+$k:splat,unlock2,unlock3;

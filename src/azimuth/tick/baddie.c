@@ -35,8 +35,8 @@
 // The level of health at or below which a baddie can be frozen.
 #define AZ_BADDIE_FREEZE_THRESHOLD 4.0
 
-void kill_baddie(az_space_state_t *state, az_baddie_t *baddie,
-                 bool leave_pickup) {
+void kill_baddie_internal(az_space_state_t *state, az_baddie_t *baddie,
+                          bool pickups_and_scripts) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   az_play_sound(&state->soundboard, baddie->data->death_sound);
   // Add particles for baddie debris:
@@ -68,7 +68,7 @@ void kill_baddie(az_space_state_t *state, az_baddie_t *baddie,
                  az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
   }
 
-  if (leave_pickup) {
+  if (pickups_and_scripts) {
     az_add_random_pickup(state, baddie->data->potential_pickups,
                          baddie->position);
   }
@@ -76,7 +76,7 @@ void kill_baddie(az_space_state_t *state, az_baddie_t *baddie,
   // Remove the baddie.  After this point, we can no longer use the baddie
   // object.
   baddie->kind = AZ_BAD_NOTHING;
-  az_run_script(state, script);
+  if (pickups_and_scripts) az_run_script(state, script);
 }
 
 bool az_try_damage_baddie(
@@ -108,7 +108,7 @@ bool az_try_damage_baddie(
     assert(damage_was_dealt);
     // Kill the baddie.  After this point, we can no longer use the baddie
     // object.
-    kill_baddie(state, baddie, true);
+    kill_baddie_internal(state, baddie, true);
   }
   // Otherwise, if (1) the damage kind includes AZ_DMGF_FREEZE, (2) the baddie
   // is susceptible to being frozen, and (3) the baddie's health is low enough
@@ -122,6 +122,10 @@ bool az_try_damage_baddie(
   }
 
   return damage_was_dealt;
+}
+
+void az_kill_baddie(az_space_state_t *state, az_baddie_t *baddie) {
+  kill_baddie_internal(state, baddie, false);
 }
 
 /*===========================================================================*/
@@ -772,7 +776,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (baddie->cooldown <= 0.0) {
           const az_vector_t position = baddie->position;
           const double angle = baddie->angle;
-          kill_baddie(state, baddie, false);
+          az_kill_baddie(state, baddie);
           az_init_baddie(baddie, AZ_BAD_WYRMLING, position, angle);
         }
       }

@@ -46,6 +46,7 @@ typedef enum {
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_UNBAD, // remove baddie i
   AZ_OP_BOSS, // designate baddie i as the current boss
+  AZ_OP_SPLAT, // kill all baddies in the room
   // Doors:
   AZ_OP_OPEN, // open door i (but don't run its script)
   AZ_OP_CLOSE, // close door i

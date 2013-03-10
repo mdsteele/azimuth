@@ -34,6 +34,10 @@ bool az_try_damage_baddie(az_space_state_t *state, az_baddie_t *baddie,
                           const az_component_data_t *component,
                           az_damage_flags_t damage_kind, double damage_amount);
 
+// Kill the given baddie outright, without leaving behind any pickups or
+// running any scripts.
+void az_kill_baddie(az_space_state_t *state, az_baddie_t *baddie);
+
 void az_tick_baddies(az_space_state_t *state, double time);
 
 /*===========================================================================*/

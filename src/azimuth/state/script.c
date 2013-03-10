@@ -45,6 +45,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_UNBAD:  return "unbad";
     case AZ_OP_BOSS:   return "boss";
+    case AZ_OP_SPLAT:  return "splat";
     case AZ_OP_OPEN:   return "open";
     case AZ_OP_CLOSE:  return "close";
     case AZ_OP_LOCK:   return "lock";
@@ -85,6 +86,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_NOP:
     case AZ_OP_ADD:
     case AZ_OP_BAD:
+    case AZ_OP_SPLAT:
     case AZ_OP_DLOG:
     case AZ_OP_DEND:
     case AZ_OP_STOP:

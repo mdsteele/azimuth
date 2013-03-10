@@ -26,6 +26,7 @@
 
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/baddie.h" // for az_kill_baddie
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
@@ -228,6 +229,12 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_uid_t uid;
           GET_UID(AZ_UUID_BADDIE, &uid);
           state->boss_uid = uid;
+        }
+        break;
+      case AZ_OP_SPLAT:
+        AZ_ARRAY_LOOP(baddie, state->baddies) {
+          if (baddie->kind == AZ_BAD_NOTHING) continue;
+          az_kill_baddie(state, baddie);
         }
         break;
       // Doors:
