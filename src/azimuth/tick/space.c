@@ -39,14 +39,31 @@
 
 /*===========================================================================*/
 
+// How large a radius around the ship center should be made free of
+// destructible walls when we enter a room:
+#define WALL_REMOVAL_RADIUS 40.0
+
 void az_after_entering_room(az_space_state_t *state) {
+  // Mark the room as visited.
   az_set_room_visited(&state->ship.player, state->ship.player.current_room);
+  // Remove destructible walls too near where the ship starts (so that the ship
+  // doesn't start inside a destructable wall that blocks the entrance).
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    if (wall->kind == AZ_WALL_INDESTRUCTIBLE) continue;
+    if (az_circle_touches_wall(
+            wall, WALL_REMOVAL_RADIUS, state->ship.position)) {
+      wall->kind = AZ_WALL_NOTHING;
+    }
+  }
+  // Clamp the camera to be within the current room's camera bounds.
   const az_room_t *room =
     &state->planet->rooms[state->ship.player.current_room];
-  assert(0 <= room->zone_index && room->zone_index < state->planet->num_zones);
-  const az_zone_t *zone = &state->planet->zones[room->zone_index];
   state->camera.center =
     az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
+  // Set the music and run the room script (if any).
+  assert(0 <= room->zone_index && room->zone_index < state->planet->num_zones);
+  const az_zone_t *zone = &state->planet->zones[room->zone_index];
   az_change_music(&state->soundboard, zone->music);
   az_run_script(state, room->on_start);
 }
