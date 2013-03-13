@@ -169,6 +169,17 @@ static az_component_data_t wyrmling_components[] = {
     .bounding_radius = 3.0, .impact_damage = 2.0 }
 };
 
+static const az_vector_t trapdoor_hinge_vertices[] = {
+  {-10, 8}, {-10, -8}, {0, -8}, {5, -5}, {7, 0}, {5, 5}, {0, 8}
+};
+static const az_vector_t trapdoor_door_vertices[] = {
+  {10, -95}, {10, 10}, {-2, -2}, {4, -89}
+};
+static az_component_data_t trapdoor_components[] = {
+  { .polygon = AZ_INIT_POLYGON(trapdoor_door_vertices),
+    .immunities = ~AZ_DMGF_HYPER_ROCKET }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -257,8 +268,7 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {255, 0, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
-                                  AZ_DMGF_REACTIVE),
-                   .impact_damage = 0.0 }
+                                  AZ_DMGF_REACTIVE) }
   },
   [AZ_BAD_ARMORED_TURRET] = {
     .max_health = 12.0, .overall_bounding_radius = 30.5,
@@ -325,6 +335,15 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 5.0, .impact_damage = 3.0,
                    .immunities = AZ_DMGF_FREEZE },
     DECL_COMPONENTS(wyrmling_components)
+  },
+  [AZ_BAD_TRAPDOOR] = {
+    .max_health = 3.0, .overall_bounding_radius = 95.6,
+    .potential_pickups = (AZ_PUPF_LARGE_SHIELDS | AZ_PUPF_ROCKETS |
+                          AZ_PUPF_BOMBS),
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(trapdoor_hinge_vertices),
+                   .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_HYPER_ROCKET) },
+    DECL_COMPONENTS(trapdoor_components)
   }
 };
 

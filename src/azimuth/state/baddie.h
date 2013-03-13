@@ -36,7 +36,7 @@
 #define AZ_MAX_BADDIE_COMPONENTS 12
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 22
+#define AZ_NUM_BADDIE_KINDS 23
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -61,7 +61,8 @@ typedef enum {
   AZ_BAD_BEAM_SENSOR,
   AZ_BAD_ROCKWYRM,
   AZ_BAD_WYRM_EGG,
-  AZ_BAD_WYRMLING
+  AZ_BAD_WYRMLING,
+  AZ_BAD_TRAPDOOR
 } az_baddie_kind_t;
 
 typedef struct {

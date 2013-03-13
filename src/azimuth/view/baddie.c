@@ -744,6 +744,32 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glPopMatrix();
       }
       break;
+    case AZ_BAD_TRAPDOOR:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.8f - 0.8f * frozen, 0.5, 0.5f + 0.5f * frozen);
+        glVertex2f(0, 0);
+        glColor3f(0.4f - 0.4f * frozen, 0.2, 0.2f + 0.3f * frozen);
+        const az_polygon_t polygon = baddie->data->main_body.polygon;
+        for (int i = polygon.num_vertices - 1, j = 0;
+             i < polygon.num_vertices; i = j++) {
+          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+        }
+      } glEnd();
+      glPushMatrix(); {
+        assert(!az_vnonzero(baddie->components[0].position));
+        glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
+        glBegin(GL_POLYGON); {
+          const az_component_data_t *data = &baddie->data->components[0];
+          glColor3f(0.5f - 0.1f * frozen, 0.5, 0.5f + 0.1f * frozen);
+          for (int i = 0; i < data->polygon.num_vertices; ++i) {
+            if (i == 2) glColor3f(0.4f - 0.1f * frozen, 0.3,
+                                  0.3f + 0.1f * frozen);
+            glVertex2d(data->polygon.vertices[i].x,
+                       data->polygon.vertices[i].y);
+          }
+        } glEnd();
+      } glPopMatrix();
+      break;
   }
 }
 

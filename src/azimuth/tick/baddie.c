@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/script.h"
@@ -783,6 +784,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_WYRMLING:
       snake_along(state, baddie, time, 0, 5.0, 180.0, 120.0);
+      break;
+    case AZ_BAD_TRAPDOOR:
+      if (!(az_ship_is_present(&state->ship) &&
+            az_vwithin(state->ship.position, baddie->position,
+                       baddie->data->overall_bounding_radius +
+                       AZ_SHIP_DEFLECTOR_RADIUS))) {
+        baddie->components[0].angle =
+          az_angle_towards(baddie->components[0].angle, AZ_DEG2RAD(600) * time,
+                           (az_ship_is_present(&state->ship) &&
+                            az_vwithin(state->ship.position, baddie->position,
+                                       210.0) ? AZ_DEG2RAD(90) : 0));
+      }
       break;
     case AZ_BAD_BOX:
     case AZ_BAD_ARMORED_BOX:
