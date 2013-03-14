@@ -89,6 +89,9 @@ static az_vector_t wall_vertices_18[] = {
 static az_vector_t wall_vertices_19[] = {
   {0, 20}, {-6, 18}, {0, -20}, {6, 18}
 };
+static az_vector_t wall_vertices_21[] = {
+  {125, 50}, {-125, 50}, {-125, -50}, {125, -50}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -237,6 +240,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
     .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long_capped)
+  },
+  // Huge blue rectangular block:
+  [21] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 18.0,
+    .color1 = {0, 255, 255, 255}, .color2 = {0, 32, 64, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
   }
 };
 
