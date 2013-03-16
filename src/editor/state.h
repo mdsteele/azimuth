@@ -56,6 +56,14 @@ typedef enum {
   AZ_ETA_SET_UUID_SLOT
 } az_editor_text_action_t;
 
+typedef enum {
+  AZ_ERL_NORMAL_ROOM = 0,
+  AZ_ERL_BOSS_ROOM,
+  AZ_ERL_COMM_ROOM,
+  AZ_ERL_SAVE_ROOM,
+  AZ_ERL_UPGRADE_ROOM
+} az_editor_room_label_t;
+
 typedef struct {
   bool selected;
   az_baddie_spec_t spec;
@@ -84,6 +92,7 @@ typedef struct {
 typedef struct {
   bool selected;
   bool unsaved; // true if this room currently has unsaved changes
+  az_editor_room_label_t label;
   int zone_index;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
@@ -144,6 +153,8 @@ bool az_load_editor_state(az_editor_state_t *state);
 bool az_save_editor_state(az_editor_state_t *state);
 
 void az_tick_editor_state(az_editor_state_t *state, double time);
+
+void az_relabel_editor_room(az_editor_room_t *room);
 
 void az_init_editor_text(
     az_editor_state_t *state, az_editor_text_action_t action,

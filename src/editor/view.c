@@ -350,6 +350,24 @@ static void draw_room_minimap(az_editor_state_t *state,
       glColor3ub(color.r, color.g, color.b);
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%03d", key);
     } glPopMatrix();
+  } else if (state->zoom_level < 128.0 && room->label != AZ_ERL_NORMAL_ROOM) {
+    glPushMatrix(); {
+      az_camera_bounds_t *bounds = &room->camera_bounds;
+      camera_to_screen_orient(state, az_vpolar(
+          bounds->min_r + 0.5 * bounds->r_span,
+          bounds->min_theta + 0.5 * bounds->theta_span));
+      glScaled(state->zoom_level, state->zoom_level, 1);
+      glColor3f(1, 1, 1);
+      const char *label = "?";
+      switch (room->label) {
+        case AZ_ERL_NORMAL_ROOM: AZ_ASSERT_UNREACHABLE();
+        case AZ_ERL_BOSS_ROOM:    label = "B"; break;
+        case AZ_ERL_COMM_ROOM:    label = "C"; break;
+        case AZ_ERL_SAVE_ROOM:    label = "S"; break;
+        case AZ_ERL_UPGRADE_ROOM: label = "U"; break;
+      }
+      az_draw_string(8, AZ_ALIGN_CENTER, 0, -3, label);
+    } glPopMatrix();
   }
 }
 

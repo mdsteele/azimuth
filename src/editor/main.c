@@ -47,6 +47,7 @@ static az_editor_state_t state;
 static void set_room_unsaved(az_editor_room_t *room) {
   room->unsaved = true;
   state.unsaved = true;
+  az_relabel_editor_room(room);
 }
 
 static void deselect_all_rooms(void) {

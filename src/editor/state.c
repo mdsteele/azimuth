@@ -42,9 +42,30 @@ static az_script_t *clone_script(const az_script_t *script) {
   return clone;
 }
 
+void az_relabel_editor_room(az_editor_room_t *room) {
+  room->label = AZ_ERL_NORMAL_ROOM;
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->spec.kind == AZ_NODE_COMM) {
+      room->label = AZ_ERL_COMM_ROOM;
+    } else if (node->spec.kind == AZ_NODE_SAVE_POINT) {
+      room->label = AZ_ERL_SAVE_ROOM;
+    } else if (node->spec.kind == AZ_NODE_UPGRADE) {
+      room->label = AZ_ERL_UPGRADE_ROOM;
+    }
+  }
+  if (room->on_start != NULL) {
+    for (int i = 0; i < room->on_start->num_instructions; ++i) {
+      if (room->on_start->instructions[i].opcode == AZ_OP_BOSS) {
+        room->label = AZ_ERL_BOSS_ROOM;
+        break;
+      }
+    }
+  }
+}
+
 bool az_load_editor_state(az_editor_state_t *state) {
   state->spin_camera = true;
-  state->zoom_level = 1.0;
+  state->zoom_level = 128.0;
   state->brush.baddie_kind = AZ_BAD_LUMP;
   state->brush.door_kind = AZ_DOOR_NORMAL;
   state->brush.gravfield_kind = AZ_GRAV_TRAPEZOID;
@@ -113,6 +134,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
       az_editor_wall_t *wall = AZ_LIST_ADD(eroom->walls);
       wall->spec = room->walls[i];
     }
+    az_relabel_editor_room(eroom);
   }
 
   az_destroy_planet(&planet);
