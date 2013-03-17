@@ -123,6 +123,8 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
   } glEnd();
 }
 
+/*===========================================================================*/
+
 void az_draw_door(const az_door_t *door, az_clock_t clock) {
   assert(door->kind != AZ_DOOR_NOTHING);
   glPushMatrix(); {
@@ -138,6 +140,38 @@ void az_draw_doors(const az_space_state_t *state) {
     if (door->kind == AZ_DOOR_PASSAGE) continue;
     az_draw_door(door, state->clock);
   }
+}
+
+/*===========================================================================*/
+
+void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
+                        az_vector_t exit_position, double exit_angle,
+                        double progress) {
+  const az_vector_t start_position =
+    az_vadd(entrance_position, az_vpolar(-30, entrance_angle));
+  const az_vector_t end_position =
+    az_vadd(exit_position, az_vpolar(-30, exit_angle));
+  const az_vector_t center =
+    az_vadd(start_position,
+            az_vmul(az_vsub(end_position, start_position), progress));
+  const double angle =
+    entrance_angle + az_mod2pi(exit_angle + AZ_PI - entrance_angle) * progress;
+  glPushMatrix(); {
+    glTranslated(center.x, center.y, 0);
+    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
+    glBegin(GL_QUAD_STRIP); {
+      glColor3f(0.25, 0.25, 0.25); // dark gray
+      glVertex2f(60, 50); glVertex2f(-60, 50);
+      glColor3f(0.5, 0.5, 0.5); // mid gray
+      glVertex2f(60, 30); glVertex2f(-60, 30);
+      glColor3f(0.7, 0.7, 0.7); // light gray
+      glVertex2f(60, 0); glVertex2f(-60, 0);
+      glColor3f(0.5, 0.5, 0.5); // mid gray
+      glVertex2f(60, -30); glVertex2f(-60, -30);
+      glColor3f(0.25, 0.25, 0.25); // dark gray
+      glVertex2f(60, -50); glVertex2f(-60, -50);
+    } glEnd();
+  } glPopMatrix();
 }
 
 /*===========================================================================*/

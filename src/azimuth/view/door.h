@@ -35,6 +35,10 @@ void az_draw_door(const az_door_t *door, az_clock_t clock);
 // will not be drawn (they are invisible).
 void az_draw_doors(const az_space_state_t *state);
 
+void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
+                        az_vector_t exit_position, double exit_angle,
+                        double progress);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_DOOR_H_

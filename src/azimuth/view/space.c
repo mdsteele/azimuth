@@ -81,6 +81,20 @@ static void tint_screen(GLfloat alpha) {
   } glEnd();
 }
 
+static void transform_to_camera_matrix(const az_space_state_t *state) {
+  // Make positive Y be up instead of down.
+  glScaled(1, -1, 1);
+  // Center the screen on position (0, 0).
+  glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+  // Move the screen to the camera pose.
+  glTranslated(0, -az_vnorm(state->camera.center), 0);
+  glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera.center)), 0, 0, 1);
+  // Apply camera shake to the screen position.
+  const az_vector_t shake_offset =
+    az_camera_shake_offset(&state->camera, state->clock);
+  glTranslated(shake_offset.x, shake_offset.y, 0);
+}
+
 static void draw_camera_view(az_space_state_t *state) {
   az_draw_background_nodes(state);
   glPushMatrix(); {
@@ -101,36 +115,44 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_foreground_nodes(state);
 }
 
+void draw_doorway_transition(const az_space_state_t *state) {
+  assert(state->mode == AZ_MODE_DOORWAY);
+  const az_door_t *door = state->mode_data.doorway.door;
+  if (state->mode_data.doorway.step == AZ_DWS_SHIFT) {
+    assert(door != NULL);
+    az_draw_door_shift(state->mode_data.doorway.entrance_position,
+                       state->mode_data.doorway.entrance_angle,
+                       door->position, door->angle,
+                       state->mode_data.doorway.progress);
+  } else if (door != NULL && door->kind != AZ_DOOR_PASSAGE) {
+    az_draw_door(door, state->clock);
+  }
+}
+
 void az_space_draw_screen(az_space_state_t *state) {
   // Check if we're in a mode where we should be tinting the camera view black.
   const double fade_alpha = mode_fade_alpha(state);
   assert(fade_alpha >= 0.0);
   assert(fade_alpha <= 1.0);
 
-  // Draw the camera view.
-  glPushMatrix(); {
-    // Make positive Y be up instead of down.
-    glScaled(1, -1, 1);
-    // Center the screen on position (0, 0).
-    glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
-    // Move the screen to the camera pose.
-    glTranslated(0, -az_vnorm(state->camera.center), 0);
-    glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera.center)), 0, 0, 1);
-    // Apply camera shake to the screen position.
-    const az_vector_t shake_offset =
-      az_camera_shake_offset(&state->camera, state->clock);
-    glTranslated(shake_offset.x, shake_offset.y, 0);
-    // Draw what the camera sees.
-    if (fade_alpha < 1.0) {
+  // Draw what the camera sees.
+  if (fade_alpha < 1.0) {
+    glPushMatrix(); {
+      transform_to_camera_matrix(state);
       draw_camera_view(state);
-    }
-    if (state->mode == AZ_MODE_DOORWAY) {
-      // TODO: draw door transition
-    }
-  } glPopMatrix();
+    } glPopMatrix();
+  }
 
   // Tint the camera view black (based on fade_alpha).
   if (fade_alpha > 0.0) tint_screen(fade_alpha);
+
+  // If we're going through a doorway, draw the doorway transition animation.
+  if (state->mode == AZ_MODE_DOORWAY) {
+    glPushMatrix(); {
+      transform_to_camera_matrix(state);
+      draw_doorway_transition(state);
+    } glPopMatrix();
+  }
 
   az_draw_hud(state);
 }

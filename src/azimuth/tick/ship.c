@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h> // for NULL
+#include <string.h> // for memset
 
 #include "azimuth/constants.h"
 #include "azimuth/state/door.h"
@@ -161,8 +162,8 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     case AZ_IMP_DOOR_INSIDE:
       ship->tractor_beam.active = false;
       state->mode = AZ_MODE_DOORWAY;
+      memset(&state->mode_data.doorway, 0, sizeof(state->mode_data.doorway));
       state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
-      state->mode_data.doorway.progress = 0.0;
       state->mode_data.doorway.door = impact->target.door;
       return;
     case AZ_IMP_DOOR_OUTSIDE:

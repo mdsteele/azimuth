@@ -122,7 +122,7 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
 static void tick_doorway_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_DOORWAY);
   const double fade_time = 0.25; // seconds
-  const double shift_time = 0.3; // seconds
+  const double shift_time = 0.5; // seconds
   switch (state->mode_data.doorway.step) {
     case AZ_DWS_FADE_OUT:
       assert(state->mode_data.doorway.door != NULL);
@@ -132,23 +132,32 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
         state->mode_data.doorway.step =
           (state->mode_data.doorway.door->kind == AZ_DOOR_PASSAGE ?
            AZ_DWS_FADE_IN : AZ_DWS_SHIFT);
+        const az_vector_t entrance_position =
+          state->mode_data.doorway.door->position;
+        const double entrance_angle = state->mode_data.doorway.door->angle;
         state->mode_data.doorway.progress = 0.0;
+        state->mode_data.doorway.entrance_position = entrance_position;
+        state->mode_data.doorway.entrance_angle = entrance_angle;
+        state->mode_data.doorway.cam_start_r = az_vnorm(state->camera.center);
+        state->mode_data.doorway.cam_start_theta =
+          az_vtheta(state->camera.center);
         // Replace state with new room data.
-        const az_room_key_t old_key = state->ship.player.current_room;
-        const az_vector_t old_pos = state->mode_data.doorway.door->position;
-        const az_room_key_t key = state->mode_data.doorway.door->destination;
+        const az_room_key_t origin_key = state->ship.player.current_room;
+        const az_room_key_t dest_key =
+          state->mode_data.doorway.door->destination;
         state->mode_data.doorway.door = NULL;
         az_clear_space(state);
-        assert(0 <= key && key < state->planet->num_rooms);
-        az_enter_room(state, &state->planet->rooms[key]);
-        state->ship.player.current_room = key;
+        assert(0 <= dest_key && dest_key < state->planet->num_rooms);
+        az_enter_room(state, &state->planet->rooms[dest_key]);
+        state->ship.player.current_room = dest_key;
         // Pick a door to exit out of.
         double best_dist = INFINITY;
         az_door_t *exit = NULL;
         AZ_ARRAY_LOOP(door, state->doors) {
           if (door->kind == AZ_DOOR_NOTHING) continue;
-          if (door->destination != old_key) continue;
-          const double dist = az_vnorm(az_vsub(door->position, old_pos));
+          if (door->destination != origin_key) continue;
+          const double dist =
+            az_vnorm(az_vsub(door->position, entrance_position));
           if (dist < best_dist) {
             best_dist = dist;
             exit = door;
@@ -160,17 +169,41 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
             az_vadd(exit->position, az_vpolar(60.0, exit->angle));
           state->ship.velocity =
             az_vpolar(0.25 * az_vnorm(state->ship.velocity), exit->angle);
+          state->ship.angle = az_mod2pi(
+              state->ship.angle + AZ_PI + exit->angle - entrance_angle);
           exit->openness = 1.0;
           exit->is_open = false;
           state->mode_data.doorway.door = exit;
         }
         // Record that we are now in the new room.
+        const az_vector_t old_camera_center = state->camera.center;
         az_after_entering_room(state);
+        // Set us up for the camera shift animation.
+        if (exit != NULL && state->mode_data.doorway.step == AZ_DWS_SHIFT) {
+          state->mode_data.doorway.cam_delta_r =
+            az_vnorm(state->camera.center) -
+            state->mode_data.doorway.cam_start_r;
+          state->mode_data.doorway.cam_delta_theta =
+            az_mod2pi(az_vtheta(state->camera.center) -
+                      state->mode_data.doorway.cam_start_theta);
+          state->camera.center = old_camera_center;
+        } else state->mode_data.doorway.step = AZ_DWS_FADE_IN;
       }
       break;
     case AZ_DWS_SHIFT:
-      state->mode_data.doorway.progress += time / shift_time;
-      // TODO: shift camera, etc.
+      assert(state->mode_data.doorway.door != NULL);
+      // Increase progress:
+      state->mode_data.doorway.progress =
+        fmin(1.0, state->mode_data.doorway.progress + time / shift_time);
+      // Shift camera position:
+      state->camera.center =
+        az_vpolar((state->mode_data.doorway.cam_start_r +
+                   state->mode_data.doorway.cam_delta_r *
+                   state->mode_data.doorway.progress),
+                  (state->mode_data.doorway.cam_start_theta +
+                   state->mode_data.doorway.cam_delta_theta *
+                   state->mode_data.doorway.progress));
+      // When progress is complete, go to the next step:
       if (state->mode_data.doorway.progress >= 1.0) {
         state->mode_data.doorway.step = AZ_DWS_FADE_IN;
         state->mode_data.doorway.progress = 0.0;
@@ -326,7 +359,10 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       tick_upgrade_mode(state, time);
       break;
   }
-  az_tick_camera(state, time);
+  if (!(state->mode == AZ_MODE_DOORWAY &&
+        state->mode_data.doorway.step == AZ_DWS_SHIFT)) {
+    az_tick_camera(state, time);
+  }
   tick_message(&state->message, time);
   tick_countdown(&state->countdown, time);
 }

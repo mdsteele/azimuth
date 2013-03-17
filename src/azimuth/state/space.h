@@ -94,6 +94,10 @@ typedef struct {
       enum { AZ_DWS_FADE_OUT, AZ_DWS_SHIFT, AZ_DWS_FADE_IN } step;
       double progress; // 0.0 to 1.0
       const az_door_t *door;
+      az_vector_t entrance_position;
+      double entrance_angle;
+      double cam_start_r, cam_start_theta;
+      double cam_delta_r, cam_delta_theta;
     } doorway;
     struct {
       enum { AZ_GOS_ASPLODE, AZ_GOS_FADE_OUT } step;
