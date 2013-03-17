@@ -42,9 +42,10 @@ typedef enum {
   AZ_OP_TEST, // push 1 if flag i is set, else 0
   AZ_OP_SET, // set flag i
   AZ_OP_CLR, // clear flag i
+  // Objects:
+  AZ_OP_NIX, // remove object i (of any type)
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
-  AZ_OP_UNBAD, // remove baddie i
   AZ_OP_BOSS, // designate baddie i as the current boss
   AZ_OP_SPLAT, // kill all baddies in the room
   // Doors:

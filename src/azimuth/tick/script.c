@@ -101,11 +101,19 @@ static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
     vm->pc = new_pc - 1; \
   } while (0)
 
-#define GET_UID(uuid_type, uid_out) do { \
+#define GET_UUID(uuid_out) do { \
     const int slot = (int)ins.immediate; \
-    const az_uuid_t uuid = state->uuids[slot - 1]; \
-    if (slot < 1 || slot > AZ_NUM_UUID_SLOTS || uuid.type != (uuid_type)) { \
-      SCRIPT_ERROR("invalid uuid"); \
+    if (slot < 1 || slot > AZ_NUM_UUID_SLOTS) { \
+      SCRIPT_ERROR("invalid uuid index"); \
+    } \
+    *(uuid_out) = state->uuids[slot - 1]; \
+  } while (0)
+
+#define GET_UID(uuid_type, uid_out) do { \
+    az_uuid_t uuid; \
+    GET_UUID(&uuid); \
+    if (uuid.type != (uuid_type)) { \
+      SCRIPT_ERROR("invalid uuid type"); \
     } \
     *(uid_out) = uuid.uid; \
   } while (0)
@@ -199,6 +207,48 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_CLR:
         az_clear_flag(&state->ship.player, (az_flag_t)ins.immediate);
         break;
+      // Objects:
+      case AZ_OP_NIX:
+        {
+          az_uuid_t uuid;
+          GET_UUID(&uuid);
+          switch (uuid.type) {
+            case AZ_UUID_NOTHING: SCRIPT_ERROR("invalid uuid type");
+            case AZ_UUID_BADDIE:
+              {
+                az_baddie_t *baddie;
+                if (az_lookup_baddie(state, uuid.uid, &baddie)) {
+                  baddie->kind = AZ_BAD_NOTHING;
+                }
+              }
+              break;
+            case AZ_UUID_DOOR:
+              {
+                az_door_t *door;
+                if (az_lookup_door(state, uuid.uid, &door)) {
+                  door->kind = AZ_DOOR_NOTHING;
+                }
+              }
+              break;
+            case AZ_UUID_GRAVFIELD:
+              {
+                az_gravfield_t *gravfield;
+                if (az_lookup_gravfield(state, uuid.uid, &gravfield)) {
+                  gravfield->kind = AZ_GRAV_NOTHING;
+                }
+              }
+              break;
+            case AZ_UUID_NODE:
+              {
+                az_node_t *node;
+                if (az_lookup_node(state, uuid.uid, &node)) {
+                  node->kind = AZ_NODE_NOTHING;
+                }
+              }
+              break;
+          }
+        }
+        break;
       // Baddies:
       case AZ_OP_BAD:
         {
@@ -211,16 +261,6 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_baddie_t *baddie;
           if (az_insert_baddie(state, &baddie)) {
             az_init_baddie(baddie, kind, (az_vector_t){x, y}, angle);
-          }
-        }
-        break;
-      case AZ_OP_UNBAD:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_BADDIE, &uid);
-          az_baddie_t *baddie;
-          if (az_lookup_baddie(state, uid, &baddie)) {
-            baddie->kind = AZ_BAD_NOTHING;
           }
         }
         break;
