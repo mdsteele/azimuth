@@ -855,6 +855,9 @@ static void begin_set_uuid_slot(void) {
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (gravfield->selected) uuid_slot = gravfield->spec.uuid_slot;
   }
+  AZ_LIST_LOOP(wall, room->walls) {
+    if (wall->selected) uuid_slot = wall->spec.uuid_slot;
+  }
   if (uuid_slot < 0) return;
   az_init_editor_text(&state, AZ_ETA_SET_UUID_SLOT, "%d", uuid_slot);
 }
@@ -882,6 +885,9 @@ static void try_set_uuid_slot(void) {
     AZ_LIST_LOOP(gravfield, room->gravfields) {
       if (gravfield->spec.uuid_slot == uuid_slot) return;
     }
+    AZ_LIST_LOOP(wall, room->walls) {
+      if (wall->spec.uuid_slot == uuid_slot) return;
+    }
   }
   state.text.action = AZ_ETA_NOTHING;
   set_room_unsaved(room);
@@ -901,6 +907,12 @@ static void try_set_uuid_slot(void) {
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (gravfield->selected) {
       gravfield->spec.uuid_slot = uuid_slot;
+      return;
+    }
+  }
+  AZ_LIST_LOOP(wall, room->walls) {
+    if (wall->selected) {
+      wall->spec.uuid_slot = uuid_slot;
       return;
     }
   }

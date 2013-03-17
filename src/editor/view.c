@@ -208,6 +208,33 @@ static void draw_node(const az_editor_state_t *state,
   }
 }
 
+static void draw_script_and_uuid_slot(
+    az_editor_state_t *state, az_vector_t position,
+    const az_script_t *script, int uuid_slot) {
+  if (script == NULL && uuid_slot == 0) return;
+  glPushMatrix(); {
+    camera_to_screen_orient(state, position);
+    if (script != NULL) {
+      glColor3f(0.75, 0, 1); // purple
+      glBegin(GL_QUADS); {
+        glVertex2f(5, -9); glVertex2f(-5, -9);
+        glVertex2f(-5, 0); glVertex2f(5, 0);
+      } glEnd();
+      glColor3f(0, 0, 0); // black
+      az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
+    }
+    if (uuid_slot != 0) {
+      glColor3f(1, 0, 0); // red
+      glBegin(GL_QUADS); {
+        glVertex2f(9, 0); glVertex2f(-9, 0);
+        glVertex2f(-9, 9); glVertex2f(9, 9);
+      } glEnd();
+      glColor3f(0, 0, 0); // black
+      az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d", uuid_slot);
+    }
+  } glPopMatrix();
+}
+
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_BG) {
@@ -237,6 +264,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
                 0.5 + 0.01 * az_clock_zigzag(50, 1, state->clock))
     };
     az_draw_wall(&real_wall);
+    draw_script_and_uuid_slot(
+        state, real_wall.position, NULL, editor_wall->spec.uuid_slot);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||
@@ -249,31 +278,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
     az_draw_baddie(&real_baddie, state->clock);
-    if (editor_baddie->spec.on_kill != NULL ||
-        editor_baddie->spec.uuid_slot != 0) {
-      glPushMatrix(); {
-        camera_to_screen_orient(state, real_baddie.position);
-        if (editor_baddie->spec.on_kill != NULL) {
-          glColor3f(0.75, 0, 1); // purple
-          glBegin(GL_QUADS); {
-            glVertex2f(5, -9); glVertex2f(-5, -9);
-            glVertex2f(-5, 0); glVertex2f(5, 0);
-          } glEnd();
-          glColor3f(0, 0, 0); // black
-          az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
-        }
-        if (editor_baddie->spec.uuid_slot != 0) {
-          glColor3f(1, 0, 0); // red
-          glBegin(GL_QUADS); {
-            glVertex2f(9, 0); glVertex2f(-9, 0);
-            glVertex2f(-9, 9); glVertex2f(9, 9);
-          } glEnd();
-          glColor3f(0, 0, 0); // black
-          az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d",
-                         editor_baddie->spec.uuid_slot);
-        }
-      } glPopMatrix();
-    }
+    draw_script_and_uuid_slot(
+        state, real_baddie.position, editor_baddie->spec.on_kill,
+        editor_baddie->spec.uuid_slot);
   }
   AZ_LIST_LOOP(editor_door, room->doors) {
     const az_door_t real_door = {

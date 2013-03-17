@@ -110,6 +110,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       wall->data = spec->data;
       wall->position = spec->position;
       wall->angle = spec->angle;
+      put_uuid(state, spec->uuid_slot, AZ_UUID_WALL, wall->uid);
     }
   }
 }
@@ -248,9 +249,22 @@ az_projectile_t *az_add_projectile(
   return NULL;
 }
 
+bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
+                    az_wall_t **wall_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->walls));
+  az_wall_t *wall = &state->walls[index];
+  if (wall->kind != AZ_WALL_NOTHING && wall->uid == uid) {
+    *wall_out = wall;
+    return true;
+  }
+  return false;
+}
+
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
   AZ_ARRAY_LOOP(wall, state->walls) {
     if (wall->kind == AZ_WALL_NOTHING) {
+      az_assign_uid(wall - state->walls, &wall->uid);
       wall->flare = 0.0;
       *wall_out = wall;
       return true;

@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/uid.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -66,6 +67,7 @@ typedef struct {
 typedef struct {
   az_wall_kind_t kind; // if AZ_WALL_NOTHING, this wall is not present
   const az_wall_data_t *data;
+  az_uid_t uid;
   az_vector_t position;
   double angle;
   double flare; // from 0.0 (nothing) to 1.0 (was just now hit)

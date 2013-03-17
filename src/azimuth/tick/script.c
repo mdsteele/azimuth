@@ -246,6 +246,14 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
                 }
               }
               break;
+            case AZ_UUID_WALL:
+              {
+                az_wall_t *wall;
+                if (az_lookup_wall(state, uuid.uid, &wall)) {
+                  wall->kind = AZ_WALL_NOTHING;
+                }
+              }
+              break;
           }
         }
         break;

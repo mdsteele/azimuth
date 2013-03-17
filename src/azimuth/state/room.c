@@ -220,14 +220,17 @@ static void parse_node_directive(az_load_room_t *loader) {
 
 static void parse_wall_directive(az_load_room_t *loader) {
   if (loader->room->num_walls >= loader->num_walls) FAIL();
-  int kind, index;
+  int kind, index, uuid_slot;
   double x, y, angle;
-  READ("%d d%d x%lf y%lf a%lf\n", &kind, &index, &x, &y, &angle);
-  if (kind <= 0 || kind > AZ_NUM_WALL_KINDS) FAIL();
-  if (index < 0 || index >= AZ_NUM_WALL_DATAS) FAIL();
+  READ("%d d%d x%lf y%lf a%lf u%d\n",
+       &kind, &index, &x, &y, &angle, &uuid_slot);
+  if (kind <= 0 || kind > AZ_NUM_WALL_KINDS ||
+      index < 0 || index >= AZ_NUM_WALL_DATAS ||
+      uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_wall_spec_t *wall = &loader->room->walls[loader->room->num_walls];
   wall->kind = (az_wall_kind_t)kind;
   wall->data = az_get_wall_data(index);
+  wall->uuid_slot = uuid_slot;
   wall->position = (az_vector_t){x, y};
   wall->angle = angle;
   ++loader->room->num_walls;
@@ -309,9 +312,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
   WRITE_SCRIPT('s', room->on_start);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_spec_t *wall = &room->walls[i];
-    WRITE("!W%d d%d x%.02f y%.02f a%f\n", (int)wall->kind,
+    WRITE("!W%d d%d x%.02f y%.02f a%f u%d\n", (int)wall->kind,
           az_wall_data_index(wall->data), wall->position.x, wall->position.y,
-          wall->angle);
+          wall->angle, wall->uuid_slot);
   }
   for (int i = 0; i < room->num_doors; ++i) {
     const az_door_spec_t *door = &room->doors[i];

@@ -74,6 +74,7 @@ typedef struct {
   const az_wall_data_t *data;
   az_vector_t position;
   double angle;
+  int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
 } az_wall_spec_t;
 
 // Represents one room of the planetoid.  This sturct owns all of its pointers.

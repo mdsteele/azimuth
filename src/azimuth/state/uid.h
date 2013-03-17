@@ -57,7 +57,8 @@ typedef enum {
   AZ_UUID_BADDIE,
   AZ_UUID_DOOR,
   AZ_UUID_GRAVFIELD,
-  AZ_UUID_NODE
+  AZ_UUID_NODE,
+  AZ_UUID_WALL
 } az_uuid_type_t;
 
 typedef struct {

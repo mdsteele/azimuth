@@ -167,6 +167,8 @@ az_projectile_t *az_add_projectile(
     az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
     az_vector_t position, double angle);
 
+bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
+                    az_wall_t **wall_out);
 bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
 
 void az_add_random_pickup(az_space_state_t *state,
