@@ -78,14 +78,12 @@ typedef enum {
 
 // Bitset of flags dictating special projectile behavior:
 typedef uint_fast8_t az_proj_flags_t;
-// HOMING: projectile homes in on targets
-#define AZ_PROJF_HOMING   ((az_proj_flags_t)(1u << 0))
 // NO_HIT: projectile never impacts anything (just goes until it expires)
-#define AZ_PROJF_NO_HIT   ((az_proj_flags_t)(1u << 1))
+#define AZ_PROJF_NO_HIT   ((az_proj_flags_t)(1u << 0))
 // PHASED: projectile passes through walls
-#define AZ_PROJF_PHASED   ((az_proj_flags_t)(1u << 2))
+#define AZ_PROJF_PHASED   ((az_proj_flags_t)(1u << 1))
 // PIERCING: projectile pierces through multiple targets
-#define AZ_PROJF_PIERCING ((az_proj_flags_t)(1u << 3))
+#define AZ_PROJF_PIERCING ((az_proj_flags_t)(1u << 2))
 
 typedef struct {
   double speed;
@@ -94,6 +92,7 @@ typedef struct {
   double splash_damage; // how much damage the explosion deals
   double splash_radius; // radius of explosion (zero for most projectiles)
   double impact_shake; // how much we shake the camera on impact
+  double homing_rate; // homing turn rate in radians per second
   az_proj_kind_t shrapnel_kind; // if AZ_PROJ_NOTHING, this proj doesn't burst
   az_damage_flags_t damage_kind; // 0 is interpreted as normal damage
   az_proj_flags_t properties;

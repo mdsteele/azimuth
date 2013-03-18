@@ -92,8 +92,7 @@ static void on_projectile_impact(az_space_state_t *state,
       az_projectile_t *shrapnel = az_add_projectile(
           state, proj->data->shrapnel_kind, false,
           az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power);
-      if (shrapnel != NULL &&
-          !(shrapnel->data->properties & AZ_PROJF_HOMING)) {
+      if (shrapnel != NULL && shrapnel->data->homing_rate == 0.0) {
         shrapnel->velocity = az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
       }
     }
@@ -212,7 +211,7 @@ static void on_projectile_hit_ship(
 static void projectile_home_in(az_space_state_t *state,
                                az_projectile_t *proj,
                                double time) {
-  assert(proj->data->properties & AZ_PROJF_HOMING);
+  assert(proj->data->homing_rate > 0.0);
   const double proj_angle = az_vtheta(proj->velocity);
   // First, figure out what position we're homing in on.
   az_vector_t goal = state->ship.position;
@@ -235,10 +234,26 @@ static void projectile_home_in(az_space_state_t *state,
   }
   // Now, home in on the goal position.
   const double new_angle =
-    az_angle_towards(proj_angle, time * 3.5,
+    az_angle_towards(proj_angle, time * proj->data->homing_rate,
                      az_vtheta(az_vsub(goal, proj->position)));
   proj->velocity = az_vpolar(proj->data->speed, new_angle);
   proj->angle = new_angle;
+}
+
+static void leave_ember_trail(
+    az_space_state_t *state, az_projectile_t *proj, az_color_t color,
+    double lifetime, double radius) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_EMBER;
+    particle->color = color;
+    particle->position = proj->position;
+    particle->velocity = AZ_VZERO;
+    particle->angle = proj->angle;
+    particle->lifetime = lifetime;
+    particle->param1 = radius;
+  }
 }
 
 static void leave_missile_trail(az_space_state_t *state,
@@ -268,8 +283,14 @@ static void projectile_special_logic(az_space_state_t *state,
   // The projectile still hasn't hit anything.  Apply kind-specific logic to
   // the projectile (e.g. homing projectiles will home in).
   switch (proj->kind) {
-    case AZ_PROJ_GUN_FREEZE:
+    case AZ_PROJ_GUN_CHARGED_NORMAL:
+      leave_ember_trail(state, proj, (az_color_t){255, 255, 255, 128},
+                        0.1, 6.0);
+      break;
     case AZ_PROJ_GUN_CHARGED_FREEZE:
+      leave_ember_trail(state, proj, (az_color_t){0, 255, 255, 128}, 0.2, 6.0);
+      // fallthrough
+    case AZ_PROJ_GUN_FREEZE:
     case AZ_PROJ_GUN_FREEZE_HOMING:
     case AZ_PROJ_GUN_FREEZE_BURST:
     case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
@@ -283,8 +304,17 @@ static void projectile_special_logic(az_space_state_t *state,
       }
       break;
     case AZ_PROJ_GUN_HOMING:
+      az_add_speck(state, (az_color_t){0, 128, 255, 255}, 0.2,
+                   proj->position, AZ_VZERO);
+      break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
-      az_add_speck(state, (az_color_t){0, 0, 255, 255}, 0.2,
+      leave_ember_trail(state, proj, (az_color_t){0, 96, 255, 128}, 0.2, 8.0);
+      break;
+    case AZ_PROJ_GUN_CHARGED_PIERCE:
+      leave_ember_trail(state, proj, (az_color_t){255, 0, 255, 128}, 0.5, 8.0);
+      break;
+    case AZ_PROJ_GUN_HOMING_PIERCE:
+      az_add_speck(state, (az_color_t){255, 0, 255, 255}, 0.3,
                    proj->position, AZ_VZERO);
       break;
     case AZ_PROJ_GUN_CHARGED_BEAM:
@@ -433,18 +463,7 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
-      {
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_EMBER;
-          particle->color = (az_color_t){255, 128, 0, 128};
-          particle->position = proj->position;
-          particle->velocity = AZ_VZERO;
-          particle->angle = proj->angle;
-          particle->lifetime = 0.1;
-          particle->param1 = 5.0;
-        }
-      }
+      leave_ember_trail(state, proj, (az_color_t){255, 128, 0, 128}, 0.1, 5.0);
       break;
     default: break;
   }
@@ -496,7 +515,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   // Resolve the impact (if any):
   switch (impact.type) {
     case AZ_IMP_NOTHING:
-      if (proj->data->properties & AZ_PROJF_HOMING) {
+      if (proj->data->homing_rate != 0.0) {
         projectile_home_in(state, proj, time);
       }
       break;

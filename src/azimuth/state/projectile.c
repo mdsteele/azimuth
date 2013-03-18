@@ -55,21 +55,21 @@ static const az_proj_data_t proj_data[] = {
     .speed = 500.0,
     .lifetime = 3.0,
     .impact_damage = 0.5,
-    .properties = AZ_PROJF_HOMING
+    .homing_rate = AZ_DEG2RAD(200)
   },
   [AZ_PROJ_GUN_CHARGED_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,
     .impact_damage = 4.0,
+    .homing_rate = AZ_DEG2RAD(360),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
-    .properties = AZ_PROJF_HOMING
   },
   [AZ_PROJ_GUN_FREEZE_HOMING] = {
     .speed = 500.0,
     .lifetime = 3.0,
     .impact_damage = 0.5,
-    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
-    .properties = AZ_PROJF_HOMING
+    .homing_rate = AZ_DEG2RAD(200),
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE
   },
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
@@ -95,7 +95,8 @@ static const az_proj_data_t proj_data[] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.05,
-    .properties = AZ_PROJF_HOMING | AZ_PROJF_PHASED
+    .homing_rate = AZ_DEG2RAD(200),
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_PHASE_BURST] = {
     .speed = 600.0,
@@ -153,7 +154,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 400.0,
     .lifetime = 1.1,
     .impact_damage = 0.5,
-    .properties = AZ_PROJF_HOMING
+    .homing_rate = AZ_DEG2RAD(200)
   },
   [AZ_PROJ_GUN_PIERCE] = {
     .speed = 700.0,
@@ -164,8 +165,9 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_GUN_CHARGED_PIERCE] = {
     .speed = 800.0,
-    .lifetime = 2.0,
-    .impact_damage = 16.0,
+    .lifetime = 3.0,
+    .impact_damage = 12.0,
+    .homing_rate = AZ_DEG2RAD(60),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
   },
@@ -180,8 +182,9 @@ static const az_proj_data_t proj_data[] = {
     .speed = 600.0,
     .lifetime = 3.0,
     .impact_damage = 1.0,
+    .homing_rate = AZ_DEG2RAD(200),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .properties = AZ_PROJF_HOMING | AZ_PROJF_PIERCING
+    .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_CHARGED_BEAM] = {
     .lifetime = 0.25,
@@ -236,8 +239,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 4.0,
     .splash_radius = 20.0,
     .impact_shake = 0.75,
-    .damage_kind = AZ_DMGF_ROCKET,
-    .properties = AZ_PROJF_HOMING
+    .homing_rate = AZ_DEG2RAD(270),
+    .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_PHASE] = {
     .speed = 1000.0,

@@ -579,7 +579,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
             break;
           case AZ_GUN_HOMING:
             fire_projectiles(state, AZ_PROJ_MISSILE_HOMING, 1.0,
-                             3, AZ_DEG2RAD(20), 0, AZ_SND_FIRE_HYPER_ROCKET);
+                             3, AZ_DEG2RAD(30), 0, AZ_SND_FIRE_HYPER_ROCKET);
             break;
           case AZ_GUN_PHASE:
             for (int param = -1; param <= 1; param += 2) {

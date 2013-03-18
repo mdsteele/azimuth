@@ -120,7 +120,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_HOMING:
     case AZ_PROJ_GUN_HOMING_SHRAPNEL:
       glBegin(GL_TRIANGLES); {
-        glColor3f(0, 0, 1); // blue
+        glColor3f(0, 0.25, 1);
         glVertex2f(4, 0);
         glVertex2f(-4, 2);
         glVertex2f(-4, -2);
@@ -128,7 +128,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
       glBegin(GL_TRIANGLES); {
-        glColor3f(0, 0, 1); // blue
+        glColor3f(0, 0.25, 1);
         glVertex2f(8, 0);
         glVertex2f(-8, 4);
         glVertex2f(-8, -4);
@@ -188,9 +188,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_PROJ_GUN_PIERCE:
-    case AZ_PROJ_GUN_CHARGED_PIERCE:
     case AZ_PROJ_GUN_FREEZE_PIERCE:
-    case AZ_PROJ_GUN_HOMING_PIERCE:
       {
         const GLfloat red =
           (proj->kind == AZ_PROJ_GUN_FREEZE_PIERCE ? 0.3 : 1.0);
@@ -212,6 +210,26 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
           glVertex2f(-6, -8);
         } glEnd();
       }
+      break;
+    case AZ_PROJ_GUN_CHARGED_PIERCE:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0, 1, 0.8);
+        glVertex2f(0, 0);
+        glColor4f(1, 0, 1, 0);
+        for (int i = 0; i <= 360; i += 45) {
+          const double radius = (i % 2 ? 20.0 : 10.0);
+          const double theta = AZ_DEG2RAD(i + 400 * proj->age);
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
+    case AZ_PROJ_GUN_HOMING_PIERCE:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0, 1, 0.5);
+        glVertex2f(-5, 0);
+        glColor3f(1, 0, 1);
+        glVertex2f(-8, 5); glVertex2f(6, 0); glVertex2f(-8, -5);
+      } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_BEAM:
       glBegin(GL_TRIANGLE_FAN); {
