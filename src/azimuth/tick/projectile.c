@@ -104,7 +104,6 @@ static void on_projectile_impact(az_space_state_t *state,
   switch (proj->kind) {
     case AZ_PROJ_GUN_PHASE:
     case AZ_PROJ_GUN_FREEZE_PHASE:
-    case AZ_PROJ_GUN_TRIPLE_PHASE:
     case AZ_PROJ_GUN_HOMING_PHASE:
     case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_PHASE_PIERCE:
@@ -271,7 +270,6 @@ static void projectile_special_logic(az_space_state_t *state,
   switch (proj->kind) {
     case AZ_PROJ_GUN_FREEZE:
     case AZ_PROJ_GUN_CHARGED_FREEZE:
-    case AZ_PROJ_GUN_FREEZE_TRIPLE:
     case AZ_PROJ_GUN_FREEZE_HOMING:
     case AZ_PROJ_GUN_FREEZE_BURST:
     case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
@@ -286,7 +284,6 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_GUN_HOMING:
     case AZ_PROJ_GUN_CHARGED_HOMING:
-    case AZ_PROJ_GUN_TRIPLE_HOMING:
       az_add_speck(state, (az_color_t){0, 0, 255, 255}, 0.2,
                    proj->position, AZ_VZERO);
       break;

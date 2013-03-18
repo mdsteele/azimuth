@@ -65,7 +65,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   switch (proj->kind) {
     case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PROJ_GUN_NORMAL:
-    case AZ_PROJ_GUN_TRIPLE:
     case AZ_PROJ_GUN_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
@@ -84,7 +83,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_NORMAL:
-    case AZ_PROJ_GUN_CHARGED_TRIPLE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
         glVertex2f( 0.0,  0.0);
@@ -103,7 +101,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       break;
     case AZ_PROJ_GUN_FREEZE:
     case AZ_PROJ_GUN_CHARGED_FREEZE:
-    case AZ_PROJ_GUN_FREEZE_TRIPLE:
     case AZ_PROJ_GUN_FREEZE_HOMING:
     case AZ_PROJ_GUN_FREEZE_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
@@ -121,7 +118,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_HOMING:
-    case AZ_PROJ_GUN_TRIPLE_HOMING:
     case AZ_PROJ_GUN_HOMING_SHRAPNEL:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0, 1); // blue
@@ -140,7 +136,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       break;
     case AZ_PROJ_GUN_PHASE:
     case AZ_PROJ_GUN_FREEZE_PHASE:
-    case AZ_PROJ_GUN_TRIPLE_PHASE:
     case AZ_PROJ_GUN_HOMING_PHASE:
     case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_PHASE_PIERCE:
@@ -178,7 +173,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       break;
     case AZ_PROJ_GUN_BURST:
     case AZ_PROJ_GUN_FREEZE_BURST:
-    case AZ_PROJ_GUN_TRIPLE_BURST:
     case AZ_PROJ_GUN_HOMING_BURST:
     case AZ_PROJ_GUN_BURST_PIERCE:
       glPushMatrix(); {
@@ -196,7 +190,6 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_PIERCE:
     case AZ_PROJ_GUN_CHARGED_PIERCE:
     case AZ_PROJ_GUN_FREEZE_PIERCE:
-    case AZ_PROJ_GUN_TRIPLE_PIERCE:
     case AZ_PROJ_GUN_HOMING_PIERCE:
       {
         const GLfloat red =
