@@ -113,6 +113,7 @@ typedef struct {
   az_vector_t position;
   az_vector_t velocity;
   double angle;
+  double power; // damage multiplier
   double age; // seconds
   double param; // the meaning of this is projectile-kind-specific
   // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
@@ -126,7 +127,7 @@ typedef struct {
 // fired from the given position at the given angle.
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
                         bool fired_by_enemy, az_vector_t position,
-                        double angle);
+                        double angle, double power);
 
 /*===========================================================================*/
 

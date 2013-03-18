@@ -240,39 +240,59 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
 /*===========================================================================*/
 // Weapons:
 
+// Calculate the base power multiplier for gun projectiles.  Each gun upgrade
+// that the player has collected boosts power by 5.5% for all guns (but not for
+// ordnance).
+static double gun_power_mult(const az_space_state_t *state) {
+  double power = 1.0;
+  for (az_upgrade_t upg = AZ_UPG_GUN_CHARGE; upg <= AZ_UPG_GUN_BEAM; ++upg) {
+    if (az_has_upgrade(&state->ship.player, upg)) power *= 1.055;
+  }
+  return power;
+}
+
 static void fire_projectiles(
-    az_space_state_t *state, az_proj_kind_t kind, int num_shots,
+    az_space_state_t *state, az_proj_kind_t kind, double power, int num_shots,
     double dtheta, double theta_offset, az_sound_key_t sound) {
   const az_ship_t *ship = &state->ship;
   const az_vector_t gun_position =
     az_vadd(ship->position, az_vpolar(18, ship->angle));
   double theta = 0.0;
   for (int i = 0; i < num_shots; ++i) {
-    if (az_add_projectile(state, kind, false, gun_position,
-                          ship->angle + theta_offset + theta) == NULL) break;
+    if (az_add_projectile(
+            state, kind, false, gun_position,
+            ship->angle + theta_offset + theta, power) == NULL) break;
     theta = -theta;
     if (i % 2 == 0) theta += dtheta;
   }
   az_play_sound(&state->soundboard, sound);
 }
 
+// Fire a single, non-gun projectile.
 static void fire_one_projectile(
     az_space_state_t *state, az_proj_kind_t kind, az_sound_key_t sound) {
-  fire_projectiles(state, kind, 1, 0.0, 0.0, sound);
+  fire_projectiles(state, kind, 1.0, 1, 0.0, 0.0, sound);
 }
 
+// Fire multiple projectiles from a gun weapon (applying the gun power bonus).
 static void fire_gun_multi(
     az_space_state_t *state, double energy_mult, az_proj_kind_t kind,
     int num_shots, double dtheta, double theta_offset, az_sound_key_t sound) {
-  const double energy_cost = 20.0 * energy_mult;
-  az_ship_t *ship = &state->ship;
-  if (ship->player.energy < energy_cost) return;
-  ship->player.energy -= energy_cost;
-  fire_projectiles(state, kind, num_shots, dtheta, theta_offset, sound);
+  // Consume energy for this shot (or return early if we can't afford it).
+  if (energy_mult > 0.0) {
+    const double energy_cost = 20.0 * energy_mult;
+    az_ship_t *ship = &state->ship;
+    if (ship->player.energy < energy_cost) return;
+    ship->player.energy -= energy_cost;
+  }
+  fire_projectiles(state, kind, gun_power_mult(state), num_shots, dtheta,
+                   theta_offset, sound);
 }
 
-static void fire_gun_single(az_space_state_t *state, double energy_mult,
-                            az_proj_kind_t kind, az_sound_key_t sound) {
+// Fire a single projectile from a gun weapon (applying the gun power bonus).
+static void fire_gun_single(
+    az_space_state_t *state, double energy_mult, az_proj_kind_t kind,
+    az_sound_key_t sound) {
   fire_gun_multi(state, energy_mult, kind, 1, 0.0, 0.0, sound);
 }
 
@@ -289,7 +309,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
 
   // Determine how much energy the beam needs and how much damage it'll do:
   double energy_cost = AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND * time;
-  double damage_mult = 1.0;
+  double damage_mult = gun_power_mult(state);
   switch (minor) {
     case AZ_GUN_NONE: break;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
@@ -511,14 +531,14 @@ static void fire_weapons(az_space_state_t *state, double time) {
           az_add_projectile(
               state, AZ_PROJ_MEGA_BOMB, false,
               az_vadd(ship->position, az_vpolar(-12, ship->angle)),
-              ship->angle);
+              ship->angle, 1.0);
         } else {
           if (player->bombs <= 0) return;
           --player->bombs;
           az_add_projectile(
               state, AZ_PROJ_BOMB, false,
               az_vadd(ship->position, az_vpolar(-12, ship->angle)),
-              ship->angle);
+              ship->angle, 1.0);
           az_play_sound(&state->soundboard, AZ_SND_DROP_BOMB);
         }
         ship->ordn_charge = 0.0;
@@ -555,7 +575,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                                 AZ_SND_FIRE_HYPER_ROCKET);
             break;
           case AZ_GUN_HOMING:
-            fire_projectiles(state, AZ_PROJ_MISSILE_HOMING,
+            fire_projectiles(state, AZ_PROJ_MISSILE_HOMING, 1.0,
                              3, AZ_DEG2RAD(20), 0, AZ_SND_FIRE_HYPER_ROCKET);
             break;
           case AZ_GUN_PHASE:
@@ -563,7 +583,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
               az_projectile_t *proj = az_add_projectile(
                   state, AZ_PROJ_MISSILE_PHASE, false,
                   az_vadd(ship->position, az_vpolar(18, ship->angle)),
-                  ship->angle);
+                  ship->angle, 1.0);
               if (proj != NULL) proj->param = param;
             }
             az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
@@ -587,38 +607,38 @@ static void fire_weapons(az_space_state_t *state, double time) {
       else {
         switch (player->gun2) {
           case AZ_GUN_NONE:
-            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_NORMAL,
-                                AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,
+                            AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
           case AZ_GUN_FREEZE:
-            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_FREEZE,
-                                AZ_SND_FIRE_GUN_FREEZE);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE,
+                            AZ_SND_FIRE_GUN_FREEZE);
             break;
           case AZ_GUN_TRIPLE:
-            fire_projectiles(state, AZ_PROJ_GUN_CHARGED_TRIPLE,
-                             3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                           3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_HOMING:
-            fire_projectiles(state, AZ_PROJ_GUN_CHARGED_HOMING,
-                             4, AZ_DEG2RAD(90), AZ_DEG2RAD(45),
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING,
+                           4, AZ_DEG2RAD(90), AZ_DEG2RAD(45),
                              AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_PHASE:
-            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_PHASE,
-                                AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE,
+                            AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_BURST:
-            fire_projectiles(state, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0,
-                             AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 9, AZ_DEG2RAD(5), 0,
+                           AZ_SND_FIRE_GUN_NORMAL);
           break;
           case AZ_GUN_PIERCE:
-            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_PIERCE,
-                                AZ_SND_FIRE_GUN_PIERCE);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE,
+                            AZ_SND_FIRE_GUN_PIERCE);
             break;
           case AZ_GUN_BEAM:
-            fire_one_projectile(state, AZ_PROJ_GUN_CHARGED_BEAM,
-                                AZ_SND_FIRE_GUN_CHARGED_BEAM);
+            fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_BEAM,
+                            AZ_SND_FIRE_GUN_CHARGED_BEAM);
             break;
         }
       }

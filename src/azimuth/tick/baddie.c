@@ -155,7 +155,7 @@ static void fire_projectile(az_space_state_t *state, az_baddie_t *baddie,
   const double theta = firing_angle + baddie->angle;
   az_add_projectile(state, kind, true,
                     az_vadd(baddie->position, az_vpolar(forward, theta)),
-                    theta + proj_angle_offset);
+                    theta + proj_angle_offset, 1.0);
 }
 
 static az_vector_t force_field(

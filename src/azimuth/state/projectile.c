@@ -36,7 +36,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_NORMAL] = {
     .speed = 800.0,
     .lifetime = 2.0,
-    .impact_damage = 5.0,
+    .impact_damage = 8.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_FREEZE] = {
@@ -48,7 +48,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_FREEZE] = {
     .speed = 850.0,
     .lifetime = 2.0,
-    .impact_damage = 5.0,
+    .impact_damage = 8.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE
   },
   [AZ_PROJ_GUN_FREEZE_TRIPLE] = {
@@ -65,7 +65,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_TRIPLE] = {
     .speed = 800.0,
     .lifetime = 2.0,
-    .impact_damage = 4.0,
+    .impact_damage = 6.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_HOMING] = {
@@ -77,7 +77,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,
-    .impact_damage = 2.5,
+    .impact_damage = 4.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
     .properties = AZ_PROJF_HOMING
   },
@@ -103,7 +103,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
     .speed = 800.0,
     .lifetime = 3.0,
-    .impact_damage = 10.0,
+    .impact_damage = 12.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
   },
@@ -149,7 +149,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_FREEZE_BURST] = {
     .speed = 900.0,
     .lifetime = 2.0,
-    .impact_damage = 1.0,
+    .impact_damage = 1.5,
     .shrapnel_kind = AZ_PROJ_GUN_FREEZE_SHRAPNEL,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE
   },
@@ -200,7 +200,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_PIERCE] = {
     .speed = 800.0,
     .lifetime = 2.0,
-    .impact_damage = 10.0,
+    .impact_damage = 16.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
   },
@@ -354,8 +354,9 @@ static const az_proj_data_t proj_data[] = {
 
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
                         bool fired_by_enemy, az_vector_t position,
-                        double angle) {
+                        double angle, double power) {
   assert(kind != AZ_PROJ_NOTHING);
+  assert(power > 0.0);
   memset(proj, 0, sizeof(*proj));
   proj->kind = kind;
   const int data_index = (int)kind;
@@ -365,6 +366,7 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
   proj->position = position;
   proj->velocity = az_vpolar(proj->data->speed, angle);
   proj->angle = angle;
+  proj->power = power;
   proj->last_hit_uid = AZ_NULL_UID;
 }
 

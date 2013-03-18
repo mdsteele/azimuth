@@ -44,7 +44,7 @@ static void on_projectile_impact(az_space_state_t *state,
     // Damage the ship if it's within the blast.
     if (az_ship_is_present(&state->ship) &&
         az_vwithin(state->ship.position, proj->position, radius)) {
-      az_damage_ship(state, proj->data->splash_damage, false);
+      az_damage_ship(state, proj->data->splash_damage * proj->power, false);
     }
     // Damage baddies that are within the blast.
     AZ_ARRAY_LOOP(baddie, state->baddies) {
@@ -55,7 +55,7 @@ static void on_projectile_impact(az_space_state_t *state,
                      radius + baddie->data->overall_bounding_radius)) {
         az_try_damage_baddie(state, baddie, &baddie->data->main_body,
                              proj->data->damage_kind,
-                             proj->data->splash_damage);
+                             proj->data->splash_damage * proj->power);
         if (proj->kind == AZ_PROJ_MISSILE_FREEZE &&
             !(baddie->data->main_body.immunities & AZ_DMGF_FREEZE)) {
           baddie->frozen = 1.0;
@@ -91,7 +91,7 @@ static void on_projectile_impact(az_space_state_t *state,
       const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random(-.5, .5));
       az_projectile_t *shrapnel = az_add_projectile(
           state, proj->data->shrapnel_kind, false,
-          az_vadd(proj->position, az_vpolar(0.1, theta)), theta);
+          az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power);
       if (shrapnel != NULL &&
           !(shrapnel->data->properties & AZ_PROJF_HOMING)) {
         shrapnel->velocity = az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
@@ -193,7 +193,7 @@ static void on_projectile_hit_baddie(
   assert(!proj->fired_by_enemy);
   proj->last_hit_uid = baddie->uid;
   az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
-                       proj->data->impact_damage);
+                       proj->data->impact_damage * proj->power);
   // Note that at this point, the baddie may now be dead and removed.  So we
   // can no longer use the `baddie` or `component` pointers.
   on_projectile_hit_target(state, proj, normal);
@@ -206,7 +206,7 @@ static void on_projectile_hit_ship(
   assert(proj->fired_by_enemy);
   assert(az_ship_is_present(&state->ship));
   proj->last_hit_uid = AZ_SHIP_UID;
-  az_damage_ship(state, proj->data->impact_damage, false);
+  az_damage_ship(state, proj->data->impact_damage * proj->power, false);
   on_projectile_hit_target(state, proj, normal);
 }
 
@@ -313,7 +313,7 @@ static void projectile_special_logic(az_space_state_t *state,
                          radius + baddie->data->overall_bounding_radius)) {
             az_try_damage_baddie(state, baddie, &baddie->data->main_body,
                                  proj->data->damage_kind,
-                                 proj->data->splash_damage *
+                                 proj->data->splash_damage * proj->power *
                                  (time / proj->data->lifetime));
           }
         }
@@ -345,7 +345,7 @@ static void projectile_special_logic(az_space_state_t *state,
                 state, AZ_PROJ_MISSILE_TRIPLE, proj->fired_by_enemy,
                 az_vadd(proj->position, az_vpolar((j ? offset : -offset),
                                                   proj->angle + AZ_HALF_PI)),
-                proj->angle);
+                proj->angle, proj->power);
           }
         }
       }
@@ -373,7 +373,7 @@ static void projectile_special_logic(az_space_state_t *state,
           for (int i = 0; i < 360; i += 40) {
             az_add_projectile(
                 state, AZ_PROJ_ROCKET, proj->fired_by_enemy, proj->position,
-                az_mod2pi(proj->angle + AZ_DEG2RAD(i)));
+                az_mod2pi(proj->angle + AZ_DEG2RAD(i)), proj->power);
           }
           proj->kind = AZ_PROJ_NOTHING;
           az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);

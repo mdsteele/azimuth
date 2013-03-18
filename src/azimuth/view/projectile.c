@@ -75,7 +75,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2f( 0.0,  2.0);
         glVertex2f(-1.5,  1.5);
         glColor4f(1, 1, 1, 0); // transparent white
-        glVertex2f(-10.,  0.0);
+        glVertex2f(-10.0 * proj->power, 0.0);
         glColor3f(1, 1, 1); // white
         glVertex2f(-1.5, -1.5);
         glVertex2f( 0.0, -2.0);
@@ -93,7 +93,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2f( 0.0,  4.0);
         glVertex2f(-3.0,  3.0);
         glColor4f(1, 1, 1, 0); // transparent white
-        glVertex2f(-20.,  0.0);
+        glVertex2f(-20.0 * proj->power, 0.0);
         glColor3f(1, 1, 1); // white
         glVertex2f(-3.0, -3.0);
         glVertex2f( 0.0, -4.0);

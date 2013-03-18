@@ -165,7 +165,7 @@ void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
 // the projectile array is full.
 az_projectile_t *az_add_projectile(
     az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
-    az_vector_t position, double angle);
+    az_vector_t position, double angle, double power);
 
 bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
                     az_wall_t **wall_out);
