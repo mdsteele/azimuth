@@ -94,6 +94,7 @@ typedef struct {
   bool unsaved; // true if this room currently has unsaved changes
   az_editor_room_label_t label;
   int zone_index;
+  az_room_flags_t properties;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);

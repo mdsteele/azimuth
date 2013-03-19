@@ -69,7 +69,8 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
     const bool visited = az_test_room_visited(player, i);
-    const bool mapped = az_test_zone_mapped(player, room->zone_index);
+    const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
+      az_test_zone_mapped(player, room->zone_index);
     if (!visited && !mapped) continue;
     const az_camera_bounds_t *bounds = &room->camera_bounds;
     const az_color_t zone_color = planet->zones[room->zone_index].color;

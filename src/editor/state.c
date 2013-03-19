@@ -33,6 +33,8 @@
 
 /*===========================================================================*/
 
+#define SAVE_ALL_ROOMS false
+
 static az_script_t *clone_script(const az_script_t *script) {
   if (script == NULL) return NULL;
   az_script_t *clone = AZ_ALLOC(1, az_script_t);
@@ -100,6 +102,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     const az_room_t *room = &planet.rooms[key];
     az_editor_room_t *eroom = AZ_LIST_ADD(state->planet.rooms);
     eroom->zone_index = room->zone_index;
+    eroom->properties = room->properties;
     eroom->camera_bounds = room->camera_bounds;
     eroom->on_start = clone_script(room->on_start);
     // Convert baddies:
@@ -150,7 +153,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
   // Count unsaved rooms:
   int num_rooms_to_save = 0;
   AZ_LIST_LOOP(room, state->planet.rooms) {
-    if (room->unsaved) ++num_rooms_to_save;
+    if (SAVE_ALL_ROOMS || room->unsaved) ++num_rooms_to_save;
   }
   // Convert planet:
   const int num_texts = AZ_LIST_SIZE(state->planet.texts);
@@ -184,13 +187,14 @@ bool az_save_editor_state(az_editor_state_t *state) {
   int num_rooms_to_save_so_far = 0;
   for (az_room_key_t key = 0; key < num_rooms; ++key) {
     az_editor_room_t *eroom = AZ_LIST_GET(state->planet.rooms, key);
-    if (eroom->unsaved) {
+    if (SAVE_ALL_ROOMS || eroom->unsaved) {
       assert(num_rooms_to_save_so_far < num_rooms_to_save);
       rooms_to_save[num_rooms_to_save_so_far] = key;
       ++num_rooms_to_save_so_far;
     }
     az_room_t *room = &planet.rooms[key];
     room->zone_index = eroom->zone_index;
+    room->properties = eroom->properties;
     room->camera_bounds = eroom->camera_bounds;
     room->on_start = clone_script(eroom->on_start);
     // Convert baddies:

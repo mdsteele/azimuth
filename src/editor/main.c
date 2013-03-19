@@ -661,6 +661,23 @@ static void do_change_zone(int delta) {
   set_room_unsaved(room);
 }
 
+static void do_toggle_property(az_room_flags_t flag) {
+  bool currently_set = true;
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    if (!room->selected) continue;
+    if (!(room->properties & flag)) {
+      currently_set = false;
+      break;
+    }
+  }
+  AZ_LIST_LOOP(room, state.planet.rooms) {
+    if (!room->selected) continue;
+    if (currently_set) room->properties &= ~flag;
+    else room->properties |= flag;
+    set_room_unsaved(room);
+  }
+}
+
 static void auto_set_door_dest(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   AZ_LIST_LOOP(door, room->doors) {
@@ -1035,7 +1052,8 @@ static void event_loop(void) {
               if (event.key.command) {
                 if (event.key.shift) auto_set_door_dest();
                 else begin_set_door_dest();
-              } else state.tool = AZ_TOOL_DOOR;
+              } else if (event.key.shift) do_toggle_property(AZ_ROOMF_DARK);
+              else state.tool = AZ_TOOL_DOOR;
               break;
             case AZ_KEY_E:
               if (event.key.command) begin_edit_gravfield();
@@ -1044,6 +1062,9 @@ static void event_loop(void) {
               if (event.key.shift) do_move_to_front();
               break;
             case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
+            case AZ_KEY_H:
+              if (event.key.shift) do_toggle_property(AZ_ROOMF_HEATED);
+              break;
             case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:
               if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
@@ -1069,6 +1090,7 @@ static void event_loop(void) {
               break;
             case AZ_KEY_U:
               if (event.key.command) begin_set_uuid_slot();
+              else if (event.key.shift) do_toggle_property(AZ_ROOMF_UNMAPPED);
               break;
             case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
             case AZ_KEY_Z: do_change_zone(event.key.shift ? -1 : 1); break;

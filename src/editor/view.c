@@ -84,7 +84,9 @@ static void draw_zone_swatch(az_editor_state_t *state,
   const double max_theta = min_theta + bounds->theta_span;
   const az_color_t color =
     AZ_LIST_GET(state->planet.zones, room->zone_index)->color;
-  glColor3ub(color.r / 2, color.g / 2, color.b / 2);
+  if (room->properties & AZ_ROOMF_UNMAPPED) {
+    glColor3ub(color.r / 4, color.g / 4, color.b / 4);
+  } else glColor3ub(color.r / 2, color.g / 2, color.b / 2);
   glBegin(GL_QUAD_STRIP); {
     const az_vector_t offset1 =
       az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
@@ -479,6 +481,18 @@ static void draw_hud(az_editor_state_t* state) {
   const az_zone_t *zone = AZ_LIST_GET(state->planet.zones, room->zone_index);
   glColor3ub(zone->color.r, zone->color.g, zone->color.b);
   az_draw_string(8, AZ_ALIGN_LEFT, 150, 5, zone->name);
+
+  // Draw room properties:
+  glColor3f(1, 1, 1);
+  if (room->properties & AZ_ROOMF_DARK) {
+    az_draw_string(8, AZ_ALIGN_LEFT, 600, 5, "D");
+  }
+  if (room->properties & AZ_ROOMF_HEATED) {
+    az_draw_string(8, AZ_ALIGN_LEFT, 610, 5, "H");
+  }
+  if (room->properties & AZ_ROOMF_UNMAPPED) {
+    az_draw_string(8, AZ_ALIGN_LEFT, 620, 5, "U");
+  }
 
   // Draw the tool name:
   const char *tool_name = "???";

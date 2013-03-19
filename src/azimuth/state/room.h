@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_STATE_ROOM_H_
 #define AZIMUTH_STATE_ROOM_H_
 
+#include <stdint.h>
+
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/camera.h" // for az_camera_bounds_t
 #include "azimuth/state/door.h" // for az_door_kind_t
@@ -77,10 +79,19 @@ typedef struct {
   int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
 } az_wall_spec_t;
 
+// Bitset of flags dictating special room behavior:
+typedef uint_fast8_t az_room_flags_t;
+// DARK: the room is very dark, and requires the Infrascanner to see well
+#define AZ_ROOMF_DARK     ((az_room_flags_t)(1u << 0))
+// HEATED: the room is very hot, and deals damage unless you have Thermal Armor
+#define AZ_ROOMF_HEATED   ((az_room_flags_t)(1u << 1))
+// UNMAPPED: the room is not included in the map data for the room's zone
+#define AZ_ROOMF_UNMAPPED ((az_room_flags_t)(1u << 2))
+
 // Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
-  az_room_key_t key;
   int zone_index;
+  az_room_flags_t properties;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start; // NULL if no script
   // Initial room objects:

@@ -84,16 +84,16 @@ static az_script_t *maybe_parse_script(az_load_room_t *loader, char ch) {
 }
 
 static void parse_room_header(az_load_room_t *loader) {
-  int room_num, zone_index;
+  int zone_index;
+  unsigned int properties;
   double min_r, r_span, min_theta, theta_span;
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
-  READ("@R%d z%d c(%lf,%lf,%lf,%lf) b%d d%d g%d n%d w%d\n",
-       &room_num, &zone_index, &min_r, &r_span, &min_theta, &theta_span,
-       &num_baddies, &num_doors, &num_gravfields, &num_nodes, &num_walls);
-  if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
+  READ("@R z%d p%u b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n",
+       &zone_index, &properties, &num_baddies, &num_doors, &num_gravfields,
+       &num_nodes, &num_walls, &min_r, &r_span, &min_theta, &theta_span);
   if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
-  loader->room->key = room_num;
   loader->room->zone_index = zone_index;
+  loader->room->properties = (az_room_flags_t)properties;
   if (min_r < 0.0 || r_span < 0.0 || theta_span < 0.0) FAIL();
   loader->room->camera_bounds.min_r = min_r;
   loader->room->camera_bounds.r_span = r_span;
@@ -303,12 +303,12 @@ static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("@R%d z%d c(%.02f,%.02f,%f,%f) b%d d%d g%d n%d w%d\n",
-        room->key, room->zone_index,
-        room->camera_bounds.min_r, room->camera_bounds.r_span,
-        room->camera_bounds.min_theta, room->camera_bounds.theta_span,
+  WRITE("@R z%d p%u b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",
+        room->zone_index, (unsigned int)room->properties,
         room->num_baddies, room->num_doors, room->num_gravfields,
-        room->num_nodes, room->num_walls);
+        room->num_nodes, room->num_walls, room->camera_bounds.min_r,
+        room->camera_bounds.r_span, room->camera_bounds.min_theta,
+        room->camera_bounds.theta_span);
   WRITE_SCRIPT('s', room->on_start);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_spec_t *wall = &room->walls[i];
