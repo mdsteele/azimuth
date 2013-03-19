@@ -55,15 +55,26 @@ void az_init_player(az_player_t *player) {
 
 /*===========================================================================*/
 
+static bool test_flag(const uint64_t *array, unsigned int index) {
+  return (array[index >> 6] & (UINT64_C(1) << (index & 0x3f))) != 0;
+}
+
+static void set_flag(uint64_t *array, unsigned int index) {
+  array[index >> 6] |= (UINT64_C(1) << (index & 0x3f));
+}
+
+static void clear_flag(uint64_t *array, unsigned int index) {
+  array[index >> 6] &= ~(UINT64_C(1) << (index & 0x3f));
+}
+
+/*===========================================================================*/
+
 // Check whether the player has a particular upgrade yet.
 bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade) {
   const unsigned int index = (unsigned int)upgrade;
   assert(index < AZ_NUM_UPGRADES);
-  if (index < 64u) {
-    return 0 != (player->upgrades1 & (UINT64_C(1) << index));
-  } else {
-    return 0 != (player->upgrades2 & (UINT64_C(1) << (index - 64u)));
-  }
+  assert(index < 64 * AZ_ARRAY_SIZE(player->upgrades));
+  return test_flag(player->upgrades, index);
 }
 
 // Give an upgrade to the player.
@@ -74,11 +85,8 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   // Record the upgrade as acquired.
   const unsigned int index = (unsigned int)upgrade;
   assert(index < AZ_NUM_UPGRADES);
-  if (index < 64u) {
-    player->upgrades1 |= (UINT64_C(1) << index);
-  } else {
-    player->upgrades2 |= (UINT64_C(1) << (index - 64));
-  }
+  assert(index < 64 * AZ_ARRAY_SIZE(player->upgrades));
+  set_flag(player->upgrades, index);
 
   // For weapon upgrades, select the new weapon.  For capacity upgrades,
   // increase max capacity.
@@ -117,47 +125,54 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
 bool az_test_room_visited(const az_player_t *player, az_room_key_t room) {
   const unsigned int index = (unsigned int)room;
   assert(index < AZ_MAX_NUM_ROOMS);
-  if (index < 64u) {
-    return (bool)(player->rooms1 & (UINT64_C(1) << index));
-  } else if (index < 128u) {
-    return (bool)(player->rooms2 & (UINT64_C(1) << (index - 64u)));
-  } else {
-    return (bool)(player->rooms3 & (UINT64_C(1) << (index - 128u)));
-  }
+  assert(index < 64 * AZ_ARRAY_SIZE(player->rooms_visited));
+  return test_flag(player->rooms_visited, index);
 }
 
 void az_set_room_visited(az_player_t *player, az_room_key_t room) {
   const unsigned int index = (unsigned int)room;
   assert(index < AZ_MAX_NUM_ROOMS);
-  if (index < 64u) {
-    player->rooms1 |=  (UINT64_C(1) << index);
-  } else if (index < 128u) {
-    player->rooms2 |= (UINT64_C(1) << (index - 64u));
-  } else {
-    player->rooms3 |= (UINT64_C(1) << (index - 128u));
-  }
+  assert(index < 64 * AZ_ARRAY_SIZE(player->rooms_visited));
+  set_flag(player->rooms_visited, index);
 }
 
 /*===========================================================================*/
 
-#define AZ_MAX_NUM_FLAGS 64
+bool az_test_zone_mapped(const az_player_t *player, int zone) {
+  const unsigned int index = (unsigned int)zone;
+  assert(index < AZ_MAX_NUM_ZONES);
+  assert(index < 64 * AZ_ARRAY_SIZE(player->zones_mapped));
+  return test_flag(player->zones_mapped, index);
+}
+
+void az_set_zone_mapped(az_player_t *player, int zone) {
+  const unsigned int index = (unsigned int)zone;
+  assert(index < AZ_MAX_NUM_ZONES);
+  assert(index < 64 * AZ_ARRAY_SIZE(player->zones_mapped));
+  set_flag(player->zones_mapped, index);
+}
+
+/*===========================================================================*/
 
 bool az_test_flag(const az_player_t *player, az_flag_t flag) {
   const unsigned int index = (unsigned int)flag;
   assert(index < AZ_MAX_NUM_FLAGS);
-  return (bool)(player->flags & (UINT64_C(1) << index));
+  assert(index < 64 * AZ_ARRAY_SIZE(player->flags));
+  return test_flag(player->flags, index);
 }
 
 void az_set_flag(az_player_t *player, az_flag_t flag) {
   const unsigned int index = (unsigned int)flag;
   assert(index < AZ_MAX_NUM_FLAGS);
-  player->flags |= (UINT64_C(1) << index);
+  assert(index < 64 * AZ_ARRAY_SIZE(player->flags));
+  set_flag(player->flags, index);
 }
 
 void az_clear_flag(az_player_t *player, az_flag_t flag) {
   const unsigned int index = (unsigned int)flag;
   assert(index < AZ_MAX_NUM_FLAGS);
-  player->flags &= ~(UINT64_C(1) << index);
+  assert(index < 64 * AZ_ARRAY_SIZE(player->flags));
+  clear_flag(player->flags, index);
 }
 
 /*===========================================================================*/

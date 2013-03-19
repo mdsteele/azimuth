@@ -91,7 +91,7 @@ static void parse_room_header(az_load_room_t *loader) {
        &room_num, &zone_index, &min_r, &r_span, &min_theta, &theta_span,
        &num_baddies, &num_doors, &num_gravfields, &num_nodes, &num_walls);
   if (room_num < 0 || room_num >= AZ_MAX_NUM_ROOMS) FAIL();
-  if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ROOMS) FAIL();
+  if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
   loader->room->key = room_num;
   loader->room->zone_index = zone_index;
   if (min_r < 0.0 || r_span < 0.0 || theta_span < 0.0) FAIL();

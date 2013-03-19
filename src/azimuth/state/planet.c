@@ -100,7 +100,7 @@ static void parse_planet_header(az_load_planet_t *loader) {
   READ("@P z%d r%d t%d s%d x%lf y%lf a%lf\n",
        &num_zones, &num_rooms, &num_texts, &start_room_num,
        &start_x, &start_y, &start_angle);
-  if (num_zones < 1 || num_zones > num_rooms ||
+  if (num_zones < 1 || num_zones > AZ_MAX_NUM_ZONES ||
       num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
       num_texts < 0 || num_texts > AZ_MAX_NUM_TEXTS ||
       start_room_num < 0 || start_room_num >= num_rooms) FAIL();

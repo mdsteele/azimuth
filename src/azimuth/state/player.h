@@ -85,14 +85,10 @@ typedef int az_flag_t;
 // This structure stores any and all information needed to store a saved game.
 typedef struct {
   // Bitmasks storing game progress:
-  uint64_t upgrades1, upgrades2;
-  uint64_t rooms1, rooms2, rooms3;
-#if AZ_MAX_NUM_ROOMS > 64 * 3
-#error "Not enough roomsN bitvectors in az_player_t."
-#elif AZ_MAX_NUM_ROOMS <= 64 * 2
-#error "Too many roomsN bitvectors in az_player_t."
-#endif
-  uint64_t flags;
+  uint64_t upgrades[(AZ_NUM_UPGRADES + 63) / 64];
+  uint64_t rooms_visited[(AZ_MAX_NUM_ROOMS + 63) / 64];
+  uint64_t zones_mapped[(AZ_MAX_NUM_ZONES + 63) / 64];
+  uint64_t flags[(AZ_MAX_NUM_FLAGS + 63) / 64];
   // Total game time for this playthrough so far, in seconds:
   double total_time;
   // The room we're currently in.  For save files, this indicates the room in
@@ -123,6 +119,11 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade);
 bool az_test_room_visited(const az_player_t *player, az_room_key_t room);
 // Set the player as having visited the given room.
 void az_set_room_visited(az_player_t *player, az_room_key_t room);
+
+// Check whether the player has gotten map data for the given zone yet.
+bool az_test_zone_mapped(const az_player_t *player, int zone);
+// Set the player as having gotten map data for the given zone.
+void az_set_zone_mapped(az_player_t *player, int zone);
 
 // Check whether a given game flag is set for the player.
 bool az_test_flag(const az_player_t *player, az_flag_t flag);

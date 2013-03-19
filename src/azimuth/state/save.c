@@ -37,34 +37,50 @@ void az_reset_saved_games(az_saved_games_t *games) {
 
 /*===========================================================================*/
 
+static bool parse_bitfield(FILE *file, uint64_t *array, int array_length) {
+  assert(array_length >= 1);
+  if (fscanf(file, "=%"SCNx64, &array[0]) < 1) return false;
+  for (int i = 1; i < array_length; ++i) {
+    if (fscanf(file, ":%"SCNx64, &array[i]) < 1) return false;
+  }
+  return true;
+}
+
+#define READ_BITFIELD(prefix, array) do { \
+    if (fscanf(file, prefix) < 0) return false; \
+    if (!parse_bitfield(file, (array), AZ_ARRAY_SIZE(array))) { \
+      return false; \
+    } \
+  } while (0)
+
 static bool parse_saved_game(const az_planet_t *planet, FILE *file,
                              az_player_t *player) {
   az_init_player(player);
-  uint64_t upgrades1, upgrades2;
+
+  uint64_t upgrades[AZ_ARRAY_SIZE(player->upgrades)];
+  READ_BITFIELD(" up", upgrades);
+  READ_BITFIELD(" rv", player->rooms_visited);
+  READ_BITFIELD(" zm", player->zones_mapped);
+  READ_BITFIELD(" fl", player->flags);
   int rockets, bombs, gun1, gun2, ordnance;
-  if (fscanf(file, " u1=%"SCNx64" u2=%"SCNx64
-             " r1=%"SCNx64" r2=%"SCNx64" r3=%"SCNx64
-             " f1=%"SCNx64" tt=%lf cr=%d"
-             " rk=%d bm=%d g1=%d g2=%d or=%d\n",
-             &upgrades1, &upgrades2,
-             &player->rooms1, &player->rooms2, &player->rooms3,
-             &player->flags, &player->total_time, &player->current_room,
-             &rockets, &bombs, &gun1, &gun2, &ordnance) < 13) return false;
+  if (fscanf(file, " tt=%lf cr=%d rk=%d bm=%d g1=%d g2=%d or=%d\n",
+             &player->total_time, &player->current_room, &rockets, &bombs,
+             &gun1, &gun2, &ordnance) < 7) return false;
   if (player->total_time < 0.0) return false;
   if (player->current_room < 0 ||
       player->current_room >= planet->num_rooms) {
     return false;
   }
+
   // Grant upgrades to the player.  This will correctly set their maximum
   // shields/energy/rockets/bombs.
-  for (unsigned int i = 0u; i < 64u; ++i) {
-    if (upgrades1 & (UINT64_C(1) << i)) {
-      az_give_upgrade(player, (az_upgrade_t)i);
-    }
-  }
-  for (unsigned int i = 64u; i < AZ_NUM_UPGRADES; ++i) {
-    if (upgrades2 & (UINT64_C(1) << (i - 64u))) {
-      az_give_upgrade(player, (az_upgrade_t)i);
+  for (int i = 0; i < AZ_ARRAY_SIZE(upgrades); ++i) {
+    for (int j = 0; j < 64; ++j) {
+      const int index = 64 * i + j;
+      if (index >= AZ_NUM_UPGRADES) break;
+      if ((upgrades[i] & (UINT64_C(1) << j)) != 0) {
+        az_give_upgrade(player, (az_upgrade_t)index);
+      }
     }
   }
   // Validate and set current ammo stock (rockets and bombs).
@@ -88,6 +104,8 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
   az_select_ordnance(player, (az_ordnance_t)ordnance);
   return true;
 }
+
+#undef READ_BITFIELD
 
 static bool parse_saved_games(const az_planet_t *planet, FILE *file,
                               az_saved_games_t *games_out) {
@@ -121,17 +139,33 @@ bool az_load_games_from_file(const az_planet_t *planet,
 
 /*===========================================================================*/
 
+static bool write_bitfield(const char *prefix, const uint64_t *array,
+                           int array_length, FILE *file) {
+  assert(array_length >= 1);
+  if (fprintf(file, " %s=%"PRIx64, prefix, array[0]) < 0) return false;
+  for (int i = 1; i < array_length; ++i) {
+    if (fprintf(file, ":%"PRIx64, array[i]) < 0) return false;
+  }
+  return true;
+}
+
+#define WRITE_BITFIELD(prefix, array) do { \
+    if (!write_bitfield(prefix, array, AZ_ARRAY_SIZE(array), file)) { \
+      return false; \
+    } \
+  } while (0)
+
 static bool write_games(const az_saved_games_t *games, FILE *file) {
   AZ_ARRAY_LOOP(game, games->games) {
     if (game->present) {
       const az_player_t *player = &game->player;
-      if (fprintf(file, "@S u1=%"PRIx64" u2=%"PRIx64
-                  " r1=%"PRIx64" r2=%"PRIx64" r3=%"PRIx64
-                  " f1=%"PRIx64" tt=%.02f cr=%d"
-                  " rk=%d bm=%d g1=%d g2=%d or=%d\n",
-                  player->upgrades1, player->upgrades2,
-                  player->rooms1, player->rooms2, player->rooms3,
-                  player->flags, player->total_time, player->current_room,
+      if (fprintf(file, "@S") < 0) return false;
+      WRITE_BITFIELD("up", player->upgrades);
+      WRITE_BITFIELD("rv", player->rooms_visited);
+      WRITE_BITFIELD("zm", player->zones_mapped);
+      WRITE_BITFIELD("fl", player->flags);
+      if (fprintf(file, " tt=%.02f cr=%d rk=%d bm=%d g1=%d g2=%d or=%d\n",
+                  player->total_time, player->current_room,
                   player->rockets, player->bombs, player->gun1, player->gun2,
                   player->ordnance) < 0) return false;
     } else {
@@ -140,6 +174,8 @@ static bool write_games(const az_saved_games_t *games, FILE *file) {
   }
   return true;
 }
+
+#undef WRITE_BITFIELD
 
 bool az_save_games_to_file(const az_saved_games_t *games,
                            const char *filepath) {

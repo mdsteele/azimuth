@@ -78,6 +78,38 @@ void test_player_set_room_visited(void) {
   EXPECT_TRUE(az_test_room_visited(&player, 150));
 }
 
+void test_player_set_zone_mapped(void) {
+  az_player_t player = {.max_shields = 100};
+  EXPECT_FALSE(az_test_zone_mapped(&player, 0));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 1));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 2));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 3));
+
+  az_set_zone_mapped(&player, 2);
+  EXPECT_FALSE(az_test_zone_mapped(&player, 0));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 1));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 2));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 3));
+
+  az_set_zone_mapped(&player, 1);
+  EXPECT_FALSE(az_test_zone_mapped(&player, 0));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 1));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 2));
+  EXPECT_FALSE(az_test_zone_mapped(&player, 3));
+
+  az_set_zone_mapped(&player, 3);
+  EXPECT_FALSE(az_test_zone_mapped(&player, 0));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 1));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 2));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 3));
+
+  az_set_zone_mapped(&player, 0);
+  EXPECT_TRUE(az_test_zone_mapped(&player, 0));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 1));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 2));
+  EXPECT_TRUE(az_test_zone_mapped(&player, 3));
+}
+
 void test_player_flags(void) {
   az_player_t player = {.max_shields = 100};
   EXPECT_FALSE(az_test_flag(&player, 6));
