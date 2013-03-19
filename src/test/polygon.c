@@ -493,6 +493,14 @@ void test_circle_hits_polygon(void) {
   EXPECT_VAPPROX(nix, pos);
   EXPECT_VAPPROX(nix, impact);
 
+  // Check case where circle is completely inside the polygon:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      square, 0.2, (az_vector_t){0.5, -0.5}, (az_vector_t){20, 0},
+      &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){0.5, -0.5}), pos);
+  EXPECT_VAPPROX(((az_vector_t){0.35857864376269, -0.35857864376269}), impact);
+
   // We should never hit the null polygon.
   pos = impact = nix;
   EXPECT_FALSE(az_circle_hits_polygon(
@@ -864,7 +872,16 @@ void test_arc_circle_hits_polygon(void) {
       AZ_DEG2RAD(89), &angle, &pos, &impact));
   EXPECT_APPROX(0, angle);
   EXPECT_VAPPROX(((az_vector_t){2, 2}), pos);
-  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0.93933982822, 0.93933982822}), impact);
+
+  // Check case where circle starts completely inside the polygon:
+  angle = 99999; pos = impact = nix;
+  EXPECT_TRUE(az_arc_circle_hits_polygon(
+      square, 0.2, (az_vector_t){-0.5, 0.5}, (az_vector_t){5, 1},
+      AZ_DEG2RAD(89), &angle, &pos, &impact));
+  EXPECT_APPROX(0, angle);
+  EXPECT_VAPPROX(((az_vector_t){-0.5, 0.5}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-0.35857864376269, 0.35857864376269}), impact);
 }
 
 void test_arc_circle_hits_polygon_trans(void) {

@@ -219,7 +219,7 @@ typedef struct {
   double angle; // only used for the az_arc_*_impact functions
   az_vector_t position;
   // Normal vector.  For ray impacts, the length is not guaranteed, but for
-  // circle impacts it will point from position to the point of contact.
+  // circle impacts it will point from the point of contact to position.
   az_vector_t normal;
 } az_impact_t;
 

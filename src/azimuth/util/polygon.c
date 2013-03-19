@@ -403,6 +403,15 @@ bool az_circle_hits_line_segment(
 bool az_circle_hits_polygon(
     az_polygon_t polygon, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *impact_out) {
+  // If the circle is already touching the polygon, count that as an immediate
+  // impact.
+  if (az_circle_touches_polygon(polygon, radius, start)) {
+    if (pos_out != NULL) *pos_out = start;
+    if (impact_out != NULL) {
+      *impact_out = az_vsub(start, az_vwithlen(start, radius));
+    }
+    return true;
+  }
   bool hit = false;
   az_vector_t hit_at;
   // Check if the circle hits any corners of the polygon.
@@ -765,6 +774,16 @@ bool az_arc_circle_hits_polygon(
     az_polygon_t polygon, double circle_radius, az_vector_t start,
     az_vector_t spin_center, double spin_angle,
     double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+  // If the circle is already touching the polygon, count that as an immediate
+  // impact.
+  if (az_circle_touches_polygon(polygon, circle_radius, start)) {
+    if (angle_out != NULL) *angle_out = 0.0;
+    if (pos_out != NULL) *pos_out = start;
+    if (impact_out != NULL) {
+      *impact_out = az_vsub(start, az_vwithlen(start, circle_radius));
+    }
+    return true;
+  }
   bool hit = false;
   // Check if the circle hits any corners of the polygon.
   for (int i = 0; i < polygon.num_vertices; ++i) {
