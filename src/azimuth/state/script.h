@@ -42,6 +42,7 @@ typedef enum {
   AZ_OP_TEST, // push 1 if flag i is set, else 0
   AZ_OP_SET, // set flag i
   AZ_OP_CLR, // clear flag i
+  AZ_OP_MAP, // grant map data for zone i
   // Objects:
   AZ_OP_NIX, // remove object i (of any type)
   // Baddies:

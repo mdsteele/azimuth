@@ -198,14 +198,40 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         break;
       // Flags:
       case AZ_OP_TEST:
-        STACK_PUSH(az_test_flag(&state->ship.player,
-                                (az_flag_t)ins.immediate));
+        {
+          const int flag_index = (int)ins.immediate;
+          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+            SCRIPT_ERROR("invalid flag index");
+          }
+          STACK_PUSH(az_test_flag(&state->ship.player, (az_flag_t)flag_index));
+        }
         break;
       case AZ_OP_SET:
-        az_set_flag(&state->ship.player, (az_flag_t)ins.immediate);
+        {
+          const int flag_index = (int)ins.immediate;
+          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+            SCRIPT_ERROR("invalid flag index");
+          }
+          az_set_flag(&state->ship.player, (az_flag_t)flag_index);
+        }
         break;
       case AZ_OP_CLR:
-        az_clear_flag(&state->ship.player, (az_flag_t)ins.immediate);
+        {
+          const int flag_index = (int)ins.immediate;
+          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+            SCRIPT_ERROR("invalid flag index");
+          }
+          az_clear_flag(&state->ship.player, (az_flag_t)flag_index);
+        }
+        break;
+      case AZ_OP_MAP:
+        {
+          const int zone_index = (int)ins.immediate;
+          if (zone_index < 0 || zone_index >= state->planet->num_zones) {
+            SCRIPT_ERROR("invalid zone index");
+          }
+          az_set_zone_mapped(&state->ship.player, zone_index);
+        }
         break;
       // Objects:
       case AZ_OP_NIX:

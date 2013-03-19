@@ -67,8 +67,10 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
   const az_planet_t *planet = state->planet;
   const az_player_t *player = state->player;
   for (int i = 0; i < planet->num_rooms; ++i) {
-    if (!az_test_room_visited(player, i)) continue;
     const az_room_t *room = &planet->rooms[i];
+    const bool visited = az_test_room_visited(player, i);
+    const bool mapped = az_test_zone_mapped(player, room->zone_index);
+    if (!visited && !mapped) continue;
     const az_camera_bounds_t *bounds = &room->camera_bounds;
     const az_color_t zone_color = planet->zones[room->zone_index].color;
 
@@ -86,40 +88,57 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
     // Fill room with color:
     if (i == player->current_room && az_clock_mod(2, 20, state->clock)) {
       glColor3f(1, 1, 1);
-    } else glColor3ub(zone_color.r / 2, zone_color.g / 2, zone_color.b / 2);
-    glBegin(GL_QUAD_STRIP); {
-      glVertex2d(min_r * cos(min_theta) + offset1.x,
-                 min_r * sin(min_theta) + offset1.y);
-      glVertex2d(max_r * cos(min_theta) + offset1.x,
-                 max_r * sin(min_theta) + offset1.y);
-      for (double theta = min_theta; theta <= max_theta; theta += step) {
-        glVertex2d(min_r * cos(theta), min_r * sin(theta));
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-      glVertex2d(min_r * cos(max_theta) + offset2.x,
-                 min_r * sin(max_theta) + offset2.y);
-      glVertex2d(max_r * cos(max_theta) + offset2.x,
-                 max_r * sin(max_theta) + offset2.y);
-    } glEnd();
+    } else if (!visited) {
+      assert(mapped);
+      glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
+    } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
+    if (bounds->theta_span >= 6.28) {
+      glBegin(GL_POLYGON); {
+        for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
+          glVertex2d(max_r * cos(theta), max_r * sin(theta));
+        }
+      } glEnd();
+    } else {
+      glBegin(GL_QUAD_STRIP); {
+        glVertex2d(min_r * cos(min_theta) + offset1.x,
+                   min_r * sin(min_theta) + offset1.y);
+        glVertex2d(max_r * cos(min_theta) + offset1.x,
+                   max_r * sin(min_theta) + offset1.y);
+        for (double theta = min_theta; theta <= max_theta; theta += step) {
+          glVertex2d(min_r * cos(theta), min_r * sin(theta));
+          glVertex2d(max_r * cos(theta), max_r * sin(theta));
+        }
+        glVertex2d(min_r * cos(max_theta) + offset2.x,
+                   min_r * sin(max_theta) + offset2.y);
+        glVertex2d(max_r * cos(max_theta) + offset2.x,
+                   max_r * sin(max_theta) + offset2.y);
+      } glEnd();
+    }
 
     // Draw outline:
     glColor3f(1, 1, 1); // white
     glBegin(GL_LINE_LOOP); {
-      glVertex2d(min_r * cos(min_theta) + offset1.x,
-                 min_r * sin(min_theta) + offset1.y);
-      glVertex2d(max_r * cos(min_theta) + offset1.x,
-                 max_r * sin(min_theta) + offset1.y);
-      for (double theta = min_theta; theta <= max_theta; theta += step) {
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-      glVertex2d(max_r * cos(max_theta) + offset2.x,
-                 max_r * sin(max_theta) + offset2.y);
-      glVertex2d(min_r * cos(max_theta) + offset2.x,
-                 min_r * sin(max_theta) + offset2.y);
-      for (double theta = max_theta; theta >= min_theta; theta -= step) {
-        glVertex2d(min_r * cos(theta), min_r * sin(theta));
-      }
-    } glEnd();
+      if (bounds->theta_span >= 6.28) {
+        for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
+          glVertex2d(max_r * cos(theta), max_r * sin(theta));
+        }
+      } else {
+        glVertex2d(min_r * cos(min_theta) + offset1.x,
+                   min_r * sin(min_theta) + offset1.y);
+        glVertex2d(max_r * cos(min_theta) + offset1.x,
+                   max_r * sin(min_theta) + offset1.y);
+        for (double theta = min_theta; theta <= max_theta; theta += step) {
+          glVertex2d(max_r * cos(theta), max_r * sin(theta));
+        }
+        glVertex2d(max_r * cos(max_theta) + offset2.x,
+                   max_r * sin(max_theta) + offset2.y);
+        glVertex2d(min_r * cos(max_theta) + offset2.x,
+                   min_r * sin(max_theta) + offset2.y);
+        for (double theta = max_theta; theta >= min_theta; theta -= step) {
+          glVertex2d(min_r * cos(theta), min_r * sin(theta));
+        }
+      } glEnd();
+    }
   }
 }
 
