@@ -23,16 +23,19 @@
 
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
 typedef struct {
   const az_planet_t *planet;
   az_player_t *player;
-  // TODO more fields
+  az_clock_t clock;
 } az_paused_state_t;
 
 void az_paused_draw_screen(az_paused_state_t *state);
+
+void az_tick_paused_state(az_paused_state_t *state, double time);
 
 /*===========================================================================*/
 

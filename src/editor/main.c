@@ -28,6 +28,7 @@
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
+#include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/script.h"
@@ -256,10 +257,7 @@ static void do_mass_move(int x, int y, int dx, int dy) {
   int room_count = 0;
   AZ_LIST_LOOP(room, state.planet.rooms) {
     if (!room->selected) continue;
-    const az_camera_bounds_t *bounds = &room->camera_bounds;
-    mass_center = az_vadd(mass_center, az_vpolar(
-        bounds->min_r + 0.5 * bounds->r_span,
-        bounds->min_theta + 0.5 * bounds->theta_span));
+    mass_center = az_vadd(mass_center, az_bounds_center(&room->camera_bounds));
     ++room_count;
   }
   if (room_count == 0) return;

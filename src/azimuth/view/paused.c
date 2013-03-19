@@ -20,20 +20,21 @@
 #include "azimuth/view/paused.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include <GL/gl.h>
 
+#include "azimuth/constants.h"
+#include "azimuth/state/camera.h"
+#include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/upgrade.h"
+#include "azimuth/util/clock.h"
+#include "azimuth/util/vector.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
-
-static void set_weapon_box_color(bool selected) {
-  if (selected) glColor3f(1, 1, 1);
-  else glColor3f(1, 0, 1);
-}
 
 static void draw_rect(double x, double y, double w, double h) {
   x += 0.5;
@@ -46,6 +47,114 @@ static void draw_rect(double x, double y, double w, double h) {
     glVertex2d(x + w, y + h);
     glVertex2d(x, y + h);
   } glEnd();
+}
+
+/*===========================================================================*/
+
+#define MINIMAP_ZOOM 100.0
+
+static void draw_minimap_rooms(az_paused_state_t *state) {
+  // Draw planet surface outline:
+  glColor3f(1, 1, 0); // yellow
+  glBegin(GL_LINE_LOOP); {
+    for (int i = 0; i < 360; i += 3) {
+      glVertex2d(AZ_PLANETOID_RADIUS * cos(AZ_DEG2RAD(i)),
+                 AZ_PLANETOID_RADIUS * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+
+  // Draw explored rooms:
+  const az_planet_t *planet = state->planet;
+  const az_player_t *player = state->player;
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    if (!az_test_room_visited(player, i)) continue;
+    const az_room_t *room = &planet->rooms[i];
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
+    const az_color_t zone_color = planet->zones[room->zone_index].color;
+
+    const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+    const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
+    const double min_theta = bounds->min_theta;
+    const double max_theta = min_theta + bounds->theta_span;
+
+    const az_vector_t offset1 =
+      az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
+    const az_vector_t offset2 =
+      az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
+    const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
+
+    // Fill room with color:
+    if (i == player->current_room && az_clock_mod(2, 20, state->clock)) {
+      glColor3f(1, 1, 1);
+    } else glColor3ub(zone_color.r / 2, zone_color.g / 2, zone_color.b / 2);
+    glBegin(GL_QUAD_STRIP); {
+      glVertex2d(min_r * cos(min_theta) + offset1.x,
+                 min_r * sin(min_theta) + offset1.y);
+      glVertex2d(max_r * cos(min_theta) + offset1.x,
+                 max_r * sin(min_theta) + offset1.y);
+      for (double theta = min_theta; theta <= max_theta; theta += step) {
+        glVertex2d(min_r * cos(theta), min_r * sin(theta));
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+      glVertex2d(min_r * cos(max_theta) + offset2.x,
+                 min_r * sin(max_theta) + offset2.y);
+      glVertex2d(max_r * cos(max_theta) + offset2.x,
+                 max_r * sin(max_theta) + offset2.y);
+    } glEnd();
+
+    // Draw outline:
+    glColor3f(1, 1, 1); // white
+    glBegin(GL_LINE_LOOP); {
+      glVertex2d(min_r * cos(min_theta) + offset1.x,
+                 min_r * sin(min_theta) + offset1.y);
+      glVertex2d(max_r * cos(min_theta) + offset1.x,
+                 max_r * sin(min_theta) + offset1.y);
+      for (double theta = min_theta; theta <= max_theta; theta += step) {
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+      glVertex2d(max_r * cos(max_theta) + offset2.x,
+                 max_r * sin(max_theta) + offset2.y);
+      glVertex2d(min_r * cos(max_theta) + offset2.x,
+                 min_r * sin(max_theta) + offset2.y);
+      for (double theta = max_theta; theta >= min_theta; theta -= step) {
+        glVertex2d(min_r * cos(theta), min_r * sin(theta));
+      }
+    } glEnd();
+  }
+}
+
+static void draw_minimap(az_paused_state_t *state) {
+  const az_room_key_t current_room = state->player->current_room;
+  assert(current_room < state->planet->num_rooms);
+  const az_vector_t center =
+    az_bounds_center(&state->planet->rooms[current_room].camera_bounds);
+
+  glEnable(GL_SCISSOR_TEST); {
+    glScissor(190, 110, 260, 260);
+    glPushMatrix(); {
+      // Make positive Y be up instead of down.
+      glScaled(1, -1, 1);
+      // Center the screen on position (0, 0).
+      glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+      // Zoom out.
+      glScaled(1.0 / MINIMAP_ZOOM, 1.0 / MINIMAP_ZOOM, 1);
+      // Move the screen to the camera pose.
+      glTranslated(0, -az_vnorm(center), 0);
+      glRotated(90.0 - AZ_RAD2DEG(az_vtheta(center)), 0, 0, 1);
+      // Draw what the camera sees.
+      draw_minimap_rooms(state);
+    } glPopMatrix();
+  } glDisable(GL_SCISSOR_TEST);
+
+  glColor3f(1, 1, 1);
+  draw_rect(190, 110, 260, 260);
+}
+
+/*===========================================================================*/
+
+static void set_weapon_box_color(bool selected) {
+  if (selected) glColor3f(1, 1, 1);
+  else glColor3f(1, 0, 1);
 }
 
 static void draw_upg_box(const az_player_t *player, double x, double y,
@@ -63,7 +172,7 @@ static int round_towards_middle(double amount, double maximum) {
   return (int)(amount - offset) + offset;
 }
 
-void az_paused_draw_screen(az_paused_state_t *state) {
+static void draw_upgrades(az_paused_state_t *state) {
   const az_player_t *player = state->player;
 
   glColor3f(1, 0, 1);
@@ -123,8 +232,18 @@ void az_paused_draw_screen(az_paused_state_t *state) {
   draw_upg_box(player, 470, 200, AZ_UPG_LATERAL_THRUSTERS);
   draw_upg_box(player, 470, 220, AZ_UPG_CPLUS_DRIVE);
   draw_upg_box(player, 470, 240, AZ_UPG_ORION_BOOSTER);
+}
 
+/*===========================================================================*/
+
+void az_paused_draw_screen(az_paused_state_t *state) {
+  draw_minimap(state);
+  draw_upgrades(state);
   az_draw_cursor();
+}
+
+void az_tick_paused_state(az_paused_state_t *state, double time) {
+  ++state->clock;
 }
 
 /*===========================================================================*/

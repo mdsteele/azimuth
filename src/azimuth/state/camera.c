@@ -26,6 +26,11 @@
 
 /*===========================================================================*/
 
+az_vector_t az_bounds_center(const az_camera_bounds_t *bounds) {
+  return az_vpolar(bounds->min_r + 0.5 * bounds->r_span,
+                   bounds->min_theta + 0.5 * bounds->theta_span);
+}
+
 az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
                                az_vector_t vec) {
   const double r = fmin(fmax(bounds->min_r, az_vnorm(vec)),

@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/script.h"
 #include "azimuth/util/vector.h"
@@ -310,8 +311,7 @@ bool az_editor_is_in_minimap_mode(const az_editor_state_t *state) {
 void az_center_editor_camera_on_current_room(az_editor_state_t *state) {
   const az_camera_bounds_t *bounds =
     &AZ_LIST_GET(state->planet.rooms, state->current_room)->camera_bounds;
-  state->camera = az_vpolar(bounds->min_r + 0.5 * bounds->r_span,
-                            bounds->min_theta + 0.5 * bounds->theta_span);
+  state->camera = az_bounds_center(bounds);
 }
 
 void az_destroy_editor_state(az_editor_state_t *state) {

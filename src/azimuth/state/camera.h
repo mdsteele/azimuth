@@ -33,6 +33,9 @@ typedef struct {
   double theta_span;
 } az_camera_bounds_t;
 
+// Return the center point of the camera bounds.
+az_vector_t az_bounds_center(const az_camera_bounds_t *bounds);
+
 // Clamp a vector to be within the given camera bounds.
 az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
                                az_vector_t vec);

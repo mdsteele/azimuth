@@ -4,7 +4,7 @@
 !Z"Cnidam" c(0,255,255) m3
 !Z"Nandiar" c(255,255,0) m4
 !Z"Voquan" c(0,255,0) m5
-!Z"Barrag" c(0,0,255) m6
+!Z"Barrag" c(0,96,255) m6
 !Z"Sarvari" c(255,0,0) m7
 !Z"Core" c(128,128,128) m8
 !T0"

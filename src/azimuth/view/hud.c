@@ -40,21 +40,21 @@
 #define HUD_PADDING 4
 #define HUD_BAR_HEIGHT 9
 
-static void draw_hud_bar(int left, int top, double cur, double max) {
+static void draw_hud_bar(float left, float top, float cur, float max) {
   // Draw bar:
   glBegin(GL_QUADS);
-  glVertex2d(left, top);
-  glVertex2d(left, top + HUD_BAR_HEIGHT);
-  glVertex2d(left + cur, top + HUD_BAR_HEIGHT);
-  glVertex2d(left + cur, top);
+  glVertex2f(left, top);
+  glVertex2f(left, top + HUD_BAR_HEIGHT);
+  glVertex2f(left + cur, top + HUD_BAR_HEIGHT);
+  glVertex2f(left + cur, top);
   glEnd();
   // Draw outline:
   glColor3f(1, 1, 1); // white
   glBegin(GL_LINE_LOOP);
-  glVertex2f(left + 0.5, top + 0.5);
-  glVertex2f(left + 0.5, top + HUD_BAR_HEIGHT + 0.5);
-  glVertex2f(left + max + 0.5, top + HUD_BAR_HEIGHT + 0.5);
-  glVertex2f(left + max + 0.5, top + 0.5);
+  glVertex2f(left + 0.5f, top + 0.5f);
+  glVertex2f(left + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
+  glVertex2f(left + max + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
+  glVertex2f(left + max + 0.5f, top + 0.5f);
   glEnd();
 }
 
@@ -102,28 +102,28 @@ static void set_gun_color(az_gun_t gun) {
     case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
     case AZ_GUN_FREEZE: glColor3f(0, 1, 1); break;
     case AZ_GUN_TRIPLE: glColor3f(0, 1, 0); break;
-    case AZ_GUN_HOMING: glColor3f(0, 0, 1); break;
-    case AZ_GUN_BEAM:   glColor3f(1, 0, 0); break;
+    case AZ_GUN_HOMING: glColor3f(0, 0.375, 1); break;
     case AZ_GUN_PHASE:  glColor3f(1, 1, 0); break;
-    case AZ_GUN_BURST:  glColor3f(0.5, 0.5, 0.5); break;
+    case AZ_GUN_BURST:  glColor3f(0.75, 0.375, 0); break;
     case AZ_GUN_PIERCE: glColor3f(1, 0, 1); break;
+    case AZ_GUN_BEAM:   glColor3f(1, 0, 0); break;
   }
 }
 
-static void draw_hud_gun_name(int left, int top, az_gun_t gun) {
+static void draw_hud_gun_name(float left, float top, az_gun_t gun) {
   if (gun != AZ_GUN_NONE) {
     glColor3f(1, 1, 1);
     glBegin(GL_LINE_STRIP);
-    glVertex2d(left + 3.5, top + 0.5);
-    glVertex2d(left + 0.5, top + 0.5);
-    glVertex2d(left + 0.5, top + 10.5);
-    glVertex2d(left + 3.5, top + 10.5);
+    glVertex2f(left + 3.5f, top + 0.5f);
+    glVertex2f(left + 0.5f, top + 0.5f);
+    glVertex2f(left + 0.5f, top + 10.5f);
+    glVertex2f(left + 3.5f, top + 10.5f);
     glEnd();
     glBegin(GL_LINE_STRIP);
-    glVertex2d(left + 51.5, top + 0.5);
-    glVertex2d(left + 54.5, top + 0.5);
-    glVertex2d(left + 54.5, top + 10.5);
-    glVertex2d(left + 51.5, top + 10.5);
+    glVertex2f(left + 51.5f, top + 0.5f);
+    glVertex2f(left + 54.5f, top + 0.5f);
+    glVertex2f(left + 54.5f, top + 10.5f);
+    glVertex2f(left + 51.5f, top + 10.5f);
     glEnd();
 
     set_gun_color(gun);
@@ -132,7 +132,7 @@ static void draw_hud_gun_name(int left, int top, az_gun_t gun) {
   }
 }
 
-static void draw_hud_ordnance(int left, int top, bool is_rockets,
+static void draw_hud_ordnance(float left, float top, bool is_rockets,
                               int cur, int max, az_ordnance_t selected) {
   // Draw nothing if the player doesn't have this kind of ordnance yet.
   if (max <= 0) return;
@@ -142,16 +142,16 @@ static void draw_hud_ordnance(int left, int top, bool is_rockets,
       (!is_rockets && selected == AZ_ORDN_BOMBS)) {
     glColor3f(1, 1, 1);
     glBegin(GL_LINE_STRIP);
-    glVertex2d(left + 3.5, top + 0.5);
-    glVertex2d(left + 0.5, top + 0.5);
-    glVertex2d(left + 0.5, top + 10.5);
-    glVertex2d(left + 3.5, top + 10.5);
+    glVertex2f(left + 3.5f, top + 0.5f);
+    glVertex2f(left + 0.5f, top + 0.5f);
+    glVertex2f(left + 0.5f, top + 10.5f);
+    glVertex2f(left + 3.5f, top + 10.5f);
     glEnd();
     glBegin(GL_LINE_STRIP);
-    glVertex2d(left + 51.5, top + 0.5);
-    glVertex2d(left + 54.5, top + 0.5);
-    glVertex2d(left + 54.5, top + 10.5);
-    glVertex2d(left + 51.5, top + 10.5);
+    glVertex2f(left + 51.5f, top + 0.5f);
+    glVertex2f(left + 54.5f, top + 0.5f);
+    glVertex2f(left + 54.5f, top + 10.5f);
+    glVertex2f(left + 51.5f, top + 10.5f);
     glEnd();
   }
 

@@ -38,7 +38,7 @@ az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
 
   while (true) {
     // Tick the state and redraw the screen.
-    //az_tick_paused_state(&state, 1.0/60.0); // TODO
+    az_tick_paused_state(&state, 1.0/60.0);
     az_start_screen_redraw(); {
       az_paused_draw_screen(&state);
     } az_finish_screen_redraw();
