@@ -119,6 +119,34 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2d(-5, -11); glVertex2d(-2, -11);
       } glEnd();
       break;
+    case AZ_UPG_GUN_HOMING:
+      glPushMatrix(); {
+        glRotatef(45 * frame, 0, 0, 1);
+        glBegin(GL_TRIANGLES); {
+          glColor3f(0, 0.375, 1);
+          glVertex2f( 8,  6); glVertex2f(6, -2); glVertex2f(10, -2);
+          glVertex2f(-8, -6); glVertex2f(-6, 2); glVertex2f(-10, 2);
+        } glEnd();
+        glBegin(GL_POINTS); {
+          for (int i = 0; i < 8; ++i) {
+            glColor4f(0, 0.375, 1, 1.0f - 0.125f * i);
+            const double radius = 8.0;
+            const double theta = AZ_DEG2RAD(-10) * i;
+            const double x = radius * cos(theta);
+            const double y = radius * sin(theta);
+            glVertex2d(x, y); glVertex2d(-x, -y);
+          }
+        } glEnd();
+      } glPopMatrix();
+      glPushMatrix(); {
+        glRotatef(-45 * frame, 0, 0, 1);
+        glBegin(GL_TRIANGLES); {
+          glColor3f(0, 0.375, 1);
+          glVertex2f(-3, -4); glVertex2f( 1, -2.5); glVertex2f( 1, -5.5);
+          glVertex2f( 3,  4); glVertex2f(-1,  2.5); glVertex2f(-1,  5.5);
+        } glEnd();
+      } glPopMatrix();
+      break;
     case AZ_UPG_GUN_PHASE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 0.5, 0, 0);
@@ -151,6 +179,27 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           glVertex2f(-2.6,  4); glVertex2f(-6.6, 0); glVertex2f(-2.6, -4);
         } glEnd();
       } glPopMatrix();
+      break;
+    case AZ_UPG_GUN_PIERCE:
+      {
+        const int offset = frame - 3;
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(1, 0, 1, 0.75); // magenta
+          glVertex2f(9 + offset, -9 - offset);
+          glColor4f(1, 0, 1, 0); // transparent magenta
+          glVertex2f(9 + offset, -3 - offset);
+          glVertex2f(-10 - offset, 10 + offset);
+          glVertex2f(3 + offset, -9 - offset);
+        } glEnd();
+        glBegin(GL_TRIANGLE_FAN); {
+          const GLfloat wiggle = 7 + frame;
+          glVertex2f(6 + offset, -6 - offset);
+          glColor4f(1, 0, 1, 0.75); // magenta
+          glVertex2f(wiggle + offset, 4 - offset);
+          glVertex2f(10 + offset, -10 - offset);
+          glVertex2f(-4 + offset, -wiggle - offset);
+        } glEnd();
+      }
       break;
     case AZ_UPG_GUN_BEAM:
       glBegin(GL_QUAD_STRIP); {
