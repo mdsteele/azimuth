@@ -92,6 +92,12 @@ static az_vector_t wall_vertices_19[] = {
 static az_vector_t wall_vertices_21[] = {
   {125, 50}, {-125, 50}, {-125, -50}, {125, -50}
 };
+static az_vector_t wall_vertices_22[] = {
+  {50, 33}, {-50, 33}, {-50, -33}, {50, -33}
+};
+static az_vector_t wall_vertices_23[] = {
+  {25, 33}, {-25, 33}, {-25, -33}, {25, -33}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -245,8 +251,19 @@ static az_wall_data_t wall_datas[] = {
   [21] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 18.0,
     .color1 = {0, 255, 255, 255}, .color2 = {0, 32, 64, 255},
-    .elasticity = 0.4,
-    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Red/gray rectangle cinderbrick:
+  [22] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
+    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
+  },
+  // Red/gray rectangle half-size cinderbrick:
+  [23] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
+    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
   }
 };
 

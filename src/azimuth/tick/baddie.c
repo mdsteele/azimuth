@@ -403,10 +403,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   baddie->armor_flare =
     fmax(0.0, baddie->armor_flare - time / AZ_BADDIE_ARMOR_FLARE_TIME);
 
-  // Allow the baddie to thaw a bit.
+  // Allow the baddie to thaw a bit.  If we're in a superheated room, thaw
+  // faster than usual.
   assert(baddie->frozen >= 0.0);
   assert(baddie->frozen <= 1.0);
-  baddie->frozen = fmax(0.0, baddie->frozen - time / AZ_BADDIE_THAW_TIME);
+  const double thaw_rate =
+    (state->planet->rooms[state->ship.player.current_room].properties &
+     AZ_ROOMF_HEATED) ? 3.0 / AZ_BADDIE_THAW_TIME : 1.0 / AZ_BADDIE_THAW_TIME;
+  baddie->frozen = fmax(0.0, baddie->frozen - thaw_rate * time);
   if (baddie->frozen > 0.0) {
     baddie->velocity = AZ_VZERO;
     return;
