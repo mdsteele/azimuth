@@ -20,6 +20,7 @@
 #include "azimuth/view/space.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include <GL/gl.h>
 
@@ -40,6 +41,12 @@
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
+
+static az_room_flags_t room_properties(const az_space_state_t *state) {
+  const az_room_key_t current_room = state->ship.player.current_room;
+  assert(0 <= current_room && current_room < state->planet->num_rooms);
+  return state->planet->rooms[current_room].properties;
+}
 
 static double mode_fade_alpha(az_space_state_t *state) {
   switch (state->mode) {
@@ -86,6 +93,16 @@ static void transform_to_camera_matrix(const az_space_state_t *state) {
   glScaled(1, -1, 1);
   // Center the screen on position (0, 0).
   glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+  // If we're in a superheated room, wobble the screen a bit (to simulate heat
+  // refraction).
+  if (room_properties(state) & AZ_ROOMF_HEATED) {
+    GLfloat matrix[16] = {
+      1, 0.002 * cos(state->camera.wobble_theta), 0, 0,
+      0, 1 + 0.005 * sin(state->camera.wobble_theta), 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1};
+    glMultMatrixf(matrix);
+  }
   // Move the screen to the camera pose.
   glTranslated(0, -az_vnorm(state->camera.center), 0);
   glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera.center)), 0, 0, 1);
@@ -141,6 +158,22 @@ void az_space_draw_screen(az_space_state_t *state) {
       transform_to_camera_matrix(state);
       draw_camera_view(state);
     } glPopMatrix();
+  }
+
+  // If we're in a superheated room, make everything glow red.
+  if (room_properties(state) & AZ_ROOMF_HEATED) {
+    glBegin(GL_QUADS); {
+      const GLfloat alpha1 = 0.1 + 0.03 * cos(state->camera.wobble_theta);
+      const GLfloat alpha2 = 0.1 + 0.03 * sin(state->camera.wobble_theta);
+      glColor4f(1, 0, 0, alpha1);
+      glVertex2i(0, 0);
+      glColor4f(1, 0, 0, alpha2);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+      glColor4f(1, 0, 0, alpha1);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glColor4f(1, 0, 0, alpha2);
+      glVertex2i(AZ_SCREEN_WIDTH, 0);
+    } glEnd();
   }
 
   // Tint the camera view black (based on fade_alpha).

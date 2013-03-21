@@ -45,6 +45,7 @@ az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
 typedef struct {
   az_vector_t center;
   double shake_horz, shake_vert;
+  double wobble_theta;
 } az_camera_t;
 
 az_vector_t az_camera_shake_offset(const az_camera_t *camera,

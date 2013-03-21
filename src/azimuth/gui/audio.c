@@ -409,6 +409,13 @@ static az_sound_entry_t sound_entries[] = {
     .phaser_offset = -0.09300001, .phaser_sweep = -0.19305,
     .volume_adjust = -0.42592590332
   },
+  [AZ_SND_HEAT_DAMAGE] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.605633795261, .freq_slide = 0.591549277306,
+    .freq_delta_slide = -0.943661987782, .repeat_speed = 0.0352112688124,
+    .phaser_offset = 0.309859156609, .phaser_sweep = -0.33802819252,
+    .hpf_cutoff = 0.133802816272, .volume_adjust = -0.2
+  },
   [AZ_SND_HIT_WALL] = {
     .wave_kind = NOISE,
     .env_sustain = 0.03245, .env_decay = 0.10518,

@@ -21,15 +21,17 @@
 
 #include "azimuth/state/camera.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 void az_tick_camera(az_space_state_t *state, double time) {
+  az_camera_t *camera = &state->camera;
   const az_camera_bounds_t *bounds =
     &state->planet->rooms[state->ship.player.current_room].camera_bounds;
-  az_track_camera_towards(&state->camera,
-                          az_clamp_to_bounds(bounds, state->ship.position),
-                          time);
+  az_track_camera_towards(
+      camera, az_clamp_to_bounds(bounds, state->ship.position), time);
+  camera->wobble_theta = az_mod2pi(camera->wobble_theta + AZ_TWO_PI * time);
 }
 
 /*===========================================================================*/

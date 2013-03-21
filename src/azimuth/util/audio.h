@@ -42,7 +42,7 @@ typedef enum {
 } az_music_key_t;
 
 // The number of different sound keys there are:
-#define AZ_NUM_SOUND_KEYS 38
+#define AZ_NUM_SOUND_KEYS 39
 
 typedef enum {
   AZ_SND_BEAM_FREEZE,
@@ -74,6 +74,7 @@ typedef enum {
   AZ_SND_FIRE_HYPER_ROCKET,
   AZ_SND_FIRE_MISSILE_BEAM,
   AZ_SND_FIRE_ROCKET,
+  AZ_SND_HEAT_DAMAGE,
   AZ_SND_HIT_WALL,
   AZ_SND_KILL_ATOM,
   AZ_SND_KILL_DRAGONFLY,

@@ -65,6 +65,8 @@
 #define AZ_CPLUS_DECAY_TIME 3.5
 // Energy consumed by the C-plus drive per second while active:
 #define AZ_CPLUS_POWER_COST 100.0
+// Damage per second taken in superheated rooms without Thermal Armor:
+#define AZ_HEAT_DAMAGE_PER_SECOND 5.0
 
 /*===========================================================================*/
 // Basics:
@@ -946,6 +948,15 @@ void az_tick_ship(az_space_state_t *state, double time) {
   ship->shield_flare =
     fmax(0.0, ship->shield_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
   ship->temp_invincibility = fmax(0.0, ship->temp_invincibility - time);
+
+  // If we're in a superheated room, and we don't have Thermal Armor, take
+  // damage continuously.
+  if ((state->planet->rooms[player->current_room].properties &
+       AZ_ROOMF_HEATED) && !az_has_upgrade(player, AZ_UPG_THERMAL_ARMOR)) {
+    az_loop_sound(&state->soundboard, AZ_SND_HEAT_DAMAGE);
+    az_damage_ship(state, AZ_HEAT_DAMAGE_PER_SECOND * time, false);
+    if (state->mode == AZ_MODE_GAME_OVER) return;
+  }
 
   // Recharge energy, but only if we're not currently firing a beam gun or
   // using the C-plus drive.
