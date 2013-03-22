@@ -132,6 +132,29 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
                            const az_node_t *tractor_node) {
   az_ship_t *ship = &state->ship;
 
+  // If we're entering or exiting a body of water, make a splash.
+  const az_vector_t delta = az_vsub(impact->position, ship->position);
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (gravfield->kind != AZ_GRAV_WATER) continue;
+    az_vector_t position;
+    double angle;
+    if (az_ray_hits_water_surface(
+            gravfield, ship->position, delta, &position, &angle)) {
+      az_particle_t *particle;
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_SPLOOSH;
+        particle->color = (az_color_t){167, 205, 255, 192};
+        particle->position = position;
+        particle->angle = angle;
+        particle->velocity = AZ_VZERO;
+        particle->param1 =
+          4.0 * sqrt(fabs(az_vdot(ship->velocity, az_vpolar(1, angle))));
+        particle->lifetime = 0.1 * sqrt(particle->param1);
+      }
+      az_play_sound(&state->soundboard, AZ_SND_SPLASH);
+    }
+  }
+
   // Move the ship:
   ship->position = impact->position;
   if (tractor_node != NULL) {

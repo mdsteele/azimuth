@@ -480,6 +480,12 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.225352108479, .freq_slide = 0.2832,
     .repeat_speed = 0.542253494263
   },
+  [AZ_SND_SPLASH] = {
+    .wave_kind = NOISE,
+    .env_attack = 0.302816897631, .env_decay = 0.464788734913,
+    .start_freq = 0.84507, .freq_slide = 0.422535, .freq_delta_slide = -0.0986,
+    .phaser_sweep = 1.0, .hpf_cutoff = 0.5
+  },
   [AZ_SND_TRACTOR_BEAM] = {
     .wave_kind = WOBBLE, .env_sustain = 1.0, .start_freq = 0.18,
     .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.5

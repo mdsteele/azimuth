@@ -73,6 +73,10 @@ double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield);
 bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point);
 
+bool az_ray_hits_water_surface(
+    const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, double *angle_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_GRAVFIELD_H_

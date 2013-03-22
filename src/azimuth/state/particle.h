@@ -35,7 +35,9 @@ typedef enum {
   // EMBER: A shrinking glowball.  param1=radius
   AZ_PAR_EMBER,
   // SHARD: A trianglar shard of metal/rock.
-  AZ_PAR_SHARD
+  AZ_PAR_SHARD,
+  // SPLOOSH: A splash made from entering/exiting water.  param1=amplitude
+  AZ_PAR_SPLOOSH
 } az_particle_kind_t;
 
 typedef struct {

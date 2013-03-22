@@ -82,4 +82,22 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
   }
 }
 
+bool az_ray_hits_water_surface(
+    const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, double *angle_out) {
+  assert(gravfield->kind == AZ_GRAV_WATER);
+  const double semilength = gravfield->size.trapezoid.semilength;
+  const double front_offset = gravfield->size.trapezoid.front_offset;
+  const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
+  const az_vector_t p1 = {semilength, front_offset - front_semiwidth};
+  const az_vector_t p2 = {semilength, front_offset + front_semiwidth};
+  if (az_ray_hits_line_segment(
+          az_vadd(az_vrotate(p1, gravfield->angle), gravfield->position),
+          az_vadd(az_vrotate(p2, gravfield->angle), gravfield->position),
+          start, delta, point_out, NULL)) {
+    if (angle_out != NULL) *angle_out = gravfield->angle;
+    return true;
+  } else return false;
+}
+
 /*===========================================================================*/

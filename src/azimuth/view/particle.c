@@ -81,19 +81,35 @@ static void draw_particle(const az_particle_t *particle) {
       } glEnd();
       break;
     case AZ_PAR_SHARD:
-      glScaled(particle->param1, particle->param1, 1.0);
-      glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0.0, 0.0, 1.0);
+      glScaled(particle->param1, particle->param1, 1);
+      glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);
       glBegin(GL_TRIANGLES); {
         az_color_t color = particle->color;
         const double alpha = 1.0 - particle->age / particle->lifetime;
         with_color_alpha(color, alpha);
-        glVertex2d(2, 3);
+        glVertex2f(2, 3);
         color.r *= 0.6; color.g *= 0.6; color.b *= 0.6;
         with_color_alpha(color, alpha);
-        glVertex2d(-2, 4);
+        glVertex2f(-2, 4);
         color.r *= 0.6; color.g *= 0.6; color.b *= 0.6;
         with_color_alpha(color, alpha);
-        glVertex2d(0, -4);
+        glVertex2f(0, -4);
+      } glEnd();
+      break;
+    case AZ_PAR_SPLOOSH:
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, 1);
+        glVertex2f(0, 0);
+        with_color_alpha(particle->color, 0);
+        const GLfloat height =
+          particle->param1 * sin(AZ_PI * particle->age / particle->lifetime);
+        glVertex2f(0, 14);
+        glVertex2f(0.3f * height, 7);
+        glVertex2f(height, 0);
+        glVertex2f(0.3f * height, -7);
+        glVertex2f(0, -14);
+        glVertex2f(-0.05f * height, 0);
+        glVertex2f(0, 14);
       } glEnd();
       break;
   }

@@ -129,13 +129,16 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
   const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
-  glBegin(GL_QUADS); {
+  glBegin(GL_QUAD_STRIP); {
+    glColor4f(1, 1, 1, 0);
+    glVertex2d(semilength + 6, -front_semiwidth + front_offset);
+    glVertex2d(semilength + 6, front_semiwidth + front_offset);
     glColor4f(0.3, 0.6, 1, 0.3);
     glVertex2d(semilength, -front_semiwidth + front_offset);
     glVertex2d(semilength, front_semiwidth + front_offset);
     glColor4f(0, 0, 0.4, 0.75);
-    glVertex2d(-semilength, rear_semiwidth);
     glVertex2d(-semilength, -rear_semiwidth);
+    glVertex2d(-semilength, rear_semiwidth);
   } glEnd();
 }
 
