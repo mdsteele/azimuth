@@ -22,10 +22,25 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
+
+bool az_trapezoidal(az_gravfield_kind_t kind) {
+  assert(kind != AZ_GRAV_NOTHING);
+  switch (kind) {
+    case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_GRAV_TRAPEZOID:
+    case AZ_GRAV_WATER:
+      return true;
+    case AZ_GRAV_SECTOR_PULL:
+    case AZ_GRAV_SECTOR_SPIN:
+      return false;
+  }
+  AZ_ASSERT_UNREACHABLE();
+}
 
 double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN ||
@@ -38,7 +53,7 @@ double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield) {
 bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
-  if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
+  if (az_trapezoidal(gravfield->kind)) {
     const double semilength = gravfield->size.trapezoid.semilength;
     const double front_offset = gravfield->size.trapezoid.front_offset;
     const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
@@ -54,8 +69,6 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
         trapezoid, az_vrotate(az_vsub(point, gravfield->position),
                               -gravfield->angle));
   } else {
-    assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN ||
-           gravfield->kind == AZ_GRAV_SECTOR_PULL);
     const double thickness = gravfield->size.sector.thickness;
     assert(thickness > 0.0);
     const double inner_radius = gravfield->size.sector.inner_radius;

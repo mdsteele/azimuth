@@ -19,6 +19,8 @@
 
 #include "azimuth/tick/gravfield.h"
 
+#include <assert.h>
+
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
@@ -28,7 +30,8 @@
 /*===========================================================================*/
 
 static void apply_gravfield_to_ship(
-    az_space_state_t *state, az_gravfield_t *gravfield, double time) {
+    az_space_state_t *state, az_gravfield_t *gravfield, double time,
+    bool *ship_is_in_water) {
   az_ship_t *ship = &state->ship;
   switch (gravfield->kind) {
     case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -57,14 +60,22 @@ static void apply_gravfield_to_ship(
                             az_vtheta(delta) + AZ_HALF_PI));
       }
       break;
+    case AZ_GRAV_WATER:
+      // The effects of water on the ship (e.g. increased drag) are handled in
+      // azimuth/tick/ship.c; for now, just note that the ship is in water.
+      *ship_is_in_water = true;
+      break;
   }
 }
 
-void az_tick_gravfields(az_space_state_t *state, double time) {
+void az_tick_gravfields(az_space_state_t *state, double time,
+                        bool *ship_is_in_water) {
+  assert(ship_is_in_water != NULL);
+  *ship_is_in_water = false;
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
     if (az_point_within_gravfield(gravfield, state->ship.position)) {
-      apply_gravfield_to_ship(state, gravfield, time);
+      apply_gravfield_to_ship(state, gravfield, time, ship_is_in_water);
     }
   }
 }

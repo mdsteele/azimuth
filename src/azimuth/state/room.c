@@ -169,7 +169,7 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   gravfield->position = (az_vector_t){x, y};
   gravfield->angle = angle;
   gravfield->strength = strength;
-  if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
+  if (az_trapezoidal(gravfield->kind)) {
     double front_offset, front_semiwidth, rear_semiwidth, semilength;
     READ("o%lf f%lf r%lf l%lf", &front_offset, &front_semiwidth,
          &rear_semiwidth, &semilength);
@@ -328,7 +328,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
     WRITE("!G%d x%.02f y%.02f a%f s%.02f ",
           (int)gravfield->kind, gravfield->position.x, gravfield->position.y,
           gravfield->angle, gravfield->strength);
-    if (gravfield->kind == AZ_GRAV_TRAPEZOID) {
+    if (az_trapezoidal(gravfield->kind)) {
       WRITE("o%.02f f%.02f r%.02f l%.02f",
             gravfield->size.trapezoid.front_offset,
             gravfield->size.trapezoid.front_semiwidth,

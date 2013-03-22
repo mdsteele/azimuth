@@ -96,8 +96,10 @@ static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
   return best_node;
 }
 
-static void apply_gravity_to_ship(az_space_state_t *state, double time) {
-  az_tick_gravfields(state, time);
+static void apply_gravity_to_ship(az_space_state_t *state, double time,
+                                  bool *is_in_water) {
+  assert(is_in_water != NULL);
+  az_tick_gravfields(state, time, is_in_water);
   // Planetary gravity works as follows.  By the spherical shell theorem, the
   // force of gravity on the ship (while inside the planetoid) varies linearly
   // with the distance from the planetoid's center, so the change in velocity
@@ -105,18 +107,19 @@ static void apply_gravity_to_ship(az_space_state_t *state, double time) {
   // we should then multiply this scalar by the unit vector pointing from the
   // ship towards the core, which is -position/vnorm(position).  The
   // vnorm(position) factors cancel and we end up with what we have here.
+  const double bouyancy_multiplier = (*is_in_water ? -0.35 : 1.0);
   state->ship.velocity = az_vadd(state->ship.velocity,
-      az_vmul(state->ship.position, -time *
+      az_vmul(state->ship.position, -time * bouyancy_multiplier *
               (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
 }
 
-static void apply_drag_to_ship(az_ship_t *ship, double time) {
-  const double base_max_speed =
-    AZ_SHIP_BASE_MAX_SPEED *
-    (az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR) ?
-     AZ_DYNAMIC_ARMOR_SPEED_MULT : 1.0);
+static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
+                               double time) {
+  const bool dynamic = az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR);
+  const double max_speed = AZ_SHIP_BASE_MAX_SPEED *
+    (is_in_water ? (dynamic ? 0.8 : 0.4) : (dynamic ? 1.35 : 1.0));
   const double drag_coeff =
-    AZ_SHIP_BASE_THRUST_ACCEL / (base_max_speed * base_max_speed);
+    AZ_SHIP_BASE_THRUST_ACCEL / (max_speed * max_speed);
   const az_vector_t drag_force =
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
   ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
@@ -885,16 +888,26 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
   controls->up_pressed = false;
 }
 
-static void apply_ship_thrusters(az_ship_t *ship, double time) {
+static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
+                                 double time) {
   if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   const az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
-  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time;
   const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
+  const bool dynamic = az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR);
+  // Calculate the change in velocity imparted by the ship's thrusters.  If
+  // we're in water, we scale it down to account for the added mass effect
+  // (see http://en.wikipedia.org/wiki/Added_mass).  Dynamic Armor reduces this
+  // effect somewhat.
+  const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time *
+    (!is_in_water ? 1.0 : dynamic ? 0.6 : 0.4);
+  // Also, turn more slowly when we're in water (unless we have Dynamic Armor).
+  const double turn_rate = AZ_SHIP_TURN_RATE *
+    (is_in_water && !dynamic ? 0.6 : 1.0);
   // Turning left:
   if (controls->left_held && !controls->right_held) {
     if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle + AZ_SHIP_TURN_RATE * time);
+      ship->angle = az_mod2pi(ship->angle + turn_rate * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse / 2,
@@ -904,7 +917,7 @@ static void apply_ship_thrusters(az_ship_t *ship, double time) {
   // Turning right:
   if (controls->right_held && !controls->left_held) {
     if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle - AZ_SHIP_TURN_RATE * time);
+      ship->angle = az_mod2pi(ship->angle - turn_rate * time);
     } else if (has_lateral) {
       ship->velocity = az_vadd(ship->velocity,
                                az_vpolar(impulse / 2,
@@ -1049,10 +1062,11 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (state->mode != AZ_MODE_NORMAL) return;
 
   // Apply various forces:
-  apply_gravity_to_ship(state, time);
+  bool is_in_water;
+  apply_gravity_to_ship(state, time, &is_in_water);
   apply_cplus_drive(state, time);
-  apply_ship_thrusters(ship, time);
-  apply_drag_to_ship(ship, time);
+  apply_ship_thrusters(ship, is_in_water, time);
+  apply_drag_to_ship(ship, is_in_water, time);
 
   // Activate tractor beam if necessary:
   if (controls->util_held && controls->fire_pressed &&

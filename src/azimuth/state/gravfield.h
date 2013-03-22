@@ -30,13 +30,14 @@
 
 // The number of different gravfield kinds there are, not counting
 // AZ_GRAV_NOTHING:
-#define AZ_NUM_GRAVFIELD_KINDS 3
+#define AZ_NUM_GRAVFIELD_KINDS 4
 
 typedef enum {
   AZ_GRAV_NOTHING = 0,
   AZ_GRAV_TRAPEZOID,
   AZ_GRAV_SECTOR_PULL,
-  AZ_GRAV_SECTOR_SPIN
+  AZ_GRAV_SECTOR_SPIN,
+  AZ_GRAV_WATER
 } az_gravfield_kind_t;
 
 typedef union {
@@ -61,6 +62,11 @@ typedef struct {
   double strength; // negative to reverse direction; must be nonzero
   az_gravfield_size_t size;
 } az_gravfield_t;
+
+// Return true if the given gravfield kind is trapezoidal (i.e. it uses the
+// trapezoid field of az_gravfield_size_t), or false if it is sectoral (i.e. it
+// uses the sector field of az_gravfield_size_t).
+bool az_trapezoidal(az_gravfield_kind_t kind);
 
 double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield);
 

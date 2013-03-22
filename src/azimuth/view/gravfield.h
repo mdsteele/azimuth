@@ -31,8 +31,12 @@
 // equivalent.
 void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time);
 
-// Draw all gravfields.  The GL matrix should be at the camera position.
+// Draw all non-water gravfields.  The GL matrix should be at the camera
+// position.
 void az_draw_gravfields(const az_space_state_t *state);
+
+// Draw all water gravfields.  The GL matrix should be at the camera position.
+void az_draw_water(const az_space_state_t *state);
 
 /*===========================================================================*/
 

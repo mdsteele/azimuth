@@ -247,6 +247,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     tint_screen(0.5);
   }
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
+    if (editor_gravfield->spec.kind == AZ_GRAV_WATER) continue;
     const az_gravfield_t real_gravfield = {
       .kind = editor_gravfield->spec.kind,
       .position = editor_gravfield->spec.position,
@@ -308,6 +309,17 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
                      editor_door->spec.uuid_slot);
       }
     } glPopMatrix();
+  }
+  AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
+    if (editor_gravfield->spec.kind != AZ_GRAV_WATER) continue;
+    const az_gravfield_t real_gravfield = {
+      .kind = editor_gravfield->spec.kind,
+      .position = editor_gravfield->spec.position,
+      .angle = editor_gravfield->spec.angle,
+      .strength = editor_gravfield->spec.strength,
+      .size = editor_gravfield->spec.size
+    };
+    az_draw_gravfield(&real_gravfield, state->total_time);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_FG) {
@@ -439,7 +451,7 @@ static void draw_camera_view(az_editor_state_t *state) {
   }
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
-    if (gravfield->spec.kind == AZ_GRAV_TRAPEZOID) {
+    if (az_trapezoidal(gravfield->spec.kind)) {
       draw_selection_circle(gravfield->spec.position, gravfield->spec.angle,
                             gravfield->spec.size.trapezoid.semilength);
     } else {

@@ -123,6 +123,22 @@ static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
   }
 }
 
+static void draw_water_gravfield(const az_gravfield_t *gravfield) {
+  assert(gravfield->kind == AZ_GRAV_WATER);
+  const double semilength = gravfield->size.trapezoid.semilength;
+  const double front_offset = gravfield->size.trapezoid.front_offset;
+  const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
+  const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
+  glBegin(GL_QUADS); {
+    glColor4f(0.3, 0.6, 1, 0.3);
+    glVertex2d(semilength, -front_semiwidth + front_offset);
+    glVertex2d(semilength, front_semiwidth + front_offset);
+    glColor4f(0, 0, 0.4, 0.75);
+    glVertex2d(-semilength, rear_semiwidth);
+    glVertex2d(-semilength, -rear_semiwidth);
+  } glEnd();
+}
+
 /*===========================================================================*/
 
 void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time) {
@@ -141,6 +157,9 @@ void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time) {
       case AZ_GRAV_SECTOR_SPIN:
         draw_sector_spin_gravfield(gravfield, total_time);
         break;
+      case AZ_GRAV_WATER:
+        draw_water_gravfield(gravfield);
+        break;
     }
   } glPopMatrix();
 }
@@ -148,9 +167,17 @@ void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time) {
 void az_draw_gravfields(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
+    if (gravfield->kind == AZ_GRAV_WATER) continue;
     az_draw_gravfield(gravfield, state->ship.player.total_time);
   }
 }
 
+void az_draw_water(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (gravfield->kind == AZ_GRAV_WATER) {
+      az_draw_gravfield(gravfield, state->ship.player.total_time);
+    }
+  }
+}
 
 /*===========================================================================*/

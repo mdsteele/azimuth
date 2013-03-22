@@ -21,11 +21,17 @@
 #ifndef AZIMUTH_TICK_GRAVFIELD_H_
 #define AZIMUTH_TICK_GRAVFIELD_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_gravfields(az_space_state_t *state, double time);
+// Tick all gravfields, applying their force to the ship.  Additionally, set
+// *ship_is_in_water to whether or not the ship is currently within at least
+// one water gravfield.
+void az_tick_gravfields(az_space_state_t *state, double time,
+                        bool *ship_is_in_water);
 
 /*===========================================================================*/
 

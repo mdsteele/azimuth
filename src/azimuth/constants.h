@@ -57,7 +57,7 @@
 #define AZ_PLANETOID_RADIUS 50000.0
 // The acceleration due to gravity at the surface of the planetoid, in
 // pixels/second^2:
-#define AZ_PLANETOID_SURFACE_GRAVITY 16.0
+#define AZ_PLANETOID_SURFACE_GRAVITY 20.0
 
 /*===========================================================================*/
 // Player:
@@ -96,9 +96,6 @@
 // How close the ship must be to an upgrade to pick it up:
 #define AZ_UPGRADE_COLLECTION_RADIUS 30.0
 
-// The factor by which having the Dynamic Armor upgrade boosts your effective
-// maximum speed with normal thrusters:
-#define AZ_DYNAMIC_ARMOR_SPEED_MULT 1.5
 // The additional energy produced by the Fusion Reactor upgrade, in
 // energy/second:
 #define AZ_FUSION_REACTOR_RECHARGE_RATE 75.0
