@@ -84,7 +84,9 @@ static void begin_saved_game(const az_planet_t *planet,
   if (saved_game->present) {
     // Resume saved game:
     state.ship.player = saved_game->player;
-    az_enter_room(&state, &planet->rooms[state.ship.player.current_room]);
+    const az_room_t *room = &planet->rooms[state.ship.player.current_room];
+    az_enter_room(&state, room);
+    state.ship.position = az_bounds_center(&room->camera_bounds);
     AZ_ARRAY_LOOP(node, state.nodes) {
       if (node->kind == AZ_NODE_SAVE_POINT) {
         state.ship.position = node->position;

@@ -25,6 +25,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/state/player.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
@@ -112,6 +113,57 @@ static void transform_to_camera_matrix(const az_space_state_t *state) {
   glTranslated(shake_offset.x, shake_offset.y, 0);
 }
 
+static void draw_darkness(az_space_state_t *state) {
+  const GLfloat blue = 0.11;
+  if (az_has_upgrade(&state->ship.player, AZ_UPG_INFRASCANNER)) {
+    const double radius = 100.0;
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4f(0, 0, blue, 0);
+      glVertex2f(0, 0);
+      glColor4f(0, 0, blue, 1);
+      for (int i = 90; i <= 270; i += 10) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_QUAD_STRIP); {
+      glColor4f(0, 0, blue, 1);
+      glVertex2f(0, radius); glVertex2f(1000, radius + 300);
+      glColor4f(0, 0, blue, 0);
+      glVertex2f(0, 0); glVertex2f(1000, 0);
+      glColor4f(0, 0, blue, 1);
+      glVertex2f(0, -radius); glVertex2f(1000, -radius - 300);
+    } glEnd();
+    glBegin(GL_QUAD_STRIP); {
+      glVertex2f(1000, radius + 300);
+      glVertex2f(1000, 1000);
+      for (int i = 90; i <= 270; i += 10) {
+        const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
+        glVertex2d(radius * c, radius * s);
+        glVertex2d(1000 * c, 1000 * s);
+      }
+      glVertex2f(1000, -radius - 300);
+      glVertex2f(1000, -1000);
+    } glEnd();
+  } else {
+    const double radius = 80.0;
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4f(0, 0, blue, 0);
+      glVertex2f(0, 0);
+      glColor4f(0, 0, blue, 1);
+      for (int i = 0; i <= 360; i += 10) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_QUAD_STRIP); {
+      for (int i = 0; i <= 360; i += 10) {
+        const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
+        glVertex2d(radius * c, radius * s);
+        glVertex2d(1000 * c, 1000 * s);
+      }
+    } glEnd();
+  }
+}
+
 static void draw_camera_view(az_space_state_t *state) {
   az_draw_background_nodes(state);
   glPushMatrix(); {
@@ -152,28 +204,39 @@ void az_space_draw_screen(az_space_state_t *state) {
   assert(fade_alpha >= 0.0);
   assert(fade_alpha <= 1.0);
 
-  // Draw what the camera sees.
   if (fade_alpha < 1.0) {
+    // Draw what the camera sees.
     glPushMatrix(); {
       transform_to_camera_matrix(state);
       draw_camera_view(state);
     } glPopMatrix();
-  }
 
-  // If we're in a superheated room, make everything glow red.
-  if (room_properties(state) & AZ_ROOMF_HEATED) {
-    glBegin(GL_QUADS); {
-      const GLfloat alpha1 = 0.1 + 0.03 * cos(state->camera.wobble_theta);
-      const GLfloat alpha2 = 0.1 + 0.03 * sin(state->camera.wobble_theta);
-      glColor4f(1, 0, 0, alpha1);
-      glVertex2i(0, 0);
-      glColor4f(1, 0, 0, alpha2);
-      glVertex2i(0, AZ_SCREEN_HEIGHT);
-      glColor4f(1, 0, 0, alpha1);
-      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
-      glColor4f(1, 0, 0, alpha2);
-      glVertex2i(AZ_SCREEN_WIDTH, 0);
-    } glEnd();
+    // If we're in a superheated room, make everything glow red.
+    const az_room_flags_t properties = room_properties(state);
+    if (properties & AZ_ROOMF_HEATED) {
+      glBegin(GL_QUADS); {
+        const GLfloat alpha1 = 0.1 + 0.03 * cos(state->camera.wobble_theta);
+        const GLfloat alpha2 = 0.1 + 0.03 * sin(state->camera.wobble_theta);
+        glColor4f(1, 0, 0, alpha1);
+        glVertex2i(0, 0);
+        glColor4f(1, 0, 0, alpha2);
+        glVertex2i(0, AZ_SCREEN_HEIGHT);
+        glColor4f(1, 0, 0, alpha1);
+        glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+        glColor4f(1, 0, 0, alpha2);
+        glVertex2i(AZ_SCREEN_WIDTH, 0);
+      } glEnd();
+    }
+
+    // If we're in a dark room, draw darkness around the ship.
+    if (properties & AZ_ROOMF_DARK) {
+      glPushMatrix(); {
+        transform_to_camera_matrix(state);
+        glTranslated(state->ship.position.x, state->ship.position.y, 0);
+        glRotated(AZ_RAD2DEG(state->ship.angle), 0, 0, 1);
+        draw_darkness(state);
+      } glPopMatrix();
+    }
   }
 
   // Tint the camera view black (based on fade_alpha).
