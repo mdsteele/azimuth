@@ -213,6 +213,13 @@ void az_init_wall_drawing(void) {
 
 /*===========================================================================*/
 
+void az_draw_wall_data(const az_wall_data_t *data) {
+  const GLuint display_list =
+    wall_display_lists_start + az_wall_data_index(data);
+  assert(glIsList(display_list));
+  glCallList(display_list);
+}
+
 void az_draw_wall(const az_wall_t *wall) {
   assert(wall->kind != AZ_WALL_NOTHING);
   const GLuint display_list =

@@ -195,6 +195,10 @@ static void do_select(int x, int y, bool multi) {
     } else if (best_node->spec.kind == AZ_NODE_DOODAD_FG ||
                best_node->spec.kind == AZ_NODE_DOODAD_BG) {
       state.brush.doodad_kind = best_node->spec.subkind.doodad;
+    } else if (best_node->spec.kind == AZ_NODE_FAKE_WALL_FG ||
+               best_node->spec.kind == AZ_NODE_FAKE_WALL_BG) {
+      state.brush.wall_data_index =
+        az_wall_data_index(best_node->spec.subkind.fake_wall);
     }
   } else if (best_wall != NULL) {
     if (multi) {
@@ -514,6 +518,10 @@ static void do_add_node(int x, int y) {
   } else if (state.brush.node_kind == AZ_NODE_DOODAD_FG ||
              state.brush.node_kind == AZ_NODE_DOODAD_BG) {
     node->spec.subkind.doodad = state.brush.doodad_kind;
+  } else if (state.brush.node_kind == AZ_NODE_FAKE_WALL_FG ||
+             state.brush.node_kind == AZ_NODE_FAKE_WALL_BG) {
+    node->spec.subkind.fake_wall =
+      az_get_wall_data(state.brush.wall_data_index);
   }
   node->spec.position = pt;
   node->spec.angle = state.brush.angle;
@@ -622,6 +630,12 @@ static void do_change_data(int delta, bool secondary) {
         az_modulo((int)node->spec.subkind.doodad + delta, AZ_NUM_DOODAD_KINDS);
       node->spec.subkind.doodad = new_doodad;
       state.brush.doodad_kind = new_doodad;
+    } else if ((node->spec.kind == AZ_NODE_FAKE_WALL_FG ||
+                node->spec.kind == AZ_NODE_FAKE_WALL_BG) && secondary) {
+      const int old_index = az_wall_data_index(node->spec.subkind.fake_wall);
+      const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
+      node->spec.subkind.fake_wall = az_get_wall_data(new_index);
+      state.brush.wall_data_index = new_index;
     } else {
       const az_node_kind_t new_kind =
         az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
@@ -632,6 +646,10 @@ static void do_change_data(int delta, bool secondary) {
       } else if (new_kind == AZ_NODE_DOODAD_FG ||
                  new_kind == AZ_NODE_DOODAD_BG) {
         node->spec.subkind.doodad = state.brush.doodad_kind;
+      } else if (new_kind == AZ_NODE_FAKE_WALL_FG ||
+                 new_kind == AZ_NODE_FAKE_WALL_BG) {
+        node->spec.subkind.fake_wall =
+          az_get_wall_data(state.brush.wall_data_index);
       }
     }
     set_room_unsaved(room);

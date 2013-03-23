@@ -239,7 +239,8 @@ static void draw_script_and_uuid_slot(
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    if (editor_node->spec.kind == AZ_NODE_DOODAD_BG) {
+    if (editor_node->spec.kind == AZ_NODE_DOODAD_BG ||
+        editor_node->spec.kind == AZ_NODE_FAKE_WALL_BG) {
       draw_node(state, editor_node);
     }
   }
@@ -272,7 +273,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||
-        editor_node->spec.kind == AZ_NODE_DOODAD_BG) continue;
+        editor_node->spec.kind == AZ_NODE_DOODAD_BG ||
+        editor_node->spec.kind == AZ_NODE_FAKE_WALL_FG ||
+        editor_node->spec.kind == AZ_NODE_FAKE_WALL_BG) continue;
     draw_node(state, editor_node);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
@@ -322,7 +325,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     az_draw_gravfield(&real_gravfield, state->total_time);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
-    if (editor_node->spec.kind == AZ_NODE_DOODAD_FG) {
+    if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||
+        editor_node->spec.kind == AZ_NODE_FAKE_WALL_FG) {
       draw_node(state, editor_node);
     }
   }

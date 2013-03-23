@@ -31,6 +31,10 @@
 // _before_ any calls to az_draw_wall or az_draw_walls.
 void az_init_wall_drawing(void);
 
+// Draw a single wall, without flare or additional transforms.  The GL matrix
+// should be at the wall position.
+void az_draw_wall_data(const az_wall_data_t *data);
+
 // Draw a single wall.  The GL matrix should be at the camera position.
 void az_draw_wall(const az_wall_t *wall);
 

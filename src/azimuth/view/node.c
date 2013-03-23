@@ -29,6 +29,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/view/wall.h"
 
 /*===========================================================================*/
 
@@ -694,6 +695,10 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
     case AZ_NODE_DOODAD_BG:
       draw_doodad(node->subkind.doodad, clock);
       break;
+    case AZ_NODE_FAKE_WALL_FG:
+    case AZ_NODE_FAKE_WALL_BG:
+      az_draw_wall_data(node->subkind.fake_wall);
+      break;
   }
 }
 
@@ -708,7 +713,8 @@ void az_draw_node(const az_node_t *node, az_clock_t clock) {
 
 void az_draw_background_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_DOODAD_BG) {
+    if (node->kind == AZ_NODE_DOODAD_BG ||
+        node->kind == AZ_NODE_FAKE_WALL_BG) {
       az_draw_node(node, state->clock);
     }
   }
@@ -727,14 +733,17 @@ void az_draw_middle_nodes(const az_space_state_t *state) {
     if (node->kind == AZ_NODE_NOTHING ||
         node->kind == AZ_NODE_UPGRADE ||
         node->kind == AZ_NODE_DOODAD_FG ||
-        node->kind == AZ_NODE_DOODAD_BG) continue;
+        node->kind == AZ_NODE_DOODAD_BG ||
+        node->kind == AZ_NODE_FAKE_WALL_FG ||
+        node->kind == AZ_NODE_FAKE_WALL_BG) continue;
     az_draw_node(node, state->clock);
   }
 }
 
 void az_draw_foreground_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_DOODAD_FG) {
+    if (node->kind == AZ_NODE_DOODAD_FG ||
+        node->kind == AZ_NODE_FAKE_WALL_FG) {
       az_draw_node(node, state->clock);
     }
   }

@@ -197,16 +197,21 @@ static void parse_node_directive(az_load_room_t *loader) {
   READ("%d", &kind);
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
-  if (kind == AZ_NODE_UPGRADE || kind == AZ_NODE_DOODAD_FG ||
-      kind == AZ_NODE_DOODAD_BG) {
+  if (kind == AZ_NODE_UPGRADE ||
+      kind == AZ_NODE_DOODAD_FG || kind == AZ_NODE_DOODAD_BG ||
+      kind == AZ_NODE_FAKE_WALL_FG || kind == AZ_NODE_FAKE_WALL_BG) {
     int subkind;
     READ("/%d", &subkind);
     if (kind == AZ_NODE_UPGRADE) {
       if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
       node->subkind.upgrade = (az_upgrade_t)subkind;
-    } else {
+    } else if (kind == AZ_NODE_DOODAD_FG || kind == AZ_NODE_DOODAD_BG) {
       if (subkind < 0 || subkind >= AZ_NUM_DOODAD_KINDS) FAIL();
       node->subkind.doodad = (az_doodad_kind_t)subkind;
+    } else {
+      assert(kind == AZ_NODE_FAKE_WALL_FG || kind == AZ_NODE_FAKE_WALL_BG);
+      if (subkind < 0 || subkind >= AZ_NUM_WALL_DATAS) FAIL();
+      node->subkind.fake_wall = az_get_wall_data(subkind);
     }
   }
   double x, y, angle;
@@ -349,6 +354,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
     } else if (node->kind == AZ_NODE_DOODAD_FG ||
                node->kind == AZ_NODE_DOODAD_BG) {
       WRITE("/%d", (int)node->subkind.doodad);
+    } else if (node->kind == AZ_NODE_FAKE_WALL_FG ||
+               node->kind == AZ_NODE_FAKE_WALL_BG) {
+      WRITE("/%d", az_wall_data_index(node->subkind.fake_wall));
     }
     WRITE(" x%.02f y%.02f a%f\n",
           node->position.x, node->position.y, node->angle);

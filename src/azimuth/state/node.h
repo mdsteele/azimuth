@@ -24,12 +24,13 @@
 #include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/upgrade.h"
+#include "azimuth/state/wall.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 7
+#define AZ_NUM_NODE_KINDS 9
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
@@ -39,7 +40,9 @@ typedef enum {
   AZ_NODE_REFILL,
   AZ_NODE_COMM,
   AZ_NODE_DOODAD_FG,
-  AZ_NODE_DOODAD_BG
+  AZ_NODE_DOODAD_BG,
+  AZ_NODE_FAKE_WALL_FG,
+  AZ_NODE_FAKE_WALL_BG
 } az_node_kind_t;
 
 // The number of different doodad kinds there are:
@@ -56,6 +59,7 @@ typedef enum {
 typedef union {
   az_upgrade_t upgrade;
   az_doodad_kind_t doodad;
+  const az_wall_data_t *fake_wall;
 } az_node_subkind_t;
 
 typedef struct {
