@@ -812,7 +812,8 @@ static void fire_weapons(az_space_state_t *state, double time) {
 /*===========================================================================*/
 // Engines:
 
-static void apply_cplus_drive(az_space_state_t *state, double time) {
+static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
+                              double time) {
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
@@ -822,6 +823,13 @@ static void apply_cplus_drive(az_space_state_t *state, double time) {
     assert(ship->cplus.charge == 0.0);
     assert(ship->cplus.tap_time == 0.0);
   } else {
+    // We can't use the C-plus drive in water without dynamic armor.
+    if (is_in_water && !az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
+      ship->cplus.state = AZ_CPLUS_INACTIVE;
+      ship->cplus.charge = 0.0;
+      ship->cplus.tap_time = 0.0;
+      return;
+    }
     switch (ship->cplus.state) {
       case AZ_CPLUS_INACTIVE:
         assert(ship->cplus.charge >= 0.0);
@@ -1087,7 +1095,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Apply various forces:
   bool is_in_water;
   apply_gravity_to_ship(state, time, &is_in_water);
-  apply_cplus_drive(state, time);
+  apply_cplus_drive(state, is_in_water, time);
   apply_ship_thrusters(ship, is_in_water, time);
   apply_drag_to_ship(ship, is_in_water, time);
 
