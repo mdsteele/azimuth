@@ -18,62 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_STATE_NODE_H_
-#define AZIMUTH_STATE_NODE_H_
+#ifndef AZIMUTH_TICK_NODE_H_
+#define AZIMUTH_TICK_NODE_H_
 
-#include "azimuth/state/script.h"
-#include "azimuth/state/uid.h"
-#include "azimuth/state/upgrade.h"
-#include "azimuth/state/wall.h"
-#include "azimuth/util/vector.h"
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-// The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 9
-
-typedef enum {
-  AZ_NODE_NOTHING = 0,
-  AZ_NODE_SAVE_POINT,
-  AZ_NODE_TRACTOR,
-  AZ_NODE_UPGRADE,
-  AZ_NODE_REFILL,
-  AZ_NODE_COMM,
-  AZ_NODE_DOODAD_FG,
-  AZ_NODE_DOODAD_BG,
-  AZ_NODE_FAKE_WALL_FG,
-  AZ_NODE_FAKE_WALL_BG
-} az_node_kind_t;
-
-// The number of different doodad kinds there are:
-#define AZ_NUM_DOODAD_KINDS 5
-
-typedef enum {
-  AZ_DOOD_WARNING_LIGHT,
-  AZ_DOOD_PIPE_STRAIGHT,
-  AZ_DOOD_PIPE_CORNER,
-  AZ_DOOD_PIPE_TEE,
-  AZ_DOOD_MACHINE_FAN
-} az_doodad_kind_t;
-
-typedef union {
-  az_upgrade_t upgrade;
-  az_doodad_kind_t doodad;
-  const az_wall_data_t *fake_wall;
-} az_node_subkind_t;
-
-typedef struct {
-  az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
-  az_node_subkind_t subkind;
-  az_uid_t uid;
-  const az_script_t *on_use; // not owned; NULL if no script
-  az_vector_t position;
-  double angle;
-  enum { AZ_NS_FAR = 0, AZ_NS_NEAR, AZ_NS_READY, AZ_NS_ACTIVE } state;
-} az_node_t;
-
-#define AZ_NODE_BOUNDING_RADIUS 50.0
+void az_tick_nodes(az_space_state_t *state, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_STATE_NODE_H_
+#endif // AZIMUTH_TICK_NODE_H_

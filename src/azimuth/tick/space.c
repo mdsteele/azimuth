@@ -27,6 +27,7 @@
 #include "azimuth/tick/baddie.h"
 #include "azimuth/tick/camera.h"
 #include "azimuth/tick/door.h"
+#include "azimuth/tick/node.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
@@ -333,6 +334,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       az_tick_timers(state, time);
       tick_pickups_walls_doors_projectiles_and_baddies(state, time);
       az_tick_ship(state, time);
+      az_tick_nodes(state, time);
       break;
     case AZ_MODE_DIALOG:
       tick_dialog_mode(state, time);
@@ -343,11 +345,13 @@ void az_tick_space_state(az_space_state_t *state, double time) {
         az_tick_timers(state, time);
         tick_pickups_walls_doors_projectiles_and_baddies(state, time);
         az_tick_ship(state, time);
+        az_tick_nodes(state, time);
       }
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
       tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+      az_tick_nodes(state, time);
       break;
     case AZ_MODE_PAUSING:
     case AZ_MODE_RESUMING:

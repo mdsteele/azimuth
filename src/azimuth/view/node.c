@@ -663,13 +663,41 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_NODE_TRACTOR:
-      glColor3f(1, 1, 1); // white
-      glBegin(GL_LINE_LOOP); {
-        // TODO: make this look better
-        const double radius = 10.0;
-        for (int i = 0; i < 16; ++i) {
-          glVertex2d(radius * cos(i * AZ_PI_EIGHTHS),
-                     radius * sin(i * AZ_PI_EIGHTHS));
+      for (int i = 0; i < 3; ++i) {
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.25, 0.25, 0.25);
+          glVertex2f(0, 3); glVertex2f(12, 3);
+          glColor3f(0.75, 0.75, 0.75);
+          glVertex2f(0, 0);
+          glColor3f(0.5, 0.5, 0.5);
+          glVertex2f(13.5, 0);
+          glColor3f(0.25, 0.25, 0.25);
+          glVertex2f(0, -3); glVertex2f(12, -3);
+        } glEnd();
+        glRotatef(120, 0, 0, 1);
+      }
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75);
+        glVertex2f(0, 0);
+        glColor3f(0.35, 0.35, 0.35);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(6 * cos(AZ_DEG2RAD(i)), 6 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        switch (node->state) {
+          case AZ_NS_FAR: glColor3f(0, 0, 0); break;
+          case AZ_NS_NEAR: glColor3f(1, 1, 0.5); break;
+          case AZ_NS_READY:
+            if (az_clock_mod(2, 5, clock)) glColor3f(1, 0, 1);
+            else glColor3f(1, 1, 0.5);
+            break;
+          case AZ_NS_ACTIVE: glColor3f(1, 0, 1); break;
+        }
+        glVertex2f(0, 0);
+        glColor4f(0, 0, 0, 0);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
       break;

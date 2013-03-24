@@ -100,6 +100,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       node->on_use = spec->on_use;
       node->position = spec->position;
       node->angle = spec->angle;
+      node->state = AZ_NS_FAR;
     }
   }
   for (int i = 0; i < room->num_walls; ++i) {
