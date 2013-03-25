@@ -80,42 +80,54 @@ static void tick_console_mode(az_space_state_t *state, double time) {
   }
   assert(node != NULL);
   assert(node->kind == AZ_NODE_CONSOLE);
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
+  double *progress = &state->mode_data.console.progress;
   const double align_time = 0.3; // seconds
+  const double use_time = 1.5; // seconds
   switch (state->mode_data.console.step) {
     case AZ_CSS_ALIGN:
-      assert(state->mode_data.console.progress >= 0.0);
-      assert(state->mode_data.console.progress < 1.0);
-      state->mode_data.console.progress =
-        fmin(1.0, state->mode_data.console.progress + time / align_time);
-      state->ship.position =
-        az_vadd(node->position,
-                az_vmul(state->mode_data.console.position_delta,
-                        1.0 - state->mode_data.console.progress));
-      state->ship.angle =
+      assert(*progress >= 0.0);
+      assert(*progress < 1.0);
+      *progress = fmin(1.0, *progress + time / align_time);
+      ship->position = az_vadd(
+          node->position,
+          az_vmul(state->mode_data.console.position_delta, 1.0 - *progress));
+      ship->angle =
         az_mod2pi(node->angle + state->mode_data.console.angle_delta *
-                  (1.0 - state->mode_data.console.progress));
-      state->ship.velocity = AZ_VZERO;
-      if (state->mode_data.console.progress >= 1.0) {
+                  (1.0 - *progress));
+      ship->velocity = AZ_VZERO;
+      if (*progress >= 1.0) {
         state->mode_data.console.step = AZ_CSS_USE;
-        state->mode_data.console.progress = 0.0;
+        *progress = 0.0;
       }
       break;
     case AZ_CSS_USE:
+      assert(*progress >= 0.0);
+      assert(*progress < 1.0);
+      *progress = fmin(1.0, *progress + time / use_time);
       switch (node->subkind.console) {
         case AZ_CONS_COMM: break;
         case AZ_CONS_REFILL:
-          state->ship.player.rockets = state->ship.player.max_rockets;
-          state->ship.player.bombs = state->ship.player.max_bombs;
+          player->rockets =
+            az_imax(player->rockets, *progress * player->max_rockets);
+          player->bombs =
+            az_imax(player->bombs, *progress * player->max_bombs);
           // fallthrough
         case AZ_CONS_SAVE:
-          state->ship.player.shields = state->ship.player.max_shields;
-          state->ship.player.energy = state->ship.player.max_energy;
+          player->shields =
+            fmax(player->shields, *progress * player->max_shields);
+          player->energy =
+            fmax(player->energy, *progress * player->max_energy);
           break;
       }
-      // TODO: animate using the console
-      state->mode_data.console.step = AZ_CSS_FINISH;
+      if (*progress >= 1.0) {
+        state->mode_data.console.step = AZ_CSS_FINISH;
+        *progress = 0.0;
+      }
       break;
     case AZ_CSS_FINISH:
+      assert(*progress == 0.0);
       state->mode = AZ_MODE_NORMAL;
       az_run_script(state, node->on_use);
       break;

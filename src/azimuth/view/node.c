@@ -63,17 +63,64 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_CONS_SAVE:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(25, 18);
-        glVertex2d(-25, 18);
-        glVertex2d(-25, -18);
-        glVertex2d(25, -18);
+      // Pipe:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.05, 0.2, 0.05);
+        glVertex2f(-40, 5); glVertex2f(-30, 5);
+        glColor3f(0.325, 0.45, 0.325);
+        glVertex2f(-40, 0); glVertex2f(-30, 0);
+        glColor3f(0.05, 0.2, 0.05);
+        glVertex2f(-40, -5); glVertex2f(-30, -5);
+      } glEnd();
+      // Coupling:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.175, 0.1);
+        glVertex2f(-46, 6); glVertex2f(-40, 6);
+        glColor3f(0.375, 0.425, 0.375);
+        glVertex2f(-46, 0); glVertex2f(-40, 0);
+        glColor3f(0.1, 0.175, 0.1);
+        glVertex2f(-46, -6); glVertex2f(-40, -6);
+      } glEnd();
+      // Port:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.05, 0.15, 0.05);
+        glVertex2f(-24, 4.5); glVertex2f(-12, 2.5);
+        glColor3f(0.325, 0.4, 0.325);
+        glVertex2f(-24, 0); glVertex2f(-12, 0);
+        glColor3f(0.05, 0.15, 0.05);
+        glVertex2f(-24, -4.5); glVertex2f(-12, -2.5);
+      } glEnd();
+      glBegin(GL_QUADS); {
+        // Connecting strut:
+        glColor3f(0.35, 0.35, 0.35);
+        glVertex2f(-24, 21); glVertex2f(-30, 21);
+        glVertex2f(-30, -21); glVertex2f(-24, -21);
+        // Glow:
+        if (node->state == AZ_NS_ACTIVE) {
+          if (az_clock_mod(2, 5, clock)) glColor4f(1, 1, 0.5, 0.5);
+          else glColor4f(0.5, 1, 1, 0.5);
+          glVertex2f(-35, 20); glVertex2f(35, 20);
+          glVertex2f(35, -20); glVertex2f(-35, -20);
+        } else {
+          const GLfloat ampl = 3.0f + az_clock_zigzag(30, 1, clock) *
+            (node->state == AZ_NS_READY ? 0.3f : 0.1f);
+          glColor4f(1, 1, 1, 0);
+          glVertex2f(35, 20 - ampl); glVertex2f(-35, 20 - ampl);
+          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
+          glVertex2f(-35, 20); glVertex2f(35, 20);
+          glVertex2f(-35, -20); glVertex2f(35, -20);
+          glColor4f(1, 1, 1, 0);
+          glVertex2f(35, -20 + ampl); glVertex2f(-35, -20 + ampl);
+        }
+        // Top arm:
+        glColor3f(0.25, 0.25, 0.25);
+        glVertex2f(-25, 30); glVertex2f(25, 30);
+        glColor3f(0.75, 0.75, 0.75);
+        glVertex2f(35, 20); glVertex2f(-35, 20);
+        // Bottom arm:
+        glVertex2f(35, -20); glVertex2f(-35, -20);
+        glColor3f(0.25, 0.25, 0.25);
+        glVertex2f(-25, -30); glVertex2f(25, -30);
       } glEnd();
       break;
   }
