@@ -27,7 +27,7 @@
 
 // Get the length of a statically-sized array, as a compile-time constant.
 #define AZ_ARRAY_SIZE(a) \
-  ((sizeof(a) / sizeof(*(a))) / !(sizeof(a) % sizeof(*(a))))
+  ((int)((sizeof(a) / sizeof(*(a))) / !(sizeof(a) % sizeof(*(a)))))
 
 // Loop over a statically-sized array.
 #define AZ_ARRAY_LOOP(var_name, array) \

@@ -211,8 +211,7 @@ void az_tick_gameover_state(az_gameover_state_t *state, double time) {
 
 /*===========================================================================*/
 
-static bool point_in_button(
-    const az_gameover_state_t *state, az_button_id_t button_id, int x, int y) {
+static bool point_in_button(az_button_id_t button_id, int x, int y) {
   assert(gameover_view_initialized);
   return az_polygon_contains(button_info[button_id].polygon,
                              (az_vector_t){x, y});
@@ -222,7 +221,7 @@ static void button_on_hover(
     az_gameover_state_t *state, az_gameover_button_t *button,
     az_button_id_t button_id, int x, int y) {
   if ((state->mode == AZ_GMODE_FADE_IN || state->mode == AZ_GMODE_NORMAL) &&
-      point_in_button(state, button_id, x, y)) {
+      point_in_button(button_id, x, y)) {
     if (!button->hovering) {
       button->hovering = true;
       button->hover_start = state->clock;
@@ -244,7 +243,7 @@ void az_gameover_on_hover(az_gameover_state_t *state, int x, int y) {
 static void button_on_click(
     az_gameover_state_t *state, az_button_id_t button_id, int x, int y) {
   if ((state->mode == AZ_GMODE_FADE_IN || state->mode == AZ_GMODE_NORMAL) &&
-      point_in_button(state, button_id, x, y)) {
+      point_in_button(button_id, x, y)) {
     switch (button_id) {
       case AZ_BUTTON_RETRY:
         state->retry_button.hover_pulse = HOVER_PULSE_CLICK;

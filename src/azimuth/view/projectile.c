@@ -30,8 +30,7 @@
 
 /*===========================================================================*/
 
-static void draw_rocket(const az_projectile_t* proj, az_clock_t clock,
-                        az_color_t color) {
+static void draw_rocket(az_clock_t clock, az_color_t color) {
   glColor3ub(color.r, color.g, color.b);
   glBegin(GL_QUADS); {
     const int y = 2 - az_clock_mod(6, 2, clock);
@@ -244,27 +243,27 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_ROCKET:
-      draw_rocket(proj, clock, (az_color_t){128, 0, 0, 255});
+      draw_rocket(clock, (az_color_t){128, 0, 0, 255});
       break;
     case AZ_PROJ_HYPER_ROCKET:
     case AZ_PROJ_MISSILE_PIERCE:
-      draw_rocket(proj, clock, (az_color_t){192, 0, 192, 255});
+      draw_rocket(clock, (az_color_t){192, 0, 192, 255});
       break;
     case AZ_PROJ_MISSILE_FREEZE:
-      draw_rocket(proj, clock, (az_color_t){0, 192, 192, 255});
+      draw_rocket(clock, (az_color_t){0, 192, 192, 255});
       break;
     case AZ_PROJ_MISSILE_BARRAGE: break; // invisible
     case AZ_PROJ_MISSILE_TRIPLE:
-      draw_rocket(proj, clock, (az_color_t){0, 192, 0, 255});
+      draw_rocket(clock, (az_color_t){0, 192, 0, 255});
       break;
     case AZ_PROJ_MISSILE_HOMING:
-      draw_rocket(proj, clock, (az_color_t){0, 0, 255, 255});
+      draw_rocket(clock, (az_color_t){0, 0, 255, 255});
       break;
     case AZ_PROJ_MISSILE_PHASE:
-      draw_rocket(proj, clock, (az_color_t){192, 192, 0, 255});
+      draw_rocket(clock, (az_color_t){192, 192, 0, 255});
       break;
     case AZ_PROJ_MISSILE_BURST:
-      draw_rocket(proj, clock, (az_color_t){192, 96, 0, 255});
+      draw_rocket(clock, (az_color_t){192, 96, 0, 255});
       break;
     case AZ_PROJ_MISSILE_BEAM:
       glBegin(GL_TRIANGLE_FAN); {

@@ -33,7 +33,7 @@
 
 /*===========================================================================*/
 
-static void draw_passage(const az_door_t *door) {
+static void draw_passage(void) {
   glColor3f(0, 1, 0); // green
   glBegin(GL_LINES); {
     for (GLfloat x = 30; x >= -30; x -= 4) glVertex2f(x, 50);
@@ -93,7 +93,7 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
       color = (az_color_t){0, 128, 255, 255};
       break;
     case AZ_DOOR_PASSAGE:
-      draw_passage(door);
+      draw_passage();
       return;
     case AZ_DOOR_FORCEFIELD:
       draw_forcefield(door, clock);

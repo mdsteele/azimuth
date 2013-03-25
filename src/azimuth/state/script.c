@@ -203,19 +203,19 @@ az_script_t *az_sscan_script(const char *string, int length) {
   }
   az_instruction_t *instructions =
     AZ_ALLOC(num_instructions, az_instruction_t);
-  int index = 0;
+  int idx = 0;
   for (int i = 0; i < num_instructions; ++i) {
     int num_read;
     char name[12];
-    if (sscanf(string + index, "%11[a-z]%n%lf%n", name, &num_read,
+    if (sscanf(string + idx, "%11[a-z]%n%lf%n", name, &num_read,
                &instructions[i].immediate, &num_read) == 0) {
       free(instructions);
       return NULL;
     }
-    index += num_read;
-    assert(index <= length);
-    if (index >= length ||
-        string[index++] != (i == num_instructions - 1 ? ';' : ',') ||
+    idx += num_read;
+    assert(idx <= length);
+    if (idx >= length ||
+        string[idx++] != (i == num_instructions - 1 ? ';' : ',') ||
         !opcode_for_name(name, &instructions[i].opcode)) {
       free(instructions);
       return NULL;

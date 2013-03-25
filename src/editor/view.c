@@ -279,7 +279,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     draw_node(state, editor_node);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
-    az_baddie_t real_baddie = {0};
+    az_baddie_t real_baddie;
     az_init_baddie(&real_baddie, editor_baddie->spec.kind,
                    editor_baddie->spec.position, editor_baddie->spec.angle);
     if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
@@ -558,9 +558,9 @@ static void draw_hud(az_editor_state_t* state) {
                  tool_name);
 
   // Draw space coords of mouse position:
-  int x, y;
-  if (az_get_mouse_position(&x, &y)) {
-    const az_vector_t pt = az_pixel_to_position(state, x, y);
+  int mouse_x, mouse_y;
+  if (az_get_mouse_position(&mouse_x, &mouse_y)) {
+    const az_vector_t pt = az_pixel_to_position(state, mouse_x, mouse_y);
     glColor3f(1, 1, 1); // white
     az_draw_printf(8, AZ_ALIGN_LEFT, 5, AZ_SCREEN_HEIGHT - 13,
                    "(%.01f, %.01f)", pt.x, pt.y);

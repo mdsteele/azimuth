@@ -347,8 +347,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
             glColor3f(0.75, 0.25, 1);
             glVertex2f(0, 0);
             glColor3f(0.2 + 0.4 * flare, 0.2 - 0.3 * flare, 0.2 - 0.3 * flare);
-            for (int i = 0; i < polygon.num_vertices; ++i) {
-              glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+            for (int j = 0; j < polygon.num_vertices; ++j) {
+              glVertex2d(polygon.vertices[j].x, polygon.vertices[j].y);
             }
           } glEnd();
           glBegin(GL_QUADS); {
@@ -678,14 +678,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
             glColor3f(0.75, 1.0f - hurt, 0.25 + 0.1f * hurt);
             glVertex2f(0, 0);
             const double radius = data->bounding_radius * 1.05;
-            for (int i = 0; i <= 360; i += 30) {
-              if (i % (last ? 360 : 180) == 0) {
+            for (int j = 0; j <= 360; j += 30) {
+              if (j % (last ? 360 : 180) == 0) {
                 glColor3f(0.5f, 0.75f - 0.7f * hurt, 0.15f + 0.1f * hurt);
               } else {
                 glColor3f(0.25, 0.35 - 0.3f * hurt, 0.125f);
               }
-              glVertex2d(radius * cos(AZ_DEG2RAD(i)),
-                         radius * sin(AZ_DEG2RAD(i)));
+              glVertex2d(radius * cos(AZ_DEG2RAD(j)),
+                         radius * sin(AZ_DEG2RAD(j)));
             }
           } glEnd();
         } glPopMatrix();
@@ -734,11 +734,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
             glColor3f(0.75, 1, 0.25);
             glVertex2f(0, 0);
             const double radius = data->bounding_radius * 1.05;
-            for (int i = 0; i <= 360; i += 30) {
-              if (i % (last ? 360 : 180) == 0) glColor3f(0.5, 0.75, 0.15);
+            for (int j = 0; j <= 360; j += 30) {
+              if (j % (last ? 360 : 180) == 0) glColor3f(0.5, 0.75, 0.15);
               else glColor3f(0.25, 0.35, 0.125);
-              glVertex2d(radius * cos(AZ_DEG2RAD(i)),
-                         radius * sin(AZ_DEG2RAD(i)));
+              glVertex2d(radius * cos(AZ_DEG2RAD(j)),
+                         radius * sin(AZ_DEG2RAD(j)));
             }
           } glEnd();
         } glPopMatrix();

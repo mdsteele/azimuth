@@ -146,9 +146,9 @@ bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist) {
 
 int az_modulo(int a, int b) {
   assert(b != 0);
-  const int remainder = a % b;
-  if (remainder == 0) return 0;
-  return ((a < 0) ^ (b < 0) ? remainder + b : remainder);
+  const int remain = a % b;
+  if (remain == 0) return 0;
+  return ((a < 0) ^ (b < 0) ? remain + b : remain);
 }
 
 double az_mod2pi(double theta) {

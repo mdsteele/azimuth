@@ -23,15 +23,17 @@
 
 /*===========================================================================*/
 
-#define AZ_UID_INDEX_MASK 0xFFFFu
-#define AZ_UID_COUNT_STEP 0x10000u
+#define AZ_UID_INDEX_MASK (UINT64_C(0xFFFF))
+#define AZ_UID_COUNT_STEP (UINT64_C(0x10000))
 
 const az_uid_t AZ_NULL_UID = 0u;
 const az_uid_t AZ_SHIP_UID = (az_uid_t)(-1);
 
 void az_assign_uid(int index, az_uid_t *uid) {
-  assert(index == (index & AZ_UID_INDEX_MASK));
-  *uid = ((*uid + AZ_UID_COUNT_STEP) & ~AZ_UID_INDEX_MASK) | index;
+  assert(index >= 0);
+  const uint64_t index64 = index;
+  assert(index64 == (index64 & AZ_UID_INDEX_MASK));
+  *uid = ((*uid + AZ_UID_COUNT_STEP) & ~AZ_UID_INDEX_MASK) | index64;
 }
 
 int az_uid_index(az_uid_t uid) {

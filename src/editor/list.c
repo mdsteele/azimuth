@@ -43,10 +43,10 @@ void _az_list_destroy(int *num, int *max, void **items) {
   *items = NULL;
 }
 
-void *_az_list_get(int num, void *items, size_t item_size, int index) {
-  assert(index >= 0);
-  assert(index < num);
-  return (char *)items + index * item_size;
+void *_az_list_get(int num, void *items, size_t item_size, int idx) {
+  assert(idx >= 0);
+  assert(idx < num);
+  return (char *)items + idx * item_size;
 }
 
 void *_az_list_add(int *num, int *max, void **items, size_t item_size) {

@@ -63,7 +63,7 @@ typedef struct {
   } tractor_beam;
 } az_ship_t;
 
-const extern az_polygon_t AZ_SHIP_POLYGON;
+extern const az_polygon_t AZ_SHIP_POLYGON;
 
 // Return true if the ship is present (i.e. not destroyed), false otherwise.
 bool az_ship_is_present(const az_ship_t *ship);

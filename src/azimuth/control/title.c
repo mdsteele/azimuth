@@ -33,8 +33,8 @@
 
 /*===========================================================================*/
 
-static void erase_saved_game(az_saved_games_t *saved_games, int index) {
-  saved_games->games[index].present = false;
+static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
+  saved_games->games[slot_index].present = false;
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
   char path_buffer[strlen(data_dir) + 10u];

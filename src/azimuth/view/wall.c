@@ -127,12 +127,12 @@ static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
     const float strut = bezel * 0.66666;
     for (float x = left; x < right - breadth; x += breadth - strut) {
       for (int j = 0; j < 2; ++j) {
-        const float y1 = (j ? bottom : top);
-        const float y2 = (j ? top : bottom);
+        const float y_1 = (j ? bottom : top);
+        const float y_2 = (j ? top : bottom);
         glColor4ub(color1.r, color1.g, color1.b, color1.a);
-        glVertex2f(x, y1); glVertex2f(x + breadth, y2);
+        glVertex2f(x, y_1); glVertex2f(x + breadth, y_2);
         glColor4ub(color2.r, color2.g, color2.b, color2.a);
-        glVertex2f(x + breadth + strut, y2); glVertex2f(x + strut, y1);
+        glVertex2f(x + breadth + strut, y_2); glVertex2f(x + strut, y_1);
       }
     }
     // Edges:

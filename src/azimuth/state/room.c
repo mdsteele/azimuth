@@ -124,13 +124,13 @@ static void parse_room_header(az_load_room_t *loader) {
 
 static void parse_baddie_directive(az_load_room_t *loader) {
   if (loader->room->num_baddies >= loader->num_baddies) FAIL();
-  int index, uuid_slot;
+  int kind, uuid_slot;
   double x, y, angle;
-  READ("%d x%lf y%lf a%lf u%d\n", &index, &x, &y, &angle, &uuid_slot);
-  if (index <= 0 || index > AZ_NUM_BADDIE_KINDS ||
+  READ("%d x%lf y%lf a%lf u%d\n", &kind, &x, &y, &angle, &uuid_slot);
+  if (kind <= 0 || kind > AZ_NUM_BADDIE_KINDS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_baddie_spec_t *baddie = &loader->room->baddies[loader->room->num_baddies];
-  baddie->kind = (az_baddie_kind_t)index;
+  baddie->kind = (az_baddie_kind_t)kind;
   baddie->position = (az_vector_t){x, y};
   baddie->angle = angle;
   baddie->uuid_slot = uuid_slot;
@@ -140,15 +140,15 @@ static void parse_baddie_directive(az_load_room_t *loader) {
 
 static void parse_door_directive(az_load_room_t *loader) {
   if (loader->room->num_doors >= loader->num_doors) FAIL();
-  int index, destination, uuid_slot;
+  int kind, destination, uuid_slot;
   double x, y, angle;
   READ("%d x%lf y%lf a%lf r%d u%d\n",
-       &index, &x, &y, &angle, &destination, &uuid_slot);
-  if (index <= 0 || index > AZ_NUM_DOOR_KINDS ||
+       &kind, &x, &y, &angle, &destination, &uuid_slot);
+  if (kind <= 0 || kind > AZ_NUM_DOOR_KINDS ||
       destination < 0 || destination >= AZ_MAX_NUM_ROOMS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_door_spec_t *door = &loader->room->doors[loader->room->num_doors];
-  door->kind = (az_door_kind_t)index;
+  door->kind = (az_door_kind_t)kind;
   door->position = (az_vector_t){x, y};
   door->angle = angle;
   door->destination = (az_room_key_t)destination;
@@ -159,13 +159,13 @@ static void parse_door_directive(az_load_room_t *loader) {
 
 static void parse_gravfield_directive(az_load_room_t *loader) {
   if (loader->room->num_gravfields >= loader->num_gravfields) FAIL();
-  int index, uuid_slot;
+  int kind, uuid_slot;
   double x, y, angle, strength;
-  READ("%d x%lf y%lf a%lf s%lf ", &index, &x, &y, &angle, &strength);
-  if (index <= 0 || index > AZ_NUM_GRAVFIELD_KINDS || strength == 0.0) FAIL();
+  READ("%d x%lf y%lf a%lf s%lf ", &kind, &x, &y, &angle, &strength);
+  if (kind <= 0 || kind > AZ_NUM_GRAVFIELD_KINDS || strength == 0.0) FAIL();
   az_gravfield_spec_t *gravfield =
     &loader->room->gravfields[loader->room->num_gravfields];
-  gravfield->kind = (az_gravfield_kind_t)index;
+  gravfield->kind = (az_gravfield_kind_t)kind;
   gravfield->position = (az_vector_t){x, y};
   gravfield->angle = angle;
   gravfield->strength = strength;
@@ -226,16 +226,16 @@ static void parse_node_directive(az_load_room_t *loader) {
 
 static void parse_wall_directive(az_load_room_t *loader) {
   if (loader->room->num_walls >= loader->num_walls) FAIL();
-  int kind, index, uuid_slot;
+  int kind, data_index, uuid_slot;
   double x, y, angle;
   READ("%d d%d x%lf y%lf a%lf u%d\n",
-       &kind, &index, &x, &y, &angle, &uuid_slot);
+       &kind, &data_index, &x, &y, &angle, &uuid_slot);
   if (kind <= 0 || kind > AZ_NUM_WALL_KINDS ||
-      index < 0 || index >= AZ_NUM_WALL_DATAS ||
+      data_index < 0 || data_index >= AZ_NUM_WALL_DATAS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_wall_spec_t *wall = &loader->room->walls[loader->room->num_walls];
   wall->kind = (az_wall_kind_t)kind;
-  wall->data = az_get_wall_data(index);
+  wall->data = az_get_wall_data(data_index);
   wall->uuid_slot = uuid_slot;
   wall->position = (az_vector_t){x, y};
   wall->angle = angle;
