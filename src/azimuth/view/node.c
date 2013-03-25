@@ -32,6 +32,7 @@
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
+// Upgrades:
 
 // Helper function for drawing upgrade icons for armor upgrades.
 static void draw_armor(void) {
@@ -467,6 +468,7 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
 }
 
 /*===========================================================================*/
+// Doodads:
 
 static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
   assert(0 <= (int)doodad_kind && (int)doodad_kind < AZ_NUM_DOODAD_KINDS);
@@ -654,7 +656,12 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
   switch (node->kind) {
     case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_NODE_SAVE_POINT:
-      glColor3f(1, 1, 1); // white
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
       glBegin(GL_LINE_LOOP); {
         glVertex2d(25, 18);
         glVertex2d(-25, 18);
@@ -705,14 +712,24 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       draw_upgrade_icon(node->subkind.upgrade, clock);
       break;
     case AZ_NODE_REFILL:
-      glColor3f(1, 1, 1); // white
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
       glBegin(GL_LINE_LOOP); {
         glVertex2d(10, 0); glVertex2d(0, 10);
         glVertex2d(-10, 0); glVertex2d(0, -10);
       } glEnd();
       break;
     case AZ_NODE_COMM:
-      glColor3f(1, 1, 1); // white
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
       glBegin(GL_LINE_LOOP); {
         glVertex2d(10, 0);
         glVertex2d(-10, 10);
@@ -758,13 +775,12 @@ void az_draw_upgrade_nodes(const az_space_state_t *state) {
 
 void az_draw_middle_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING ||
-        node->kind == AZ_NODE_UPGRADE ||
-        node->kind == AZ_NODE_DOODAD_FG ||
-        node->kind == AZ_NODE_DOODAD_BG ||
-        node->kind == AZ_NODE_FAKE_WALL_FG ||
-        node->kind == AZ_NODE_FAKE_WALL_BG) continue;
-    az_draw_node(node, state->clock);
+    if (node->kind == AZ_NODE_SAVE_POINT ||
+        node->kind == AZ_NODE_TRACTOR ||
+        node->kind == AZ_NODE_REFILL ||
+        node->kind == AZ_NODE_COMM) {
+      az_draw_node(node, state->clock);
+    }
   }
 }
 

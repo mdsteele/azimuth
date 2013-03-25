@@ -35,6 +35,8 @@ void az_tick_nodes(az_space_state_t *state, double time) {
     az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM);
   double best_tractor_dist = AZ_TRACTOR_BEAM_MAX_RANGE;
   az_node_t *closest_tractor_node = NULL;
+  double best_console_dist = AZ_CONSOLE_RANGE;
+  az_node_t *closest_console_node = NULL;
   AZ_ARRAY_LOOP(node, state->nodes) {
     switch (node->kind) {
       case AZ_NODE_TRACTOR:
@@ -49,6 +51,19 @@ void az_tick_nodes(az_space_state_t *state, double time) {
           }
         } else node->state = AZ_NS_FAR;
         break;
+      case AZ_NODE_SAVE_POINT:
+      case AZ_NODE_REFILL:
+      case AZ_NODE_COMM:
+        if (az_vwithin(state->ship.position, node->position,
+                       AZ_CONSOLE_RANGE)) {
+          node->state = AZ_NS_NEAR;
+          const double dist = az_vdist(state->ship.position, node->position);
+          if (dist <= best_tractor_dist) {
+            best_console_dist = dist;
+            closest_console_node = node;
+          }
+        } else node->state = AZ_NS_FAR;
+        break;
       default: break;
     }
   }
@@ -58,6 +73,15 @@ void az_tick_nodes(az_space_state_t *state, double time) {
   if (state->ship.tractor_beam.active) {
     az_node_t *node;
     if (az_lookup_node(state, state->ship.tractor_beam.node_uid, &node)) {
+      node->state = AZ_NS_ACTIVE;
+    }
+  }
+  if (closest_console_node != NULL) {
+    closest_console_node->state = AZ_NS_READY;
+  }
+  if (state->mode == AZ_MODE_CONSOLE) {
+    az_node_t *node;
+    if (az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
       node->state = AZ_NS_ACTIVE;
     }
   }

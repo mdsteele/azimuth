@@ -72,15 +72,22 @@ typedef struct {
   // Mode information:
   enum {
     AZ_MODE_NORMAL = 0, // flying around; the normal mode of gameplay
+    AZ_MODE_CONSOLE, // using a save point, refill node, or comm node
     AZ_MODE_DIALOG, // engaged in story dialog
     AZ_MODE_DOORWAY, // waiting while we pass through a door
     AZ_MODE_GAME_OVER, // showing the game over animation
     AZ_MODE_PAUSING, // entering the pause screen
     AZ_MODE_RESUMING, // leaving the pause screen
-    AZ_MODE_SAVING, // using a save point
     AZ_MODE_UPGRADE // receiving an upgrade
   } mode;
   union {
+    struct {
+      enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_FINISH } step;
+      double progress;
+      az_uid_t node_uid;
+      az_vector_t position_delta;
+      double angle_delta;
+    } console;
     struct {
       enum { AZ_DLS_BEGIN, AZ_DLS_TALK, AZ_DLS_PAUSE, AZ_DLS_END } step;
       double progress; // 0.0 to 1.0

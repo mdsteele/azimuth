@@ -71,6 +71,59 @@ void az_after_entering_room(az_space_state_t *state) {
 
 /*===========================================================================*/
 
+static void tick_console_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_CONSOLE);
+  az_node_t *node = NULL;
+  if (!az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
+    state->mode = AZ_MODE_NORMAL;
+    return;
+  }
+  assert(node != NULL);
+  assert(node->kind == AZ_NODE_SAVE_POINT || node->kind == AZ_NODE_REFILL ||
+         node->kind == AZ_NODE_COMM);
+  const double align_time = 0.3; // seconds
+  switch (state->mode_data.console.step) {
+    case AZ_CSS_ALIGN:
+      assert(state->mode_data.console.progress >= 0.0);
+      assert(state->mode_data.console.progress < 1.0);
+      state->mode_data.console.progress =
+        fmin(1.0, state->mode_data.console.progress + time / align_time);
+      state->ship.position =
+        az_vadd(node->position,
+                az_vmul(state->mode_data.console.position_delta,
+                        1.0 - state->mode_data.console.progress));
+      state->ship.angle =
+        az_mod2pi(node->angle + state->mode_data.console.angle_delta *
+                  (1.0 - state->mode_data.console.progress));
+      state->ship.velocity = AZ_VZERO;
+      if (state->mode_data.console.progress >= 1.0) {
+        state->mode_data.console.step = AZ_CSS_USE;
+        state->mode_data.console.progress = 0.0;
+      }
+      break;
+    case AZ_CSS_USE:
+      switch (node->kind) {
+        case AZ_NODE_REFILL:
+          state->ship.player.rockets = state->ship.player.max_rockets;
+          state->ship.player.bombs = state->ship.player.max_bombs;
+          // fallthrough
+        case AZ_NODE_SAVE_POINT:
+          state->ship.player.shields = state->ship.player.max_shields;
+          state->ship.player.energy = state->ship.player.max_energy;
+          break;
+        case AZ_NODE_COMM: break;
+        default: AZ_ASSERT_UNREACHABLE();
+      }
+      // TODO: animate using the console
+      state->mode_data.console.step = AZ_CSS_FINISH;
+      break;
+    case AZ_CSS_FINISH:
+      state->mode = AZ_MODE_NORMAL;
+      az_run_script(state, node->on_use);
+      break;
+  }
+}
+
 static void tick_dialog_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_DIALOG);
   const double open_close_time = 0.5; // seconds
@@ -336,6 +389,11 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       az_tick_ship(state, time);
       az_tick_nodes(state, time);
       break;
+    case AZ_MODE_CONSOLE:
+      tick_console_mode(state, time);
+      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+      az_tick_nodes(state, time);
+      break;
     case AZ_MODE_DIALOG:
       tick_dialog_mode(state, time);
       break;
@@ -356,9 +414,6 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     case AZ_MODE_PAUSING:
     case AZ_MODE_RESUMING:
       AZ_ASSERT_UNREACHABLE(); // these modes are handled above
-    case AZ_MODE_SAVING:
-      // TODO: maybe we should add some kind of saving animation?
-      break;
     case AZ_MODE_UPGRADE:
       tick_upgrade_mode(state, time);
       break;

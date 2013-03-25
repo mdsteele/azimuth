@@ -71,8 +71,8 @@ static double mode_fade_alpha(az_space_state_t *state) {
     case AZ_MODE_RESUMING:
       return 1.0 - state->mode_data.pause.progress;
     case AZ_MODE_NORMAL:
+    case AZ_MODE_CONSOLE:
     case AZ_MODE_DIALOG:
-    case AZ_MODE_SAVING:
     case AZ_MODE_UPGRADE:
       return 0.0;
   }

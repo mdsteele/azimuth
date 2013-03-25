@@ -81,21 +81,6 @@ static void recharge_ship_energy(az_player_t *player, double time) {
                         player->energy + recharge_rate * time);
 }
 
-static const az_node_t *choose_nearby_node(const az_space_state_t *state) {
-  const az_node_t *best_node = NULL;
-  double best_dist = 50.0;
-  AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING || node->kind == AZ_NODE_TRACTOR ||
-        node->kind == AZ_NODE_UPGRADE) continue;
-    const double dist = az_vdist(node->position, state->ship.position);
-    if (dist <= best_dist) {
-      best_dist = dist;
-      best_node = node;
-    }
-  }
-  return best_node;
-}
-
 static void apply_gravity_to_ship(az_space_state_t *state, double time,
                                   bool *is_in_water) {
   assert(is_in_water != NULL);
@@ -1054,16 +1039,29 @@ void az_tick_ship(az_space_state_t *state, double time) {
     on_ship_impact(state, &impact, NULL);
   }
 
-  // If we press the util key while near a save point, initiate saving.
+  // If we press the util key while near a console, use it.
   if (controls->util_pressed && state->mode == AZ_MODE_NORMAL) {
-    const az_node_t *node = choose_nearby_node(state);
-    if (node != NULL) {
-      if (node->kind == AZ_NODE_SAVE_POINT) {
-        state->mode = AZ_MODE_SAVING;
-      } else if (node->kind == AZ_NODE_REFILL) {
-        // TODO: implement refill nodes
+    const az_node_t *console = NULL;
+    double best_dist = AZ_CONSOLE_RANGE;
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind == AZ_NODE_SAVE_POINT || node->kind == AZ_NODE_REFILL ||
+          node->kind == AZ_NODE_COMM) {
+        const double dist = az_vdist(node->position, state->ship.position);
+        if (dist <= best_dist) {
+          best_dist = dist;
+          console = node;
+        }
       }
-      az_run_script(state, node->on_use);
+    }
+    if (console != NULL) {
+      state->mode = AZ_MODE_CONSOLE;
+      state->mode_data.console.step = AZ_CSS_ALIGN;
+      state->mode_data.console.progress = 0.0;
+      state->mode_data.console.node_uid = console->uid;
+      state->mode_data.console.position_delta =
+        az_vsub(ship->position, console->position);
+      state->mode_data.console.angle_delta =
+        az_mod2pi(ship->angle - console->angle);
     }
   }
   controls->util_pressed = false;

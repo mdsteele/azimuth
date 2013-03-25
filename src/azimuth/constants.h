@@ -87,14 +87,19 @@
 #define AZ_SHIP_DEFLECTOR_RADIUS 15.0
 // How fast the ship can turn, in radians/second:
 #define AZ_SHIP_TURN_RATE 5.0
+
+/*===========================================================================*/
+// Nodes:
+
+// How close the ship must be to a console node to use it:
+#define AZ_CONSOLE_RANGE 40.0
 // Max range of tractor beam, in pixels:
 #define AZ_TRACTOR_BEAM_MAX_RANGE 300.0
+// How close the ship must be to an upgrade node to pick it up:
+#define AZ_UPGRADE_COLLECTION_RADIUS 30.0
 
 /*===========================================================================*/
 // Upgrades:
-
-// How close the ship must be to an upgrade to pick it up:
-#define AZ_UPGRADE_COLLECTION_RADIUS 30.0
 
 // The additional energy produced by the Fusion Reactor upgrade, in
 // energy/second:
