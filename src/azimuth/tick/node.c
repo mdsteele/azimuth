@@ -19,6 +19,8 @@
 
 #include "azimuth/tick/node.h"
 
+#include <assert.h>
+
 #include "azimuth/constants.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/node.h"
@@ -51,14 +53,12 @@ void az_tick_nodes(az_space_state_t *state, double time) {
           }
         } else node->state = AZ_NS_FAR;
         break;
-      case AZ_NODE_SAVE_POINT:
-      case AZ_NODE_REFILL:
-      case AZ_NODE_COMM:
+      case AZ_NODE_CONSOLE:
         if (az_vwithin(state->ship.position, node->position,
                        AZ_CONSOLE_RANGE)) {
           node->state = AZ_NS_NEAR;
           const double dist = az_vdist(state->ship.position, node->position);
-          if (dist <= best_tractor_dist) {
+          if (dist <= best_console_dist) {
             best_console_dist = dist;
             closest_console_node = node;
           }
@@ -73,6 +73,7 @@ void az_tick_nodes(az_space_state_t *state, double time) {
   if (state->ship.tractor_beam.active) {
     az_node_t *node;
     if (az_lookup_node(state, state->ship.tractor_beam.node_uid, &node)) {
+      assert(node->kind == AZ_NODE_TRACTOR);
       node->state = AZ_NS_ACTIVE;
     }
   }
@@ -82,6 +83,7 @@ void az_tick_nodes(az_space_state_t *state, double time) {
   if (state->mode == AZ_MODE_CONSOLE) {
     az_node_t *node;
     if (az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
+      assert(node->kind == AZ_NODE_CONSOLE);
       node->state = AZ_NS_ACTIVE;
     }
   }

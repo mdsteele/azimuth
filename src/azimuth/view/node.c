@@ -32,6 +32,54 @@
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
+// Consoles:
+
+static void draw_console(const az_node_t *node, az_clock_t clock) {
+  assert(node->kind == AZ_NODE_CONSOLE);
+  switch (node->subkind.console) {
+    case AZ_CONS_COMM:
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(10, 0);
+        glVertex2d(-10, 10);
+        glVertex2d(-10, -10);
+      } glEnd();
+      break;
+    case AZ_CONS_REFILL:
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(10, 0); glVertex2d(0, 10);
+        glVertex2d(-10, 0); glVertex2d(0, -10);
+      } glEnd();
+      break;
+    case AZ_CONS_SAVE:
+      switch (node->state) {
+        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
+        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
+        case AZ_NS_READY: glColor3f(0, 1, 0); break;
+        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
+      }
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(25, 18);
+        glVertex2d(-25, 18);
+        glVertex2d(-25, -18);
+        glVertex2d(25, -18);
+      } glEnd();
+      break;
+  }
+}
+
+/*===========================================================================*/
 // Upgrades:
 
 // Helper function for drawing upgrade icons for armor upgrades.
@@ -655,19 +703,8 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
 static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
   switch (node->kind) {
     case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_NODE_SAVE_POINT:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(25, 18);
-        glVertex2d(-25, 18);
-        glVertex2d(-25, -18);
-        glVertex2d(25, -18);
-      } glEnd();
+    case AZ_NODE_CONSOLE:
+      draw_console(node, clock);
       break;
     case AZ_NODE_TRACTOR:
       for (int i = 0; i < 3; ++i) {
@@ -711,31 +748,6 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
     case AZ_NODE_UPGRADE:
       draw_upgrade_icon(node->subkind.upgrade, clock);
       break;
-    case AZ_NODE_REFILL:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(10, 0); glVertex2d(0, 10);
-        glVertex2d(-10, 0); glVertex2d(0, -10);
-      } glEnd();
-      break;
-    case AZ_NODE_COMM:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(10, 0);
-        glVertex2d(-10, 10);
-        glVertex2d(-10, -10);
-      } glEnd();
-      break;
     case AZ_NODE_DOODAD_FG:
     case AZ_NODE_DOODAD_BG:
       draw_doodad(node->subkind.doodad, clock);
@@ -775,10 +787,7 @@ void az_draw_upgrade_nodes(const az_space_state_t *state) {
 
 void az_draw_middle_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_SAVE_POINT ||
-        node->kind == AZ_NODE_TRACTOR ||
-        node->kind == AZ_NODE_REFILL ||
-        node->kind == AZ_NODE_COMM) {
+    if (node->kind == AZ_NODE_CONSOLE || node->kind == AZ_NODE_TRACTOR) {
       az_draw_node(node, state->clock);
     }
   }

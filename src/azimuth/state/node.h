@@ -30,20 +30,27 @@
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 9
+#define AZ_NUM_NODE_KINDS 7
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
-  AZ_NODE_SAVE_POINT,
+  AZ_NODE_CONSOLE,
   AZ_NODE_TRACTOR,
   AZ_NODE_UPGRADE,
-  AZ_NODE_REFILL,
-  AZ_NODE_COMM,
   AZ_NODE_DOODAD_FG,
   AZ_NODE_DOODAD_BG,
   AZ_NODE_FAKE_WALL_FG,
   AZ_NODE_FAKE_WALL_BG
 } az_node_kind_t;
+
+// The number of different console kinds there are:
+#define AZ_NUM_CONSOLE_KINDS 3
+
+typedef enum {
+  AZ_CONS_COMM,
+  AZ_CONS_REFILL,
+  AZ_CONS_SAVE
+} az_console_kind_t;
 
 // The number of different doodad kinds there are:
 #define AZ_NUM_DOODAD_KINDS 5
@@ -57,6 +64,7 @@ typedef enum {
 } az_doodad_kind_t;
 
 typedef union {
+  az_console_kind_t console;
   az_upgrade_t upgrade;
   az_doodad_kind_t doodad;
   const az_wall_data_t *fake_wall;

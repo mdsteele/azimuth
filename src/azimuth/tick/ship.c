@@ -1044,8 +1044,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     const az_node_t *console = NULL;
     double best_dist = AZ_CONSOLE_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
-      if (node->kind == AZ_NODE_SAVE_POINT || node->kind == AZ_NODE_REFILL ||
-          node->kind == AZ_NODE_COMM) {
+      if (node->kind == AZ_NODE_CONSOLE) {
         const double dist = az_vdist(node->position, state->ship.position);
         if (dist <= best_dist) {
           best_dist = dist;

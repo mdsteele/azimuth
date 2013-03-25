@@ -127,6 +127,7 @@ typedef struct {
     az_door_kind_t door_kind;
     az_gravfield_kind_t gravfield_kind;
     az_node_kind_t node_kind;
+    az_console_kind_t console_kind;
     az_doodad_kind_t doodad_kind;
     az_upgrade_t upgrade_kind;
     az_wall_kind_t wall_kind;

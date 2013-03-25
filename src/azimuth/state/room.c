@@ -197,12 +197,13 @@ static void parse_node_directive(az_load_room_t *loader) {
   READ("%d", &kind);
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
-  if (kind == AZ_NODE_UPGRADE ||
-      kind == AZ_NODE_DOODAD_FG || kind == AZ_NODE_DOODAD_BG ||
-      kind == AZ_NODE_FAKE_WALL_FG || kind == AZ_NODE_FAKE_WALL_BG) {
+  if (kind != AZ_NODE_TRACTOR) {
     int subkind;
     READ("/%d", &subkind);
-    if (kind == AZ_NODE_UPGRADE) {
+    if (kind == AZ_NODE_CONSOLE) {
+      if (subkind < 0 || subkind >= AZ_NUM_CONSOLE_KINDS) FAIL();
+      node->subkind.console = (az_console_kind_t)subkind;
+    } else if (kind == AZ_NODE_UPGRADE) {
       if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
       node->subkind.upgrade = (az_upgrade_t)subkind;
     } else if (kind == AZ_NODE_DOODAD_FG || kind == AZ_NODE_DOODAD_BG) {
@@ -349,7 +350,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
     WRITE("!N%d", (int)node->kind);
-    if (node->kind == AZ_NODE_UPGRADE) {
+    if (node->kind == AZ_NODE_CONSOLE) {
+      WRITE("/%d", (int)node->subkind.console);
+    } else if (node->kind == AZ_NODE_UPGRADE) {
       WRITE("/%d", (int)node->subkind.upgrade);
     } else if (node->kind == AZ_NODE_DOODAD_FG ||
                node->kind == AZ_NODE_DOODAD_BG) {

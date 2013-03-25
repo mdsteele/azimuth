@@ -100,6 +100,51 @@ static void add_new_room(void) {
   set_room_unsaved(room);
 }
 
+
+static void set_brush_from_node_subkind(az_editor_node_t *node) {
+  switch (node->spec.kind) {
+    case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_NODE_CONSOLE:
+      state.brush.console_kind = node->spec.subkind.console;
+      break;
+    case AZ_NODE_TRACTOR: break;
+    case AZ_NODE_UPGRADE:
+      state.brush.upgrade_kind = node->spec.subkind.upgrade;
+      break;
+    case AZ_NODE_DOODAD_FG:
+    case AZ_NODE_DOODAD_BG:
+      state.brush.doodad_kind = node->spec.subkind.doodad;
+      break;
+    case AZ_NODE_FAKE_WALL_FG:
+    case AZ_NODE_FAKE_WALL_BG:
+      state.brush.wall_data_index =
+        az_wall_data_index(node->spec.subkind.fake_wall);
+      break;
+  }
+}
+
+static void set_node_subkind_from_brush(az_editor_node_t *node) {
+  switch (node->spec.kind) {
+    case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_NODE_CONSOLE:
+      node->spec.subkind.console = state.brush.console_kind;
+      break;
+    case AZ_NODE_TRACTOR: break;
+    case AZ_NODE_UPGRADE:
+      node->spec.subkind.upgrade = state.brush.upgrade_kind;
+      break;
+    case AZ_NODE_DOODAD_FG:
+    case AZ_NODE_DOODAD_BG:
+      node->spec.subkind.doodad = state.brush.doodad_kind;
+      break;
+    case AZ_NODE_FAKE_WALL_FG:
+    case AZ_NODE_FAKE_WALL_BG:
+      node->spec.subkind.fake_wall =
+        az_get_wall_data(state.brush.wall_data_index);
+      break;
+  }
+}
+
 static void select_all(az_editor_room_t *room, bool selected) {
   AZ_LIST_LOOP(baddie, room->baddies) baddie->selected = selected;
   AZ_LIST_LOOP(door, room->doors) door->selected = selected;
@@ -190,16 +235,7 @@ static void do_select(int x, int y, bool multi) {
     }
     state.brush.angle = best_node->spec.angle;
     state.brush.node_kind = best_node->spec.kind;
-    if (best_node->spec.kind == AZ_NODE_UPGRADE) {
-      state.brush.upgrade_kind = best_node->spec.subkind.upgrade;
-    } else if (best_node->spec.kind == AZ_NODE_DOODAD_FG ||
-               best_node->spec.kind == AZ_NODE_DOODAD_BG) {
-      state.brush.doodad_kind = best_node->spec.subkind.doodad;
-    } else if (best_node->spec.kind == AZ_NODE_FAKE_WALL_FG ||
-               best_node->spec.kind == AZ_NODE_FAKE_WALL_BG) {
-      state.brush.wall_data_index =
-        az_wall_data_index(best_node->spec.subkind.fake_wall);
-    }
+    set_brush_from_node_subkind(best_node);
   } else if (best_wall != NULL) {
     if (multi) {
       best_wall->selected = !best_wall->selected;
@@ -513,16 +549,7 @@ static void do_add_node(int x, int y) {
   az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
   node->selected = true;
   node->spec.kind = state.brush.node_kind;
-  if (state.brush.node_kind == AZ_NODE_UPGRADE) {
-    node->spec.subkind.upgrade = state.brush.upgrade_kind;
-  } else if (state.brush.node_kind == AZ_NODE_DOODAD_FG ||
-             state.brush.node_kind == AZ_NODE_DOODAD_BG) {
-    node->spec.subkind.doodad = state.brush.doodad_kind;
-  } else if (state.brush.node_kind == AZ_NODE_FAKE_WALL_FG ||
-             state.brush.node_kind == AZ_NODE_FAKE_WALL_BG) {
-    node->spec.subkind.fake_wall =
-      az_get_wall_data(state.brush.wall_data_index);
-  }
+  set_node_subkind_from_brush(node);
   node->spec.position = pt;
   node->spec.angle = state.brush.angle;
   set_room_unsaved(room);
@@ -619,38 +646,38 @@ static void do_change_data(int delta, bool secondary) {
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;
-    if (node->spec.kind == AZ_NODE_UPGRADE && secondary) {
-      const az_upgrade_t new_upgrade =
-        az_modulo((int)node->spec.subkind.upgrade + delta, AZ_NUM_UPGRADES);
-      node->spec.subkind.upgrade = new_upgrade;
-      state.brush.upgrade_kind = new_upgrade;
-    } else if ((node->spec.kind == AZ_NODE_DOODAD_FG ||
-                node->spec.kind == AZ_NODE_DOODAD_BG) && secondary) {
-      const az_doodad_kind_t new_doodad =
-        az_modulo((int)node->spec.subkind.doodad + delta, AZ_NUM_DOODAD_KINDS);
-      node->spec.subkind.doodad = new_doodad;
-      state.brush.doodad_kind = new_doodad;
-    } else if ((node->spec.kind == AZ_NODE_FAKE_WALL_FG ||
-                node->spec.kind == AZ_NODE_FAKE_WALL_BG) && secondary) {
-      const int old_index = az_wall_data_index(node->spec.subkind.fake_wall);
-      const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
-      node->spec.subkind.fake_wall = az_get_wall_data(new_index);
-      state.brush.wall_data_index = new_index;
-    } else {
-      const az_node_kind_t new_kind =
-        az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
-      node->spec.kind = new_kind;
-      state.brush.node_kind = new_kind;
-      if (new_kind == AZ_NODE_UPGRADE) {
-        node->spec.subkind.upgrade = state.brush.upgrade_kind;
-      } else if (new_kind == AZ_NODE_DOODAD_FG ||
-                 new_kind == AZ_NODE_DOODAD_BG) {
-        node->spec.subkind.doodad = state.brush.doodad_kind;
-      } else if (new_kind == AZ_NODE_FAKE_WALL_FG ||
-                 new_kind == AZ_NODE_FAKE_WALL_BG) {
-        node->spec.subkind.fake_wall =
-          az_get_wall_data(state.brush.wall_data_index);
+    if (secondary) {
+      switch (node->spec.kind) {
+        case AZ_NODE_NOTHING: AZ_ASSERT_UNREACHABLE();
+        case AZ_NODE_CONSOLE:
+          node->spec.subkind.console =
+            az_modulo((int)node->spec.subkind.console + delta,
+                      AZ_NUM_CONSOLE_KINDS);
+          break;
+        case AZ_NODE_TRACTOR: break;
+        case AZ_NODE_UPGRADE:
+          node->spec.subkind.upgrade =
+            az_modulo((int)node->spec.subkind.upgrade + delta,
+                      AZ_NUM_UPGRADES);
+          break;
+        case AZ_NODE_DOODAD_FG:
+        case AZ_NODE_DOODAD_BG:
+          node->spec.subkind.doodad =
+            az_modulo((int)node->spec.subkind.doodad + delta,
+                      AZ_NUM_DOODAD_KINDS);
+          break;
+        case AZ_NODE_FAKE_WALL_FG:
+        case AZ_NODE_FAKE_WALL_BG:
+          node->spec.subkind.fake_wall = az_get_wall_data(az_modulo(
+              az_wall_data_index(node->spec.subkind.fake_wall) + delta,
+              AZ_NUM_WALL_DATAS));
+          break;
       }
+      set_brush_from_node_subkind(node);
+    } else {
+      node->spec.kind = state.brush.node_kind =
+        az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
+      set_node_subkind_from_brush(node);
     }
     set_room_unsaved(room);
   }

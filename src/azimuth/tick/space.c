@@ -79,8 +79,7 @@ static void tick_console_mode(az_space_state_t *state, double time) {
     return;
   }
   assert(node != NULL);
-  assert(node->kind == AZ_NODE_SAVE_POINT || node->kind == AZ_NODE_REFILL ||
-         node->kind == AZ_NODE_COMM);
+  assert(node->kind == AZ_NODE_CONSOLE);
   const double align_time = 0.3; // seconds
   switch (state->mode_data.console.step) {
     case AZ_CSS_ALIGN:
@@ -102,17 +101,16 @@ static void tick_console_mode(az_space_state_t *state, double time) {
       }
       break;
     case AZ_CSS_USE:
-      switch (node->kind) {
-        case AZ_NODE_REFILL:
+      switch (node->subkind.console) {
+        case AZ_CONS_COMM: break;
+        case AZ_CONS_REFILL:
           state->ship.player.rockets = state->ship.player.max_rockets;
           state->ship.player.bombs = state->ship.player.max_bombs;
           // fallthrough
-        case AZ_NODE_SAVE_POINT:
+        case AZ_CONS_SAVE:
           state->ship.player.shields = state->ship.player.max_shields;
           state->ship.player.energy = state->ship.player.max_energy;
           break;
-        case AZ_NODE_COMM: break;
-        default: AZ_ASSERT_UNREACHABLE();
       }
       // TODO: animate using the console
       state->mode_data.console.step = AZ_CSS_FINISH;

@@ -48,10 +48,12 @@ static az_script_t *clone_script(const az_script_t *script) {
 void az_relabel_editor_room(az_editor_room_t *room) {
   room->label = AZ_ERL_NORMAL_ROOM;
   AZ_LIST_LOOP(node, room->nodes) {
-    if (node->spec.kind == AZ_NODE_COMM) {
-      room->label = AZ_ERL_COMM_ROOM;
-    } else if (node->spec.kind == AZ_NODE_SAVE_POINT) {
-      room->label = AZ_ERL_SAVE_ROOM;
+    if (node->spec.kind == AZ_NODE_CONSOLE) {
+      if (node->spec.subkind.console == AZ_CONS_COMM) {
+        room->label = AZ_ERL_COMM_ROOM;
+      } else if (node->spec.subkind.console == AZ_CONS_SAVE) {
+        room->label = AZ_ERL_SAVE_ROOM;
+      }
     } else if (node->spec.kind == AZ_NODE_UPGRADE) {
       room->label = AZ_ERL_UPGRADE_ROOM;
     }

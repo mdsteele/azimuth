@@ -88,7 +88,8 @@ static void begin_saved_game(const az_planet_t *planet,
     az_enter_room(&state, room);
     state.ship.position = az_bounds_center(&room->camera_bounds);
     AZ_ARRAY_LOOP(node, state.nodes) {
-      if (node->kind == AZ_NODE_SAVE_POINT) {
+      if (node->kind == AZ_NODE_CONSOLE &&
+          node->subkind.console == AZ_CONS_SAVE) {
         state.ship.position = node->position;
         state.ship.angle = node->angle;
         break;
@@ -171,13 +172,15 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
     } else if (state.mode == AZ_MODE_CONSOLE &&
                state.mode_data.console.step == AZ_CSS_FINISH) {
       az_node_t *node;
-      if (az_lookup_node(&state, state.mode_data.console.node_uid, &node) &&
-          node->kind == AZ_NODE_SAVE_POINT) {
-        // If we need to save the game, do so.
-        const bool ok = save_current_game(saved_games);
-        state.message.time_remaining = 4.0;
-        if (ok) state.message.text = &save_success_text;
-        else state.message.text = &save_failed_text;
+      if (az_lookup_node(&state, state.mode_data.console.node_uid, &node)) {
+        assert(node->kind == AZ_NODE_CONSOLE);
+        if (node->subkind.console == AZ_CONS_SAVE) {
+          // If we need to save the game, do so.
+          const bool ok = save_current_game(saved_games);
+          state.message.time_remaining = 4.0;
+          if (ok) state.message.text = &save_success_text;
+          else state.message.text = &save_failed_text;
+        }
       }
     }
 
