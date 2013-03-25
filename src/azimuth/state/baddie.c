@@ -66,13 +66,13 @@ static const az_vector_t zipper_vertices[] = {
 
 static az_component_data_t atom_components[] = {
   { .init_position = {20, 0},
-    .bounding_radius = 6.3, .immunities = ~AZ_DMGF_PIERCE,
+    .bounding_radius = 6.3, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
     .impact_damage = 15.0 },
   { .init_position = {-1.675, -4.977}, .init_angle = AZ_DEG2RAD(100),
-    .bounding_radius = 6.5, .immunities = ~AZ_DMGF_PIERCE,
+    .bounding_radius = 6.5, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
     .impact_damage = 15.0 },
   { .init_position = {8.212, 16.96}, .init_angle = AZ_DEG2RAD(200),
-    .bounding_radius = 6.7, .immunities = ~AZ_DMGF_PIERCE,
+    .bounding_radius = 6.7, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
     .impact_damage = 15.0 }
 };
 
@@ -89,9 +89,9 @@ static const az_vector_t clam_shell2_vertices[] = {
 };
 static az_component_data_t clam_components[] = {
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell1_vertices),
-    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) },
+    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE | AZ_DMGF_CPLUS) },
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell2_vertices),
-    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE) }
+    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE | AZ_DMGF_CPLUS) }
 };
 
 static const az_vector_t nightbug_vertices[] = {

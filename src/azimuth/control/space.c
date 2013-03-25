@@ -144,6 +144,7 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
     az_start_screen_redraw(); {
       az_space_draw_screen(&state);
     } az_finish_screen_redraw();
+    memset(&state.ship.controls, 0, sizeof(state.ship.controls));
 
     // Check the current mode; we may need to do something before we move on to
     // handling events.

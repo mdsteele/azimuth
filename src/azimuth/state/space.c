@@ -297,7 +297,8 @@ void az_damage_ship(az_space_state_t *state, double damage,
   az_ship_t *ship = &state->ship;
   assert(az_ship_is_present(ship));
   assert(damage >= 0.0);
-  if (ship->temp_invincibility > 0.0) return;
+  if (ship->temp_invincibility > 0.0 ||
+      ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   if (induce_temp_invincibility) ship->temp_invincibility = 1.0;
   if (damage <= 0.0) return;
   ship->shield_flare = 1.0;

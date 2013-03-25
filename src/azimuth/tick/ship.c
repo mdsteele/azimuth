@@ -143,6 +143,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   // Move the ship:
   ship->position = impact->position;
   if (tractor_node != NULL) {
+    assert(az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM));
     ship->velocity = az_vrotate(ship->velocity, impact->angle);
     ship->angle = az_mod2pi(ship->angle + impact->angle);
   }
@@ -871,6 +872,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
               ship->cplus.state = AZ_CPLUS_ACTIVE;
               ship->cplus.charge = 0.0;
               ship->cplus.tap_time = 0.0;
+              ship->temp_invincibility = 0.0;
             } else ship->cplus.tap_time = AZ_DOUBLE_TAP_TIME;
           }
         }
@@ -879,6 +881,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       case AZ_CPLUS_ACTIVE:
         assert(ship->cplus.charge == 0.0);
         assert(ship->cplus.tap_time == 0.0);
+        assert(ship->temp_invincibility == 0.0);
         const double energy_cost = AZ_CPLUS_POWER_COST * time;
         if (controls->down_held || !controls->up_held ||
             player->energy < energy_cost) {
@@ -999,6 +1002,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // onto.
   az_node_t *tractor_node = NULL;
   if (ship->tractor_beam.active) {
+    assert(az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM));
     if (!controls->util_held ||
         !az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node)) {
       ship->tractor_beam.active = false;
@@ -1053,6 +1057,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
       }
     }
     if (console != NULL) {
+      controls->util_pressed = false;
       state->mode = AZ_MODE_CONSOLE;
       state->mode_data.console.step = AZ_CSS_ALIGN;
       state->mode_data.console.progress = 0.0;
@@ -1063,7 +1068,6 @@ void az_tick_ship(az_space_state_t *state, double time) {
         az_mod2pi(ship->angle - console->angle);
     }
   }
-  controls->util_pressed = false;
 
   // Check if we hit an upgrade.
   if (state->mode == AZ_MODE_NORMAL) {
@@ -1097,8 +1101,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
   apply_drag_to_ship(ship, is_in_water, time);
 
   // Activate tractor beam if necessary:
-  if (controls->util_held && controls->fire_pressed &&
-      !ship->tractor_beam.active) {
+  if (controls->util_pressed && !ship->tractor_beam.active &&
+      az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM)) {
     assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
@@ -1111,10 +1115,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
       }
     }
     if (tractor_node != NULL) {
+      controls->util_pressed = false;
       ship->tractor_beam.active = true;
       ship->tractor_beam.node_uid = tractor_node->uid;
       ship->tractor_beam.distance = best_distance;
-      controls->fire_pressed = false;
       az_run_script(state, tractor_node->on_use);
     }
   }
