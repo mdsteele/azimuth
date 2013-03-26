@@ -106,6 +106,25 @@ static const az_vector_t wall_vertices_25[] = {
   {80, 0}, {40, 69.282032302755098}, {-40, 69.282032302755098},
   {-80, 0}, {-40, -69.282032302755098}, {40, -69.282032302755098}
 };
+static az_vector_t wall_vertices_26[] = {
+  {40, 30}, {39.24, 33.83}, {37.07, 37.07}, {33.83, 39.24}, {30, 40},
+  {-30, 40}, {-33.83, 39.24}, {-37.07, 37.07}, {-39.24, 33.83}, {-40, 30},
+  {-40, -30}, {-39.24, -33.83}, {-37.07, -37.07}, {-33.83, -39.24}, {-30, -40},
+  {30, -40}, {33.83, -39.24}, {37.07, -37.07}, {39.24, -33.83}, {40, -30}
+};
+static az_vector_t wall_vertices_27[] = {
+  // Rounded corner for {16.57, 40}:
+  {16.57, 26.93}, {14.98, 30.76}, {11.16, 32.35}, {7.33, 30.76},
+  // Rounded corner for {-40, -16.57}:
+  {-30.76, -7.33}, {-31.94, -9.09}, {-32.35, -11.16},
+  {-31.94, -13.23}, {-30.76, -14.99}, {-29.01, -16.16},
+  // Rounded corner for {16.57, -40}:
+  {9.09, -31.94}, {11.16, -32.35}, {13.23, -31.94},
+  {14.99, -30.76}, {16.16, -29.01}, {16.57, -26.93}
+};
+static az_vector_t wall_vertices_31[] = {
+  {25, 55}, {-25, 55}, {-25, -55}, {25, -55}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -265,13 +284,13 @@ static az_wall_data_t wall_datas[] = {
   [22] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
     .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
-    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
   },
   // Red/gray rectangle half-size cinderbrick:
   [23] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
     .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
-    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
   },
   // Green/purple hexagtonal block:
   [24] = {
@@ -284,6 +303,42 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 20.0,
     .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_25)
+  },
+  // Blue/gray square block with rounded corners:
+  [26] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {64, 64, 80, 255}, .color2 = {32, 32, 32, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_26)
+  },
+  // Blue/gray triangular block with rounded corners:
+  [27] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 5.4134,
+    .color1 = {64, 64, 72, 255}, .color2 = {32, 32, 32, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_27)
+  },
+  // Green metal rectangle:
+  [28] = {
+    .style = AZ_WSTY_METAL,
+    .color1 = {96, 128, 64, 255}, .color2 = {24, 32, 16, 255},
+    .elasticity = 0.6, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Green metal rectangle reverse:
+  [29] = {
+    .style = AZ_WSTY_ALT_METAL,
+    .color1 = {96, 128, 64, 255}, .color2 = {24, 32, 16, 255},
+    .elasticity = 0.6, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Green metal angle:
+  [30] = {
+    .style = AZ_WSTY_METAL,
+    .color1 = {96, 128, 64, 255}, .color2 = {24, 32, 16, 255},
+    .elasticity = 0.6, .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  // Red/gray long rectangle cinderbrick:
+  [31] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
+    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_31)
   }
 };
 

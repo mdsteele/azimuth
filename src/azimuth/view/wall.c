@@ -152,6 +152,21 @@ static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
   } glEnd();
 }
 
+static void draw_metal(bool alt, az_color_t color1, az_color_t color2,
+                       az_polygon_t polygon) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2d(0, 0);
+    for (int i = polygon.num_vertices - 1, j = 0;
+         i < polygon.num_vertices; i = j++) {
+      if ((i % 2 != 0) ^ alt) {
+        glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      } else glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+    }
+  } glEnd();
+}
+
 static void draw_trifan(az_color_t color1, az_color_t color2,
                         az_polygon_t polygon) {
   glBegin(GL_TRIANGLE_FAN); {
@@ -191,6 +206,12 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
       case AZ_WSTY_GIRDER_CAP:
         draw_girder(data->bezel, data->color1, data->color2, data->polygon,
                     true);
+        break;
+      case AZ_WSTY_METAL:
+        draw_metal(false, data->color1, data->color2, data->polygon);
+        break;
+      case AZ_WSTY_ALT_METAL:
+        draw_metal(true, data->color1, data->color2, data->polygon);
         break;
       case AZ_WSTY_TRIFAN:
         draw_trifan(data->color1, data->color2, data->polygon);

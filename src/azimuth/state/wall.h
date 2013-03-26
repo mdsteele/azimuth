@@ -51,6 +51,8 @@ typedef enum {
   AZ_WSTY_ALT_BEZEL_21,
   AZ_WSTY_GIRDER,
   AZ_WSTY_GIRDER_CAP,
+  AZ_WSTY_METAL,
+  AZ_WSTY_ALT_METAL,
   AZ_WSTY_TRIFAN
 } az_wall_style_t;
 

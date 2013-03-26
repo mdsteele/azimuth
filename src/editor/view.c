@@ -330,6 +330,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       draw_node(state, editor_node);
     }
   }
+  draw_camera_edge_bounds(room);
 }
 
 static void draw_room_minimap(az_editor_state_t *state,
@@ -441,7 +442,6 @@ static void draw_camera_view(az_editor_state_t *state) {
 
   // Draw the camera bounds, and a dot for the camera center.
   draw_camera_center_bounds(room);
-  draw_camera_edge_bounds(room);
   glColor4f(1, 0, 0, 0.75); // red tint
   glBegin(GL_POINTS); {
     glVertex2d(state->camera.x, state->camera.y);
