@@ -1,0 +1,119 @@
+digraph azimuth {
+
+node [shape=box];
+
+// Upgrades:
+"Charge Gun" [color=brown];
+"Rockets" [color=brown];
+"Freeze Gun" [color=cyan];
+"Hardened Armor" [color=brown];
+"C-Plus Drive" [color=magenta];
+"Triple Gun" [color=magenta];
+"Bombs" [color=magenta];
+"Hyper Rockets" [color=magenta];
+"Tractor Beam" [color=brown];
+"Homing Gun" [color=yellow];
+"Retro Thrusters" [color=yellow];
+"Phase Gun" [color=blue];
+"Infrascanner" [color=blue];
+"Fusion Reactor" [color=blue];
+"Thermal Armor" [color=cyan];
+"Dynamic Armor" [color=yellow];
+"Emergency Shields" [color=cyan];
+"Mega Bombs" [color=cyan];
+"High Explosives" [color=blue];
+"Attuned Explosives" [color=green];
+"Gravitic Armor" [color=green];
+"Orion Booster" [color=blue];
+"Quantum Reactor" [color=green];
+"Burst Gun" [color=red];
+"Pierce Gun" [color=cyan];
+"Beam Gun" [color=red];
+"Reactive Armor" [color=gray];
+// Shield batteries:
+"S1" [shape=circle, color=magenta];
+"S2" [shape=circle, color=magenta];
+"S3" [shape=circle, color=yellow];
+"S4" [shape=circle, color=brown];
+"S12" [shape=circle, color=gray];
+// Capacitors:
+"C1" [shape=circle, color=brown];
+"C6" [shape=circle, color=red];
+
+// Bosses:
+"Snapdragon" [shape=hexagon, color=brown];
+"Rockwyrm" [shape=hexagon, color=magenta];
+"Oth GS" [shape=hexagon, color=yellow];
+"Forcefiend" [shape=hexagon, color=blue];
+"Juggernaut" [shape=hexagon, color=cyan];
+"Nocturne" [shape=hexagon, color=green];
+"[Sarvari boss]" [shape=hexagon, color=red];
+"Oth SGS" [shape=hexagon, color=gray];
+"Zenith Core" [shape=hexagon, color=gray];
+
+// Navigation:
+"Start Game" [shape=ellipse, color=brown];
+"Enter Filimun" [shape=ellipse, color=magenta];
+"Enter Nandiar" [shape=ellipse, color=yellow];
+"Enter Deep Barrag" [shape=ellipse, color=blue];
+"Enter Central Cnidam" [shape=ellipse, color=cyan];
+"Enter Deep Voquan" [shape=ellipse, color=green];
+"Enter Core Zone" [shape=ellipse, color=gray];
+
+// Dependencies:
+"Start Game" -> "Charge Gun" -> "Snapdragon" -> "Rockets";
+"Rockets" -> "Enter Filimun";
+"Enter Filimun" -> "S1";
+"Enter Filimun" -> "Freeze Gun";
+"Enter Filimun" -> "C-Plus Drive";
+"C-Plus Drive" -> "Tractor Beam";
+"Freeze Gun" -> "Hardened Armor" [style=dashed];
+"Hyper Rockets" -> "Hardened Armor" [style=dashed];
+"Freeze Gun" -> "C1";
+"Freeze Gun" -> "Bombs" [style=dashed];
+"C-Plus Drive" -> "Bombs" [style=dashed];
+"Bombs" -> "Rockwyrm";
+"Rockwyrm" -> "Hyper Rockets" -> "Enter Nandiar";
+"C-Plus Drive" -> "Triple Gun";
+"Oth GS" -> "Dynamic Armor";
+"Enter Nandiar" -> "Tractor Beam";
+"Bombs" -> "S2";
+"Enter Nandiar" -> "Retro Thrusters";
+"Enter Nandiar" -> "S3";
+"Tractor Beam" -> "Infrascanner";
+"Tractor Beam" -> "S4";
+"Infrascanner" -> "Thermal Armor";
+"Mega Bombs" -> "Burst Gun";
+"Thermal Armor" -> "Burst Gun";
+"Tractor Beam" -> "Oth GS";
+"Infrascanner" -> "Homing Gun";
+"Homing Gun" -> "High Explosives";
+"Dynamic Armor" -> "Enter Deep Barrag";
+"Enter Deep Barrag" -> "High Explosives";
+"Enter Deep Barrag" -> "Forcefiend";
+"Forcefiend" -> "Phase Gun";
+"Enter Deep Barrag" -> "Fusion Reactor";
+"Phase Gun" -> "Enter Central Cnidam";
+"Enter Central Cnidam" -> "Juggernaut";
+"Enter Central Cnidam" -> "Emergency Shields";
+"Juggernaut" -> "Mega Bombs";
+"Mega Bombs" -> "Enter Deep Voquan";
+"Thermal Armor" -> "Enter Deep Voquan";
+"Enter Deep Voquan" -> "Nocturne";
+"Nocturne" -> "Gravitic Armor";
+"Gravitic Armor" -> "Orion Booster";
+"Mega Bombs" -> "Attuned Explosives";
+"Gravitic Armor" -> "Pierce Gun";
+"Pierce Gun" -> "Quantum Reactor";
+"Gravitic Armor" -> "[Sarvari boss]";
+"Burst Gun" -> "[Sarvari boss]";
+"[Sarvari boss]" -> "Beam Gun";
+"Orion Booster" -> "Enter Core Zone";
+"Beam Gun" -> "Enter Core Zone";
+"Beam Gun" -> "C6";
+"Enter Core Zone" -> "S12";
+"Enter Core Zone" -> "Oth SGS";
+"Oth SGS" -> "Reactive Armor";
+"Oth SGS" -> "Zenith Core";
+
+}

@@ -1,0 +1,4 @@
+1: Killed first boss (colony)
+2: Met first AI, upper armory door unlocked
+3: Opened door to Filimun zone
+4: Opened door to Core zone
