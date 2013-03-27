@@ -132,4 +132,57 @@ void test_player_flags(void) {
   EXPECT_FALSE(az_test_flag(&player, 47));
 }
 
+void test_select_gun(void) {
+  az_player_t player = {.max_shields = 100};
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun2);
+
+  // If we select a gun we don't have, nothing happens.
+  az_select_gun(&player, AZ_GUN_CHARGE);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun2);
+
+  // When we get a new gun, it is selected.
+  az_give_upgrade(&player, AZ_UPG_GUN_CHARGE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun2);
+  // If we select a gun we don't have, nothing happens.
+  az_select_gun(&player, AZ_GUN_FREEZE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun2);
+
+  // When we get a new gun, it is selected.
+  az_give_upgrade(&player, AZ_UPG_GUN_TRIPLE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
+
+  // When we get a new gun, it is selected.
+  az_give_upgrade(&player, AZ_UPG_GUN_PHASE);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
+  // Selecting a gun swaps out the one selected least recently.
+  az_select_gun(&player, AZ_GUN_CHARGE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
+  az_select_gun(&player, AZ_GUN_TRIPLE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
+  // Selecting a gun twice in a row normally has no effect.
+  az_select_gun(&player, AZ_GUN_TRIPLE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
+
+  // Selecting the CHARGE gun twice in a row puts us back to CHARGE/NONE.
+  az_select_gun(&player, AZ_GUN_CHARGE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
+  az_select_gun(&player, AZ_GUN_CHARGE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_NONE, player.gun2);
+  // Then we can select a second gun.
+  az_select_gun(&player, AZ_GUN_PHASE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
+}
+
 /*===========================================================================*/

@@ -187,6 +187,10 @@ void az_select_gun(az_player_t *player, az_gun_t gun) {
   }
   // Check if the chosen gun is already selected.
   if (player->gun1 == gun) {
+    // If we select CHARGE twice in a row, put us back to CHARGE/NONE.
+    if (gun == AZ_GUN_CHARGE && player->next_gun) {
+      player->gun2 = AZ_GUN_NONE;
+    }
     player->next_gun = true;
     return;
   }
