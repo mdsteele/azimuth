@@ -353,15 +353,12 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
   double beam_init_angle = ship->angle;
   // Normally, there will be a single beam.  But for a TRIPLE/BEAM gun, there
   // are three beams, and for a BURST/BEAM gun, the beam reflects off of
-  // whatever it hits, creating a second beam.
+  // whatever it hits, creating additional beams.
   const int num_beams = (minor == AZ_GUN_TRIPLE ? 3 :
                          minor == AZ_GUN_BURST ? 3 : 1);
   for (int beam_index = 0; beam_index < num_beams; ++beam_index) {
-    // Determine how much damage the beam should do.  If this is a BURST beam,
-    // it loses power with each reflection.
-    if (minor == AZ_GUN_BURST && beam_index > 0) {
-      damage_mult *= 0.5;
-    }
+    // Determine how much damage the beam should do.  Note that for BURST
+    // beams, the damage_mult will change with each loop iteration.
     const double damage =
       AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND * damage_mult * time;
 
@@ -467,11 +464,12 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       // Add particles off of whatever the beam hits:
       beam_emit_particles(state, impact.position, impact.normal, hit_color);
       // If this is a BURST beam, the next beam reflects off of the impact
-      // point.
+      // point.  The next beam will be reduced in power.
       if (minor == AZ_GUN_BURST) {
         const double normal_theta = az_vtheta(impact.normal);
         beam_start = az_vadd(impact.position, az_vpolar(0.1, normal_theta));
         beam_init_angle = az_mod2pi(2.0 * normal_theta - beam_angle + AZ_PI);
+        damage_mult *= 0.5;
       }
     }
     // If a BURST beam doesn't hit anything, it doesn't reflect (so there is no

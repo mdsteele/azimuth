@@ -61,10 +61,13 @@ void *_az_alloc(const char *funcname, size_t n, size_t size)
 // Use this macro to check at compile time that a (compile-time-constant)
 // expression is true.  It is legal at top-level or within a function.
 #define AZ_STATIC_ASSERT(condition) \
-  typedef int AZ_SA_JOIN(az_static_assertion_, __LINE__)[(condition) ? 1 : -1]
-// Helper macros for AZ_STATIC_ASSERT:
-#define AZ_SA_JOIN(a, b) AZ_SA_JOIN2(a, b)
-#define AZ_SA_JOIN2(a, b) a##b
+  typedef int AZ_JOIN(az_static_assertion_, __LINE__)[(condition) ? 1 : -1]
+
+// Join two tokens.  This is handy when one of the two tokens is __LINE__;
+// using AZ_JOIN(foo_, __LINE__) will produce e.g. foo_123, whereas
+// foo_##__LINE__ would result in foo___LINE__.
+#define AZ_JOIN(a, b) AZ_JOIN2(a, b)
+#define AZ_JOIN2(a, b) a##b
 
 // AZ_COUNT_ARGS(...) expands to the number of arguments passed to it (as long
 // as that number is between 1 and 15, inclusive).  Beware: it may silently

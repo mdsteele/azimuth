@@ -27,6 +27,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -220,6 +221,7 @@ bool az_insert_particle(az_space_state_t *state,
       return true;
     }
   }
+  AZ_WARNING_ONCE("Failed to insert particle; array is full.\n");
   return false;
 }
 
@@ -236,6 +238,7 @@ void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
       return;
     }
   }
+  AZ_WARNING_ONCE("Failed to add speck; array is full.\n");
 }
 
 az_projectile_t *az_add_projectile(
@@ -247,6 +250,8 @@ az_projectile_t *az_add_projectile(
       return proj;
     }
   }
+  AZ_WARNING_ONCE("Failed to add projectile (kind=%d); array is full.\n",
+                  (int)kind);
   return NULL;
 }
 
@@ -288,6 +293,8 @@ void az_add_random_pickup(az_space_state_t *state,
       return;
     }
   }
+  AZ_WARNING_ONCE("Failed to add pickup (kind=%d); array is full.\n",
+                  (int)kind);
 }
 
 /*===========================================================================*/
