@@ -374,9 +374,9 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
 
       // Draw the name of the zone the player is in for this save file:
       const az_room_t *room = &state->planet->rooms[player->current_room];
-      assert(0 <= room->zone_index);
-      assert(room->zone_index < state->planet->num_zones);
-      const az_zone_t *zone = &state->planet->zones[room->zone_index];
+      assert(0 <= room->zone_key);
+      assert(room->zone_key < state->planet->num_zones);
+      const az_zone_t *zone = &state->planet->zones[room->zone_key];
       if (active) glColor3ub(zone->color.r, zone->color.g, zone->color.b);
       else glColor3ub(zone->color.r / 3, zone->color.g / 3, zone->color.b / 3);
       az_draw_string(8, AZ_ALIGN_LEFT, 6, 24, zone->name);

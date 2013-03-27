@@ -138,14 +138,14 @@ void az_set_room_visited(az_player_t *player, az_room_key_t room) {
 
 /*===========================================================================*/
 
-bool az_test_zone_mapped(const az_player_t *player, int zone) {
+bool az_test_zone_mapped(const az_player_t *player, az_zone_key_t zone) {
   const unsigned int idx = (unsigned int)zone;
   assert(idx < AZ_MAX_NUM_ZONES);
   assert(idx < 64 * AZ_ARRAY_SIZE(player->zones_mapped));
   return test_flag(player->zones_mapped, idx);
 }
 
-void az_set_zone_mapped(az_player_t *player, int zone) {
+void az_set_zone_mapped(az_player_t *player, az_zone_key_t zone) {
   const unsigned int idx = (unsigned int)zone;
   assert(idx < AZ_MAX_NUM_ZONES);
   assert(idx < 64 * AZ_ARRAY_SIZE(player->zones_mapped));

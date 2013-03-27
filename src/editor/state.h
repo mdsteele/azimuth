@@ -93,7 +93,7 @@ typedef struct {
   bool selected;
   bool unsaved; // true if this room currently has unsaved changes
   az_editor_room_label_t label;
-  int zone_index;
+  az_zone_key_t zone_key;
   az_room_flags_t properties;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
@@ -132,7 +132,7 @@ typedef struct {
     az_upgrade_t upgrade_kind;
     az_wall_kind_t wall_kind;
     int wall_data_index;
-    int zone_index;
+    az_zone_key_t zone_key;
   } brush;
   az_room_key_t current_room;
   struct {

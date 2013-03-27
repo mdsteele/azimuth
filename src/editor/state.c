@@ -103,7 +103,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   for (az_room_key_t key = 0; key < planet.num_rooms; ++key) {
     const az_room_t *room = &planet.rooms[key];
     az_editor_room_t *eroom = AZ_LIST_ADD(state->planet.rooms);
-    eroom->zone_index = room->zone_index;
+    eroom->zone_key = room->zone_key;
     eroom->properties = room->properties;
     eroom->camera_bounds = room->camera_bounds;
     eroom->on_start = clone_script(room->on_start);
@@ -195,7 +195,7 @@ bool az_save_editor_state(az_editor_state_t *state) {
       ++num_rooms_to_save_so_far;
     }
     az_room_t *room = &planet.rooms[key];
-    room->zone_index = eroom->zone_index;
+    room->zone_key = eroom->zone_key;
     room->properties = eroom->properties;
     room->camera_bounds = eroom->camera_bounds;
     room->on_start = clone_script(eroom->on_start);

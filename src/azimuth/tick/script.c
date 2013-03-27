@@ -230,7 +230,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (zone_index < 0 || zone_index >= state->planet->num_zones) {
             SCRIPT_ERROR("invalid zone index");
           }
-          az_set_zone_mapped(&state->ship.player, zone_index);
+          az_set_zone_mapped(&state->ship.player, (az_zone_key_t)zone_index);
         }
         break;
       // Objects:

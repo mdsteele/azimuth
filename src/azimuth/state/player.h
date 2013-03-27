@@ -79,8 +79,9 @@ typedef uint_fast16_t az_damage_flags_t;
 #define AZ_SHIELDS_LOW_THRESHOLD 50.0
 #define AZ_SHIELDS_VERY_LOW_THRESHOLD 25.0
 
-typedef int az_room_key_t;
 typedef int az_flag_t;
+typedef int az_room_key_t;
+typedef int az_zone_key_t;
 
 // This structure stores any and all information needed to store a saved game.
 typedef struct {
@@ -121,9 +122,9 @@ bool az_test_room_visited(const az_player_t *player, az_room_key_t room);
 void az_set_room_visited(az_player_t *player, az_room_key_t room);
 
 // Check whether the player has gotten map data for the given zone yet.
-bool az_test_zone_mapped(const az_player_t *player, int zone);
+bool az_test_zone_mapped(const az_player_t *player, az_zone_key_t zone);
 // Set the player as having gotten map data for the given zone.
-void az_set_zone_mapped(az_player_t *player, int zone);
+void az_set_zone_mapped(az_player_t *player, az_zone_key_t zone);
 
 // Check whether a given game flag is set for the player.
 bool az_test_flag(const az_player_t *player, az_flag_t flag);

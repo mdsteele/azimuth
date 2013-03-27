@@ -198,7 +198,7 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   for (int i = 0; i < planet_out->num_rooms; ++i) {
     sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, i);
     if (!az_load_room_from_file(path_buffer, &planet_out->rooms[i]) ||
-        planet_out->rooms[i].zone_index >= planet_out->num_zones) {
+        planet_out->rooms[i].zone_key >= planet_out->num_zones) {
       az_destroy_planet(planet_out);
       return false;
     }

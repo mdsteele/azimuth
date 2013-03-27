@@ -83,7 +83,7 @@ static void draw_zone_swatch(az_editor_state_t *state,
   const double min_theta = bounds->min_theta;
   const double max_theta = min_theta + bounds->theta_span;
   const az_color_t color =
-    AZ_LIST_GET(state->planet.zones, room->zone_index)->color;
+    AZ_LIST_GET(state->planet.zones, room->zone_key)->color;
   if (room->properties & AZ_ROOMF_UNMAPPED) {
     glColor3ub(color.r / 4, color.g / 4, color.b / 4);
   } else glColor3ub(color.r / 2, color.g / 2, color.b / 2);
@@ -372,7 +372,7 @@ static void draw_room_minimap(az_editor_state_t *state,
           bounds->min_theta + 0.5 * bounds->theta_span));
       glScaled(state->zoom_level, state->zoom_level, 1);
       const az_color_t color =
-        AZ_LIST_GET(state->planet.zones, room->zone_index)->color;
+        AZ_LIST_GET(state->planet.zones, room->zone_key)->color;
       glColor3ub(color.r, color.g, color.b);
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%03d", key);
     } glPopMatrix();
@@ -494,7 +494,7 @@ static void draw_hud(az_editor_state_t* state) {
   }
 
   // Draw the zone name:
-  const az_zone_t *zone = AZ_LIST_GET(state->planet.zones, room->zone_index);
+  const az_zone_t *zone = AZ_LIST_GET(state->planet.zones, room->zone_key);
   glColor3ub(zone->color.r, zone->color.g, zone->color.b);
   az_draw_string(8, AZ_ALIGN_LEFT, 150, 5, zone->name);
 

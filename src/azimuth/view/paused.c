@@ -70,10 +70,10 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
     const az_room_t *room = &planet->rooms[i];
     const bool visited = az_test_room_visited(player, i);
     const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
-      az_test_zone_mapped(player, room->zone_index);
+      az_test_zone_mapped(player, room->zone_key);
     if (!visited && !mapped) continue;
     const az_camera_bounds_t *bounds = &room->camera_bounds;
-    const az_color_t zone_color = planet->zones[room->zone_index].color;
+    const az_color_t zone_color = planet->zones[room->zone_key].color;
 
     const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
     const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;

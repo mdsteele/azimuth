@@ -87,7 +87,7 @@ static void add_new_room(void) {
   az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);
   assert(room->on_start == NULL);
   room->selected = true;
-  room->zone_index = state.brush.zone_index;
+  room->zone_key = state.brush.zone_key;
   const double current_r = az_vnorm(state.camera);
   const double theta_span = 200.0 / (80.0 + current_r);
   room->camera_bounds = (az_camera_bounds_t){
@@ -700,9 +700,9 @@ static void do_change_data(int delta, bool secondary) {
 
 static void do_change_zone(int delta) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  room->zone_index = az_modulo(room->zone_index + delta,
-                               AZ_LIST_SIZE(state.planet.zones));
-  state.brush.zone_index = room->zone_index;
+  room->zone_key = az_modulo(room->zone_key + delta,
+                             AZ_LIST_SIZE(state.planet.zones));
+  state.brush.zone_key = room->zone_key;
   set_room_unsaved(room);
 }
 
@@ -864,7 +864,7 @@ static void try_set_current_room(void) {
   state.text.action = AZ_ETA_NOTHING;
   state.current_room = key;
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, key);
-  state.brush.zone_index = room->zone_index;
+  state.brush.zone_key = room->zone_key;
   az_center_editor_camera_on_current_room(&state);
   deselect_all_rooms();
   room->selected = true;

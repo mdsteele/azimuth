@@ -28,7 +28,7 @@
 #include "azimuth/state/door.h" // for az_door_kind_t
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/node.h" // for az_node_kind_t
-#include "azimuth/state/player.h" // for az_room_key_t
+#include "azimuth/state/player.h"
 #include "azimuth/state/script.h"
 #include "azimuth/state/wall.h"
 
@@ -90,7 +90,7 @@ typedef uint_fast8_t az_room_flags_t;
 
 // Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
-  int zone_index;
+  az_zone_key_t zone_key;
   az_room_flags_t properties;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start; // NULL if no script
