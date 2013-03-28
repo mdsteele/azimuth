@@ -26,6 +26,8 @@
 #include <GL/gl.h>
 
 #include "azimuth/state/node.h"
+#include "azimuth/state/pickup.h"
+#include "azimuth/state/player.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
@@ -36,7 +38,29 @@
 void az_draw_ship(az_space_state_t* state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
-  const az_controls_t *controls = &ship->controls;
+
+  // Draw the magnet sweep:
+  if (az_has_upgrade(&ship->player, AZ_UPG_MAGNET_SWEEP)) {
+    AZ_ARRAY_LOOP(pickup, state->pickups) {
+      if (pickup->kind == AZ_PUP_NOTHING) continue;
+      if (az_vwithin(pickup->position, ship->position,
+                     AZ_MAGNET_SWEEP_MAX_RANGE)) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          const az_vector_t offset = az_vwithlen(az_vrot90ccw(
+              az_vsub(pickup->position, ship->position)), 6.0);
+          glColor4f(1, 1, 0.5, 0);
+          glVertex2d(pickup->position.x + offset.x,
+                     pickup->position.y + offset.y);
+          glColor4f(1, 1, 0.5, 0.2);
+          glVertex2d(ship->position.x, ship->position.y);
+          glVertex2d(pickup->position.x, pickup->position.y);
+          glColor4f(1, 1, 0.5, 0);
+          glVertex2d(pickup->position.x - offset.x,
+                     pickup->position.y - offset.y);
+        } glEnd();
+      }
+    }
+  }
 
   // Draw the tractor beam:
   if (ship->tractor_beam.active) {
@@ -82,10 +106,10 @@ void az_draw_ship(az_space_state_t* state) {
     if (ship->temp_invincibility <= 0.0 ||
         az_clock_mod(4, 1, state->clock) != 0) {
       // Exhaust:
-      if (controls->up_held && !controls->down_held) {
+      if (ship->thrusters != AZ_THRUST_NONE) {
         double zig = az_clock_zigzag(10, 1, state->clock);
         // For forward thrusters:
-        if (!controls->burn_held) {
+        if (ship->thrusters == AZ_THRUST_FORWARD) {
           // From port engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange
@@ -109,6 +133,7 @@ void az_draw_ship(az_space_state_t* state) {
         }
         // For reverse thrusters:
         else {
+          assert(ship->thrusters == AZ_THRUST_REVERSE);
           // From port engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange

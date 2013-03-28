@@ -910,7 +910,6 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   const az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
-  const bool has_lateral = az_has_upgrade(player, AZ_UPG_LATERAL_THRUSTERS);
   const bool dynamic = az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR);
   // Calculate the change in velocity imparted by the ship's thrusters.  If
   // we're in water, we scale it down to account for the added mass effect
@@ -923,44 +922,25 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
     (is_in_water && !dynamic ? 0.6 : 1.0);
   // Turning left:
   if (controls->left_held && !controls->right_held) {
-    if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle + turn_rate * time);
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse / 2,
-                                         ship->angle - AZ_HALF_PI));
-    }
+    ship->angle = az_mod2pi(ship->angle + turn_rate * time);
   }
   // Turning right:
   if (controls->right_held && !controls->left_held) {
-    if (!controls->burn_held) {
-      ship->angle = az_mod2pi(ship->angle - turn_rate * time);
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse / 2,
-                                         ship->angle + AZ_HALF_PI));
-    }
+    ship->angle = az_mod2pi(ship->angle - turn_rate * time);
   }
   // Forward thrust:
   if (controls->up_held && !controls->down_held) {
-    if (!controls->burn_held) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(impulse, ship->angle));
-    } else if (has_lateral) {
-      ship->velocity = az_vadd(ship->velocity,
-                               az_vpolar(-impulse/2, ship->angle));
-    }
+    ship->velocity = az_vadd(ship->velocity,
+                             az_vpolar(impulse, ship->angle));
+    ship->thrusters = AZ_THRUST_FORWARD;
   }
   // Retro thrusters:
-  if (controls->down_held && !controls->up_held &&
+  else if (controls->down_held && !controls->up_held &&
       az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
-    const double speed = az_vnorm(ship->velocity);
-    if (speed <= impulse) {
-      ship->velocity = AZ_VZERO;
-    } else {
-      ship->velocity = az_vmul(ship->velocity, (speed - impulse) / speed);
-    }
-  }
+    ship->velocity = az_vadd(ship->velocity,
+                             az_vpolar(-impulse/2, ship->angle));
+    ship->thrusters = AZ_THRUST_REVERSE;
+  } else ship->thrusters = AZ_THRUST_NONE;
 }
 
 /*===========================================================================*/

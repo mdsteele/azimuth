@@ -37,14 +37,6 @@
 #endif
 
 /*===========================================================================*/
-// Pickups:
-
-// How close the ship must be to a pickup to collect it, in pixels:
-#define AZ_PICKUP_COLLECTION_RANGE 20.0
-// How long pickups last before expiring, in seconds:
-#define AZ_PICKUP_MAX_AGE 10.0
-
-/*===========================================================================*/
 // Planetoid:
 
 // The maximum number of progress flags allowed in the game scenario:

@@ -128,7 +128,6 @@ static void update_controls(void) {
   state.ship.controls.fire_held = az_is_key_held(AZ_KEY_V);
   state.ship.controls.ordn_held = az_is_key_held(AZ_KEY_C);
   state.ship.controls.util_held = az_is_key_held(AZ_KEY_X);
-  state.ship.controls.burn_held = az_is_key_held(AZ_KEY_Z);
 }
 
 az_space_action_t az_space_event_loop(const az_planet_t *planet,

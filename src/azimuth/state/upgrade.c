@@ -71,8 +71,8 @@ const char *az_upgrade_name(az_upgrade_t upgrade) {
     case AZ_UPG_ATTUNED_EXPLOSIVES: return "ATTUNED EXPLOSIVES";
     case AZ_UPG_TRACTOR_BEAM: return "TRACTOR BEAM";
     case AZ_UPG_INFRASCANNER: return "INFRASCANNER";
+    case AZ_UPG_MAGNET_SWEEP: return "MAGNET SWEEP";
     case AZ_UPG_RETRO_THRUSTERS: return "RETRO THRUSTERS";
-    case AZ_UPG_LATERAL_THRUSTERS: return "LATERAL THRUSTERS";
     case AZ_UPG_CPLUS_DRIVE: return "C-PLUS DRIVE";
     case AZ_UPG_ORION_BOOSTER: return "ORION BOOSTER";
     case AZ_UPG_HARDENED_ARMOR: return "HARDENED ARMOR";

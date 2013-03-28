@@ -242,6 +242,7 @@ static void draw_upgrades(az_paused_state_t *state) {
 
   draw_upg_box(player, 20, 260, AZ_UPG_TRACTOR_BEAM);
   draw_upg_box(player, 20, 280, AZ_UPG_INFRASCANNER);
+  draw_upg_box(player, 20, 300, AZ_UPG_MAGNET_SWEEP);
 
   draw_upg_box(player, 470, 80, AZ_UPG_HYPER_ROCKETS);
   draw_upg_box(player, 470, 100, AZ_UPG_MEGA_BOMBS);
@@ -249,9 +250,8 @@ static void draw_upgrades(az_paused_state_t *state) {
   draw_upg_box(player, 470, 140, AZ_UPG_ATTUNED_EXPLOSIVES);
 
   draw_upg_box(player, 470, 180, AZ_UPG_RETRO_THRUSTERS);
-  draw_upg_box(player, 470, 200, AZ_UPG_LATERAL_THRUSTERS);
-  draw_upg_box(player, 470, 220, AZ_UPG_CPLUS_DRIVE);
-  draw_upg_box(player, 470, 240, AZ_UPG_ORION_BOOSTER);
+  draw_upg_box(player, 470, 200, AZ_UPG_CPLUS_DRIVE);
+  draw_upg_box(player, 470, 220, AZ_UPG_ORION_BOOSTER);
 }
 
 /*===========================================================================*/

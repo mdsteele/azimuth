@@ -38,7 +38,6 @@ typedef struct {
   bool fire_held, fire_pressed;
   bool ordn_held;
   bool util_held, util_pressed;
-  bool burn_held;
 } az_controls_t;
 
 typedef struct {
@@ -51,6 +50,7 @@ typedef struct {
   double ordn_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   double temp_invincibility; // seconds
+  enum { AZ_THRUST_NONE = 0, AZ_THRUST_FORWARD, AZ_THRUST_REVERSE } thrusters;
   struct {
     enum { AZ_CPLUS_INACTIVE = 0, AZ_CPLUS_READY, AZ_CPLUS_ACTIVE } state;
     double charge; // from 0.0 (uncharged) to 1.0 (fully charged)

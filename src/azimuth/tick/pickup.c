@@ -28,11 +28,12 @@
 /*===========================================================================*/
 
 void az_tick_pickups(az_space_state_t *state, double time) {
-  az_player_t *player = &state->ship.player;
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) continue;
     pickup->age += time;
-    if (az_vwithin(pickup->position, state->ship.position,
+    if (az_vwithin(pickup->position, ship->position,
                    AZ_PICKUP_COLLECTION_RANGE)) {
       switch (pickup->kind) {
         case AZ_PUP_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -65,6 +66,14 @@ void az_tick_pickups(az_space_state_t *state, double time) {
       pickup->kind = AZ_PUP_NOTHING;
     } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
       pickup->kind = AZ_PUP_NOTHING;
+    } else if (az_has_upgrade(player, AZ_UPG_MAGNET_SWEEP) &&
+               az_vwithin(pickup->position, ship->position,
+                          AZ_MAGNET_SWEEP_MAX_RANGE)) {
+      const az_vector_t delta = az_vsub(ship->position, pickup->position);
+      const double speed =
+        200.0 * (1.0 - az_vnorm(delta) / AZ_MAGNET_SWEEP_MAX_RANGE);
+      pickup->position =
+        az_vadd(pickup->position, az_vwithlen(delta, speed * time));
     }
   }
 }
