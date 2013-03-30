@@ -53,6 +53,7 @@ node [shape=box];
 
 // Navigation:
 "Start Game" [shape=ellipse, color=brown];
+"Enter East Colony" [shape=ellipse, color=brown];
 "Enter Filimun" [shape=ellipse, color=magenta];
 "Enter Nandiar" [shape=ellipse, color=yellow];
 "Enter Deep Barrag" [shape=ellipse, color=blue];
@@ -67,9 +68,11 @@ node [shape=box];
 "Enter Filimun" -> "Freeze Gun";
 "Enter Filimun" -> "C-Plus Drive";
 "C-Plus Drive" -> "Tractor Beam";
-"Freeze Gun" -> "Hardened Armor" [style=dashed];
-"Hyper Rockets" -> "Hardened Armor" [style=dashed];
-"Freeze Gun" -> "C1";
+"Freeze Gun" -> "Enter East Colony" [style=dashed];
+"Hyper Rockets" -> "Enter East Colony" [style=dashed];
+"Enter East Colony" -> "Hardened Armor";
+"Enter East Colony" -> "C1";
+"C-Plus Drive" -> "C1";
 "Freeze Gun" -> "Bombs" [style=dashed];
 "C-Plus Drive" -> "Bombs" [style=dashed];
 "Bombs" -> "Rockwyrm";

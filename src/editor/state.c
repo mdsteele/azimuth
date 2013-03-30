@@ -74,6 +74,11 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->brush.baddie_kind = AZ_BAD_LUMP;
   state->brush.door_kind = AZ_DOOR_NORMAL;
   state->brush.gravfield_kind = AZ_GRAV_TRAPEZOID;
+  state->brush.gravfield_strength = 100.0;
+  state->brush.gravfield_size.trapezoid.front_offset = 0.0;
+  state->brush.gravfield_size.trapezoid.front_semiwidth = 50.0;
+  state->brush.gravfield_size.trapezoid.rear_semiwidth = 100.0;
+  state->brush.gravfield_size.trapezoid.semilength = 100.0;
   state->brush.node_kind = AZ_NODE_TRACTOR;
   state->brush.doodad_kind = AZ_DOOD_WARNING_LIGHT;
   state->brush.upgrade_kind = AZ_UPG_GUN_CHARGE;

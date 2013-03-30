@@ -126,6 +126,8 @@ typedef struct {
     az_baddie_kind_t baddie_kind;
     az_door_kind_t door_kind;
     az_gravfield_kind_t gravfield_kind;
+    double gravfield_strength;
+    az_gravfield_size_t gravfield_size;
     az_node_kind_t node_kind;
     az_console_kind_t console_kind;
     az_doodad_kind_t doodad_kind;

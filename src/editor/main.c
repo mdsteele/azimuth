@@ -255,6 +255,8 @@ static void do_select(int x, int y, bool multi) {
     }
     state.brush.angle = best_gravfield->spec.angle;
     state.brush.gravfield_kind = best_gravfield->spec.kind;
+    state.brush.gravfield_strength = best_gravfield->spec.strength;
+    state.brush.gravfield_size = best_gravfield->spec.size;
   } else if (!multi) {
     select_all(room, false);
   }
@@ -534,11 +536,8 @@ static void do_add_gravfield(int x, int y) {
   gravfield->spec.kind = state.brush.gravfield_kind;
   gravfield->spec.position = pt;
   gravfield->spec.angle = state.brush.angle;
-  gravfield->spec.strength = 100.0;
-  gravfield->spec.size.trapezoid.front_offset = 0.0;
-  gravfield->spec.size.trapezoid.front_semiwidth = 50.0;
-  gravfield->spec.size.trapezoid.rear_semiwidth = 100.0;
-  gravfield->spec.size.trapezoid.semilength = 100.0;
+  gravfield->spec.strength = state.brush.gravfield_strength;
+  gravfield->spec.size = state.brush.gravfield_size;
   set_room_unsaved(room);
 }
 
@@ -791,6 +790,8 @@ static void try_edit_gravfield(void) {
     gravfield->spec.size.trapezoid.front_semiwidth = front_semiwidth;
     gravfield->spec.size.trapezoid.rear_semiwidth = rear_semiwidth;
     gravfield->spec.size.trapezoid.semilength = semilength;
+    state.brush.gravfield_strength = gravfield->spec.strength;
+    state.brush.gravfield_size = gravfield->spec.size;
     set_room_unsaved(room);
   }
 }
