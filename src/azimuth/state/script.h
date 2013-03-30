@@ -31,9 +31,13 @@ typedef enum {
   // Stack manipulation:
   AZ_OP_PUSH, // push i onto the stack
   AZ_OP_POP, // pop i values from the stack (minimum of 1)
+  AZ_OP_DUP, // duplicate top i values on the stack (minimum of 1)
   // Arithmetic:
   AZ_OP_ADD, // pop top two, push (a + b)
   AZ_OP_ADDI, // pop top, push a + i
+  AZ_OP_SUB, // pop top two, push (a - b)
+  AZ_OP_SUBI, // pop top, push a - i
+  AZ_OP_ISUB, // pop top, push i - a
   // Branches:
   AZ_OP_BEQZ, // pop top, add i to PC if it is zero
   AZ_OP_BNEZ, // pop top, add i to PC if it is not zero
@@ -59,6 +63,9 @@ typedef enum {
   // Gravfields:
   AZ_OP_GSTR, // push strength of gravfield i
   AZ_OP_SSTR, // pop top, set strength of gravfield i to a
+  // Nodes:
+  AZ_OP_GMARK, // push value of marker node i
+  AZ_OP_SMARK, // pop top, set value of marker node i to a
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen
   AZ_OP_DLOG, // begin dialog

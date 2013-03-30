@@ -34,8 +34,12 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_NOP:    return "nop";
     case AZ_OP_PUSH:   return "push";
     case AZ_OP_POP:    return "pop";
+    case AZ_OP_DUP:    return "dup";
     case AZ_OP_ADD:    return "add";
     case AZ_OP_ADDI:   return "addi";
+    case AZ_OP_SUB:    return "sub";
+    case AZ_OP_SUBI:   return "subi";
+    case AZ_OP_ISUB:   return "isub";
     case AZ_OP_BEQZ:   return "beqz";
     case AZ_OP_BNEZ:   return "bnez";
     case AZ_OP_JUMP:   return "jump";
@@ -55,6 +59,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_UNLOCK: return "unlock";
     case AZ_OP_GSTR:   return "gstr";
     case AZ_OP_SSTR:   return "sstr";
+    case AZ_OP_GMARK:  return "gmark";
+    case AZ_OP_SMARK:  return "smark";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
@@ -88,6 +94,7 @@ static bool should_print_immediate(az_instruction_t ins) {
   switch (ins.opcode) {
     case AZ_OP_NOP:
     case AZ_OP_ADD:
+    case AZ_OP_SUB:
     case AZ_OP_BAD:
     case AZ_OP_SPLAT:
     case AZ_OP_DLOG:
@@ -96,10 +103,13 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_ERROR:
       return false;
     case AZ_OP_POP:
+    case AZ_OP_DUP:
     case AZ_OP_BOSS:
       return (ins.immediate != 0.0);
     case AZ_OP_PUSH:
     case AZ_OP_ADDI:
+    case AZ_OP_SUBI:
+    case AZ_OP_ISUB:
     case AZ_OP_BEQZ:
     case AZ_OP_BNEZ:
     case AZ_OP_JUMP:
@@ -116,6 +126,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_UNLOCK:
     case AZ_OP_GSTR:
     case AZ_OP_SSTR:
+    case AZ_OP_GMARK:
+    case AZ_OP_SMARK:
     case AZ_OP_MSG:
     case AZ_OP_PT:
     case AZ_OP_PB:

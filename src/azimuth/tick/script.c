@@ -20,7 +20,9 @@
 #include "azimuth/tick/script.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -67,21 +69,27 @@ static void print_error(const char *msg, const az_script_vm_t *vm) {
 #define STACK_PUSH(...) do { \
     if (vm->stack_size + AZ_COUNT_ARGS(__VA_ARGS__) <= \
         AZ_ARRAY_SIZE(vm->stack)) { \
-      do_stack_push(vm, AZ_COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
+      if (!do_stack_push(vm, AZ_COUNT_ARGS(__VA_ARGS__), __VA_ARGS__)) { \
+        SCRIPT_ERROR("non-finite result"); \
+      } \
     } else SCRIPT_ERROR("stack overflow"); \
   } while (0)
 
-static void do_stack_push(az_script_vm_t *vm, int num_args, ...) {
+static bool do_stack_push(az_script_vm_t *vm, int num_args, ...) {
   assert(vm->stack_size + num_args <= AZ_ARRAY_SIZE(vm->stack));
+  bool finite = true;
   va_list args;
   va_start(args, num_args);
   for (int i = 0; i < num_args; ++i) {
     assert(vm->stack_size + i < AZ_ARRAY_SIZE(vm->stack));
-    vm->stack[vm->stack_size + i] = va_arg(args, double);
+    const double value = va_arg(args, double);
+    if (!isfinite(value)) finite = false;
+    vm->stack[vm->stack_size + i] = value;
   }
   va_end(args);
   vm->stack_size += num_args;
   assert(vm->stack_size <= AZ_ARRAY_SIZE(vm->stack));
+  return finite;
 }
 
 /*===========================================================================*/
@@ -237,9 +245,23 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         break;
       case AZ_OP_POP:
         {
-          int num = az_imax(1, (int)ins.immediate);
+          const int num = az_imax(1, (int)ins.immediate);
           if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
           vm->stack_size -= num;
+        }
+        break;
+      case AZ_OP_DUP:
+        {
+          const int num = az_imax(1, (int)ins.immediate);
+          if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
+          if (vm->stack_size + num > AZ_ARRAY_SIZE(vm->stack)) {
+            SCRIPT_ERROR("stack overflow");
+          }
+          for (int i = 0; i < num; ++i) {
+            vm->stack[vm->stack_size + i] =
+              vm->stack[vm->stack_size - num + i];
+          }
+          vm->stack_size += num;
         }
         break;
       // Arithmetic:
@@ -255,6 +277,27 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           double a;
           STACK_POP(&a);
           STACK_PUSH(a + ins.immediate);
+        }
+        break;
+      case AZ_OP_SUB:
+        {
+          double a, b;
+          STACK_POP(&a, &b);
+          STACK_PUSH(a - b);
+        }
+        break;
+      case AZ_OP_SUBI:
+        {
+          double a;
+          STACK_POP(&a);
+          STACK_PUSH(a - ins.immediate);
+        }
+        break;
+      case AZ_OP_ISUB:
+        {
+          double a;
+          STACK_POP(&a);
+          STACK_PUSH(ins.immediate - a);
         }
         break;
       // Branches:
@@ -502,6 +545,35 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_gravfield_t *gravfield;
           if (az_lookup_gravfield(state, uid, &gravfield)) {
             gravfield->strength = value;
+          }
+        }
+        break;
+      // Nodes:
+      case AZ_OP_GMARK:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_NODE, &uid);
+          double value = 0.0;
+          az_node_t *node;
+          if (az_lookup_node(state, uid, &node)) {
+            if (node->kind == AZ_NODE_MARKER) {
+              value = (double)node->subkind.marker;
+            } else SCRIPT_ERROR("invalid node kind");
+          }
+          STACK_PUSH(value);
+        }
+        break;
+      case AZ_OP_SMARK:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_NODE, &uid);
+          double value;
+          STACK_POP(&value);
+          az_node_t *node;
+          if (az_lookup_node(state, uid, &node)) {
+            if (node->kind == AZ_NODE_MARKER) {
+              node->subkind.marker = (int)value;
+            } else SCRIPT_ERROR("invalid node kind");
           }
         }
         break;
