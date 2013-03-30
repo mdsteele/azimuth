@@ -29,6 +29,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/view/string.h"
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
@@ -802,6 +803,17 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
     case AZ_NODE_FAKE_WALL_FG:
     case AZ_NODE_FAKE_WALL_BG:
       az_draw_wall_data(node->subkind.fake_wall);
+      break;
+    case AZ_NODE_MARKER:
+      glColor3f(0, 1, 1);
+      glBegin(GL_LINES); {
+        glVertex2f(-20, 0); glVertex2f(20, 0);
+        glVertex2f(0, -20); glVertex2f(0, 20);
+      } glEnd();
+      glPushMatrix(); {
+        glScalef(1, -1, 1);
+        az_draw_printf(8, AZ_ALIGN_LEFT, 3, -10, "%d", node->subkind.marker);
+      } glPopMatrix();
       break;
   }
 }

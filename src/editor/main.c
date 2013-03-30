@@ -120,6 +120,9 @@ static void set_brush_from_node_subkind(az_editor_node_t *node) {
       state.brush.wall_data_index =
         az_wall_data_index(node->spec.subkind.fake_wall);
       break;
+    case AZ_NODE_MARKER:
+      state.brush.marker_value = node->spec.subkind.marker;
+      break;
   }
 }
 
@@ -141,6 +144,9 @@ static void set_node_subkind_from_brush(az_editor_node_t *node) {
     case AZ_NODE_FAKE_WALL_BG:
       node->spec.subkind.fake_wall =
         az_get_wall_data(state.brush.wall_data_index);
+      break;
+    case AZ_NODE_MARKER:
+      node->spec.subkind.marker = state.brush.marker_value;
       break;
   }
 }
@@ -670,6 +676,9 @@ static void do_change_data(int delta, bool secondary) {
           node->spec.subkind.fake_wall = az_get_wall_data(az_modulo(
               az_wall_data_index(node->spec.subkind.fake_wall) + delta,
               AZ_NUM_WALL_DATAS));
+          break;
+        case AZ_NODE_MARKER:
+          node->spec.subkind.marker += delta;
           break;
       }
       set_brush_from_node_subkind(node);

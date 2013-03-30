@@ -198,22 +198,34 @@ static void parse_node_directive(az_load_room_t *loader) {
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
   node->kind = (az_node_kind_t)kind;
-  if (kind != AZ_NODE_TRACTOR) {
+  if (node->kind != AZ_NODE_TRACTOR) {
     int subkind;
     READ("/%d", &subkind);
-    if (kind == AZ_NODE_CONSOLE) {
-      if (subkind < 0 || subkind >= AZ_NUM_CONSOLE_KINDS) FAIL();
-      node->subkind.console = (az_console_kind_t)subkind;
-    } else if (kind == AZ_NODE_UPGRADE) {
-      if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
-      node->subkind.upgrade = (az_upgrade_t)subkind;
-    } else if (kind == AZ_NODE_DOODAD_FG || kind == AZ_NODE_DOODAD_BG) {
-      if (subkind < 0 || subkind >= AZ_NUM_DOODAD_KINDS) FAIL();
-      node->subkind.doodad = (az_doodad_kind_t)subkind;
-    } else {
-      assert(kind == AZ_NODE_FAKE_WALL_FG || kind == AZ_NODE_FAKE_WALL_BG);
-      if (subkind < 0 || subkind >= AZ_NUM_WALL_DATAS) FAIL();
-      node->subkind.fake_wall = az_get_wall_data(subkind);
+    switch (node->kind) {
+      case AZ_NODE_NOTHING:
+      case AZ_NODE_TRACTOR:
+        AZ_ASSERT_UNREACHABLE();
+      case AZ_NODE_CONSOLE:
+        if (subkind < 0 || subkind >= AZ_NUM_CONSOLE_KINDS) FAIL();
+        node->subkind.console = (az_console_kind_t)subkind;
+        break;
+      case AZ_NODE_UPGRADE:
+        if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();
+        node->subkind.upgrade = (az_upgrade_t)subkind;
+        break;
+      case AZ_NODE_DOODAD_FG:
+      case AZ_NODE_DOODAD_BG:
+        if (subkind < 0 || subkind >= AZ_NUM_DOODAD_KINDS) FAIL();
+        node->subkind.doodad = (az_doodad_kind_t)subkind;
+        break;
+      case AZ_NODE_FAKE_WALL_FG:
+      case AZ_NODE_FAKE_WALL_BG:
+        if (subkind < 0 || subkind >= AZ_NUM_WALL_DATAS) FAIL();
+        node->subkind.fake_wall = az_get_wall_data(subkind);
+        break;
+      case AZ_NODE_MARKER:
+        node->subkind.marker = subkind;
+        break;
     }
   }
   int uuid_slot;
@@ -353,16 +365,31 @@ static bool write_room(const az_room_t *room, FILE *file) {
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
     WRITE("!N%d", (int)node->kind);
-    if (node->kind == AZ_NODE_CONSOLE) {
-      WRITE("/%d", (int)node->subkind.console);
-    } else if (node->kind == AZ_NODE_UPGRADE) {
-      WRITE("/%d", (int)node->subkind.upgrade);
-    } else if (node->kind == AZ_NODE_DOODAD_FG ||
-               node->kind == AZ_NODE_DOODAD_BG) {
-      WRITE("/%d", (int)node->subkind.doodad);
-    } else if (node->kind == AZ_NODE_FAKE_WALL_FG ||
-               node->kind == AZ_NODE_FAKE_WALL_BG) {
-      WRITE("/%d", az_wall_data_index(node->subkind.fake_wall));
+    if (node->kind != AZ_NODE_TRACTOR) {
+      int subkind = 0;
+      switch (node->kind) {
+        case AZ_NODE_NOTHING:
+        case AZ_NODE_TRACTOR:
+          AZ_ASSERT_UNREACHABLE();
+        case AZ_NODE_CONSOLE:
+          subkind = (int)node->subkind.console;
+          break;
+        case AZ_NODE_UPGRADE:
+          subkind = (int)node->subkind.upgrade;
+          break;
+        case AZ_NODE_DOODAD_FG:
+        case AZ_NODE_DOODAD_BG:
+          subkind = (int)node->subkind.doodad;
+          break;
+        case AZ_NODE_FAKE_WALL_FG:
+        case AZ_NODE_FAKE_WALL_BG:
+          subkind = az_wall_data_index(node->subkind.fake_wall);
+          break;
+        case AZ_NODE_MARKER:
+          subkind = node->subkind.marker;
+          break;
+      }
+      WRITE("/%d", subkind);
     }
     WRITE(" x%.02f y%.02f a%f u%d\n",
           node->position.x, node->position.y, node->angle, node->uuid_slot);

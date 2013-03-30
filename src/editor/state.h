@@ -131,6 +131,7 @@ typedef struct {
     az_node_kind_t node_kind;
     az_console_kind_t console_kind;
     az_doodad_kind_t doodad_kind;
+    int marker_value;
     az_upgrade_t upgrade_kind;
     az_wall_kind_t wall_kind;
     int wall_data_index;
