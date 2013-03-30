@@ -916,6 +916,9 @@ static void begin_set_uuid_slot(void) {
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (gravfield->selected) uuid_slot = gravfield->spec.uuid_slot;
   }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->selected) uuid_slot = node->spec.uuid_slot;
+  }
   AZ_LIST_LOOP(wall, room->walls) {
     if (wall->selected) uuid_slot = wall->spec.uuid_slot;
   }
@@ -946,6 +949,9 @@ static void try_set_uuid_slot(void) {
     AZ_LIST_LOOP(gravfield, room->gravfields) {
       if (gravfield->spec.uuid_slot == uuid_slot) return;
     }
+    AZ_LIST_LOOP(node, room->nodes) {
+      if (node->spec.uuid_slot == uuid_slot) return;
+    }
     AZ_LIST_LOOP(wall, room->walls) {
       if (wall->spec.uuid_slot == uuid_slot) return;
     }
@@ -968,6 +974,12 @@ static void try_set_uuid_slot(void) {
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (gravfield->selected) {
       gravfield->spec.uuid_slot = uuid_slot;
+      return;
+    }
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->selected) {
+      node->spec.uuid_slot = uuid_slot;
       return;
     }
   }

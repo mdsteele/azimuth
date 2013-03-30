@@ -187,31 +187,8 @@ static void tint_screen(GLfloat alpha) {
   } glPopMatrix();
 }
 
-static void draw_node(const az_editor_state_t *state,
-                      az_editor_node_t *editor_node) {
-  const az_node_t real_node = {
-    .kind = editor_node->spec.kind,
-    .subkind = editor_node->spec.subkind,
-    .position = editor_node->spec.position,
-    .angle = editor_node->spec.angle
-  };
-  az_draw_node(&real_node, state->clock);
-  if (editor_node->spec.on_use != NULL) {
-    glPushMatrix(); {
-      camera_to_screen_orient(state, real_node.position);
-      glColor3f(0.75, 0, 1); // purple
-      glBegin(GL_QUADS); {
-        glVertex2f(5, -9); glVertex2f(-5, -9);
-        glVertex2f(-5, 0); glVertex2f(5, 0);
-      } glEnd();
-      glColor3f(0, 0, 0); // black
-      az_draw_string(8, AZ_ALIGN_CENTER, 0, -8, "$");
-    } glPopMatrix();
-  }
-}
-
 static void draw_script_and_uuid_slot(
-    az_editor_state_t *state, az_vector_t position,
+    const az_editor_state_t *state, az_vector_t position,
     const az_script_t *script, int uuid_slot) {
   if (script == NULL && uuid_slot == 0) return;
   glPushMatrix(); {
@@ -235,6 +212,20 @@ static void draw_script_and_uuid_slot(
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d", uuid_slot);
     }
   } glPopMatrix();
+}
+
+static void draw_node(const az_editor_state_t *state,
+                      az_editor_node_t *editor_node) {
+  const az_node_t real_node = {
+    .kind = editor_node->spec.kind,
+    .subkind = editor_node->spec.subkind,
+    .position = editor_node->spec.position,
+    .angle = editor_node->spec.angle
+  };
+  az_draw_node(&real_node, state->clock);
+  draw_script_and_uuid_slot(
+      state, real_node.position, editor_node->spec.on_use,
+      editor_node->spec.uuid_slot);
 }
 
 static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {

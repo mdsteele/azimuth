@@ -102,6 +102,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       node->position = spec->position;
       node->angle = spec->angle;
       node->state = AZ_NS_FAR;
+      put_uuid(state, spec->uuid_slot, AZ_UUID_NODE, node->uid);
     }
   }
   for (int i = 0; i < room->num_walls; ++i) {

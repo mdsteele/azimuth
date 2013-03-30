@@ -69,6 +69,7 @@ typedef struct {
   az_script_t *on_use; // owned; NULL if no script
   az_vector_t position;
   double angle;
+  int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
 } az_node_spec_t;
 
 typedef struct {

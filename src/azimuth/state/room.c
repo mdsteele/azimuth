@@ -197,6 +197,7 @@ static void parse_node_directive(az_load_room_t *loader) {
   READ("%d", &kind);
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
   az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
+  node->kind = (az_node_kind_t)kind;
   if (kind != AZ_NODE_TRACTOR) {
     int subkind;
     READ("/%d", &subkind);
@@ -215,11 +216,13 @@ static void parse_node_directive(az_load_room_t *loader) {
       node->subkind.fake_wall = az_get_wall_data(subkind);
     }
   }
+  int uuid_slot;
   double x, y, angle;
-  READ(" x%lf y%lf a%lf", &x, &y, &angle);
-  node->kind = (az_node_kind_t)kind;
+  READ(" x%lf y%lf a%lf u%d\n", &x, &y, &angle, &uuid_slot);
+  if (uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   node->position = (az_vector_t){x, y};
   node->angle = angle;
+  node->uuid_slot = uuid_slot;
   node->on_use = maybe_parse_script(loader, 'u');
   ++loader->room->num_nodes;
 }
@@ -361,8 +364,8 @@ static bool write_room(const az_room_t *room, FILE *file) {
                node->kind == AZ_NODE_FAKE_WALL_BG) {
       WRITE("/%d", az_wall_data_index(node->subkind.fake_wall));
     }
-    WRITE(" x%.02f y%.02f a%f\n",
-          node->position.x, node->position.y, node->angle);
+    WRITE(" x%.02f y%.02f a%f u%d\n",
+          node->position.x, node->position.y, node->angle, node->uuid_slot);
     WRITE_SCRIPT('u', node->on_use);
   }
   for (int i = 0; i < room->num_baddies; ++i) {
