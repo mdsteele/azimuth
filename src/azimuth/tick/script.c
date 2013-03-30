@@ -61,16 +61,32 @@ static void print_error(const char *msg, const az_script_vm_t *vm) {
 
 /*===========================================================================*/
 
-// STACK_PUSH(value) pushes a single value onto the stack.
-#define STACK_PUSH(v) do { \
-    if (vm->stack_size < AZ_ARRAY_SIZE(vm->stack)) { \
-      vm->stack[vm->stack_size++] = (double)(v); \
+// STACK_PUSH(...) takes 1 or more double args, and pushes those values onto
+// the stack (or errors on overflow), in order (so that the last argument will
+// be the new top of the stack).
+#define STACK_PUSH(...) do { \
+    if (vm->stack_size + AZ_COUNT_ARGS(__VA_ARGS__) <= \
+        AZ_ARRAY_SIZE(vm->stack)) { \
+      do_stack_push(vm, AZ_COUNT_ARGS(__VA_ARGS__), __VA_ARGS__); \
     } else SCRIPT_ERROR("stack overflow"); \
   } while (0)
 
+static void do_stack_push(az_script_vm_t *vm, int num_args, ...) {
+  assert(vm->stack_size + num_args <= AZ_ARRAY_SIZE(vm->stack));
+  va_list args;
+  va_start(args, num_args);
+  for (int i = 0; i < num_args; ++i) {
+    assert(vm->stack_size + i < AZ_ARRAY_SIZE(vm->stack));
+    vm->stack[vm->stack_size + i] = va_arg(args, double);
+  }
+  va_end(args);
+  vm->stack_size += num_args;
+  assert(vm->stack_size <= AZ_ARRAY_SIZE(vm->stack));
+}
+
 /*===========================================================================*/
 
-// STACK_POP(...) takes from 1 to 8 double* args; it pops that many values off
+// STACK_POP(...) takes 1 or more double* args; it pops that many values off
 // the stack (or errors on underflow), and assigns them to the pointers.  The
 // top of the stack will be stored to the rightmost pointer passed, and so on.
 #define STACK_POP(...) do { \
@@ -132,6 +148,69 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
     do_suspend(vm, (script), (target_vm)); \
     return; \
   } while (0)
+
+/*===========================================================================*/
+
+typedef enum {
+  AZ_OBJ_NOTHING = 0,
+  AZ_OBJ_BADDIE,
+  AZ_OBJ_DOOR,
+  AZ_OBJ_GRAVFIELD,
+  AZ_OBJ_NODE,
+  AZ_OBJ_WALL
+} az_object_type_t;
+
+typedef struct {
+  az_object_type_t type;
+  union {
+    az_baddie_t *baddie;
+    az_door_t *door;
+    az_gravfield_t *gravfield;
+    az_node_t *node;
+    az_wall_t *wall;
+  } obj;
+} az_object_t;
+
+#define GET_OBJECT(object_out) do { \
+    az_uuid_t uuid; \
+    GET_UUID(&uuid); \
+    if (uuid.type == AZ_UUID_NOTHING) SCRIPT_ERROR("invalid uuid type"); \
+    else lookup_object(state, uuid, (object_out)); \
+  } while (0)
+
+static void lookup_object(az_space_state_t *state, az_uuid_t uuid,
+                          az_object_t *object) {
+  assert(uuid.type != AZ_UUID_NOTHING);
+  object->type = AZ_OBJ_NOTHING;
+  switch (uuid.type) {
+    case AZ_UUID_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_UUID_BADDIE:
+      if (az_lookup_baddie(state, uuid.uid, &object->obj.baddie)) {
+        object->type = AZ_OBJ_BADDIE;
+      }
+      break;
+    case AZ_UUID_DOOR:
+      if (az_lookup_door(state, uuid.uid, &object->obj.door)) {
+        object->type = AZ_OBJ_DOOR;
+      }
+      break;
+    case AZ_UUID_GRAVFIELD:
+      if (az_lookup_gravfield(state, uuid.uid, &object->obj.gravfield)) {
+        object->type = AZ_OBJ_GRAVFIELD;
+      }
+      break;
+    case AZ_UUID_NODE:
+      if (az_lookup_node(state, uuid.uid, &object->obj.node)) {
+        object->type = AZ_OBJ_NODE;
+      }
+      break;
+    case AZ_UUID_WALL:
+      if (az_lookup_wall(state, uuid.uid, &object->obj.wall)) {
+        object->type = AZ_OBJ_WALL;
+      }
+      break;
+  }
+}
 
 /*===========================================================================*/
 
@@ -203,7 +282,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
             SCRIPT_ERROR("invalid flag index");
           }
-          STACK_PUSH(az_test_flag(&state->ship.player, (az_flag_t)flag_index));
+          STACK_PUSH(az_test_flag(&state->ship.player, (az_flag_t)flag_index) ?
+                     1.0 : 0.0);
         }
         break;
       case AZ_OP_SET:
@@ -236,49 +316,76 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       // Objects:
       case AZ_OP_NIX:
         {
-          az_uuid_t uuid;
-          GET_UUID(&uuid);
-          switch (uuid.type) {
-            case AZ_UUID_NOTHING: SCRIPT_ERROR("invalid uuid type");
-            case AZ_UUID_BADDIE:
-              {
-                az_baddie_t *baddie;
-                if (az_lookup_baddie(state, uuid.uid, &baddie)) {
-                  baddie->kind = AZ_BAD_NOTHING;
-                }
-              }
+          az_object_t object;
+          GET_OBJECT(&object);
+          switch (object.type) {
+            case AZ_OBJ_NOTHING: break;
+            case AZ_OBJ_BADDIE:
+              object.obj.baddie->kind = AZ_BAD_NOTHING;
               break;
-            case AZ_UUID_DOOR:
-              {
-                az_door_t *door;
-                if (az_lookup_door(state, uuid.uid, &door)) {
-                  door->kind = AZ_DOOR_NOTHING;
-                }
-              }
+            case AZ_OBJ_DOOR:
+              object.obj.door->kind = AZ_DOOR_NOTHING;
               break;
-            case AZ_UUID_GRAVFIELD:
-              {
-                az_gravfield_t *gravfield;
-                if (az_lookup_gravfield(state, uuid.uid, &gravfield)) {
-                  gravfield->kind = AZ_GRAV_NOTHING;
-                }
-              }
+            case AZ_OBJ_GRAVFIELD:
+              object.obj.gravfield->kind = AZ_GRAV_NOTHING;
               break;
-            case AZ_UUID_NODE:
-              {
-                az_node_t *node;
-                if (az_lookup_node(state, uuid.uid, &node)) {
-                  node->kind = AZ_NODE_NOTHING;
-                }
-              }
+            case AZ_OBJ_NODE:
+              object.obj.node->kind = AZ_NODE_NOTHING;
               break;
-            case AZ_UUID_WALL:
-              {
-                az_wall_t *wall;
-                if (az_lookup_wall(state, uuid.uid, &wall)) {
-                  wall->kind = AZ_WALL_NOTHING;
-                }
-              }
+            case AZ_OBJ_WALL:
+              object.obj.wall->kind = AZ_WALL_NOTHING;
+              break;
+          }
+        }
+        break;
+      case AZ_OP_GPOS:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          az_vector_t position = AZ_VZERO;
+          switch (object.type) {
+            case AZ_OBJ_NOTHING: break;
+            case AZ_OBJ_BADDIE:
+              position = object.obj.baddie->position;
+              break;
+            case AZ_OBJ_DOOR:
+              position = object.obj.door->position;
+              break;
+            case AZ_OBJ_GRAVFIELD:
+              position = object.obj.gravfield->position;
+              break;
+            case AZ_OBJ_NODE:
+              position = object.obj.node->position;
+              break;
+            case AZ_OBJ_WALL:
+              position = object.obj.wall->position;
+              break;
+          }
+          STACK_PUSH(position.x, position.y);
+        }
+        break;
+      case AZ_OP_SPOS:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          az_vector_t position;
+          STACK_POP(&position.x, &position.y);
+          switch (object.type) {
+            case AZ_OBJ_NOTHING: break;
+            case AZ_OBJ_BADDIE:
+              object.obj.baddie->position = position;
+              break;
+            case AZ_OBJ_DOOR:
+              object.obj.door->position = position;
+              break;
+            case AZ_OBJ_GRAVFIELD:
+              object.obj.gravfield->position = position;
+              break;
+            case AZ_OBJ_NODE:
+              object.obj.node->position = position;
+              break;
+            case AZ_OBJ_WALL:
+              object.obj.wall->position = position;
               break;
           }
         }
@@ -377,16 +484,16 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         break;
       // Gravfields:
-      case AZ_OP_GETGS:
+      case AZ_OP_GSTR:
         {
           az_uid_t uid;
           GET_UID(AZ_UUID_GRAVFIELD, &uid);
           az_gravfield_t *gravfield;
           STACK_PUSH(az_lookup_gravfield(state, uid, &gravfield) ?
-                     gravfield->strength : 0);
+                     gravfield->strength : 0.0);
         }
         break;
-      case AZ_OP_SETGS:
+      case AZ_OP_SSTR:
         {
           double value;
           STACK_POP(&value);

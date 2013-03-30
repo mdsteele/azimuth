@@ -44,6 +44,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_CLR:    return "clr";
     case AZ_OP_MAP:    return "map";
     case AZ_OP_NIX:    return "nix";
+    case AZ_OP_GPOS:   return "gpos";
+    case AZ_OP_SPOS:   return "spos";
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_BOSS:   return "boss";
     case AZ_OP_SPLAT:  return "splat";
@@ -51,8 +53,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_CLOSE:  return "close";
     case AZ_OP_LOCK:   return "lock";
     case AZ_OP_UNLOCK: return "unlock";
-    case AZ_OP_GETGS:  return "getgs";
-    case AZ_OP_SETGS:  return "setgs";
+    case AZ_OP_GSTR:   return "gstr";
+    case AZ_OP_SSTR:   return "sstr";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
@@ -106,12 +108,14 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_CLR:
     case AZ_OP_MAP:
     case AZ_OP_NIX:
+    case AZ_OP_GPOS:
+    case AZ_OP_SPOS:
     case AZ_OP_OPEN:
     case AZ_OP_CLOSE:
     case AZ_OP_LOCK:
     case AZ_OP_UNLOCK:
-    case AZ_OP_GETGS:
-    case AZ_OP_SETGS:
+    case AZ_OP_GSTR:
+    case AZ_OP_SSTR:
     case AZ_OP_MSG:
     case AZ_OP_PT:
     case AZ_OP_PB:

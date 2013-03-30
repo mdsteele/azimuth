@@ -45,6 +45,8 @@ typedef enum {
   AZ_OP_MAP, // grant map data for zone i
   // Objects:
   AZ_OP_NIX, // remove object i (of any type)
+  AZ_OP_GPOS, // push (x, y) position of object i (of any type)
+  AZ_OP_SPOS, // pop top two, set position of obj i (of any type) to (a, b)
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_BOSS, // designate baddie i as the current boss
@@ -55,8 +57,8 @@ typedef enum {
   AZ_OP_LOCK, // close and lock door i
   AZ_OP_UNLOCK, // unlock (but do not open) door i
   // Gravfields:
-  AZ_OP_GETGS, // push strength of gravfield i
-  AZ_OP_SETGS, // pop top, set strength of gravfield i to a
+  AZ_OP_GSTR, // push strength of gravfield i
+  AZ_OP_SSTR, // pop top, set strength of gravfield i to a
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen
   AZ_OP_DLOG, // begin dialog

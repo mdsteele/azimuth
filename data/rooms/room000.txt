@@ -44,6 +44,6 @@ $s:boss1,mus9;
 !B14 x185.08 y-461.88 a2.019838 u0
 !B14 x456.08 y-190.88 a2.754856 u0
 !B14 x460.08 y190.12 a-2.647651 u0
-$k:getgs2,addi400,setgs2;
+$k:gstr2,addi400,sstr2;
 !B13 x0.00 y0.00 a0.000000 u1
 $k:unlock3;
