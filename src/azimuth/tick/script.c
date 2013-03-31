@@ -577,6 +577,28 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
+      // Camera:
+      case AZ_OP_GCAM:
+        STACK_PUSH(state->camera.center.x, state->camera.center.y);
+        break;
+      case AZ_OP_NPS:
+        {
+          double x, y;
+          STACK_POP(&x, &y);
+          state->camera.wobble_goal = 0.5 * ins.immediate;
+          az_particle_t *particle;
+          if (az_insert_particle(state, &particle)) {
+            particle->kind = AZ_PAR_NPS_PORTAL;
+            particle->color = (az_color_t){128, 64, 255, 255};
+            particle->position.x = x;
+            particle->position.y = y;
+            particle->velocity = AZ_VZERO;
+            particle->angle = 0.0;
+            particle->lifetime = ins.immediate;
+            particle->param1 = 50.0 * sqrt(ins.immediate);
+          }
+        }
+        break;
       // Messages/dialog:
       case AZ_OP_MSG:
         {

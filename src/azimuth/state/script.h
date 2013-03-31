@@ -66,6 +66,9 @@ typedef enum {
   // Nodes:
   AZ_OP_GMARK, // push value of marker node i
   AZ_OP_SMARK, // pop top, set value of marker node i to a
+  // Camera:
+  AZ_OP_GCAM, // push (x, y) position of camera center
+  AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen
   AZ_OP_DLOG, // begin dialog

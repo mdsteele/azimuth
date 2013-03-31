@@ -71,11 +71,23 @@ static void draw_particle(const az_particle_t *particle) {
     case AZ_PAR_EMBER:
       glBegin(GL_TRIANGLE_FAN); {
         with_color_alpha(particle->color, 1);
-        glVertex2i(0, 0);
+        glVertex2f(0, 0);
         with_color_alpha(particle->color, 0);
         const double radius =
           particle->param1 * (1.0 - particle->age / particle->lifetime);
         for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
+    case AZ_PAR_NPS_PORTAL:
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, 1);
+        glVertex2f(0, 0);
+        with_color_alpha(particle->color, 0.5);
+        const double radius = particle->param1 *
+          (1.0 - 2.0 * fabs((particle->age / particle->lifetime) - 0.5));
+        for (int i = 0; i <= 360; i += 5) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();

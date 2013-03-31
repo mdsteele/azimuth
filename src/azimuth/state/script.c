@@ -61,6 +61,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SSTR:   return "sstr";
     case AZ_OP_GMARK:  return "gmark";
     case AZ_OP_SMARK:  return "smark";
+    case AZ_OP_GCAM:   return "gcam";
+    case AZ_OP_NPS:    return "nps";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
@@ -97,6 +99,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_SUB:
     case AZ_OP_BAD:
     case AZ_OP_SPLAT:
+    case AZ_OP_GCAM:
     case AZ_OP_DLOG:
     case AZ_OP_DEND:
     case AZ_OP_STOP:
@@ -128,6 +131,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_SSTR:
     case AZ_OP_GMARK:
     case AZ_OP_SMARK:
+    case AZ_OP_NPS:
     case AZ_OP_MSG:
     case AZ_OP_PT:
     case AZ_OP_PB:

@@ -19,6 +19,8 @@
 
 #include "azimuth/tick/camera.h"
 
+#include <math.h>
+
 #include "azimuth/state/camera.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/vector.h"
@@ -31,6 +33,12 @@ void az_tick_camera(az_space_state_t *state, double time) {
     &state->planet->rooms[state->ship.player.current_room].camera_bounds;
   az_track_camera_towards(
       camera, az_clamp_to_bounds(bounds, state->ship.position), time);
+  if (camera->wobble_goal > camera->wobble_intensity) {
+    camera->wobble_intensity += time;
+  } else {
+    camera->wobble_goal = 0.0;
+    camera->wobble_intensity = fmax(0.0, camera->wobble_intensity - time);
+  }
   camera->wobble_theta = az_mod2pi(camera->wobble_theta + AZ_TWO_PI * time);
 }
 

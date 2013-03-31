@@ -94,14 +94,30 @@ static void transform_to_camera_matrix(const az_space_state_t *state) {
   glScaled(1, -1, 1);
   // Center the screen on position (0, 0).
   glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
-  // If we're in a superheated room, wobble the screen a bit (to simulate heat
-  // refraction).
+  // If we're in a superheated room, wobble the screen slightly (to simulate
+  // heat refraction).
   if (room_properties(state) & AZ_ROOMF_HEATED) {
+    const GLfloat xy = 0.002 * cos(state->camera.wobble_theta);
+    const GLfloat yy = 1 + 0.005 * sin(state->camera.wobble_theta);
     GLfloat matrix[16] = {
-      1, 0.002 * cos(state->camera.wobble_theta), 0, 0,
-      0, 1 + 0.005 * sin(state->camera.wobble_theta), 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1};
+      1, xy, 0, 0,
+      0, yy, 0, 0,
+      0,  0, 1, 0,
+      0,  0, 0, 1};
+    glMultMatrixf(matrix);
+  }
+  // If camera wobble is active (e.g. because of an NPS portal), wobble the
+  // screen accordingly.
+  if (state->camera.wobble_intensity > 0.0) {
+    const GLfloat xy = 0.15 * state->camera.wobble_intensity *
+      cos(3.0 * state->camera.wobble_theta);
+    const GLfloat yx = 0.2 * state->camera.wobble_intensity *
+      sin(2.0 * state->camera.wobble_theta);
+    GLfloat matrix[16] = {
+      1, xy, 0, 0,
+      yx, 1, 0, 0,
+      0,  0, 1, 0,
+      0,  0, 0, 1};
     glMultMatrixf(matrix);
   }
   // Move the screen to the camera pose.
