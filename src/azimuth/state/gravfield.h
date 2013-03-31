@@ -68,7 +68,7 @@ typedef struct {
 // uses the sector field of az_gravfield_size_t).
 bool az_trapezoidal(az_gravfield_kind_t kind);
 
-double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield);
+double az_sector_interior_angle(const az_gravfield_size_t *size);
 
 bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point);

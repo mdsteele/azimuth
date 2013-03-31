@@ -50,6 +50,7 @@ static void arc_vertices(double r, double start_theta, double end_theta) {
        (theta < end_theta) == (start_theta < end_theta); theta += step) {
     glVertex2d(r * cos(theta), r * sin(theta));
   }
+  glVertex2d(r * cos(end_theta), r * sin(end_theta));
 }
 
 static void circle_vertices(double r) {
@@ -210,6 +211,35 @@ static void draw_script_and_uuid_slot(
       } glEnd();
       glColor3f(0, 0, 0); // black
       az_draw_printf(8, AZ_ALIGN_CENTER, 0, 1, "%02d", uuid_slot);
+    }
+  } glPopMatrix();
+}
+
+static void draw_gravfield_border(const az_gravfield_spec_t *gravfield) {
+  glPushMatrix(); {
+    glTranslated(gravfield->position.x, gravfield->position.y, 0);
+    glRotated(AZ_RAD2DEG(gravfield->angle), 0, 0, 1);
+    if (az_trapezoidal(gravfield->kind)) {
+      const double foff = gravfield->size.trapezoid.front_offset;
+      const double fsw = gravfield->size.trapezoid.front_semiwidth;
+      const double rsw = gravfield->size.trapezoid.rear_semiwidth;
+      const double sl = gravfield->size.trapezoid.semilength;
+      glBegin(GL_LINE_LOOP); {
+        glVertex2d(sl, foff - fsw); glVertex2d(sl, foff + fsw);
+        glVertex2d(-sl, rsw); glVertex2d(-sl, -rsw);
+      } glEnd();
+      glBegin(GL_LINES); {
+        glVertex2d(0, 0); glVertex2d(sl, 0);
+      } glEnd();
+    } else {
+      glBegin(GL_LINE_LOOP); {
+        const double sweep = az_sector_interior_angle(&gravfield->size);
+        const double irad = gravfield->size.sector.inner_radius;
+        const double thick = gravfield->size.sector.thickness;
+        arc_vertices(irad + thick, 0, sweep);
+        if (irad > 0.0) arc_vertices(irad, sweep, 0);
+        else glVertex2f(0, 0);
+      } glEnd();
     }
   } glPopMatrix();
 }
@@ -446,14 +476,8 @@ static void draw_camera_view(az_editor_state_t *state) {
   }
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
-    if (az_trapezoidal(gravfield->spec.kind)) {
-      draw_selection_circle(gravfield->spec.position, gravfield->spec.angle,
-                            gravfield->spec.size.trapezoid.semilength);
-    } else {
-      draw_selection_circle(gravfield->spec.position, gravfield->spec.angle,
-                            gravfield->spec.size.sector.inner_radius +
-                            gravfield->spec.size.sector.thickness);
-    }
+    glColor3f(1, 1, 1);
+    draw_gravfield_border(&gravfield->spec);
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (!node->selected) continue;

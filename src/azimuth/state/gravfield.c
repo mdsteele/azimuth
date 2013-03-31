@@ -42,22 +42,21 @@ bool az_trapezoidal(az_gravfield_kind_t kind) {
   AZ_ASSERT_UNREACHABLE();
 }
 
-double az_sector_gravfield_interior_angle(const az_gravfield_t *gravfield) {
-  assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN ||
-         gravfield->kind == AZ_GRAV_SECTOR_PULL);
-  const double angle =
-    az_mod2pi_nonneg(AZ_DEG2RAD(gravfield->size.sector.sweep_degrees));
-  return (angle == 0.0 ? AZ_TWO_PI : angle);
+double az_sector_interior_angle(const az_gravfield_size_t *size) {
+  const double radians =
+    az_mod2pi_nonneg(AZ_DEG2RAD(size->sector.sweep_degrees));
+  return (radians == 0.0 ? AZ_TWO_PI : radians);
 }
 
 bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
+  const az_gravfield_size_t *size = &gravfield->size;
   if (az_trapezoidal(gravfield->kind)) {
-    const double semilength = gravfield->size.trapezoid.semilength;
-    const double front_offset = gravfield->size.trapezoid.front_offset;
-    const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
-    const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
+    const double semilength = size->trapezoid.semilength;
+    const double front_offset = size->trapezoid.front_offset;
+    const double front_semiwidth = size->trapezoid.front_semiwidth;
+    const double rear_semiwidth = size->trapezoid.rear_semiwidth;
     const az_vector_t vertices[4] = {
       {semilength, front_offset - front_semiwidth},
       {semilength, front_offset + front_semiwidth},
@@ -69,16 +68,16 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
         trapezoid, az_vrotate(az_vsub(point, gravfield->position),
                               -gravfield->angle));
   } else {
-    const double thickness = gravfield->size.sector.thickness;
+    const double thickness = size->sector.thickness;
     assert(thickness > 0.0);
-    const double inner_radius = gravfield->size.sector.inner_radius;
+    const double inner_radius = size->sector.inner_radius;
     assert(inner_radius >= 0.0);
     const double outer_radius = inner_radius + thickness;
     return (az_vwithin(point, gravfield->position, outer_radius) &&
             !az_vwithin(point, gravfield->position, inner_radius) &&
             az_mod2pi_nonneg(az_vtheta(az_vsub(point, gravfield->position)) -
                              gravfield->angle) <=
-            az_sector_gravfield_interior_angle(gravfield));
+            az_sector_interior_angle(size));
   }
 }
 

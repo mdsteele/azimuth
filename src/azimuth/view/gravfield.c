@@ -68,7 +68,7 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
   const double stride = 100.0;
   const double inner_radius = gravfield->size.sector.inner_radius;
   const double outer_radius = inner_radius + gravfield->size.sector.thickness;
-  const double interior_angle = az_sector_gravfield_interior_angle(gravfield);
+  const double interior_angle = az_sector_interior_angle(&gravfield->size);
   assert(gravfield->strength != 0.0);
   const double offset = fmod(0.5 * total_time * gravfield->strength, stride);
   const double rlimit =
@@ -96,10 +96,11 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
 static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
                                        double total_time) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN);
-  const double stride = AZ_DEG2RAD(60);
   const double inner_radius = gravfield->size.sector.inner_radius;
   const double outer_radius = inner_radius + gravfield->size.sector.thickness;
-  const double interior_angle = az_sector_gravfield_interior_angle(gravfield);
+  const double interior_angle = az_sector_interior_angle(&gravfield->size);
+  const double stride =
+    AZ_TWO_PI / floor(0.5 + outer_radius * AZ_TWO_PI / 200.0);
   assert(gravfield->strength != 0.0);
   const double offset =
     fmod(total_time * gravfield->strength / outer_radius, stride);
