@@ -278,6 +278,10 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .size = editor_gravfield->spec.size
     };
     az_draw_gravfield(&real_gravfield, state->total_time);
+    if (real_gravfield.strength == 0.0) {
+      glColor3f(1, 0, 1);
+      draw_gravfield_border(&editor_gravfield->spec);
+    }
   }
   AZ_LIST_LOOP(editor_wall, room->walls) {
     const az_wall_t real_wall = {

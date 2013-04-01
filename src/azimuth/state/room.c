@@ -162,7 +162,7 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   int kind, uuid_slot;
   double x, y, angle, strength;
   READ("%d x%lf y%lf a%lf s%lf ", &kind, &x, &y, &angle, &strength);
-  if (kind <= 0 || kind > AZ_NUM_GRAVFIELD_KINDS || strength == 0.0) FAIL();
+  if (kind <= 0 || kind > AZ_NUM_GRAVFIELD_KINDS) FAIL();
   az_gravfield_spec_t *gravfield =
     &loader->room->gravfields[loader->room->num_gravfields];
   gravfield->kind = (az_gravfield_kind_t)kind;
@@ -173,7 +173,8 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
     double front_offset, front_semiwidth, rear_semiwidth, semilength;
     READ("o%lf f%lf r%lf l%lf", &front_offset, &front_semiwidth,
          &rear_semiwidth, &semilength);
-    if (semilength <= 0.0) FAIL();
+    if (semilength <= 0.0 || front_semiwidth < 0.0 ||
+        rear_semiwidth < 0.0) FAIL();
     gravfield->size.trapezoid.semilength = semilength;
     gravfield->size.trapezoid.front_offset = front_offset;
     gravfield->size.trapezoid.front_semiwidth = front_semiwidth;
@@ -181,6 +182,7 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   } else {
     double sweep_degrees, inner_radius, thickness;
     READ("w%lf i%lf t%lf", &sweep_degrees, &inner_radius, &thickness);
+    if (inner_radius < 0.0 || thickness <= 0.0) FAIL();
     gravfield->size.sector.sweep_degrees = sweep_degrees;
     gravfield->size.sector.inner_radius = inner_radius;
     gravfield->size.sector.thickness = thickness;

@@ -770,37 +770,54 @@ static void begin_edit_gravfield(void) {
     }
   }
   if (gravfield == NULL) return;
-  az_init_editor_text(
-      &state, AZ_ETA_EDIT_GRAVFIELD, "s%.02f l%.02f o%.02f f%.02f r%.02f",
-      gravfield->strength, gravfield->size.trapezoid.semilength,
-      gravfield->size.trapezoid.front_offset,
-      gravfield->size.trapezoid.front_semiwidth,
-      gravfield->size.trapezoid.rear_semiwidth);
+  if (az_trapezoidal(gravfield->kind)) {
+    az_init_editor_text(
+        &state, AZ_ETA_EDIT_GRAVFIELD, "s%g o%g f%g r%g l%g",
+        gravfield->strength, gravfield->size.trapezoid.front_offset,
+        gravfield->size.trapezoid.front_semiwidth,
+        gravfield->size.trapezoid.rear_semiwidth,
+        gravfield->size.trapezoid.semilength);
+  } else {
+    az_init_editor_text(
+        &state, AZ_ETA_EDIT_GRAVFIELD, "s%g w%g i%g t%g",
+        gravfield->strength, gravfield->size.sector.sweep_degrees,
+        gravfield->size.sector.inner_radius, gravfield->size.sector.thickness);
+  }
 }
 
 static void try_edit_gravfield(void) {
   assert(state.text.action == AZ_ETA_EDIT_GRAVFIELD);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
   assert(state.text.buffer[state.text.length] == '\0');
-  double strength, semilength, front_offset, front_semiwidth, rear_semiwidth;
   int count;
-  if (sscanf(state.text.buffer, "s%lf l%lf o%lf f%lf r%lf%n", &strength,
-             &semilength, &front_offset, &front_semiwidth, &rear_semiwidth,
-             &count) < 5) return;
-  if (count != state.text.length) return;
-  if (strength == 0.0 || semilength <= 0.0 ||
-      front_semiwidth < 0.0 || rear_semiwidth < 0.0) return;
+  double strength;
+  az_gravfield_size_t size;
+  bool trapezoidal;
+  if (sscanf(state.text.buffer, "s%lf o%lf f%lf r%lf l%lf%n", &strength,
+             &size.trapezoid.front_offset, &size.trapezoid.front_semiwidth,
+             &size.trapezoid.rear_semiwidth, &size.trapezoid.semilength,
+             &count) == 5 && count == state.text.length) {
+    if (size.trapezoid.semilength <= 0.0 ||
+        size.trapezoid.front_semiwidth < 0.0 ||
+        size.trapezoid.rear_semiwidth < 0.0) return;
+    trapezoidal = true;
+  } else if (sscanf(state.text.buffer, "s%lf w%lf i%lf t%lf%n",
+                    &strength, &size.sector.sweep_degrees,
+                    &size.sector.inner_radius, &size.sector.thickness,
+                    &count) == 4 && count == state.text.length) {
+    if (size.sector.inner_radius < 0.0 ||
+        size.sector.thickness <= 0.0) return;
+    trapezoidal = false;
+  } else return;
   state.text.action = AZ_ETA_NOTHING;
+  state.brush.gravfield_strength = strength;
+  state.brush.gravfield_size = size;
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
+    if (az_trapezoidal(gravfield->spec.kind) != trapezoidal) continue;
     gravfield->spec.strength = strength;
-    gravfield->spec.size.trapezoid.front_offset = front_offset;
-    gravfield->spec.size.trapezoid.front_semiwidth = front_semiwidth;
-    gravfield->spec.size.trapezoid.rear_semiwidth = rear_semiwidth;
-    gravfield->spec.size.trapezoid.semilength = semilength;
-    state.brush.gravfield_strength = gravfield->spec.strength;
-    state.brush.gravfield_size = gravfield->spec.size;
+    gravfield->spec.size = size;
     set_room_unsaved(room);
   }
 }

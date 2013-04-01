@@ -34,12 +34,13 @@
 static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
                                      double total_time) {
   assert(gravfield->kind == AZ_GRAV_TRAPEZOID);
+  if (gravfield->strength == 0.0) return;
+  const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
   const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
   const double stride = 100.0;
-  assert(gravfield->strength != 0.0);
   const double offset = fmod(0.5 * total_time * gravfield->strength, stride);
   glBegin(GL_QUADS); {
     const double xlimit =
@@ -52,10 +53,10 @@ static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
       const double y0t = front_offset + front_semiwidth;
       const double bottom_ratio = (y0b + rear_semiwidth) / (2.0 * semilength);
       const double top_ratio = (y0t - rear_semiwidth) / (2.0 * semilength);
-      glColor4f(0, 0.25, 0.5, fabs(x0a - x1) / stride); // dark bluish tint
+      glColor4f(0, 0.25, 0.5, alpha_mult * fabs(x0a - x1) / stride);
       glVertex2d(x0a, -rear_semiwidth + (x0a + semilength) * bottom_ratio);
       glVertex2d(x0a, rear_semiwidth + (x0a + semilength) * top_ratio);
-      glColor4f(0, 0, 0.5, fabs(x1a - x1) / stride); // dark blue tint
+      glColor4f(0, 0, 0.5, alpha_mult * fabs(x1a - x1) / stride);
       glVertex2d(x1a, rear_semiwidth + (x1a + semilength) * top_ratio);
       glVertex2d(x1a, -rear_semiwidth + (x1a + semilength) * bottom_ratio);
     }
@@ -65,11 +66,12 @@ static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
 static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
                                        double total_time) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_PULL);
+  if (gravfield->strength == 0.0) return;
+  const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
   const double stride = 100.0;
   const double inner_radius = gravfield->size.sector.inner_radius;
   const double outer_radius = inner_radius + gravfield->size.sector.thickness;
   const double interior_angle = az_sector_interior_angle(&gravfield->size);
-  assert(gravfield->strength != 0.0);
   const double offset = fmod(0.5 * total_time * gravfield->strength, stride);
   const double rlimit =
     (gravfield->strength < 0.0 ? outer_radius + stride : outer_radius);
@@ -77,8 +79,8 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
     const double r1 = r0 + copysign(stride, gravfield->strength);
     const double r0a = fmin(fmax(r0, inner_radius), outer_radius);
     const double r1a = fmin(fmax(r1, inner_radius), outer_radius);
-    const GLfloat alpha0 = fabs(r1 - r0a) / stride;
-    const GLfloat alpha1 = fabs(r1 - r1a) / stride;
+    const GLfloat alpha0 = alpha_mult * fabs(r1 - r0a) / stride;
+    const GLfloat alpha1 = alpha_mult * fabs(r1 - r1a) / stride;
     const int limit = ceil(interior_angle / AZ_DEG2RAD(6));
     const double step = interior_angle / limit;
     glBegin(GL_QUAD_STRIP); {
@@ -96,12 +98,13 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
 static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
                                        double total_time) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN);
+  if (gravfield->strength == 0.0) return;
+  const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
   const double inner_radius = gravfield->size.sector.inner_radius;
   const double outer_radius = inner_radius + gravfield->size.sector.thickness;
   const double interior_angle = az_sector_interior_angle(&gravfield->size);
   const double stride =
-    AZ_TWO_PI / floor(0.5 + outer_radius * AZ_TWO_PI / 200.0);
-  assert(gravfield->strength != 0.0);
+    AZ_TWO_PI / fmax(1.0, floor(0.5 + outer_radius * AZ_TWO_PI / 200.0));
   const double offset =
     fmod(total_time * gravfield->strength / outer_radius, stride);
   const double tlimit = (gravfield->strength < 0.0 ? -stride : 0.0);
@@ -115,7 +118,7 @@ static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
     glBegin(GL_QUAD_STRIP); {
       for (int i = 0; i <= limit; ++i) {
         const double t = t0a - i * step;
-        const double alpha = fabs(t - t1) / stride;
+        const double alpha = alpha_mult * fabs(t - t1) / stride;
         glColor4f(0, 0.25 * alpha, 0.5, alpha); // dark bluish tint
         glVertex2d(inner_radius * cos(t), inner_radius * sin(t));
         glVertex2d(outer_radius * cos(t), outer_radius * sin(t));

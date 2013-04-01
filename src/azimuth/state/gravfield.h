@@ -59,7 +59,7 @@ typedef struct {
   az_uid_t uid;
   az_vector_t position;
   double angle;
-  double strength; // negative to reverse direction; must be nonzero
+  double strength; // negative to reverse direction
   az_gravfield_size_t size;
 } az_gravfield_t;
 
