@@ -151,6 +151,17 @@ int az_modulo(int a, int b) {
   return ((a < 0) ^ (b < 0) ? remain + b : remain);
 }
 
+double az_signmod(double a, double b, double sign) {
+  assert(isfinite(a));
+  assert(isfinite(b));
+  assert(b != 0.0);
+  assert(!isnan(sign));
+  const double remain = fmod(a, b);
+  if (remain == 0.0) return copysign(0.0, sign);
+  else if (copysign(1.0, a) == copysign(1.0, sign)) return remain;
+  else return remain + copysign(b, sign);
+}
+
 double az_mod2pi(double theta) {
   assert(isfinite(theta));
   return theta - AZ_TWO_PI * floor((theta + AZ_PI) / AZ_TWO_PI);

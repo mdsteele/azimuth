@@ -84,7 +84,7 @@ static void recharge_ship_energy(az_player_t *player, double time) {
 static void apply_gravity_to_ship(az_space_state_t *state, double time,
                                   bool *is_in_water) {
   assert(is_in_water != NULL);
-  az_tick_gravfields(state, time, is_in_water);
+  az_apply_gravfields_to_ship(state, time, is_in_water);
   // Planetary gravity works as follows.  By the spherical shell theorem, the
   // force of gravity on the ship (while inside the planetoid) varies linearly
   // with the distance from the planetoid's center, so the change in velocity

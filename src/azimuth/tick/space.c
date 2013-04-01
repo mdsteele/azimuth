@@ -27,6 +27,7 @@
 #include "azimuth/tick/baddie.h"
 #include "azimuth/tick/camera.h"
 #include "azimuth/tick/door.h"
+#include "azimuth/tick/gravfield.h"
 #include "azimuth/tick/node.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
@@ -357,9 +358,10 @@ static void tick_countdown(az_countdown_t *countdown, double time) {
   countdown->time_remaining = fmax(0.0, countdown->time_remaining - time);
 }
 
-static void tick_pickups_walls_doors_projectiles_and_baddies(
+static void tick_most_objects(
     az_space_state_t *state, double time) {
   az_tick_pickups(state, time);
+  az_tick_gravfields(state, time);
   az_tick_walls(state, time);
   az_tick_doors(state, time);
   az_tick_projectiles(state, time);
@@ -395,13 +397,13 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   switch (state->mode) {
     case AZ_MODE_NORMAL:
       az_tick_timers(state, time);
-      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+      tick_most_objects(state, time);
       az_tick_ship(state, time);
       az_tick_nodes(state, time);
       break;
     case AZ_MODE_CONSOLE:
       tick_console_mode(state, time);
-      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+      tick_most_objects(state, time);
       az_tick_nodes(state, time);
       break;
     case AZ_MODE_DIALOG:
@@ -411,14 +413,14 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       tick_doorway_mode(state, time);
       if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
         az_tick_timers(state, time);
-        tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+        tick_most_objects(state, time);
         az_tick_ship(state, time);
         az_tick_nodes(state, time);
       }
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
-      tick_pickups_walls_doors_projectiles_and_baddies(state, time);
+      tick_most_objects(state, time);
       az_tick_nodes(state, time);
       break;
     case AZ_MODE_PAUSING:

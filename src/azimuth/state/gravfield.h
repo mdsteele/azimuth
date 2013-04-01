@@ -61,6 +61,7 @@ typedef struct {
   double angle;
   double strength; // negative to reverse direction
   az_gravfield_size_t size;
+  double age; // time * strength
 } az_gravfield_t;
 
 // Return true if the given gravfield kind is trapezoidal (i.e. it uses the

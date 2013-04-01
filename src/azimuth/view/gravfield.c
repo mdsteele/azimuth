@@ -31,8 +31,7 @@
 
 /*===========================================================================*/
 
-static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
-                                     double total_time) {
+static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind == AZ_GRAV_TRAPEZOID);
   if (gravfield->strength == 0.0) return;
   const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
@@ -41,7 +40,8 @@ static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
   const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
   const double stride = 100.0;
-  const double offset = fmod(0.5 * total_time * gravfield->strength, stride);
+  const double offset =
+    az_signmod(0.5 * gravfield->age, stride, gravfield->strength);
   glBegin(GL_QUADS); {
     const double xlimit =
       (gravfield->strength < 0.0 ? -semilength - stride : -semilength);
@@ -63,8 +63,7 @@ static void draw_trapezoid_gravfield(const az_gravfield_t *gravfield,
   } glEnd();
 }
 
-static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
-                                       double total_time) {
+static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_PULL);
   if (gravfield->strength == 0.0) return;
   const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
@@ -72,7 +71,8 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
   const double inner_radius = gravfield->size.sector.inner_radius;
   const double outer_radius = inner_radius + gravfield->size.sector.thickness;
   const double interior_angle = az_sector_interior_angle(&gravfield->size);
-  const double offset = fmod(0.5 * total_time * gravfield->strength, stride);
+  const double offset =
+    az_signmod(0.5 * gravfield->age, stride, gravfield->strength);
   const double rlimit =
     (gravfield->strength < 0.0 ? outer_radius + stride : outer_radius);
   for (double r0 = inner_radius - offset; r0 < rlimit; r0 += stride) {
@@ -95,8 +95,7 @@ static void draw_sector_pull_gravfield(const az_gravfield_t *gravfield,
   }
 }
 
-static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
-                                       double total_time) {
+static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind == AZ_GRAV_SECTOR_SPIN);
   if (gravfield->strength == 0.0) return;
   const double alpha_mult = fmin(1.0, fabs(gravfield->strength) / 200.0);
@@ -106,15 +105,16 @@ static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield,
   const double stride =
     AZ_TWO_PI / fmax(1.0, floor(0.5 + outer_radius * AZ_TWO_PI / 200.0));
   const double offset =
-    fmod(total_time * gravfield->strength / outer_radius, stride);
+    az_signmod(gravfield->age / outer_radius, stride, gravfield->strength);
   const double tlimit = (gravfield->strength < 0.0 ? -stride : 0.0);
   for (double t0 = interior_angle + offset; t0 > tlimit; t0 -= stride) {
     const double t1 = t0 - copysign(stride, gravfield->strength);
     const double t0a = fmin(fmax(t0, 0.0), interior_angle);
     const double t1a = fmin(fmax(t1, 0.0), interior_angle);
-    assert(t0a != t1a);
+    if (t0a == t1a) continue;
     const int limit = ceil(fabs(t0a - t1a) / AZ_DEG2RAD(5));
     const double step = (t0a - t1a) / limit;
+    assert(step != 0.0);
     glBegin(GL_QUAD_STRIP); {
       for (int i = 0; i <= limit; ++i) {
         const double t = t0a - i * step;
@@ -148,7 +148,7 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
 
 /*===========================================================================*/
 
-void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time) {
+void az_draw_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
   glPushMatrix(); {
     glTranslated(gravfield->position.x, gravfield->position.y, 0);
@@ -156,13 +156,13 @@ void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time) {
     switch (gravfield->kind) {
       case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
       case AZ_GRAV_TRAPEZOID:
-        draw_trapezoid_gravfield(gravfield, total_time);
+        draw_trapezoid_gravfield(gravfield);
         break;
       case AZ_GRAV_SECTOR_PULL:
-        draw_sector_pull_gravfield(gravfield, total_time);
+        draw_sector_pull_gravfield(gravfield);
         break;
       case AZ_GRAV_SECTOR_SPIN:
-        draw_sector_spin_gravfield(gravfield, total_time);
+        draw_sector_spin_gravfield(gravfield);
         break;
       case AZ_GRAV_WATER:
         draw_water_gravfield(gravfield);
@@ -175,14 +175,14 @@ void az_draw_gravfields(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
     if (gravfield->kind == AZ_GRAV_WATER) continue;
-    az_draw_gravfield(gravfield, state->ship.player.total_time);
+    az_draw_gravfield(gravfield);
   }
 }
 
 void az_draw_water(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_WATER) {
-      az_draw_gravfield(gravfield, state->ship.player.total_time);
+      az_draw_gravfield(gravfield);
     }
   }
 }

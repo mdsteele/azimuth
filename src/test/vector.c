@@ -26,17 +26,41 @@
 /*===========================================================================*/
 
 void test_modulo(void) {
-  EXPECT_TRUE(az_modulo(10, 7) == 3);
-  EXPECT_TRUE(az_modulo(-10, 7) == 4);
-  EXPECT_TRUE(az_modulo(10, -7) == -4);
-  EXPECT_TRUE(az_modulo(-10, -7) == -3);
+  EXPECT_INT_EQ(3, az_modulo(10, 7));
+  EXPECT_INT_EQ(4, az_modulo(-10, 7));
+  EXPECT_INT_EQ(-4, az_modulo(10, -7));
+  EXPECT_INT_EQ(-3, az_modulo(-10, -7));
 
-  EXPECT_TRUE(az_modulo(0, 7) == 0);
-  EXPECT_TRUE(az_modulo(0, -7) == 0);
-  EXPECT_TRUE(az_modulo(14, 7) == 0);
-  EXPECT_TRUE(az_modulo(14, -7) == 0);
-  EXPECT_TRUE(az_modulo(-14, 7) == 0);
-  EXPECT_TRUE(az_modulo(-14, -7) == 0);
+  EXPECT_INT_EQ(0, az_modulo(0, 7));
+  EXPECT_INT_EQ(0, az_modulo(0, -7));
+  EXPECT_INT_EQ(0, az_modulo(14, 7));
+  EXPECT_INT_EQ(0, az_modulo(14, -7));
+  EXPECT_INT_EQ(0, az_modulo(-14, 7));
+  EXPECT_INT_EQ(0, az_modulo(-14, -7));
+}
+
+void test_signmod(void) {
+  EXPECT_APPROX( 3.0, az_signmod( 10.0,  7.0,  1.0));
+  EXPECT_APPROX(-4.0, az_signmod( 10.0,  7.0, -1.0));
+  EXPECT_APPROX( 4.0, az_signmod(-10.0,  7.0,  1.0));
+  EXPECT_APPROX(-3.0, az_signmod(-10.0,  7.0, -1.0));
+  EXPECT_APPROX( 3.0, az_signmod( 10.0, -7.0,  1.0));
+  EXPECT_APPROX(-4.0, az_signmod( 10.0, -7.0, -1.0));
+  EXPECT_APPROX( 4.0, az_signmod(-10.0, -7.0,  1.0));
+  EXPECT_APPROX(-3.0, az_signmod(-10.0, -7.0, -1.0));
+
+  EXPECT_APPROX(0.0, az_signmod(  0.0,  7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod(  0.0,  7.0, -1.0));
+  EXPECT_APPROX(0.0, az_signmod(  0.0, -7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod(  0.0, -7.0, -1.0));
+  EXPECT_APPROX(0.0, az_signmod( 14.0,  7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod( 14.0,  7.0, -1.0));
+  EXPECT_APPROX(0.0, az_signmod( 14.0, -7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod( 14.0, -7.0, -1.0));
+  EXPECT_APPROX(0.0, az_signmod(-14.0,  7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod(-14.0,  7.0, -1.0));
+  EXPECT_APPROX(0.0, az_signmod(-14.0, -7.0,  1.0));
+  EXPECT_APPROX(0.0, az_signmod(-14.0, -7.0, -1.0));
 }
 
 void test_mod2pi(void) {

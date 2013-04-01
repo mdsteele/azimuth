@@ -109,6 +109,12 @@ bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist);
 // function uses the sign of the divisor (i.e. it is a modulo operation).
 int az_modulo(int a, int b);
 
+// Compute a mod b, with the result having the same sign as the sign argument.
+// This contrasts to fmod(a, b), which uses the sign of a, and az_modulo, which
+// uses the sign of b (and operates on ints rather than doubles).  The b
+// argument must be nonzero.
+double az_signmod(double a, double b, double sign);
+
 // Add or subtract a multiple of 2pi from the given number so that the result
 // is between -pi and pi.
 double az_mod2pi(double theta);

@@ -27,9 +27,7 @@
 /*===========================================================================*/
 
 // Draw a single gravfield.  The GL matrix should be at the camera position.
-// The total_time argument should be state.ship.player.total_time, or some
-// equivalent.
-void az_draw_gravfield(const az_gravfield_t *gravfield, double total_time);
+void az_draw_gravfield(const az_gravfield_t *gravfield);
 
 // Draw all non-water gravfields.  The GL matrix should be at the camera
 // position.

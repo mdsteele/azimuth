@@ -275,9 +275,10 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .position = editor_gravfield->spec.position,
       .angle = editor_gravfield->spec.angle,
       .strength = editor_gravfield->spec.strength,
-      .size = editor_gravfield->spec.size
+      .size = editor_gravfield->spec.size,
+      .age = state->total_time * editor_gravfield->spec.strength
     };
-    az_draw_gravfield(&real_gravfield, state->total_time);
+    az_draw_gravfield(&real_gravfield);
     if (real_gravfield.strength == 0.0) {
       glColor3f(1, 0, 1);
       draw_gravfield_border(&editor_gravfield->spec);
@@ -345,9 +346,10 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .position = editor_gravfield->spec.position,
       .angle = editor_gravfield->spec.angle,
       .strength = editor_gravfield->spec.strength,
-      .size = editor_gravfield->spec.size
+      .size = editor_gravfield->spec.size,
+      .age = state->total_time * editor_gravfield->spec.strength
     };
-    az_draw_gravfield(&real_gravfield, state->total_time);
+    az_draw_gravfield(&real_gravfield);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||

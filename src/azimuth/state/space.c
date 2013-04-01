@@ -183,6 +183,7 @@ bool az_insert_gravfield(az_space_state_t *state,
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) {
       az_assign_uid(gravfield - state->gravfields, &gravfield->uid);
+      gravfield->age = 0.0;
       *gravfield_out = gravfield;
       return true;
     }

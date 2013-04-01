@@ -68,8 +68,15 @@ static void apply_gravfield_to_ship(
   }
 }
 
-void az_tick_gravfields(az_space_state_t *state, double time,
-                        bool *ship_is_in_water) {
+void az_tick_gravfields(az_space_state_t *state, double time) {
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (gravfield->kind == AZ_GRAV_NOTHING) continue;
+    gravfield->age += time * gravfield->strength;
+  }
+}
+
+void az_apply_gravfields_to_ship(az_space_state_t *state, double time,
+                                 bool *ship_is_in_water) {
   assert(ship_is_in_water != NULL);
   *ship_is_in_water = false;
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
