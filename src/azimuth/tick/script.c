@@ -222,6 +222,20 @@ static void lookup_object(az_space_state_t *state, az_uuid_t uuid,
 
 /*===========================================================================*/
 
+#define UNARY_OP(expr) do { \
+    double a; \
+    STACK_POP(&a); \
+    STACK_PUSH(expr); \
+  } while (0)
+
+#define BINARY_OP(expr) do { \
+    double a, b; \
+    STACK_POP(&a, &b); \
+    STACK_PUSH(expr); \
+  } while (0)
+
+/*===========================================================================*/
+
 void az_run_script(az_space_state_t *state, const az_script_t *script) {
   if (script == NULL || script->num_instructions == 0) return;
   az_script_vm_t vm = { .script = script };
@@ -265,41 +279,29 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         break;
       // Arithmetic:
-      case AZ_OP_ADD:
-        {
-          double a, b;
-          STACK_POP(&a, &b);
-          STACK_PUSH(a + b);
-        }
-        break;
-      case AZ_OP_ADDI:
-        {
-          double a;
-          STACK_POP(&a);
-          STACK_PUSH(a + ins.immediate);
-        }
-        break;
-      case AZ_OP_SUB:
-        {
-          double a, b;
-          STACK_POP(&a, &b);
-          STACK_PUSH(a - b);
-        }
-        break;
-      case AZ_OP_SUBI:
-        {
-          double a;
-          STACK_POP(&a);
-          STACK_PUSH(a - ins.immediate);
-        }
-        break;
-      case AZ_OP_ISUB:
-        {
-          double a;
-          STACK_POP(&a);
-          STACK_PUSH(ins.immediate - a);
-        }
-        break;
+      case AZ_OP_ADD: BINARY_OP(a + b); break;
+      case AZ_OP_ADDI: UNARY_OP(a + ins.immediate); break;
+      case AZ_OP_SUB: BINARY_OP(a - b); break;
+      case AZ_OP_SUBI: UNARY_OP(a - ins.immediate); break;
+      case AZ_OP_ISUB: UNARY_OP(ins.immediate - a); break;
+      case AZ_OP_MUL: BINARY_OP(a * b); break;
+      case AZ_OP_MULI: UNARY_OP(a * ins.immediate); break;
+      case AZ_OP_DIV: BINARY_OP(a / b); break;
+      case AZ_OP_DIVI: UNARY_OP(a / ins.immediate); break;
+      case AZ_OP_IDIV: UNARY_OP(ins.immediate / a); break;
+      // Comparisons:
+      case AZ_OP_EQ: BINARY_OP(a == b ? 1.0 : 0.0); break;
+      case AZ_OP_EQI: UNARY_OP(a == ins.immediate ? 1.0 : 0.0); break;
+      case AZ_OP_NE: BINARY_OP(a != b ? 1.0 : 0.0); break;
+      case AZ_OP_NEI: UNARY_OP(a != ins.immediate ? 1.0 : 0.0); break;
+      case AZ_OP_LT: BINARY_OP(a < b ? 1.0 : 0.0); break;
+      case AZ_OP_LTI: UNARY_OP(a < ins.immediate ? 1.0 : 0.0); break;
+      case AZ_OP_GT: BINARY_OP(a > b ? 1.0 : 0.0); break;
+      case AZ_OP_GTI: UNARY_OP(a > ins.immediate ? 1.0 : 0.0); break;
+      case AZ_OP_LE: BINARY_OP(a <= b ? 1.0 : 0.0); break;
+      case AZ_OP_LEI: UNARY_OP(a <= ins.immediate ? 1.0 : 0.0); break;
+      case AZ_OP_GE: BINARY_OP(a >= b ? 1.0 : 0.0); break;
+      case AZ_OP_GEI: UNARY_OP(a >= ins.immediate ? 1.0 : 0.0); break;
       // Branches:
       case AZ_OP_BEQZ:
         {

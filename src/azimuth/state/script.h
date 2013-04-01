@@ -38,6 +38,24 @@ typedef enum {
   AZ_OP_SUB, // pop top two, push (a - b)
   AZ_OP_SUBI, // pop top, push a - i
   AZ_OP_ISUB, // pop top, push i - a
+  AZ_OP_MUL, // pop top two, push (a * b)
+  AZ_OP_MULI, // pop top, push a * i
+  AZ_OP_DIV, // pop top two, push (a / b)
+  AZ_OP_DIVI, // pop top, push a / i
+  AZ_OP_IDIV, // pop top, push i / a
+  // Comparisons:
+  AZ_OP_EQ, // pop top two, push (a == b ? 1 : 0)
+  AZ_OP_EQI, // pop top, push (a == i ? 1 : 0)
+  AZ_OP_NE, // pop top two, push (a != b ? 1 : 0)
+  AZ_OP_NEI, // pop top, push (a != i ? 1 : 0)
+  AZ_OP_LT, // pop top two, push (a < b ? 1 : 0)
+  AZ_OP_LTI, // pop top, push (a < i ? 1 : 0)
+  AZ_OP_GT, // pop top two, push (a > b ? 1 : 0)
+  AZ_OP_GTI, // pop top, push (a > i ? 1 : 0)
+  AZ_OP_LE, // pop top two, push (a <= b ? 1 : 0)
+  AZ_OP_LEI, // pop top, push (a <= i ? 1 : 0)
+  AZ_OP_GE, // pop top two, push (a >= b ? 1 : 0)
+  AZ_OP_GEI, // pop top, push (a >= i ? 1 : 0)
   // Branches:
   AZ_OP_BEQZ, // pop top, add i to PC if it is zero
   AZ_OP_BNEZ, // pop top, add i to PC if it is not zero

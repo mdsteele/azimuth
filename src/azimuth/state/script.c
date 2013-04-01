@@ -40,6 +40,23 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SUB:    return "sub";
     case AZ_OP_SUBI:   return "subi";
     case AZ_OP_ISUB:   return "isub";
+    case AZ_OP_MUL:    return "mul";
+    case AZ_OP_MULI:   return "muli";
+    case AZ_OP_DIV:    return "div";
+    case AZ_OP_DIVI:   return "divi";
+    case AZ_OP_IDIV:   return "idiv";
+    case AZ_OP_EQ:     return "eq";
+    case AZ_OP_EQI:    return "eqi";
+    case AZ_OP_NE:     return "ne";
+    case AZ_OP_NEI:    return "nei";
+    case AZ_OP_LT:     return "lt";
+    case AZ_OP_LTI:    return "lti";
+    case AZ_OP_GT:     return "gt";
+    case AZ_OP_GTI:    return "gti";
+    case AZ_OP_LE:     return "le";
+    case AZ_OP_LEI:    return "lei";
+    case AZ_OP_GE:     return "ge";
+    case AZ_OP_GEI:    return "gei";
     case AZ_OP_BEQZ:   return "beqz";
     case AZ_OP_BNEZ:   return "bnez";
     case AZ_OP_JUMP:   return "jump";
@@ -97,6 +114,14 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_NOP:
     case AZ_OP_ADD:
     case AZ_OP_SUB:
+    case AZ_OP_MUL:
+    case AZ_OP_DIV:
+    case AZ_OP_EQ:
+    case AZ_OP_NE:
+    case AZ_OP_LT:
+    case AZ_OP_GT:
+    case AZ_OP_LE:
+    case AZ_OP_GE:
     case AZ_OP_BAD:
     case AZ_OP_SPLAT:
     case AZ_OP_GCAM:
@@ -113,6 +138,15 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_ADDI:
     case AZ_OP_SUBI:
     case AZ_OP_ISUB:
+    case AZ_OP_MULI:
+    case AZ_OP_DIVI:
+    case AZ_OP_IDIV:
+    case AZ_OP_EQI:
+    case AZ_OP_NEI:
+    case AZ_OP_LTI:
+    case AZ_OP_GTI:
+    case AZ_OP_LEI:
+    case AZ_OP_GEI:
     case AZ_OP_BEQZ:
     case AZ_OP_BNEZ:
     case AZ_OP_JUMP:

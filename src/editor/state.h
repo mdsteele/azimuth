@@ -118,7 +118,7 @@ typedef struct {
     az_editor_text_action_t action; // if AZ_ETA_NOTHING, text box inactive
     int cursor;
     int length;
-    char buffer[100];
+    char buffer[1000];
   } text;
   az_editor_tool_t tool;
   struct {
