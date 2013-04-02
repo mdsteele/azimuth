@@ -56,10 +56,12 @@ az_vector_t az_vneg(az_vector_t v) {
 }
 
 az_vector_t az_vmul(az_vector_t v, double f) {
+  assert(isfinite(f));
   return (az_vector_t){.x = v.x * f, .y = v.y * f};
 }
 
 az_vector_t az_vdiv(az_vector_t v, double f) {
+  assert(isfinite(f));
   assert(f != 0.0);
   return (az_vector_t){.x = v.x / f, .y = v.y / f};
 }
@@ -76,7 +78,7 @@ az_vector_t az_vproj(az_vector_t v1, az_vector_t v2) {
   assert(vfinite(v1));
   assert(vfinite(v2));
   const double sqnorm = az_vdot(v2, v2);
-  assert(sqnorm > 0.0);
+  if (sqnorm == 0.0) return AZ_VZERO;
   return az_vmul(v2, az_vdot(v1, v2) / sqnorm);
 }
 

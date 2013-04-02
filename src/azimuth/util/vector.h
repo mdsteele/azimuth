@@ -67,11 +67,9 @@ double az_vdot(az_vector_t v1, az_vector_t v2);
 // Compute the magnitude of the cross product of the two vectors.
 double az_vcross(az_vector_t v1, az_vector_t v2);
 
-// Project the first vector onto the second.  The second vector must be
-// nonzero.
+// Project the first vector onto the second.
 az_vector_t az_vproj(az_vector_t v1, az_vector_t v2);
-// Flatten the first vector with respect to the second.  The second vector must
-// be nonzero.
+// Flatten the first vector with respect to the second.
 az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2);
 
 // Rotate a vector counterclockwise by the given angle.

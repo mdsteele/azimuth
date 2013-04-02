@@ -232,6 +232,58 @@ static void fly_towards_ship(
   baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
 }
 
+static bool perch_on_ceiling(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  const double turn_rate = 4.0;
+  const double max_speed = 500.0;
+  const double accel = 200.0;
+  const double lateral_decel_rate = 250.0;
+  // Pick a ceiling to perch on.
+  const double baddie_norm = az_vnorm(baddie->position);
+  const double baddie_theta = az_vtheta(baddie->position);
+  az_vector_t goal = AZ_VZERO;
+  double best_dist = INFINITY;
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    if (az_vnorm(wall->position) < baddie_norm) continue;
+    const double dist = az_vdist(wall->position, baddie->position) +
+      50000.0 * fabs(az_mod2pi(az_vtheta(wall->position) - baddie_theta));
+    if (dist < best_dist) {
+      goal = wall->position;
+      best_dist = dist;
+    }
+  }
+  // Turn towards that wall.
+  const double goal_theta = az_vtheta(az_vsub(goal, baddie->position));
+  baddie->angle =
+    az_angle_towards(baddie->angle, turn_rate * time, goal_theta);
+  // If we kept going straight, what's the distance until we hit a wall?
+  az_impact_t impact;
+  az_circle_impact(state, baddie->data->main_body.bounding_radius,
+                   baddie->position, az_vsub(goal, baddie->position),
+                   (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+  const double dist = az_vdist(baddie->position, impact.position);
+  // If we're there, stop.
+  if (dist <= 2.0) {
+    baddie->velocity = AZ_VZERO;
+    baddie->angle = az_vtheta(impact.normal);
+    return true;
+  }
+  // Otherwise, steady ourselves sideways, and accel/decel to an appropriate
+  // speed depending on how far we are from the perch.
+  const az_vector_t unit = az_vpolar(1, baddie->angle);
+  const az_vector_t lateral = az_vflatten(baddie->velocity, unit);
+  const double forward_speed = az_vdot(baddie->velocity, unit);
+  const double desired_speed = 0.8 * dist + 90.0;
+  const az_vector_t dvel =
+    az_vadd(az_vcaplen(az_vneg(lateral), lateral_decel_rate * time),
+            (forward_speed < desired_speed ?
+             az_vmul(unit, accel * time) :
+             az_vmul(unit, -accel * time)));
+  baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
+  return false;
+}
+
 static void crawl_around(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     bool rightwards, double turn_rate, double max_speed, double accel) {
@@ -504,6 +556,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
         baddie->cooldown = 2.0;
       }
+      break;
+    case AZ_BAD_BOX:
+    case AZ_BAD_ARMORED_BOX:
+      // Do nothing.
       break;
     case AZ_BAD_CLAM:
       {
@@ -801,9 +857,33 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                                        210.0) ? AZ_DEG2RAD(90) : 0));
       }
       break;
-    case AZ_BAD_BOX:
-    case AZ_BAD_ARMORED_BOX:
-      // Do nothing.
+    case AZ_BAD_SWOOPER:
+      // State 0: Perch on the nearest wall, then go to state 1.
+      if (baddie->state == 0) {
+        if (perch_on_ceiling(state, baddie, time)) {
+          baddie->cooldown = 2.0;
+          baddie->state = 1;
+        }
+      }
+      // State 1: Sit and wait until the ship is nearby, then go to state 2.
+      else if (baddie->state == 1) {
+        if (baddie->cooldown <= 0.0 && az_ship_is_present(&state->ship) &&
+            az_vwithin(state->ship.position, baddie->position, 250.0) &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          baddie->param = 3.5;
+          baddie->state = 2;
+        }
+      }
+      // State 2: Chase the ship for up to a few seconds, then go to state 0.
+      else {
+        assert(baddie->state == 2);
+        if (az_ship_is_present(&state->ship)) {
+          fly_towards_ship(state, baddie, time,
+                           5.0, 500.0, 300.0, 250.0, 0.0, 100.0);
+          baddie->param = fmax(0.0, baddie->param - time);
+        } else baddie->param = 0.0;
+        if (baddie->param <= 0.0) baddie->state = 0;
+      }
       break;
   }
 }
