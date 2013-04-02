@@ -56,6 +56,7 @@ typedef struct {
 
 typedef struct {
   az_gravfield_kind_t kind;
+  az_script_t *on_enter; // owned; NULL if no script
   az_vector_t position;
   double angle;
   double strength;

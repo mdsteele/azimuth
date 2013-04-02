@@ -131,6 +131,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     for (int i = 0; i < room->num_gravfields; ++i) {
       az_editor_gravfield_t *gravfield = AZ_LIST_ADD(eroom->gravfields);
       gravfield->spec = room->gravfields[i];
+      gravfield->spec.on_enter = clone_script(gravfield->spec.on_enter);
     }
     // Convert nodes:
     AZ_LIST_INIT(eroom->nodes, room->num_nodes);
@@ -223,6 +224,8 @@ bool az_save_editor_state(az_editor_state_t *state) {
     room->gravfields = AZ_ALLOC(room->num_gravfields, az_gravfield_spec_t);
     for (int i = 0; i < room->num_gravfields; ++i) {
       room->gravfields[i] = AZ_LIST_GET(eroom->gravfields, i)->spec;
+      room->gravfields[i].on_enter =
+        clone_script(room->gravfields[i].on_enter);
     }
     // Convert nodes:
     room->num_nodes = AZ_LIST_SIZE(eroom->nodes);

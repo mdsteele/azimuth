@@ -832,6 +832,9 @@ static void begin_edit_script(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) script = door->spec.on_open;
   }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (gravfield->selected) script = gravfield->spec.on_enter;
+  }
   AZ_LIST_LOOP(node, room->nodes) {
     if (node->selected) script = node->spec.on_use;
   }
@@ -864,6 +867,9 @@ static void try_edit_script(void) {
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) dest = &door->spec.on_open;
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (gravfield->selected) dest = &gravfield->spec.on_enter;
   }
   AZ_LIST_LOOP(node, room->nodes) {
     if (node->selected) dest = &node->spec.on_use;

@@ -83,6 +83,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     if (az_insert_gravfield(state, &gravfield)) {
       const az_gravfield_spec_t *spec = &room->gravfields[i];
       gravfield->kind = spec->kind;
+      gravfield->on_enter = spec->on_enter;
       gravfield->position = spec->position;
       gravfield->angle = spec->angle;
       gravfield->strength = spec->strength;
@@ -184,6 +185,7 @@ bool az_insert_gravfield(az_space_state_t *state,
     if (gravfield->kind == AZ_GRAV_NOTHING) {
       az_assign_uid(gravfield - state->gravfields, &gravfield->uid);
       gravfield->age = 0.0;
+      gravfield->script_fired = false;
       *gravfield_out = gravfield;
       return true;
     }

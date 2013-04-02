@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 
+#include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
@@ -57,11 +58,13 @@ typedef union {
 typedef struct {
   az_gravfield_kind_t kind; // if AZ_GRAV_NOTHING, this gravfield isn't present
   az_uid_t uid;
+  const az_script_t *on_enter; // not owned; NULL if no script
   az_vector_t position;
   double angle;
   double strength; // negative to reverse direction
   az_gravfield_size_t size;
   double age; // time * strength
+  bool script_fired; // true if on_enter script has already run
 } az_gravfield_t;
 
 // Return true if the given gravfield kind is trapezoidal (i.e. it uses the

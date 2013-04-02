@@ -189,8 +189,8 @@ static void parse_gravfield_directive(az_load_room_t *loader) {
   }
   READ(" u%d\n", &uuid_slot);
   gravfield->uuid_slot = uuid_slot;
+  gravfield->on_enter = maybe_parse_script(loader, 'e');
   ++loader->room->num_gravfields;
-  if (scan_to_script(loader)) FAIL();
 }
 
 static void parse_node_directive(az_load_room_t *loader) {
@@ -363,6 +363,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
             gravfield->size.sector.thickness);
     }
     WRITE(" u%d\n", gravfield->uuid_slot);
+    WRITE_SCRIPT('e', gravfield->on_enter);
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];

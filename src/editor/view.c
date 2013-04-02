@@ -283,6 +283,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       glColor3f(1, 0, 1);
       draw_gravfield_border(&editor_gravfield->spec);
     }
+    draw_script_and_uuid_slot(
+        state, real_gravfield.position, editor_gravfield->spec.on_enter,
+        editor_gravfield->spec.uuid_slot);
   }
   AZ_LIST_LOOP(editor_wall, room->walls) {
     const az_wall_t real_wall = {
@@ -350,6 +353,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .age = state->total_time * editor_gravfield->spec.strength
     };
     az_draw_gravfield(&real_gravfield);
+    draw_script_and_uuid_slot(
+        state, real_gravfield.position, editor_gravfield->spec.on_enter,
+        editor_gravfield->spec.uuid_slot);
   }
   AZ_LIST_LOOP(editor_node, room->nodes) {
     if (editor_node->spec.kind == AZ_NODE_DOODAD_FG ||

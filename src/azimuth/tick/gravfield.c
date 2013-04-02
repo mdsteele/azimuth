@@ -24,6 +24,7 @@
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
@@ -72,6 +73,11 @@ void az_tick_gravfields(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
     gravfield->age += time * gravfield->strength;
+    if (!gravfield->script_fired && gravfield->on_enter != NULL &&
+        az_point_within_gravfield(gravfield, state->ship.position)) {
+      gravfield->script_fired = true;
+      az_run_script(state, gravfield->on_enter);
+    }
   }
 }
 
