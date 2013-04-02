@@ -107,7 +107,7 @@ void az_draw_ship(az_space_state_t* state) {
         az_clock_mod(4, 1, state->clock) != 0) {
       // Exhaust:
       if (ship->thrusters != AZ_THRUST_NONE) {
-        double zig = az_clock_zigzag(10, 1, state->clock);
+        const double zig = az_clock_zigzag(10, 1, state->clock);
         // For forward thrusters:
         if (ship->thrusters == AZ_THRUST_FORWARD) {
           // From port engine:
