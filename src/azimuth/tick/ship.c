@@ -1085,7 +1085,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
       if (node->kind == AZ_NODE_TRACTOR) {
-        const double dist = az_vnorm(az_vsub(node->position, ship->position));
+        const double dist = az_vdist(node->position, ship->position);
         if (dist <= best_distance) {
           tractor_node = node;
           best_distance = dist;

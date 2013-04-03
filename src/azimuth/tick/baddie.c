@@ -246,8 +246,9 @@ static bool perch_on_ceiling(
   AZ_ARRAY_LOOP(wall, state->walls) {
     if (wall->kind == AZ_WALL_NOTHING) continue;
     if (az_vnorm(wall->position) < baddie_norm) continue;
-    const double dist = az_vdist(wall->position, baddie->position) +
-      50000.0 * fabs(az_mod2pi(az_vtheta(wall->position) - baddie_theta));
+    const az_vector_t delta = az_vsub(wall->position, baddie->position);
+    const double dist = az_vnorm(delta) +
+      150.0 * fabs(az_mod2pi(az_vtheta(delta) - baddie_theta));
     if (dist < best_dist) {
       goal = wall->position;
       best_dist = dist;
@@ -726,8 +727,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           particle->velocity = AZ_VZERO;
           particle->angle = baddie->angle;
           particle->lifetime = 0.0;
-          particle->param1 =
-            az_vnorm(az_vsub(impact.position, particle->position));
+          particle->param1 = az_vdist(impact.position, particle->position);
           particle->param2 = 6 + az_clock_zigzag(6, 1, state->clock);
           for (int i = 0; i < 5; ++i) {
             az_add_speck(state, particle->color, 1.0, impact.position,
@@ -887,6 +887,55 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_ICE_CRAWLER:
       crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
+      break;
+    case AZ_BAD_BEAM_TURRET:
+      // Aim gun:
+      baddie->components[0].angle =
+        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(30) * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
+      // If we can see the ship, turn on the beam:
+      if (angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(20)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        baddie->cooldown = 0.5;
+      }
+      // If beam is still turned on, fire:
+      if (baddie->cooldown > 0.0) {
+        // Fire a beam.
+        const double beam_damage = 20.0 * time;
+        const double beam_theta = baddie->angle + baddie->components[0].angle;
+        const az_vector_t beam_start =
+          az_vadd(baddie->position, az_vpolar(30, beam_theta));
+        az_impact_t impact;
+        az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
+                      AZ_IMPF_NOTHING, baddie->uid, &impact);
+        if (impact.type == AZ_IMP_BADDIE) {
+          az_try_damage_baddie(state, impact.target.baddie.baddie,
+              impact.target.baddie.component, AZ_DMGF_BEAM, beam_damage);
+        } else if (impact.type == AZ_IMP_SHIP) {
+          az_damage_ship(state, beam_damage, false);
+        }
+        // Add particles for the beam.
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_BEAM;
+          const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+          particle->color = (az_color_t){alt/2, 255, alt, 192};
+          particle->position = beam_start;
+          particle->velocity = AZ_VZERO;
+          particle->angle = beam_theta;
+          particle->lifetime = 0.0;
+          particle->param1 = az_vdist(impact.position, particle->position);
+          particle->param2 = 2.0 + 0.5 * az_clock_zigzag(8, 1, state->clock);
+          az_add_speck(state, particle->color, 1.0, impact.position,
+                       az_vpolar(az_random(20.0, 70.0),
+                                 az_vtheta(impact.normal) +
+                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+        }
+        az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
+      }
       break;
   }
 }

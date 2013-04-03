@@ -207,6 +207,7 @@ typedef enum {
 } az_impact_type_t;
 
 typedef uint_fast8_t az_impact_flags_t;
+#define AZ_IMPF_NOTHING      ((az_impact_flags_t)0)
 #define AZ_IMPF_BADDIE       ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
 #define AZ_IMPF_DOOR_INSIDE  ((az_impact_flags_t)(1u << AZ_IMP_DOOR_INSIDE))
 #define AZ_IMPF_DOOR_OUTSIDE ((az_impact_flags_t)(1u << AZ_IMP_DOOR_OUTSIDE))

@@ -51,6 +51,10 @@ void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
 static void persist_sound_internal(
     az_soundboard_t *soundboard, az_sound_key_t sound, bool loop) {
   if (soundboard->num_persists < AZ_ARRAY_SIZE(soundboard->persists)) {
+    // Don't persist the same sound more than once in the same frame.
+    for (int i = 0; i < soundboard->num_persists; ++i) {
+      if (soundboard->persists[i].sound == sound) return;
+    }
     soundboard->persists[soundboard->num_persists].sound = sound;
     soundboard->persists[soundboard->num_persists].loop = loop;
     ++soundboard->num_persists;

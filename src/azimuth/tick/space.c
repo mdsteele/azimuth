@@ -221,8 +221,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
         AZ_ARRAY_LOOP(door, state->doors) {
           if (door->kind == AZ_DOOR_NOTHING) continue;
           if (door->destination != origin_key) continue;
-          const double dist =
-            az_vnorm(az_vsub(door->position, entrance_position));
+          const double dist = az_vdist(door->position, entrance_position);
           if (dist < best_dist) {
             best_dist = dist;
             exit = door;
