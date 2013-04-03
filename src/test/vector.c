@@ -87,7 +87,7 @@ void test_mod2pi(void) {
   }
 }
 
-void test_vector_polar(void) {
+void test_vpolar(void) {
   const double m = 2342.2908;
   const double t = 4.3901;
   const az_vector_t v = az_vpolar(m, t);
@@ -95,7 +95,21 @@ void test_vector_polar(void) {
   EXPECT_APPROX(az_mod2pi(t), az_vtheta(v));
 }
 
-void test_vector_rotate(void) {
+void test_vproj(void) {
+  for (int i = 0; i < 1000; ++i) {
+    const az_vector_t vec = {az_random(-1.5, 1.5), az_random(-1.5, 1.5)};
+    EXPECT_VAPPROX(AZ_VZERO, az_vproj(AZ_VZERO, vec));
+    EXPECT_VAPPROX(AZ_VZERO, az_vflatten(AZ_VZERO, vec));
+    EXPECT_VAPPROX(AZ_VZERO, az_vproj(vec, AZ_VZERO));
+    EXPECT_VAPPROX(vec, az_vflatten(vec, AZ_VZERO));
+    const az_vector_t vec2 = {az_random(-1.5, 1.5), az_random(-1.5, 1.5)};
+    EXPECT_APPROX(0, az_vcross(az_vproj(vec, vec2), vec2));
+    EXPECT_APPROX(0, az_vdot(az_vflatten(vec, vec2), vec2));
+    RETURN_IF_FAILED();
+  }
+}
+
+void test_vrotate(void) {
   EXPECT_VAPPROX(AZ_VZERO, az_vrotate(AZ_VZERO, 47.3));
   EXPECT_VAPPROX(((az_vector_t){-1, 1}),
                  az_vrotate((az_vector_t){1, 1}, AZ_HALF_PI));

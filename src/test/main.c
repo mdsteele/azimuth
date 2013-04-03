@@ -75,8 +75,9 @@ int main(int argc, char **argv) {
   RUN_TEST(test_text_scan2);
   RUN_TEST(test_uids);
   RUN_TEST(test_vcaplen);
-  RUN_TEST(test_vector_polar);
-  RUN_TEST(test_vector_rotate);
+  RUN_TEST(test_vpolar);
+  RUN_TEST(test_vproj);
+  RUN_TEST(test_vrotate);
   RUN_TEST(test_vunit);
   RUN_TEST(test_vwithlen);
   RUN_TEST(test_zero_array);

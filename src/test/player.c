@@ -30,20 +30,20 @@ void test_player_give_upgrade(void) {
   az_give_upgrade(&player, AZ_UPG_SHIELD_BATTERY_10);
   EXPECT_FALSE(az_has_upgrade(&player, AZ_UPG_GUN_HOMING));
   EXPECT_TRUE(az_has_upgrade(&player, AZ_UPG_SHIELD_BATTERY_10));
-  EXPECT_TRUE(player.max_shields == 125);
+  EXPECT_INT_EQ(125, player.max_shields);
 
   az_give_upgrade(&player, AZ_UPG_SHIELD_BATTERY_10);
   EXPECT_FALSE(az_has_upgrade(&player, AZ_UPG_GUN_HOMING));
   EXPECT_TRUE(az_has_upgrade(&player, AZ_UPG_SHIELD_BATTERY_10));
-  EXPECT_TRUE(player.max_shields == 125);
+  EXPECT_INT_EQ(125, player.max_shields);
 
   az_give_upgrade(&player, AZ_UPG_GUN_HOMING);
   EXPECT_TRUE(az_has_upgrade(&player, AZ_UPG_GUN_HOMING));
   EXPECT_TRUE(az_has_upgrade(&player, AZ_UPG_SHIELD_BATTERY_10));
-  EXPECT_TRUE(player.max_shields == 125);
+  EXPECT_INT_EQ(125, player.max_shields);
 
   az_give_upgrade(&player, AZ_UPG_SHIELD_BATTERY_04);
-  EXPECT_TRUE(player.max_shields == 150);
+  EXPECT_INT_EQ(150, player.max_shields);
 }
 
 void test_player_set_room_visited(void) {

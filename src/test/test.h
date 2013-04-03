@@ -70,6 +70,11 @@
     if (!_expect_approx(expected, actual, #expected " == " #actual)) return; \
   } while (false)
 
+// If the current test has already failed, return immediately.
+#define RETURN_IF_FAILED() do { \
+    if (_current_test_failed) return; \
+  } while (false)
+
 int final_test_summary(void);
 
 /*===========================================================================*/

@@ -40,6 +40,7 @@ void _az_fatal(const char *funcname, const char *format, ...) {
 }
 
 void *_az_alloc(const char *funcname, size_t n, size_t size) {
+  if (n == 0) return NULL;
   void *ptr = calloc(n, size);
   if (ptr == NULL) {
     _az_fatal(funcname, "Out of memory.\n");

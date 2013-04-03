@@ -46,9 +46,19 @@ void test_zero_array(void) {
   for (int i = 0; i < AZ_ARRAY_SIZE(b); ++i) {
     EXPECT_INT_EQ(0, b[i]);
   }
+  // Test that zeroing an array of pointers produces NULLs on this system:
+  int *pointers[] = {&a, &c};
+  EXPECT_TRUE(pointers[0] != NULL);
+  EXPECT_TRUE(pointers[1] != NULL);
+  AZ_ZERO_ARRAY(pointers);
+  EXPECT_TRUE(pointers[0] == NULL);
+  EXPECT_TRUE(pointers[1] == NULL);
 }
 
 void test_alloc(void) {
+  // Test that we return NULL for zero-sized allocations.
+  EXPECT_TRUE(AZ_ALLOC(0, char) == NULL);
+
   // Try a small allocation.  The memory should be zeroed.
   const int length1 = 17;
   double *array1 = AZ_ALLOC(length1, double);
@@ -69,6 +79,5 @@ void test_alloc(void) {
 // Test out some static assertions:
 AZ_STATIC_ASSERT(1 + 2 == 3);
 AZ_STATIC_ASSERT(sizeof(char) == 1);
-AZ_STATIC_ASSERT((intptr_t)NULL == 0);
 
 /*===========================================================================*/
