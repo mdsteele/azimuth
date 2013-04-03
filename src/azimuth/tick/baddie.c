@@ -885,6 +885,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (baddie->param <= 0.0) baddie->state = 0;
       }
       break;
+    case AZ_BAD_ICE_CRAWLER:
+      crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
+      break;
   }
 }
 

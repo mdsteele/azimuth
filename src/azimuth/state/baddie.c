@@ -185,6 +185,19 @@ static const az_vector_t swooper_vertices[] = {
   {-10, -8}, {0, -12}, {7, -3}, {8, 0}
 };
 
+static const az_vector_t ice_crawler_body_vertices[] = {
+  {8, 0}, {-2, 15}, {-16, 10}, {-18, 0}, {-16, -10}, {-2, -15}
+};
+static const az_vector_t ice_crawler_shell_vertices[] = {
+  {17, -4}, {11, 2}, {14, 12}, {6, 14}, {5, 17}, {-5, 18},
+  {-14, 12}, {-16, 0}, {-13, -13}, {-2, -18}, {9, -16}, {10, -9}
+};
+static az_component_data_t ice_crawler_components[] = {
+  { .polygon = AZ_INIT_POLYGON(ice_crawler_shell_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE),
+    .impact_damage = 15.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -355,6 +368,14 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {0, 128, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .impact_damage = 8.0 }
+  },
+  [AZ_BAD_ICE_CRAWLER] = {
+    .max_health = 7.0, .overall_bounding_radius = 18.9,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {0, 128, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(ice_crawler_body_vertices),
+                   .impact_damage = 10.0, .immunities = AZ_DMGF_FREEZE },
+    DECL_COMPONENTS(ice_crawler_components)
   }
 };
 

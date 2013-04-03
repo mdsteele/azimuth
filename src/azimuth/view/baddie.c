@@ -818,6 +818,45 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glEnd();
       }
       break;
+    case AZ_BAD_ICE_CRAWLER:
+      // Feet:
+      glBegin(GL_QUADS); {
+        const GLfloat offset = 0.8f * (az_clock_zigzag(5, 6, clock) - 2.0f);
+        for (int i = 0; i < 4; ++i) {
+          glColor3f(0.5f + 0.5f * flare, 0.15f, 0.5f);
+          glVertex2f(0, 5); glVertex2f(0, -5);
+          const GLfloat x = (i == 0 || i == 3 ? -19.0f : -20.0f);
+          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
+          glVertex2f(x, y - 2);
+          glColor3f(0.2f + 0.2f * flare, 0.1f, 0.4f);
+          glVertex2f(x, y + 2);
+        }
+      } glEnd();
+      // Body:
+      glPushMatrix(); {
+        glTranslatef(-0.2f * az_clock_zigzag(5, 5, clock), 0, 0);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.5f + 0.5f * flare, 0.2, 0.4);
+          glVertex2f(-15, 0);
+          glColor3f(0.4f + 0.6f * flare, 0, 0.2);
+          for (int i = -135; i <= 135; i += 5) {
+            glVertex2d(13 * cos(AZ_DEG2RAD(i)) - 4, 14 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        // Shell:
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(0.35, 1, 1, 0.6);
+          glVertex2f(-4, 0);
+          glColor4f(0.06, 0.125, 0.2, 0.8);
+          const az_component_data_t *component = &baddie->data->components[0];
+          for (int i = 0, j = component->polygon.num_vertices;
+               i >= 0; i = --j) {
+            const az_vector_t vertex = component->polygon.vertices[i];
+            glVertex2d(vertex.x, vertex.y);
+          }
+        } glEnd();
+      } glPopMatrix();
+      break;
   }
 }
 
