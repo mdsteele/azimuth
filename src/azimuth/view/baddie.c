@@ -176,6 +176,18 @@ static const az_vector_t oth_crab_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_crab_triangles) % 3 == 0);
 
+static const az_vector_t oth_orb_triangles[] = {
+  {0, 0}, {20, 0}, {14.1, 14.1},
+  {0, 0}, {14.1, 14.1}, {0, 20},
+  {0, 0}, {0, 20}, {-14.1, 14.1},
+  {0, 0}, {-14.1, 14.1}, {-20, 0},
+  {0, 0}, {-20, 0}, {-14.1, -14.1},
+  {0, 0}, {-14.1, -14.1}, {0, -20},
+  {0, 0}, {0, -20}, {14.1, -14.1},
+  {0, 0}, {14.1, -14.1}, {20, 0}
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_orb_triangles) % 3 == 0);
+
 static void draw_oth(
     const az_baddie_t *baddie, GLfloat flare, GLfloat frozen, az_clock_t clock,
     const az_vector_t *vertices, int num_vertices) {
@@ -936,6 +948,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_OTH_CRAB:
       draw_oth(baddie, flare, frozen, clock, oth_crab_triangles,
                AZ_ARRAY_SIZE(oth_crab_triangles));
+      break;
+    case AZ_BAD_OTH_ORB:
+      draw_oth(baddie, flare, frozen, clock, oth_orb_triangles,
+               AZ_ARRAY_SIZE(oth_orb_triangles));
       break;
   }
 }

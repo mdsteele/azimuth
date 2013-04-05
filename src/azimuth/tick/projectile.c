@@ -481,6 +481,9 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_FIREBALL_SLOW:
       leave_ember_trail(state, proj, (az_color_t){255, 128, 0, 128}, 0.1, 5.0);
       break;
+    case AZ_PROJ_OTH_HOMING:
+      leave_oth_trail(state, proj, 0.2, 4.0, AZ_DEG2RAD(720));
+      break;
     case AZ_PROJ_OTH_ROCKET:
       leave_oth_trail(state, proj, 0.5, 9.0, AZ_DEG2RAD(720));
       break;

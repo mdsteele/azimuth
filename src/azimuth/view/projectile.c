@@ -60,6 +60,21 @@ static void draw_rocket(az_clock_t clock, az_color_t color) {
   } glEnd();
 }
 
+static void draw_oth_projectile(const az_projectile_t* proj, double radius,
+                                az_clock_t clock) {
+  const double turn_degrees = 1440.0 * proj->age;
+  glBegin(GL_TRIANGLES); {
+    for (int i = 0; i < 3; ++i) {
+      const az_clock_t clk = clock + 2 * i;
+      glColor3f((az_clock_mod(6, 1, clk)     < 3 ? 1.0f : 0.25f),
+                (az_clock_mod(6, 1, clk + 2) < 3 ? 1.0f : 0.25f),
+                (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f));
+      glVertex2d(radius * cos(AZ_DEG2RAD(i * 120 + turn_degrees)),
+                 radius * sin(AZ_DEG2RAD(i * 120 + turn_degrees)));
+    }
+  } glEnd();
+}
+
 static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   switch (proj->kind) {
     case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -321,20 +336,11 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_OTH_HOMING:
+      draw_oth_projectile(proj, 4.0, clock);
+      break;
     case AZ_PROJ_OTH_ROCKET:
-      glPushMatrix(); {
-        glRotated(1440.0 * proj->age, 0, 0, 1);
-        glBegin(GL_TRIANGLES); {
-          for (int i = 0; i < 3; ++i) {
-            const az_clock_t clk = clock + 2 * i;
-            glColor3f((az_clock_mod(6, 1, clk)     < 3 ? 1.0f : 0.25f),
-                      (az_clock_mod(6, 1, clk + 2) < 3 ? 1.0f : 0.25f),
-                      (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f));
-            glVertex2d(9.0 * cos(AZ_DEG2RAD(i * 120)),
-                       9.0 * sin(AZ_DEG2RAD(i * 120)));
-          }
-        } glEnd();
-      } glPopMatrix();
+      draw_oth_projectile(proj, 9.0, clock);
       break;
     case AZ_PROJ_SPINE:
       glBegin(GL_TRIANGLE_STRIP); {

@@ -402,6 +402,11 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
+  },
+  [AZ_BAD_OTH_ORB] = {
+    .max_health = 50.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   }
 };
 

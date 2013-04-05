@@ -301,6 +301,12 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 2.0,
     .impact_damage = 10.0
   },
+  [AZ_PROJ_OTH_HOMING] = {
+    .speed = 500.0,
+    .lifetime = 5.0,
+    .impact_damage = 1.0,
+    .homing_rate = AZ_DEG2RAD(720)
+  },
   [AZ_PROJ_OTH_ROCKET] = {
     .speed = 1200.0,
     .lifetime = 3.0,

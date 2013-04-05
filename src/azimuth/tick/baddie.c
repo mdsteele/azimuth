@@ -947,6 +947,17 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 2.0;
       }
       break;
+    case AZ_BAD_OTH_ORB:
+      drift_towards_ship(state, baddie, time, 80, 20, 100);
+      if (baddie->cooldown <= 0.0 && az_ship_is_present(&state->ship) &&
+          az_vwithin(baddie->position, state->ship.position, 500) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_OTH_HOMING,
+                        baddie->data->main_body.bounding_radius,
+                        az_random(-AZ_PI, AZ_PI), 0.0);
+        baddie->cooldown = 0.1;
+      }
+      break;
   }
 }
 
