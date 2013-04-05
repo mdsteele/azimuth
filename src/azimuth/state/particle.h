@@ -34,9 +34,11 @@ typedef enum {
   AZ_PAR_BEAM,
   // EMBER: A shrinking glowball.  param1=radius
   AZ_PAR_EMBER,
+  // OTH_FRAGMENT: A rainbow triangle.  param1=radius, param2=spin_rate
+  AZ_PAR_OTH_FRAGMENT,
   // NPS_PORTAL: A Nonlinear Paradimensional Shear portal.  param1=radius
   AZ_PAR_NPS_PORTAL,
-  // SHARD: A trianglar shard of metal/rock.
+  // SHARD: A trianglar shard of metal/rock.  param1=scale, param2=spin_rate
   AZ_PAR_SHARD,
   // SPLOOSH: A splash made from entering/exiting water.  param1=amplitude
   AZ_PAR_SPLOOSH

@@ -937,6 +937,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
       }
       break;
+    case AZ_BAD_OTH_CRAB:
+      fly_towards_ship(state, baddie, time,
+                       2.0, 40.0, 100.0, 20.0, 100.0, 100.0);
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_OTH_ROCKET, 15.0, 0.0, 0.0);
+        baddie->cooldown = 2.0;
+      }
+      break;
   }
 }
 

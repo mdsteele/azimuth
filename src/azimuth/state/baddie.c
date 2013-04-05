@@ -202,6 +202,13 @@ static az_component_data_t ice_crawler_components[] = {
     .impact_damage = 15.0 }
 };
 
+static const az_vector_t oth_crab_vertices[] = {
+  {0, 20}, {-5, 16}, {-25, 22}, {-10, 11}, {-15, 7},
+  {-15, -7}, {-10, -11}, {-25, -22}, {-5, -16}, {0, -20},
+  {5, -16.66}, {22, -25}, {41, -12}, {24, -17}, {15, -10},
+  {15, 10}, {24, 17}, {41, 12}, {22, 25}, {5, 16.66}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_LUMP] = {
     .max_health = 10.0,
@@ -389,6 +396,12 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(beam_turret_components)
+  },
+  [AZ_BAD_OTH_CRAB] = {
+    .max_health = 50.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
+                   .impact_damage = 20.0 }
   }
 };
 

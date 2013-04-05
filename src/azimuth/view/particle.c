@@ -27,6 +27,7 @@
 
 #include "azimuth/state/particle.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
@@ -36,7 +37,7 @@ static void with_color_alpha(az_color_t color, double alpha_factor) {
   glColor4ub(color.r, color.g, color.b, color.a * alpha_factor);
 }
 
-static void draw_particle(const az_particle_t *particle) {
+static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
   assert(particle->age <= particle->lifetime);
   switch (particle->kind) {
     case AZ_PAR_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -77,6 +78,21 @@ static void draw_particle(const az_particle_t *particle) {
           particle->param1 * (1.0 - particle->age / particle->lifetime);
         for (int i = 0; i <= 360; i += 30) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
+    case AZ_PAR_OTH_FRAGMENT:
+      glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);
+      glBegin(GL_TRIANGLES); {
+        const double radius =
+          particle->param1 * (1.0 - particle->age / particle->lifetime);
+        for (int i = 0; i < 3; ++i) {
+          const az_clock_t clk = clock + 2 * i;
+          glColor3f((az_clock_mod(6, 1, clk)     < 3 ? 1.0f : 0.25f),
+                    (az_clock_mod(6, 1, clk + 2) < 3 ? 1.0f : 0.25f),
+                    (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f));
+          glVertex2d(radius * cos(AZ_DEG2RAD(i * 120)),
+                     radius * sin(AZ_DEG2RAD(i * 120)));
         }
       } glEnd();
       break;
@@ -133,7 +149,7 @@ void az_draw_particles(const az_space_state_t* state) {
     glPushMatrix(); {
       glTranslated(particle->position.x, particle->position.y, 0);
       glRotated(AZ_RAD2DEG(particle->angle), 0, 0, 1);
-      draw_particle(particle);
+      draw_particle(particle, state->clock);
     } glPopMatrix();
   }
 }

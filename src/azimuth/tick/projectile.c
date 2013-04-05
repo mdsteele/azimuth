@@ -256,6 +256,22 @@ static void leave_ember_trail(
   }
 }
 
+static void leave_oth_trail(
+    az_space_state_t *state, az_projectile_t *proj, double lifetime,
+    double radius, double spin) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_OTH_FRAGMENT;
+    particle->position = proj->position;
+    particle->velocity = AZ_VZERO;
+    particle->angle = proj->angle;
+    particle->lifetime = lifetime;
+    particle->param1 = radius;
+    particle->param2 = spin;
+  }
+}
+
 static void leave_missile_trail(az_space_state_t *state,
                                 az_projectile_t *proj,
                                 double time, az_color_t color) {
@@ -464,6 +480,9 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
       leave_ember_trail(state, proj, (az_color_t){255, 128, 0, 128}, 0.1, 5.0);
+      break;
+    case AZ_PROJ_OTH_ROCKET:
+      leave_oth_trail(state, proj, 0.5, 9.0, AZ_DEG2RAD(720));
       break;
     default: break;
   }
