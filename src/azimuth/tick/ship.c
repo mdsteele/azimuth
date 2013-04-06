@@ -155,25 +155,42 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   switch (impact->type) {
     case AZ_IMP_NOTHING: return;
     case AZ_IMP_BADDIE:
-      if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
-          az_try_damage_baddie(
-              state, impact->target.baddie.baddie,
-              impact->target.baddie.component, AZ_DMGF_CPLUS,
-              impact->target.baddie.baddie->data->max_health)) {
-        assert(impact->target.baddie.baddie->kind == AZ_BAD_NOTHING);
-        return;
-      } else {
+      {
+        az_baddie_t *baddie = impact->target.baddie.baddie;
+        const az_component_data_t *component = impact->target.baddie.component;
+        // If the ship is in C-plus mode, we will kill the baddie outright and
+        // keep going without taking damage (unless the baddie is immune to
+        // C-plus damage).
+        if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
+            az_try_damage_baddie(state, baddie, component, AZ_DMGF_CPLUS,
+                                 baddie->data->max_health)) {
+          assert(baddie->kind == AZ_BAD_NOTHING);
+          return;
+        }
+        // We didn't kill the baddie yet, so we're going to bounce off of it
+        // and possibly take damage.
         elasticity = 0.5;
-        if (impact->target.baddie.baddie->frozen == 0.0) {
+        rel_velocity = az_vsub(ship->velocity, baddie->velocity);
+        if (baddie->frozen == 0.0) {
           ship->tractor_beam.active = false;
-          damage = impact->target.baddie.component->impact_damage;
-          if (damage > 0.0) {
-            induce_temp_invincibility = true;
-            rel_velocity =
-              az_vsub(ship->velocity, impact->target.baddie.baddie->velocity);
-            if (az_vnonzero(rel_velocity)) {
-              elasticity += 2.5 * damage / az_vnorm(rel_velocity);
-            }
+          damage = component->impact_damage;
+          if (damage > 0.0) induce_temp_invincibility = true;
+        }
+        // If we have Reactive Armor, and if the baddie is dealing damage to
+        // us, deal damage back to the baddie.
+        if (damage > 0.0 &&
+            az_has_upgrade(&ship->player, AZ_UPG_REACTIVE_ARMOR) &&
+            az_try_damage_baddie(state, baddie, component, AZ_DMGF_REACTIVE,
+                                 0.5 * damage)) {
+          ship->reactive_flare = 1.0;
+          az_particle_t *particle;
+          if (az_insert_particle(state, &particle)) {
+            particle->kind = AZ_PAR_BOOM;
+            particle->color = (az_color_t){255, 0, 0, 255};
+            particle->position = az_vsub(ship->position, impact->normal);
+            particle->velocity = AZ_VZERO;
+            particle->lifetime = 0.4;
+            particle->param1 = 15.0;
           }
         }
       }
@@ -264,7 +281,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
 
 
 void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
-                           const az_impact_t *impact) {
+                           az_vector_t delta, const az_impact_t *impact) {
   az_ship_t *ship = &state->ship;
   az_impact_t virtual_impact = {
     .type = AZ_IMP_BADDIE,
@@ -272,9 +289,9 @@ void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
     .position = ship->position
   };
   if (az_circle_hits_baddie(
-          baddie, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
-          az_vsub(baddie->position, impact->position), NULL,
-          &virtual_impact.normal, &virtual_impact.target.baddie.component)) {
+          baddie, AZ_SHIP_DEFLECTOR_RADIUS, az_vadd(ship->position, delta),
+          az_vneg(delta), NULL, &virtual_impact.normal,
+          &virtual_impact.target.baddie.component)) {
     az_node_t *tractor_node = NULL;
     if (ship->tractor_beam.active) {
       az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node);
@@ -987,6 +1004,11 @@ void az_tick_ship(az_space_state_t *state, double time) {
   assert(ship->shield_flare <= 1.0);
   ship->shield_flare =
     fmax(0.0, ship->shield_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
+  assert(ship->reactive_flare >= 0.0);
+  assert(ship->reactive_flare <= 1.0);
+  ship->reactive_flare =
+    fmax(0.0, ship->reactive_flare - time / AZ_SHIP_SHIELD_FLARE_TIME);
+  assert(ship->temp_invincibility >= 0.0);
   ship->temp_invincibility = fmax(0.0, ship->temp_invincibility - time);
 
   // If we're in a superheated room, and we don't have Thermal Armor, take

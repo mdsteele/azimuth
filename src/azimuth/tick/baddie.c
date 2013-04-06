@@ -484,11 +484,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     // If we hit the ship, we might damage it.  On the other hand, if the ship
     // has C-plus or Reactive Armor, it might kill the baddie, in which case we
     // need to return early.
+    const az_vector_t old_position = baddie->position;
+    baddie->position = impact.position;
     if (impact.type == AZ_IMP_SHIP) {
-      az_on_baddie_hit_ship(state, baddie, &impact);
+      az_on_baddie_hit_ship(
+          state, baddie, az_vsub(baddie->position, old_position), &impact);
       if (baddie->kind == AZ_BAD_NOTHING) return;
     }
-    baddie->position = impact.position;
     if (impact.type != AZ_IMP_NOTHING) {
       // Push the baddie slightly away from the impact point (so that we're
       // hopefully no longer in contact with the object we hit).

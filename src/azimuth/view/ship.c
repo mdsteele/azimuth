@@ -246,6 +246,18 @@ void az_draw_ship(az_space_state_t* state) {
       } glEnd();
     }
 
+    // Reactive Armor flare:
+    if (ship->reactive_flare > 0.0) {
+      assert(ship->reactive_flare <= 1.0);
+      glColor4f(1, 0.25, 0, 0.5 * ship->reactive_flare);
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
+          glVertex2d(AZ_SHIP_POLYGON.vertices[i].x,
+                     AZ_SHIP_POLYGON.vertices[i].y);
+        }
+      } glEnd();
+    }
+
     // C-plus blink:
     if (ship->cplus.state == AZ_CPLUS_READY) {
       assert(ship->cplus.charge > 0.0);
@@ -253,7 +265,7 @@ void az_draw_ship(az_space_state_t* state) {
       glColor4f(0, 1, 0, (az_clock_mod(2, 3, state->clock) ? 0.25 : 0.5) *
                 (1.0 - pow(ship->cplus.charge, 4.0)));
       glBegin(GL_POLYGON); {
-        for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++ i) {
+        for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
           glVertex2d(AZ_SHIP_POLYGON.vertices[i].x,
                      AZ_SHIP_POLYGON.vertices[i].y);
         }
