@@ -25,6 +25,11 @@
 
 /*===========================================================================*/
 
+// Called (from az_tick_baddies) when a baddie is about to hit the ship, just
+// _before_ the baddie's position has been set to impact->position.
+void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
+                           const az_impact_t *impact);
+
 void az_tick_ship(az_space_state_t *state, double time);
 
 /*===========================================================================*/

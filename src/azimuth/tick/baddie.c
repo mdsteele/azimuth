@@ -27,6 +27,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/script.h"
+#include "azimuth/tick/ship.h" // for az_on_baddie_hit_ship
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
@@ -480,6 +481,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
                      baddie->position, az_vmul(baddie->velocity, time),
                      impact_flags, baddie->uid, &impact);
+    // If we hit the ship, we might damage it.  On the other hand, if the ship
+    // has C-plus or Reactive Armor, it might kill the baddie, in which case we
+    // need to return early.
+    if (impact.type == AZ_IMP_SHIP) {
+      az_on_baddie_hit_ship(state, baddie, &impact);
+      if (baddie->kind == AZ_BAD_NOTHING) return;
+    }
     baddie->position = impact.position;
     if (impact.type != AZ_IMP_NOTHING) {
       // Push the baddie slightly away from the impact point (so that we're
@@ -490,11 +498,6 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       baddie->velocity =
         az_vsub(baddie->velocity,
                 az_vmul(az_vproj(baddie->velocity, impact.normal), 1.5));
-      // If we hit the ship, damage the ship.
-      if (impact.type == AZ_IMP_SHIP) {
-        az_damage_ship(state, baddie->data->main_body.impact_damage, true);
-        // TODO apply force to the ship to push it away
-      }
     }
   }
 

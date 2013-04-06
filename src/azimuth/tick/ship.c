@@ -151,6 +151,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   // Resolve the collision (if any):
   double damage = 0.0, elasticity = 0.0;
   bool induce_temp_invincibility = false;
+  az_vector_t rel_velocity = ship->velocity;
   switch (impact->type) {
     case AZ_IMP_NOTHING: return;
     case AZ_IMP_BADDIE:
@@ -168,8 +169,10 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
           damage = impact->target.baddie.component->impact_damage;
           if (damage > 0.0) {
             induce_temp_invincibility = true;
-            if (az_vnonzero(ship->velocity)) {
-              elasticity += 7.5 * damage / az_vnorm(ship->velocity);
+            rel_velocity =
+              az_vsub(ship->velocity, impact->target.baddie.baddie->velocity);
+            if (az_vnonzero(rel_velocity)) {
+              elasticity += 2.5 * damage / az_vnorm(rel_velocity);
             }
           }
         }
@@ -214,7 +217,9 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   } else if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
     induce_temp_invincibility = true;
     state->ship.cplus.state = AZ_CPLUS_INACTIVE;
+    rel_velocity = az_vsub(rel_velocity, ship->velocity);
     ship->velocity = az_vmul(ship->velocity, 0.3);
+    rel_velocity = az_vadd(rel_velocity, ship->velocity);
     az_play_sound(&state->soundboard, AZ_SND_CPLUS_IMPACT);
   }
 
@@ -235,7 +240,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   // Bounce the ship off the object.
   if (tractor_node == NULL) {
     ship->velocity =
-      az_vsub(ship->velocity, az_vmul(az_vproj(ship->velocity, impact->normal),
+      az_vsub(ship->velocity, az_vmul(az_vproj(rel_velocity, impact->normal),
                                       1.0 + elasticity));
   } else {
     ship->velocity = az_vmul(ship->velocity, -elasticity);
@@ -255,6 +260,27 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
 
   // Damage the ship.
   az_damage_ship(state, damage, induce_temp_invincibility);
+}
+
+
+void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
+                           const az_impact_t *impact) {
+  az_ship_t *ship = &state->ship;
+  az_impact_t virtual_impact = {
+    .type = AZ_IMP_BADDIE,
+    .target.baddie = { .baddie = baddie },
+    .position = ship->position
+  };
+  if (az_circle_hits_baddie(
+          baddie, AZ_SHIP_DEFLECTOR_RADIUS, ship->position,
+          az_vsub(baddie->position, impact->position), NULL,
+          &virtual_impact.normal, &virtual_impact.target.baddie.component)) {
+    az_node_t *tractor_node = NULL;
+    if (ship->tractor_beam.active) {
+      az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node);
+    }
+    on_ship_impact(state, &virtual_impact, tractor_node);
+  }
 }
 
 /*===========================================================================*/
