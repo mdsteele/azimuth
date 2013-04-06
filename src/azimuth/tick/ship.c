@@ -198,6 +198,10 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         damage = (ship->cplus.state == AZ_CPLUS_ACTIVE ? 0.0 :
                   impact->target.wall->data->impact_damage_coeff *
                   az_vnorm(ship->velocity) / AZ_SHIP_BASE_MAX_SPEED);
+        if (az_has_upgrade(&ship->player, AZ_UPG_HARDENED_ARMOR)) {
+          damage *= (AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR /
+                     AZ_ARMOR_DAMAGE_FACTOR);
+        }
       }
       break;
   }

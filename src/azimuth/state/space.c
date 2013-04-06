@@ -24,6 +24,7 @@
 
 #include "azimuth/state/room.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
@@ -313,6 +314,23 @@ void az_damage_ship(az_space_state_t *state, double damage,
   if (induce_temp_invincibility) ship->temp_invincibility = 1.0;
   if (damage <= 0.0) return;
   ship->shield_flare = 1.0;
+  // Each armor upgrade cumulatively reduces the damage taken.
+  const az_player_t *player = &ship->player;
+  if (az_has_upgrade(player, AZ_UPG_HARDENED_ARMOR)) {
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
+  }
+  if (az_has_upgrade(player, AZ_UPG_THERMAL_ARMOR)) {
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
+  }
+  if (az_has_upgrade(player, AZ_UPG_GRAVITIC_ARMOR)) {
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
+  }
+  if (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
+  }
+  if (az_has_upgrade(player, AZ_UPG_REACTIVE_ARMOR)) {
+    damage *= AZ_REACTIVE_ARMOR_DAMAGE_FACTOR;
+  }
   // If the ship can survive the damage, reduce shields and we're done.
   if (ship->player.shields > damage) {
     ship->player.shields -= damage;

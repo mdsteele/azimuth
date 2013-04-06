@@ -28,6 +28,13 @@
 #define AZ_ENERGY_PER_CAPACITOR 50
 #define AZ_SHIELDS_PER_BATTERY 25
 
+// Damage multiplier for most armor upgrades:
+#define AZ_ARMOR_DAMAGE_FACTOR 0.75
+// Damage multiplier for wall damage for Hardened Armor upgrade:
+#define AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR 0.25
+// Damage multiplier for Reactive Armor upgrade:
+#define AZ_REACTIVE_ARMOR_DAMAGE_FACTOR 0.5
+
 typedef enum {
   // Primary weapon:
   AZ_UPG_GUN_CHARGE = 0,

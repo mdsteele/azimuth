@@ -697,7 +697,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         az_ray_impact(state, beam_start, az_vpolar(1000, baddie->angle),
                       (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
         const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
-        const double beam_damage = 100.0 * time;
+        const double beam_damage = 300.0 * time;
         // Damage the ship and any baddies within the beam.
         if (az_ship_is_present(&state->ship) &&
             az_ray_hits_ship(&state->ship, beam_start, beam_delta,
@@ -904,7 +904,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // If beam is still turned on, fire:
       if (baddie->cooldown > 0.0) {
         // Fire a beam.
-        const double beam_damage = 20.0 * time;
+        const double beam_damage = 60.0 * time;
         const double beam_theta = baddie->angle + baddie->components[0].angle;
         const az_vector_t beam_start =
           az_vadd(baddie->position, az_vpolar(30, beam_theta));
