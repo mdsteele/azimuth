@@ -167,6 +167,24 @@ static void draw_metal(bool alt, az_color_t color1, az_color_t color2,
   } glEnd();
 }
 
+static void draw_pipe(az_color_t color1, az_color_t color2,
+                      az_polygon_t polygon) {
+  glBegin(GL_QUAD_STRIP); {
+    assert(polygon.num_vertices >= 3);
+    const float top = polygon.vertices[0].y;
+    const float bottom = polygon.vertices[polygon.num_vertices - 1].y;
+    const float middle = (top + bottom) * 0.5f;
+    const float right = polygon.vertices[0].x;
+    const float left = polygon.vertices[1].x;
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    glVertex2f(left, top); glVertex2f(right, top);
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2f(left, middle); glVertex2f(right, middle);
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    glVertex2f(left, bottom); glVertex2f(right, bottom);
+  } glEnd();
+}
+
 static void draw_trifan(az_color_t color1, az_color_t color2,
                         az_polygon_t polygon) {
   glBegin(GL_TRIANGLE_FAN); {
@@ -191,11 +209,11 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         draw_bezel(data->bezel, false, data->color2, data->color1,
                    data->polygon);
         break;
-      case AZ_WSTY_ALT_BEZEL_12:
+      case AZ_WSTY_BEZEL_ALT_12:
         draw_bezel(data->bezel, true, data->color1, data->color2,
                    data->polygon);
         break;
-      case AZ_WSTY_ALT_BEZEL_21:
+      case AZ_WSTY_BEZEL_ALT_21:
         draw_bezel(data->bezel, true, data->color2, data->color1,
                    data->polygon);
         break;
@@ -210,8 +228,11 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
       case AZ_WSTY_METAL:
         draw_metal(false, data->color1, data->color2, data->polygon);
         break;
-      case AZ_WSTY_ALT_METAL:
+      case AZ_WSTY_METAL_ALT:
         draw_metal(true, data->color1, data->color2, data->polygon);
+        break;
+      case AZ_WSTY_PIPE:
+        draw_pipe(data->color1, data->color2, data->polygon);
         break;
       case AZ_WSTY_TRIFAN:
         draw_trifan(data->color1, data->color2, data->polygon);

@@ -441,13 +441,14 @@ static void do_mass_rotate(int x, int y, int dx, int dy) {
 static void do_rotate_align(bool to_camera) {
   const double cam_up =
     (state.spin_camera ? az_vtheta(state.camera) : AZ_HALF_PI);
+  const double step = AZ_DEG2RAD(45);
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
 #define ROTATE(obj) do { \
     AZ_LIST_LOOP(obj, room->obj##s) { \
       if (!obj->selected) continue; \
       const double up = (to_camera ? cam_up : az_vtheta(obj->spec.position)); \
-      obj->spec.angle = az_mod2pi(up + AZ_HALF_PI * \
-          ceil(az_mod2pi_nonneg(obj->spec.angle - up + 0.001) / AZ_HALF_PI)); \
+      obj->spec.angle = az_mod2pi(up + step * \
+          ceil(az_mod2pi_nonneg(obj->spec.angle - up + 0.001) / step)); \
       set_room_unsaved(room); \
     } \
   } while (0)
