@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_STATE_BADDIE_H_
 #define AZIMUTH_STATE_BADDIE_H_
 
+#include <stdint.h>
+
 #include "azimuth/state/pickup.h" // for az_pickup_flags_t
 #include "azimuth/state/player.h" // for az_damage_kinds_t
 #include "azimuth/state/script.h"
@@ -36,11 +38,11 @@
 #define AZ_MAX_BADDIE_COMPONENTS 12
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 28
+#define AZ_NUM_BADDIE_KINDS 30
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
-  AZ_BAD_LUMP,
+  AZ_BAD_MARKER,
   AZ_BAD_TURRET,
   AZ_BAD_ZIPPER,
   AZ_BAD_BOUNCER,
@@ -67,7 +69,9 @@ typedef enum {
   AZ_BAD_ICE_CRAWLER,
   AZ_BAD_BEAM_TURRET,
   AZ_BAD_OTH_CRAB,
-  AZ_BAD_OTH_ORB
+  AZ_BAD_OTH_ORB,
+  AZ_BAD_OTH_SNAPDRAGON,
+  AZ_BAD_OTH_RAZOR
 } az_baddie_kind_t;
 
 typedef struct {
@@ -79,12 +83,24 @@ typedef struct {
   double impact_damage;
 } az_component_data_t;
 
+// Bitset of flags dictating special baddie behavior:
+typedef uint_fast8_t az_baddie_flags_t;
+// INCORPOREAL: baddie cannot be hit by ship or by weapons
+#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 0))
+// KAMIKAZE: baddie dies when it hits the ship
+#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 1))
+// NO_HOMING_BEAM: homing beam ignores this baddie
+#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 2))
+// NO_HOMING_PROJ: homing projectiles ignore this baddie
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 3))
+
 typedef struct {
   double overall_bounding_radius;
   double max_health;
   az_pickup_flags_t potential_pickups;
   az_color_t color;
   az_sound_key_t death_sound;
+  az_baddie_flags_t properties;
   az_component_data_t main_body;
   int num_components;
   const az_component_data_t *components; // array of length num_components

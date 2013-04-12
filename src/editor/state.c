@@ -71,7 +71,7 @@ void az_relabel_editor_room(az_editor_room_t *room) {
 bool az_load_editor_state(az_editor_state_t *state) {
   state->spin_camera = true;
   state->zoom_level = 128.0;
-  state->brush.baddie_kind = AZ_BAD_LUMP;
+  state->brush.baddie_kind = AZ_BAD_MARKER;
   state->brush.door_kind = AZ_DOOR_NORMAL;
   state->brush.gravfield_kind = AZ_GRAV_TRAPEZOID;
   state->brush.gravfield_strength = 100.0;

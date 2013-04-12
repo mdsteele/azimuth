@@ -49,6 +49,7 @@ static void on_projectile_impact(az_space_state_t *state,
     // Damage baddies that are within the blast.
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
       // TODO: This isn't a good condition on which to do splash damage.  We
       //       need an az_circle_touches_baddie function, or whatever.
       if (az_vwithin(baddie->position, proj->position,
@@ -137,6 +138,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_MISSILE_PHASE:
     case AZ_PROJ_MISSILE_PIERCE:
     case AZ_PROJ_MISSILE_BEAM:
+    case AZ_PROJ_OTH_ROCKET:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
@@ -220,6 +222,7 @@ static void projectile_home_in(az_space_state_t *state,
     bool found_target = false;
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
+      if (baddie->data->properties & AZ_BADF_NO_HOMING_PROJ) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
       const double dist = az_vdist(baddie->position, proj->position) +
         fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
@@ -351,6 +354,7 @@ static void projectile_special_logic(az_space_state_t *state,
         // Damage enemies within the blast (over the lifetime of the blast):
         AZ_ARRAY_LOOP(baddie, state->baddies) {
           if (baddie->kind == AZ_BAD_NOTHING) continue;
+          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
           // TODO: This isn't a good condition on which to do splash damage.
           if (az_vwithin(baddie->position, proj->position,
                          radius + baddie->data->overall_bounding_radius)) {
@@ -486,6 +490,11 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_OTH_ROCKET:
       leave_oth_trail(state, proj, 0.5, 9.0, AZ_DEG2RAD(720));
+      break;
+    case AZ_PROJ_OTH_SPRAY:
+      if (az_clock_mod(2, 1, state->clock)) {
+        leave_oth_trail(state, proj, 0.1, 5.0, AZ_DEG2RAD(360));
+      }
       break;
     default: break;
   }

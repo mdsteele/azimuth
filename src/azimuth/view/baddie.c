@@ -188,6 +188,47 @@ static const az_vector_t oth_orb_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_orb_triangles) % 3 == 0);
 
+static const az_vector_t oth_snapdragon_triangles[] = {
+  // Body:
+  {0, 0}, {22.5, 15}, {0, 30},
+  {22.5, -15}, {22.5, 15}, {0, 0},
+  {0, -30}, {22.5, -15}, {0, 0},
+  {-22.5, 15}, {0, 0}, {0, 30},
+  {0, 0}, {-22.5, 15}, {-22.5, -15},
+  {0, -30}, {0, 0}, {-22.5, -15},
+  // Tail:
+  {-22.5, 0}, {-22.5, 15}, {-37.5, 7.5},
+  {-22.5, -15}, {-22.5, 0}, {-37.5, -7.5},
+  // Left arm:
+  {22.5, 15}, {6, 48}, {7.5, 24.9},
+  // Right arm:
+  {6, -48}, {22.5, -15}, {7.5, -24.9},
+  // Left legs:
+  {0, 30}, {-15, 48}, {-7.5, 24.9},
+  {-7.5, 24.9}, {-22.5, 37.5}, {-15, 19.95},
+  {-15, 19.95}, {-30, 25.5}, {-22.5, 15},
+  // Right legs:
+  {0, -30}, {-15, -48}, {-7.5, -24.9},
+  {-7.5, -24.9}, {-22.5, -37.5}, {-15, -19.95},
+  {-15, -19.95}, {-30, -25.5}, {-22.5, -15},
+  // Left pincer:
+  {22.5, 3}, {33, 9}, {22.5, 15},
+  {33, 9}, {37.5, 19.5}, {22.5, 15},
+  {48, 3}, {37.5, 19.5}, {33, 9},
+  // Right pincer:
+  {33, -9}, {22.5, -3}, {22.5, -15},
+  {37.5, -19.5}, {33, -9}, {22.5, -15},
+  {37.5, -19.5}, {48, -3}, {33, -9}
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_snapdragon_triangles) % 3 == 0);
+
+static const az_vector_t oth_razor_triangles[] = {
+  {12, 0}, {1.5, 2.59808}, {1.5, -2.59808},
+  {-6, 10.3923}, {-3, 0}, {1.5, 2.59808},
+  {-6, -10.3923}, {1.5, -2.59808}, {-3, 0}
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_triangles) % 3 == 0);
+
 static void draw_oth(
     const az_baddie_t *baddie, GLfloat flare, GLfloat frozen, az_clock_t clock,
     const az_vector_t *vertices, int num_vertices) {
@@ -227,13 +268,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
   if (baddie->frozen > 0.0) clock = 0;
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_BAD_LUMP:
-      glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
-      glBegin(GL_POLYGON); {
-        az_polygon_t polygon = baddie->data->main_body.polygon;
-        for (int i = 0; i < polygon.num_vertices; ++i) {
-          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
-        }
+    case AZ_BAD_MARKER:
+      glColor3f(1, 0, 1); // magenta
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(-20, 0); glVertex2f(20, 0); glVertex2f(0, 20);
+        glVertex2f(0, -20); glVertex2f(20, 0);
       } glEnd();
       break;
     case AZ_BAD_CRAWLING_TURRET:
@@ -953,6 +992,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       draw_oth(baddie, flare, frozen, clock, oth_orb_triangles,
                AZ_ARRAY_SIZE(oth_orb_triangles));
       break;
+    case AZ_BAD_OTH_SNAPDRAGON:
+      draw_oth(baddie, flare, frozen, clock, oth_snapdragon_triangles,
+               AZ_ARRAY_SIZE(oth_snapdragon_triangles));
+      break;
+    case AZ_BAD_OTH_RAZOR:
+      draw_oth(baddie, flare, frozen, clock, oth_razor_triangles,
+               AZ_ARRAY_SIZE(oth_razor_triangles));
+      break;
   }
 }
 
@@ -967,7 +1014,8 @@ void az_draw_baddie(const az_baddie_t *baddie, az_clock_t clock) {
 
 void az_draw_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
-    if (baddie->kind == AZ_BAD_NOTHING) continue;
+    if (baddie->kind == AZ_BAD_NOTHING ||
+        baddie->kind == AZ_BAD_MARKER) continue;
     az_draw_baddie(baddie, state->clock);
   }
 }

@@ -71,6 +71,7 @@ typedef enum {
   AZ_OP_SPOS, // pop top two, set position of obj i (of any type) to (a, b)
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
+  AZ_OP_SBADK, // pop top, transform baddie i to kind a
   AZ_OP_BOSS, // designate baddie i as the current boss
   AZ_OP_SPLAT, // kill all baddies in the room
   // Doors:

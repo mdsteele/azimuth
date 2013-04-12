@@ -210,12 +210,11 @@ static const az_vector_t oth_crab_vertices[] = {
 };
 
 static az_baddie_data_t baddie_datas[] = {
-  [AZ_BAD_LUMP] = {
-    .max_health = 10.0,
-    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .color = {255, 0, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .main_body = { .polygon = AZ_INIT_POLYGON(lump_vertices),
-                   .impact_damage = 10.0 }
+  [AZ_BAD_MARKER] = {
+    .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
+                   AZ_BADF_NO_HOMING_PROJ),
+    .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_TURRET] = {
     .max_health = 12.0, .overall_bounding_radius = 30.5,
@@ -340,6 +339,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = AZ_BADF_NO_HOMING_PROJ,
     .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_components)
   },
@@ -407,6 +407,18 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 50.0, .potential_pickups = ~AZ_PUPF_NOTHING,
     .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
+  },
+  [AZ_BAD_OTH_SNAPDRAGON] = {
+    .max_health = 60.0,
+    .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0 }
+  },
+  [AZ_BAD_OTH_RAZOR] = {
+    .max_health = 0.1,
+    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = AZ_BADF_KAMIKAZE,
+    .main_body = { .bounding_radius = 10.0, .impact_damage = 3.0 }
   }
 };
 

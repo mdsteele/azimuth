@@ -316,6 +316,12 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 4.0,
     .damage_kind = AZ_DMGF_ROCKET
   },
+  [AZ_PROJ_OTH_SPRAY] = {
+    .speed = 400.0,
+    .lifetime = 4.0,
+    .impact_damage = 5.0,
+    .homing_rate = AZ_DEG2RAD(40)
+  },
   [AZ_PROJ_SPINE] = {
     .speed = 200.0,
     .lifetime = 4.0,

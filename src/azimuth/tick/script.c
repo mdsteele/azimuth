@@ -441,12 +441,31 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           double k, x, y, angle;
           STACK_POP(&k, &x, &y, &angle);
           int kind = (int)k;
-          if (kind < 1 || kind >= AZ_NUM_BADDIE_KINDS) {
+          if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
             SCRIPT_ERROR("invalid baddie kind");
           }
           az_baddie_t *baddie;
           if (az_insert_baddie(state, &baddie)) {
             az_init_baddie(baddie, kind, (az_vector_t){x, y}, angle);
+          }
+        }
+        break;
+      case AZ_OP_SBADK:
+        {
+          az_uid_t uid;
+          GET_UID(AZ_UUID_BADDIE, &uid);
+          double argument;
+          STACK_POP(&argument);
+          const int kind = (int)argument;
+          if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
+            SCRIPT_ERROR("invalid baddie kind");
+          }
+          az_baddie_t *baddie;
+          if (az_lookup_baddie(state, uid, &baddie)) {
+            const az_script_t *baddie_script = baddie->on_kill;
+            az_init_baddie(baddie, (az_baddie_kind_t)kind, baddie->position,
+                           baddie->angle);
+            baddie->on_kill = baddie_script;
           }
         }
         break;
@@ -460,6 +479,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_SPLAT:
         AZ_ARRAY_LOOP(baddie, state->baddies) {
           if (baddie->kind == AZ_BAD_NOTHING) continue;
+          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
           az_kill_baddie(state, baddie);
         }
         break;

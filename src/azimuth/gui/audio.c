@@ -401,6 +401,29 @@ static az_sound_entry_t sound_entries[] = {
     .phaser_offset = 0.352112650871, .phaser_sweep = 0.549295783043,
     .volume_adjust = 0.4
   },
+  [AZ_SND_FIRE_OTH_ROCKET] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.605633795261, .env_punch = 0.160833105445,
+    .env_decay = 0.732394337654, .start_freq = 0.345070421696,
+    .freq_slide = -0.00747528579086, .freq_delta_slide = -0.00656020781025,
+    .arp_mod = 0.704225301743, .arp_speed = 0.732394337654,
+    .phaser_offset = -0.16901409626, .phaser_sweep = -0.563380241394,
+    .lpf_cutoff = 0.795774638653, .lpf_ramp = -0.126760542393,
+    .lpf_resonance = 0.718309879303, .volume_adjust = 0.6
+  },
+  [AZ_SND_FIRE_OTH_SPRAY] = {
+    .wave_kind = SQUARE,
+    .env_attack = 0.0563380271196, .env_sustain = 0.309859156609,
+    .env_punch = 0.0774647891521, .env_decay = 0.598591566086,
+    .start_freq = 0.387323945761, .freq_slide = 0.0563380718231,
+    .freq_delta_slide = -0.08450704813,
+    .vibrato_depth = 0.0774647891521, .vibrato_speed = 0.654929578304,
+    .arp_mod = -0.140845060349,
+    .square_duty = 0.570422530174, .duty_sweep = -0.281690120697,
+    .repeat_speed = 0.612676084042, .phaser_sweep = 0.774647831917,
+    .lpf_cutoff = 0.718309879303, .lpf_ramp = -0.0098278503865,
+    .lpf_resonance = 0.366197168827
+  },
   [AZ_SND_FIRE_ROCKET] = {
     .wave_kind = NOISE,
     .env_sustain = 0.39907, .env_punch = 0.65582, .env_decay = 0.39085,
@@ -467,6 +490,17 @@ static az_sound_entry_t sound_entries[] = {
     .freq_slide = 0.212676, .freq_delta_slide = -0.197183,
     .square_duty = 0.873239, .phaser_offset = 0.40845,
     .volume_adjust = -0.19
+  },
+  [AZ_SND_LAUNCH_OTH_RAZORS] = {
+    .wave_kind = NOISE,
+    .env_attack = -0.0173337701708, .env_sustain = 0.450704216957,
+    .env_punch = 0.0839145034552, .env_decay = 0.133802816272,
+    .start_freq = 0.211267605424, .freq_delta_slide = -0.464788734913,
+    .vibrato_speed = 0.725352108479,
+    .arp_mod = -0.0140845179558, .arp_speed = -0.966199994087,
+    .repeat_speed = 0.58450704813, .phaser_sweep = 0.563380241394,
+    .lpf_cutoff = 0.781690120697, .lpf_ramp = -0.464788734913,
+    .lpf_resonance = 0.274647891521
   },
   [AZ_SND_PICKUP_ORDNANCE] = {
     .wave_kind = SQUARE,

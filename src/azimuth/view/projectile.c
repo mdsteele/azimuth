@@ -342,6 +342,9 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_OTH_ROCKET:
       draw_oth_projectile(proj, 9.0, clock);
       break;
+    case AZ_PROJ_OTH_SPRAY:
+      draw_oth_projectile(proj, 5.0, clock);
+      break;
     case AZ_PROJ_SPINE:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0, 0.3, 0);

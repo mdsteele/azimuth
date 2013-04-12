@@ -37,8 +37,8 @@
 // The level of health at or below which a baddie can be frozen.
 #define AZ_BADDIE_FREEZE_THRESHOLD 4.0
 
-void kill_baddie_internal(az_space_state_t *state, az_baddie_t *baddie,
-                          bool pickups_and_scripts) {
+static void kill_baddie_internal(
+    az_space_state_t *state, az_baddie_t *baddie, bool pickups_and_scripts) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   az_play_sound(&state->soundboard, baddie->data->death_sound);
   // Add particles for baddie debris:
@@ -150,13 +150,13 @@ static bool has_line_of_sight_to_ship(az_space_state_t *state,
   return (impact.type == AZ_IMP_SHIP);
 }
 
-static void fire_projectile(az_space_state_t *state, az_baddie_t *baddie,
-                            az_proj_kind_t kind, double forward,
-                            double firing_angle, double proj_angle_offset) {
+static az_projectile_t *fire_projectile(
+    az_space_state_t *state, az_baddie_t *baddie, az_proj_kind_t kind,
+    double forward, double firing_angle, double proj_angle_offset) {
   const double theta = firing_angle + baddie->angle;
-  az_add_projectile(state, kind, true,
-                    az_vadd(baddie->position, az_vpolar(forward, theta)),
-                    theta + proj_angle_offset, 1.0);
+  return az_add_projectile(
+      state, kind, true, az_vadd(baddie->position, az_vpolar(forward, theta)),
+      theta + proj_angle_offset, 1.0);
 }
 
 static az_vector_t force_field(
@@ -476,7 +476,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   // Apply velocity.
   if (az_vnonzero(baddie->velocity)) {
     az_impact_flags_t impact_flags = AZ_IMPF_BADDIE;
-    if (state->ship.temp_invincibility > 0.0) impact_flags |= AZ_IMPF_SHIP;
+    if ((baddie->data->properties & AZ_BADF_INCORPOREAL) ||
+        state->ship.temp_invincibility > 0.0) impact_flags |= AZ_IMPF_SHIP;
     az_impact_t impact;
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
                      baddie->position, az_vmul(baddie->velocity, time),
@@ -506,9 +507,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   // Perform kind-specific logic.
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_BAD_LUMP:
-      baddie->angle = az_mod2pi(baddie->angle + 3.0 * time);
-      break;
+    case AZ_BAD_MARKER: break; // Do nothing.
     case AZ_BAD_TURRET:
     case AZ_BAD_ARMORED_TURRET:
       // Aim gun:
@@ -948,8 +947,11 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->cooldown <= 0.0 &&
           angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6)) &&
           has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_OTH_ROCKET, 15.0, 0.0, 0.0);
-        baddie->cooldown = 2.0;
+        if (fire_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                            15.0, 0.0, 0.0) != NULL) {
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+          baddie->cooldown = 2.0;
+        }
       }
       break;
     case AZ_BAD_OTH_ORB:
@@ -961,6 +963,79 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         baddie->data->main_body.bounding_radius,
                         az_random(-AZ_PI, AZ_PI), 0.0);
         baddie->cooldown = 0.1;
+      }
+      break;
+    case AZ_BAD_OTH_SNAPDRAGON:
+      fly_towards_ship(state, baddie, time,
+                       5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
+      if (baddie->cooldown <= 0.0) {
+        az_baddie_t *razor;
+        switch (baddie->state) {
+          case 0:
+          case 1:
+          case 2:
+          case 4:
+          case 6:
+            if (angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6))) {
+              az_projectile_t *proj = fire_projectile(
+                  state, baddie, AZ_PROJ_OTH_ROCKET, 30.0, 0.0, 0.0);
+              if (proj != NULL) {
+                proj->power = 0.7;
+                az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+                baddie->cooldown = 2.0;
+                ++baddie->state;
+              }
+            }
+            break;
+          case 3:
+          case 7:
+            for (int i = 0; i < 360; i += 15) {
+              fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
+                              baddie->data->main_body.bounding_radius,
+                              AZ_DEG2RAD(i), 0.0);
+            }
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
+            baddie->cooldown = 2.0;
+            ++baddie->state;
+            break;
+          case 5:
+            for (int i = -1; i <= 1; ++i) {
+              if (az_insert_baddie(state, &razor)) {
+                az_init_baddie(razor, AZ_BAD_OTH_RAZOR, baddie->position,
+                               baddie->angle + AZ_PI + i * AZ_DEG2RAD(45));
+                razor->velocity =
+                  az_vpolar(az_random(300, 500), razor->angle);
+              } else break;
+            }
+            az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
+            baddie->cooldown = az_random(2.0, 4.0);
+            ++baddie->state;
+            break;
+          case 8:
+            for (int i = 0; i < 4; ++i) {
+              if (az_insert_baddie(state, &razor)) {
+                az_init_baddie(razor, AZ_BAD_OTH_RAZOR, baddie->position,
+                               baddie->angle + AZ_DEG2RAD(45) +
+                               i * AZ_DEG2RAD(90));
+                razor->state = 1;
+                razor->velocity = az_vpolar(300, razor->angle);
+              } else break;
+            }
+            az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
+            baddie->cooldown = az_random(2.0, 4.0);
+            baddie->state = 0;
+            break;
+        }
+      }
+      break;
+    case AZ_BAD_OTH_RAZOR:
+      if (baddie->state == 0) {
+        drift_towards_ship(state, baddie, time, 400, 500, 100);
+        baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(180) * time);
+      } else {
+        assert(baddie->state == 1);
+        baddie->velocity = az_vwithlen(baddie->velocity, 300.0);
+        baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(180) * time);
       }
       break;
   }
