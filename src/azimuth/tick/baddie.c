@@ -801,6 +801,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_BEAM_SENSOR:
+    case AZ_BAD_GUN_SENSOR:
       if (baddie->state == 0) {
         if (baddie->health < baddie->data->max_health) {
           baddie->state = 1;

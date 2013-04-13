@@ -708,9 +708,13 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_BEAM_SENSOR:
       glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.75, 0.25 + 0.5 * flare, 0.5); // reddish
+        if (baddie->state == 0) {
+          glColor3f(0.75, 0.25 + 0.5 * flare, 0.5); // reddish
+        } else glColor3f(0.25 + 0.5 * flare, 0.75, 0.5); // greenish
         glVertex2f(8, 0);
-        glColor3f(0.25, 0.5 * flare, 0.5 * flare); // dark red
+        if (baddie->state == 0) {
+          glColor3f(0.25, 0.5 * flare, 0.5 * flare); // dark red
+        } else glColor3f(0.25 * flare, 0.25 + 0.25 * flare, 0.5 * flare);
         const double radius = baddie->data->main_body.bounding_radius;
         for (int i = 0; i <= 360; i += 15) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
@@ -999,6 +1003,33 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_OTH_RAZOR:
       draw_oth(baddie, flare, frozen, clock, oth_razor_triangles,
                AZ_ARRAY_SIZE(oth_razor_triangles));
+      break;
+    case AZ_BAD_GUN_SENSOR:
+      glBegin(GL_TRIANGLE_FAN); {
+        if (baddie->state == 0) {
+          glColor3f(0.75, 0.4 + 0.35 * flare, 0.5);
+        } else glColor3f(0.25 + 0.5 * flare, 0.75, 0.5);
+        glVertex2f(5, 0);
+        if (baddie->state == 0) {
+          glColor4f(0.25, 0.2 + 0.3 * flare, 0.5 * flare, 0.5);
+        } else glColor4f(0.1 + 0.15 * flare, 0.25 + 0.25 * flare,
+                         0.5 * flare, 0.5);
+        for (int i = 0, j = baddie->data->main_body.polygon.num_vertices;
+             i >= 0; i = --j) {
+          const az_vector_t v = baddie->data->main_body.polygon.vertices[i];
+          glVertex2d(v.x, v.y);
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.5, 0.5, 0.5);
+        glVertex2f(-7, 0);
+        glColor3f(0.2, 0.2, 0.2);
+        const az_component_data_t *component = &baddie->data->components[0];
+        for (int i = 0, j = component->polygon.num_vertices; i >= 0; i = --j) {
+          const az_vector_t vertex = component->polygon.vertices[i];
+          glVertex2d(vertex.x, vertex.y);
+        }
+      } glEnd();
       break;
   }
 }

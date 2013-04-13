@@ -209,6 +209,17 @@ static const az_vector_t oth_crab_vertices[] = {
   {15, 10}, {24, 17}, {41, 12}, {22, 25}, {5, 16.66}
 };
 
+static const az_vector_t gun_sensor_main_vertices[] = {
+  {7, 15}, {-7, 15}, {-15, 7}, {-15, -7},
+  {-7, -15}, {7, -15}, {15, -7}, {15, 7}
+};
+static const az_vector_t gun_sensor_casing_vertices[] = {
+  {2, 0}, {10, 15}, {10, 20}, {-20, 20}, {-20, -20}, {10, -20}, {10, -15}
+};
+static az_component_data_t gun_sensor_components[] = {
+  { .polygon = AZ_INIT_POLYGON(gun_sensor_casing_vertices), .immunities = ~0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -419,6 +430,14 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {255, 255, 255, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_KAMIKAZE,
     .main_body = { .bounding_radius = 10.0, .impact_damage = 3.0 }
+  },
+  [AZ_BAD_GUN_SENSOR] = {
+    .max_health = 1000000.0, .overall_bounding_radius = 30.0,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(gun_sensor_main_vertices),
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
+                                  AZ_DMGF_REACTIVE) },
+    DECL_COMPONENTS(gun_sensor_components)
   }
 };
 
