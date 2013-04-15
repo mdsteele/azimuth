@@ -82,6 +82,7 @@ static void do_select_room(int x, int y, bool multi) {
 }
 
 static void add_new_room(void) {
+  if (AZ_LIST_SIZE(state.planet.rooms) >= AZ_MAX_NUM_ROOMS) return;
   deselect_all_rooms();
   const az_room_key_t room_key = AZ_LIST_SIZE(state.planet.rooms);
   az_editor_room_t *room = AZ_LIST_ADD(state.planet.rooms);

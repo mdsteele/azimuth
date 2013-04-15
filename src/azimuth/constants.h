@@ -42,7 +42,7 @@
 // The maximum number of progress flags allowed in the game scenario:
 #define AZ_MAX_NUM_FLAGS 128
 // The maximum number of rooms allowed in the game scenario:
-#define AZ_MAX_NUM_ROOMS 256
+#define AZ_MAX_NUM_ROOMS 960
 // The maximum number of zones allowed in the game scenario:
 #define AZ_MAX_NUM_ZONES 64
 // The radius of the planetoid in which the game takes place, in pixels:

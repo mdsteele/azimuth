@@ -20,9 +20,10 @@
 #include "azimuth/state/save.h"
 
 #include <assert.h>
-#include <inttypes.h> // for PRIx64 and SCNx64
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h> // for memset
 
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
@@ -39,9 +40,11 @@ void az_reset_saved_games(az_saved_games_t *games) {
 
 static bool parse_bitfield(FILE *file, uint64_t *array, int array_length) {
   assert(array_length >= 1);
+  memset(array, 0, array_length * sizeof(array[0]));
   if (fscanf(file, "=%"SCNx64, &array[0]) < 1) return false;
   for (int i = 1; i < array_length; ++i) {
-    if (fscanf(file, ":%"SCNx64, &array[i]) < 1) return false;
+    if (fgetc(file) != ':') break;
+    if (fscanf(file, "%"SCNx64, &array[i]) < 1) return false;
   }
   return true;
 }
@@ -76,10 +79,10 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
   // shields/energy/rockets/bombs.
   for (int i = 0; i < AZ_ARRAY_SIZE(upgrades); ++i) {
     for (int j = 0; j < 64; ++j) {
-      const int index = 64 * i + j;
-      if (index >= AZ_NUM_UPGRADES) break;
+      const int idx = 64 * i + j;
+      if (idx >= AZ_NUM_UPGRADES) break;
       if ((upgrades[i] & (UINT64_C(1) << j)) != 0) {
-        az_give_upgrade(player, (az_upgrade_t)index);
+        az_give_upgrade(player, (az_upgrade_t)idx);
       }
     }
   }
@@ -143,7 +146,9 @@ static bool write_bitfield(const char *prefix, const uint64_t *array,
                            int array_length, FILE *file) {
   assert(array_length >= 1);
   if (fprintf(file, " %s=%"PRIx64, prefix, array[0]) < 0) return false;
-  for (int i = 1; i < array_length; ++i) {
+  int last = array_length - 1;
+  while (last >= 0 && array[last] == UINT64_C(0)) --last;
+  for (int i = 1; i <= last; ++i) {
     if (fprintf(file, ":%"PRIx64, array[i]) < 0) return false;
   }
   return true;
