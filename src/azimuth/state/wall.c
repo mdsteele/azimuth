@@ -363,6 +363,13 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_TRIFAN,
     .color1 = {255, 255, 64, 255}, .color2 = {64, 64, 16, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_34)
+  },
+  // Silver short girder:
+  [35] = {
+    .style = AZ_WSTY_GIRDER, .bezel = 7.0,
+    .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_girder_short)
   }
 };
 

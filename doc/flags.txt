@@ -3,3 +3,4 @@
 3: Opened door to Filimun zone
 4: Opened door to Core zone
 5: Killed security drone in Colony room 14
+6: Unlocked door in Colony Energy Recycling Unit (room 69)
