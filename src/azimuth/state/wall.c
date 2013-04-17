@@ -131,6 +131,9 @@ static az_vector_t wall_vertices_32[] = {
 static az_vector_t wall_vertices_34[] = {
   {28, 28}, {-28, 28}, {-28, 11.6}, {11.6, -28}, {28, -28}
 };
+static az_vector_t wall_vertices_37[] = {
+  {0, 45}, {-20, 42}, {-10, 0}, {-7, -3}, {0, -45}, {22, 42}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -370,6 +373,20 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
     .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_short)
+  },
+  // Small stalactite:
+  [36] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 1000.0,
+    .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_18)
+  },
+  // Large stalactite:
+  [37] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 20.0,
+    .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_37)
   }
 };
 

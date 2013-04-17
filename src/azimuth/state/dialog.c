@@ -67,7 +67,14 @@ bool az_fprint_text(const az_text_t *text, FILE *file) {
           WRITE("$%c", escape);
         }
       }
-      WRITE("%.*s", fragment->length, fragment->chars);
+      for (int k = 0; k < fragment->length; ++k) {
+        const char ch = fragment->chars[k];
+        switch (ch) {
+          case '"': WRITE("\\\""); break;
+          case '\\': WRITE("\\\\"); break;
+          default: WRITE("%c", ch); break;
+        }
+      }
     }
   }
   return true;
