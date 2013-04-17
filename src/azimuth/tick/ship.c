@@ -43,6 +43,8 @@
 /*===========================================================================*/
 // Constants:
 
+// How long after using energy we are unable to recharge, in seconds:
+#define AZ_RECHARGE_COOLDOWN_TIME 0.15
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 0.6
 // The time needed to charge up hyper/mega ordnance, in seconds:
@@ -70,6 +72,18 @@
 
 /*===========================================================================*/
 // Basics:
+
+static bool try_use_energy(az_ship_t *ship, double energy, bool exhaust) {
+  if (ship->player.energy < energy) {
+    if (exhaust) ship->player.energy = 0.0;
+    return false;
+  }
+  ship->player.energy -= energy;
+  assert(ship->player.energy >= 0.0);
+  ship->recharge_cooldown =
+    fmax(ship->recharge_cooldown, AZ_RECHARGE_COOLDOWN_TIME);
+  return true;
+}
 
 static void recharge_ship_energy(az_player_t *player, double time) {
   const double recharge_rate = AZ_SHIP_BASE_RECHARGE_RATE +
@@ -348,12 +362,11 @@ static void fire_gun_multi(
     az_space_state_t *state, double energy_mult, az_proj_kind_t kind,
     double base_power, int num_shots, double dtheta, double theta_offset,
     az_sound_key_t sound) {
+  az_ship_t *ship = &state->ship;
   // Consume energy for this shot (or return early if we can't afford it).
   if (energy_mult > 0.0) {
-    const double energy_cost = 20.0 * energy_mult;
-    az_ship_t *ship = &state->ship;
-    if (ship->player.energy < energy_cost) return;
-    ship->player.energy -= energy_cost;
+    const double energy_cost = 10.0 * energy_mult;
+    if (!try_use_energy(ship, energy_cost, false)) return;
   }
   fire_projectiles(state, kind, base_power * gun_power_mult(state), num_shots,
                    dtheta, theta_offset, sound);
@@ -391,11 +404,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
-  if (ship->player.energy < energy_cost) {
-    ship->player.energy = 0.0;
-    return;
-  }
-  ship->player.energy -= energy_cost;
+  if (!try_use_energy(ship, energy_cost, true)) return;
 
   az_damage_flags_t damage_kind = AZ_DMGF_BEAM;
   if (minor == AZ_GUN_FREEZE) damage_kind |= AZ_DMGF_FREEZE;
@@ -937,10 +946,9 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
         assert(ship->temp_invincibility == 0.0);
         const double energy_cost = AZ_CPLUS_POWER_COST * time;
         if (controls->down_held || !controls->up_held ||
-            player->energy < energy_cost) {
+            !try_use_energy(ship, energy_cost, true)) {
           ship->cplus.state = AZ_CPLUS_INACTIVE;
         } else {
-          player->energy -= energy_cost;
           ship->velocity = az_vpolar(1000.0, ship->angle);
           az_particle_t *particle;
           if (az_insert_particle(state, &particle)) {
@@ -1007,7 +1015,9 @@ void az_tick_ship(az_space_state_t *state, double time) {
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
 
-  // Allow the shield flare to die down a bit.
+  // Cool down various ship systems.
+  assert(ship->recharge_cooldown >= 0.0);
+  ship->recharge_cooldown = fmax(0.0, ship->recharge_cooldown - time);
   assert(ship->shield_flare >= 0.0);
   assert(ship->shield_flare <= 1.0);
   ship->shield_flare =
@@ -1028,11 +1038,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
     if (state->mode == AZ_MODE_GAME_OVER) return;
   }
 
-  // Recharge energy, but only if we're not currently firing a beam gun or
-  // using the C-plus drive.
-  if (ship->cplus.state != AZ_CPLUS_ACTIVE &&
+  // Recharge energy, but only if we're not currently (1) using the C-plus
+  // drive, (2) waiting for energy usage to cool down, (3) trying to fire a
+  // beam gun, or (4) charging the gun.
+  if (ship->cplus.state != AZ_CPLUS_ACTIVE && ship->recharge_cooldown <= 0.0 &&
       !(controls->fire_held &&
-        (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM))) {
+        (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM ||
+         (player->gun1 == AZ_GUN_CHARGE && ship->gun_charge < 1.0)))) {
     recharge_ship_energy(player, time);
   }
 
