@@ -162,17 +162,21 @@ static void draw_hud_ordnance(float left, float top, bool is_rockets,
 
   // Draw icon.
   if (is_rockets) {
-    glColor3f(1, 1, 1);
+    glColor3f(1, 0.25, 0.25);
     az_draw_string(8, AZ_ALIGN_LEFT, left + 36, top + 2, "R");
   } else {
-    glColor3f(1, 1, 1);
+    glColor3f(0.25, 0.25, 1);
     az_draw_string(8, AZ_ALIGN_LEFT, left + 36, top + 2, "B");
   }
 }
 
 static void draw_hud_weapons_selection(const az_player_t *player) {
-  const int height = 25 + 2 * HUD_PADDING;
-  const int width = 115 + 2 * HUD_PADDING;
+  const bool wide = player->max_rockets > 0 || player->max_bombs > 0;
+  if (player->gun1 == AZ_GUN_NONE && !wide) return;
+  const bool tall = player->gun2 != AZ_GUN_NONE || player->max_bombs > 0;
+
+  const int height = (tall ? 25 : 10) + 2 * HUD_PADDING;
+  const int width = (wide ? 115 : 55) + 2 * HUD_PADDING;
   glPushMatrix(); {
     glTranslatef(AZ_SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
 
