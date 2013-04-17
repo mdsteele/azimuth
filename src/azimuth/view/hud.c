@@ -32,6 +32,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/dialog.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -336,7 +337,7 @@ static void draw_box(double left, double top, double width, double height) {
 #define DIALOG_BOX_MARGIN 10
 #define PORTRAIT_BOX_WIDTH 150
 #define PORTRAIT_BOX_HEIGHT 150
-#define PORTRAIT_BOX_MARGIN 15
+#define PORTRAIT_BOX_MARGIN 5
 #define DIALOG_HORZ_SPACING 20
 #define DIALOG_VERT_SPACING 50
 
@@ -424,43 +425,50 @@ static void draw_dialog_text(const az_space_state_t *state) {
   } glPopMatrix();
 }
 
-static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom) {
+static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom,
+                                 bool talking, az_clock_t clock) {
+  if (portrait == AZ_POR_NOTHING) return;
   glPushMatrix(); {
+    const GLfloat x_scale =
+      (PORTRAIT_BOX_WIDTH - 2 * PORTRAIT_BOX_MARGIN) / 100.0;
+    const GLfloat y_scale =
+      (PORTRAIT_BOX_HEIGHT - 2 * PORTRAIT_BOX_MARGIN) / 100.0;
     if (!is_bottom) {
       glTranslatef((AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH -
                     PORTRAIT_BOX_WIDTH) / 2 + PORTRAIT_BOX_MARGIN,
                    (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING) / 2 -
-                   PORTRAIT_BOX_HEIGHT + PORTRAIT_BOX_MARGIN, 0);
+                   PORTRAIT_BOX_MARGIN, 0);
+      glScalef(x_scale, -y_scale, 1);
     } else {
       glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + DIALOG_BOX_WIDTH -
-                    PORTRAIT_BOX_WIDTH) / 2 + PORTRAIT_BOX_MARGIN,
+                    PORTRAIT_BOX_WIDTH) / 2 + PORTRAIT_BOX_WIDTH -
+                   PORTRAIT_BOX_MARGIN,
                    (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING) / 2 +
-                   PORTRAIT_BOX_MARGIN, 0);
+                   PORTRAIT_BOX_HEIGHT - PORTRAIT_BOX_MARGIN, 0);
+      glScalef(-x_scale, -y_scale, 1);
     }
-    switch (portrait) {
-      case AZ_POR_NOTHING: break;
-      case AZ_POR_HOPPER: break; // TODO
-      case AZ_POR_HQ: break; // TODO
-      case AZ_POR_CPU_A: break; // TODO
-      case AZ_POR_CPU_B: break; // TODO
-      case AZ_POR_CPU_C: break; // TODO
-      case AZ_POR_TRICHORD: break; // TODO
-    }
+    az_draw_portrait(portrait, talking, clock);
   } glPopMatrix();
 }
 
 static void draw_dialog(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DIALOG);
+  bool talking = false;
+  const bool bottom_next = state->mode_data.dialog.bottom_next;
   switch (state->mode_data.dialog.step) {
     case AZ_DLS_BEGIN:
       draw_dialog_frames(state->mode_data.dialog.progress);
       break;
     case AZ_DLS_TALK:
+      talking = true;
+      // fallthrough
     case AZ_DLS_PAUSE:
       draw_dialog_frames(1.0);
       draw_dialog_text(state);
-      draw_dialog_portrait(state->mode_data.dialog.top, false);
-      draw_dialog_portrait(state->mode_data.dialog.bottom, true);
+      draw_dialog_portrait(state->mode_data.dialog.top, false,
+                           talking && !bottom_next, state->clock);
+      draw_dialog_portrait(state->mode_data.dialog.bottom, true,
+                           talking && bottom_next, state->clock);
       break;
     case AZ_DLS_END:
       draw_dialog_frames(1.0 - state->mode_data.dialog.progress);

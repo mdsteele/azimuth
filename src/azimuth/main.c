@@ -35,6 +35,7 @@
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/prefs.h"
 #include "azimuth/util/random.h" // for az_init_random
+#include "azimuth/view/dialog.h" // for az_init_portrait_drawing
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
 /*===========================================================================*/
@@ -82,6 +83,7 @@ int main(int argc, char **argv) {
   az_init_random();
   az_init_baddie_datas();
   az_init_wall_datas();
+  az_register_gl_init_func(az_init_portrait_drawing);
   az_register_gl_init_func(az_init_wall_drawing);
   az_init_gui(false, true);
 
