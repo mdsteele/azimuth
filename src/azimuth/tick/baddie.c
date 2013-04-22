@@ -1039,6 +1039,35 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(180) * time);
       }
       break;
+    case AZ_BAD_SECURITY_DRONE:
+      // Chase ship:
+      drift_towards_ship(state, baddie, time, 300,
+                         (az_vwithin(state->ship.position, baddie->position,
+                                     200) ? -300 : 300), 100);
+      // Orient body:
+      baddie->angle = az_vtheta(baddie->position);
+      // Aim gun:
+      baddie->components[0].angle = az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
+          az_vtheta(az_vsub(state->ship.position,
+                            baddie->position))) - baddie->angle);
+      // State 0: cooling off for next salvo:
+      if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        baddie->state = 10;
+      }
+      // State N: firing salvo, N shots left until next cooldown.
+      if (baddie->state > 0 && baddie->cooldown <= 0.0) {
+        const double offset =
+          (baddie->state % 2 ? AZ_DEG2RAD(-15) : AZ_DEG2RAD(15));
+        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+                        baddie->components[0].angle - offset, offset);
+        --baddie->state;
+        baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
+      }
+      break;
   }
 }
 

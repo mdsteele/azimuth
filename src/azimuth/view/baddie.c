@@ -41,10 +41,8 @@ static void az_gl_color(az_color_t color) {
   glColor4ub(color.r, color.g, color.b, color.a);
 }
 
-static void draw_turret(const az_baddie_t *baddie,
-                        az_color_t far_edge, az_color_t mid_edge,
-                        az_color_t near_edge, az_color_t center,
-                        az_color_t gun_edge, az_color_t gun_middle) {
+static void draw_turret_body_outer_edge(
+    const az_baddie_t *baddie, az_color_t far_edge, az_color_t mid_edge) {
   glBegin(GL_QUAD_STRIP); {
     for (int i = 0; i <= 360; i += 60) {
       az_gl_color(mid_edge);
@@ -53,17 +51,11 @@ static void draw_turret(const az_baddie_t *baddie,
       glVertex2d(20 * cos(AZ_DEG2RAD(i)), 20 * sin(AZ_DEG2RAD(i)));
     }
   } glEnd();
-  glPushMatrix(); {
-    glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
-    glBegin(GL_QUAD_STRIP); {
-      az_gl_color(gun_edge);
-      glVertex2f( 0,  5); glVertex2f(30,  5);
-      az_gl_color(gun_middle);
-      glVertex2f( 0,  0); glVertex2f(30,  0);
-      az_gl_color(gun_edge);
-      glVertex2f( 0, -5); glVertex2f(30, -5);
-    } glEnd();
-  } glPopMatrix();
+}
+
+static void draw_turret_body_center(
+    const az_baddie_t *baddie, az_color_t mid_edge, az_color_t near_edge,
+    az_color_t center) {
   az_gl_color(center);
   glBegin(GL_POLYGON); {
     for (int i = 0; i < 360; i += 60) {
@@ -78,6 +70,25 @@ static void draw_turret(const az_baddie_t *baddie,
       glVertex2d(18 * cos(AZ_DEG2RAD(i)), 18 * sin(AZ_DEG2RAD(i)));
     }
   } glEnd();
+}
+
+static void draw_turret(const az_baddie_t *baddie,
+                        az_color_t far_edge, az_color_t mid_edge,
+                        az_color_t near_edge, az_color_t center,
+                        az_color_t gun_edge, az_color_t gun_middle) {
+  draw_turret_body_outer_edge(baddie, far_edge, mid_edge);
+  glPushMatrix(); {
+    glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
+    glBegin(GL_QUAD_STRIP); {
+      az_gl_color(gun_edge);
+      glVertex2f( 0,  5); glVertex2f(30,  5);
+      az_gl_color(gun_middle);
+      glVertex2f( 0,  0); glVertex2f(30,  0);
+      az_gl_color(gun_edge);
+      glVertex2f( 0, -5); glVertex2f(30, -5);
+    } glEnd();
+  } glPopMatrix();
+  draw_turret_body_center(baddie, mid_edge, near_edge, center);
 }
 
 static void draw_atom_electron(double radius, az_vector_t position,
@@ -1030,6 +1041,51 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2d(vertex.x, vertex.y);
         }
       } glEnd();
+      break;
+    case AZ_BAD_SECURITY_DRONE:
+      draw_turret_body_outer_edge(baddie,
+          color3(0.25 + 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare - 0.1 * frozen,
+                 0.25 - 0.1 * flare + 0.1 * frozen),
+          color3(0.35 + 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare + 0.15 * frozen));
+      glPushMatrix(); {
+        glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
+        // Gun barrels:
+        const az_color_t gun_edge =
+          color3(0.25 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
+        const az_color_t gun_middle =
+          color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen);
+        for (int i = -1; i <= 1; i += 2) {
+          glBegin(GL_QUAD_STRIP); {
+            az_gl_color(gun_edge);
+            glVertex2f( 0,  2 * i); glVertex2f(30,  2 * i);
+            az_gl_color(gun_middle);
+            glVertex2f( 0,  6 * i); glVertex2f(30,  6 * i);
+            az_gl_color(gun_edge);
+            glVertex2f( 0, 10 * i); glVertex2f(30, 10 * i);
+          } glEnd();
+        }
+        // Counterweight:
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
+                    0.25 - 0.1 * flare - 0.1 * frozen,
+                    0.25 - 0.1 * flare + 0.1 * frozen);
+          glVertex2f(0, 0);
+          glVertex2f(-16, 15); glVertex2f(-24, 0); glVertex2f(-16, -15);
+        } glEnd();
+      } glPopMatrix();
+      draw_turret_body_center(baddie,
+          color3(0.35 + 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare - 0.15 * frozen,
+                 0.35 - 0.15 * flare + 0.15 * frozen),
+          color3(0.5 + 0.25 * flare - 0.25 * frozen,
+                 0.5 - 0.25 * flare - 0.25 * frozen,
+                 0.5 - 0.25 * flare + 0.25 * frozen),
+          color3(0.6 + 0.4 * flare - 0.3 * frozen,
+                 0.6 - 0.3 * flare - 0.3 * frozen,
+                 0.6 - 0.3 * flare + 0.4 * frozen));
       break;
   }
 }

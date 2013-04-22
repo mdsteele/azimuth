@@ -220,6 +220,15 @@ static az_component_data_t gun_sensor_components[] = {
   { .polygon = AZ_INIT_POLYGON(gun_sensor_casing_vertices), .immunities = ~0 }
 };
 
+static const az_vector_t security_drone_cannon_vertices[] = {
+  {30, 10}, {-10.66, 10}, {-16, 15}, {-24, 0}, {-16, -15}, {-10.66, -10},
+  {30, -10}, {30, -2}, {0, -2}, {0, 2}, {30, 2}
+};
+static az_component_data_t security_drone_components[] = {
+  { .polygon = AZ_INIT_POLYGON(security_drone_cannon_vertices),
+    .impact_damage = 10.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -438,6 +447,14 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
                                   AZ_DMGF_REACTIVE) },
     DECL_COMPONENTS(gun_sensor_components)
+  },
+  [AZ_BAD_SECURITY_DRONE] = {
+    .max_health = 20.0, .overall_bounding_radius = 31.7,
+    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .impact_damage = 10.0 },
+    DECL_COMPONENTS(security_drone_components)
   }
 };
 
