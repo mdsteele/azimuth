@@ -521,7 +521,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           angle_to_ship_within(state, baddie, baddie->components[0].angle,
                                AZ_DEG2RAD(6)) &&
           has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                         baddie->components[0].angle, 0.0);
         baddie->cooldown = 1.5;
       }
@@ -660,7 +660,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             angle_to_ship_within(state, baddie, baddie->components[0].angle,
                                  AZ_DEG2RAD(6)) &&
             has_line_of_sight_to_ship(state, baddie)) {
-          fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+          fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                           baddie->components[0].angle, 0.0);
           baddie->cooldown = 1.0;
         }
@@ -769,7 +769,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           angle_to_ship_within(state, baddie, baddie->components[0].angle,
                                AZ_DEG2RAD(6)) &&
           has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                         baddie->components[0].angle, 0.0);
         baddie->cooldown = 1.5;
       }
@@ -1061,8 +1061,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // State N: firing salvo, N shots left until next cooldown.
       if (baddie->state > 0 && baddie->cooldown <= 0.0) {
         const double offset =
-          (baddie->state % 2 ? AZ_DEG2RAD(-15) : AZ_DEG2RAD(15));
-        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0,
+          (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
+        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
                         baddie->components[0].angle - offset, offset);
         --baddie->state;
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);

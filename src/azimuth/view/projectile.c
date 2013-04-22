@@ -336,6 +336,14 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_LASER_PULSE:
+      glBegin(GL_QUADS); {
+        glColor3f(1, 0.3, 0);
+        glVertex2d(0, -1.5); glVertex2d(0, 1.5);
+        glColor4f(1, 0.3, 0, 0);
+        glVertex2d(-20, 1.5); glVertex2d(-20, -1.5);
+      } glEnd();
+      break;
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
       break;
