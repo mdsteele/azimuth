@@ -544,7 +544,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
                 door->kind == AZ_DOOR_FORCEFIELD) {
               SCRIPT_ERROR("wrong door kind");
             }
-            door->kind = AZ_DOOR_NORMAL;
+            door->kind = (door->kind == AZ_DOOR_LOCKED ?
+                          AZ_DOOR_UNLOCKED : AZ_DOOR_NORMAL);
           }
         }
         break;

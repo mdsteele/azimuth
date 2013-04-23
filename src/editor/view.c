@@ -383,6 +383,7 @@ static void draw_room_minimap(az_editor_state_t *state,
         case AZ_DOOR_MEGA_BOMB: glColor3f(0, 1, 1); break;
         case AZ_DOOR_PASSAGE: glColor3f(0, 1, 0); break;
         case AZ_DOOR_FORCEFIELD: continue; // don't draw
+        case AZ_DOOR_UNLOCKED: glColor3f(1, 1, 0); break;
       }
       glPushMatrix(); {
         glTranslated(editor_door->spec.position.x,

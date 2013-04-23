@@ -98,6 +98,10 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     case AZ_DOOR_FORCEFIELD:
       draw_forcefield(door, clock);
       return;
+    case AZ_DOOR_UNLOCKED:
+      color = (az_clock_mod(2, 4, clock) ? (az_color_t){192, 192, 192, 255} :
+               (az_color_t){192, 192, 64, 255});
+      break;
   }
 
   if (door->openness < 1.0) {

@@ -1,6 +1,7 @@
-1: Killed first boss (colony)
+1: Killed Snapdragon (Colony boss)
 2: Met first AI, upper armory door unlocked
 3: Opened door to Filimun zone
 4: Opened door to Core zone
 5: Killed security drone in Colony room 14
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
+7: Entered upper armory (room 23)
