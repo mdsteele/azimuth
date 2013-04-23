@@ -387,6 +387,18 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_37)
+  },
+  // Red/gray square block:
+  [38] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {160, 160, 160, 255}, .color2 = {32, 0, 0, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_32)
+  },
+  // Reddish-gray pipe:
+  [39] = {
+    .style = AZ_WSTY_PIPE,
+    .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   }
 };
 
