@@ -452,10 +452,31 @@ static void draw_camera_view(az_editor_state_t *state) {
     circle_vertices(AZ_PLANETOID_RADIUS);
   } glEnd();
 
+  // Determine bounds of current camera view:
+  const double camera_radius = state->zoom_level * AZ_SCREEN_RADIUS;
+  const double camera_mid_r = az_vnorm(state->camera);
+  const double camera_min_r = fmax(0.0, camera_mid_r - camera_radius);
+  const double camera_max_r = camera_mid_r + camera_radius;
+  const double camera_theta = az_vtheta(state->camera);
+  const double camera_theta_span = (camera_mid_r <= camera_radius ? AZ_TWO_PI :
+                                    2.0 * asin(camera_radius / camera_mid_r));
+
   // Draw other rooms:
   for (int i = 0; i < AZ_LIST_SIZE(state->planet.rooms); ++i) {
     if (i == state->current_room) continue;
     az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms, i);
+    // Determine whether the room is (possibly) in view.  If not, don't bother
+    // drawing it.
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
+    if (bounds->min_r + bounds->r_span + AZ_SCREEN_RADIUS < camera_min_r ||
+        bounds->min_r - AZ_SCREEN_RADIUS > camera_max_r) continue;
+    const double extra_theta_span = camera_theta_span +
+      (bounds->min_r <= AZ_SCREEN_RADIUS ? AZ_TWO_PI :
+       2.0 * asin(AZ_SCREEN_RADIUS / bounds->min_r));
+    if (az_mod2pi_nonneg(camera_theta -
+                         (bounds->min_theta - 0.5 * extra_theta_span)) >
+        bounds->theta_span + extra_theta_span) continue;
+    // Draw the room.
     if (!az_editor_is_in_minimap_mode(state)) {
       draw_room(state, room);
       if (room->selected) draw_camera_edge_bounds(room);
