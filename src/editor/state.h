@@ -154,8 +154,9 @@ typedef struct {
 bool az_load_editor_state(az_editor_state_t *state);
 
 // Save the editor state to disk.  Return false on failure, otherwise set
-// state->unsaved to false and return true.
-bool az_save_editor_state(az_editor_state_t *state);
+// state->unsaved to false and return true.  If summarize is true, also print
+// some summary info about the scenario to the console.
+bool az_save_editor_state(az_editor_state_t *state, bool summarize);
 
 void az_tick_editor_state(az_editor_state_t *state, double time);
 

@@ -122,16 +122,16 @@ typedef struct {
 
   // Space objects (these all get cleared out when we exit a room):
   az_uid_t boss_uid;
-  az_baddie_t baddies[100];
-  az_door_t doors[20];
-  az_gravfield_t gravfields[50];
-  az_node_t nodes[50];
+  az_baddie_t baddies[AZ_MAX_NUM_BADDIES];
+  az_door_t doors[AZ_MAX_NUM_DOORS];
+  az_gravfield_t gravfields[AZ_MAX_NUM_GRAVFIELDS];
+  az_node_t nodes[AZ_MAX_NUM_NODES];
   az_particle_t particles[500];
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
   az_speck_t specks[750];
   az_timer_t timers[5];
-  az_wall_t walls[250];
+  az_wall_t walls[AZ_MAX_NUM_WALLS];
   az_uuid_t uuids[AZ_NUM_UUID_SLOTS];
 } az_space_state_t;
 

@@ -513,6 +513,7 @@ static void do_set_camera_bounds(int x, int y) {
 static void do_add_baddie(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
+  if (AZ_LIST_SIZE(room->baddies) >= AZ_MAX_NUM_BADDIES) return;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_baddie_t *baddie = AZ_LIST_ADD(room->baddies);
   baddie->selected = true;
@@ -525,6 +526,7 @@ static void do_add_baddie(int x, int y) {
 static void do_add_door(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
+  if (AZ_LIST_SIZE(room->doors) >= AZ_MAX_NUM_DOORS) return;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_door_t *door = AZ_LIST_ADD(room->doors);
   door->selected = true;
@@ -538,6 +540,7 @@ static void do_add_door(int x, int y) {
 static void do_add_gravfield(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
+  if (AZ_LIST_SIZE(room->gravfields) >= AZ_MAX_NUM_GRAVFIELDS) return;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_gravfield_t *gravfield = AZ_LIST_ADD(room->gravfields);
   gravfield->selected = true;
@@ -552,6 +555,7 @@ static void do_add_gravfield(int x, int y) {
 static void do_add_node(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
+  if (AZ_LIST_SIZE(room->nodes) >= AZ_MAX_NUM_NODES) return;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
   node->selected = true;
@@ -565,6 +569,7 @@ static void do_add_node(int x, int y) {
 static void do_add_wall(int x, int y) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   select_all(room, false);
+  if (AZ_LIST_SIZE(room->walls) >= AZ_MAX_NUM_WALLS) return;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
   wall->selected = true;
@@ -1025,8 +1030,8 @@ static void try_set_uuid_slot(void) {
   }
 }
 
-static void do_save(void) {
-  if (!az_save_editor_state(&state)) {
+static void do_save(bool summarize) {
+  if (!az_save_editor_state(&state, summarize)) {
     printf("Failed to save scenario.\n");
   }
 }
@@ -1174,7 +1179,7 @@ static void event_loop(void) {
               else state.tool = AZ_TOOL_ROTATE;
               break;
             case AZ_KEY_S:
-              if (event.key.command) do_save();
+              if (event.key.command) do_save(event.key.shift);
               else state.spin_camera = !state.spin_camera;
               break;
             case AZ_KEY_T:
@@ -1185,7 +1190,9 @@ static void event_loop(void) {
               else if (event.key.shift) do_toggle_property(AZ_ROOMF_UNMAPPED);
               break;
             case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
-            case AZ_KEY_Z: do_change_zone(event.key.shift ? -1 : 1); break;
+            case AZ_KEY_Z:
+              if (!event.key.command) do_change_zone(event.key.shift ? -1 : 1);
+              break;
             case AZ_KEY_BACKSPACE: do_remove(); break;
             default: break;
           }

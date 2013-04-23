@@ -156,7 +156,58 @@ bool az_load_editor_state(az_editor_state_t *state) {
   return true;
 }
 
-bool az_save_editor_state(az_editor_state_t *state) {
+static void summarize_scenario(const az_planet_t *planet) {
+  printf("\n");
+  // Print names of upgrades that aren't in the scenario, or that are in the
+  // scenario multiple times:
+  for (int upg = 0; upg < AZ_NUM_UPGRADES; ++upg) {
+    int num_copies = 0, first_room = 0;
+    for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+      const az_room_t *room = &planet->rooms[room_index];
+      for (int i = 0; i < room->num_nodes; ++i) {
+        const az_node_spec_t *node = &room->nodes[i];
+        if (node->kind == AZ_NODE_UPGRADE &&
+            node->subkind.upgrade == (az_upgrade_t)upg) {
+          if (num_copies == 0) first_room = room_index;
+          else if (num_copies == 1) {
+            printf("\x1b[31m(%d) %s: %d %d", upg, az_upgrade_name(upg),
+                   first_room, room_index);
+          } else printf(" %d", room_index);
+          ++num_copies;
+        }
+      }
+    }
+    if (num_copies == 0) {
+      printf("\x1b[34m(%d) %s\x1b[m\n", upg, az_upgrade_name(upg));
+    } else if (num_copies > 1) printf("\x1b[m\n");
+  }
+  // Print number of rooms in each zone (both total rooms in that zone, and
+  // "populated" rooms in that zone, so we can tell how many more rooms need to
+  // be fleshed out):
+  printf("\n\x1b[33;1m        Zone  Pop  TTL  Frac\x1b[m\n");
+  int total_pop_rooms = 0;
+  for (int zone_index = 0; zone_index < planet->num_zones; ++zone_index) {
+    const az_zone_t *zone = &planet->zones[zone_index];
+    int num_rooms = 0, num_pop_rooms = 0;
+    for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+      const az_room_t *room = &planet->rooms[room_index];
+      if (room->zone_key == (az_zone_key_t)zone_index) {
+        ++num_rooms;
+        if (room->num_walls >= 8) {
+          ++num_pop_rooms;
+          ++total_pop_rooms;
+        }
+      }
+    }
+    printf("%12s  %3d  %3d  %3d%%\n", zone->name, num_pop_rooms, num_rooms,
+           (int)(100.0 * (double)num_pop_rooms / (double)num_rooms));
+  }
+  printf("\x1b[1m       TOTAL  %3d  %3d  %3d%%\x1b[m\n\n",
+         total_pop_rooms, planet->num_rooms,
+         (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms));
+}
+
+bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   assert(state != NULL);
   // Count unsaved rooms:
   int num_rooms_to_save = 0;
@@ -242,6 +293,8 @@ bool az_save_editor_state(az_editor_state_t *state) {
     }
   }
   assert(num_rooms_to_save_so_far == num_rooms_to_save);
+  // Summarize:
+  if (summarize) summarize_scenario(&planet);
   // Write to disk:
   const bool success =
     az_save_planet(&planet, "data", rooms_to_save, num_rooms_to_save);

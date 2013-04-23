@@ -33,13 +33,6 @@
 
 /*===========================================================================*/
 
-// TODO: move these elsewhere
-#define AZ_MAX_NUM_BADDIES 192
-#define AZ_MAX_NUM_DOORS 20
-#define AZ_MAX_NUM_GRAVFIELDS 50
-#define AZ_MAX_NUM_NODES 50
-#define AZ_MAX_NUM_WALLS 250
-
 typedef struct {
   FILE *file;
   bool success;
