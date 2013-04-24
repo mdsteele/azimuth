@@ -49,10 +49,10 @@ void az_relabel_editor_room(az_editor_room_t *room) {
   room->label = AZ_ERL_NORMAL_ROOM;
   AZ_LIST_LOOP(node, room->nodes) {
     if (node->spec.kind == AZ_NODE_CONSOLE) {
-      if (node->spec.subkind.console == AZ_CONS_COMM) {
-        room->label = AZ_ERL_COMM_ROOM;
-      } else if (node->spec.subkind.console == AZ_CONS_SAVE) {
-        room->label = AZ_ERL_SAVE_ROOM;
+      switch (node->spec.subkind.console) {
+        case AZ_CONS_COMM: room->label = AZ_ERL_COMM_ROOM; break;
+        case AZ_CONS_REFILL: room->label = AZ_ERL_REFILL_ROOM; break;
+        case AZ_CONS_SAVE: room->label = AZ_ERL_SAVE_ROOM; break;
       }
     } else if (node->spec.kind == AZ_NODE_UPGRADE) {
       room->label = AZ_ERL_UPGRADE_ROOM;

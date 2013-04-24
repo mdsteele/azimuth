@@ -301,13 +301,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
   },
-  // Green/purple hexagtonal block:
+  // Green/purple hexagonal block:
   [24] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 20.0,
     .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_24)
   },
-  // Large green/purple hexagtonal block:
+  // Large green/purple hexagonal block:
   [25] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 20.0,
     .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},

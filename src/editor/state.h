@@ -60,6 +60,7 @@ typedef enum {
   AZ_ERL_NORMAL_ROOM = 0,
   AZ_ERL_BOSS_ROOM,
   AZ_ERL_COMM_ROOM,
+  AZ_ERL_REFILL_ROOM,
   AZ_ERL_SAVE_ROOM,
   AZ_ERL_UPGRADE_ROOM
 } az_editor_room_label_t;

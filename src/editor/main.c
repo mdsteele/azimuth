@@ -1093,6 +1093,13 @@ static void event_loop(void) {
                   --state.text.length;
                 }
                 break;
+              case AZ_KEY_UP_ARROW:
+                state.text.cursor = az_imax(state.text.cursor - 39, 0);
+                break;
+              case AZ_KEY_DOWN_ARROW:
+                state.text.cursor = az_imin(state.text.cursor + 39,
+                                            state.text.length);
+                break;
               case AZ_KEY_LEFT_ARROW:
                 state.text.cursor = az_imax(state.text.cursor - 1, 0);
                 break;

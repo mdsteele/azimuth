@@ -423,6 +423,7 @@ static void draw_room_minimap(az_editor_state_t *state,
         case AZ_ERL_NORMAL_ROOM: AZ_ASSERT_UNREACHABLE();
         case AZ_ERL_BOSS_ROOM:    label = "B"; break;
         case AZ_ERL_COMM_ROOM:    label = "C"; break;
+        case AZ_ERL_REFILL_ROOM:  label = "R"; break;
         case AZ_ERL_SAVE_ROOM:    label = "S"; break;
         case AZ_ERL_UPGRADE_ROOM: label = "U"; break;
       }
@@ -628,10 +629,15 @@ static void draw_hud(az_editor_state_t* state) {
 
   // Draw the text box:
   if (state->text.action != AZ_ETA_NOTHING) {
+    const int chars_per_row = 39;
+    const int row_height = 22;
+    const int num_rows =
+      az_imax(1, (state->text.length + chars_per_row - 1) / chars_per_row);
     const GLfloat left = 5.5;
     const GLfloat right = AZ_SCREEN_WIDTH - 5.5;
     const GLfloat top = 20.5;
-    const GLfloat bottom = top + 22;
+    const GLfloat bottom = top + row_height * num_rows;
+    // Draw box:
     glColor3f(0, 0, 0); // black
     glBegin(GL_QUADS); {
       glVertex2f(left, top); glVertex2f(left, bottom);
@@ -642,15 +648,29 @@ static void draw_hud(az_editor_state_t* state) {
       glVertex2f(left, top); glVertex2f(left, bottom);
       glVertex2f(right, bottom); glVertex2f(right, top);
     } glEnd();
+    // Draw text:
     glColor3f(1, 1, 1); // white
-    az_draw_chars(16, AZ_ALIGN_LEFT, 9, 24, state->text.buffer,
-                  state->text.length);
+    for (int row = 0; row < num_rows; ++row) {
+      const int start = row * chars_per_row;
+      az_draw_chars(16, AZ_ALIGN_LEFT, 9, top + 3.5 + row_height * row,
+                    state->text.buffer + start,
+                    az_imin(chars_per_row, state->text.length - start));
+    }
+    // Draw cursor:
     if (az_clock_mod(2, 16, state->clock) != 0) {
+      int row = state->text.cursor / chars_per_row;
+      int col = state->text.cursor % chars_per_row;
+      if (row == num_rows) {
+        assert(col == 0);
+        row = num_rows - 1;
+        col = chars_per_row;
+      } else assert(row < num_rows);
       glColor3f(1, 0, 0); // red
       glBegin(GL_LINES); {
-        const GLfloat x = 9.5 + 16 * state->text.cursor;
-        glVertex2f(x, top + 3);
-        glVertex2f(x, bottom - 3);
+        const GLfloat x = left + 4 + 16 * col;
+        const GLfloat y = top + 3 + row_height * row;
+        glVertex2f(x, y);
+        glVertex2f(x, y + 15);
       } glEnd();
     }
   }
