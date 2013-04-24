@@ -28,12 +28,14 @@
 
 typedef enum {
   AZ_PAR_NOTHING = 0,
-  // BOOM: An explosion.  param1=radius
+  // BOOM: A small explosion.  param1=radius
   AZ_PAR_BOOM,
   // BEAM: A beam.  param1=length, param2=width/2
   AZ_PAR_BEAM,
   // EMBER: A shrinking glowball.  param1=radius
   AZ_PAR_EMBER,
+  // EXPLOSION: An explosion from ordnance.  param1=radius
+  AZ_PAR_EXPLOSION,
   // OTH_FRAGMENT: A rainbow triangle.  param1=radius, param2=spin_rate
   AZ_PAR_OTH_FRAGMENT,
   // NPS_PORTAL: A Nonlinear Paradimensional Shear portal.  param1=radius

@@ -38,6 +38,7 @@ static void with_color_alpha(az_color_t color, double alpha_factor) {
 }
 
 static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
+  assert(particle->kind != AZ_PAR_NOTHING);
   assert(particle->age <= particle->lifetime);
   switch (particle->kind) {
     case AZ_PAR_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -78,6 +79,22 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
           particle->param1 * (1.0 - particle->age / particle->lifetime);
         for (int i = 0; i <= 360; i += 30) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
+    case AZ_PAR_EXPLOSION:
+      glBegin(GL_QUAD_STRIP); {
+        const double tt = 1.0 - particle->age / particle->lifetime;
+        const double inner_alpha = tt * tt;
+        const double outer_alpha = tt;
+        const double inner_radius = particle->param1 * (1.0 - tt * tt * tt);
+        const double outer_radius = particle->param1;
+        for (int i = 0; i <= 360; i += 10) {
+          const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
+          with_color_alpha(particle->color, inner_alpha);
+          glVertex2d(inner_radius * c, inner_radius * s);
+          with_color_alpha(particle->color, outer_alpha);
+          glVertex2d(outer_radius * c, outer_radius * s);
         }
       } glEnd();
       break;

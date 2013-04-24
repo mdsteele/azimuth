@@ -112,12 +112,14 @@ static void on_projectile_impact(az_space_state_t *state,
       break;
     default:
       if (az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_BOOM;
-        particle->color = AZ_WHITE;
+        const bool splash = radius > 0.0;
+        particle->kind = (splash ? AZ_PAR_EXPLOSION : AZ_PAR_BOOM);
+        particle->color =
+          (splash ? (az_color_t){255, 240, 224, 192} : AZ_WHITE);
         particle->position = proj->position;
         particle->velocity = AZ_VZERO;
-        particle->lifetime = 0.3;
-        particle->param1 = (radius <= 0.0 ? 10.0 : radius);
+        particle->lifetime = (splash ? 0.15 * cbrt(radius) : 0.3);
+        particle->param1 = (splash ? radius : 10.0);
       }
       for (int i = 0; i < 5; ++i) {
         az_add_speck(state, AZ_WHITE, 1.0, proj->position,
