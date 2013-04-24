@@ -1,4 +1,4 @@
-@P z8 r235 t19 s6 x0.00 y49700.00 a-1.570796
+@P z8 r237 t19 s6 x0.00 y49700.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -10,11 +10,11 @@
 !T0"
   Save Station"
 !T1"
-  Security Hall"
+  Repair Bay"
 !T2"
   Auxiliary Power Station"
 !T3"
-  Repair Bay"
+  Security Hall"
 !T4"
   [Initializing systems].  Terminal online."
 !T5"

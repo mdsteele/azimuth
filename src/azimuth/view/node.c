@@ -52,16 +52,94 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_CONS_REFILL:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(10, 0); glVertex2d(0, 10);
-        glVertex2d(-10, 0); glVertex2d(0, -10);
+      // Frame:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(25, -20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(29, -24);
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(30, 0);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(35, 0);
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(25, 20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(29, 24);
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(-20, 20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-24, 24);
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(-20, -20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-24, -24);
+        glColor3f(0.5, 0.5, 0.5); glVertex2f(25, -20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(29, -24);
       } glEnd();
+      // Glow:
+      if (node->state == AZ_NS_ACTIVE) {
+        glColor4f(1, 1, 0, 0.1f + 0.03f * az_clock_zigzag(6, 3, clock));
+        glBegin(GL_POLYGON); {
+          glVertex2f(25, -20); glVertex2f(30, 0); glVertex2f(25, 20);
+          glVertex2f(-20, 20); glVertex2f(-20, -20);
+        } glEnd();
+      } else {
+        glBegin(GL_QUADS); {
+          const int index = (node->state == AZ_NS_READY ?
+                             4 - az_clock_mod(5, 6, clock) :
+                             az_clock_mod(5, 10, clock));
+          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
+          switch (index) {
+            case 0: glVertex2f(-20, 20); glVertex2f(-20, -20); break;
+            case 1: glVertex2f(-20, 20); glVertex2f( 25,  20); break;
+            case 2: glVertex2f( 25, 20); glVertex2f( 30,   0); break;
+            case 3: glVertex2f( 30,  0); glVertex2f( 25, -20); break;
+            case 4: glVertex2f(25, -20); glVertex2f(-20, -20); break;
+            default: AZ_ASSERT_UNREACHABLE();
+          }
+          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0);
+          switch (index) {
+            case 0: glVertex2f(-15, -20); glVertex2f(-15,   20); break;
+            case 1: glVertex2f(26.5, 15); glVertex2f(-20,   15); break;
+            case 2: glVertex2f( 24,   0); glVertex2f( 19,   20); break;
+            case 3: glVertex2f( 19, -20); glVertex2f( 24,    0); break;
+            case 4: glVertex2f(-20, -15); glVertex2f(26.5, -15); break;
+            default: AZ_ASSERT_UNREACHABLE();
+          }
+        } glEnd();
+      }
+      // Pipes:
+      for (int i = -1; i <= 1; i += 2) {
+        const int port_inner = (node->state == AZ_NS_ACTIVE ? 12 : 15);
+        const int port_outer = port_inner + 12;
+        // Port:
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.05, 0.15, 0.05);
+          glVertex2f(1.5, i * port_outer); glVertex2f(-0.5, i * port_inner);
+          glColor3f(0.325, 0.4, 0.325);
+          glVertex2f(-3, i * port_outer); glVertex2f(-3, i * port_inner);
+          glColor3f(0.05, 0.15, 0.05);
+          glVertex2f(-7.5, i * port_outer); glVertex2f(-5.5, i * port_inner);
+        } glEnd();
+        // Pipe:
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.05, 0.15, 0.05);
+          glVertex2f(1.5, i * port_outer); glVertex2f(1.5, i * 30);
+          glColor3f(0.325, 0.4, 0.325);
+          glVertex2f(-3, i * port_outer); glVertex2f(-3, i * 30);
+          glColor3f(0.05, 0.15, 0.05);
+          glVertex2f(-7.5, i * port_outer); glVertex2f(-7.5, i * 30);
+        } glEnd();
+        // Sub-coupling:
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.1, 0.175, 0.1);
+          glVertex2f(2, i * port_outer); glVertex2f(2, i * (port_outer + 2));
+          glColor3f(0.375, 0.425, 0.375);
+          glVertex2f(-3, i * port_outer); glVertex2f(-3, i * (port_outer + 2));
+          glColor3f(0.1, 0.175, 0.1);
+          glVertex2f(-8, i * port_outer); glVertex2f(-8, i * (port_outer + 2));
+        } glEnd();
+        // Coupling:
+        glBegin(GL_QUAD_STRIP); {
+          glColor3f(0.1, 0.175, 0.1);
+          glVertex2f(3, i * 36); glVertex2f(3, i * 30);
+          glColor3f(0.375, 0.425, 0.375);
+          glVertex2f(-3, i * 36); glVertex2f(-3, i * 30);
+          glColor3f(0.1, 0.175, 0.1);
+          glVertex2f(-9, i * 36); glVertex2f(-9, i * 30);
+        } glEnd();
+      }
       break;
     case AZ_CONS_SAVE:
       // Pipe:
@@ -761,6 +839,47 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
           } glEnd();
         }
       } glPopMatrix();
+      break;
+    case AZ_DOOD_PIPE_SHORT:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-10, 5); glVertex2f(10, 5);
+        glColor3f(0.65, 0.9, 0.65);
+        glVertex2f(-10, 0); glVertex2f(10, 0);
+        glColor3f(0.1, 0.4, 0.1);
+        glVertex2f(-10, -5); glVertex2f(10, -5);
+      } glEnd();
+      break;
+    case AZ_DOOD_SUPPLY_BOX:
+      glColor3f(0.28, 0.28, 0.28);
+      glBegin(GL_POLYGON); {
+        glVertex2f( 20,  15); glVertex2f(-20,  15);
+        glVertex2f(-20, -15); glVertex2f( 20, -15);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); glVertex2f( 20,  15);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f( 25,  20);
+
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-14,  15);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-19,  20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-18,  13);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-23,  18);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-20,   9);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-25,  14);
+
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-20, -15);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-25, -20);
+
+        glColor3f(0.25, 0.25, 0.25); glVertex2f( 14, -15);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f( 19, -20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f( 18, -13);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f( 23, -18);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f( 20,  -9);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f( 25, -14);
+
+        glColor3f(0.25, 0.25, 0.25); glVertex2f( 20,  15);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f( 25,  20);
+      } glEnd();
       break;
   }
 }

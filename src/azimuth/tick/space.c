@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h"
@@ -71,6 +72,29 @@ void az_after_entering_room(az_space_state_t *state) {
 }
 
 /*===========================================================================*/
+
+static az_text_fragment_t refilled_shields_only_fragments[] = {
+  {.color = {255, 255, 255, 255}, .length = 17, .chars = "Shields refilled."}
+};
+static az_text_line_t refilled_shields_only_lines[] = {
+  {.total_length = 17, .num_fragments = 1,
+   .fragments = refilled_shields_only_fragments}
+};
+static const az_text_t refilled_shields_only_text = {
+  .num_lines = 1, .lines = refilled_shields_only_lines
+};
+
+static az_text_fragment_t refilled_shields_and_ammo_fragments[] = {
+  {.color = {255, 255, 255, 255}, .length = 32,
+   .chars = "Shields and ammunition refilled."}
+};
+static az_text_line_t refilled_shields_and_ammo_lines[] = {
+  {.total_length = 32, .num_fragments = 1,
+   .fragments = refilled_shields_and_ammo_fragments}
+};
+static const az_text_t refilled_shields_and_ammo_text = {
+  .num_lines = 1, .lines = refilled_shields_and_ammo_lines
+};
 
 static void tick_console_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_CONSOLE);
@@ -129,6 +153,12 @@ static void tick_console_mode(az_space_state_t *state, double time) {
       break;
     case AZ_CSS_FINISH:
       assert(*progress == 0.0);
+      if (node->subkind.console == AZ_CONS_REFILL) {
+        state->message.time_remaining = 4.0;
+        if (player->max_rockets == 0 && player->max_bombs == 0) {
+          state->message.text = &refilled_shields_only_text;
+        } else state->message.text = &refilled_shields_and_ammo_text;
+      }
       state->mode = AZ_MODE_NORMAL;
       az_run_script(state, node->on_use);
       break;
