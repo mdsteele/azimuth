@@ -134,6 +134,12 @@ static az_vector_t wall_vertices_34[] = {
 static az_vector_t wall_vertices_37[] = {
   {0, 45}, {-20, 42}, {-10, 0}, {-7, -3}, {0, -45}, {22, 42}
 };
+static az_vector_t wall_vertices_41[] = {
+  {0, -80}, {24, -94}, {47, -93}, {98, -98}, {120, -50}, {110, -15},
+  {118, 20}, {119, 52}, {102, 95}, {75, 90}, {30, 88}, {0, 80}, {-30, 97},
+  {-80, 90}, {-105, 60}, {-103, 37}, {-120, 20}, {-110, -40}, {-115, -70},
+  {-100, -90}, {-40, -95}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -230,7 +236,7 @@ static az_wall_data_t wall_datas[] = {
   // Big gray/brown boulder:
   [13] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 40.0,
-    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {96, 84, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_13)
   },
@@ -399,6 +405,19 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_PIPE,
     .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Red/gray triangle block:
+  [40] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {160, 160, 160, 255}, .color2 = {32, 0, 0, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_34)
+  },
+  // Huge gray/brown boulder:
+  [41] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 70.0,
+    .color1 = {96, 88, 80, 255}, .color2 = {48, 32, 16, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_41)
   }
 };
 
