@@ -33,11 +33,11 @@ static az_vector_t wall_vertices_0[] = {
   {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
 };
 static az_vector_t wall_vertices_1[] = {
-  {50, 50}, {-50, 50}, {-50, -50}, {50, -50}
+  {50, -50}, {50, 50}, {-50, 50}, {-50, -50}
 };
 static az_vector_t wall_vertices_2[] = {
-  {10, -25}, {60, -25}, {60, 25}, {-10.710678, 25},
-  {-60.710678, -25}, {-25.355339, -60.355339}
+  {60, 25}, {-10.710678, 25}, {-60.710678, -25}, {-25.355339, -60.355339},
+  {10, -25}, {60, -25}
 };
 static az_vector_t wall_vertices_3[] = {
   {-20, -8}, {15, -10}, {25, 0}, {15, 10}, {-20, 8}
@@ -55,6 +55,9 @@ static az_vector_t wall_vertices_girder_long[] = {
 };
 static az_vector_t wall_vertices_girder_long_capped[] = {
   {25, 0}, {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
+};
+static az_vector_t wall_vertices_girder_long_double_capped[] = {
+  {50, -25}, {50, 25}, {-50, 25}, {-50, -25}
 };
 static az_vector_t wall_vertices_girder_short[] = {
   {2, 0}, {27, 25}, {-27, 25}, {-2, 0}, {-27, -25}, {27, -25}
@@ -147,6 +150,9 @@ static az_vector_t wall_vertices_42[] = {
 static az_vector_t wall_vertices_43[] = {
   {35, 34}, {9, 32}, {-20, 20}, {-31, -8}, {-33, -35},
   {30, -35}, {30, -33}, {31, -31}, {33, -30}, {35, -30}
+};
+static az_vector_t wall_vertices_47[] = {
+  {33, -30}, {33, 30}, {-32, 30}, {-32, -30}
 };
 
 static az_wall_data_t wall_datas[] = {
@@ -460,6 +466,34 @@ static az_wall_data_t wall_datas[] = {
     .color3 = {0, 0, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_42)
+  },
+  // Silver long double-capped girder:
+  [46] = {
+    .style = AZ_WSTY_GIRDER_CAPS, .bezel = 5.0,
+    .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long_double_capped)
+  },
+  // Blue-gray girder box:
+  [47] = {
+    .style = AZ_WSTY_GIRDER_CAPS, .bezel = 7.0,
+    .color1 = {192, 192, 255, 255}, .color2 = {64, 64, 96, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_47)
+  },
+  // Yellowish-gray angle pipe:
+  [48] = {
+    .style = AZ_WSTY_QUADSTRIP_213,
+    .color1 = {192, 192, 96, 255}, .color2 = {48, 48, 32, 255},
+    .color3 = {48, 48, 32, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  // Reddish-gray angle pipe:
+  [49] = {
+    .style = AZ_WSTY_QUADSTRIP_213,
+    .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
+    .color3 = {32, 24, 24, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_2)
   }
 };
 
