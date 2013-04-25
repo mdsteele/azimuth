@@ -167,21 +167,33 @@ static void draw_metal(bool alt, az_color_t color1, az_color_t color2,
   } glEnd();
 }
 
-static void draw_pipe(az_color_t color1, az_color_t color2,
-                      az_polygon_t polygon) {
+static void draw_quadstrip(double param, az_color_t color1, az_color_t color2,
+                           az_color_t color3, az_polygon_t polygon) {
+  assert(param > -1.0 && param < 1.0);
+  assert(polygon.num_vertices % 2 == 0);
+  const int n = polygon.num_vertices / 2;
+  az_vector_t midpoints[n];
+  for (int i = 0; i < n; ++i) {
+    const az_vector_t p1 = polygon.vertices[i];
+    const az_vector_t p2 = polygon.vertices[polygon.num_vertices - i - 1];
+    midpoints[i] = az_vadd(p2, az_vmul(az_vsub(p1, p2), 0.5 * (1.0 + param)));
+  }
   glBegin(GL_QUAD_STRIP); {
-    assert(polygon.num_vertices >= 3);
-    const float top = polygon.vertices[0].y;
-    const float bottom = polygon.vertices[polygon.num_vertices - 1].y;
-    const float middle = (top + bottom) * 0.5f;
-    const float right = polygon.vertices[0].x;
-    const float left = polygon.vertices[1].x;
-    glColor4ub(color2.r, color2.g, color2.b, color2.a);
-    glVertex2f(left, top); glVertex2f(right, top);
-    glColor4ub(color1.r, color1.g, color1.b, color1.a);
-    glVertex2f(left, middle); glVertex2f(right, middle);
-    glColor4ub(color2.r, color2.g, color2.b, color2.a);
-    glVertex2f(left, bottom); glVertex2f(right, bottom);
+    for (int i = 0; i < n; ++i) {
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2d(midpoints[i].x, midpoints[i].y);
+    }
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    for (int i = 0; i < n; ++i) {
+      glColor4ub(color3.r, color3.g, color3.b, color3.a);
+      glVertex2d(polygon.vertices[polygon.num_vertices - i - 1].x,
+                 polygon.vertices[polygon.num_vertices - i - 1].y);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2d(midpoints[i].x, midpoints[i].y);
+    }
   } glEnd();
 }
 
@@ -231,8 +243,17 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
       case AZ_WSTY_METAL_ALT:
         draw_metal(true, data->color1, data->color2, data->polygon);
         break;
-      case AZ_WSTY_PIPE:
-        draw_pipe(data->color1, data->color2, data->polygon);
+      case AZ_WSTY_QUADSTRIP_123:
+        draw_quadstrip(data->bezel, data->color1, data->color2, data->color3,
+                       data->polygon);
+        break;
+      case AZ_WSTY_QUADSTRIP_213:
+        draw_quadstrip(data->bezel, data->color2, data->color1, data->color3,
+                       data->polygon);
+        break;
+      case AZ_WSTY_QUADSTRIP_321:
+        draw_quadstrip(data->bezel, data->color3, data->color2, data->color1,
+                       data->polygon);
         break;
       case AZ_WSTY_TRIFAN:
         draw_trifan(data->color1, data->color2, data->polygon);
