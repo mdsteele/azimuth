@@ -73,6 +73,12 @@
 /*===========================================================================*/
 // Basics:
 
+static bool is_normal_mode(const az_space_state_t *state) {
+  return (state->mode == AZ_MODE_NORMAL ||
+          (state->mode == AZ_MODE_DOORWAY &&
+           state->mode_data.doorway.step == AZ_DWS_FADE_IN));
+}
+
 static bool try_use_energy(az_ship_t *ship, double energy, bool exhaust) {
   if (ship->player.energy < energy) {
     if (exhaust) ship->player.energy = 0.0;
@@ -1010,7 +1016,7 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
 // Complete tick function:
 
 void az_tick_ship(az_space_state_t *state, double time) {
-  if (state->mode == AZ_MODE_GAME_OVER) return;
+  assert(is_normal_mode(state));
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
@@ -1059,8 +1065,18 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // Apply tractor beam's velocity changes:
+  if (ship->tractor_beam.active) {
+    assert(tractor_node != NULL);
+    assert(tractor_node->kind == AZ_NODE_TRACTOR);
+    ship->velocity = az_vflatten(ship->velocity,
+        az_vsub(ship->position, tractor_node->position));
+    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
+  } else assert(tractor_node == NULL);
+
   // Apply velocity.  If the tractor beam is active, that implies angular
   // motion (around the locked-onto node); otherwise, linear motion.
+  assert(is_normal_mode(state));
   az_impact_flags_t impact_flags = AZ_IMPF_SHIP;
   if (ship->temp_invincibility > 0.0) impact_flags |= AZ_IMPF_BADDIE;
   if (ship->tractor_beam.active) {
@@ -1072,8 +1088,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     assert(az_dapprox(0.0, az_vdot(ship->velocity, delta)));
     assert(az_dapprox(ship->tractor_beam.distance, az_vnorm(delta)));
     const double invdist = 1.0 / ship->tractor_beam.distance;
-    const double dtheta =
-      time * invdist *
+    const double dtheta = time * invdist *
       az_vdot(ship->velocity, az_vrot90ccw(az_vmul(delta, invdist)));
 
     // Figure out what, if anything, the ship hits:
@@ -1092,9 +1107,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
         az_vmul(ship->velocity, time), impact_flags, AZ_SHIP_UID, &impact);
     on_ship_impact(state, &impact, NULL);
   }
+  if (!is_normal_mode(state)) return;
 
   // If we press the util key while near a console, use it.
-  if (controls->util_pressed && state->mode == AZ_MODE_NORMAL) {
+  if (controls->util_pressed) {
     const az_node_t *console = NULL;
     double best_dist = AZ_CONSOLE_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
@@ -1116,32 +1132,27 @@ void az_tick_ship(az_space_state_t *state, double time) {
         az_vsub(ship->position, console->position);
       state->mode_data.console.angle_delta =
         az_mod2pi(ship->angle - console->angle);
+      return;
     }
   }
 
   // Check if we hit an upgrade.
-  if (state->mode == AZ_MODE_NORMAL) {
-    AZ_ARRAY_LOOP(node, state->nodes) {
-      if (node->kind != AZ_NODE_UPGRADE) continue;
-      if (az_vwithin(ship->position, node->position,
-                     AZ_UPGRADE_COLLECTION_RADIUS)) {
-        state->mode = AZ_MODE_UPGRADE;
-        state->mode_data.upgrade.step = AZ_UGS_OPEN;
-        state->mode_data.upgrade.progress = 0.0;
-        state->mode_data.upgrade.upgrade = node->subkind.upgrade;
-        const az_script_t *script = node->on_use;
-        node->kind = AZ_NODE_NOTHING;
-        az_give_upgrade(player, node->subkind.upgrade);
-        az_run_script(state, script);
-        break;
-      }
+  assert(is_normal_mode(state));
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind != AZ_NODE_UPGRADE) continue;
+    if (az_vwithin(ship->position, node->position,
+                   AZ_UPGRADE_COLLECTION_RADIUS)) {
+      state->mode = AZ_MODE_UPGRADE;
+      state->mode_data.upgrade.step = AZ_UGS_OPEN;
+      state->mode_data.upgrade.progress = 0.0;
+      state->mode_data.upgrade.upgrade = node->subkind.upgrade;
+      const az_script_t *script = node->on_use;
+      node->kind = AZ_NODE_NOTHING;
+      az_give_upgrade(player, node->subkind.upgrade);
+      az_run_script(state, script);
+      return;
     }
   }
-
-  // By now it's possible we've changed modes (e.g. we may have gone through a
-  // door, or been destroyed by a wall impact).  We should only continue
-  // onwards if we're still in normal mode.
-  if (state->mode != AZ_MODE_NORMAL) return;
 
   // Apply various forces:
   bool is_in_water;
@@ -1172,14 +1183,6 @@ void az_tick_ship(az_space_state_t *state, double time) {
       az_run_script(state, tractor_node->on_use);
     }
   }
-  // Apply tractor beam's velocity changes:
-  if (ship->tractor_beam.active) {
-    assert(tractor_node != NULL);
-    assert(tractor_node->kind == AZ_NODE_TRACTOR);
-    ship->velocity = az_vflatten(ship->velocity,
-        az_vsub(ship->position, tractor_node->position));
-    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
-  } else assert(tractor_node == NULL);
 
   fire_weapons(state, time);
 }

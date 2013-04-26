@@ -206,8 +206,15 @@ static void on_projectile_hit_ship(
     az_space_state_t *state, az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(proj->fired_by_enemy);
-  assert(az_ship_is_present(&state->ship));
+  az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
   proj->last_hit_uid = AZ_SHIP_UID;
+  // Knock the ship around:
+  ship->velocity = az_vadd(ship->velocity, az_vwithlen(
+      az_vsub(ship->position, proj->position), 10.0 * proj->power *
+      (proj->data->impact_damage + proj->data->splash_damage) +
+      8.0 * proj->data->impact_shake));
+  // Damage the ship and explode the projectile:
   az_damage_ship(state, proj->data->impact_damage * proj->power, false);
   on_projectile_hit_target(state, proj, normal);
 }

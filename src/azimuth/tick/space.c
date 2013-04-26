@@ -424,12 +424,6 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   az_tick_particles(state, time);
   az_tick_specks(state, time);
   switch (state->mode) {
-    case AZ_MODE_NORMAL:
-      az_tick_timers(state, time);
-      tick_most_objects(state, time);
-      az_tick_ship(state, time);
-      az_tick_nodes(state, time);
-      break;
     case AZ_MODE_CONSOLE:
       tick_console_mode(state, time);
       tick_most_objects(state, time);
@@ -440,12 +434,15 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
-      if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
-        az_tick_timers(state, time);
-        tick_most_objects(state, time);
+      if (state->mode_data.doorway.step != AZ_DWS_FADE_IN) break;
+      // fallthrough
+    case AZ_MODE_NORMAL:
+      az_tick_timers(state, time);
+      tick_most_objects(state, time);
+      if (state->mode != AZ_MODE_GAME_OVER) {
         az_tick_ship(state, time);
-        az_tick_nodes(state, time);
       }
+      az_tick_nodes(state, time);
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
