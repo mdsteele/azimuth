@@ -524,6 +524,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                         baddie->components[0].angle, 0.0);
         baddie->cooldown = 1.5;
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
       }
       break;
     case AZ_BAD_ZIPPER:
@@ -662,6 +663,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             has_line_of_sight_to_ship(state, baddie)) {
           fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                           baddie->components[0].angle, 0.0);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
           baddie->cooldown = 1.0;
         }
         // Randomly go crazy:
@@ -771,6 +773,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           has_line_of_sight_to_ship(state, baddie)) {
         fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
                         baddie->components[0].angle, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
         baddie->cooldown = 1.5;
       }
       break;
@@ -1064,6 +1067,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
         fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
                         baddie->components[0].angle - offset, offset);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
         --baddie->state;
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
       }

@@ -393,6 +393,12 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.2, .vibrato_depth = 0.5, .vibrato_speed = 0.75,
     .repeat_speed = 0.55, .phaser_offset = 0.25, .phaser_sweep = -0.25
   },
+  [AZ_SND_FIRE_LASER_PULSE] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.11852, .env_punch = 0.132, .env_decay = 0.183098584414,
+    .start_freq = 0.535211265087, .freq_limit = 0.2, .freq_slide = -0.26748,
+    .square_duty = 0.18045, .duty_sweep = 0.18344
+  },
   [AZ_SND_FIRE_MISSILE_BEAM] = {
     .wave_kind = SAWTOOTH,
     .env_sustain = 0.03084, .env_decay = 0.66197180748,
