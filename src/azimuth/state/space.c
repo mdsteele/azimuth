@@ -230,6 +230,22 @@ bool az_insert_particle(az_space_state_t *state,
   return false;
 }
 
+void az_add_beam(az_space_state_t *state, az_color_t color, az_vector_t start,
+                 az_vector_t end, double lifetime, double semiwidth) {
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BEAM;
+    particle->color = color;
+    particle->position = start;
+    particle->velocity = AZ_VZERO;
+    const az_vector_t delta = az_vsub(end, start);
+    particle->angle = az_vtheta(delta);
+    particle->lifetime = lifetime;
+    particle->param1 = az_vnorm(delta);
+    particle->param2 = semiwidth;
+  }
+}
+
 void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
                   az_vector_t position, az_vector_t velocity) {
   AZ_ARRAY_LOOP(speck, state->specks) {

@@ -492,23 +492,13 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     }
 
     // Add a particle for the beam itself:
-    az_particle_t *particle;
-    if (az_insert_particle(state, &particle)) {
-      particle->kind = AZ_PAR_BEAM;
-      const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
-      particle->color = (az_color_t){
-        (minor == AZ_GUN_FREEZE ? alt : 255),
-        (minor == AZ_GUN_FREEZE ? 128 : minor == AZ_GUN_PIERCE ? 0 : alt),
-        (minor == AZ_GUN_FREEZE ? 255 : minor == AZ_GUN_PHASE ? 0 : alt),
-        192};
-      particle->position = beam_start;
-      particle->velocity = AZ_VZERO;
-      particle->angle = beam_angle;
-      particle->lifetime = 0.0;
-      particle->param1 = az_vdist(beam_start, impact.position);
-      particle->param2 =
-        sqrt(damage_mult) * (3.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
-    }
+    const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+    const az_color_t beam_color = {
+      (minor == AZ_GUN_FREEZE ? alt : 255),
+      (minor == AZ_GUN_FREEZE ? 128 : minor == AZ_GUN_PIERCE ? 0 : alt),
+      (minor == AZ_GUN_FREEZE ? 255 : minor == AZ_GUN_PHASE ? 0 : alt), 192};
+    az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+        sqrt(damage_mult) * (3.0 + 0.5 * az_clock_zigzag(8, 1, state->clock)));
 
     // Resolve hits:
     bool did_hit = true;

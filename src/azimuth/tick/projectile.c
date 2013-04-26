@@ -458,17 +458,8 @@ static void projectile_special_logic(az_space_state_t *state,
           on_projectile_hit_wall(state, proj, impact.normal);
         }
         // Add a particle for the beam.
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_BEAM;
-          particle->color = (az_color_t){255, 64, 0, 192};
-          particle->position = beam_start;
-          particle->velocity = AZ_VZERO;
-          particle->angle = state->ship.angle;
-          particle->lifetime = 0.3;
-          particle->param1 = az_vdist(beam_start, impact.position);
-          particle->param2 = 5.0;
-        }
+        az_add_beam(state, (az_color_t){255, 64, 0, 192}, beam_start,
+                    impact.position, 0.3, 5.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_MISSILE_BEAM);
       } else {
         proj->position =

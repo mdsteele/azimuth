@@ -722,25 +722,17 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           }
         }
         // Add particles for the beam.
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_BEAM;
-          particle->color = (az_color_t){
-            (az_clock_mod(6, 1, state->clock) < 3 ? 255 : 64),
-            (az_clock_mod(6, 1, state->clock + 2) < 3 ? 255 : 64),
-            (az_clock_mod(6, 1, state->clock + 4) < 3 ? 255 : 64), 192};
-          particle->position = beam_start;
-          particle->velocity = AZ_VZERO;
-          particle->angle = baddie->angle;
-          particle->lifetime = 0.0;
-          particle->param1 = az_vdist(impact.position, particle->position);
-          particle->param2 = 6 + az_clock_zigzag(6, 1, state->clock);
-          for (int i = 0; i < 5; ++i) {
-            az_add_speck(state, particle->color, 1.0, impact.position,
-                         az_vpolar(az_random(20.0, 70.0),
-                                   az_vtheta(impact.normal) +
-                                   az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-          }
+        const az_color_t beam_color = {
+          (az_clock_mod(6, 1, state->clock) < 3 ? 255 : 64),
+          (az_clock_mod(6, 1, state->clock + 2) < 3 ? 255 : 64),
+          (az_clock_mod(6, 1, state->clock + 4) < 3 ? 255 : 64), 192};
+        az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+                    6 + az_clock_zigzag(6, 1, state->clock));
+        for (int i = 0; i < 5; ++i) {
+          az_add_speck(state, beam_color, 1.0, impact.position,
+                       az_vpolar(az_random(20.0, 70.0),
+                                 az_vtheta(impact.normal) +
+                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
         }
       }
       break;
@@ -926,22 +918,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           az_damage_ship(state, beam_damage, false);
         }
         // Add particles for the beam.
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_BEAM;
-          const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
-          particle->color = (az_color_t){alt/2, 255, alt, 192};
-          particle->position = beam_start;
-          particle->velocity = AZ_VZERO;
-          particle->angle = beam_theta;
-          particle->lifetime = 0.0;
-          particle->param1 = az_vdist(impact.position, particle->position);
-          particle->param2 = 2.0 + 0.5 * az_clock_zigzag(8, 1, state->clock);
-          az_add_speck(state, particle->color, 1.0, impact.position,
-                       az_vpolar(az_random(20.0, 70.0),
-                                 az_vtheta(impact.normal) +
-                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-        }
+        const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+        const az_color_t beam_color = {alt/2, 255, alt, 192};
+        az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+                    2.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
+        az_add_speck(state, (impact.type == AZ_IMP_WALL ?
+                             impact.target.wall->data->color1 :
+                             AZ_WHITE), 1.0, impact.position,
+                     az_vpolar(az_random(20.0, 70.0),
+                               az_vtheta(impact.normal) +
+                               az_random(-AZ_HALF_PI, AZ_HALF_PI)));
         az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
       }
       break;

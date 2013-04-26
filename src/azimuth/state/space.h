@@ -165,6 +165,9 @@ bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
 
 bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
 
+void az_add_beam(az_space_state_t *state, az_color_t color, az_vector_t start,
+                 az_vector_t end, double lifetime, double semiwidth);
+
 void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
                   az_vector_t position, az_vector_t velocity);
 
