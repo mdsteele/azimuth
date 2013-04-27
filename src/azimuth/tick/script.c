@@ -29,7 +29,7 @@
 #include "azimuth/state/object.h"
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
-#include "azimuth/tick/baddie.h" // for az_kill_baddie
+#include "azimuth/tick/object.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
@@ -331,11 +331,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
+      case AZ_OP_KILL:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          az_kill_object(state, &object);
+        }
+        break;
       case AZ_OP_GPOS:
         {
           az_object_t object;
           GET_OBJECT(&object);
-          const az_vector_t position = az_get_object_position(&object);
+          const az_vector_t position =
+            (object.type == AZ_OBJ_NODE ? AZ_VZERO :
+             az_get_object_position(&object));
           STACK_PUSH(position.x, position.y);
         }
         break;
@@ -345,16 +354,19 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_OBJECT(&object);
           az_vector_t new_position;
           STACK_POP(&new_position.x, &new_position.y);
-          const az_vector_t old_position = az_get_object_position(&object);
-          az_move_object(state, &object, az_vsub(new_position, old_position),
-                         0.0);
+          if (object.type != AZ_OBJ_NOTHING) {
+            const az_vector_t old_position = az_get_object_position(&object);
+            az_move_object(state, &object, az_vsub(new_position, old_position),
+                           0.0);
+          }
         }
         break;
       case AZ_OP_GANG:
         {
           az_object_t object;
           GET_OBJECT(&object);
-          STACK_PUSH(az_get_object_angle(&object));
+          STACK_PUSH(object.type == AZ_OBJ_NOTHING ? 0.0 :
+                     az_get_object_angle(&object));
         }
         break;
       case AZ_OP_SANG:
@@ -363,9 +375,11 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_OBJECT(&object);
           double new_angle;
           STACK_POP(&new_angle);
-          const double old_angle = az_get_object_angle(&object);
-          az_move_object(state, &object, AZ_VZERO,
-                         az_mod2pi(new_angle - old_angle));
+          if (object.type != AZ_OBJ_NOTHING) {
+            const double old_angle = az_get_object_angle(&object);
+            az_move_object(state, &object, AZ_VZERO,
+                           az_mod2pi(new_angle - old_angle));
+          }
         }
         break;
       // Baddies:

@@ -25,8 +25,8 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
-#include "azimuth/tick/baddie.h" // for az_try_damage_baddie
 #include "azimuth/tick/door.h" // for az_try_open_door
+#include "azimuth/tick/object.h" // for az_try_damage_baddie
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"

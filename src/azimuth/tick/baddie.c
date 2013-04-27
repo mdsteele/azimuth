@@ -25,112 +25,13 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
-#include "azimuth/state/object.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/object.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/tick/ship.h" // for az_on_baddie_hit_ship
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
-
-/*===========================================================================*/
-
-// The level of health at or below which a baddie can be frozen.
-#define AZ_BADDIE_FREEZE_THRESHOLD 4.0
-
-static void kill_baddie_internal(
-    az_space_state_t *state, az_baddie_t *baddie, bool pickups_and_scripts) {
-  assert(baddie->kind != AZ_BAD_NOTHING);
-  az_play_sound(&state->soundboard, baddie->data->death_sound);
-  // Add particles for baddie debris:
-  const double radius = baddie->data->overall_bounding_radius;
-  const double step = 3.0 + radius / 20.0;
-  for (double y = -radius; y <= radius; y += step) {
-    for (double x = -radius; x <= radius; x += step) {
-      const az_vector_t pos = {x + baddie->position.x + az_random(-3, 3),
-                               y + baddie->position.y + az_random(-3, 3)};
-      az_particle_t *particle;
-      if (az_point_touches_baddie(baddie, pos) &&
-          az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_SHARD;
-        particle->color = baddie->data->color;
-        particle->position = pos;
-        particle->velocity = az_vmul(az_vsub(pos, baddie->position), 5.0);
-        particle->velocity.x += az_random(-radius, radius);
-        particle->velocity.y += az_random(-radius, radius);
-        particle->angle = az_random(0.0, AZ_TWO_PI);
-        particle->lifetime = az_random(0.5, 1.0);
-        particle->param1 = az_random(1.0, 3.0) *
-          (baddie->data->main_body.bounding_radius / 40.0);
-        particle->param2 = az_random(-10.0, 10.0);
-      }
-    }
-  }
-  for (int i = 0; i < 20; ++i) {
-    az_add_speck(state, AZ_WHITE, 2.0, baddie->position,
-                 az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
-  }
-
-  if (pickups_and_scripts) {
-    az_add_random_pickup(state, baddie->data->potential_pickups,
-                         baddie->position);
-  }
-  const az_script_t *script = baddie->on_kill;
-  // Remove the baddie.  After this point, we can no longer use the baddie
-  // object.
-  baddie->kind = AZ_BAD_NOTHING;
-  if (pickups_and_scripts) az_run_script(state, script);
-  // TODO: Kill/remove the baddie's cargo objects.
-}
-
-bool az_try_damage_baddie(
-    az_space_state_t *state, az_baddie_t *baddie,
-    const az_component_data_t *component, az_damage_flags_t damage_kind,
-    double damage_amount) {
-  assert(baddie->kind != AZ_BAD_NOTHING);
-  assert(baddie->health > 0.0);
-  assert(damage_amount >= 0.0);
-
-  // If the damage is zero, we can quit early.
-  if (damage_amount <= 0.0) return false;
-
-  // Determine if the baddie is susceptible to this kind of damage; if so,
-  // damage the baddie.
-  bool damage_was_dealt = false;
-  az_damage_flags_t modified_damage_kind = damage_kind;
-  modified_damage_kind &= ~AZ_DMGF_FREEZE;
-  if (!modified_damage_kind) modified_damage_kind = AZ_DMGF_NORMAL;
-  if (modified_damage_kind & ~(component->immunities)) {
-    baddie->armor_flare = 1.0;
-    baddie->health -= damage_amount;
-    damage_was_dealt = true;
-  }
-
-  // If this was enough to kill the baddie, remove it and add debris/pickups in
-  // its place.
-  if (baddie->health <= 0.0) {
-    assert(damage_was_dealt);
-    // Kill the baddie.  After this point, we can no longer use the baddie
-    // object.
-    kill_baddie_internal(state, baddie, true);
-  }
-  // Otherwise, if (1) the damage kind includes AZ_DMGF_FREEZE, (2) the baddie
-  // is susceptible to being frozen, and (3) the baddie's health is low enough
-  // for it to be frozen, freeze the baddie (even if the baddie didn't actually
-  // take any damage from this hit).
-  else if ((damage_kind & AZ_DMGF_FREEZE) &&
-           !(component->immunities & AZ_DMGF_FREEZE) &&
-           baddie->health <=
-           fmax(damage_amount, 1.0) * AZ_BADDIE_FREEZE_THRESHOLD) {
-    baddie->frozen = 1.0;
-  }
-
-  return damage_was_dealt;
-}
-
-void az_kill_baddie(az_space_state_t *state, az_baddie_t *baddie) {
-  kill_baddie_internal(state, baddie, false);
-}
 
 /*===========================================================================*/
 

@@ -65,6 +65,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_CLR:    return "clr";
     case AZ_OP_MAP:    return "map";
     case AZ_OP_NIX:    return "nix";
+    case AZ_OP_KILL:   return "kill";
     case AZ_OP_GPOS:   return "gpos";
     case AZ_OP_SPOS:   return "spos";
     case AZ_OP_GANG:   return "gang";
@@ -135,6 +136,7 @@ static bool should_print_immediate(az_instruction_t ins) {
       return false;
     case AZ_OP_POP:
     case AZ_OP_DUP:
+    case AZ_OP_KILL:
     case AZ_OP_GPOS:
     case AZ_OP_SPOS:
     case AZ_OP_GANG:

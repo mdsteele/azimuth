@@ -69,16 +69,6 @@ bool az_lookup_object(az_space_state_t *state, az_uuid_t uuid,
 az_vector_t az_get_object_position(const az_object_t *object);
 double az_get_object_angle(const az_object_t *object);
 
-// Move an object relative to its current location, propagating changes to
-// other objects as necessary (e.g. moving a baddie moves its cargo too, moving
-// a tractor node may pull the ship along, etc).
-void az_move_object(az_space_state_t *state, az_object_t *object,
-                    az_vector_t delta_position, double delta_angle);
-
-// TODO: Is az_move_baddie_cargo really the right API?
-void az_move_baddie_cargo(az_space_state_t *state, az_baddie_t *baddie,
-                          az_vector_t delta_position, double delta_angle);
-
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_OBJECT_H_

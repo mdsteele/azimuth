@@ -31,9 +31,9 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
-#include "azimuth/tick/baddie.h" // for az_try_damage_baddie
 #include "azimuth/tick/door.h" // for az_try_open_door
 #include "azimuth/tick/gravfield.h"
+#include "azimuth/tick/object.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
