@@ -43,7 +43,11 @@ static bool parse_bitfield(FILE *file, uint64_t *array, int array_length) {
   memset(array, 0, array_length * sizeof(array[0]));
   if (fscanf(file, "=%"SCNx64, &array[0]) < 1) return false;
   for (int i = 1; i < array_length; ++i) {
-    if (fgetc(file) != ':') break;
+    const char ch = fgetc(file);
+    if (ch != ':') {
+      ungetc(ch, file);
+      break;
+    }
     if (fscanf(file, "%"SCNx64, &array[i]) < 1) return false;
   }
   return true;

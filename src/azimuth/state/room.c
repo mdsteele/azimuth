@@ -56,6 +56,14 @@ typedef struct {
     } \
   } while (false)
 
+#define TRY_GETC(ch) try_getc(ch, loader->file)
+static bool try_getc(char ch, FILE *file) {
+  const char next_ch = fgetc(file);
+  if (next_ch == ch) return true;
+  ungetc(next_ch, file);
+  return false;
+}
+
 // Read the next non-whitespace character.  If it is '$', return true; if it is
 // '!' or if we reach EOF, return false; otherwise, fail parsing.
 static bool scan_to_script(az_load_room_t *loader) {
@@ -119,7 +127,7 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   if (loader->room->num_baddies >= loader->num_baddies) FAIL();
   int kind, uuid_slot;
   double x, y, angle;
-  READ("%d x%lf y%lf a%lf u%d\n", &kind, &x, &y, &angle, &uuid_slot);
+  READ("%d x%lf y%lf a%lf u%d", &kind, &x, &y, &angle, &uuid_slot);
   if (kind <= 0 || kind > AZ_NUM_BADDIE_KINDS ||
       uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) FAIL();
   az_baddie_spec_t *baddie = &loader->room->baddies[loader->room->num_baddies];
@@ -127,6 +135,13 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   baddie->position = (az_vector_t){x, y};
   baddie->angle = angle;
   baddie->uuid_slot = uuid_slot;
+  for (int i = 0; i < AZ_ARRAY_SIZE(baddie->cargo_slots); ++i) {
+    if (!TRY_GETC(':')) break;
+    int cargo_slot;
+    READ("%d", &cargo_slot);
+    if (cargo_slot < 0 || cargo_slot > AZ_NUM_UUID_SLOTS) FAIL();
+    baddie->cargo_slots[i] = cargo_slot;
+  }
   baddie->on_kill = maybe_parse_script(loader, 'k');
   ++loader->room->num_baddies;
 }
@@ -274,6 +289,7 @@ static void validate_room(az_load_room_t *loader) {
       loader->room->num_walls != loader->num_walls) FAIL();
 }
 
+#undef TRY_GETC
 #undef READ
 #undef FAIL
 
@@ -393,9 +409,13 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_baddies; ++i) {
     const az_baddie_spec_t *baddie = &room->baddies[i];
-    WRITE("!B%d x%.02f y%.02f a%f u%d\n", (int)baddie->kind,
+    WRITE("!B%d x%.02f y%.02f a%f u%d", (int)baddie->kind,
           baddie->position.x, baddie->position.y, baddie->angle,
           baddie->uuid_slot);
+    AZ_ARRAY_LOOP(slot, baddie->cargo_slots) {
+      if (*slot != 0) WRITE(":%d", *slot);
+    }
+    WRITE("\n");
     WRITE_SCRIPT('k', baddie->on_kill);
   }
   return true;

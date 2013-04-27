@@ -887,6 +887,47 @@ static void try_edit_script(void) {
   set_room_unsaved(room);
 }
 
+static void begin_set_cargo_slots(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) {
+      AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie->spec.cargo_slots) == 4);
+      az_init_editor_text(&state, AZ_ETA_SET_CARGO_SLOTS, "%d,%d,%d,%d",
+                          baddie->spec.cargo_slots[0],
+                          baddie->spec.cargo_slots[1],
+                          baddie->spec.cargo_slots[2],
+                          baddie->spec.cargo_slots[3]);
+      return;
+    }
+  }
+}
+
+static void try_set_cargo_slots(void) {
+  assert(state.text.action == AZ_ETA_SET_CARGO_SLOTS);
+  assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
+  assert(state.text.buffer[state.text.length] == '\0');
+  int slots[4], count;
+  if (sscanf(state.text.buffer, "%d,%d,%d,%d%n",
+             &slots[0], &slots[1], &slots[2], &slots[3], &count) < 4) return;
+  if (count != state.text.length) return;
+  for (int i = 0; i < AZ_ARRAY_SIZE(slots); ++i) {
+    if (slots[i] < 0 || slots[i] > AZ_NUM_UUID_SLOTS) return;
+  }
+  state.text.action = AZ_ETA_NOTHING;
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (baddie->selected) {
+      AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie->spec.cargo_slots) ==
+                       AZ_ARRAY_SIZE(slots));
+      for (int i = 0; i < AZ_ARRAY_SIZE(baddie->spec.cargo_slots); ++i) {
+        baddie->spec.cargo_slots[i] = slots[i];
+      }
+      set_room_unsaved(room);
+      return;
+    }
+  }
+}
+
 static void begin_set_current_room(void) {
   az_init_editor_text(&state, AZ_ETA_SET_CURRENT_ROOM, "%03d",
                       state.current_room);
@@ -1076,6 +1117,7 @@ static void event_loop(void) {
                   case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
                   case AZ_ETA_EDIT_GRAVFIELD: try_edit_gravfield(); break;
                   case AZ_ETA_EDIT_SCRIPT: try_edit_script(); break;
+                  case AZ_ETA_SET_CARGO_SLOTS: try_set_cargo_slots(); break;
                   case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
                   case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
                   case AZ_ETA_SET_UUID_SLOT: try_set_uuid_slot(); break;
@@ -1151,7 +1193,10 @@ static void event_loop(void) {
               if (event.key.shift) do_move_to_back();
               else state.tool = AZ_TOOL_BADDIE;
               break;
-            case AZ_KEY_C: state.tool = AZ_TOOL_CAMERA; break;
+            case AZ_KEY_C:
+              if (event.key.command) {
+                if (event.key.shift) begin_set_cargo_slots();
+              } else state.tool = AZ_TOOL_CAMERA; break;
             case AZ_KEY_D:
               if (event.key.command) {
                 if (event.key.shift) auto_set_door_dest();

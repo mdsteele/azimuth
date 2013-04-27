@@ -26,8 +26,10 @@
 #define AZ_UID_INDEX_MASK (UINT64_C(0xFFFF))
 #define AZ_UID_COUNT_STEP (UINT64_C(0x10000))
 
+#define SHIP_UID ((az_uid_t)(-1))
 const az_uid_t AZ_NULL_UID = 0u;
-const az_uid_t AZ_SHIP_UID = (az_uid_t)(-1);
+const az_uid_t AZ_SHIP_UID = SHIP_UID;
+const az_uuid_t AZ_SHIP_UUID = { .type = AZ_UUID_SHIP, .uid = SHIP_UID };
 
 void az_assign_uid(int index, az_uid_t *uid) {
   assert(index >= 0);

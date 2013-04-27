@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "azimuth/state/object.h"
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h" // for az_kill_baddie
@@ -127,10 +128,10 @@ static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
 
 #define GET_UUID(uuid_out) do { \
     const int slot = (int)ins.immediate; \
-    if (slot < 1 || slot > AZ_NUM_UUID_SLOTS) { \
+    if (slot < 0 || slot > AZ_NUM_UUID_SLOTS) { \
       SCRIPT_ERROR("invalid uuid index"); \
     } \
-    *(uuid_out) = state->uuids[slot - 1]; \
+    *(uuid_out) = (slot == 0 ? AZ_SHIP_UUID : state->uuids[slot - 1]); \
   } while (0)
 
 #define GET_UID(uuid_type, uid_out) do { \
@@ -159,66 +160,12 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_OBJ_NOTHING = 0,
-  AZ_OBJ_BADDIE,
-  AZ_OBJ_DOOR,
-  AZ_OBJ_GRAVFIELD,
-  AZ_OBJ_NODE,
-  AZ_OBJ_WALL
-} az_object_type_t;
-
-typedef struct {
-  az_object_type_t type;
-  union {
-    az_baddie_t *baddie;
-    az_door_t *door;
-    az_gravfield_t *gravfield;
-    az_node_t *node;
-    az_wall_t *wall;
-  } obj;
-} az_object_t;
-
 #define GET_OBJECT(object_out) do { \
     az_uuid_t uuid; \
     GET_UUID(&uuid); \
     if (uuid.type == AZ_UUID_NOTHING) SCRIPT_ERROR("invalid uuid type"); \
-    else lookup_object(state, uuid, (object_out)); \
+    else az_lookup_object(state, uuid, (object_out)); \
   } while (0)
-
-static void lookup_object(az_space_state_t *state, az_uuid_t uuid,
-                          az_object_t *object) {
-  assert(uuid.type != AZ_UUID_NOTHING);
-  object->type = AZ_OBJ_NOTHING;
-  switch (uuid.type) {
-    case AZ_UUID_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_UUID_BADDIE:
-      if (az_lookup_baddie(state, uuid.uid, &object->obj.baddie)) {
-        object->type = AZ_OBJ_BADDIE;
-      }
-      break;
-    case AZ_UUID_DOOR:
-      if (az_lookup_door(state, uuid.uid, &object->obj.door)) {
-        object->type = AZ_OBJ_DOOR;
-      }
-      break;
-    case AZ_UUID_GRAVFIELD:
-      if (az_lookup_gravfield(state, uuid.uid, &object->obj.gravfield)) {
-        object->type = AZ_OBJ_GRAVFIELD;
-      }
-      break;
-    case AZ_UUID_NODE:
-      if (az_lookup_node(state, uuid.uid, &object->obj.node)) {
-        object->type = AZ_OBJ_NODE;
-      }
-      break;
-    case AZ_UUID_WALL:
-      if (az_lookup_wall(state, uuid.uid, &object->obj.wall)) {
-        object->type = AZ_OBJ_WALL;
-      }
-      break;
-  }
-}
 
 /*===========================================================================*/
 
@@ -377,6 +324,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             case AZ_OBJ_NODE:
               object.obj.node->kind = AZ_NODE_NOTHING;
               break;
+            case AZ_OBJ_SHIP: SCRIPT_ERROR("invalid object type");
             case AZ_OBJ_WALL:
               object.obj.wall->kind = AZ_WALL_NOTHING;
               break;
@@ -387,25 +335,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         {
           az_object_t object;
           GET_OBJECT(&object);
-          az_vector_t position = AZ_VZERO;
-          switch (object.type) {
-            case AZ_OBJ_NOTHING: break;
-            case AZ_OBJ_BADDIE:
-              position = object.obj.baddie->position;
-              break;
-            case AZ_OBJ_DOOR:
-              position = object.obj.door->position;
-              break;
-            case AZ_OBJ_GRAVFIELD:
-              position = object.obj.gravfield->position;
-              break;
-            case AZ_OBJ_NODE:
-              position = object.obj.node->position;
-              break;
-            case AZ_OBJ_WALL:
-              position = object.obj.wall->position;
-              break;
-          }
+          const az_vector_t position = az_get_object_position(&object);
           STACK_PUSH(position.x, position.y);
         }
         break;
@@ -413,26 +343,29 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         {
           az_object_t object;
           GET_OBJECT(&object);
-          az_vector_t position;
-          STACK_POP(&position.x, &position.y);
-          switch (object.type) {
-            case AZ_OBJ_NOTHING: break;
-            case AZ_OBJ_BADDIE:
-              object.obj.baddie->position = position;
-              break;
-            case AZ_OBJ_DOOR:
-              object.obj.door->position = position;
-              break;
-            case AZ_OBJ_GRAVFIELD:
-              object.obj.gravfield->position = position;
-              break;
-            case AZ_OBJ_NODE:
-              object.obj.node->position = position;
-              break;
-            case AZ_OBJ_WALL:
-              object.obj.wall->position = position;
-              break;
-          }
+          az_vector_t new_position;
+          STACK_POP(&new_position.x, &new_position.y);
+          const az_vector_t old_position = az_get_object_position(&object);
+          az_move_object(state, &object, az_vsub(new_position, old_position),
+                         0.0);
+        }
+        break;
+      case AZ_OP_GANG:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          STACK_PUSH(az_get_object_angle(&object));
+        }
+        break;
+      case AZ_OP_SANG:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          double new_angle;
+          STACK_POP(&new_angle);
+          const double old_angle = az_get_object_angle(&object);
+          az_move_object(state, &object, AZ_VZERO,
+                         az_mod2pi(new_angle - old_angle));
         }
         break;
       // Baddies:

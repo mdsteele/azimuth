@@ -66,9 +66,11 @@ typedef enum {
   AZ_OP_CLR, // clear flag i
   AZ_OP_MAP, // grant map data for zone i
   // Objects:
-  AZ_OP_NIX, // remove object i (of any type)
+  AZ_OP_NIX, // remove object i (of any non-ship type)
   AZ_OP_GPOS, // push (x, y) position of object i (of any type)
   AZ_OP_SPOS, // pop top two, set position of obj i (of any type) to (a, b)
+  AZ_OP_GANG, // push angle of object i (of any type)
+  AZ_OP_SANG, // pop top, set angle of obj i (of any type) to a
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_SBADK, // pop top, transform baddie i to kind a

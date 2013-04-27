@@ -58,6 +58,7 @@ typedef enum {
   AZ_UUID_DOOR,
   AZ_UUID_GRAVFIELD,
   AZ_UUID_NODE,
+  AZ_UUID_SHIP,
   AZ_UUID_WALL
 } az_uuid_type_t;
 
@@ -65,6 +66,9 @@ typedef struct {
   az_uuid_type_t type;
   az_uid_t uid;
 } az_uuid_t;
+
+// The unique UUID that represents the ship.
+extern const az_uuid_t AZ_SHIP_UUID;
 
 /*===========================================================================*/
 

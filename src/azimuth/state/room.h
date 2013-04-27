@@ -50,6 +50,7 @@ typedef struct {
   az_vector_t position;
   double angle;
   int uuid_slot; // 0 if none, otherwise from 1 to AZ_NUM_UUID_SLOTS inclusive
+  int cargo_slots[AZ_MAX_BADDIE_CARGO_UUIDS]; // UUID slots of objects to carry
 } az_baddie_spec_t;
 
 typedef struct {

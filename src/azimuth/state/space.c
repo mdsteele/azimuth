@@ -58,6 +58,11 @@ static void put_uuid(az_space_state_t *state, int slot,
 }
 
 void az_enter_room(az_space_state_t *state, const az_room_t *room) {
+  // Make a map from UUID table indices to the baddie (if any) carrying that
+  // object as cargo.
+  az_baddie_t *cargo_carriers[AZ_NUM_UUID_SLOTS];
+  AZ_ZERO_ARRAY(cargo_carriers);
+  // Insert objects into space:
   for (int i = 0; i < room->num_baddies; ++i) {
     az_baddie_t *baddie;
     if (az_insert_baddie(state, &baddie)) {
@@ -65,6 +70,13 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
       baddie->on_kill = spec->on_kill;
       put_uuid(state, spec->uuid_slot, AZ_UUID_BADDIE, baddie->uid);
+      AZ_ARRAY_LOOP(slot, spec->cargo_slots) {
+        if (*slot == 0) continue;
+        const int slot_index = *slot - 1;
+        assert(slot_index >= 0);
+        assert(slot_index < AZ_ARRAY_SIZE(cargo_carriers));
+        cargo_carriers[slot_index] = baddie;
+      }
     }
   }
   for (int i = 0; i < room->num_doors; ++i) {
@@ -116,6 +128,19 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       wall->position = spec->position;
       wall->angle = spec->angle;
       put_uuid(state, spec->uuid_slot, AZ_UUID_WALL, wall->uid);
+    }
+  }
+  // Now that all objects are inserted and the UUID table is populated, fill in
+  // each baddie's cargo table:
+  for (int i = 0; i < AZ_ARRAY_SIZE(cargo_carriers); ++i) {
+    az_baddie_t *baddie = cargo_carriers[i];
+    if (baddie == NULL) continue;
+    assert(baddie->kind != AZ_BAD_NOTHING);
+    AZ_ARRAY_LOOP(cargo, baddie->cargo_uuids) {
+      if (cargo->type == AZ_UUID_NOTHING) {
+        *cargo = state->uuids[i];
+        break;
+      }
     }
   }
 }

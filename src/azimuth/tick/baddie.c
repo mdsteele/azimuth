@@ -25,6 +25,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/object.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/tick/ship.h" // for az_on_baddie_hit_ship
@@ -79,6 +80,7 @@ static void kill_baddie_internal(
   // object.
   baddie->kind = AZ_BAD_NOTHING;
   if (pickups_and_scripts) az_run_script(state, script);
+  // TODO: Kill/remove the baddie's cargo objects.
 }
 
 bool az_try_damage_baddie(
@@ -474,6 +476,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   baddie->cooldown = fmax(0.0, baddie->cooldown - time);
 
   // Apply velocity.
+  const az_vector_t old_baddie_position = baddie->position;
+  const double old_baddie_angle = baddie->angle;
   if (az_vnonzero(baddie->velocity)) {
     az_impact_flags_t impact_flags = AZ_IMPF_BADDIE;
     if ((baddie->data->properties & AZ_BADF_INCORPOREAL) ||
@@ -485,11 +489,11 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     // If we hit the ship, we might damage it.  On the other hand, if the ship
     // has C-plus or Reactive Armor, it might kill the baddie, in which case we
     // need to return early.
-    const az_vector_t old_position = baddie->position;
     baddie->position = impact.position;
     if (impact.type == AZ_IMP_SHIP) {
       az_on_baddie_hit_ship(
-          state, baddie, az_vsub(baddie->position, old_position), &impact);
+          state, baddie, az_vsub(baddie->position, old_baddie_position),
+          &impact);
       if (baddie->kind == AZ_BAD_NOTHING) return;
     }
     if (impact.type != AZ_IMP_NOTHING) {
@@ -1058,6 +1062,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
       }
       break;
+  }
+
+  // Move cargo with the baddie.
+  if (baddie->kind != AZ_BAD_NOTHING) {
+    az_move_baddie_cargo(
+        state, baddie,
+        az_vsub(baddie->position, old_baddie_position),
+        az_mod2pi(baddie->angle - old_baddie_angle));
   }
 }
 

@@ -67,6 +67,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_NIX:    return "nix";
     case AZ_OP_GPOS:   return "gpos";
     case AZ_OP_SPOS:   return "spos";
+    case AZ_OP_GANG:   return "gang";
+    case AZ_OP_SANG:   return "sang";
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_SBADK:  return "sbadk";
     case AZ_OP_BOSS:   return "boss";
@@ -133,7 +135,10 @@ static bool should_print_immediate(az_instruction_t ins) {
       return false;
     case AZ_OP_POP:
     case AZ_OP_DUP:
-    case AZ_OP_BOSS:
+    case AZ_OP_GPOS:
+    case AZ_OP_SPOS:
+    case AZ_OP_GANG:
+    case AZ_OP_SANG:
       return (ins.immediate != 0.0);
     case AZ_OP_PUSH:
     case AZ_OP_ADDI:
@@ -156,9 +161,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_CLR:
     case AZ_OP_MAP:
     case AZ_OP_NIX:
-    case AZ_OP_GPOS:
-    case AZ_OP_SPOS:
     case AZ_OP_SBADK:
+    case AZ_OP_BOSS:
     case AZ_OP_OPEN:
     case AZ_OP_CLOSE:
     case AZ_OP_LOCK:

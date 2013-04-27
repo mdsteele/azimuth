@@ -36,6 +36,8 @@
 
 // The maximum number of components that a baddie kind can have:
 #define AZ_MAX_BADDIE_COMPONENTS 12
+// The maximum number of objects a baddie can carry as cargo:
+#define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
 #define AZ_NUM_BADDIE_KINDS 32
@@ -130,6 +132,7 @@ typedef struct {
   double param; // the meaning of this is baddie-kind-specific
   int state; // the meaning of this is baddie-kind-specific
   az_component_t components[AZ_MAX_BADDIE_COMPONENTS];
+  az_uuid_t cargo_uuids[AZ_MAX_BADDIE_CARGO_UUIDS];
 } az_baddie_t;
 
 /*===========================================================================*/
