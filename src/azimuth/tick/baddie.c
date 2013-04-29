@@ -963,6 +963,39 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
       }
       break;
+    case AZ_BAD_SMALL_TRUCK:
+      // States 0 and 1: fly forward.
+      if (baddie->state == 0 || baddie->state == 1) {
+        const double max_speed = 100.0, accel = 50.0;
+        const double min_dist = 100.0, max_dist = 200.0;
+        az_impact_t impact;
+        az_circle_impact(
+            state, baddie->data->overall_bounding_radius, baddie->position,
+            az_vpolar(max_dist + 1.0, baddie->angle),
+            (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+        const double dist = az_vdist(baddie->position, impact.position);
+        const double fraction =
+          fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
+        const double speed_limit = az_vnorm(baddie->velocity) + accel * time;
+        const double speed = fmin(speed_limit, max_speed * sqrt(fraction));
+        baddie->state = (speed < speed_limit ? 0 : 1);
+        baddie->velocity = az_vpolar(speed, baddie->angle);
+        if (fraction <= 0.0) {
+          baddie->components[0].angle = az_mod2pi(baddie->angle + AZ_HALF_PI);
+          baddie->state = 2;
+        }
+      }
+      // State 2: Turn.
+      else {
+        assert(baddie->state == 2);
+        baddie->velocity = AZ_VZERO;
+        const double turn_rate = AZ_DEG2RAD(50);
+        const double goal_angle = baddie->components[0].angle;
+        baddie->angle =
+          az_angle_towards(baddie->angle, turn_rate * time, goal_angle);
+        if (baddie->angle == goal_angle) baddie->state = 0;
+      }
+      break;
   }
 
   // Move cargo with the baddie.

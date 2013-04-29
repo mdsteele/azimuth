@@ -229,6 +229,11 @@ static az_component_data_t security_drone_components[] = {
     .impact_damage = 10.0 }
 };
 
+static const az_vector_t small_truck_vertices[] = {
+  {32, 12}, {10, 20}, {10, 14}, {-30, 14},
+  {-30, -14}, {10, -14}, {10, -20}, {32, -12}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -455,6 +460,15 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(security_drone_components)
+  },
+  [AZ_BAD_SMALL_TRUCK] = {
+    .max_health = 40.0,
+    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(small_truck_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_REACTIVE), .impact_damage = 8.0 }
   }
 };
 
