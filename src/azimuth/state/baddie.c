@@ -607,6 +607,58 @@ bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point) {
 
 /*===========================================================================*/
 
+static bool circle_touches_component(
+    const az_component_data_t *component, az_vector_t position, double angle,
+    double circle_radius, az_vector_t circle_center) {
+  if (!az_vwithin(position, circle_center,
+                  component->bounding_radius + circle_radius)) return false;
+  if (component->polygon.num_vertices == 0) return true;
+  return az_circle_touches_polygon_trans(component->polygon, position, angle,
+                                         circle_radius, circle_center);
+}
+
+bool az_circle_touches_baddie(
+    const az_baddie_t *baddie, double radius, az_vector_t center,
+    const az_component_data_t **component_out) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
+  // Common case: if circle definitely doesn't touch the baddie, return early.
+  if (!az_vwithin(baddie->position, center, radius +
+                  baddie->data->overall_bounding_radius)) return false;
+
+  // Semi-common case: cast a ray towards the baddie center, returning the
+  // first component hit.
+  if (az_ray_hits_baddie(
+          baddie, center,
+          az_vwithlen(az_vsub(baddie->position, center), radius),
+          NULL, NULL, component_out)) return true;
+
+  // Okay, now we have to exhaustively check each component.
+  const az_baddie_data_t *data = baddie->data;
+  // Calculate center relative to the positioning of the baddie.
+  const az_vector_t rel_center =
+    az_vrotate(az_vsub(center, baddie->position), -baddie->angle);
+  // Check the non-main components first.
+  for (int i = 0; i < data->num_components; ++i) {
+    const az_component_data_t *component = &data->components[i];
+    if (circle_touches_component(
+            component, baddie->components[i].position,
+            baddie->components[i].angle, radius, rel_center)) {
+      if (component_out != NULL) *component_out = component;
+      return true;
+    }
+  }
+  // Now check the main body.
+  if (circle_touches_component(&data->main_body, AZ_VZERO, 0.0,
+                               radius, rel_center)) {
+    if (component_out != NULL) *component_out = &data->main_body;
+    return true;
+  }
+
+  return false;
+}
+
+/*===========================================================================*/
+
 static bool ray_hits_component(
     const az_component_data_t *component, az_vector_t position, double angle,
     az_vector_t start, az_vector_t delta, az_vector_t *point_out,

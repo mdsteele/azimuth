@@ -50,11 +50,10 @@ static void on_projectile_impact(az_space_state_t *state,
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
-      // TODO: This isn't a good condition on which to do splash damage.  We
-      //       need an az_circle_touches_baddie function, or whatever.
-      if (az_vwithin(baddie->position, proj->position,
-                     radius + baddie->data->overall_bounding_radius)) {
-        az_try_damage_baddie(state, baddie, &baddie->data->main_body,
+      const az_component_data_t *component;
+      if (az_circle_touches_baddie(baddie, radius, proj->position,
+                                   &component)) {
+        az_try_damage_baddie(state, baddie, component,
                              proj->data->damage_kind,
                              proj->data->splash_damage * proj->power);
         if (proj->kind == AZ_PROJ_MISSILE_FREEZE &&
@@ -364,10 +363,10 @@ static void projectile_special_logic(az_space_state_t *state,
         AZ_ARRAY_LOOP(baddie, state->baddies) {
           if (baddie->kind == AZ_BAD_NOTHING) continue;
           if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
-          // TODO: This isn't a good condition on which to do splash damage.
-          if (az_vwithin(baddie->position, proj->position,
-                         radius + baddie->data->overall_bounding_radius)) {
-            az_try_damage_baddie(state, baddie, &baddie->data->main_body,
+          const az_component_data_t *component;
+          if (az_circle_touches_baddie(baddie, radius, proj->position,
+                                       &component)) {
+            az_try_damage_baddie(state, baddie, component,
                                  proj->data->damage_kind,
                                  proj->data->splash_damage * proj->power *
                                  (time / proj->data->lifetime));
