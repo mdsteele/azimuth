@@ -189,6 +189,28 @@ static void on_projectile_hit_target(
   if (!(proj->data->properties & AZ_PROJF_PIERCING)) {
     proj->kind = AZ_PROJ_NOTHING;
   }
+  // Pierce Missiles are special: when they hit a target, they ricochet towards
+  // another target.
+  if (proj->kind == AZ_PROJ_MISSILE_PIERCE) {
+    if (proj->param < 4) {
+      const double old_proj_angle = proj->angle;
+      double best_dist = INFINITY;
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind == AZ_BAD_NOTHING) continue;
+        if (baddie->data->properties & AZ_BADF_NO_HOMING_PROJ) continue;
+        if (baddie->uid == proj->last_hit_uid) continue;
+        const double dist = az_vdist(baddie->position, proj->position) +
+          fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
+                         old_proj_angle)) * 100.0;
+        if (dist < best_dist) {
+          best_dist = dist;
+          proj->angle = az_vtheta(az_vsub(baddie->position, proj->position));
+        }
+      }
+      proj->velocity = az_vpolar(az_vnorm(proj->velocity) - 50.0, proj->angle);
+      ++proj->param;
+    } else proj->kind = AZ_PROJ_NOTHING;
+  }
 }
 
 // Called when a projectile hits a baddie.
@@ -227,7 +249,6 @@ static void projectile_home_in(az_space_state_t *state,
                                az_projectile_t *proj,
                                double time) {
   assert(proj->data->homing_rate > 0.0);
-  const double proj_angle = az_vtheta(proj->velocity);
   // First, figure out what position we're homing in on.
   az_vector_t goal = state->ship.position;
   if (!proj->fired_by_enemy) {
@@ -239,7 +260,7 @@ static void projectile_home_in(az_space_state_t *state,
       if (baddie->uid == proj->last_hit_uid) continue;
       const double dist = az_vdist(baddie->position, proj->position) +
         fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
-                       proj_angle)) * 100.0;
+                       proj->angle)) * 100.0;
       if (dist < best_dist) {
         best_dist = dist;
         found_target = true;
@@ -249,11 +270,9 @@ static void projectile_home_in(az_space_state_t *state,
     if (!found_target) return;
   }
   // Now, home in on the goal position.
-  const double new_angle =
-    az_angle_towards(proj_angle, time * proj->data->homing_rate,
-                     az_vtheta(az_vsub(goal, proj->position)));
-  proj->velocity = az_vpolar(proj->data->speed, new_angle);
-  proj->angle = new_angle;
+  proj->angle = az_angle_towards(proj->angle, time * proj->data->homing_rate,
+                                 az_vtheta(az_vsub(goal, proj->position)));
+  proj->velocity = az_vpolar(proj->data->speed, proj->angle);
 }
 
 static void leave_ember_trail(

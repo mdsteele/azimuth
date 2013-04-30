@@ -258,13 +258,13 @@ static const az_proj_data_t proj_data[] = {
     .properties = AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_MISSILE_PIERCE] = {
-    .speed = 1500.0,
+    .speed = 1000.0,
     .lifetime = 3.0,
-    .impact_damage = 18.0,
-    .splash_damage = 18.0,
-    .splash_radius = 35.0,
-    .impact_shake = 4.0,
-    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET,
+    .impact_damage = 8.0,
+    .splash_damage = 4.0,
+    .splash_radius = 30.0,
+    .impact_shake = 1.5,
+    .damage_kind = AZ_DMGF_PIERCE | AZ_DMGF_ROCKET,
     .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_MISSILE_BEAM] = {
