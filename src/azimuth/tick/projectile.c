@@ -44,7 +44,12 @@ static void on_projectile_impact(az_space_state_t *state,
     // Damage the ship if it's within the blast.
     if (az_ship_is_present(&state->ship) &&
         az_vwithin(state->ship.position, proj->position, radius)) {
-      az_damage_ship(state, proj->data->splash_damage * proj->power, false);
+      double damage = proj->data->splash_damage * proj->power;
+      if (!proj->fired_by_enemy &&
+          az_has_upgrade(&state->ship.player, AZ_UPG_ATTUNED_EXPLOSIVES)) {
+        damage *= AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR;
+      }
+      az_damage_ship(state, damage, false);
     }
     // Damage baddies that are within the blast.
     AZ_ARRAY_LOOP(baddie, state->baddies) {
@@ -409,7 +414,8 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_missile_trail(state, proj, time, (az_color_t){0, 255, 0, 255});
       break;
     case AZ_PROJ_MISSILE_HOMING:
-      leave_missile_trail(state, proj, time, (az_color_t){0, 64, 255, 255});
+      leave_missile_trail(state, proj, time, (az_color_t){128, 192, 255, 255});
+      break;
     case AZ_PROJ_MISSILE_PHASE:
       leave_missile_trail(state, proj, time, (az_color_t){192, 192, 64, 255});
       proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
@@ -473,7 +479,7 @@ static void projectile_special_logic(az_space_state_t *state,
       } else {
         proj->angle = az_mod2pi(proj->angle + 1.5 * time);
       }
-      if (proj->kind == AZ_PROJ_MEGA_BOMB &&
+      if (proj->kind == AZ_PROJ_MEGA_BOMB && proj->age >= 0.25 &&
           (proj->age < 2.0 ?
            (ceil(2.0 * proj->age) > ceil(2.0 * (proj->age - time))) :
            (ceil(6.0 * proj->age) > ceil(6.0 * (proj->age - time))))) {

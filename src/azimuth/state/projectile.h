@@ -111,7 +111,7 @@ typedef struct {
   double angle;
   double power; // damage multiplier
   double age; // seconds
-  double param; // the meaning of this is projectile-kind-specific
+  int param; // the meaning of this is projectile-kind-specific
   // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
   // gun), this records the UID of the last baddie hit.  The projectile cannot
   // immediately hit this same baddie again.  This can also be AZ_SHIP_UID if

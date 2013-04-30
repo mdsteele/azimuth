@@ -374,7 +374,7 @@ void az_damage_ship(az_space_state_t *state, double damage,
     damage *= AZ_ARMOR_DAMAGE_FACTOR;
   }
   if (az_has_upgrade(player, AZ_UPG_REACTIVE_ARMOR)) {
-    damage *= AZ_REACTIVE_ARMOR_DAMAGE_FACTOR;
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
   }
   // If the ship can survive the damage, reduce shields and we're done.
   if (ship->player.shields > damage) {

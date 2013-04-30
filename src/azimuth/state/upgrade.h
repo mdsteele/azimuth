@@ -28,12 +28,14 @@
 #define AZ_ENERGY_PER_CAPACITOR 50
 #define AZ_SHIELDS_PER_BATTERY 25
 
-// Damage multiplier for most armor upgrades:
-#define AZ_ARMOR_DAMAGE_FACTOR 0.75
-// Damage multiplier for wall damage for Hardened Armor upgrade:
-#define AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR 0.25
-// Damage multiplier for Reactive Armor upgrade:
-#define AZ_REACTIVE_ARMOR_DAMAGE_FACTOR 0.5
+// Multiplier for incoming damage for armor upgrades:
+#define AZ_ARMOR_DAMAGE_FACTOR 0.8
+// Multiplier for incoming wall damage for Hardened Armor upgrade:
+#define AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR 0.5
+// Ordanance power multiplier for High Explosives:
+#define AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER 1.5
+// Multiplier for incoming splash damage, for Attuned Explosives:
+#define AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR 0.5
 
 typedef enum {
   // Primary weapon:
@@ -126,6 +128,9 @@ typedef enum {
 
 // Return the name of the upgrade as a NUL-terminted string.
 const char *az_upgrade_name(az_upgrade_t upgrade);
+
+void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
+                                const char **line2_out);
 
 /*===========================================================================*/
 
