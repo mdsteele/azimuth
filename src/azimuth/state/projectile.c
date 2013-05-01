@@ -304,7 +304,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,
     .lifetime = 2.0,
-    .impact_damage = 1.5
+    .impact_damage = 3.0
   },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,
