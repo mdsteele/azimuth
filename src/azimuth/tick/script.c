@@ -382,6 +382,79 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           }
         }
         break;
+      case AZ_OP_GSTAT:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          double value = 0.0;
+          switch (object.type) {
+            case AZ_OBJ_NOTHING: break;
+            case AZ_OBJ_BADDIE:
+              assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
+              value = (double)object.obj.baddie->state;
+              break;
+            case AZ_OBJ_DOOR:
+              assert(object.obj.door->kind != AZ_DOOR_NOTHING);
+              if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
+                SCRIPT_ERROR("invalid door kind");
+              }
+              value = (object.obj.door->is_open ? 1.0 : 0.0);
+              break;
+            case AZ_OBJ_GRAVFIELD:
+              assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
+              value = (object.obj.gravfield->script_fired ? 1.0 : 0.0);
+              break;
+            case AZ_OBJ_NODE:
+              assert(object.obj.node->kind != AZ_NODE_NOTHING);
+              if (object.obj.node->kind == AZ_NODE_MARKER) {
+                value = (double)object.obj.node->subkind.marker;
+              } else SCRIPT_ERROR("invalid node kind");
+              break;
+            case AZ_OBJ_SHIP:
+            case AZ_OBJ_WALL:
+              SCRIPT_ERROR("invalid object type");
+              break;
+          }
+          STACK_PUSH(value);
+        }
+        break;
+      case AZ_OP_SSTAT:
+        {
+          az_object_t object;
+          GET_OBJECT(&object);
+          double value;
+          STACK_POP(&value);
+          switch (object.type) {
+            case AZ_OBJ_NOTHING: break;
+            case AZ_OBJ_BADDIE:
+              assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
+              object.obj.baddie->state = (int)value;
+              break;
+            case AZ_OBJ_DOOR:
+              assert(object.obj.door->kind != AZ_DOOR_NOTHING);
+              if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
+                SCRIPT_ERROR("invalid door kind");
+              }
+              object.obj.door->is_open = (value != 0.0);
+              object.obj.door->openness = (value != 0.0 ? 1.0 : 0.0);
+              break;
+            case AZ_OBJ_GRAVFIELD:
+              assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
+              object.obj.gravfield->script_fired = (value != 0.0);
+              break;
+            case AZ_OBJ_NODE:
+              assert(object.obj.node->kind != AZ_NODE_NOTHING);
+              if (object.obj.node->kind == AZ_NODE_MARKER) {
+                object.obj.node->subkind.marker = (int)value;
+              } else SCRIPT_ERROR("invalid node kind");
+              break;
+            case AZ_OBJ_SHIP:
+            case AZ_OBJ_WALL:
+              SCRIPT_ERROR("invalid object type");
+              break;
+          }
+        }
+        break;
       // Baddies:
       case AZ_OP_BAD:
         {
@@ -515,35 +588,6 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_gravfield_t *gravfield;
           if (az_lookup_gravfield(state, uid, &gravfield)) {
             gravfield->strength = value;
-          }
-        }
-        break;
-      // Nodes:
-      case AZ_OP_GMARK:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_NODE, &uid);
-          double value = 0.0;
-          az_node_t *node;
-          if (az_lookup_node(state, uid, &node)) {
-            if (node->kind == AZ_NODE_MARKER) {
-              value = (double)node->subkind.marker;
-            } else SCRIPT_ERROR("invalid node kind");
-          }
-          STACK_PUSH(value);
-        }
-        break;
-      case AZ_OP_SMARK:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_NODE, &uid);
-          double value;
-          STACK_POP(&value);
-          az_node_t *node;
-          if (az_lookup_node(state, uid, &node)) {
-            if (node->kind == AZ_NODE_MARKER) {
-              node->subkind.marker = (int)value;
-            } else SCRIPT_ERROR("invalid node kind");
           }
         }
         break;

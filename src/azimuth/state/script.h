@@ -72,6 +72,8 @@ typedef enum {
   AZ_OP_SPOS, // pop top two, set position of obj i (of any type) to (a, b)
   AZ_OP_GANG, // push angle of object i (of any type)
   AZ_OP_SANG, // pop top, set angle of obj i (of any type) to a
+  AZ_OP_GSTAT, // push state of object i (meaning of "state" depends on type)
+  AZ_OP_SSTAT, // pop top, set state of object i to a
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_SBADK, // pop top, transform baddie i to kind a
@@ -85,9 +87,6 @@ typedef enum {
   // Gravfields:
   AZ_OP_GSTR, // push strength of gravfield i
   AZ_OP_SSTR, // pop top, set strength of gravfield i to a
-  // Nodes:
-  AZ_OP_GMARK, // push value of marker node i
-  AZ_OP_SMARK, // pop top, set value of marker node i to a
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
   AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)

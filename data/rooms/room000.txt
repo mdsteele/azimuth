@@ -1,6 +1,6 @@
 @R z7 p0 b9 d1 g1 n3 w32
   c(279.05,0.00,4.712389,6.283185)
-$s:boss1,mus9,wait0.12,gmark4,muli20,gstr2,add,dup,sstr2,gmark4,muli600,div,gei1,beqz4,gmark4,isub0,smark4,jump-15;
+$s:boss1,mus9,wait0.12,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz4,gstat4,isub0,sstat4,jump-15;
 !W1 d0 x102.20 y503.10 a0.000000 u0
 !W1 d0 x290.60 y424.59 a-0.787340 u0
 !W1 d0 x-98.10 y503.10 a0.000000 u0

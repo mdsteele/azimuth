@@ -329,8 +329,7 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
     }
   }
   // States 2-19: Fire a steady spray of bullets:
-  else {
-    assert(2 <= baddie->state && baddie->state <= 19);
+  else if (2 <= baddie->state && baddie->state <= 19) {
     if (baddie->cooldown <= 0.0) {
       for (int i = -1; i <= 1; ++i) {
         fire_projectile(state, baddie, AZ_PROJ_STINGER,
@@ -340,7 +339,7 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
       baddie->cooldown = 0.1;
       --baddie->state;
     }
-  }
+  } else baddie->state = 0;
   // Chase ship; get slightly slower as we get hurt.
   snake_along(state, baddie, time, 2, 40.0, 130.0 - 10.0 * hurt, 50.0);
 }
@@ -511,8 +510,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             has_line_of_sight_to_ship(state, baddie)) {
           baddie->state = 1;
         }
-      } else {
-        assert(baddie->state == 1);
+      } else if (baddie->state == 1) {
         baddie->param = fmin(1.0, baddie->param + time / 0.5);
         if (baddie->cooldown <= 0.0 && baddie->param == 1.0) {
           for (int i = 0; i < 2; ++i) {
@@ -522,7 +520,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->cooldown = 5.0;
           baddie->state = 0;
         }
-      }
+      } else baddie->state = 0;
       break;
     case AZ_BAD_SPINE_MINE:
       drift_towards_ship(state, baddie, time, 20, 20, 20);
@@ -550,8 +548,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->components[0].angle = 1.0;
           baddie->state = 0;
         }
-      } else {
-        assert(baddie->state == 0);
+      } else if (baddie->state == 0) {
         // Try to aim gun (but sometimes twitch randomly):
         const int aim = az_randint(-1, 1);
         baddie->components[0].angle = fmax(-1.0, fmin(1.0, az_mod2pi(
@@ -588,7 +585,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                          spark_start, az_vpolar(az_random(10, 70), theta));
           }
         }
-      }
+      } else baddie->state = 0;
       break;
     case AZ_BAD_ZENITH_CORE:
       // Lie dormant for 31 seconds.
@@ -692,13 +689,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             az_vwithin(state->ship.position, baddie->position, 200.0)) {
           baddie->state = 1;
         }
-      } else {
-        assert(baddie->state == 1);
+      } else if (baddie->state == 1) {
         if (!az_ship_is_present(&state->ship) ||
             !az_vwithin(state->ship.position, baddie->position, 400.0)) {
           baddie->state = 0;
         }
-      }
+      } else baddie->state = 0;
       break;
     case AZ_BAD_BEAM_SENSOR:
     case AZ_BAD_GUN_SENSOR:
@@ -707,13 +703,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->state = 1;
           az_run_script(state, baddie->on_kill);
         }
-      } else {
-        assert(baddie->state == 1);
-        if (baddie->health >= baddie->data->max_health) {
-          baddie->state = 0;
-        }
       }
-      baddie->health = fmax(baddie->health, baddie->data->max_health - 1);
+      baddie->health = baddie->data->max_health;
       break;
     case AZ_BAD_ROCKWYRM:
       tick_rockwyrm(state, baddie, time);
@@ -738,7 +729,6 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 1: Hatch as soon as cooldown reaches zero.
       else {
-        assert(baddie->state == 1);
         if (baddie->cooldown <= 0.0) {
           const az_vector_t position = baddie->position;
           const double angle = baddie->angle;
@@ -780,15 +770,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       // State 2: Chase the ship for up to a few seconds, then go to state 0.
-      else {
-        assert(baddie->state == 2);
+      else if (baddie->state == 2) {
         if (az_ship_is_present(&state->ship)) {
           fly_towards_ship(state, baddie, time,
                            5.0, 500.0, 300.0, 250.0, 0.0, 100.0);
           baddie->param = fmax(0.0, baddie->param - time);
         } else baddie->param = 0.0;
         if (baddie->param <= 0.0) baddie->state = 0;
-      }
+      } else baddie->state = 0;
       break;
     case AZ_BAD_ICE_CRAWLER:
       crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
@@ -928,7 +917,6 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         drift_towards_ship(state, baddie, time, 400, 500, 100);
         baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(180) * time);
       } else {
-        assert(baddie->state == 1);
         baddie->velocity = az_vwithlen(baddie->velocity, 300.0);
         baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(180) * time);
       }
@@ -986,15 +974,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       // State 2: Turn.
-      else {
-        assert(baddie->state == 2);
+      else if (baddie->state == 2) {
         baddie->velocity = AZ_VZERO;
         const double turn_rate = AZ_DEG2RAD(50);
         const double goal_angle = baddie->components[0].angle;
         baddie->angle =
           az_angle_towards(baddie->angle, turn_rate * time, goal_angle);
         if (baddie->angle == goal_angle) baddie->state = 0;
-      }
+      } else baddie->state = 0;
       break;
   }
 
