@@ -35,10 +35,11 @@
 
 static void draw_passage(void) {
   glColor3f(0, 1, 0); // green
+  glBegin(GL_LINE_STRIP); {
+    glVertex2f(30, 50); glVertex2f(-30, 50);
+    glVertex2f(-30, -50); glVertex2f(30, -50);
+  } glEnd();
   glBegin(GL_LINES); {
-    for (GLfloat x = 30; x >= -30; x -= 4) glVertex2f(x, 50);
-    for (GLfloat y = 50; y >= -50; y -= 4) glVertex2f(-30, y);
-    for (GLfloat x = -30; x <= 30; x += 4) glVertex2f(x, -50);
     for (GLfloat y = -50; y <= 50; y += 4) glVertex2f(30, y);
     for (GLfloat y = -50; y <= 50; y += 4) glVertex2f(-10, y);
   } glEnd();
