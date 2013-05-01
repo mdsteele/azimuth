@@ -384,19 +384,24 @@ static void fire_gun_single(
 // Fire multiple ordnance projectiles (applying the ordnance power bonus).
 static void fire_ordn_multi(
     az_space_state_t *state, az_proj_kind_t kind, bool forward,
-    int num_shots, double dtheta, bool alt_params, az_sound_key_t sound) {
+    int num_shots, double dtheta, bool alt_params, az_sound_key_t sound,
+    double recoil) {
   const double power =
     (az_has_upgrade(&state->ship.player, AZ_UPG_HIGH_EXPLOSIVES) ?
      AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER : 1.0);
   fire_projectiles(state, kind, power, forward, num_shots, dtheta, 0.0,
                    alt_params, sound);
+  if (recoil != 0.0) {
+    state->ship.velocity =
+      az_vadd(state->ship.velocity, az_vpolar(-recoil, state->ship.angle));
+  }
 }
 
 // Fire a single ordnance projectile (applying the ordnance power bonus).
 static void fire_ordn_single(
     az_space_state_t *state, az_proj_kind_t kind, bool forward,
-    az_sound_key_t sound) {
-  fire_ordn_multi(state, kind, forward, 1, 0.0, false, sound);
+    az_sound_key_t sound, double recoil) {
+  fire_ordn_multi(state, kind, forward, 1, 0.0, false, sound, recoil);
 }
 
 static void beam_emit_particles(az_space_state_t *state, az_vector_t position,
@@ -516,12 +521,13 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
 
     // Resolve hits:
     bool did_hit = true;
+    bool did_damage = false;
     az_color_t hit_color = AZ_WHITE;
     switch (impact.type) {
       case AZ_IMP_NOTHING: did_hit = false; break;
       case AZ_IMP_BADDIE:
         assert(minor != AZ_GUN_PIERCE); // pierced baddies are dealt with above
-        az_try_damage_baddie(
+        did_damage = az_try_damage_baddie(
             state, impact.target.baddie.baddie,
             impact.target.baddie.component, damage_kind, damage);
         break;
@@ -546,9 +552,9 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         damage_mult *= 0.5;
       }
     }
-    // If a BURST beam doesn't hit anything, it doesn't reflect (so there is no
-    // additional beam).
-    else if (minor == AZ_GUN_BURST) break;
+    // If a BURST beam damages a baddie, or if it doesn't hit anything, it
+    // doesn't reflect (so there is no additional beam).
+    if (minor == AZ_GUN_BURST && (did_damage || !did_hit)) break;
   }
 
   // Play a looping sound (based on beam kind):
@@ -605,11 +611,12 @@ static void fire_weapons(az_space_state_t *state, double time) {
             player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
           player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
           fire_ordn_single(state, AZ_PROJ_HYPER_ROCKET, true,
-                           AZ_SND_FIRE_HYPER_ROCKET);
+                           AZ_SND_FIRE_HYPER_ROCKET, 100);
         } else {
           if (player->rockets <= 0) return;
           --player->rockets;
-          fire_ordn_single(state, AZ_PROJ_ROCKET, true, AZ_SND_FIRE_ROCKET);
+          fire_ordn_single(state, AZ_PROJ_ROCKET, true,
+                           AZ_SND_FIRE_ROCKET, 20);
         }
         ship->ordn_charge = 0.0;
         return;
@@ -618,11 +625,11 @@ static void fire_weapons(az_space_state_t *state, double time) {
             player->bombs >= AZ_BOMBS_PER_MEGA_BOMB) {
           player->bombs -= AZ_BOMBS_PER_MEGA_BOMB;
           fire_ordn_single(state, AZ_PROJ_MEGA_BOMB, false,
-                           AZ_SND_BLINK_MEGA_BOMB);
+                           AZ_SND_BLINK_MEGA_BOMB, 0);
         } else {
           if (player->bombs <= 0) return;
           --player->bombs;
-          fire_ordn_single(state, AZ_PROJ_BOMB, false, AZ_SND_DROP_BOMB);
+          fire_ordn_single(state, AZ_PROJ_BOMB, false, AZ_SND_DROP_BOMB, 0);
         }
         ship->ordn_charge = 0.0;
         return;
@@ -651,31 +658,33 @@ static void fire_weapons(az_space_state_t *state, double time) {
           case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
           case AZ_GUN_FREEZE:
             fire_ordn_single(state, AZ_PROJ_MISSILE_FREEZE, true,
-                             AZ_SND_FIRE_HYPER_ROCKET);
+                             AZ_SND_FIRE_HYPER_ROCKET, 70);
             break;
           case AZ_GUN_TRIPLE:
             fire_ordn_single(state, AZ_PROJ_MISSILE_BARRAGE, true,
-                             AZ_SND_FIRE_HYPER_ROCKET);
+                             AZ_SND_FIRE_HYPER_ROCKET, 0);
             break;
           case AZ_GUN_HOMING:
             fire_ordn_multi(state, AZ_PROJ_MISSILE_HOMING, true, 3,
-                            AZ_DEG2RAD(30), false, AZ_SND_FIRE_HYPER_ROCKET);
+                            AZ_DEG2RAD(30), false,
+                            AZ_SND_FIRE_HYPER_ROCKET, 40);
             break;
           case AZ_GUN_PHASE:
             fire_ordn_multi(state, AZ_PROJ_MISSILE_PHASE, true, 2,
-                            AZ_DEG2RAD(0), true, AZ_SND_FIRE_HYPER_ROCKET);
+                            AZ_DEG2RAD(0), true,
+                            AZ_SND_FIRE_HYPER_ROCKET, 100);
             break;
           case AZ_GUN_BURST:
             fire_ordn_single(state, AZ_PROJ_MISSILE_BURST, true,
-                             AZ_SND_FIRE_HYPER_ROCKET);
+                             AZ_SND_FIRE_HYPER_ROCKET, 70);
             break;
           case AZ_GUN_PIERCE:
             fire_ordn_single(state, AZ_PROJ_MISSILE_PIERCE, true,
-                             AZ_SND_FIRE_HYPER_ROCKET);
+                             AZ_SND_FIRE_HYPER_ROCKET, 100);
             break;
           case AZ_GUN_BEAM:
             fire_ordn_single(state, AZ_PROJ_MISSILE_BEAM, true,
-                             AZ_SND_CHARGED_MISSILE_BEAM);
+                             AZ_SND_CHARGED_MISSILE_BEAM, 0);
             break;
         }
         ship->ordn_charge = 0.0;
