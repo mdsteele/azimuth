@@ -448,7 +448,7 @@ static void do_rotate_align(bool to_camera) {
     AZ_LIST_LOOP(obj, room->obj##s) { \
       if (!obj->selected) continue; \
       const double up = (to_camera ? cam_up : az_vtheta(obj->spec.position)); \
-      obj->spec.angle = az_mod2pi(up + step * \
+      obj->spec.angle = state.brush.angle = az_mod2pi(up + step * \
           ceil(az_mod2pi_nonneg(obj->spec.angle - up + 0.001) / step)); \
       set_room_unsaved(room); \
     } \

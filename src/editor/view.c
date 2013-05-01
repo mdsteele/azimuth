@@ -585,23 +585,38 @@ static void draw_hud(az_editor_state_t* state) {
       break;
     case AZ_TOOL_BADDIE:
       tool_name = "BADDIE";
-      glColor3f(0, 0, 1);
+      glColor3f(0.25, 0.25, 1);
+      az_draw_printf(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5,
+                     AZ_SCREEN_HEIGHT - 28, "%d/%d",
+                     AZ_LIST_SIZE(room->baddies), AZ_MAX_NUM_BADDIES);
       break;
     case AZ_TOOL_DOOR:
       tool_name = "DOOR";
       glColor3f(0, 1, 0);
+      az_draw_printf(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5,
+                     AZ_SCREEN_HEIGHT - 28, "%d/%d",
+                     AZ_LIST_SIZE(room->doors), AZ_MAX_NUM_DOORS);
       break;
     case AZ_TOOL_GRAVFIELD:
       tool_name = "GRAVFIELD";
       glColor3f(0, 0.5, 0.5);
+      az_draw_printf(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5,
+                     AZ_SCREEN_HEIGHT - 28, "%d/%d",
+                     AZ_LIST_SIZE(room->gravfields), AZ_MAX_NUM_GRAVFIELDS);
       break;
     case AZ_TOOL_NODE:
       tool_name = "NODE";
       glColor3f(0, 1, 1);
+      az_draw_printf(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5,
+                     AZ_SCREEN_HEIGHT - 28, "%d/%d",
+                     AZ_LIST_SIZE(room->nodes), AZ_MAX_NUM_NODES);
       break;
     case AZ_TOOL_WALL:
       tool_name = "WALL";
       glColor3f(1, 1, 0);
+      az_draw_printf(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5,
+                     AZ_SCREEN_HEIGHT - 28, "%d/%d",
+                     AZ_LIST_SIZE(room->walls), AZ_MAX_NUM_WALLS);
       break;
   }
   az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 5, AZ_SCREEN_HEIGHT - 13,
