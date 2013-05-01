@@ -39,7 +39,8 @@ static GLuint portrait_display_lists_start;
 #define HOPPER_PAUSED_INDEX 0
 #define HOPPER_TALKING_INDEX 1
 #define CPU_A_PAUSED_INDEX 2
-#define NUM_PORTRAIT_DISPLAY_LISTS 3
+#define CPU_B_PAUSED_INDEX 3
+#define NUM_PORTRAIT_DISPLAY_LISTS 4
 
 /*===========================================================================*/
 
@@ -182,6 +183,28 @@ static const az_vector_t cpu_a5_vertices[] = {
   {30, 60}, {56, 60}, {56, 63}, {57, 63}, {57, 100}
 };
 
+static const az_vector_t cpu_b1_vertices[] = {
+  {30, 60}, {36, 60}, {36, 63}, {37, 63}, {37, 70}, {0, 70},
+  {0, 20}, {37, 20}, {37, 37}, {36, 37}, {36, 40}, {30, 40}
+};
+static const az_vector_t cpu_b2_vertices[] = {
+  {100, 0}, {100, 24}, {60, 24}, {58, 25}, {57, 27},
+  {57, 37}, {56, 37}, {56, 40}, {44, 40}, {44, 37}, {43, 37},
+  {43, 17}, {42, 15}, {40, 14}, {0, 14}, {0, 0}
+};
+static const az_vector_t cpu_b3_vertices[] = {
+  {100, 47}, {83, 47}, {73, 47}, {73, 46}, {70, 46}, {70, 40}, {64, 40},
+  {64, 37}, {63, 37}, {63, 30}, {100, 30}
+};
+static const az_vector_t cpu_b4_vertices[] = {
+  {63, 100}, {63, 63}, {64, 63}, {64, 60}, {70, 60}, {70, 54}, {73, 54},
+  {73, 53}, {100, 53}, {100, 100}
+};
+static const az_vector_t cpu_b5_vertices[] = {
+  {0, 100}, {0, 76}, {40, 76}, {42, 75}, {43, 73}, {43, 63}, {44, 63},
+  {44, 60}, {56, 60}, {56, 63}, {57, 63}, {57, 100}
+};
+
 /*===========================================================================*/
 
 void az_init_portrait_drawing(void) {
@@ -216,7 +239,22 @@ void az_init_portrait_drawing(void) {
     draw_portrait_polygon(6, color1, color2, polygon5);
     draw_computer_circle(40, 50, color1, (az_color_t){255, 0, 255, 128});
   } glEndList();
-  // TODO: Compile other portraits.
+  // Compile CPU B portrait:
+  glNewList(portrait_display_lists_start + CPU_B_PAUSED_INDEX, GL_COMPILE); {
+    const az_color_t color1 = {128, 255, 128, 255};
+    const az_color_t color2 = {0, 255, 128, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(cpu_b1_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(cpu_b2_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon2);
+    const az_polygon_t polygon3 = AZ_INIT_POLYGON(cpu_b3_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon3);
+    const az_polygon_t polygon4 = AZ_INIT_POLYGON(cpu_b4_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon4);
+    const az_polygon_t polygon5 = AZ_INIT_POLYGON(cpu_b5_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon5);
+    draw_computer_circle(60, 50, color1, (az_color_t){0, 255, 0, 128});
+  } glEndList();
 }
 
 /*===========================================================================*/
@@ -237,7 +275,12 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
         draw_computer_blinkenlight(40, 50, (az_color_t){255, 128, 255, 255});
       }
       break;
-    case AZ_POR_CPU_B: return; // TODO
+    case AZ_POR_CPU_B:
+      display_list += CPU_B_PAUSED_INDEX;
+      if (az_clock_mod(2, (talking ? 3 : 25), clock)) {
+        draw_computer_blinkenlight(60, 50, (az_color_t){128, 255, 128, 255});
+      }
+      break;
     case AZ_POR_CPU_C: return; // TODO
     case AZ_POR_TRICHORD: return; // TODO
   }
