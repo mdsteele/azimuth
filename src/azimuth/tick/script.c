@@ -236,6 +236,37 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DIV: BINARY_OP(a / b); break;
       case AZ_OP_DIVI: UNARY_OP(a / ins.immediate); break;
       case AZ_OP_IDIV: UNARY_OP(ins.immediate / a); break;
+      // Vectors:
+      case AZ_OP_VADD:
+        {
+          double xa, ya, xb, yb;
+          STACK_POP(&xa, &ya, &xb, &yb);
+          STACK_PUSH(xa + xb, ya + yb);
+        }
+        break;
+      case AZ_OP_VSUB:
+        {
+          double xa, ya, xb, yb;
+          STACK_POP(&xa, &ya, &xb, &yb);
+          STACK_PUSH(xa - xb, ya - yb);
+        }
+        break;
+      case AZ_OP_VMUL:
+        {
+          double x, y, f;
+          STACK_POP(&x, &y, &f);
+          STACK_PUSH(x * f, y * f);
+        }
+        break;
+      case AZ_OP_VMULI:
+        {
+          double x, y;
+          STACK_POP(&x, &y);
+          STACK_PUSH(x * ins.immediate, y * ins.immediate);
+        }
+        break;
+      case AZ_OP_VNORM: BINARY_OP(hypot(a, b)); break;
+      case AZ_OP_VTHETA: BINARY_OP(atan2(b, a)); break;
       // Comparisons:
       case AZ_OP_EQ: BINARY_OP(a == b ? 1.0 : 0.0); break;
       case AZ_OP_EQI: UNARY_OP(a == ins.immediate ? 1.0 : 0.0); break;

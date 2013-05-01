@@ -45,6 +45,12 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_DIV:    return "div";
     case AZ_OP_DIVI:   return "divi";
     case AZ_OP_IDIV:   return "idiv";
+    case AZ_OP_VADD:   return "vadd";
+    case AZ_OP_VSUB:   return "vsub";
+    case AZ_OP_VMUL:   return "vmul";
+    case AZ_OP_VMULI:  return "vmuli";
+    case AZ_OP_VNORM:  return "vnorm";
+    case AZ_OP_VTHETA: return "vtheta";
     case AZ_OP_EQ:     return "eq";
     case AZ_OP_EQI:    return "eqi";
     case AZ_OP_NE:     return "ne";
@@ -120,6 +126,11 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_SUB:
     case AZ_OP_MUL:
     case AZ_OP_DIV:
+    case AZ_OP_VADD:
+    case AZ_OP_VSUB:
+    case AZ_OP_VMUL:
+    case AZ_OP_VNORM:
+    case AZ_OP_VTHETA:
     case AZ_OP_EQ:
     case AZ_OP_NE:
     case AZ_OP_LT:
@@ -151,6 +162,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MULI:
     case AZ_OP_DIVI:
     case AZ_OP_IDIV:
+    case AZ_OP_VMULI:
     case AZ_OP_EQI:
     case AZ_OP_NEI:
     case AZ_OP_LTI:

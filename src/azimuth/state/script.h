@@ -43,6 +43,13 @@ typedef enum {
   AZ_OP_DIV, // pop top two, push (a / b)
   AZ_OP_DIVI, // pop top, push a / i
   AZ_OP_IDIV, // pop top, push i / a
+  // Vectors:
+  AZ_OP_VADD, // pop top four, push (a + c) and (b + d)
+  AZ_OP_VSUB, // pop top four, push (a - c) and (b - d)
+  AZ_OP_VMUL, // pop top three, push (a * c) and (b * c)
+  AZ_OP_VMULI, // pop top two, push (a * i) and (b * i)
+  AZ_OP_VNORM, // pop top two, push hypot(a, b)
+  AZ_OP_VTHETA, // pop top two, push atan2(b, a)
   // Comparisons:
   AZ_OP_EQ, // pop top two, push (a == b ? 1 : 0)
   AZ_OP_EQI, // pop top, push (a == i ? 1 : 0)
