@@ -39,16 +39,69 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
   assert(node->kind == AZ_NODE_CONSOLE);
   switch (node->subkind.console) {
     case AZ_CONS_COMM:
-      switch (node->state) {
-        case AZ_NS_FAR: glColor3f(1, 1, 1); break;
-        case AZ_NS_NEAR: glColor3f(1, 0, 0); break;
-        case AZ_NS_READY: glColor3f(0, 1, 0); break;
-        case AZ_NS_ACTIVE: glColor3f(0, 0, 1); break;
-      }
-      glBegin(GL_LINE_LOOP); {
-        glVertex2d(10, 0);
-        glVertex2d(-10, 10);
-        glVertex2d(-10, -10);
+      // Platform:
+      glBegin(GL_POLYGON); {
+        glColor3f(0.1, 0.1, 0.1);
+        glVertex2f(26, 16); glVertex2f(26, -16);
+        glVertex2f(-17, -16); glVertex2f(-20, -13);
+        glVertex2f(-20, 13); glVertex2f(-17, 16);
+      } glEnd();
+      // Glow:
+      glBegin(GL_TRIANGLE_FAN); {
+        if (node->state == AZ_NS_READY) glColor4f(1, 1, 0.5, 0.3);
+        else glColor4f(1, 1, 1, 0.1);
+        glVertex2f(0, 0);
+        glColor4f(1, 1, 1, 0);
+        const double radius = 10 + az_clock_zigzag(6, 6, clock);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      // Port:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.05, 0.15, 0.05);
+        glVertex2f(26, 3.5); glVertex2f(15, 1.5);
+        glColor3f(0.325, 0.4, 0.325);
+        glVertex2f(26, 0); glVertex2f(15, 0);
+        glColor3f(0.05, 0.15, 0.05);
+        glVertex2f(26, -3.5); glVertex2f(15, -1.5);
+      } glEnd();
+      // Box:
+      glBegin(GL_QUADS); {
+        glColor3f(0.4, 0.4, 0.4);
+        glVertex2f(29, 18); glVertex2f(29, -19);
+        glVertex2f(48, -19); glVertex2f(48, 18);
+        const int slowdown = (node->state == AZ_NS_ACTIVE ? 6 : 16);
+        for (int i = 0; i < 3; ++i) {
+          const int size = 5;
+          const int x = 30 + (size + 1) * i;
+          for (int j = 0; j < 6; ++j) {
+            const int y = (size + 1) * (j - 3);
+            switch ((az_clock_mod(5, slowdown, clock) + i * 29 +
+                     az_clock_mod(j + 5, slowdown, clock)) % 5) {
+              case 0: glColor3f(0, 0, 0); break;
+              case 1: glColor3f(1, 0, 0); break;
+              case 2: glColor3f(0, 0, 1); break;
+              case 3: glColor3f(1, 1, 1); break;
+              case 4: glColor3f(0, 1, 0); break;
+            }
+            glVertex2i(x, y); glVertex2i(x + size, y);
+            glVertex2i(x + size, y + size); glVertex2i(x, y + size);
+          }
+        }
+      } glEnd();
+      // Siding:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.4, 0.4, 0.4); glVertex2f(29,  18);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(26,  21);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f(29, -19);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(26, -22);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f(48, -19);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(51, -22);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f(48,  18);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(51,  21);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f(29,  18);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(26,  21);
       } glEnd();
       break;
     case AZ_CONS_REFILL:
