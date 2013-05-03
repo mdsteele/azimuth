@@ -576,6 +576,25 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(-12, -7); glVertex2f(-2, -6);
       } glEnd();
       break;
+    case AZ_UPG_MAGNET_SWEEP:
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = -200; i <= 20; i += 20) {
+          const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
+          glColor3f(1, 0, 0); glVertex2d(9 * c, 9 * s - 1);
+          glColor3f(0.7, 0, 0); glVertex2d(5 * c, 5 * s - 1);
+        }
+      } glEnd();
+      glBegin(GL_QUADS); {
+        for (int i = -1; i <= 1; i += 2) {
+          glColor3f(0.5, 0.6, 0.6);
+          glVertex2f(i * 2, 9); glVertex2f(i * 6, 9);
+          glColor3f(1, 0, 0);
+          glVertex2f(i * 8.5, 2);
+          glColor3f(0.7, 0, 0);
+          glVertex2f(i * 4.7, 0.7);
+        }
+      }
+      break;
     case AZ_UPG_CPLUS_DRIVE:
       glBegin(GL_TRIANGLES); {
         for (int i = 1; i < 4; ++i) {
@@ -691,7 +710,12 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
     // TODO: Draw other upgrade icons.
-    default:
+    case AZ_UPG_HIGH_EXPLOSIVES:
+    case AZ_UPG_ATTUNED_EXPLOSIVES:
+    case AZ_UPG_TRACTOR_BEAM:
+    case AZ_UPG_INFRASCANNER:
+    case AZ_UPG_ORION_BOOSTER:
+    case AZ_UPG_FUSION_REACTOR:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
       glBegin(GL_QUADS); {
         glVertex2d(12, 12);
