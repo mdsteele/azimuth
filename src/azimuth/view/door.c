@@ -20,6 +20,7 @@
 #include "azimuth/view/door.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include <GL/gl.h>
@@ -71,49 +72,7 @@ static void draw_forcefield(const az_door_t *door, az_clock_t clock) {
   }
 }
 
-static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
-  az_color_t color = AZ_WHITE;
-  switch (door->kind) {
-    case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
-    case AZ_DOOR_NORMAL:
-      color = (az_color_t){192, 192, 192, 255};
-      break;
-    case AZ_DOOR_LOCKED:
-      color = (az_color_t){64, 64, 64, 255};
-      break;
-    case AZ_DOOR_ROCKET:
-      color = (az_color_t){255, 0, 0, 255};
-      break;
-    case AZ_DOOR_HYPER_ROCKET:
-      color = (az_color_t){255, 0, 128, 255};
-      break;
-    case AZ_DOOR_BOMB:
-      color = (az_color_t){0, 0, 255, 255};
-      break;
-    case AZ_DOOR_MEGA_BOMB:
-      color = (az_color_t){0, 128, 255, 255};
-      break;
-    case AZ_DOOR_PASSAGE:
-      draw_passage();
-      return;
-    case AZ_DOOR_FORCEFIELD:
-      draw_forcefield(door, clock);
-      return;
-    case AZ_DOOR_UNLOCKED:
-      color = (az_clock_mod(2, 4, clock) ? (az_color_t){192, 192, 192, 255} :
-               (az_color_t){192, 192, 64, 255});
-      break;
-  }
-
-  if (door->openness < 1.0) {
-    glColor4ub(color.r, color.g, color.b, color.a);
-    glBegin(GL_QUADS); {
-      glVertex2f(30, 50);
-      glVertex2f(30, -50);
-      glVertex2f(40.0 - 10.0 * door->openness, -35);
-      glVertex2f(40.0 - 10.0 * door->openness, 35);
-    } glEnd();
-  }
+static void draw_door_pipe(void) {
   glBegin(GL_QUAD_STRIP); {
     glColor3f(0.25, 0.25, 0.25); // dark gray
     glVertex2f(30, 50); glVertex2f(-30, 50);
@@ -126,6 +85,82 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     glColor3f(0.25, 0.25, 0.25); // dark gray
     glVertex2f(30, -50); glVertex2f(-30, -50);
   } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glVertex2f(31, 51); glVertex2f(24, 51);
+    glColor3f(0.45, 0.45, 0.45); // mid gray
+    glVertex2f(31, 31); glVertex2f(24, 31);
+    glColor3f(0.65, 0.65, 0.65); // light gray
+    glVertex2f(31, 0); glVertex2f(24, 0);
+    glColor3f(0.45, 0.45, 0.45); // mid gray
+    glVertex2f(31, -31); glVertex2f(24, -31);
+    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glVertex2f(31, -51); glVertex2f(24, -51);
+  } glEnd();
+}
+
+static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
+  az_color_t color1 = AZ_WHITE, color2 = AZ_WHITE;
+  switch (door->kind) {
+    case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_DOOR_UNLOCKED:
+      if (az_clock_mod(2, 4, clock)) {
+        color1 = (az_color_t){192, 192, 64, 255};
+        color2 = (az_color_t){128, 128, 48, 255};
+        break;
+      } // else fallthrough
+    case AZ_DOOR_NORMAL:
+      color1 = (az_color_t){192, 192, 192, 255};
+      color2 = (az_color_t){128, 128, 128, 255};
+      break;
+    case AZ_DOOR_LOCKED:
+      color1 = (az_color_t){80, 80, 80, 255};
+      color2 = (az_color_t){48, 48, 48, 255};
+      break;
+    case AZ_DOOR_ROCKET:
+      color1 = (az_color_t){192, 0, 0, 255};
+      color2 = (az_color_t){128, 0, 0, 255};
+      break;
+    case AZ_DOOR_HYPER_ROCKET:
+      color1 = (az_color_t){255, 0, 128, 255};
+      color2 = (az_color_t){192, 0, 96, 255};
+      break;
+    case AZ_DOOR_BOMB:
+      color1 = (az_color_t){0, 0, 192, 255};
+      color2 = (az_color_t){0, 0, 128, 255};
+      break;
+    case AZ_DOOR_MEGA_BOMB:
+      color1 = (az_color_t){0, 128, 255, 255};
+      color2 = (az_color_t){0, 96, 192, 255};
+      break;
+    case AZ_DOOR_PASSAGE:
+      draw_passage();
+      return;
+    case AZ_DOOR_FORCEFIELD:
+      draw_forcefield(door, clock);
+      return;
+  }
+
+  if (door->openness < 1.0) {
+    glBegin(GL_QUADS); {
+      const GLfloat x1 = 30.0;
+      const GLfloat x2 = 40.0 - 10.0 * door->openness;
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2f(x1, 20);
+      glVertex2f(x1, -20);
+      glVertex2f(x2, -10);
+      glVertex2f(x2, 10);
+      for (int i = -1; i <= 1; i += 2) {
+        glColor4ub(color2.r, color2.g, color2.b, color2.a);
+        glVertex2f(x2, i * 35);
+        glVertex2f(x1, i * 50);
+        glColor4ub(color1.r, color1.g, color1.b, color1.a);
+        glVertex2f(x1, i * (20 + 10.0 * door->openness));
+        glVertex2f(x2, i * (10.0 + 25.0 * door->openness));
+      }
+    } glEnd();
+  }
+  draw_door_pipe();
 }
 
 /*===========================================================================*/
@@ -164,18 +199,11 @@ void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
   glPushMatrix(); {
     glTranslated(center.x, center.y, 0);
     glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
-    glBegin(GL_QUAD_STRIP); {
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2f(60, 50); glVertex2f(-60, 50);
-      glColor3f(0.5, 0.5, 0.5); // mid gray
-      glVertex2f(60, 30); glVertex2f(-60, 30);
-      glColor3f(0.7, 0.7, 0.7); // light gray
-      glVertex2f(60, 0); glVertex2f(-60, 0);
-      glColor3f(0.5, 0.5, 0.5); // mid gray
-      glVertex2f(60, -30); glVertex2f(-60, -30);
-      glColor3f(0.25, 0.25, 0.25); // dark gray
-      glVertex2f(60, -50); glVertex2f(-60, -50);
-    } glEnd();
+    glTranslated(30, 0, 0);
+    draw_door_pipe();
+    glRotated(180, 0, 0, 1);
+    glTranslated(60, 0, 0);
+    draw_door_pipe();
   } glPopMatrix();
 }
 
