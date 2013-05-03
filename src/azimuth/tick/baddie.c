@@ -964,12 +964,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         const double dist = az_vdist(baddie->position, impact.position);
         const double fraction =
           fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
-        const double speed_limit = az_vnorm(baddie->velocity) + accel * time;
-        const double speed = fmin(speed_limit, max_speed * sqrt(fraction));
-        baddie->state = (speed < speed_limit ? 0 : 1);
+        const double speed_limit = max_speed * sqrt(fraction);
+        const double speed =
+          fmin(speed_limit, az_vnorm(baddie->velocity) + accel * time);
+        baddie->state = (speed >= max_speed || speed < speed_limit ? 1 : 0);
         baddie->velocity = az_vpolar(speed, baddie->angle);
         if (fraction <= 0.0) {
-          baddie->components[0].angle = az_mod2pi(baddie->angle + AZ_HALF_PI);
+          baddie->param = az_mod2pi(baddie->angle + AZ_HALF_PI);
           baddie->state = 2;
         }
       }
@@ -977,7 +978,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       else if (baddie->state == 2) {
         baddie->velocity = AZ_VZERO;
         const double turn_rate = AZ_DEG2RAD(50);
-        const double goal_angle = baddie->components[0].angle;
+        const double goal_angle = baddie->param;
         baddie->angle =
           az_angle_towards(baddie->angle, turn_rate * time, goal_angle);
         if (baddie->angle == goal_angle) baddie->state = 0;
