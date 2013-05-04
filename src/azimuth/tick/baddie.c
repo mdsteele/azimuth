@@ -984,6 +984,48 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (baddie->angle == goal_angle) baddie->state = 0;
       } else baddie->state = 0;
       break;
+    case AZ_BAD_HEAT_RAY:
+      // State 0: Fire beam until cooldown expires.
+      if (baddie->state == 0) {
+        if (baddie->cooldown > 0.0) {
+          // Fire a beam.
+          const double beam_damage = 40.0 * time;
+          const az_vector_t beam_start =
+            az_vadd(baddie->position, az_vpolar(15, baddie->angle));
+          az_impact_t impact;
+          az_ray_impact(state, beam_start, az_vpolar(1000, baddie->angle),
+                        AZ_IMPF_NOTHING, baddie->uid, &impact);
+          if (impact.type == AZ_IMP_BADDIE) {
+            az_try_damage_baddie(state, impact.target.baddie.baddie,
+                impact.target.baddie.component, AZ_DMGF_BEAM, beam_damage);
+          } else if (impact.type == AZ_IMP_SHIP) {
+            az_damage_ship(state, beam_damage, false);
+          }
+          // Add particles for the beam.
+          const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+          const az_color_t beam_color = {255, 128, alt, 192};
+          az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+                      4.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
+          az_add_speck(state, (impact.type == AZ_IMP_WALL ?
+                               impact.target.wall->data->color1 :
+                               AZ_WHITE), 1.0, impact.position,
+                       az_vpolar(az_random(20.0, 70.0),
+                                 az_vtheta(impact.normal) +
+                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+          az_loop_sound(&state->soundboard, AZ_SND_BEAM_FREEZE);
+        } else {
+          baddie->state = 1;
+          baddie->cooldown = az_random(0.5, 3.0);
+        }
+      }
+      // State 1: Recharge until cooldown expires.
+      else {
+        if (baddie->cooldown <= 0.0) {
+          baddie->state = 0;
+          baddie->cooldown = 1.5;
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie.

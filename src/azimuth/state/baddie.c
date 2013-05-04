@@ -234,6 +234,11 @@ static const az_vector_t small_truck_vertices[] = {
   {-30, -14}, {10, -14}, {10, -20}, {32, -12}
 };
 
+static const az_vector_t heat_ray_vertices[] = {
+  {0, -13.6}, {1, -13.9}, {3.4, -13.9}, {5.5, -13}, {7.4, -11.5}, {8.5, -9.5},
+  {9, -7}, {15, -7}, {15, 7}, {0, 7}, {0, 15}, {-10, 20}, {-10, -20}, {0, -15}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -469,6 +474,13 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
                                   AZ_DMGF_REACTIVE), .impact_damage = 8.0 }
+  },
+  [AZ_BAD_HEAT_RAY] = {
+    .max_health = 40.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
+                   .immunities = ~(AZ_DMGF_CPLUS | AZ_DMGF_HYPER_ROCKET) }
   }
 };
 
