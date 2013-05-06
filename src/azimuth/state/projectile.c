@@ -306,6 +306,13 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 2.0,
     .impact_damage = 3.0
   },
+  [AZ_PROJ_NUCLEAR_EXPLOSION] = {
+    .splash_damage = 75.0,
+    .splash_radius = 200.0,
+    .impact_shake = 5.0,
+    .damage_kind = AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,

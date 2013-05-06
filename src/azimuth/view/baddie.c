@@ -1192,6 +1192,54 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glEnd();
       } glPopMatrix();
       break;
+    case AZ_BAD_NUCLEAR_MINE:
+      // Arms:
+      glPushMatrix(); {
+        for (int i = 0; i < 3; ++i) {
+          glBegin(GL_QUADS); {
+            glColor3f(0.55 + 0.4 * flare, 0.55, 0.5 + 0.5 * frozen);
+            glVertex2f(0, 1.5); glVertex2f(18, 1.5);
+            glColor3f(0.35 + 0.3 * flare, 0.35, 0.3 + 0.3 * frozen);
+            glVertex2f(18, -1.5); glVertex2f(0, -1.5);
+          } glEnd();
+          glRotatef(120, 0, 0, 1);
+        }
+      } glPopMatrix();
+      // Body:
+      glBegin(GL_POLYGON); {
+        glColor3f(0.65 + 0.3 * flare - 0.3 * frozen, 0.65 - 0.3 * flare,
+                  0.5 - 0.3 * flare + 0.5 * frozen);
+        for (int i = 0; i <= 360; i += 60) {
+          glVertex2d(8 * cos(AZ_DEG2RAD(i)), 8 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = 0; i <= 360; i += 60) {
+          glColor3f(0.65 + 0.3 * flare - 0.3 * frozen, 0.65 - 0.3 * flare,
+                    0.5 - 0.3 * flare + 0.5 * frozen);
+          glVertex2d(8 * cos(AZ_DEG2RAD(i)), 8 * sin(AZ_DEG2RAD(i)));
+          glColor3f(0.35f + 0.3f * flare, 0.35f, 0.15f + 0.3f * frozen);
+          glVertex2d(12 * cos(AZ_DEG2RAD(i)), 12 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      // Radiation symbol:
+      if (baddie->state == 1 && az_clock_mod(2, 3, clock)) glColor3f(1, 0, 0);
+      else glColor3f(0, 0, 0.5f * frozen);
+      glBegin(GL_TRIANGLE_FAN); {
+        glVertex2d(0, 0);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(1.5 * cos(AZ_DEG2RAD(i)), 1.5 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      for (int j = 60; j < 420; j += 120) {
+        glBegin(GL_QUAD_STRIP); {
+          for (int i = j - 30; i <= j + 30; i += 10) {
+            glVertex2d(3 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
+            glVertex2d(8 * cos(AZ_DEG2RAD(i)), 8 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+      }
+      break;
   }
 }
 

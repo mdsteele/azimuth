@@ -239,6 +239,13 @@ static const az_vector_t heat_ray_vertices[] = {
   {9, -7}, {15, -7}, {15, 7}, {0, 7}, {0, 15}, {-10, 20}, {-10, -20}, {0, -15}
 };
 
+static const az_vector_t nuclear_mine_vertices[] = {
+  {11, -1.5}, {18, -1.5}, {18, 1.5}, {11, 1.5}, {6, 10.3923}, {-4.2, 10.2763},
+  {-7.7, 16.3385}, {-10.299, 14.8385}, {-6.79904, 8.77628}, {-12, 0},
+  {-6.79904, -8.77628}, {-10.299, -14.8385}, {-7.7, -16.3385},
+  {-4.2, -10.2763}, {6, -10.3923}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -481,6 +488,12 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~(AZ_DMGF_CPLUS | AZ_DMGF_HYPER_ROCKET) }
+  },
+  [AZ_BAD_NUCLEAR_MINE] = {
+    .max_health = 7.0, .potential_pickups = AZ_PUPF_ALL,
+    .color = {160, 160, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(nuclear_mine_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BOMB) }
   }
 };
 

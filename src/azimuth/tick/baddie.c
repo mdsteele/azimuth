@@ -525,7 +525,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SPINE_MINE:
       drift_towards_ship(state, baddie, time, 20, 20, 20);
       baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
-      if (az_vwithin(baddie->position, state->ship.position, 150.0) &&
+      if (az_ship_is_present(&state->ship) &&
+          az_vwithin(baddie->position, state->ship.position, 150.0) &&
           has_line_of_sight_to_ship(state, baddie)) {
         for (int i = 0; i < 360; i += 20) {
           fire_projectile(state, baddie, AZ_PROJ_SPINE,
@@ -1023,6 +1024,27 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (baddie->cooldown <= 0.0) {
           baddie->state = 0;
           baddie->cooldown = 1.5;
+        }
+      }
+      break;
+    case AZ_BAD_NUCLEAR_MINE:
+      baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(90) * time);
+      // State 0: Wait for ship.
+      if (baddie->state == 0) {
+        if (az_ship_is_present(&state->ship) &&
+            az_vwithin(baddie->position, state->ship.position, 150.0) &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          baddie->state = 1;
+          baddie->cooldown = 0.75;
+          az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
+        }
+      }
+      // State 1: Explode when cooldown reaches zero.
+      else {
+        if (baddie->cooldown <= 0.0) {
+          fire_projectile(state, baddie, AZ_PROJ_NUCLEAR_EXPLOSION,
+                          0.0, 0.0, 0.0);
+          az_kill_baddie(state, baddie);
         }
       }
       break;

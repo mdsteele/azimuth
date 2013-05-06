@@ -151,6 +151,7 @@ static void on_projectile_impact(az_space_state_t *state,
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
       break;
     case AZ_PROJ_MEGA_BOMB:
+    case AZ_PROJ_NUCLEAR_EXPLOSION:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
       break;
     default: break;
@@ -493,6 +494,7 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
+    case AZ_PROJ_NUCLEAR_EXPLOSION:
       if (proj->age >= proj->data->lifetime) {
         on_projectile_hit_wall(state, proj, AZ_VZERO);
       } else {
