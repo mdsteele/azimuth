@@ -34,10 +34,6 @@
 
 #define DECL_COMPONENTS(c) .num_components=AZ_ARRAY_SIZE(c), .components=(c)
 
-static const az_vector_t lump_vertices[] = {
-  {20, 0}, {15, 15}, {-15, 15}, {-15, -15}, {15, -15}
-};
-
 static const az_vector_t turret_vertices[] = {
   {20, 0}, {10, 17.320508075688775}, {-10, 17.320508075688775},
   {-20, 0}, {-10, -17.320508075688775}, {10, -17.320508075688775}
@@ -244,6 +240,11 @@ static const az_vector_t nuclear_mine_vertices[] = {
   {-7.7, 16.3385}, {-10.299, 14.8385}, {-6.79904, 8.77628}, {-12, 0},
   {-6.79904, -8.77628}, {-10.299, -14.8385}, {-7.7, -16.3385},
   {-4.2, -10.2763}, {6, -10.3923}
+};
+
+static const az_vector_t beam_wall_vertices[] = {
+  {52, 15}, {-52, 15}, {-52, 10}, {-50, 10}, {-50, -10}, {-52, -10},
+  {-52, -15}, {52, -15}, {52, -10}, {50, -10}, {50, 10}, {52, 10}
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -494,6 +495,13 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {160, 160, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(nuclear_mine_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BOMB) }
+  },
+  [AZ_BAD_BEAM_WALL] = {
+    .max_health = 150.0, .potential_pickups = AZ_PUPF_NOTHING,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+    .main_body = { .polygon = AZ_INIT_POLYGON(beam_wall_vertices),
+                   .immunities = ~AZ_DMGF_BEAM }
   }
 };
 

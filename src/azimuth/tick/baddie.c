@@ -994,7 +994,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           const az_vector_t beam_start =
             az_vadd(baddie->position, az_vpolar(15, baddie->angle));
           az_impact_t impact;
-          az_ray_impact(state, beam_start, az_vpolar(1000, baddie->angle),
+          az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
                         AZ_IMPF_NOTHING, baddie->uid, &impact);
           if (impact.type == AZ_IMP_BADDIE) {
             az_try_damage_baddie(state, impact.target.baddie.baddie,
@@ -1048,6 +1048,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_BEAM_WALL: break; // Do nothing.
   }
 
   // Move cargo with the baddie.

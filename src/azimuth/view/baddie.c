@@ -1240,6 +1240,33 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glEnd();
       }
       break;
+    case AZ_BAD_BEAM_WALL:
+      glBegin(GL_QUADS); {
+        // Interior:
+        glColor3f(0.3, 0.3, 0.3);
+        glVertex2f(50, 15); glVertex2f(-50, 15);
+        glVertex2f(-50, -15); glVertex2f(50, -15);
+        // Diagonal struts:
+        for (int i = 0; i < 3; ++i) {
+          const float x = -50 + 32 * i;
+          for (int j = 0; j < 2; ++j) {
+            const float y = (j ? -12 : 12);
+            glColor3f(0.75 + 0.25 * flare, 0.75, 0.75);
+            glVertex2f(x, y); glVertex2f(x + 32, -y);
+            glColor3f(0.35 + 0.35 * flare, 0.4, 0.35);
+            glVertex2f(x + 32 + 4, -y); glVertex2f(x + 4, y);
+          }
+
+        }
+        // Top and bottom struts:
+        for (int y = -10; y <= 15; y += 25) {
+          glColor3f(0.75 + 0.25 * flare, 0.75, 0.75);
+          glVertex2f(52, y); glVertex2f(-52, y);
+          glColor3f(0.35 + 0.35 * flare, 0.4, 0.35);
+          glVertex2f(-52, y - 5); glVertex2f(52, y - 5);
+        }
+      } glEnd();
+      break;
   }
 }
 
