@@ -28,6 +28,7 @@
 #include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/script.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "editor/list.h"
 
@@ -393,6 +394,74 @@ void az_destroy_editor_state(az_editor_state_t *state) {
     AZ_LIST_DESTROY(room->walls);
   }
   AZ_LIST_DESTROY(state->planet.rooms);
+}
+
+/*===========================================================================*/
+
+bool az_editor_object_next(az_editor_object_t *object) {
+  az_editor_room_t *room = object->room;
+  ++object->index;
+  switch (object->type) {
+    case AZ_EOBJ_NOTHING:
+      object->index = 0;
+      object->type = AZ_EOBJ_BADDIE;
+      // fallthrough
+    case AZ_EOBJ_BADDIE:
+      if (object->index < AZ_LIST_SIZE(room->baddies)) {
+        az_editor_baddie_t *baddie = AZ_LIST_GET(room->baddies, object->index);
+        object->selected = &baddie->selected;
+        object->position = &baddie->spec.position;
+        object->angle = &baddie->spec.angle;
+        return true;
+      }
+      object->index = 0;
+      object->type = AZ_EOBJ_DOOR;
+      // fallthrough
+    case AZ_EOBJ_DOOR:
+      if (object->index < AZ_LIST_SIZE(room->doors)) {
+        az_editor_door_t *door = AZ_LIST_GET(room->doors, object->index);
+        object->selected = &door->selected;
+        object->position = &door->spec.position;
+        object->angle = &door->spec.angle;
+        return true;
+      }
+      object->index = 0;
+      object->type = AZ_EOBJ_GRAVFIELD;
+      // fallthrough
+    case AZ_EOBJ_GRAVFIELD:
+      if (object->index < AZ_LIST_SIZE(room->gravfields)) {
+        az_editor_gravfield_t *gravfield =
+          AZ_LIST_GET(room->gravfields, object->index);
+        object->selected = &gravfield->selected;
+        object->position = &gravfield->spec.position;
+        object->angle = &gravfield->spec.angle;
+        return true;
+      }
+      object->index = 0;
+      object->type = AZ_EOBJ_NODE;
+      // fallthrough
+    case AZ_EOBJ_NODE:
+      if (object->index < AZ_LIST_SIZE(room->nodes)) {
+        az_editor_node_t *node = AZ_LIST_GET(room->nodes, object->index);
+        object->selected = &node->selected;
+        object->position = &node->spec.position;
+        object->angle = &node->spec.angle;
+        return true;
+      }
+      object->index = 0;
+      object->type = AZ_EOBJ_WALL;
+      // fallthrough
+    case AZ_EOBJ_WALL:
+      if (object->index < AZ_LIST_SIZE(room->walls)) {
+        az_editor_wall_t *wall = AZ_LIST_GET(room->walls, object->index);
+        object->selected = &wall->selected;
+        object->position = &wall->spec.position;
+        object->angle = &wall->spec.angle;
+        return true;
+      }
+      return false;
+  }
+  AZ_ASSERT_UNREACHABLE();
 }
 
 /*===========================================================================*/

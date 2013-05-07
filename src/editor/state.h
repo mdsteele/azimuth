@@ -178,4 +178,28 @@ void az_destroy_editor_state(az_editor_state_t *state);
 
 /*===========================================================================*/
 
+#define AZ_EDITOR_OBJECT_LOOP(var_name, editor_room) \
+  for (az_editor_object_t var_name = {.room = editor_room}; \
+       az_editor_object_next(&(var_name));)
+
+typedef struct {
+  bool *selected;
+  az_vector_t *position;
+  double *angle;
+  az_editor_room_t *room;
+  enum {
+    AZ_EOBJ_NOTHING = 0,
+    AZ_EOBJ_BADDIE,
+    AZ_EOBJ_DOOR,
+    AZ_EOBJ_GRAVFIELD,
+    AZ_EOBJ_NODE,
+    AZ_EOBJ_WALL
+  } type;
+  int index;
+} az_editor_object_t;
+
+bool az_editor_object_next(az_editor_object_t *object);
+
+/*===========================================================================*/
+
 #endif // EDITOR_STATE_H_
