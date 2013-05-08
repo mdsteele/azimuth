@@ -74,6 +74,13 @@ typedef union {
   int marker;
 } az_node_subkind_t;
 
+typedef enum {
+  AZ_NS_FAR = 0,
+  AZ_NS_NEAR,
+  AZ_NS_READY,
+  AZ_NS_ACTIVE
+} az_node_status_t;
+
 typedef struct {
   az_node_kind_t kind; // if AZ_NODE_NOTHING, this node is not present
   az_node_subkind_t subkind;
@@ -81,7 +88,7 @@ typedef struct {
   const az_script_t *on_use; // not owned; NULL if no script
   az_vector_t position;
   double angle;
-  enum { AZ_NS_FAR = 0, AZ_NS_NEAR, AZ_NS_READY, AZ_NS_ACTIVE } state;
+  az_node_status_t status;
 } az_node_t;
 
 #define AZ_NODE_BOUNDING_RADIUS 50.0

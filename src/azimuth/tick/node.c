@@ -45,47 +45,47 @@ void az_tick_nodes(az_space_state_t *state, double time) {
         if (has_tractor_beam &&
             az_vwithin(state->ship.position, node->position,
                        AZ_TRACTOR_BEAM_MAX_RANGE)) {
-          node->state = AZ_NS_NEAR;
+          node->status = AZ_NS_NEAR;
           const double dist = az_vdist(state->ship.position, node->position);
           if (dist <= best_tractor_dist) {
             best_tractor_dist = dist;
             closest_tractor_node = node;
           }
-        } else node->state = AZ_NS_FAR;
+        } else node->status = AZ_NS_FAR;
         break;
       case AZ_NODE_CONSOLE:
         if (az_vwithin(state->ship.position, node->position,
                        AZ_CONSOLE_RANGE)) {
-          node->state = AZ_NS_NEAR;
+          node->status = AZ_NS_NEAR;
           const double dist = az_vdist(state->ship.position, node->position);
           if (dist <= best_console_dist) {
             best_console_dist = dist;
             closest_console_node = node;
           }
-        } else node->state = AZ_NS_FAR;
+        } else node->status = AZ_NS_FAR;
         break;
       default: break;
     }
   }
   if (closest_tractor_node != NULL) {
-    closest_tractor_node->state = AZ_NS_READY;
+    closest_tractor_node->status = AZ_NS_READY;
   }
   if (state->ship.tractor_beam.active) {
     az_node_t *node;
     if (az_lookup_node(state, state->ship.tractor_beam.node_uid, &node)) {
       assert(node->kind == AZ_NODE_TRACTOR);
-      node->state = AZ_NS_ACTIVE;
+      node->status = AZ_NS_ACTIVE;
     }
   }
   if (closest_console_node != NULL) {
-    closest_console_node->state = AZ_NS_READY;
+    closest_console_node->status = AZ_NS_READY;
   }
   if (state->mode == AZ_MODE_CONSOLE &&
       state->mode_data.console.step != AZ_CSS_ALIGN) {
     az_node_t *node;
     if (az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
       assert(node->kind == AZ_NODE_CONSOLE);
-      node->state = AZ_NS_ACTIVE;
+      node->status = AZ_NS_ACTIVE;
     }
   }
 }

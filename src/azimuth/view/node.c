@@ -48,7 +48,7 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       // Glow:
       glBegin(GL_TRIANGLE_FAN); {
-        if (node->state == AZ_NS_READY) glColor4f(1, 1, 0.5, 0.3);
+        if (node->status == AZ_NS_READY) glColor4f(1, 1, 0.5, 0.3);
         else glColor4f(1, 1, 1, 0.1);
         glVertex2f(0, 0);
         glColor4f(1, 1, 1, 0);
@@ -71,7 +71,7 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
         glColor3f(0.4, 0.4, 0.4);
         glVertex2f(29, 18); glVertex2f(29, -19);
         glVertex2f(48, -19); glVertex2f(48, 18);
-        const int slowdown = (node->state == AZ_NS_ACTIVE ? 6 : 16);
+        const int slowdown = (node->status == AZ_NS_ACTIVE ? 6 : 16);
         for (int i = 0; i < 3; ++i) {
           const int size = 5;
           const int x = 30 + (size + 1) * i;
@@ -121,7 +121,7 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
         glColor3f(0.25, 0.25, 0.25); glVertex2f(29, -24);
       } glEnd();
       // Glow:
-      if (node->state == AZ_NS_ACTIVE) {
+      if (node->status == AZ_NS_ACTIVE) {
         glColor4f(1, 1, 0, 0.1f + 0.03f * az_clock_zigzag(6, 3, clock));
         glBegin(GL_POLYGON); {
           glVertex2f(25, -20); glVertex2f(30, 0); glVertex2f(25, 20);
@@ -129,10 +129,10 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
         } glEnd();
       } else {
         glBegin(GL_QUADS); {
-          const int index = (node->state == AZ_NS_READY ?
+          const int index = (node->status == AZ_NS_READY ?
                              4 - az_clock_mod(5, 6, clock) :
                              az_clock_mod(5, 10, clock));
-          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
+          glColor4f(1, 1, (node->status == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
           switch (index) {
             case 0: glVertex2f(-20, 20); glVertex2f(-20, -20); break;
             case 1: glVertex2f(-20, 20); glVertex2f( 25,  20); break;
@@ -141,7 +141,7 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
             case 4: glVertex2f(25, -20); glVertex2f(-20, -20); break;
             default: AZ_ASSERT_UNREACHABLE();
           }
-          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0);
+          glColor4f(1, 1, (node->status == AZ_NS_READY ? 0.0f : 1.0f), 0);
           switch (index) {
             case 0: glVertex2f(-15, -20); glVertex2f(-15,   20); break;
             case 1: glVertex2f(26.5, 15); glVertex2f(-20,   15); break;
@@ -154,7 +154,7 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
       }
       // Pipes:
       for (int i = -1; i <= 1; i += 2) {
-        const int port_inner = (node->state == AZ_NS_ACTIVE ? 12 : 15);
+        const int port_inner = (node->status == AZ_NS_ACTIVE ? 12 : 15);
         const int port_outer = port_inner + 12;
         // Port:
         glBegin(GL_QUAD_STRIP); {
@@ -228,17 +228,17 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
         glVertex2f(-24, 21); glVertex2f(-30, 21);
         glVertex2f(-30, -21); glVertex2f(-24, -21);
         // Glow:
-        if (node->state == AZ_NS_ACTIVE) {
+        if (node->status == AZ_NS_ACTIVE) {
           if (az_clock_mod(2, 5, clock)) glColor4f(1, 1, 0.5, 0.5);
           else glColor4f(0.5, 1, 1, 0.5);
           glVertex2f(-35, 20); glVertex2f(35, 20);
           glVertex2f(35, -20); glVertex2f(-35, -20);
         } else {
           const GLfloat ampl = 3.0f + az_clock_zigzag(30, 1, clock) *
-            (node->state == AZ_NS_READY ? 0.3f : 0.1f);
+            (node->status == AZ_NS_READY ? 0.3f : 0.1f);
           glColor4f(1, 1, 1, 0);
           glVertex2f(35, 20 - ampl); glVertex2f(-35, 20 - ampl);
-          glColor4f(1, 1, (node->state == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
+          glColor4f(1, 1, (node->status == AZ_NS_READY ? 0.0f : 1.0f), 0.5);
           glVertex2f(-35, 20); glVertex2f(35, 20);
           glVertex2f(-35, -20); glVertex2f(35, -20);
           glColor4f(1, 1, 1, 0);
@@ -256,6 +256,49 @@ static void draw_console(const az_node_t *node, az_clock_t clock) {
       } glEnd();
       break;
   }
+}
+
+/*===========================================================================*/
+// Tractor nodes:
+
+static void draw_tractor_node(az_node_status_t status, az_clock_t clock) {
+  for (int i = 0; i < 3; ++i) {
+    glBegin(GL_QUAD_STRIP); {
+      glColor3f(0.25, 0.25, 0.25);
+      glVertex2f(0, 3); glVertex2f(12, 3);
+      glColor3f(0.75, 0.75, 0.75);
+      glVertex2f(0, 0);
+      glColor3f(0.5, 0.5, 0.5);
+      glVertex2f(13.5, 0);
+      glColor3f(0.25, 0.25, 0.25);
+      glVertex2f(0, -3); glVertex2f(12, -3);
+    } glEnd();
+    glRotatef(120, 0, 0, 1);
+  }
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.75, 0.75, 0.75);
+    glVertex2f(0, 0);
+    glColor3f(0.35, 0.35, 0.35);
+    for (int i = 0; i <= 360; i += 30) {
+      glVertex2d(6 * cos(AZ_DEG2RAD(i)), 6 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    switch (status) {
+      case AZ_NS_FAR: glColor3f(0, 0, 0); break;
+      case AZ_NS_NEAR: glColor3f(1, 1, 0.5); break;
+      case AZ_NS_READY:
+        if (az_clock_mod(2, 5, clock)) glColor3f(1, 0, 1);
+        else glColor3f(1, 1, 0.5);
+        break;
+      case AZ_NS_ACTIVE: glColor3f(1, 0, 1); break;
+    }
+    glVertex2f(0, 0);
+    glColor4f(0, 0, 0, 0);
+    for (int i = 0; i <= 360; i += 30) {
+      glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
 }
 
 /*===========================================================================*/
@@ -576,6 +619,22 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(-12, -7); glVertex2f(-2, -6);
       } glEnd();
       break;
+    case AZ_UPG_TRACTOR_BEAM:
+      glPushMatrix(); {
+        glTranslatef(-6, 6, 0);
+        glScalef(0.5, 0.5, 1);
+        draw_tractor_node(AZ_NS_ACTIVE, 0);
+      } glPopMatrix();
+      glBegin(GL_QUAD_STRIP); {
+        const GLfloat green = (frame % 2 == 0 ? 0.75f : 0.25f);
+        glColor4f(1, green, 1, 0);
+        glVertex2f(-5, 9); glVertex2f(12, -8);
+        glColor4f(1, green, 1, 0.5);
+        glVertex2f(-7, 7); glVertex2f(12, -12);
+        glColor4f(1, green, 1, 0);
+        glVertex2f(-9, 5); glVertex2f(8, -12);
+      } glEnd();
+      break;
     case AZ_UPG_INFRASCANNER:
       glBegin(GL_QUAD_STRIP); {
         glColor4f(1, 1, 0.5, 0.25);
@@ -735,7 +794,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     // TODO: Draw other upgrade icons.
     case AZ_UPG_HIGH_EXPLOSIVES:
     case AZ_UPG_ATTUNED_EXPLOSIVES:
-    case AZ_UPG_TRACTOR_BEAM:
     case AZ_UPG_ORION_BOOSTER:
     case AZ_UPG_FUSION_REACTOR:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
@@ -992,43 +1050,7 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       draw_console(node, clock);
       break;
     case AZ_NODE_TRACTOR:
-      for (int i = 0; i < 3; ++i) {
-        glBegin(GL_QUAD_STRIP); {
-          glColor3f(0.25, 0.25, 0.25);
-          glVertex2f(0, 3); glVertex2f(12, 3);
-          glColor3f(0.75, 0.75, 0.75);
-          glVertex2f(0, 0);
-          glColor3f(0.5, 0.5, 0.5);
-          glVertex2f(13.5, 0);
-          glColor3f(0.25, 0.25, 0.25);
-          glVertex2f(0, -3); glVertex2f(12, -3);
-        } glEnd();
-        glRotatef(120, 0, 0, 1);
-      }
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.75, 0.75, 0.75);
-        glVertex2f(0, 0);
-        glColor3f(0.35, 0.35, 0.35);
-        for (int i = 0; i <= 360; i += 30) {
-          glVertex2d(6 * cos(AZ_DEG2RAD(i)), 6 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        switch (node->state) {
-          case AZ_NS_FAR: glColor3f(0, 0, 0); break;
-          case AZ_NS_NEAR: glColor3f(1, 1, 0.5); break;
-          case AZ_NS_READY:
-            if (az_clock_mod(2, 5, clock)) glColor3f(1, 0, 1);
-            else glColor3f(1, 1, 0.5);
-            break;
-          case AZ_NS_ACTIVE: glColor3f(1, 0, 1); break;
-        }
-        glVertex2f(0, 0);
-        glColor4f(0, 0, 0, 0);
-        for (int i = 0; i <= 360; i += 30) {
-          glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
+      draw_tractor_node(node->status, clock);
       break;
     case AZ_NODE_UPGRADE:
       draw_upgrade_icon(node->subkind.upgrade, clock);
