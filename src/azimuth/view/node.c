@@ -576,6 +576,29 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(-12, -7); glVertex2f(-2, -6);
       } glEnd();
       break;
+    case AZ_UPG_INFRASCANNER:
+      glBegin(GL_QUAD_STRIP); {
+        glColor4f(1, 1, 0.5, 0.25);
+        const GLfloat r1 = 6.0f + 0.5f * (frame == 3 ? 1 : frame);
+        const GLfloat r2 = r1 + 1.5f;
+        for (int i = 0; i <= 360; i += 20) {
+          glVertex2f(r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
+          glVertex2f(r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat outer = 12 + (frame == 3 ? 1 : frame);
+        const GLfloat inner = 2 + (frame == 3 ? 1 : frame);
+        glColor3f(1, 1, 1);
+        glVertex2f(0, 0);
+        glColor4f(1, 1, 0, 0);
+        glVertex2f(outer, 0); glVertex2f(inner, inner);
+        glVertex2f(0, outer); glVertex2f(-inner, inner);
+        glVertex2f(-outer, 0); glVertex2f(-inner, -inner);
+        glVertex2f(0, -outer); glVertex2f(inner, -inner);
+        glVertex2f(outer, 0);
+      } glEnd();
+      break;
     case AZ_UPG_MAGNET_SWEEP:
       glBegin(GL_QUAD_STRIP); {
         for (int i = -200; i <= 20; i += 20) {
@@ -713,7 +736,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     case AZ_UPG_HIGH_EXPLOSIVES:
     case AZ_UPG_ATTUNED_EXPLOSIVES:
     case AZ_UPG_TRACTOR_BEAM:
-    case AZ_UPG_INFRASCANNER:
     case AZ_UPG_ORION_BOOSTER:
     case AZ_UPG_FUSION_REACTOR:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
