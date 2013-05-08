@@ -1267,6 +1267,19 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_BAD_SPARK:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 1, 0.8);
+        glVertex2f(0, 0);
+        glColor4f(0, 1, 0, 0);
+        for (int i = 0; i <= 360; i += 45) {
+          const double radius =
+            (i % 2 ? 1.0 : 0.5) * (8.0 + 0.25 * az_clock_zigzag(8, 3, clock));
+          const double theta = AZ_DEG2RAD(i + 7 * az_clock_mod(360, 1, clock));
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
   }
 }
 

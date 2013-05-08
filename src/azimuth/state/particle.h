@@ -42,6 +42,8 @@ typedef enum {
   AZ_PAR_NPS_PORTAL,
   // SHARD: A trianglar shard of metal/rock.  param1=scale, param2=spin_rate
   AZ_PAR_SHARD,
+  // SPARK: An energy spark.  param1=radius, param2=spin_rate
+  AZ_PAR_SPARK,
   // SPLOOSH: A splash made from entering/exiting water.  param1=amplitude
   AZ_PAR_SPLOOSH
 } az_particle_kind_t;

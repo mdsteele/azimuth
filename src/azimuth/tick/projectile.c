@@ -276,35 +276,20 @@ static void projectile_home_in(az_space_state_t *state,
   proj->velocity = az_vpolar(proj->data->speed, proj->angle);
 }
 
-static void leave_ember_trail(
-    az_space_state_t *state, az_projectile_t *proj, az_color_t color,
-    double lifetime, double radius) {
+static void leave_particle_trail(
+    az_space_state_t *state, az_projectile_t *proj, az_particle_kind_t kind,
+    az_color_t color, double lifetime, double param1, double param2) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {
-    particle->kind = AZ_PAR_EMBER;
+    particle->kind = kind;
     particle->color = color;
     particle->position = proj->position;
     particle->velocity = AZ_VZERO;
     particle->angle = proj->angle;
     particle->lifetime = lifetime;
-    particle->param1 = radius;
-  }
-}
-
-static void leave_oth_trail(
-    az_space_state_t *state, az_projectile_t *proj, double lifetime,
-    double radius, double spin) {
-  assert(proj->kind != AZ_PROJ_NOTHING);
-  az_particle_t *particle;
-  if (az_insert_particle(state, &particle)) {
-    particle->kind = AZ_PAR_OTH_FRAGMENT;
-    particle->position = proj->position;
-    particle->velocity = AZ_VZERO;
-    particle->angle = proj->angle;
-    particle->lifetime = lifetime;
-    particle->param1 = radius;
-    particle->param2 = spin;
+    particle->param1 = param1;
+    particle->param2 = param2;
   }
 }
 
@@ -336,11 +321,12 @@ static void projectile_special_logic(az_space_state_t *state,
   // the projectile (e.g. homing projectiles will home in).
   switch (proj->kind) {
     case AZ_PROJ_GUN_CHARGED_NORMAL:
-      leave_ember_trail(state, proj, (az_color_t){255, 255, 255, 128},
-                        0.1, 6.0);
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){255, 255, 255, 128}, 0.1, 6.0, 0.0);
       break;
     case AZ_PROJ_GUN_CHARGED_FREEZE:
-      leave_ember_trail(state, proj, (az_color_t){0, 255, 255, 128}, 0.2, 6.0);
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){0, 255, 255, 128}, 0.2, 6.0, 0.0);
       // fallthrough
     case AZ_PROJ_GUN_FREEZE:
     case AZ_PROJ_GUN_FREEZE_HOMING:
@@ -360,10 +346,12 @@ static void projectile_special_logic(az_space_state_t *state,
                    proj->position, AZ_VZERO);
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
-      leave_ember_trail(state, proj, (az_color_t){0, 96, 255, 128}, 0.2, 8.0);
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){0, 96, 255, 128}, 0.2, 8.0, 0.0);
       break;
     case AZ_PROJ_GUN_CHARGED_PIERCE:
-      leave_ember_trail(state, proj, (az_color_t){255, 0, 255, 128}, 0.5, 8.0);
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){255, 0, 255, 128}, 0.5, 8.0, 0.0);
       break;
     case AZ_PROJ_GUN_HOMING_PIERCE:
       az_add_speck(state, (az_color_t){255, 0, 255, 255}, 0.3,
@@ -509,18 +497,29 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
-      leave_ember_trail(state, proj, (az_color_t){255, 128, 0, 128}, 0.1, 5.0);
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){255, 128, 0, 128}, 0.1, 5.0, 0.0);
       break;
     case AZ_PROJ_OTH_HOMING:
-      leave_oth_trail(state, proj, 0.2, 4.0, AZ_DEG2RAD(720));
+      leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                           0.2, 4.0, AZ_DEG2RAD(720));
       break;
     case AZ_PROJ_OTH_ROCKET:
-      leave_oth_trail(state, proj, 0.5, 9.0, AZ_DEG2RAD(720));
+      leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                           0.5, 9.0, AZ_DEG2RAD(720));
       break;
     case AZ_PROJ_OTH_SPRAY:
       if (az_clock_mod(2, 1, state->clock)) {
-        leave_oth_trail(state, proj, 0.1, 5.0, AZ_DEG2RAD(360));
+        leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                             0.1, 5.0, AZ_DEG2RAD(360));
       }
+      break;
+    case AZ_PROJ_SPARK:
+      leave_particle_trail(state, proj, AZ_PAR_SPARK,
+                           (az_color_t){0, 255, 0, 255}, 0.1, 6.0,
+                           AZ_DEG2RAD(300));
+      proj->velocity =
+        az_vadd(proj->velocity, az_vwithlen(proj->position, -600 * time));
       break;
     default: break;
   }

@@ -502,6 +502,12 @@ static az_baddie_data_t baddie_datas[] = {
     .properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_wall_vertices),
                    .immunities = ~AZ_DMGF_BEAM }
+  },
+  [AZ_BAD_SPARK] = {
+    .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
+                   AZ_BADF_NO_HOMING_PROJ),
+    .main_body = { .bounding_radius = 10.0 }
   }
 };
 

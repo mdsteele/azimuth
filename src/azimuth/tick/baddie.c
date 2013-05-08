@@ -1049,6 +1049,24 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_BEAM_WALL: break; // Do nothing.
+    case AZ_BAD_SPARK:
+      if (az_random(0, 1) < 10.0 * time) {
+        az_add_speck(
+            state, (az_color_t){0, 255, 0, 255}, 1.0, baddie->position,
+            az_vpolar(az_random(20.0, 70.0), baddie->angle +
+                      az_random(AZ_DEG2RAD(-120), AZ_DEG2RAD(120))));
+      }
+      if (az_random(0, 1) < time) {
+        const double angle = az_random(AZ_DEG2RAD(-135), AZ_DEG2RAD(135));
+        fire_projectile(state, baddie, AZ_PROJ_SPARK, 0.0, 0.0, angle);
+        for (int i = 0; i < 5; ++i) {
+          az_add_speck(
+              state, (az_color_t){0, 255, 0, 255}, 1.0, baddie->position,
+              az_vpolar(az_random(20.0, 70.0), baddie->angle + angle +
+                        az_random(AZ_DEG2RAD(-60), AZ_DEG2RAD(60))));
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie.

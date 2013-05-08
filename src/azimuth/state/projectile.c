@@ -334,6 +334,11 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 5.0,
     .homing_rate = AZ_DEG2RAD(40)
   },
+  [AZ_PROJ_SPARK] = {
+    .speed = 100.0,
+    .lifetime = 4.0,
+    .impact_damage = 3.0
+  },
   [AZ_PROJ_SPINE] = {
     .speed = 200.0,
     .lifetime = 4.0,

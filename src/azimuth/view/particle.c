@@ -141,6 +141,21 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         glVertex2f(0, -4);
       } glEnd();
       break;
+    case AZ_PAR_SPARK:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 1, 0.8);
+        glVertex2f(0, 0);
+        with_color_alpha(particle->color, 0);
+        const double radius =
+          particle->param1 * (1.0 - particle->age / particle->lifetime);
+        const double theta_offset = particle->param2 * particle->age;
+        for (int i = 0; i <= 360; i += 45) {
+          const double rho = (i % 2 ? 1.0 : 0.5) * radius;
+          const double theta = AZ_DEG2RAD(i) + theta_offset;
+          glVertex2d(rho * cos(theta), rho * sin(theta));
+        }
+      } glEnd();
+      break;
     case AZ_PAR_SPLOOSH:
       glBegin(GL_TRIANGLE_FAN); {
         with_color_alpha(particle->color, 1);

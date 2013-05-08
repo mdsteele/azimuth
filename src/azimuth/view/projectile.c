@@ -354,6 +354,18 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_OTH_SPRAY:
       draw_oth_projectile(proj, 5.0, clock);
       break;
+    case AZ_PROJ_SPARK:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 1, 0.8);
+        glVertex2f(0, 0);
+        glColor4f(0, 1, 0, 0);
+        for (int i = 0; i <= 360; i += 45) {
+          const double radius = (i % 2 ? 8.0 : 4.0);
+          const double theta = AZ_DEG2RAD(i + 400 * proj->age);
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_SPINE:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0, 0.3, 0);
