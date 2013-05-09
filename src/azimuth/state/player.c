@@ -100,6 +100,8 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
     player->max_rockets += AZ_ROCKETS_PER_AMMO_UPGRADE;
     player->rockets += AZ_ROCKETS_PER_AMMO_UPGRADE;
     if (first_rockets) az_select_ordnance(player, AZ_ORDN_ROCKETS);
+  } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
+    player->rockets = player->max_rockets;
   } else if (upgrade >= AZ_UPG_BOMB_AMMO_00 &&
              upgrade <= AZ_UPG_BOMB_AMMO_09) {
     assert(player->max_bombs >= 0);
@@ -108,6 +110,8 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
     player->max_bombs += AZ_BOMBS_PER_AMMO_UPGRADE;
     player->bombs += AZ_BOMBS_PER_AMMO_UPGRADE;
     if (first_bombs) az_select_ordnance(player, AZ_ORDN_BOMBS);
+  } else if (upgrade == AZ_UPG_MEGA_BOMBS) {
+    player->bombs = player->max_bombs;
   } else if (upgrade >= AZ_UPG_CAPACITOR_00 &&
              upgrade <= AZ_UPG_CAPACITOR_05) {
     assert(player->energy <= player->max_energy);
