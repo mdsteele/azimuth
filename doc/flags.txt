@@ -6,3 +6,5 @@
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 7: Entered upper armory (room 23)
 8: Reversed grav-corridor in Colony room 24
+9: Killed Rockwyrm (Filimun boss)
+10: Met AI after Rockwyrm, lower armory door unlocked
