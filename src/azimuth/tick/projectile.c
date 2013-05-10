@@ -251,10 +251,15 @@ static void projectile_home_in(az_space_state_t *state,
                                double time) {
   assert(proj->data->homing_rate > 0.0);
   // First, figure out what position we're homing in on.
-  az_vector_t goal = state->ship.position;
-  if (!proj->fired_by_enemy) {
+  bool found_target = false;
+  az_vector_t goal = AZ_VZERO;
+  if (proj->fired_by_enemy) {
+    if (az_ship_is_present(&state->ship)) {
+      found_target = true;
+      goal = state->ship.position;
+    }
+  } else {
     double best_dist = INFINITY;
-    bool found_target = false;
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->data->properties & AZ_BADF_NO_HOMING_PROJ) continue;
@@ -268,8 +273,8 @@ static void projectile_home_in(az_space_state_t *state,
         goal = baddie->position;
       }
     }
-    if (!found_target) return;
   }
+  if (!found_target) return;
   // Now, home in on the goal position.
   proj->angle = az_angle_towards(proj->angle, time * proj->data->homing_rate,
                                  az_vtheta(az_vsub(goal, proj->position)));
