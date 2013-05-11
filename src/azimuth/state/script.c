@@ -63,9 +63,6 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_LEI:    return "lei";
     case AZ_OP_GE:     return "ge";
     case AZ_OP_GEI:    return "gei";
-    case AZ_OP_BEQZ:   return "beqz";
-    case AZ_OP_BNEZ:   return "bnez";
-    case AZ_OP_JUMP:   return "jump";
     case AZ_OP_TEST:   return "test";
     case AZ_OP_SET:    return "set";
     case AZ_OP_CLR:    return "clr";
@@ -100,7 +97,12 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_MUS:    return "mus";
     case AZ_OP_SND:    return "snd";
     case AZ_OP_WAIT:   return "wait";
-    case AZ_OP_STOP:   return "stop";
+    case AZ_OP_JUMP:   return "jump";
+    case AZ_OP_BEQZ:   return "beqz";
+    case AZ_OP_BNEZ:   return "bnez";
+    case AZ_OP_HALT:   return "halt";
+    case AZ_OP_HEQZ:   return "heqz";
+    case AZ_OP_HNEZ:   return "hnez";
     case AZ_OP_ERROR:  return "error";
   }
   AZ_ASSERT_UNREACHABLE();
@@ -142,7 +144,9 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GCAM:
     case AZ_OP_DLOG:
     case AZ_OP_DEND:
-    case AZ_OP_STOP:
+    case AZ_OP_HALT:
+    case AZ_OP_HEQZ:
+    case AZ_OP_HNEZ:
     case AZ_OP_ERROR:
       return false;
     case AZ_OP_POP:
@@ -169,9 +173,6 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GTI:
     case AZ_OP_LEI:
     case AZ_OP_GEI:
-    case AZ_OP_BEQZ:
-    case AZ_OP_BNEZ:
-    case AZ_OP_JUMP:
     case AZ_OP_TEST:
     case AZ_OP_SET:
     case AZ_OP_CLR:
@@ -194,6 +195,9 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MUS:
     case AZ_OP_SND:
     case AZ_OP_WAIT:
+    case AZ_OP_JUMP:
+    case AZ_OP_BEQZ:
+    case AZ_OP_BNEZ:
       return true;
   }
   AZ_ASSERT_UNREACHABLE();

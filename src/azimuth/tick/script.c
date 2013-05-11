@@ -280,24 +280,6 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_LEI: UNARY_OP(a <= ins.immediate ? 1.0 : 0.0); break;
       case AZ_OP_GE: BINARY_OP(a >= b ? 1.0 : 0.0); break;
       case AZ_OP_GEI: UNARY_OP(a >= ins.immediate ? 1.0 : 0.0); break;
-      // Branches:
-      case AZ_OP_BEQZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p == 0) DO_JUMP();
-        }
-        break;
-      case AZ_OP_BNEZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p != 0) DO_JUMP();
-        }
-        break;
-      case AZ_OP_JUMP:
-        DO_JUMP();
-        break;
       // Flags:
       case AZ_OP_TEST:
         {
@@ -745,7 +727,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
         }
         break;
-      // Termination:
+      // Control flow:
       case AZ_OP_WAIT:
         if (state->mode == AZ_MODE_DIALOG) {
           SCRIPT_ERROR("can't WAIT during dialog");
@@ -761,7 +743,38 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           SCRIPT_ERROR("too many timers");
         }
         break;
-      case AZ_OP_STOP: goto halt;
+      case AZ_OP_JUMP:
+        DO_JUMP();
+        break;
+      case AZ_OP_BEQZ:
+        {
+          double p;
+          STACK_POP(&p);
+          if (p == 0) DO_JUMP();
+        }
+        break;
+      case AZ_OP_BNEZ:
+        {
+          double p;
+          STACK_POP(&p);
+          if (p != 0) DO_JUMP();
+        }
+        break;
+      case AZ_OP_HALT: goto halt;
+      case AZ_OP_HEQZ:
+        {
+          double p;
+          STACK_POP(&p);
+          if (p == 0) goto halt;
+        }
+        break;
+      case AZ_OP_HNEZ:
+        {
+          double p;
+          STACK_POP(&p);
+          if (p != 0) goto halt;
+        }
+        break;
       case AZ_OP_ERROR: SCRIPT_ERROR("ERROR opcode");
     }
     ++vm->pc;

@@ -63,10 +63,6 @@ typedef enum {
   AZ_OP_LEI, // pop top, push (a <= i ? 1 : 0)
   AZ_OP_GE, // pop top two, push (a >= b ? 1 : 0)
   AZ_OP_GEI, // pop top, push (a >= i ? 1 : 0)
-  // Branches:
-  AZ_OP_BEQZ, // pop top, add i to PC if it is zero
-  AZ_OP_BNEZ, // pop top, add i to PC if it is not zero
-  AZ_OP_JUMP, // add i to PC
   // Flags:
   AZ_OP_TEST, // push 1 if flag i is set, else 0
   AZ_OP_SET, // set flag i
@@ -108,9 +104,14 @@ typedef enum {
   // Music/sound:
   AZ_OP_MUS, // start music i
   AZ_OP_SND, // play sound i
-  // Termination:
+  // Control flow:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
-  AZ_OP_STOP, // halt script successfully
+  AZ_OP_JUMP, // add i to PC
+  AZ_OP_BEQZ, // pop top, add i to PC if a is zero
+  AZ_OP_BNEZ, // pop top, add i to PC if a is not zero
+  AZ_OP_HALT, // halt script successfully
+  AZ_OP_HEQZ, // pop top, halt script successfully if a is zero
+  AZ_OP_HNEZ, // pop top, halt script successfully if a is not zero
   AZ_OP_ERROR // halt script and printf execution state
 } az_opcode_t;
 

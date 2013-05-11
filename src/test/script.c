@@ -25,14 +25,14 @@
 
 /*===========================================================================*/
 
-static const char script_string[] = "push-23.5,nop,beqz1,stop,push0;";
+static const char script_string[] = "push-23.5,nop,beqz1,halt,push0;";
 
 void test_script_print(void) {
   az_instruction_t instructions[] = {
     { .opcode = AZ_OP_PUSH, .immediate = -23.5 },
     { .opcode = AZ_OP_NOP, .immediate = 1 },
     { .opcode = AZ_OP_BEQZ, .immediate = 1 },
-    { .opcode = AZ_OP_STOP },
+    { .opcode = AZ_OP_HALT },
     { .opcode = AZ_OP_PUSH }
   };
   az_script_t script = { .num_instructions = AZ_ARRAY_SIZE(instructions),
@@ -59,7 +59,7 @@ void test_script_scan(void) {
     EXPECT_APPROX(1, script->instructions[2].immediate);
   }
   if (script->num_instructions >= 4) {
-    EXPECT_INT_EQ(AZ_OP_STOP, script->instructions[3].opcode);
+    EXPECT_INT_EQ(AZ_OP_HALT, script->instructions[3].opcode);
     EXPECT_APPROX(0, script->instructions[3].immediate);
   }
   if (script->num_instructions >= 5) {
