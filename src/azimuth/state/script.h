@@ -103,8 +103,11 @@ typedef enum {
   // Music/sound:
   AZ_OP_MUS, // start music i
   AZ_OP_SND, // play sound i
-  // Control flow:
+  // Timers:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
+  AZ_OP_DOOM, // suspend script; set global countdown for i seconds
+  AZ_OP_SAFE, // cancel global countdown
+  // Control flow:
   AZ_OP_JUMP, // add i to PC
   AZ_OP_BEQZ, // pop top, add i to PC if a is zero
   AZ_OP_BNEZ, // pop top, add i to PC if a is not zero

@@ -275,8 +275,8 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
                                az_clock_t clock) {
   if (!countdown->is_active) return;
   glPushMatrix(); {
-    const int width = 2 * HUD_PADDING + 7 * 24;
-    const int height = 2 * HUD_PADDING + 24;
+    const int width = 2 * HUD_PADDING + 7 * 24 - 3;
+    const int height = 2 * HUD_PADDING + 20;
 
     const int xstart = AZ_SCREEN_WIDTH/2 - width/2;
     const int ystart = AZ_SCREEN_HEIGHT/2 + 75 - height/2;

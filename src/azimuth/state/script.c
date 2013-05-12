@@ -96,6 +96,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_MUS:    return "mus";
     case AZ_OP_SND:    return "snd";
     case AZ_OP_WAIT:   return "wait";
+    case AZ_OP_DOOM:   return "doom";
+    case AZ_OP_SAFE:   return "safe";
     case AZ_OP_JUMP:   return "jump";
     case AZ_OP_BEQZ:   return "beqz";
     case AZ_OP_BNEZ:   return "bnez";
@@ -142,6 +144,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GCAM:
     case AZ_OP_DLOG:
     case AZ_OP_DEND:
+    case AZ_OP_SAFE:
     case AZ_OP_HALT:
     case AZ_OP_HEQZ:
     case AZ_OP_HNEZ:
@@ -193,6 +196,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MUS:
     case AZ_OP_SND:
     case AZ_OP_WAIT:
+    case AZ_OP_DOOM:
     case AZ_OP_JUMP:
     case AZ_OP_BEQZ:
     case AZ_OP_BNEZ:

@@ -55,8 +55,9 @@ typedef struct {
 
 typedef struct {
   bool is_active;
-  double active_for;
+  double active_for; // seconds
   double time_remaining; // seconds
+  az_script_vm_t vm;
 } az_countdown_t;
 
 typedef struct {

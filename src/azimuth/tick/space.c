@@ -431,10 +431,22 @@ static void tick_message(az_message_t *message, double time) {
   }
 }
 
+// If the global countdown timer is active, count it down.
 static void tick_countdown(az_countdown_t *countdown, double time) {
   if (!countdown->is_active) return;
-  if (countdown->active_for < 10.0) countdown->active_for += time;
+  assert(countdown->vm.script != NULL);
+  countdown->active_for += time;
   countdown->time_remaining = fmax(0.0, countdown->time_remaining - time);
+}
+
+// Check if the global countdown timer is active and has reached zero, and if
+// so, resume its suspended script.
+static void check_countdown(az_space_state_t *state, double time) {
+  az_countdown_t *countdown = &state->countdown;
+  if (countdown->is_active && countdown->time_remaining <= 0.0) {
+    countdown->is_active = false;
+    az_resume_script(state, &countdown->vm);
+  }
 }
 
 static void tick_most_objects(az_space_state_t *state, double time) {
@@ -448,9 +460,10 @@ static void tick_most_objects(az_space_state_t *state, double time) {
 
 static void tick_all_objects(az_space_state_t *state, double time) {
   tick_most_objects(state, time);
-  if (state->mode != AZ_MODE_GAME_OVER) {
-    az_tick_ship(state, time);
-  }
+  // We just ticked baddies and projectiles, so the ship might've gotten blown
+  // up and we could now be in game-over mode; only tick the ship if that's not
+  // the case.
+  if (state->mode != AZ_MODE_GAME_OVER) az_tick_ship(state, time);
   az_tick_nodes(state, time);
 }
 
@@ -495,16 +508,20 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
-      if (state->mode_data.doorway.step != AZ_DWS_FADE_IN) break;
-      // fallthrough
-    case AZ_MODE_NORMAL:
-      az_tick_timers(state, time);
-      tick_all_objects(state, time);
+      if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
+        az_tick_timers(state, time);
+        tick_all_objects(state, time);
+      }
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
       tick_most_objects(state, time);
       az_tick_nodes(state, time);
+      break;
+    case AZ_MODE_NORMAL:
+      az_tick_timers(state, time);
+      check_countdown(state, time);
+      tick_all_objects(state, time);
       break;
     case AZ_MODE_PAUSING:
     case AZ_MODE_RESUMING:

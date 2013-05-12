@@ -720,7 +720,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
         }
         break;
-      // Control flow:
+      // Timers:
       case AZ_OP_WAIT:
         if (state->mode == AZ_MODE_DIALOG) {
           SCRIPT_ERROR("can't WAIT during dialog");
@@ -736,6 +736,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           SCRIPT_ERROR("too many timers");
         }
         break;
+      case AZ_OP_DOOM:
+        if (state->mode == AZ_MODE_DIALOG) {
+          SCRIPT_ERROR("can't DOOM during dialog");
+        }
+        state->countdown.is_active = true;
+        state->countdown.active_for = 0.0;
+        state->countdown.time_remaining = fmax(0.0, ins.immediate);
+        SUSPEND(vm->script, &state->countdown.vm);
+        break;
+      case AZ_OP_SAFE:
+        state->countdown.is_active = false;
+        state->countdown.vm.script = NULL;
+        break;
+      // Control flow:
       case AZ_OP_JUMP:
         DO_JUMP();
         break;
