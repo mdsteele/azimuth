@@ -83,6 +83,12 @@ typedef enum {
   AZ_BAD_SPARK
 } az_baddie_kind_t;
 
+typedef enum {
+  AZ_DEATH_SHARDS = 0,
+  AZ_DEATH_EMBERS,
+  AZ_DEATH_OTH
+} az_death_style_t;
+
 typedef struct {
   az_vector_t init_position;
   double init_angle;
@@ -106,9 +112,10 @@ typedef uint_fast8_t az_baddie_flags_t;
 typedef struct {
   double overall_bounding_radius;
   double max_health;
-  az_pickup_flags_t potential_pickups;
   az_color_t color;
   az_sound_key_t death_sound;
+  az_death_style_t death_style;
+  az_pickup_flags_t potential_pickups;
   az_baddie_flags_t properties;
   az_component_data_t main_body;
   int num_components;

@@ -22,10 +22,11 @@
 #define AZIMUTH_TICK_CAMERA_H_
 
 #include "azimuth/state/space.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-void az_tick_camera(az_space_state_t *state, double time);
+void az_tick_camera(az_space_state_t *state, az_vector_t goal, double time);
 
 /*===========================================================================*/
 

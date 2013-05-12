@@ -75,6 +75,7 @@
 
 static bool is_normal_mode(const az_space_state_t *state) {
   return (state->mode == AZ_MODE_NORMAL ||
+          state->mode == AZ_MODE_BOSS_DEATH ||
           (state->mode == AZ_MODE_DOORWAY &&
            state->mode_data.doorway.step == AZ_DWS_FADE_IN));
 }
@@ -1019,6 +1020,7 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
 void az_tick_ship(az_space_state_t *state, double time) {
   assert(is_normal_mode(state));
   az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
 
@@ -1078,6 +1080,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Apply velocity.  If the tractor beam is active, that implies angular
   // motion (around the locked-onto node); otherwise, linear motion.
   assert(is_normal_mode(state));
+  assert(az_ship_is_present(ship));
   az_impact_flags_t impact_flags = AZ_IMPF_SHIP;
   if (ship->temp_invincibility > 0.0) impact_flags |= AZ_IMPF_BADDIE;
   if (ship->tractor_beam.active) {
@@ -1139,6 +1142,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Check if we hit an upgrade.
   assert(is_normal_mode(state));
+  assert(az_ship_is_present(ship));
   AZ_ARRAY_LOOP(node, state->nodes) {
     if (node->kind != AZ_NODE_UPGRADE) continue;
     if (az_vwithin(ship->position, node->position,

@@ -72,6 +72,7 @@ typedef struct {
   // Mode information:
   enum {
     AZ_MODE_NORMAL = 0, // flying around; the normal mode of gameplay
+    AZ_MODE_BOSS_DEATH, // animating boss death
     AZ_MODE_CONSOLE, // using a save point, refill node, or comm node
     AZ_MODE_DIALOG, // engaged in story dialog
     AZ_MODE_DOORWAY, // waiting while we pass through a door
@@ -81,6 +82,11 @@ typedef struct {
     AZ_MODE_UPGRADE // receiving an upgrade
   } mode;
   union {
+    struct {
+      enum { AZ_BDS_SHAKE, AZ_BDS_BOOM, AZ_BDS_FADE } step;
+      double progress;
+      az_baddie_t boss;
+    } boss_death;
     struct {
       enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_FINISH } step;
       double progress;

@@ -71,6 +71,7 @@ static double mode_fade_alpha(az_space_state_t *state) {
     case AZ_MODE_RESUMING:
       return 1.0 - state->mode_data.pause.progress;
     case AZ_MODE_NORMAL:
+    case AZ_MODE_BOSS_DEATH:
     case AZ_MODE_CONSOLE:
     case AZ_MODE_DIALOG:
     case AZ_MODE_UPGRADE:
@@ -79,8 +80,8 @@ static double mode_fade_alpha(az_space_state_t *state) {
   AZ_ASSERT_UNREACHABLE();
 }
 
-static void tint_screen(GLfloat alpha) {
-  glColor4f(0, 0, 0, alpha);
+static void tint_screen(GLfloat gray, GLfloat alpha) {
+  glColor4f(gray, gray, gray, alpha);
   glBegin(GL_QUADS); {
     glVertex2i(0, 0);
     glVertex2i(0, AZ_SCREEN_HEIGHT);
@@ -184,7 +185,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_background_nodes(state);
   glPushMatrix(); {
     glLoadIdentity();
-    tint_screen(0.5);
+    tint_screen(0, 0.5);
   } glPopMatrix();
   az_draw_gravfields(state);
   az_draw_upgrade_nodes(state);
@@ -192,6 +193,10 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_middle_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
+  if (state->mode == AZ_MODE_BOSS_DEATH &&
+      state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING) {
+    az_draw_baddie(&state->mode_data.boss_death.boss, state->clock);
+  }
   az_draw_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
@@ -257,7 +262,33 @@ void az_space_draw_screen(az_space_state_t *state) {
   }
 
   // Tint the camera view black (based on fade_alpha).
-  if (fade_alpha > 0.0) tint_screen(fade_alpha);
+  if (fade_alpha > 0.0) tint_screen(0, fade_alpha);
+
+  // If we're in boss-death mode, draw the explosion.
+  if (state->mode == AZ_MODE_BOSS_DEATH) {
+    if (state->mode_data.boss_death.step == AZ_BDS_BOOM) {
+      glPushMatrix(); {
+        transform_to_camera_matrix(state);
+        const az_vector_t position = state->mode_data.boss_death.boss.position;
+        glTranslated(position.x, position.y, 0);
+        glRotated(AZ_RAD2DEG(az_vtheta(position)), 0, 0, 1);
+        glBegin(GL_QUADS); {
+          const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
+          const GLfloat inner = outer * state->mode_data.boss_death.progress *
+            state->mode_data.boss_death.progress;
+          glColor4f(1, 1, 1, state->mode_data.boss_death.progress);
+          glVertex2f(outer, inner); glVertex2f(-outer, inner);
+          glVertex2f(-outer, -inner); glVertex2f(outer, -inner);
+          glVertex2f(inner, outer); glVertex2f(-inner, outer);
+          glVertex2f(-inner, inner); glVertex2f(inner, inner);
+          glVertex2f(inner, -outer); glVertex2f(-inner, -outer);
+          glVertex2f(-inner, -inner); glVertex2f(inner, -inner);
+        } glEnd();
+      } glPopMatrix();
+    } else if (state->mode_data.boss_death.step == AZ_BDS_FADE) {
+      tint_screen(1, 1.0 - state->mode_data.boss_death.progress);
+    }
+  }
 
   // If we're going through a doorway, draw the doorway transition animation.
   if (state->mode == AZ_MODE_DOORWAY) {

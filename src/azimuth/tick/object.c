@@ -187,24 +187,31 @@ static void kill_baddie_internal(
   az_play_sound(&state->soundboard, baddie->data->death_sound);
   // Add particles for baddie debris:
   const double radius = baddie->data->overall_bounding_radius;
-  const double step = 3.0 + radius / 20.0;
+  const double step = 2.5 + baddie->data->main_body.bounding_radius / 15.0;
   for (double y = -radius; y <= radius; y += step) {
     for (double x = -radius; x <= radius; x += step) {
       const az_vector_t pos = {x + baddie->position.x + az_random(-3, 3),
                                y + baddie->position.y + az_random(-3, 3)};
+      const az_death_style_t dstyle = baddie->data->death_style;
       az_particle_t *particle;
       if (az_point_touches_baddie(baddie, pos) &&
           az_insert_particle(state, &particle)) {
-        particle->kind = AZ_PAR_SHARD;
+        particle->kind = (dstyle == AZ_DEATH_EMBERS ? AZ_PAR_EMBER :
+                          dstyle == AZ_DEATH_OTH ? AZ_PAR_OTH_FRAGMENT :
+                          AZ_PAR_SHARD);
         particle->color = baddie->data->color;
         particle->position = pos;
-        particle->velocity = az_vmul(az_vsub(pos, baddie->position), 5.0);
+        if (dstyle == AZ_DEATH_EMBERS) {
+          particle->velocity = az_vsub(pos, baddie->position);
+        } else {
+          particle->velocity = az_vmul(az_vsub(pos, baddie->position), 5.0);
+        }
         particle->velocity.x += az_random(-radius, radius);
         particle->velocity.y += az_random(-radius, radius);
         particle->angle = az_random(0.0, AZ_TWO_PI);
         particle->lifetime = az_random(0.5, 1.0);
-        particle->param1 = az_random(1.0, 3.0) *
-          (baddie->data->main_body.bounding_radius / 40.0);
+        particle->param1 = az_random(0.5, 1.5) * step *
+          (particle->kind == AZ_PAR_SHARD ? 0.25 : 1.4);
         particle->param2 = az_random(-10.0, 10.0);
       }
     }
@@ -332,6 +339,21 @@ bool az_try_damage_baddie(
   // no longer use the baddie object.
   else {
     assert(damage_was_dealt);
+    // If this was the boss, go into boss-death mode.
+    if (baddie->uid == state->boss_uid) {
+      state->mode = AZ_MODE_BOSS_DEATH;
+      state->mode_data.boss_death.step = AZ_BDS_SHAKE;
+      state->mode_data.boss_death.progress = 0.0;
+      baddie->health = 0.000001;
+      state->mode_data.boss_death.boss = *baddie;
+      baddie->kind = AZ_BAD_NOTHING;
+      AZ_ARRAY_LOOP(other, state->baddies) {
+        if (other->kind == AZ_BAD_NOTHING) continue;
+        if (other->data->properties & AZ_BADF_INCORPOREAL) continue;
+        az_kill_baddie(state, other);
+      }
+      return true;
+    }
     // Kill the baddie.  After this point, we can no longer use the baddie
     // object.
     az_object_t object = { .type = AZ_OBJ_BADDIE, .obj.baddie = baddie };
@@ -359,6 +381,7 @@ void az_damage_ship(az_space_state_t *state, double damage,
   if (induce_temp_invincibility) ship->temp_invincibility = 1.0;
   if (damage <= 0.0) return;
   ship->shield_flare = 1.0;
+  if (state->mode != AZ_MODE_NORMAL) return;
   // Each armor upgrade cumulatively reduces the damage taken.
   const az_player_t *player = &ship->player;
   if (az_has_upgrade(player, AZ_UPG_HARDENED_ARMOR)) {

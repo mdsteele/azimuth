@@ -26,11 +26,11 @@
 
 /*===========================================================================*/
 
-#define NOTHING_PROB 6
-#define ROCKETS_PROB 3
-#define BOMBS_PROB 2
-#define SSHIELDS_PROB 6
-#define MSHIELDS_PROB 3
+#define NOTHING_PROB 12
+#define ROCKETS_PROB 6
+#define BOMBS_PROB 4
+#define SSHIELDS_PROB 12
+#define MSHIELDS_PROB 6
 #define LSHIELDS_PROB 1
 
 az_pickup_kind_t az_choose_random_pickup_kind(
@@ -60,21 +60,26 @@ az_pickup_kind_t az_choose_random_pickup_kind(
 
   // Select the pickup kind:
   int choice = az_randint(0, limit - 1);
-  if ((potential_pickups & AZ_PUPF_ROCKETS) && choice < ROCKETS_PROB) {
-    return AZ_PUP_ROCKETS;
-  } else choice -= ROCKETS_PROB;
-  if ((potential_pickups & AZ_PUPF_BOMBS) && choice < BOMBS_PROB) {
-    return AZ_PUP_BOMBS;
-  } else choice -= BOMBS_PROB;
-  if ((potential_pickups & AZ_PUPF_SMALL_SHIELDS) && choice < SSHIELDS_PROB) {
-    return AZ_PUP_SMALL_SHIELDS;
-  } else choice -= SSHIELDS_PROB;
-  if ((potential_pickups & AZ_PUPF_MEDIUM_SHIELDS) && choice < MSHIELDS_PROB) {
-    return AZ_PUP_MEDIUM_SHIELDS;
-  } else choice -= MSHIELDS_PROB;
-  if ((potential_pickups & AZ_PUPF_LARGE_SHIELDS) && choice < LSHIELDS_PROB) {
-    return AZ_PUP_LARGE_SHIELDS;
-  } else choice -= LSHIELDS_PROB;
+  if (potential_pickups & AZ_PUPF_ROCKETS) {
+    if (choice < ROCKETS_PROB) return AZ_PUP_ROCKETS;
+    else choice -= ROCKETS_PROB;
+  }
+  if (potential_pickups & AZ_PUPF_BOMBS) {
+    if (choice < BOMBS_PROB) return AZ_PUP_BOMBS;
+    else choice -= BOMBS_PROB;
+  }
+  if (potential_pickups & AZ_PUPF_SMALL_SHIELDS) {
+    if (choice < SSHIELDS_PROB) return AZ_PUP_SMALL_SHIELDS;
+    else choice -= SSHIELDS_PROB;
+  }
+  if (potential_pickups & AZ_PUPF_MEDIUM_SHIELDS) {
+    if (choice < MSHIELDS_PROB) return AZ_PUP_MEDIUM_SHIELDS;
+    else choice -= MSHIELDS_PROB;
+  }
+  if (potential_pickups & AZ_PUPF_LARGE_SHIELDS) {
+    if (choice < LSHIELDS_PROB) return AZ_PUP_LARGE_SHIELDS;
+    else choice -= LSHIELDS_PROB;
+  }
   assert(potential_pickups & AZ_PUPF_NOTHING);
   assert(choice < NOTHING_PROB);
   return AZ_PUP_NOTHING;

@@ -509,13 +509,6 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           state->boss_uid = uid;
         }
         break;
-      case AZ_OP_SPLAT:
-        AZ_ARRAY_LOOP(baddie, state->baddies) {
-          if (baddie->kind == AZ_BAD_NOTHING) continue;
-          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
-          az_kill_baddie(state, baddie);
-        }
-        break;
       // Doors:
       case AZ_OP_OPEN:
         {

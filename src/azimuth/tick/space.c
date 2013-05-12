@@ -30,6 +30,7 @@
 #include "azimuth/tick/door.h"
 #include "azimuth/tick/gravfield.h"
 #include "azimuth/tick/node.h"
+#include "azimuth/tick/object.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/pickup.h"
 #include "azimuth/tick/projectile.h"
@@ -38,6 +39,7 @@
 #include "azimuth/tick/speck.h"
 #include "azimuth/tick/wall.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -72,6 +74,54 @@ void az_after_entering_room(az_space_state_t *state) {
 }
 
 /*===========================================================================*/
+
+static void tick_boss_death_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_BOSS_DEATH);
+  const double shake_time = 1.0; // seconds
+  const double boom_time = 1.5; // seconds
+  const double fade_time = 1.2; // seconds
+  switch (state->mode_data.boss_death.step) {
+    case AZ_BDS_SHAKE:
+      az_shake_camera(&state->camera, 4, 4);
+      assert(state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING);
+      state->mode_data.boss_death.progress =
+        fmin(1.0, state->mode_data.boss_death.progress + time / shake_time);
+      if (state->mode_data.boss_death.progress >= 1.0) {
+        state->mode_data.boss_death.step = AZ_BDS_BOOM;
+        state->mode_data.boss_death.progress = 0.0;
+      }
+      break;
+    case AZ_BDS_BOOM:
+      az_shake_camera(&state->camera, 3, 3);
+      assert(state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING);
+      state->mode_data.boss_death.progress =
+        fmin(1.0, state->mode_data.boss_death.progress + time / boom_time);
+      if (state->mode_data.boss_death.progress >= 1.0) {
+        state->mode_data.boss_death.step = AZ_BDS_FADE;
+        state->mode_data.boss_death.progress = 0.0;
+        for (int i = 0; i < 20; ++i) {
+          const az_vector_t offset = {az_random(-1, 1), az_random(-1, 1)};
+          if (az_vdot(offset, offset) > 1.0) continue;
+          az_add_random_pickup(
+              state, ~AZ_PUPF_NOTHING,
+              az_vadd(state->mode_data.boss_death.boss.position,
+                      az_vmul(offset, 100.0)));
+        }
+        state->mode_data.boss_death.boss.kind = AZ_BAD_NOTHING;
+        az_run_script(state, state->mode_data.boss_death.boss.on_kill);
+      }
+      break;
+    case AZ_BDS_FADE:
+      az_shake_camera(&state->camera, 1, 1);
+      assert(state->mode_data.boss_death.boss.kind == AZ_BAD_NOTHING);
+      state->mode_data.boss_death.progress =
+        fmin(1.0, state->mode_data.boss_death.progress + time / fade_time);
+      if (state->mode_data.boss_death.progress >= 1.0) {
+        state->mode = AZ_MODE_NORMAL;
+      }
+      break;
+  }
+}
 
 static az_text_fragment_t refilled_shields_only_fragments[] = {
   {.color = {255, 255, 255, 255}, .length = 17, .chars = "Shields refilled."}
@@ -387,14 +437,21 @@ static void tick_countdown(az_countdown_t *countdown, double time) {
   countdown->time_remaining = fmax(0.0, countdown->time_remaining - time);
 }
 
-static void tick_most_objects(
-    az_space_state_t *state, double time) {
+static void tick_most_objects(az_space_state_t *state, double time) {
   az_tick_pickups(state, time);
   az_tick_gravfields(state, time);
   az_tick_walls(state, time);
   az_tick_doors(state, time);
   az_tick_projectiles(state, time);
   az_tick_baddies(state, time);
+}
+
+static void tick_all_objects(az_space_state_t *state, double time) {
+  tick_most_objects(state, time);
+  if (state->mode != AZ_MODE_GAME_OVER) {
+    az_tick_ship(state, time);
+  }
+  az_tick_nodes(state, time);
 }
 
 /*===========================================================================*/
@@ -424,6 +481,10 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   az_tick_particles(state, time);
   az_tick_specks(state, time);
   switch (state->mode) {
+    case AZ_MODE_BOSS_DEATH:
+      tick_all_objects(state, time);
+      tick_boss_death_mode(state, time);
+      break;
     case AZ_MODE_CONSOLE:
       tick_console_mode(state, time);
       tick_most_objects(state, time);
@@ -438,11 +499,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       // fallthrough
     case AZ_MODE_NORMAL:
       az_tick_timers(state, time);
-      tick_most_objects(state, time);
-      if (state->mode != AZ_MODE_GAME_OVER) {
-        az_tick_ship(state, time);
-      }
-      az_tick_nodes(state, time);
+      tick_all_objects(state, time);
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
@@ -458,7 +515,11 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   }
   if (!(state->mode == AZ_MODE_DOORWAY &&
         state->mode_data.doorway.step == AZ_DWS_SHIFT)) {
-    az_tick_camera(state, time);
+    const az_vector_t goal =
+      (state->mode == AZ_MODE_BOSS_DEATH &&
+       state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING ?
+       state->mode_data.boss_death.boss.position : state->ship.position);
+    az_tick_camera(state, goal, time);
   }
   tick_message(&state->message, time);
   tick_countdown(&state->countdown, time);
