@@ -290,19 +290,19 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 18.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BOX] = {
-    .max_health = 10.0,
+    .max_health = 8.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = AZ_DMGF_FREEZE, .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_BOX] = {
-    .max_health = 20.0,
+    .max_health = 10.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {80, 80, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_FREEZE | AZ_DMGF_PIERCE),
+                                  AZ_DMGF_FREEZE | AZ_DMGF_BEAM),
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_CLAM] = {
