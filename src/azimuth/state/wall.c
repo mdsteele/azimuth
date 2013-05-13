@@ -154,6 +154,12 @@ static az_vector_t wall_vertices_43[] = {
 static az_vector_t wall_vertices_47[] = {
   {33, -30}, {33, 30}, {-32, 30}, {-32, -30}
 };
+static az_vector_t wall_vertices_50[] = {
+  {20, 0}, {40, 20}, {-40, 20}, {-20, 0}, {-40, -20}, {40, -20}
+};
+static az_vector_t wall_vertices_51[] = {
+  {47.5, 0}, {72.5, 25}, {-72.5, 25}, {-47.5, 0}, {-72.5, -25}, {72.5, -25}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -478,8 +484,7 @@ static az_wall_data_t wall_datas[] = {
   [47] = {
     .style = AZ_WSTY_GIRDER_CAPS, .bezel = 7.0,
     .color1 = {192, 192, 255, 255}, .color2 = {64, 64, 96, 255},
-    .elasticity = 0.5,
-    .polygon = AZ_INIT_POLYGON(wall_vertices_47)
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_47)
   },
   // Yellowish-gray angle pipe:
   [48] = {
@@ -494,6 +499,18 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
     .color3 = {32, 24, 24, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  // Brown medium girder:
+  [50] = {
+    .style = AZ_WSTY_GIRDER, .bezel = 4.7,
+    .color1 = {128, 96, 32, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_50)
+  },
+  // Silver very long girder:
+  [51] = {
+    .style = AZ_WSTY_GIRDER, .bezel = 7.0,
+    .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_51)
   }
 };
 
