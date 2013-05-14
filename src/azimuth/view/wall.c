@@ -27,6 +27,7 @@
 
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -112,6 +113,46 @@ static void draw_bezel(double bezel, bool alt, az_color_t color1,
       glVertex2d(bb.x, bb.y);
     }
   } glEnd();
+}
+
+static void draw_cell_tri(az_color_t color1, az_color_t color2,
+                          az_color_t color3, az_polygon_t polygon) {
+  for (int i = 0; i < polygon.num_vertices; ++i) {
+    const az_vector_t v1 = polygon.vertices[i];
+    const az_vector_t v2 = polygon.vertices[(i + 1) % polygon.num_vertices];
+    const az_vector_t center = az_vdiv(az_vadd(v1, v2), 3);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4ub(color3.r, color3.g, color3.b, color3.a);
+      glVertex2d(center.x, center.y);
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(0, 0);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2d(v1.x, v1.y); glVertex2d(v2.x, v2.y);
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(0, 0);
+    } glEnd();
+  }
+}
+
+static void draw_cell_quad(az_color_t color1, az_color_t color2,
+                           az_color_t color3, az_polygon_t polygon) {
+  assert(polygon.num_vertices % 2 == 0);
+  for (int i = 0; i < polygon.num_vertices; i += 2) {
+    const az_vector_t v1 = polygon.vertices[i];
+    const az_vector_t v2 = polygon.vertices[(i + 1) % polygon.num_vertices];
+    const az_vector_t v3 = polygon.vertices[(i + 2) % polygon.num_vertices];
+    const az_vector_t center = az_vdiv(az_vadd(az_vadd(v1, v2), v3), 4);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4ub(color3.r, color3.g, color3.b, color3.a);
+      glVertex2d(center.x, center.y);
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(0, 0);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      glVertex2d(v1.x, v1.y); glVertex2d(v2.x, v2.y); glVertex2d(v3.x, v3.y);
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      glVertex2d(0, 0);
+    } glEnd();
+  }
 }
 
 static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
@@ -236,6 +277,13 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         draw_bezel(data->bezel, true, data->color2, data->color1,
                    data->polygon);
         break;
+      case AZ_WSTY_CELL_TRI:
+        draw_cell_tri(data->color1, data->color2, data->color3, data->polygon);
+        break;
+      case AZ_WSTY_CELL_QUAD:
+        draw_cell_quad(data->color1, data->color2, data->color3,
+                       data->polygon);
+        break;
       case AZ_WSTY_GIRDER:
         draw_girder(data->bezel, data->color1, data->color2, data->polygon,
                     false, false);
@@ -287,22 +335,28 @@ void az_init_wall_drawing(void) {
 
 /*===========================================================================*/
 
-void az_draw_wall_data(const az_wall_data_t *data) {
+void az_draw_wall_data(const az_wall_data_t *data, az_clock_t clock) {
   const GLuint display_list =
     wall_display_lists_start + az_wall_data_index(data);
   assert(glIsList(display_list));
+  if (data->underglow) {
+    glBegin(GL_TRIANGLE_FAN); {
+      const GLfloat gray = 0.002f * az_clock_zigzag(100, 1, clock);
+      glColor3f(gray, gray, gray);
+      for (int i = 0; i < data->polygon.num_vertices; ++i) {
+        glVertex2d(data->polygon.vertices[i].x, data->polygon.vertices[i].y);
+      }
+    } glEnd();
+  }
   glCallList(display_list);
 }
 
-void az_draw_wall(const az_wall_t *wall) {
+void az_draw_wall(const az_wall_t *wall, az_clock_t clock) {
   assert(wall->kind != AZ_WALL_NOTHING);
-  const GLuint display_list =
-    wall_display_lists_start + az_wall_data_index(wall->data);
-  assert(glIsList(display_list));
   glPushMatrix(); {
     glTranslated(wall->position.x, wall->position.y, 0);
     glRotated(AZ_RAD2DEG(wall->angle), 0, 0, 1);
-    glCallList(display_list);
+    az_draw_wall_data(wall->data, clock);
     if (wall->flare > 0.0) {
       assert(wall->flare <= 1.0);
       assert(wall->kind != AZ_WALL_INDESTRUCTIBLE);
@@ -342,7 +396,7 @@ void az_draw_wall(const az_wall_t *wall) {
 void az_draw_walls(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(wall, state->walls) {
     if (wall->kind == AZ_WALL_NOTHING) continue;
-    az_draw_wall(wall);
+    az_draw_wall(wall, state->clock);
   }
 }
 

@@ -49,6 +49,8 @@ typedef enum {
   AZ_WSTY_BEZEL_21,
   AZ_WSTY_BEZEL_ALT_12,
   AZ_WSTY_BEZEL_ALT_21,
+  AZ_WSTY_CELL_TRI,
+  AZ_WSTY_CELL_QUAD,
   AZ_WSTY_GIRDER,
   AZ_WSTY_GIRDER_CAP,
   AZ_WSTY_GIRDER_CAPS,
@@ -64,6 +66,7 @@ typedef struct {
   az_wall_style_t style;
   float bezel;
   az_color_t color1, color2, color3;
+  bool underglow;
   double elasticity; // the coefficiant of restitution when ship hits the wall
   double impact_damage_coeff;
   double bounding_radius;

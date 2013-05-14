@@ -23,6 +23,7 @@
 
 #include "azimuth/state/space.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
@@ -33,10 +34,10 @@ void az_init_wall_drawing(void);
 
 // Draw a single wall, without flare or additional transforms.  The GL matrix
 // should be at the wall position.
-void az_draw_wall_data(const az_wall_data_t *data);
+void az_draw_wall_data(const az_wall_data_t *data, az_clock_t clock);
 
 // Draw a single wall.  The GL matrix should be at the camera position.
-void az_draw_wall(const az_wall_t *wall);
+void az_draw_wall(const az_wall_t *wall, az_clock_t clock);
 
 // Draw all walls.  The GL matrix should be at the camera position.
 void az_draw_walls(const az_space_state_t *state);

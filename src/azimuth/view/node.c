@@ -1061,7 +1061,7 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       break;
     case AZ_NODE_FAKE_WALL_FG:
     case AZ_NODE_FAKE_WALL_BG:
-      az_draw_wall_data(node->subkind.fake_wall);
+      az_draw_wall_data(node->subkind.fake_wall, clock);
       break;
     case AZ_NODE_MARKER:
       glColor3f(0, 1, 1);

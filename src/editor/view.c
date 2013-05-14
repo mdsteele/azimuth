@@ -296,7 +296,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .flare = (editor_wall->spec.kind == AZ_WALL_INDESTRUCTIBLE ? 0.0 :
                 0.5 + 0.01 * az_clock_zigzag(50, 1, state->clock))
     };
-    az_draw_wall(&real_wall);
+    az_draw_wall(&real_wall, state->clock);
     draw_script_and_uuid_slot(
         state, real_wall.position, NULL, editor_wall->spec.uuid_slot);
   }

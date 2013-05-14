@@ -160,6 +160,12 @@ static az_vector_t wall_vertices_50[] = {
 static az_vector_t wall_vertices_51[] = {
   {47.5, 0}, {72.5, 25}, {-72.5, 25}, {-47.5, 0}, {-72.5, -25}, {72.5, -25}
 };
+static az_vector_t wall_vertices_52[] = {
+  {90, 5}, {42, 60}, {-30, 60}, {-87, 0}, {-50, -62}, {40, -60}
+};
+static az_vector_t wall_vertices_53[] = {
+  {45, 2}, {21, 30}, {-15, 33}, {-44, 0}, {-25, -36}, {20, -30}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -511,6 +517,20 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_GIRDER, .bezel = 7.0,
     .color1 = {192, 192, 192, 255}, .color2 = {64, 64, 64, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_51)
+  },
+  // Large glowing hex crystal:
+  [52] = {
+    .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
+    .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
+    .underglow = true, .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_52)
+  },
+  // Medium glowing hex crystal:
+  [53] = {
+    .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
+    .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
+    .underglow = true, .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_53)
   }
 };
 
