@@ -238,6 +238,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_HOMING_PIERCE:
+    case AZ_PROJ_GUN_PIERCE_SHRAPNEL:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 0, 1, 0.5);
         glVertex2f(-5, 0);

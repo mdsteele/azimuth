@@ -362,6 +362,24 @@ static void projectile_special_logic(az_space_state_t *state,
       az_add_speck(state, (az_color_t){255, 0, 255, 255}, 0.3,
                    proj->position, AZ_VZERO);
       break;
+    case AZ_PROJ_GUN_BURST_PIERCE:
+      {
+        az_impact_t impact;
+        az_ray_impact(
+            state, proj->position, az_vwithlen(proj->velocity, 30.0),
+            ~AZ_IMPF_BADDIE, AZ_SHIP_UID, &impact);
+        if (impact.type != AZ_IMP_NOTHING ||
+            proj->age >= proj->data->lifetime) {
+          for (int i = -2; i <= 2; ++i) {
+            const double theta =
+              proj->angle + 0.1 * AZ_PI * (i + az_random(-.5, .5));
+            az_add_projectile(state, AZ_PROJ_GUN_PIERCE_SHRAPNEL, false,
+                              proj->position, theta, proj->power);
+          }
+          proj->kind = AZ_PROJ_NOTHING;
+        }
+      }
+      break;
     case AZ_PROJ_GUN_CHARGED_BEAM:
       {
         const double radius =
