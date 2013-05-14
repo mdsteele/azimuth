@@ -166,6 +166,20 @@ static az_vector_t wall_vertices_52[] = {
 static az_vector_t wall_vertices_53[] = {
   {45, 2}, {21, 30}, {-15, 33}, {-44, 0}, {-25, -36}, {20, -30}
 };
+static az_vector_t wall_vertices_54[] = {
+  {20, 15}, {19.62, 16.915}, {18.535, 18.535}, {16.915, 19.62}, {15, 20},
+  {-15, 20}, {-16.915, 19.62}, {-18.535, 18.535}, {-19.62, 16.915},
+  {-20, 15}, {-20, -15}, {-19.62, -16.915}, {-18.535, -18.535},
+  {-16.915, -19.62}, {-15, -20}, {15, -20}, {16.915, -19.62},
+  {18.535, -18.535}, {19.62, -16.915}, {20, -15}
+};
+static az_vector_t wall_vertices_55[] = {
+  {80, 15}, {79.62, 16.915}, {78.535, 18.535}, {76.915, 19.62}, {75, 20},
+  {-75, 20}, {-76.915, 19.62}, {-78.535, 18.535}, {-79.62, 16.915},
+  {-80, 15}, {-80, -15}, {-79.62, -16.915}, {-78.535, -18.535},
+  {-76.915, -19.62}, {-75, -20}, {75, -20}, {76.915, -19.62},
+  {78.535, -18.535}, {79.62, -16.915}, {80, -15}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -522,15 +536,27 @@ static az_wall_data_t wall_datas[] = {
   [52] = {
     .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
     .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
-    .underglow = true, .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .underglow = true, .elasticity = 0.3, .impact_damage_coeff = 7.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_52)
   },
   // Medium glowing hex crystal:
   [53] = {
     .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
     .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
-    .underglow = true, .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .underglow = true, .elasticity = 0.3, .impact_damage_coeff = 7.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_53)
+  },
+  // Small blue/gray square block with rounded corners:
+  [54] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {64, 64, 80, 255}, .color2 = {32, 32, 32, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_54)
+  },
+  // Long blue/gray rectangular block with rounded corners:
+  [55] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {64, 64, 72, 255}, .color2 = {32, 32, 32, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_55)
   }
 };
 
