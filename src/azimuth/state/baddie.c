@@ -247,6 +247,11 @@ static const az_vector_t beam_wall_vertices[] = {
   {-52, -15}, {52, -15}, {52, -10}, {50, -10}, {50, 10}, {52, 10}
 };
 
+static const az_vector_t flyer_vertices[] = {
+  {10, 2}, {7.5, 4}, {5, 4.66}, {-5, 2.66}, {-7.5, 1.33},
+  {-7.5, -1.33}, {-5, -2.66}, {5, -4.66}, {7.5, -4}, {10, -2}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -513,6 +518,14 @@ static az_baddie_data_t baddie_datas[] = {
     .properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
                    AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 10.0 }
+  },
+  [AZ_BAD_FLYER] = {
+    .max_health = 3.0, .color = {255, 64, 0, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .properties = AZ_BADF_KAMIKAZE,
+    .main_body = { .polygon = AZ_INIT_POLYGON(flyer_vertices),
+                   .impact_damage = 6.0 }
   }
 };
 

@@ -53,6 +53,16 @@ static bool has_line_of_sight_to_ship(az_space_state_t *state,
   return (impact.type == AZ_IMP_SHIP);
 }
 
+static double dist_until_hit_wall(az_space_state_t *state, az_baddie_t *baddie,
+                                  double max_dist, double rel_angle) {
+  az_impact_t impact;
+  az_circle_impact(
+      state, baddie->data->overall_bounding_radius, baddie->position,
+      az_vpolar(max_dist, baddie->angle + rel_angle),
+      (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+  return az_vdist(baddie->position, impact.position);
+}
+
 static az_projectile_t *fire_projectile(
     az_space_state_t *state, az_baddie_t *baddie, az_proj_kind_t kind,
     double forward, double firing_angle, double proj_angle_offset) {
@@ -957,12 +967,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->state == 0 || baddie->state == 1) {
         const double max_speed = 100.0, accel = 50.0;
         const double min_dist = 100.0, max_dist = 200.0;
-        az_impact_t impact;
-        az_circle_impact(
-            state, baddie->data->overall_bounding_radius, baddie->position,
-            az_vpolar(max_dist + 1.0, baddie->angle),
-            (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
-        const double dist = az_vdist(baddie->position, impact.position);
+        const double dist =
+          dist_until_hit_wall(state, baddie, max_dist + 1.0, 0.0);
         const double fraction =
           fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
         const double speed_limit = max_speed * sqrt(fraction);
@@ -1065,6 +1071,49 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               az_vpolar(az_random(20.0, 70.0), baddie->angle + angle +
                         az_random(AZ_DEG2RAD(-60), AZ_DEG2RAD(60))));
         }
+      }
+      break;
+    case AZ_BAD_FLYER:
+      {
+        baddie->angle = az_vtheta(baddie->velocity);
+        const double speed = 200.0;
+        const double turn = AZ_DEG2RAD(120) * time;
+        bool chasing_ship = false;
+        if (az_ship_is_present(&state->ship) &&
+            az_vwithin(baddie->position, state->ship.position, 200.0)) {
+          const double goal_theta =
+            az_vtheta(az_vsub(state->ship.position, baddie->position));
+          if (fabs(az_mod2pi(goal_theta - baddie->angle)) <= AZ_DEG2RAD(45) &&
+              has_line_of_sight_to_ship(state, baddie)) {
+            baddie->angle = az_angle_towards(baddie->angle, turn, goal_theta);
+            chasing_ship = true;
+          }
+        }
+        if (!chasing_ship) {
+          bool avoiding = false;
+          AZ_ARRAY_LOOP(other, state->baddies) {
+            if (other == baddie) continue;
+            if (other->kind != AZ_BAD_FLYER) continue;
+            if (az_vwithin(baddie->position, other->position,
+                           2.0 * baddie->data->overall_bounding_radius)) {
+              const double rel = az_mod2pi(az_vtheta(az_vsub(
+                  other->position, baddie->position)) - baddie->angle);
+              baddie->angle =
+                az_mod2pi(baddie->angle + (rel < 0 ? turn : -turn));
+              avoiding = true;
+              break;
+            }
+          }
+          if (!avoiding) {
+            const double left = dist_until_hit_wall(
+                state, baddie, 2000, AZ_DEG2RAD(40));
+            const double right = dist_until_hit_wall(
+                state, baddie, 2000, AZ_DEG2RAD(-40));
+            baddie->angle =
+              az_mod2pi(baddie->angle + (left > right ? turn : -turn));
+          }
+        }
+        baddie->velocity = az_vpolar(speed, baddie->angle);
       }
       break;
   }
