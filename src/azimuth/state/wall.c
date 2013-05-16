@@ -180,6 +180,12 @@ static az_vector_t wall_vertices_55[] = {
   {-76.915, -19.62}, {-75, -20}, {75, -20}, {76.915, -19.62},
   {78.535, -18.535}, {79.62, -16.915}, {80, -15}
 };
+static az_vector_t wall_vertices_56[] = {
+  {80, 30}, {79.24, 33.83}, {77.07, 37.07}, {73.83, 39.24}, {70, 40},
+  {-70, 40}, {-73.83, 39.24}, {-77.07, 37.07}, {-79.24, 33.83}, {-80, 30},
+  {-80, -30}, {-79.24, -33.83}, {-77.07, -37.07}, {-73.83, -39.24}, {-70, -40},
+  {70, -40}, {73.83, -39.24}, {77.07, -37.07}, {79.24, -33.83}, {80, -30}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -557,6 +563,12 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
     .color1 = {64, 64, 72, 255}, .color2 = {32, 32, 32, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_55)
+  },
+  // Big long blue/gray rectangular block with rounded corners:
+  [56] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {64, 64, 80, 255}, .color2 = {32, 32, 32, 255},
+    .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_56)
   }
 };
 
