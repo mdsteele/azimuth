@@ -305,27 +305,6 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   az_damage_ship(state, damage, induce_temp_invincibility);
 }
 
-
-void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
-                           az_vector_t delta, const az_impact_t *impact) {
-  az_ship_t *ship = &state->ship;
-  az_impact_t virtual_impact = {
-    .type = AZ_IMP_BADDIE,
-    .target.baddie = { .baddie = baddie },
-    .position = ship->position
-  };
-  if (az_circle_hits_baddie(
-          baddie, AZ_SHIP_DEFLECTOR_RADIUS, az_vadd(ship->position, delta),
-          az_vneg(delta), NULL, &virtual_impact.normal,
-          &virtual_impact.target.baddie.component)) {
-    az_node_t *tractor_node = NULL;
-    if (ship->tractor_beam.active) {
-      az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node);
-    }
-    on_ship_impact(state, &virtual_impact, tractor_node);
-  }
-}
-
 /*===========================================================================*/
 // Weapons:
 

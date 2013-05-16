@@ -102,14 +102,16 @@ typedef struct {
 
 // Bitset of flags dictating special baddie behavior:
 typedef uint_fast8_t az_baddie_flags_t;
+// BOUNCE_PERP: when bouncing, pretend normal is perpendicular to velocity
+#define AZ_BADF_BOUNCE_PERP    ((az_baddie_flags_t)(1u << 0))
 // INCORPOREAL: baddie cannot be hit by ship or by weapons
-#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 0))
+#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 1))
 // KAMIKAZE: baddie dies when it hits the ship
-#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 1))
+#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 2))
 // NO_HOMING_BEAM: homing beam ignores this baddie
-#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 2))
+#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 3))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
-#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 3))
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 4))
 
 typedef struct {
   double overall_bounding_radius;

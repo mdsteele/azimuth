@@ -25,12 +25,6 @@
 
 /*===========================================================================*/
 
-// Called (from az_tick_baddies) when a baddie is about to hit the ship, just
-// after the baddie's position has been set to impact->position.  The delta
-// argument should be the baddie's (new_position - old_position).
-void az_on_baddie_hit_ship(az_space_state_t *state, az_baddie_t *baddie,
-                           az_vector_t delta, const az_impact_t *impact);
-
 void az_tick_ship(az_space_state_t *state, double time);
 
 /*===========================================================================*/

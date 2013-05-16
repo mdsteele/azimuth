@@ -389,24 +389,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   const az_vector_t old_baddie_position = baddie->position;
   const double old_baddie_angle = baddie->angle;
   if (az_vnonzero(baddie->velocity)) {
-    az_impact_flags_t impact_flags = AZ_IMPF_BADDIE;
-    if ((baddie->data->properties & AZ_BADF_INCORPOREAL) ||
-        state->ship.temp_invincibility > 0.0) impact_flags |= AZ_IMPF_SHIP;
     az_impact_t impact;
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
                      baddie->position, az_vmul(baddie->velocity, time),
-                     impact_flags, baddie->uid, &impact);
-    // If we hit the ship, we might damage it.  On the other hand, if the ship
-    // has C-plus or Reactive Armor, it might kill the baddie, in which case we
-    // need to return early.
+                     (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
     baddie->position = impact.position;
-    if (impact.type == AZ_IMP_SHIP) {
-      az_on_baddie_hit_ship(
-          state, baddie, az_vsub(baddie->position, old_baddie_position),
-          &impact);
-      if (baddie->kind == AZ_BAD_NOTHING) return;
-    }
     if (impact.type != AZ_IMP_NOTHING) {
+      // Baddies with the BOUNCE_PERP flag always bounce perfectly backwards
+      // (as if they hit the wall dead-on), even if they hit a wall at an
+      // oblique angle.
+      if (baddie->data->properties & AZ_BADF_BOUNCE_PERP) {
+        impact.normal = az_vproj(impact.normal, baddie->velocity);
+      }
       // Push the baddie slightly away from the impact point (so that we're
       // hopefully no longer in contact with the object we hit).
       baddie->position = az_vadd(baddie->position,
