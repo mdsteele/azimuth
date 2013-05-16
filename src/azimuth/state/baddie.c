@@ -526,6 +526,14 @@ static az_baddie_data_t baddie_datas[] = {
     .properties = AZ_BADF_KAMIKAZE,
     .main_body = { .polygon = AZ_INIT_POLYGON(flyer_vertices),
                    .impact_damage = 6.0 }
+  },
+  [AZ_BAD_ARMORED_ZIPPER] = {
+    .max_health = 24.0, .color = {128, 160, 128, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_SHARDS,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .impact_damage = 10.0 }
   }
 };
 
