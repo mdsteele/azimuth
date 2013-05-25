@@ -629,6 +629,7 @@ static void do_change_data(int delta, bool secondary) {
       }
       set_brush_from_node_subkind(node);
     } else {
+      set_brush_from_node_subkind(node);
       node->spec.kind = state.brush.node_kind =
         az_modulo((int)node->spec.kind - 1 + delta, AZ_NUM_NODE_KINDS) + 1;
       set_node_subkind_from_brush(node);
