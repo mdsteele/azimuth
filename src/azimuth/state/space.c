@@ -63,10 +63,10 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   AZ_ZERO_ARRAY(cargo_carriers);
   // Insert objects into space:
   for (int i = 0; i < room->num_baddies; ++i) {
-    az_baddie_t *baddie;
-    if (az_insert_baddie(state, &baddie)) {
-      const az_baddie_spec_t *spec = &room->baddies[i];
-      az_init_baddie(baddie, spec->kind, spec->position, spec->angle);
+    const az_baddie_spec_t *spec = &room->baddies[i];
+    az_baddie_t *baddie =
+      az_add_baddie(state, spec->kind, spec->position, spec->angle);
+    if (baddie != NULL) {
       baddie->on_kill = spec->on_kill;
       put_uuid(state, spec->uuid_slot, AZ_UUID_BADDIE, baddie->uid);
       AZ_ARRAY_LOOP(slot, spec->cargo_slots) {
@@ -79,58 +79,72 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
     }
   }
   for (int i = 0; i < room->num_doors; ++i) {
-    az_door_t *door;
-    if (az_insert_door(state, &door)) {
-      const az_door_spec_t *spec = &room->doors[i];
-      door->kind = spec->kind;
-      door->on_open = spec->on_open;
-      door->position = spec->position;
-      door->angle = spec->angle;
-      door->destination = spec->destination;
-      if (door->kind == AZ_DOOR_ALWAYS_OPEN) {
-        door->is_open = true;
-        door->openness = 1.0;
+    const az_door_spec_t *spec = &room->doors[i];
+    AZ_ARRAY_LOOP(door, state->doors) {
+      if (door->kind == AZ_DOOR_NOTHING) {
+        door->kind = spec->kind;
+        az_assign_uid(door - state->doors, &door->uid);
+        put_uuid(state, spec->uuid_slot, AZ_UUID_DOOR, door->uid);
+        door->on_open = spec->on_open;
+        door->position = spec->position;
+        door->angle = spec->angle;
+        door->destination = spec->destination;
+        door->is_open = (spec->kind == AZ_DOOR_PASSAGE ||
+                         spec->kind == AZ_DOOR_ALWAYS_OPEN);
+        door->openness = (door->is_open ? 1.0 : 0.0);
+        break;
       }
-      put_uuid(state, spec->uuid_slot, AZ_UUID_DOOR, door->uid);
     }
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
-    az_gravfield_t *gravfield;
-    if (az_insert_gravfield(state, &gravfield)) {
-      const az_gravfield_spec_t *spec = &room->gravfields[i];
-      gravfield->kind = spec->kind;
-      gravfield->on_enter = spec->on_enter;
-      gravfield->position = spec->position;
-      gravfield->angle = spec->angle;
-      gravfield->strength = spec->strength;
-      gravfield->size = spec->size;
-      put_uuid(state, spec->uuid_slot, AZ_UUID_GRAVFIELD, gravfield->uid);
+    const az_gravfield_spec_t *spec = &room->gravfields[i];
+    AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+      if (gravfield->kind == AZ_GRAV_NOTHING) {
+        gravfield->kind = spec->kind;
+        az_assign_uid(gravfield - state->gravfields, &gravfield->uid);
+        put_uuid(state, spec->uuid_slot, AZ_UUID_GRAVFIELD, gravfield->uid);
+        gravfield->on_enter = spec->on_enter;
+        gravfield->position = spec->position;
+        gravfield->angle = spec->angle;
+        gravfield->strength = spec->strength;
+        gravfield->size = spec->size;
+        gravfield->age = 0.0;
+        gravfield->script_fired = false;
+        break;
+      }
     }
   }
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *spec = &room->nodes[i];
     if (spec->kind == AZ_NODE_UPGRADE &&
         az_has_upgrade(&state->ship.player, spec->subkind.upgrade)) continue;
-    az_node_t *node;
-    if (az_insert_node(state, &node)) {
-      node->kind = spec->kind;
-      node->subkind = spec->subkind;
-      node->on_use = spec->on_use;
-      node->position = spec->position;
-      node->angle = spec->angle;
-      node->status = AZ_NS_FAR;
-      put_uuid(state, spec->uuid_slot, AZ_UUID_NODE, node->uid);
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind == AZ_NODE_NOTHING) {
+        node->kind = spec->kind;
+        node->subkind = spec->subkind;
+        az_assign_uid(node - state->nodes, &node->uid);
+        put_uuid(state, spec->uuid_slot, AZ_UUID_NODE, node->uid);
+        node->on_use = spec->on_use;
+        node->position = spec->position;
+        node->angle = spec->angle;
+        node->status = AZ_NS_FAR;
+        break;
+      }
     }
   }
   for (int i = 0; i < room->num_walls; ++i) {
-    az_wall_t *wall;
-    if (az_insert_wall(state, &wall)) {
-      const az_wall_spec_t *spec = &room->walls[i];
-      wall->kind = spec->kind;
-      wall->data = spec->data;
-      wall->position = spec->position;
-      wall->angle = spec->angle;
-      put_uuid(state, spec->uuid_slot, AZ_UUID_WALL, wall->uid);
+    const az_wall_spec_t *spec = &room->walls[i];
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING) {
+        wall->kind = spec->kind;
+        wall->data = spec->data;
+        az_assign_uid(wall - state->walls, &wall->uid);
+        put_uuid(state, spec->uuid_slot, AZ_UUID_WALL, wall->uid);
+        wall->position = spec->position;
+        wall->angle = spec->angle;
+        wall->flare = 0.0;
+        break;
+      }
     }
   }
   // Now that all objects are inserted and the UUID table is populated, fill in
@@ -148,101 +162,20 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   }
 }
 
-bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
-                      az_baddie_t **baddie_out) {
-  const int index = az_uid_index(uid);
-  assert(0 <= index && index < AZ_ARRAY_SIZE(state->baddies));
-  az_baddie_t *baddie = &state->baddies[index];
-  if (baddie->kind != AZ_BAD_NOTHING && baddie->uid == uid) {
-    *baddie_out = baddie;
-    return true;
-  }
-  return false;
-}
+/*===========================================================================*/
 
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out) {
+az_baddie_t *az_add_baddie(az_space_state_t *state, az_baddie_kind_t kind,
+                           az_vector_t position, double angle) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) {
       az_assign_uid(baddie - state->baddies, &baddie->uid);
-      *baddie_out = baddie;
-      return true;
+      az_init_baddie(baddie, kind, position, angle);
+      return baddie;
     }
   }
-  return false;
-}
-
-bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
-                    az_door_t **door_out) {
-  const int index = az_uid_index(uid);
-  assert(0 <= index && index < AZ_ARRAY_SIZE(state->doors));
-  az_door_t *door = &state->doors[index];
-  if (door->kind != AZ_DOOR_NOTHING && door->uid == uid) {
-    *door_out = door;
-    return true;
-  }
-  return false;
-}
-
-bool az_insert_door(az_space_state_t *state, az_door_t **door_out) {
-  AZ_ARRAY_LOOP(door, state->doors) {
-    if (door->kind == AZ_DOOR_NOTHING) {
-      az_assign_uid(door - state->doors, &door->uid);
-      door->is_open = false;
-      door->openness = 0.0;
-      *door_out = door;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
-                         az_gravfield_t **gravfield_out) {
-  const int index = az_uid_index(uid);
-  assert(0 <= index && index < AZ_ARRAY_SIZE(state->gravfields));
-  az_gravfield_t *gravfield = &state->gravfields[index];
-  if (gravfield->kind != AZ_GRAV_NOTHING && gravfield->uid == uid) {
-    *gravfield_out = gravfield;
-    return true;
-  }
-  return false;
-}
-
-bool az_insert_gravfield(az_space_state_t *state,
-                         az_gravfield_t **gravfield_out) {
-  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
-    if (gravfield->kind == AZ_GRAV_NOTHING) {
-      az_assign_uid(gravfield - state->gravfields, &gravfield->uid);
-      gravfield->age = 0.0;
-      gravfield->script_fired = false;
-      *gravfield_out = gravfield;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
-                    az_node_t **node_out) {
-  const int index = az_uid_index(uid);
-  assert(0 <= index && index < AZ_ARRAY_SIZE(state->nodes));
-  az_node_t *node = &state->nodes[index];
-  if (node->kind != AZ_NODE_NOTHING && node->uid == uid) {
-    *node_out = node;
-    return true;
-  }
-  return false;
-}
-
-bool az_insert_node(az_space_state_t *state, az_node_t **node_out) {
-  AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_NOTHING) {
-      az_assign_uid(node - state->nodes, &node->uid);
-      *node_out = node;
-      return true;
-    }
-  }
-  return false;
+  AZ_WARNING_ONCE("Failed to add baddie (kind=%d); array is full.\n",
+                  (int)kind);
+  return NULL;
 }
 
 bool az_insert_particle(az_space_state_t *state,
@@ -304,30 +237,6 @@ az_projectile_t *az_add_projectile(
   return NULL;
 }
 
-bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
-                    az_wall_t **wall_out) {
-  const int index = az_uid_index(uid);
-  assert(0 <= index && index < AZ_ARRAY_SIZE(state->walls));
-  az_wall_t *wall = &state->walls[index];
-  if (wall->kind != AZ_WALL_NOTHING && wall->uid == uid) {
-    *wall_out = wall;
-    return true;
-  }
-  return false;
-}
-
-bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out) {
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_WALL_NOTHING) {
-      az_assign_uid(wall - state->walls, &wall->uid);
-      wall->flare = 0.0;
-      *wall_out = wall;
-      return true;
-    }
-  }
-  return false;
-}
-
 void az_add_random_pickup(az_space_state_t *state,
                           az_pickup_flags_t potential_pickups,
                           az_vector_t position) {
@@ -344,6 +253,68 @@ void az_add_random_pickup(az_space_state_t *state,
   }
   AZ_WARNING_ONCE("Failed to add pickup (kind=%d); array is full.\n",
                   (int)kind);
+}
+
+/*===========================================================================*/
+
+bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
+                      az_baddie_t **baddie_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->baddies));
+  az_baddie_t *baddie = &state->baddies[index];
+  if (baddie->kind != AZ_BAD_NOTHING && baddie->uid == uid) {
+    *baddie_out = baddie;
+    return true;
+  }
+  return false;
+}
+
+bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
+                    az_door_t **door_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->doors));
+  az_door_t *door = &state->doors[index];
+  if (door->kind != AZ_DOOR_NOTHING && door->uid == uid) {
+    *door_out = door;
+    return true;
+  }
+  return false;
+}
+
+bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
+                         az_gravfield_t **gravfield_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->gravfields));
+  az_gravfield_t *gravfield = &state->gravfields[index];
+  if (gravfield->kind != AZ_GRAV_NOTHING && gravfield->uid == uid) {
+    *gravfield_out = gravfield;
+    return true;
+  }
+  return false;
+}
+
+bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
+                    az_node_t **node_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->nodes));
+  az_node_t *node = &state->nodes[index];
+  if (node->kind != AZ_NODE_NOTHING && node->uid == uid) {
+    *node_out = node;
+    return true;
+  }
+  return false;
+}
+
+bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
+                    az_wall_t **wall_out) {
+  const int index = az_uid_index(uid);
+  assert(0 <= index && index < AZ_ARRAY_SIZE(state->walls));
+  az_wall_t *wall = &state->walls[index];
+  if (wall->kind != AZ_WALL_NOTHING && wall->uid == uid) {
+    *wall_out = wall;
+    return true;
+  }
+  return false;
 }
 
 /*===========================================================================*/

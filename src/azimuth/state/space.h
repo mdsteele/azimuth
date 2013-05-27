@@ -153,22 +153,10 @@ void az_clear_space(az_space_state_t *state);
 // any changes to the ship or any other fields.
 void az_enter_room(az_space_state_t *state, const az_room_t *room);
 
-bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
-                      az_baddie_t **baddie_out);
-bool az_insert_baddie(az_space_state_t *state, az_baddie_t **baddie_out);
-
-bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
-                    az_door_t **door_out);
-bool az_insert_door(az_space_state_t *state, az_door_t **door_out);
-
-bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
-                         az_gravfield_t **gravfield_out);
-bool az_insert_gravfield(az_space_state_t *state,
-                         az_gravfield_t **gravfield_out);
-
-bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
-                    az_node_t **node_out);
-bool az_insert_node(az_space_state_t *state, az_node_t **node_out);
+// Add and init a new baddie and return a pointer to it, or return NULL if the
+// baddie array is already full.
+az_baddie_t *az_add_baddie(az_space_state_t *state, az_baddie_kind_t kind,
+                           az_vector_t position, double angle);
 
 bool az_insert_particle(az_space_state_t *state, az_particle_t **particle_out);
 
@@ -184,13 +172,24 @@ az_projectile_t *az_add_projectile(
     az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
     az_vector_t position, double angle, double power);
 
-bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
-                    az_wall_t **wall_out);
-bool az_insert_wall(az_space_state_t *state, az_wall_t **wall_out);
-
+// Add a pickup of a randomly chosen kind, among those kinds allowed by the
+// potential_pickups argument.
 void az_add_random_pickup(az_space_state_t *state,
                           az_pickup_flags_t potential_pickups,
                           az_vector_t position);
+
+// Look up the specified object based on its UID and return true, or return
+// false if the object with that UID doesn't currently exist.
+bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
+                      az_baddie_t **baddie_out);
+bool az_lookup_door(az_space_state_t *state, az_uid_t uid,
+                    az_door_t **door_out);
+bool az_lookup_gravfield(az_space_state_t *state, az_uid_t uid,
+                         az_gravfield_t **gravfield_out);
+bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
+                    az_node_t **node_out);
+bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
+                    az_wall_t **wall_out);
 
 /*===========================================================================*/
 

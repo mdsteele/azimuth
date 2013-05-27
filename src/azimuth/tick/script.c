@@ -478,10 +478,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
             SCRIPT_ERROR("invalid baddie kind");
           }
-          az_baddie_t *baddie;
-          if (az_insert_baddie(state, &baddie)) {
-            az_init_baddie(baddie, kind, (az_vector_t){x, y}, angle);
-          }
+          az_add_baddie(state, kind, (az_vector_t){x, y}, angle);
         }
         break;
       case AZ_OP_SBADK:

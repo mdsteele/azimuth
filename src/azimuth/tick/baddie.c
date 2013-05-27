@@ -310,15 +310,13 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
       const double spread = AZ_DEG2RAD(num_eggs * 10);
       const az_component_t *tail =
         &baddie->components[baddie->data->num_components - 1];
-      az_baddie_t *egg;
       for (int i = 0; i < num_eggs; ++i) {
-        if (az_insert_baddie(state, &egg)) {
-          az_init_baddie(
-                         egg, AZ_BAD_WYRM_EGG,
-                         az_vadd(baddie->position,
-                                 az_vrotate(tail->position, baddie->angle)),
-                         baddie->angle + tail->angle + AZ_PI +
-                         az_random(-spread, spread));
+        az_baddie_t *egg = az_add_baddie(
+            state, AZ_BAD_WYRM_EGG,
+            az_vadd(baddie->position,
+                    az_vrotate(tail->position, baddie->angle)),
+            baddie->angle + tail->angle + AZ_PI + az_random(-spread, spread));
+        if (egg != NULL) {
           egg->velocity = az_vpolar(az_random(50, 150), egg->angle);
           // Set the egg to hatch (without waiting for the ship to get
           // close first) after a random amount of time.
@@ -859,7 +857,6 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       fly_towards_ship(state, baddie, time,
                        5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
       if (baddie->cooldown <= 0.0) {
-        az_baddie_t *razor;
         switch (baddie->state) {
           case 0:
           case 1:
@@ -890,9 +887,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             break;
           case 5:
             for (int i = -1; i <= 1; ++i) {
-              if (az_insert_baddie(state, &razor)) {
-                az_init_baddie(razor, AZ_BAD_OTH_RAZOR, baddie->position,
-                               baddie->angle + AZ_PI + i * AZ_DEG2RAD(45));
+              az_baddie_t *razor = az_add_baddie(
+                  state, AZ_BAD_OTH_RAZOR, baddie->position,
+                  baddie->angle + AZ_PI + i * AZ_DEG2RAD(45));
+              if (razor != NULL) {
                 razor->velocity =
                   az_vpolar(az_random(300, 500), razor->angle);
               } else break;
@@ -903,10 +901,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             break;
           case 8:
             for (int i = 0; i < 4; ++i) {
-              if (az_insert_baddie(state, &razor)) {
-                az_init_baddie(razor, AZ_BAD_OTH_RAZOR, baddie->position,
-                               baddie->angle + AZ_DEG2RAD(45) +
-                               i * AZ_DEG2RAD(90));
+              az_baddie_t *razor = az_add_baddie(
+                  state, AZ_BAD_OTH_RAZOR, baddie->position,
+                  baddie->angle + AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
+              if (razor != NULL) {
                 razor->state = 1;
                 razor->velocity = az_vpolar(300, razor->angle);
               } else break;
