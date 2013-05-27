@@ -66,7 +66,7 @@
 // How long the C-plus drive stays ready once charged, in seconds:
 #define AZ_CPLUS_DECAY_TIME 3.5
 // Energy consumed by the C-plus drive per second while active:
-#define AZ_CPLUS_POWER_COST 100.0
+#define AZ_CPLUS_POWER_COST 70.0
 // Damage per second taken in superheated rooms without Thermal Armor:
 #define AZ_HEAT_DAMAGE_PER_SECOND 5.0
 
@@ -253,11 +253,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   }
 
   // Update C-plus drive status.
-  if (state->ship.cplus.state == AZ_CPLUS_INACTIVE) {
-    if (state->ship.cplus.charge == 1.0) {
-      state->ship.cplus.state = AZ_CPLUS_READY;
-    } else state->ship.cplus.charge = 0.0;
-  } else if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
+  if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
     induce_temp_invincibility = true;
     state->ship.cplus.state = AZ_CPLUS_INACTIVE;
     rel_velocity = az_vsub(rel_velocity, ship->velocity);
@@ -853,111 +849,131 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
 
+  // If we don't have the C-plus drive upgrade yet, do nothing.
   if (!az_has_upgrade(player, AZ_UPG_CPLUS_DRIVE)) {
     assert(ship->cplus.state == AZ_CPLUS_INACTIVE);
     assert(ship->cplus.charge == 0.0);
     assert(ship->cplus.tap_time == 0.0);
-  } else {
-    // We can't use the C-plus drive in water without dynamic armor.
-    if (is_in_water && !az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
-      ship->cplus.state = AZ_CPLUS_INACTIVE;
-      ship->cplus.charge = 0.0;
-      ship->cplus.tap_time = 0.0;
-      return;
-    }
-    switch (ship->cplus.state) {
-      case AZ_CPLUS_INACTIVE:
-        assert(ship->cplus.charge >= 0.0);
-        assert(ship->cplus.charge <= 1.0);
-        assert(ship->cplus.tap_time == 0.0);
-        if (controls->left_held || controls->right_held ||
-            controls->down_held || !controls->up_held) {
-          if (ship->cplus.charge == 1.0) {
-            ship->cplus.state = AZ_CPLUS_READY;
-          } else ship->cplus.charge = 0.0;
-        } else {
-          const double old_charge = ship->cplus.charge;
-          ship->cplus.charge = fmin(1.0, ship->cplus.charge +
-                                    time / AZ_CPLUS_CHARGE_TIME);
-          if (ship->cplus.charge >= 1.0 && old_charge < 1.0) {
-            az_play_sound(&state->soundboard, AZ_SND_CPLUS_CHARGED);
-          }
-          if (ship->cplus.charge >= 0.5) {
-            az_particle_t *particle;
-            for (int offset = -30; offset <= 30; offset += 60) {
-              if (az_insert_particle(state, &particle)) {
-                particle->kind = AZ_PAR_EMBER;
-                if (ship->cplus.charge == 1.0) {
-                  particle->color = (az_color_t){64, 160, 64, 255};
-                } else {
-                  particle->color = (az_color_t){128, 128, 128,
-                      255 * (ship->cplus.charge - 0.25)};
-                }
-                particle->position =
-                  az_vadd(ship->position,
-                          az_vpolar(-17.0, ship->angle + AZ_DEG2RAD(offset)));
-                particle->velocity = AZ_VZERO;
-                particle->lifetime = 0.5;
-                particle->param1 = 8.0;
+    return;
+  }
+
+  // We can't use the C-plus drive in water without dynamic armor.
+  if (is_in_water && !az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
+    ship->cplus.state = AZ_CPLUS_INACTIVE;
+    ship->cplus.charge = 0.0;
+    ship->cplus.tap_time = 0.0;
+    return;
+  }
+
+  switch (ship->cplus.state) {
+    case AZ_CPLUS_INACTIVE:
+      assert(ship->cplus.charge >= 0.0);
+      assert(ship->cplus.charge <= 1.0);
+      assert(ship->cplus.tap_time == 0.0);
+      // If we stop thrusting, or if we're not going forward fast enough,
+      // reset the charge on the C-plus drive.
+      static const double min_cplus_charge_speed = 300.0; // pixels/second
+      if (controls->down_held || !controls->up_held ||
+          az_vdot(ship->velocity, az_vpolar(1, ship->angle)) <
+          min_cplus_charge_speed) {
+        if (ship->cplus.charge == 1.0) {
+          ship->cplus.state = AZ_CPLUS_READY;
+        } else ship->cplus.charge = 0.0;
+        break;
+      } else {
+        // Otherwise, increase the charge on the C-plus drive.
+        const double old_charge = ship->cplus.charge;
+        ship->cplus.charge = fmin(1.0, ship->cplus.charge +
+                                  time / AZ_CPLUS_CHARGE_TIME);
+        // Play a sound when we are fully charged.
+        if (ship->cplus.charge >= 1.0 && old_charge < 1.0) {
+          az_play_sound(&state->soundboard, AZ_SND_CPLUS_CHARGED);
+        }
+        // If we're at least halfway charged, leave a double trail of smoke
+        // behind the ship (green if we're fully charged, gray otherwise).
+        if (ship->cplus.charge >= 0.5) {
+          az_particle_t *particle;
+          for (int offset = -30; offset <= 30; offset += 60) {
+            if (az_insert_particle(state, &particle)) {
+              particle->kind = AZ_PAR_EMBER;
+              if (ship->cplus.charge == 1.0) {
+                particle->color = (az_color_t){64, 160, 64, 255};
+              } else {
+                particle->color = (az_color_t){128, 128, 128,
+                    255 * (ship->cplus.charge - 0.25)};
               }
+              particle->position =
+                az_vadd(ship->position,
+                        az_vpolar(-17.0, ship->angle + AZ_DEG2RAD(offset)));
+              particle->velocity = AZ_VZERO;
+              particle->lifetime = 0.5;
+              particle->param1 = 8.0;
             }
           }
         }
-        break;
-      case AZ_CPLUS_READY:
-        assert(ship->cplus.charge > 0.0);
-        assert(ship->cplus.charge <= 1.0);
-        assert(ship->cplus.tap_time >= 0.0);
-        assert(ship->cplus.tap_time <= 1.0);
-        ship->cplus.charge = fmax(0.0, ship->cplus.charge -
-                                  time / AZ_CPLUS_DECAY_TIME);
-        if (ship->cplus.charge == 0.0) {
-          ship->cplus.state = AZ_CPLUS_INACTIVE;
-          ship->cplus.tap_time = 0.0;
-        } else {
-          ship->cplus.tap_time = fmax(0.0, ship->cplus.tap_time - time);
-          if (controls->up_pressed) {
-            if (ship->cplus.tap_time > 0.0) {
-              ship->cplus.state = AZ_CPLUS_ACTIVE;
-              ship->cplus.charge = 0.0;
-              ship->cplus.tap_time = 0.0;
-              ship->temp_invincibility = 0.0;
-            } else ship->cplus.tap_time = AZ_DOUBLE_TAP_TIME;
-          }
+      }
+      break;
+    case AZ_CPLUS_READY:
+      assert(ship->cplus.charge > 0.0);
+      assert(ship->cplus.charge <= 1.0);
+      assert(ship->cplus.tap_time >= 0.0);
+      assert(ship->cplus.tap_time <= AZ_DOUBLE_TAP_TIME);
+      az_loop_sound(&state->soundboard, AZ_SND_CPLUS_READY);
+      // Decay the charge on the C-plus drive.  If it falls to zero before we
+      // activate the drive, put us back into the INACTIVE state.
+      ship->cplus.charge = fmax(0.0, ship->cplus.charge -
+                                time / AZ_CPLUS_DECAY_TIME);
+      if (ship->cplus.charge == 0.0) {
+        ship->cplus.state = AZ_CPLUS_INACTIVE;
+        ship->cplus.tap_time = 0.0;
+      } else {
+        // If the player presses the Up key twice within AZ_DOUBLE_TAP_TIME,
+        // put the C-plus drive into the ACTIVE state.
+        ship->cplus.tap_time = fmax(0.0, ship->cplus.tap_time - time);
+        if (controls->up_pressed) {
+          if (ship->cplus.tap_time > 0.0) {
+            ship->cplus.state = AZ_CPLUS_ACTIVE;
+            ship->cplus.charge = 0.0;
+            ship->cplus.tap_time = 0.0;
+            ship->temp_invincibility = 0.0;
+            ship->thrusters = AZ_THRUST_NONE;
+          } else ship->cplus.tap_time = AZ_DOUBLE_TAP_TIME;
         }
-        az_loop_sound(&state->soundboard, AZ_SND_CPLUS_READY);
-        break;
-      case AZ_CPLUS_ACTIVE:
-        assert(ship->cplus.charge == 0.0);
-        assert(ship->cplus.tap_time == 0.0);
-        assert(ship->temp_invincibility == 0.0);
-        const double energy_cost = AZ_CPLUS_POWER_COST * time;
-        if (controls->down_held || !controls->up_held ||
-            !try_use_energy(ship, energy_cost, true)) {
-          ship->cplus.state = AZ_CPLUS_INACTIVE;
-        } else {
-          ship->velocity = az_vpolar(1000.0, ship->angle);
-          az_particle_t *particle;
-          if (az_insert_particle(state, &particle)) {
-            particle->kind = AZ_PAR_EMBER;
-            particle->color = (az_color_t){64, 255, 64, 255};
-            particle->position =
-              az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
-            particle->velocity = AZ_VZERO;
-            particle->lifetime = 0.3;
-            particle->param1 = 20;
-          }
-          az_persist_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+      }
+      break;
+    case AZ_CPLUS_ACTIVE:
+      assert(ship->cplus.charge == 0.0);
+      assert(ship->cplus.tap_time == 0.0);
+      assert(ship->temp_invincibility == 0.0);
+      assert(ship->thrusters == AZ_THRUST_NONE);
+      // Drain energy while the C-plus drive is active.  If we stop thrusting
+      // or if we run out of energy, deactivate the C-plus drive.
+      const double energy_cost = AZ_CPLUS_POWER_COST * time;
+      if (controls->down_held || !controls->up_held ||
+          !try_use_energy(ship, energy_cost, true)) {
+        ship->cplus.state = AZ_CPLUS_INACTIVE;
+      } else {
+        // As long as the C-plus drive is active, the ship moves at a constant
+        // (fast) speed, and leaves a trail of green smoke behind it.
+        ship->velocity = az_vpolar(1000.0, ship->angle);
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_EMBER;
+          particle->color = (az_color_t){64, 255, 64, 255};
+          particle->position =
+            az_vadd(ship->position, az_vpolar(-15.0, ship->angle));
+          particle->velocity = AZ_VZERO;
+          particle->lifetime = 0.3;
+          particle->param1 = 20;
         }
-        break;
-    }
+        az_persist_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+      }
+      break;
   }
-  controls->up_pressed = false;
 }
 
 static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
                                  double time) {
-  if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   const az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
   const bool dynamic = az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR);
@@ -968,8 +984,9 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time *
     (!is_in_water ? 1.0 : dynamic ? 0.6 : 0.4);
   // Also, turn more slowly when we're in water (unless we have Dynamic Armor).
-  const double turn_rate = AZ_SHIP_TURN_RATE *
-    (is_in_water && !dynamic ? 0.6 : 1.0);
+  const double turn_rate =
+    (ship->cplus.state == AZ_CPLUS_ACTIVE ? AZ_DEG2RAD(60) :
+     AZ_SHIP_TURN_RATE * (is_in_water && !dynamic ? 0.6 : 1.0));
   // Turning left:
   if (controls->left_held && !controls->right_held) {
     ship->angle = az_mod2pi(ship->angle + turn_rate * time);
@@ -978,6 +995,7 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   if (controls->right_held && !controls->left_held) {
     ship->angle = az_mod2pi(ship->angle - turn_rate * time);
   }
+  if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   // Forward thrust:
   if (controls->up_held && !controls->down_held) {
     ship->velocity = az_vadd(ship->velocity,

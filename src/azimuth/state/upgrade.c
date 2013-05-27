@@ -221,8 +221,8 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = NULL;
       break;
     case AZ_UPG_CPLUS_DRIVE:
-      *line1_out = "Fly straight without turning or stopping to charge,";
-      *line2_out = "then double-tap [UP].  Destroys certain walls on impact.";
+      *line1_out = "Fly straight without stopping to charge, then";
+      *line2_out = "double-tap [UP].  Destroys certain walls on impact.";
       break;
     case AZ_UPG_ORION_BOOSTER:
       *line1_out = "Press [0] to select bombs, hold [C] to charge,";
