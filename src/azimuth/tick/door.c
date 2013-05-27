@@ -34,6 +34,8 @@ void az_try_open_door(az_space_state_t *state, az_door_t *door,
                       az_damage_flags_t damage_kind) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (!door->is_open && az_can_open_door(door->kind, damage_kind)) {
+    assert(door->kind != AZ_DOOR_PASSAGE);
+    assert(door->kind != AZ_DOOR_ALWAYS_OPEN);
     door->is_open = true;
     az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
     az_run_script(state, door->on_open);
@@ -50,6 +52,7 @@ static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
   if (door->is_open) {
     door->openness = fmin(1.0, door->openness + delta);
   } else {
+    assert(door->kind != AZ_DOOR_ALWAYS_OPEN);
     const double old_openness = door->openness;
     door->openness = fmax(0.0, door->openness - delta);
     // Don't allow the door to completely close while the ship is still in it;

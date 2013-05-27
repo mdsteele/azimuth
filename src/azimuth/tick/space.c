@@ -315,8 +315,13 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
             az_vpolar(0.25 * az_vnorm(state->ship.velocity), exit->angle);
           state->ship.angle = az_mod2pi(
               state->ship.angle + AZ_PI + exit->angle - entrance_angle);
-          exit->openness = 1.0;
-          exit->is_open = false;
+          if (exit->kind == AZ_DOOR_ALWAYS_OPEN) {
+            assert(exit->is_open);
+            assert(exit->openness == 1.0);
+          } else {
+            exit->openness = 1.0;
+            exit->is_open = false;
+          }
           state->mode_data.doorway.door = exit;
         }
         // Record that we are now in the new room.
@@ -336,6 +341,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
       break;
     case AZ_DWS_SHIFT:
       assert(state->mode_data.doorway.door != NULL);
+      assert(state->mode_data.doorway.door->kind != AZ_DOOR_PASSAGE);
       // Increase progress:
       state->mode_data.doorway.progress =
         fmin(1.0, state->mode_data.doorway.progress + time / shift_time);
@@ -351,7 +357,9 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
       if (state->mode_data.doorway.progress >= 1.0) {
         state->mode_data.doorway.step = AZ_DWS_FADE_IN;
         state->mode_data.doorway.progress = 0.0;
-        az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+        if (state->mode_data.doorway.door->kind != AZ_DOOR_ALWAYS_OPEN) {
+          az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+        }
       }
       break;
     case AZ_DWS_FADE_IN:

@@ -321,7 +321,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     const az_door_t real_door = {
       .kind = editor_door->spec.kind,
       .position = editor_door->spec.position,
-      .angle = editor_door->spec.angle
+      .angle = editor_door->spec.angle,
+      .is_open = (editor_door->spec.kind == AZ_DOOR_ALWAYS_OPEN),
+      .openness = (editor_door->spec.kind == AZ_DOOR_ALWAYS_OPEN ? 1.0 : 0.0)
     };
     az_draw_door(&real_door, state->clock);
     glPushMatrix(); {
@@ -384,6 +386,7 @@ static void draw_room_minimap(az_editor_state_t *state,
         case AZ_DOOR_PASSAGE: glColor3f(0, 1, 0); break;
         case AZ_DOOR_FORCEFIELD: continue; // don't draw
         case AZ_DOOR_UNLOCKED: glColor3f(1, 1, 0); break;
+        case AZ_DOOR_ALWAYS_OPEN: glColor3f(0.8, 0.8, 0.8); break;
       }
       glPushMatrix(); {
         glTranslated(editor_door->spec.position.x,

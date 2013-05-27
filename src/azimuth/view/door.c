@@ -139,9 +139,14 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     case AZ_DOOR_FORCEFIELD:
       draw_forcefield(door, clock);
       return;
+    case AZ_DOOR_ALWAYS_OPEN:
+      assert(door->is_open);
+      assert(door->openness == 1.0);
+      break;
   }
 
   if (door->openness < 1.0) {
+    assert(door->kind != AZ_DOOR_ALWAYS_OPEN);
     glBegin(GL_QUADS); {
       const GLfloat x1 = 30.0;
       const GLfloat x2 = 40.0 - 10.0 * door->openness;

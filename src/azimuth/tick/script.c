@@ -445,7 +445,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
               break;
             case AZ_OBJ_DOOR:
               assert(object.obj.door->kind != AZ_DOOR_NOTHING);
-              if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
+              if (object.obj.door->kind == AZ_DOOR_PASSAGE ||
+                  object.obj.door->kind == AZ_DOOR_ALWAYS_OPEN) {
                 SCRIPT_ERROR("invalid door kind");
               }
               object.obj.door->is_open = (value != 0.0);
@@ -516,8 +517,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_UID(AZ_UUID_DOOR, &uid);
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE) {
-              SCRIPT_ERROR("wrong door kind");
+            if (door->kind == AZ_DOOR_PASSAGE ||
+                door->kind == AZ_DOOR_ALWAYS_OPEN) {
+              SCRIPT_ERROR("invalid door kind");
             }
             if (!door->is_open) {
               az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
@@ -532,8 +534,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           GET_UID(AZ_UUID_DOOR, &uid);
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE) {
-              SCRIPT_ERROR("wrong door kind");
+            if (door->kind == AZ_DOOR_PASSAGE ||
+                door->kind == AZ_DOOR_ALWAYS_OPEN) {
+              SCRIPT_ERROR("invalid door kind");
             }
             if (door->is_open) {
               az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
@@ -549,8 +552,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
             if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_FORCEFIELD) {
-              SCRIPT_ERROR("wrong door kind");
+                door->kind == AZ_DOOR_FORCEFIELD ||
+                door->kind == AZ_DOOR_ALWAYS_OPEN) {
+              SCRIPT_ERROR("invalid door kind");
             }
             door->kind = AZ_DOOR_LOCKED;
             if (door->is_open) {
@@ -567,8 +571,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_door_t *door;
           if (az_lookup_door(state, uid, &door)) {
             if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_FORCEFIELD) {
-              SCRIPT_ERROR("wrong door kind");
+                door->kind == AZ_DOOR_FORCEFIELD ||
+                door->kind == AZ_DOOR_ALWAYS_OPEN) {
+              SCRIPT_ERROR("invalid door kind");
             }
             door->kind = (door->kind == AZ_DOOR_LOCKED ?
                           AZ_DOOR_UNLOCKED : AZ_DOOR_NORMAL);

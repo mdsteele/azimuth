@@ -87,6 +87,10 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
       door->position = spec->position;
       door->angle = spec->angle;
       door->destination = spec->destination;
+      if (door->kind == AZ_DOOR_ALWAYS_OPEN) {
+        door->is_open = true;
+        door->openness = 1.0;
+      }
       put_uuid(state, spec->uuid_slot, AZ_UUID_DOOR, door->uid);
     }
   }

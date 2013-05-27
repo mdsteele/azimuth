@@ -9,4 +9,4 @@
 9: Killed Rockwyrm (Filimun boss)
 10: Met AI after Rockwyrm, lower armory door unlocked
 11: Opened bomb door between Filimun rooms 108 and 109
-12: Opened bomb door between Colony rooms 74 and 75
+12: Opened bomb door between Colony rooms 73 and 75 (around room 74)

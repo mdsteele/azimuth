@@ -1038,6 +1038,32 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glColor3f(0.15, 0.15, 0.15); glVertex2f( 25,  20);
       } glEnd();
       break;
+    case AZ_DOOD_TUBE_WINDOW:
+      // Glass:
+      glBegin(GL_QUADS); {
+        glColor4f(1, 1, 1, 0.25); glVertex2f(-85, 64);
+        glColor4f(1, 1, 1, 0.35); glVertex2f(-85, 0);
+        glColor4f(1, 1, 1, 0.2); glVertex2f(85, 0); glVertex2f(85, 64);
+        glVertex2f(85, -64); glVertex2f(85, 0);
+        glColor4f(1, 1, 1, 0.35); glVertex2f(-85, 0);
+        glColor4f(1, 1, 1, 0.25); glVertex2f(-85, -64);
+      } glEnd();
+      // Siding:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.5, 0.44, 0.44);
+        glVertex2f(100, 78); glVertex2f(85, 64);
+        glVertex2f(-100, 78); glVertex2f(-85, 64);
+        glColor3f(0.6, 0.6, 0.6);
+        glVertex2f(-100, 0); glVertex2f(-85, 0);
+        glColor3f(0.5, 0.44, 0.44);
+        glVertex2f(-100, -78); glVertex2f(-85, -64);
+        glVertex2f(100, -78); glVertex2f(85, -64);
+        glColor3f(0.6, 0.6, 0.6);
+        glVertex2f(100, 0); glVertex2f(85, 0);
+        glColor3f(0.5, 0.44, 0.44);
+        glVertex2f(100, 78); glVertex2f(85, 64);
+      } glEnd();
+      break;
   }
 }
 

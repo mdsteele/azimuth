@@ -29,7 +29,7 @@
 
 /*===========================================================================*/
 
-AZ_STATIC_ASSERT(AZ_NUM_DOOR_KINDS == AZ_DOOR_UNLOCKED);
+AZ_STATIC_ASSERT(AZ_NUM_DOOR_KINDS == AZ_DOOR_ALWAYS_OPEN);
 
 bool az_can_open_door(az_door_kind_t door_kind,
                       az_damage_flags_t damage_kind) {
@@ -49,6 +49,7 @@ bool az_can_open_door(az_door_kind_t door_kind,
     case AZ_DOOR_PASSAGE: return false;
     case AZ_DOOR_FORCEFIELD: return false;
     case AZ_DOOR_UNLOCKED: return true;
+    case AZ_DOOR_ALWAYS_OPEN: return false;
   }
   AZ_ASSERT_UNREACHABLE();
 }

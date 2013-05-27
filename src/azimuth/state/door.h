@@ -31,7 +31,7 @@
 /*===========================================================================*/
 
 // The number of different door kinds there are, not counting AZ_DOOR_NOTHING:
-#define AZ_NUM_DOOR_KINDS 9
+#define AZ_NUM_DOOR_KINDS 10
 
 typedef enum {
   AZ_DOOR_NOTHING = 0,
@@ -43,7 +43,8 @@ typedef enum {
   AZ_DOOR_MEGA_BOMB, // openable only by a mega bomb
   AZ_DOOR_PASSAGE, // no door per se; just a passage that leads to another room
   AZ_DOOR_FORCEFIELD, // a solid forcefield that can turn on and off
-  AZ_DOOR_UNLOCKED // door that was just unlocked; any weapon can open
+  AZ_DOOR_UNLOCKED, // door that was just unlocked; any weapon can open
+  AZ_DOOR_ALWAYS_OPEN // door that is always open
 } az_door_kind_t;
 
 // Determine whether damage of the given kind will open a door of the given
