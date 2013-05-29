@@ -153,6 +153,9 @@ bool az_sprint_script(const az_script_t *script, char *buffer, int length);
 az_script_t *az_fscan_script(FILE *file);
 az_script_t *az_sscan_script(const char *string, int length);
 
+// Allocate and return a copy of the given script.  Returns NULL if given NULL.
+az_script_t *az_clone_script(const az_script_t *script);
+
 // Free the script object and its data array.  Does nothing if given NULL.
 void az_free_script(az_script_t *script);
 

@@ -66,6 +66,15 @@ typedef enum {
   AZ_ERL_UPGRADE_ROOM
 } az_editor_room_label_t;
 
+typedef enum {
+  AZ_EOBJ_NOTHING = 0,
+  AZ_EOBJ_BADDIE,
+  AZ_EOBJ_DOOR,
+  AZ_EOBJ_GRAVFIELD,
+  AZ_EOBJ_NODE,
+  AZ_EOBJ_WALL
+} az_editor_object_type_t;
+
 typedef struct {
   bool selected;
   az_baddie_spec_t spec;
@@ -90,6 +99,17 @@ typedef struct {
   bool selected;
   az_wall_spec_t spec;
 } az_editor_wall_t;
+
+typedef struct {
+  az_editor_object_type_t type;
+  union {
+    az_baddie_spec_t baddie;
+    az_door_spec_t door;
+    az_gravfield_spec_t gravfield;
+    az_node_spec_t node;
+    az_wall_spec_t wall;
+  } spec;
+} az_clipboard_object_t;
 
 typedef struct {
   bool selected;
@@ -139,6 +159,7 @@ typedef struct {
     int wall_data_index;
     az_zone_key_t zone_key;
   } brush;
+  AZ_LIST_DECLARE(az_clipboard_object_t, clipboard);
   az_room_key_t current_room;
   struct {
     az_room_key_t start_room;
@@ -164,6 +185,8 @@ void az_tick_editor_state(az_editor_state_t *state, double time);
 
 void az_relabel_editor_room(az_editor_room_t *room);
 
+void az_clear_clipboard(az_editor_state_t *state);
+
 void az_init_editor_text(
     az_editor_state_t *state, az_editor_text_action_t action,
     const char *format, ...) __attribute__((__format__(__printf__,3,4)));
@@ -187,14 +210,7 @@ typedef struct {
   az_vector_t *position;
   double *angle;
   az_editor_room_t *room;
-  enum {
-    AZ_EOBJ_NOTHING = 0,
-    AZ_EOBJ_BADDIE,
-    AZ_EOBJ_DOOR,
-    AZ_EOBJ_GRAVFIELD,
-    AZ_EOBJ_NODE,
-    AZ_EOBJ_WALL
-  } type;
+  az_editor_object_type_t type;
   int index;
 } az_editor_object_t;
 

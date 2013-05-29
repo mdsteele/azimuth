@@ -66,6 +66,11 @@ az_vector_t az_vdiv(az_vector_t v, double f) {
   return (az_vector_t){.x = v.x / f, .y = v.y / f};
 }
 
+void az_vpluseq(az_vector_t *v1, az_vector_t v2) {
+  v1->x += v2.x;
+  v1->y += v2.y;
+}
+
 double az_vdot(az_vector_t v1, az_vector_t v2) {
   return v1.x * v2.x + v1.y * v2.y;
 }

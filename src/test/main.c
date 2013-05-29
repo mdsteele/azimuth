@@ -66,6 +66,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_ray_hits_line_segment);
   RUN_TEST(test_ray_hits_polygon);
   RUN_TEST(test_ray_hits_polygon_trans);
+  RUN_TEST(test_script_clone);
   RUN_TEST(test_script_print);
   RUN_TEST(test_script_scan);
   RUN_TEST(test_select_gun);

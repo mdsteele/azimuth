@@ -69,4 +69,21 @@ void test_script_scan(void) {
   az_free_script(script);
 }
 
+void test_script_clone(void) {
+  EXPECT_TRUE(az_clone_script(NULL) == NULL);
+  az_script_t *script1 = az_sscan_script(script_string, sizeof(script_string));
+  EXPECT_INT_EQ(5, script1->num_instructions);
+  if (script1->num_instructions >= 2) {
+    EXPECT_INT_EQ(AZ_OP_NOP, script1->instructions[1].opcode);
+  }
+  az_script_t *script2 = az_clone_script(script1);
+  az_free_script(script1);
+  script1 = NULL;
+  EXPECT_INT_EQ(5, script2->num_instructions);
+  if (script2->num_instructions >= 2) {
+    EXPECT_INT_EQ(AZ_OP_NOP, script2->instructions[1].opcode);
+  }
+  az_free_script(script2);
+}
+
 /*===========================================================================*/

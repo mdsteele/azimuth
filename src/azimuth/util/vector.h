@@ -61,6 +61,8 @@ az_vector_t az_vneg(az_vector_t v);
 az_vector_t az_vmul(az_vector_t v, double f);
 // Divide a vector by a scalar.  The scalar must be nonzero.
 az_vector_t az_vdiv(az_vector_t v, double f);
+// Add the second vector to the first, in place.
+void az_vpluseq(az_vector_t *v1, az_vector_t v2);
 
 // Compute the dot product of the two vectors.
 double az_vdot(az_vector_t v1, az_vector_t v2);

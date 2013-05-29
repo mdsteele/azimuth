@@ -521,6 +521,19 @@ static void do_add_wall(int x, int y, bool constrained) {
 
 static void do_remove(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+#define NUKE_SCRIPTS(obj, script) do { \
+    AZ_LIST_LOOP(obj, room->obj##s) { \
+      if (!obj->selected) continue; \
+      az_free_script(obj->spec.script); \
+      obj->spec.script = NULL; \
+    } \
+  } while (0)
+  NUKE_SCRIPTS(baddie, on_kill);
+  NUKE_SCRIPTS(door, on_open);
+  NUKE_SCRIPTS(gravfield, on_enter);
+  NUKE_SCRIPTS(node, on_use);
+#undef NUKE_SCRIPTS
+
 #define REMOVE(obj) do { \
     AZ_LIST_DECLARE(az_editor_##obj##_t, temp_##obj##s); \
     AZ_LIST_INIT(temp_##obj##s, 2); \
@@ -538,6 +551,127 @@ static void do_remove(void) {
   REMOVE(node);
   REMOVE(wall);
 #undef REMOVE
+}
+
+static void do_copy(bool cut) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  int num_objects = 0;
+  az_vector_t center = AZ_VZERO;
+  AZ_EDITOR_OBJECT_LOOP(object, room) {
+    if (!*object.selected) continue;
+    az_vpluseq(&center, *object.position);
+    ++num_objects;
+  }
+  if (num_objects == 0) return;
+  center = az_vdiv(center, num_objects);
+  az_clear_clipboard(&state);
+  AZ_LIST_LOOP(baddie, room->baddies) {
+    if (!baddie->selected) continue;
+    az_clipboard_object_t *clip = AZ_LIST_ADD(state.clipboard);
+    clip->type = AZ_EOBJ_BADDIE;
+    clip->spec.baddie.kind = baddie->spec.kind;
+    clip->spec.baddie.on_kill = az_clone_script(baddie->spec.on_kill);
+    clip->spec.baddie.position = az_vsub(baddie->spec.position, center);
+    clip->spec.baddie.angle = baddie->spec.angle;
+  }
+  AZ_LIST_LOOP(door, room->doors) {
+    if (!door->selected) continue;
+    az_clipboard_object_t *clip = AZ_LIST_ADD(state.clipboard);
+    clip->type = AZ_EOBJ_DOOR;
+    clip->spec.door.kind = door->spec.kind;
+    clip->spec.door.on_open = az_clone_script(door->spec.on_open);
+    clip->spec.door.position = az_vsub(door->spec.position, center);
+    clip->spec.door.angle = door->spec.angle;
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (!gravfield->selected) continue;
+    az_clipboard_object_t *clip = AZ_LIST_ADD(state.clipboard);
+    clip->type = AZ_EOBJ_GRAVFIELD;
+    clip->spec.gravfield.kind = gravfield->spec.kind;
+    clip->spec.gravfield.on_enter = az_clone_script(gravfield->spec.on_enter);
+    clip->spec.gravfield.position = az_vsub(gravfield->spec.position, center);
+    clip->spec.gravfield.angle = gravfield->spec.angle;
+    clip->spec.gravfield.strength = gravfield->spec.strength;
+    clip->spec.gravfield.size = gravfield->spec.size;
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected) continue;
+    az_clipboard_object_t *clip = AZ_LIST_ADD(state.clipboard);
+    clip->type = AZ_EOBJ_NODE;
+    clip->spec.node.kind = node->spec.kind;
+    clip->spec.node.subkind = node->spec.subkind;
+    clip->spec.node.on_use = az_clone_script(node->spec.on_use);
+    clip->spec.node.position = az_vsub(node->spec.position, center);
+    clip->spec.node.angle = node->spec.angle;
+  }
+  AZ_LIST_LOOP(wall, room->walls) {
+    if (!wall->selected) continue;
+    az_clipboard_object_t *clip = AZ_LIST_ADD(state.clipboard);
+    clip->type = AZ_EOBJ_WALL;
+    clip->spec.wall.kind = wall->spec.kind;
+    clip->spec.wall.data = wall->spec.data;
+    clip->spec.wall.position = az_vsub(wall->spec.position, center);
+    clip->spec.wall.angle = wall->spec.angle;
+  }
+  if (cut) do_remove();
+}
+
+static void do_paste(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  select_all(room, false);
+  if (AZ_LIST_SIZE(state.clipboard) == 0) return;
+  set_room_unsaved(room);
+  AZ_LIST_LOOP(object, state.clipboard) {
+    switch (object->type) {
+      case AZ_EOBJ_NOTHING: break;
+      case AZ_EOBJ_BADDIE:
+        if (AZ_LIST_SIZE(room->baddies) < AZ_MAX_NUM_BADDIES) {
+          az_editor_baddie_t *baddie = AZ_LIST_ADD(room->baddies);
+          baddie->selected = true;
+          baddie->spec = object->spec.baddie;
+          az_vpluseq(&baddie->spec.position, state.camera);
+          baddie->spec.on_kill = az_clone_script(object->spec.baddie.on_kill);
+        }
+        break;
+      case AZ_EOBJ_DOOR:
+        if (AZ_LIST_SIZE(room->doors) < AZ_MAX_NUM_DOORS) {
+          az_editor_door_t *door = AZ_LIST_ADD(room->doors);
+          door->selected = true;
+          door->spec = object->spec.door;
+          az_vpluseq(&door->spec.position, state.camera);
+          door->spec.destination = state.current_room;
+          door->spec.on_open = az_clone_script(object->spec.door.on_open);
+        }
+        break;
+      case AZ_EOBJ_GRAVFIELD:
+        if (AZ_LIST_SIZE(room->gravfields) < AZ_MAX_NUM_GRAVFIELDS) {
+          az_editor_gravfield_t *gravfield = AZ_LIST_ADD(room->gravfields);
+          gravfield->selected = true;
+          gravfield->spec = object->spec.gravfield;
+          az_vpluseq(&gravfield->spec.position, state.camera);
+          gravfield->spec.on_enter =
+            az_clone_script(object->spec.gravfield.on_enter);
+        }
+        break;
+      case AZ_EOBJ_NODE:
+        if (AZ_LIST_SIZE(room->nodes) < AZ_MAX_NUM_NODES) {
+          az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
+          node->selected = true;
+          node->spec = object->spec.node;
+          az_vpluseq(&node->spec.position, state.camera);
+          node->spec.on_use = az_clone_script(object->spec.node.on_use);
+        }
+        break;
+      case AZ_EOBJ_WALL:
+        if (AZ_LIST_SIZE(room->walls) < AZ_MAX_NUM_WALLS) {
+          az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
+          wall->selected = true;
+          wall->spec = object->spec.wall;
+          az_vpluseq(&wall->spec.position, state.camera);
+        }
+        break;
+    }
+  }
 }
 
 static void do_partition(bool front) {
@@ -1136,6 +1270,7 @@ static void event_loop(void) {
             case AZ_KEY_C:
               if (event.key.command) {
                 if (event.key.shift) begin_set_cargo_slots();
+                else do_copy(false);
               } else state.tool = AZ_TOOL_CAMERA; break;
             case AZ_KEY_D:
               if (event.key.command) {
@@ -1181,7 +1316,13 @@ static void event_loop(void) {
               if (event.key.command) begin_set_uuid_slot();
               else if (event.key.shift) do_toggle_property(AZ_ROOMF_UNMAPPED);
               break;
+            case AZ_KEY_V:
+              if (event.key.command && !event.key.shift) do_paste();
+              break;
             case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
+            case AZ_KEY_X:
+              if (event.key.command && !event.key.shift) do_copy(true);
+              break;
             case AZ_KEY_Z:
               if (!event.key.command) do_change_zone(event.key.shift ? -1 : 1);
               break;

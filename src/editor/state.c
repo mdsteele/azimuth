@@ -36,16 +36,6 @@
 
 #define SAVE_ALL_ROOMS false
 
-static az_script_t *clone_script(const az_script_t *script) {
-  if (script == NULL) return NULL;
-  az_script_t *clone = AZ_ALLOC(1, az_script_t);
-  clone->num_instructions = script->num_instructions;
-  clone->instructions = AZ_ALLOC(clone->num_instructions, az_instruction_t);
-  memcpy(clone->instructions, script->instructions,
-         clone->num_instructions * sizeof(az_instruction_t));
-  return clone;
-}
-
 void az_relabel_editor_room(az_editor_room_t *room) {
   room->label = AZ_ERL_NORMAL_ROOM;
   AZ_LIST_LOOP(node, room->nodes) {
@@ -81,9 +71,11 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->brush.gravfield_size.trapezoid.rear_semiwidth = 100.0;
   state->brush.gravfield_size.trapezoid.semilength = 100.0;
   state->brush.node_kind = AZ_NODE_TRACTOR;
+  state->brush.console_kind = AZ_CONS_SAVE;
   state->brush.doodad_kind = AZ_DOOD_WARNING_LIGHT;
   state->brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
   state->brush.wall_kind = AZ_WALL_INDESTRUCTIBLE;
+  AZ_LIST_INIT(state->clipboard, 0);
 
   az_planet_t planet;
   if (!az_load_planet("data", &planet)) return false;
@@ -112,34 +104,34 @@ bool az_load_editor_state(az_editor_state_t *state) {
     eroom->zone_key = room->zone_key;
     eroom->properties = room->properties;
     eroom->camera_bounds = room->camera_bounds;
-    eroom->on_start = clone_script(room->on_start);
+    eroom->on_start = az_clone_script(room->on_start);
     // Convert baddies:
     AZ_LIST_INIT(eroom->baddies, room->num_baddies);
     for (int i = 0; i < room->num_baddies; ++i) {
       az_editor_baddie_t *baddie = AZ_LIST_ADD(eroom->baddies);
       baddie->spec = room->baddies[i];
-      baddie->spec.on_kill = clone_script(baddie->spec.on_kill);
+      baddie->spec.on_kill = az_clone_script(baddie->spec.on_kill);
     }
     // Convert doors:
     AZ_LIST_INIT(eroom->doors, room->num_doors);
     for (int i = 0; i < room->num_doors; ++i) {
       az_editor_door_t *door = AZ_LIST_ADD(eroom->doors);
       door->spec = room->doors[i];
-      door->spec.on_open = clone_script(door->spec.on_open);
+      door->spec.on_open = az_clone_script(door->spec.on_open);
     }
     // Convert gravfields:
     AZ_LIST_INIT(eroom->gravfields, room->num_gravfields);
     for (int i = 0; i < room->num_gravfields; ++i) {
       az_editor_gravfield_t *gravfield = AZ_LIST_ADD(eroom->gravfields);
       gravfield->spec = room->gravfields[i];
-      gravfield->spec.on_enter = clone_script(gravfield->spec.on_enter);
+      gravfield->spec.on_enter = az_clone_script(gravfield->spec.on_enter);
     }
     // Convert nodes:
     AZ_LIST_INIT(eroom->nodes, room->num_nodes);
     for (int i = 0; i < room->num_nodes; ++i) {
       az_editor_node_t *node = AZ_LIST_ADD(eroom->nodes);
       node->spec = room->nodes[i];
-      node->spec.on_use = clone_script(node->spec.on_use);
+      node->spec.on_use = az_clone_script(node->spec.on_use);
     }
     // Convert walls:
     AZ_LIST_INIT(eroom->walls, room->num_walls);
@@ -256,20 +248,20 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     room->zone_key = eroom->zone_key;
     room->properties = eroom->properties;
     room->camera_bounds = eroom->camera_bounds;
-    room->on_start = clone_script(eroom->on_start);
+    room->on_start = az_clone_script(eroom->on_start);
     // Convert baddies:
     room->num_baddies = AZ_LIST_SIZE(eroom->baddies);
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);
     for (int i = 0; i < room->num_baddies; ++i) {
       room->baddies[i] = AZ_LIST_GET(eroom->baddies, i)->spec;
-      room->baddies[i].on_kill = clone_script(room->baddies[i].on_kill);
+      room->baddies[i].on_kill = az_clone_script(room->baddies[i].on_kill);
     }
     // Convert doors:
     room->num_doors = AZ_LIST_SIZE(eroom->doors);
     room->doors = AZ_ALLOC(room->num_doors, az_door_spec_t);
     for (int i = 0; i < room->num_doors; ++i) {
       room->doors[i] = AZ_LIST_GET(eroom->doors, i)->spec;
-      room->doors[i].on_open = clone_script(room->doors[i].on_open);
+      room->doors[i].on_open = az_clone_script(room->doors[i].on_open);
     }
     // Convert gravfields:
     room->num_gravfields = AZ_LIST_SIZE(eroom->gravfields);
@@ -277,14 +269,14 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     for (int i = 0; i < room->num_gravfields; ++i) {
       room->gravfields[i] = AZ_LIST_GET(eroom->gravfields, i)->spec;
       room->gravfields[i].on_enter =
-        clone_script(room->gravfields[i].on_enter);
+        az_clone_script(room->gravfields[i].on_enter);
     }
     // Convert nodes:
     room->num_nodes = AZ_LIST_SIZE(eroom->nodes);
     room->nodes = AZ_ALLOC(room->num_nodes, az_node_spec_t);
     for (int i = 0; i < room->num_nodes; ++i) {
       room->nodes[i] = AZ_LIST_GET(eroom->nodes, i)->spec;
-      room->nodes[i].on_use = clone_script(room->nodes[i].on_use);
+      room->nodes[i].on_use = az_clone_script(room->nodes[i].on_use);
     }
     // Convert walls:
     room->num_walls = AZ_LIST_SIZE(eroom->walls);
@@ -357,6 +349,29 @@ void az_tick_editor_state(az_editor_state_t *state, double time) {
   }
 }
 
+void az_clear_clipboard(az_editor_state_t *state) {
+  AZ_LIST_LOOP(object, state->clipboard) {
+    switch (object->type) {
+      case AZ_EOBJ_NOTHING: break;
+      case AZ_EOBJ_BADDIE:
+        az_free_script(object->spec.baddie.on_kill);
+        break;
+      case AZ_EOBJ_DOOR:
+        az_free_script(object->spec.door.on_open);
+        break;
+      case AZ_EOBJ_GRAVFIELD:
+        az_free_script(object->spec.gravfield.on_enter);
+        break;
+      case AZ_EOBJ_NODE:
+        az_free_script(object->spec.node.on_use);
+        break;
+      case AZ_EOBJ_WALL: break;
+    }
+  }
+  AZ_LIST_DESTROY(state->clipboard);
+  AZ_LIST_INIT(state->clipboard, 0);
+}
+
 void az_init_editor_text(
     az_editor_state_t *state, az_editor_text_action_t action,
     const char *format, ...) {
@@ -383,13 +398,17 @@ void az_center_editor_camera_on_current_room(az_editor_state_t *state) {
 }
 
 void az_destroy_editor_state(az_editor_state_t *state) {
+  az_clear_clipboard(state);
+  AZ_LIST_DESTROY(state->clipboard);
   AZ_LIST_LOOP(room, state->planet.rooms) {
     az_free_script(room->on_start);
     AZ_LIST_LOOP(baddie, room->baddies) az_free_script(baddie->spec.on_kill);
     AZ_LIST_DESTROY(room->baddies);
     AZ_LIST_LOOP(door, room->doors) az_free_script(door->spec.on_open);
     AZ_LIST_DESTROY(room->doors);
+    AZ_LIST_LOOP(grav, room->gravfields) az_free_script(grav->spec.on_enter);
     AZ_LIST_DESTROY(room->gravfields);
+    AZ_LIST_LOOP(node, room->nodes) az_free_script(node->spec.on_use);
     AZ_LIST_DESTROY(room->nodes);
     AZ_LIST_DESTROY(room->walls);
   }

@@ -309,6 +309,16 @@ az_script_t *az_sscan_script(const char *string, int length) {
 
 /*===========================================================================*/
 
+az_script_t *az_clone_script(const az_script_t *script) {
+  if (script == NULL) return NULL;
+  az_script_t *clone = AZ_ALLOC(1, az_script_t);
+  clone->num_instructions = script->num_instructions;
+  clone->instructions = AZ_ALLOC(clone->num_instructions, az_instruction_t);
+  memcpy(clone->instructions, script->instructions,
+         clone->num_instructions * sizeof(az_instruction_t));
+  return clone;
+}
+
 void az_free_script(az_script_t *script) {
   if (script == NULL) return;
   free(script->instructions);
