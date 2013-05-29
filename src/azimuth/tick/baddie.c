@@ -92,9 +92,9 @@ static az_vector_t force_field(
     const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
       baddie->data->overall_bounding_radius;
     if (dist <= 0.0) {
-      drift = az_vadd(drift, az_vwithlen(delta, wall_near_coeff));
+      az_vpluseq(&drift, az_vwithlen(delta, wall_near_coeff));
     } else {
-      drift = az_vadd(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+      az_vpluseq(&drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
     }
   }
   AZ_ARRAY_LOOP(wall, state->walls) {
@@ -103,9 +103,9 @@ static az_vector_t force_field(
     const double dist = az_vnorm(delta) - wall->data->bounding_radius -
       baddie->data->overall_bounding_radius;
     if (dist <= 0.0) {
-      drift = az_vadd(drift, az_vwithlen(delta, wall_near_coeff));
+      az_vpluseq(&drift, az_vwithlen(delta, wall_near_coeff));
     } else {
-      drift = az_vadd(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+      az_vpluseq(&drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
     }
   }
   return drift;
@@ -205,11 +205,11 @@ static void crawl_around(
   // Adjust velocity in crawling direction.
   const az_vector_t unit =
     az_vpolar(1.0, baddie->angle + AZ_DEG2RAD(rightwards ? -115 : 115));
-  baddie->velocity = az_vadd(baddie->velocity, az_vmul(unit, accel * time));
+  az_vpluseq(&baddie->velocity, az_vmul(unit, accel * time));
   const double drag_coeff = accel / (max_speed * max_speed);
   const az_vector_t drag_force =
     az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
-  baddie->velocity = az_vadd(baddie->velocity, az_vmul(drag_force, time));
+  az_vpluseq(&baddie->velocity, az_vmul(drag_force, time));
   // Rotate to point away from wall.
   az_impact_t impact;
   az_circle_impact(
@@ -401,8 +401,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // Push the baddie slightly away from the impact point (so that we're
       // hopefully no longer in contact with the object we hit).
-      baddie->position = az_vadd(baddie->position,
-                                 az_vwithlen(impact.normal, 0.5));
+      az_vpluseq(&baddie->position, az_vwithlen(impact.normal, 0.5));
       // Bounce the baddie off the object.
       baddie->velocity =
         az_vsub(baddie->velocity,

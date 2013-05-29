@@ -300,7 +300,7 @@ static void do_mass_move(int x, int y, int dx, int dy) {
   int room_count = 0;
   AZ_LIST_LOOP(room, state.planet.rooms) {
     if (!room->selected) continue;
-    mass_center = az_vadd(mass_center, az_bounds_center(&room->camera_bounds));
+    az_vpluseq(&mass_center, az_bounds_center(&room->camera_bounds));
     ++room_count;
   }
   if (room_count == 0) return;
@@ -351,7 +351,7 @@ static void do_rotate(int x, int y, int dx, int dy) {
   int count = 0;
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     if (!*object.selected) continue;
-    center = az_vadd(center, *object.position);
+    az_vpluseq(&center, *object.position);
     ++count;
   }
   if (count <= 0) return;

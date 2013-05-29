@@ -63,7 +63,7 @@ void az_track_camera_towards(az_camera_t *camera, az_vector_t towards,
   const az_vector_t difference = az_vsub(towards, camera->center);
   const az_vector_t change =
     az_vmul(difference, 1.0 - pow(tracking_base, time));
-  camera->center = az_vadd(camera->center, change);
+  az_vpluseq(&camera->center, change);
   camera->shake_horz = decay_shake(camera->shake_horz, time);
   camera->shake_vert = decay_shake(camera->shake_vert, time);
 }

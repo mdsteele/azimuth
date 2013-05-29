@@ -723,11 +723,10 @@ az_vector_t az_pixel_to_position(const az_editor_state_t *state,
   pt = az_vmul(pt, state->zoom_level);
   if (state->spin_camera) {
     pt.y += az_vnorm(state->camera);
-    pt = az_vrotate(pt, az_vtheta(state->camera) - AZ_HALF_PI);
+    return az_vrotate(pt, az_vtheta(state->camera) - AZ_HALF_PI);
   } else {
-    pt = az_vadd(pt, state->camera);
+    return az_vadd(pt, state->camera);
   }
-  return pt;
 }
 
 /*===========================================================================*/

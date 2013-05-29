@@ -114,7 +114,7 @@ static void apply_gravity_to_ship(az_space_state_t *state, double time,
   // ship towards the core, which is -position/vnorm(position).  The
   // vnorm(position) factors cancel and we end up with what we have here.
   const double bouyancy_multiplier = (*is_in_water ? -0.35 : 1.0);
-  state->ship.velocity = az_vadd(state->ship.velocity,
+  az_vpluseq(&state->ship.velocity,
       az_vmul(state->ship.position, -time * bouyancy_multiplier *
               (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
 }
@@ -128,7 +128,7 @@ static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
     AZ_SHIP_BASE_THRUST_ACCEL / (max_speed * max_speed);
   const az_vector_t drag_force =
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
-  ship->velocity = az_vadd(ship->velocity, az_vmul(drag_force, time));
+  az_vpluseq(&ship->velocity, az_vmul(drag_force, time));
 }
 
 /*===========================================================================*/
@@ -258,14 +258,14 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     state->ship.cplus.state = AZ_CPLUS_INACTIVE;
     rel_velocity = az_vsub(rel_velocity, ship->velocity);
     ship->velocity = az_vmul(ship->velocity, 0.3);
-    rel_velocity = az_vadd(rel_velocity, ship->velocity);
+    az_vpluseq(&rel_velocity, ship->velocity);
     az_play_sound(&state->soundboard, AZ_SND_CPLUS_IMPACT);
   }
 
   // Push the ship slightly away from the impact point (so that we're
   // hopefully no longer in contact with whatever we hit).
   if (tractor_node == NULL) {
-    ship->position = az_vadd(ship->position, az_vwithlen(impact->normal, 0.5));
+    az_vpluseq(&ship->position, az_vwithlen(impact->normal, 0.5));
   } else {
     const double dtheta = -copysign(0.0001, impact->angle);
     ship->position =
@@ -998,15 +998,13 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   // Forward thrust:
   if (controls->up_held && !controls->down_held) {
-    ship->velocity = az_vadd(ship->velocity,
-                             az_vpolar(impulse, ship->angle));
+    az_vpluseq(&ship->velocity, az_vpolar(impulse, ship->angle));
     ship->thrusters = AZ_THRUST_FORWARD;
   }
   // Retro thrusters:
   else if (controls->down_held && !controls->up_held &&
       az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
-    ship->velocity = az_vadd(ship->velocity,
-                             az_vpolar(-impulse/2, ship->angle));
+    az_vpluseq(&ship->velocity, az_vpolar(-impulse/2, ship->angle));
     ship->thrusters = AZ_THRUST_REVERSE;
   } else ship->thrusters = AZ_THRUST_NONE;
 }

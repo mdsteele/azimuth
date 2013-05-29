@@ -237,7 +237,7 @@ static void on_projectile_hit_ship(
   assert(az_ship_is_present(ship));
   proj->last_hit_uid = AZ_SHIP_UID;
   // Knock the ship around:
-  ship->velocity = az_vadd(ship->velocity, az_vwithlen(
+  az_vpluseq(&ship->velocity, az_vwithlen(
       az_vsub(ship->position, proj->position), 10.0 * proj->power *
       (proj->data->impact_damage + proj->data->splash_damage) +
       8.0 * proj->data->impact_shake));

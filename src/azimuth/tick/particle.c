@@ -33,8 +33,7 @@ void az_tick_particles(az_space_state_t *state, double time) {
       particle->kind = AZ_PAR_NOTHING;
       continue;
     }
-    particle->position = az_vadd(particle->position,
-                                 az_vmul(particle->velocity, time));
+    az_vpluseq(&particle->position, az_vmul(particle->velocity, time));
   }
 }
 

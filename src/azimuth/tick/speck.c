@@ -33,7 +33,7 @@ void az_tick_specks(az_space_state_t *state, double time) {
       speck->kind = AZ_SPECK_NOTHING;
       continue;
     }
-    speck->position = az_vadd(speck->position, az_vmul(speck->velocity, time));
+    az_vpluseq(&speck->position, az_vmul(speck->velocity, time));
   }
 }
 

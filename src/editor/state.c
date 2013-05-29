@@ -311,9 +311,7 @@ void az_tick_editor_state(az_editor_state_t *state, double time) {
 
   if (state->controls.up && !state->controls.down) {
     if (state->spin_camera) {
-      state->camera = az_vadd(state->camera,
-                              az_vpolar(scroll_speed,
-                                        az_vtheta(state->camera)));
+      az_vpluseq(&state->camera, az_vwithlen(state->camera, scroll_speed));
     } else {
       state->camera.y += scroll_speed;
     }
@@ -323,9 +321,7 @@ void az_tick_editor_state(az_editor_state_t *state, double time) {
       if (az_vnorm(state->camera) <= scroll_speed) {
         state->camera = az_vpolar(0.0001, az_vtheta(state->camera));
       } else {
-        state->camera = az_vsub(state->camera,
-                                az_vpolar(scroll_speed,
-                                          az_vtheta(state->camera)));
+        az_vpluseq(&state->camera, az_vwithlen(state->camera, -scroll_speed));
       }
     } else {
       state->camera.y -= scroll_speed;
