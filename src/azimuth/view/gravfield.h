@@ -26,6 +26,10 @@
 
 /*===========================================================================*/
 
+// Draw a single gravfield, without additional transforms.  The GL matrix
+// should be at the gravfield position.
+void az_draw_gravfield_no_transform(const az_gravfield_t *gravfield);
+
 // Draw a single gravfield.  The GL matrix should be at the camera position.
 void az_draw_gravfield(const az_gravfield_t *gravfield);
 

@@ -571,6 +571,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
       break;
     case AZ_BAD_ZENITH_CORE:
+      // TODO: Make real graphics for the Zenith Core.
       glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
       glBegin(GL_POLYGON); {
         az_polygon_t polygon = baddie->data->main_body.polygon;
@@ -1360,6 +1361,29 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           } glPopMatrix();
         }
         glScalef(1, -1, 1);
+      }
+      break;
+    case AZ_BAD_FORCEFIEND:
+      // TODO: Make real graphics for the Forcefiend.
+      glColor3f(0.5 + 0.5 * flare, 0, 1 - 0.5 * flare);
+      glBegin(GL_LINE_LOOP); {
+        const az_polygon_t poly = baddie->data->main_body.polygon;
+        for (int i = 0; i < poly.num_vertices; ++i) {
+          glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
+        }
+      } glEnd();
+      for (int j = 0; j < baddie->data->num_components; ++j) {
+        glPushMatrix(); {
+          const az_component_t *component = &baddie->components[j];
+          glTranslated(component->position.x, component->position.y, 0);
+          glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+          glBegin(GL_LINE_LOOP); {
+            const az_polygon_t poly = baddie->data->components[j].polygon;
+            for (int i = 0; i < poly.num_vertices; ++i) {
+              glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
+            }
+          } glEnd();
+        } glPopMatrix();
       }
       break;
   }

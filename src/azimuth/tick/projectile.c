@@ -137,6 +137,8 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_ROCKET:
     case AZ_PROJ_MISSILE_TRIPLE:
     case AZ_PROJ_MISSILE_HOMING:
+    case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
+    case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
       break;
     case AZ_PROJ_HYPER_ROCKET:
@@ -155,6 +157,14 @@ static void on_projectile_impact(az_space_state_t *state,
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
       break;
     default: break;
+  }
+
+  // Gravity torpedos are special: on impact, they create a temporary gravity
+  // well that pulls the ship in.
+  if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO) {
+    assert(proj->fired_by_enemy);
+    az_add_projectile(state, AZ_PROJ_GRAVITY_TORPEDO_WELL, true,
+                      proj->position, proj->angle, proj->power);
   }
 }
 
@@ -278,7 +288,7 @@ static void projectile_home_in(az_space_state_t *state,
   // Now, home in on the goal position.
   proj->angle = az_angle_towards(proj->angle, time * proj->data->homing_rate,
                                  az_vtheta(az_vsub(goal, proj->position)));
-  proj->velocity = az_vpolar(proj->data->speed, proj->angle);
+  proj->velocity = az_vpolar(az_vnorm(proj->velocity), proj->angle);
 }
 
 static void leave_particle_trail(
@@ -381,6 +391,7 @@ static void projectile_special_logic(az_space_state_t *state,
       }
       break;
     case AZ_PROJ_GUN_CHARGED_BEAM:
+      assert(!proj->fired_by_enemy);
       {
         const double radius =
           proj->data->splash_radius * (proj->age / proj->data->lifetime);
@@ -523,6 +534,44 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
                            (az_color_t){255, 128, 0, 128}, 0.1, 5.0, 0.0);
       break;
+    case AZ_PROJ_FORCE_WAVE:
+      {
+        const double new_speed = az_vnorm(proj->velocity) + 700 * time;
+        if (proj->age >= 0.5) {
+          proj->velocity = az_vwithlen(
+              az_vflatten(proj->velocity, proj->position), new_speed);
+          proj->angle = az_vtheta(proj->velocity);
+        } else proj->velocity = az_vwithlen(proj->velocity, new_speed);
+      }
+      if (az_ship_is_present(&state->ship)) {
+        const double factor = fmin(1.0, 2.0 * proj->age);
+        const az_vector_t vertices[] = {
+          {0, -50 * factor}, {0, 50 * factor},
+          {-100 * factor, 50 * factor}, {-100 * factor, -50 * factor}
+        };
+        const az_polygon_t polygon = AZ_INIT_POLYGON(vertices);
+        if (az_circle_touches_polygon_trans(
+                polygon, proj->position, proj->angle, 1,
+                state->ship.position)) {
+          state->ship.velocity =
+            az_vadd(state->ship.velocity, az_vmul(proj->velocity, 5 * time));
+        }
+      }
+      break;
+    case AZ_PROJ_GRAVITY_TORPEDO:
+      leave_missile_trail(state, proj, time, (az_color_t){64, 64, 192, 255});
+      proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+            proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+      break;
+    case AZ_PROJ_GRAVITY_TORPEDO_WELL:
+      assert(proj->fired_by_enemy);
+      if (az_ship_is_present(&state->ship) &&
+          az_vwithin(proj->position, state->ship.position, 100.0)) {
+        az_vpluseq(&state->ship.velocity, az_vwithlen(
+            az_vsub(proj->position, state->ship.position),
+            time * 800.0 * (1.0 - proj->age / proj->data->lifetime)));
+      }
+      break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));
@@ -543,6 +592,49 @@ static void projectile_special_logic(az_space_state_t *state,
                            AZ_DEG2RAD(300));
       proj->velocity =
         az_vadd(proj->velocity, az_vwithlen(proj->position, -600 * time));
+      break;
+    case AZ_PROJ_TRINE_TORPEDO:
+      assert(proj->fired_by_enemy);
+      if (az_ship_is_present(&state->ship) &&
+          az_vwithin(proj->position, state->ship.position, 100.0)) {
+        const az_vector_t position = proj->position;
+        const double power = proj->power;
+        proj->kind = AZ_PROJ_NOTHING;
+        const double base_angle = az_random(0, AZ_TWO_PI);
+        for (int i = 0; i < 3; ++i) {
+          az_projectile_t *expander = az_add_projectile(
+              state, AZ_PROJ_TRINE_TORPEDO_EXPANDER, true,
+              position, base_angle + i * AZ_DEG2RAD(120), power);
+          if (expander != NULL) expander->age += 0.1 * i;
+        }
+      } else {
+        leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
+        proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+              proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+      }
+      break;
+    case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
+      assert(proj->fired_by_enemy);
+      if (proj->age >= proj->data->lifetime) {
+        const az_vector_t position = proj->position;
+        const double power = proj->power;
+        double goal_angle = proj->angle + AZ_PI;
+        proj->kind = AZ_PROJ_NOTHING;
+        if (az_ship_is_present(&state->ship)) {
+          goal_angle = az_vtheta(az_vsub(state->ship.position, position));
+        }
+        az_add_projectile(state, AZ_PROJ_TRINE_TORPEDO_FIREBALL, true,
+                          position, goal_angle, power);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+      } else {
+        leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
+        proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+              proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+      }
+      break;
+    case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
+      leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                           (az_color_t){255, 128, 0, 128}, 0.1, 10.0, 0.0);
       break;
     default: break;
   }

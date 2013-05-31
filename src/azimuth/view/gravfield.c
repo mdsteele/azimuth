@@ -148,26 +148,31 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
 
 /*===========================================================================*/
 
+void az_draw_gravfield_no_transform(const az_gravfield_t *gravfield) {
+  assert(gravfield->kind != AZ_GRAV_NOTHING);
+  switch (gravfield->kind) {
+    case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_GRAV_TRAPEZOID:
+      draw_trapezoid_gravfield(gravfield);
+      break;
+    case AZ_GRAV_SECTOR_PULL:
+      draw_sector_pull_gravfield(gravfield);
+      break;
+    case AZ_GRAV_SECTOR_SPIN:
+      draw_sector_spin_gravfield(gravfield);
+      break;
+    case AZ_GRAV_WATER:
+      draw_water_gravfield(gravfield);
+      break;
+  }
+}
+
 void az_draw_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
   glPushMatrix(); {
     glTranslated(gravfield->position.x, gravfield->position.y, 0);
     glRotated(AZ_RAD2DEG(gravfield->angle), 0, 0, 1);
-    switch (gravfield->kind) {
-      case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
-      case AZ_GRAV_TRAPEZOID:
-        draw_trapezoid_gravfield(gravfield);
-        break;
-      case AZ_GRAV_SECTOR_PULL:
-        draw_sector_pull_gravfield(gravfield);
-        break;
-      case AZ_GRAV_SECTOR_SPIN:
-        draw_sector_spin_gravfield(gravfield);
-        break;
-      case AZ_GRAV_WATER:
-        draw_water_gravfield(gravfield);
-        break;
-    }
+    az_draw_gravfield_no_transform(gravfield);
   } glPopMatrix();
 }
 

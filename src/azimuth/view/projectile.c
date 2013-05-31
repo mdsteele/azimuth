@@ -27,6 +27,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/gravfield.h"
 
 /*===========================================================================*/
 
@@ -71,6 +72,19 @@ static void draw_oth_projectile(const az_projectile_t* proj, double radius,
                 (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f));
       glVertex2d(radius * cos(AZ_DEG2RAD(i * 120 + turn_degrees)),
                  radius * sin(AZ_DEG2RAD(i * 120 + turn_degrees)));
+    }
+  } glEnd();
+}
+
+static void draw_spark(double age, double radius, az_color_t color) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4f(1, 1, 1, 0.8);
+    glVertex2f(0, 0);
+    glColor4ub(color.r, color.g, color.b, color.a);
+    for (int i = 0; i <= 360; i += 45) {
+      const double r = (i % 2 ? radius : 0.5 * radius);
+      const double theta = AZ_DEG2RAD(i + 400 * age);
+      glVertex2d(r * cos(theta), r * sin(theta));
     }
   } glEnd();
 }
@@ -337,6 +351,33 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_FORCE_WAVE:
+      glBegin(GL_QUADS); {
+        const GLfloat factor = fmin(1.0, 2.0 * proj->age);
+        glColor4f(0, 0.25, 0.5, 0.75);
+        glVertex2f(0, -50 * factor);
+        glVertex2f(0, 50 * factor);
+        glColor4f(0, 0, 0.5, 0);
+        glVertex2f(-150 * factor, 50 * factor);
+        glVertex2f(-150 * factor, -50 * factor);
+      } glEnd();
+      break;
+    case AZ_PROJ_GRAVITY_TORPEDO:
+      draw_spark(proj->age, 8.0, (az_color_t){0, 128, 255, 0});
+      break;
+    case AZ_PROJ_GRAVITY_TORPEDO_WELL:
+      {
+        const double init_strength = 800.0;
+        const double progress = proj->age / proj->data->lifetime;
+        az_gravfield_t gravfield = {
+          .kind = AZ_GRAV_SECTOR_PULL,
+          .strength = init_strength * (1.0 - progress),
+          .size.sector = { .thickness = 100.0 },
+          .age = init_strength * proj->age * (1.0 - 0.5 * progress)
+        };
+        az_draw_gravfield_no_transform(&gravfield);
+      }
+      break;
     case AZ_PROJ_LASER_PULSE:
       glBegin(GL_QUADS); {
         glColor3f(1, 0.3, 0);
@@ -356,16 +397,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       draw_oth_projectile(proj, 5.0, clock);
       break;
     case AZ_PROJ_SPARK:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor4f(1, 1, 1, 0.8);
-        glVertex2f(0, 0);
-        glColor4f(0, 1, 0, 0);
-        for (int i = 0; i <= 360; i += 45) {
-          const double radius = (i % 2 ? 8.0 : 4.0);
-          const double theta = AZ_DEG2RAD(i + 400 * proj->age);
-          glVertex2d(radius * cos(theta), radius * sin(theta));
-        }
-      } glEnd();
+      draw_spark(proj->age, 8.0, (az_color_t){0, 255, 0, 0});
       break;
     case AZ_PROJ_SPINE:
       glBegin(GL_TRIANGLE_STRIP); {
@@ -390,6 +422,13 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glColor3f(0.3, 0.15, 0);
         glVertex2f(-3, -3);
       } glEnd();
+      break;
+    case AZ_PROJ_TRINE_TORPEDO:
+    case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
+      draw_spark(proj->age, 10.0, (az_color_t){255, 128, 0, 0});
+      break;
+    case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
+      draw_spark(proj->age, 8.0, (az_color_t){255, 128, 0, 0});
       break;
   }
 }

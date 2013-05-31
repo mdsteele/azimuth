@@ -28,6 +28,7 @@
 /*===========================================================================*/
 
 static const az_proj_data_t proj_data[] = {
+  // Ship projectiles:
   [AZ_PROJ_GUN_NORMAL] = {
     .speed = 600.0,
     .lifetime = 2.0,
@@ -295,6 +296,7 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT
   },
+  // Baddie-only projectiles:
   [AZ_PROJ_FIREBALL_FAST] = {
     .speed = 550.0,
     .lifetime = 2.0,
@@ -304,6 +306,21 @@ static const az_proj_data_t proj_data[] = {
     .speed = 260.0,
     .lifetime = 2.0,
     .impact_damage = 10.0
+  },
+  [AZ_PROJ_FORCE_WAVE] = {
+    .speed = 200.0,
+    .lifetime = 2.0,
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_GRAVITY_TORPEDO] = {
+    .speed = 300.0,
+    .lifetime = 6.0,
+    .impact_damage = 3.0,
+    .homing_rate = AZ_DEG2RAD(150)
+  },
+  [AZ_PROJ_GRAVITY_TORPEDO_WELL] = {
+    .lifetime = 3.0,
+    .properties = AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,
@@ -352,6 +369,30 @@ static const az_proj_data_t proj_data[] = {
     .speed = 450.0,
     .lifetime = 2.0,
     .impact_damage = 4.0
+  },
+  [AZ_PROJ_TRINE_TORPEDO] = {
+    .speed = 400.0,
+    .lifetime = 6.0,
+    .homing_rate = AZ_DEG2RAD(200),
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_TRINE_TORPEDO_EXPANDER] = {
+    .speed = 200.0,
+    .lifetime = 1.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 30.0,
+    .impact_shake = 0.75,
+    .damage_kind = AZ_DMGF_ROCKET
+  },
+  [AZ_PROJ_TRINE_TORPEDO_FIREBALL] = {
+    .speed = 800.0,
+    .lifetime = 4.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 30.0,
+    .impact_shake = 0.75,
+    .damage_kind = AZ_DMGF_ROCKET
   }
 };
 
