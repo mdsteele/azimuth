@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stddef.h> // for NULL
 
+#include "azimuth/constants.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/
@@ -173,8 +174,9 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = "Press [9] to select, hold [C] and press [V] to fire.";
       break;
     case AZ_UPG_HYPER_ROCKETS:
+      { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_HYPER_ROCKET == 3); }
       *line1_out = "Press [9] to select rockets, hold [C] to charge,";
-      *line2_out = "and press [V] to fire.  Uses 5 rockets.";
+      *line2_out = "and press [V] to fire.  Uses 3 rockets.";
       break;
     case AZ_UPG_HIGH_EXPLOSIVES:
       { AZ_STATIC_ASSERT(AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER == 1.5); }
@@ -196,8 +198,9 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = "Press [0] to select, hold [C] and press [V] to drop.";
       break;
     case AZ_UPG_MEGA_BOMBS:
+      { AZ_STATIC_ASSERT(AZ_BOMBS_PER_MEGA_BOMB == 3); }
       *line1_out = "Press [0] to select bombs, hold [C] to charge,";
-      *line2_out = "and press [V] to drop.  Uses 5 bombs.";
+      *line2_out = "and press [V] to drop.  Uses 3 bombs.";
       break;
     case AZ_UPG_ATTUNED_EXPLOSIVES:
       { AZ_STATIC_ASSERT(AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR == 0.5); }
@@ -225,8 +228,9 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = "double-tap [UP].  Destroys certain walls on impact.";
       break;
     case AZ_UPG_ORION_BOOSTER:
+      { AZ_STATIC_ASSERT(AZ_BOMBS_PER_ORION_BOOST == 2); }
       *line1_out = "Press [0] to select bombs, hold [C] to charge,";
-      *line2_out = "then double-tap [DOWN] to boost.  Uses 5 bombs.";
+      *line2_out = "then double-tap [DOWN] to boost.  Uses 2 bombs.";
       break;
     case AZ_UPG_HARDENED_ARMOR:
       { AZ_STATIC_ASSERT(AZ_ARMOR_DAMAGE_FACTOR == 0.8); }

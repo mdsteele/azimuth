@@ -51,10 +51,6 @@
 #define AZ_ORDN_CHARGING_TIME 0.6
 // How much damage triple-gun projectiles do compared to normal ones:
 #define AZ_TRIPLE_DAMAGE_MULT 0.8
-// How much rocket ammo is used up when we fire a hyper rocket:
-#define AZ_ROCKETS_PER_HYPER_ROCKET 5
-// How much bomb ammo is used up when we drop a mega bomb:
-#define AZ_BOMBS_PER_MEGA_BOMB 5
 // How long it takes the ship's shield flare to die down, in seconds:
 #define AZ_SHIP_SHIELD_FLARE_TIME 0.5
 // Wall elasticity for closed doors:
@@ -307,12 +303,18 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
 // Calculate the base power multiplier for gun projectiles.  Each gun upgrade
 // that the player has collected boosts power by 5.5% for all guns (but not for
 // ordnance).
-static double gun_power_mult(const az_space_state_t *state) {
+static double gun_power_mult(const az_player_t *player) {
   double power = 1.0;
   for (az_upgrade_t upg = AZ_UPG_GUN_CHARGE; upg <= AZ_UPG_GUN_BEAM; ++upg) {
-    if (az_has_upgrade(&state->ship.player, upg)) power *= 1.055;
+    if (az_has_upgrade(player, upg)) power *= 1.055;
   }
   return power;
+}
+
+// Calculate the base power multiplier for ordnance.
+static double ordn_power_mult(const az_player_t *player) {
+  return (az_has_upgrade(player, AZ_UPG_HIGH_EXPLOSIVES) ?
+          AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER : 1.0);
 }
 
 static void fire_projectiles(
@@ -346,8 +348,8 @@ static void fire_gun_multi(
     const double energy_cost = 10.0 * energy_mult;
     if (!try_use_energy(ship, energy_cost, false)) return;
   }
-  fire_projectiles(state, kind, base_power * gun_power_mult(state), true,
-                   num_shots, dtheta, theta_offset, false, sound);
+  fire_projectiles(state, kind, base_power * gun_power_mult(&ship->player),
+                   true, num_shots, dtheta, theta_offset, false, sound);
 }
 
 // Fire a single projectile from a gun weapon (applying the gun power bonus).
@@ -362,11 +364,9 @@ static void fire_ordn_multi(
     az_space_state_t *state, az_proj_kind_t kind, bool forward,
     int num_shots, double dtheta, bool alt_params, az_sound_key_t sound,
     double recoil) {
-  const double power =
-    (az_has_upgrade(&state->ship.player, AZ_UPG_HIGH_EXPLOSIVES) ?
-     AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER : 1.0);
-  fire_projectiles(state, kind, power, forward, num_shots, dtheta, 0.0,
-                   alt_params, sound);
+  const double power = ordn_power_mult(&state->ship.player);
+  fire_projectiles(state, kind, power, forward, num_shots, dtheta,
+                   (forward ? 0.0 : AZ_PI), alt_params, sound);
   if (recoil != 0.0) {
     state->ship.velocity =
       az_vadd(state->ship.velocity, az_vpolar(-recoil, state->ship.angle));
@@ -393,7 +393,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
 
   // Determine how much energy the beam needs and how much damage it'll do:
   double energy_cost = AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND * time;
-  double damage_mult = gun_power_mult(state);
+  double damage_mult = gun_power_mult(&ship->player);
   switch (minor) {
     case AZ_GUN_NONE: break;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
@@ -561,11 +561,11 @@ static void fire_weapons(az_space_state_t *state, double time) {
     }
   } else ship->gun_charge = 0.0;
   const bool has_hyper_rockets =
-    az_has_upgrade(&state->ship.player, AZ_UPG_HYPER_ROCKETS);
+    az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS);
   const bool has_mega_bombs =
-    az_has_upgrade(&state->ship.player, AZ_UPG_MEGA_BOMBS);
-  if ((has_hyper_rockets && ship->player.ordnance == AZ_ORDN_ROCKETS) ||
-      (has_mega_bombs && ship->player.ordnance == AZ_ORDN_BOMBS)) {
+    az_has_upgrade(player, AZ_UPG_MEGA_BOMBS);
+  if ((has_hyper_rockets && player->ordnance == AZ_ORDN_ROCKETS) ||
+      (has_mega_bombs && player->ordnance == AZ_ORDN_BOMBS)) {
     if (controls->ordn_held) {
       if (ship->ordn_charge < 1.0) {
         ship->ordn_charge = fmin(1.0, ship->ordn_charge +
@@ -623,12 +623,12 @@ static void fire_weapons(az_space_state_t *state, double time) {
     assert(player->gun1 == AZ_GUN_CHARGE);
     if (ship->gun_charge >= 1.0) {
       // If the hyper rockets are also fully charged (and if the ship has
-      // enough rocket ammo), fire off a charge/rocket combo.
+      // enough rocket ammo), fire off a gun/rocket combo.
       if (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
           player->ordnance == AZ_ORDN_ROCKETS &&
-          player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
+          player->rockets >= AZ_ROCKETS_PER_MISSILE_COMBO) {
         assert(has_hyper_rockets);
-        player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
+        player->rockets -= AZ_ROCKETS_PER_MISSILE_COMBO;
         switch (player->gun2) {
           case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
           case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
@@ -972,6 +972,38 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
   }
 }
 
+static void apply_orion_booster(az_space_state_t *state, double time) {
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
+  az_controls_t *controls = &ship->controls;
+
+  // If we don't have the orion booster upgrade yet, do nothing.
+  if (!az_has_upgrade(player, AZ_UPG_ORION_BOOSTER)) {
+    assert(ship->orion.tap_time == 0.0);
+    return;
+  }
+
+  // If the player presses the Down key twice within AZ_DOUBLE_TAP_TIME,
+  // try to activate the orion booster.
+  ship->orion.tap_time = fmax(0.0, ship->orion.tap_time - time);
+  if (controls->down_pressed && player->ordnance == AZ_ORDN_BOMBS) {
+    if (ship->orion.tap_time > 0.0 && ship->ordn_charge >= 1.0 &&
+        player->bombs >= AZ_BOMBS_PER_ORION_BOOST) {
+      az_projectile_t *proj = az_add_projectile(
+          state, AZ_PROJ_ORION_BOMB, false,
+          az_vadd(ship->position, az_vpolar(-15, ship->angle)),
+          ship->angle + AZ_PI, ordn_power_mult(player));
+      if (proj != NULL) {
+        az_vpluseq(&proj->velocity, ship->velocity);
+        player->bombs -= AZ_BOMBS_PER_ORION_BOOST;
+        ship->ordn_charge = 0.0;
+        ship->orion.tap_time = 0.0;
+        az_play_sound(&state->soundboard, AZ_SND_ORION_BOOSTER);
+      }
+    } else ship->orion.tap_time = AZ_DOUBLE_TAP_TIME;
+  }
+}
+
 static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
                                  double time) {
   const az_player_t *player = &ship->player;
@@ -1158,6 +1190,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   bool is_in_water;
   apply_gravity_to_ship(state, time, &is_in_water);
   apply_cplus_drive(state, is_in_water, time);
+  apply_orion_booster(state, time);
   apply_ship_thrusters(ship, is_in_water, time);
   apply_drag_to_ship(ship, is_in_water, time);
 

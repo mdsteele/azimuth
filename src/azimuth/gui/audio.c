@@ -508,6 +508,13 @@ static az_sound_entry_t sound_entries[] = {
     .lpf_cutoff = 0.781690120697, .lpf_ramp = -0.464788734913,
     .lpf_resonance = 0.274647891521
   },
+  [AZ_SND_ORION_BOOSTER] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.338028, .env_punch = 0.4225352, .env_decay = 0.6,
+    .start_freq = 0.190140843391, .freq_slide = 0.19992,
+    .vibrato_depth = 0.39781, .vibrato_speed = 0.06258,
+    .phaser_offset = 0.746478915215, .phaser_sweep = -0.0704225301743
+  },
   [AZ_SND_PICKUP_ORDNANCE] = {
     .wave_kind = SQUARE,
     .env_sustain = 0.17572, .env_decay = 0.2746479,

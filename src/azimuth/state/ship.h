@@ -59,6 +59,9 @@ typedef struct {
     double tap_time; // seconds left for second tap of key double-tap
   } cplus;
   struct {
+    double tap_time; // seconds left for second tap of key double-tap
+  } orion;
+  struct {
     bool active;
     az_uid_t node_uid;
     double distance;

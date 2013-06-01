@@ -209,8 +209,8 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_HYPER_ROCKET] = {
     .speed = 1500.0,
     .lifetime = 3.0,
-    .impact_damage = 25.0,
-    .splash_damage = 25.0,
+    .impact_damage = 20.0,
+    .splash_damage = 20.0,
     .splash_radius = 40.0,
     .impact_shake = 4.0,
     .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
@@ -294,6 +294,19 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 200.0,
     .impact_shake = 3.0,
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_ORION_BOMB] = {
+    .speed = 500.0,
+    .lifetime = 0.08,
+    .splash_damage = 10.0,
+    .splash_radius = 20.0,
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_ORION_BLAST] = {
+    .lifetime = 0.8,
+    .splash_damage = 15.0,
+    .splash_radius = 300.0,
     .properties = AZ_PROJF_NO_HIT
   },
   // Baddie-only projectiles:

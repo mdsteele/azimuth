@@ -429,7 +429,7 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_HYPER_ROCKET:
       for (int i = 0; i < 6; ++i) {
         az_add_speck(state, (az_color_t){255, 255, 0, 255},
-                     az_random(1.0, 2.0), proj->position,
+                     0.5 + 0.1 * i, proj->position,
                      az_vrotate(az_vmul(proj->velocity, -az_random(0, 0.3)),
                                 (az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)))));
       }
@@ -529,6 +529,44 @@ static void projectile_special_logic(az_space_state_t *state,
         az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
       }
       break;
+    case AZ_PROJ_ORION_BOMB:
+      if (proj->age >= proj->data->lifetime) {
+        az_projectile_t *blast = az_add_projectile(
+            state, AZ_PROJ_ORION_BLAST, proj->fired_by_enemy,
+            proj->position, proj->angle, proj->power);
+        if (blast != NULL) {
+          blast->velocity = az_vmul(az_vsub(
+              proj->velocity, az_vpolar(proj->data->speed, proj->angle)), 0.5);
+        }
+        on_projectile_hit_wall(state, proj, AZ_VZERO);
+      }
+      break;
+    case AZ_PROJ_ORION_BLAST:
+      {
+        const double factor = proj->age / proj->data->lifetime;
+        const double radius = proj->data->splash_radius * factor * factor;
+        // Propel the ship away from the blast:
+        if (az_ship_is_present(&state->ship) &&
+            az_vwithin(state->ship.position, proj->position, radius)) {
+          az_vpluseq(&state->ship.velocity, az_vwithlen(
+              az_vsub(state->ship.position, proj->position),
+              (500 + 5000 * factor * factor) * time));
+        }
+        // Damage enemies within the blast (over the lifetime of the blast):
+        AZ_ARRAY_LOOP(baddie, state->baddies) {
+          if (baddie->kind == AZ_BAD_NOTHING) continue;
+          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+          const az_component_data_t *component;
+          if (az_circle_touches_baddie(baddie, 0.8 * radius, proj->position,
+                                       &component)) {
+            az_try_damage_baddie(state, baddie, component,
+                                 proj->data->damage_kind,
+                                 proj->data->splash_damage * proj->power *
+                                 (time / proj->data->lifetime));
+          }
+        }
+      }
+      break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
@@ -553,8 +591,7 @@ static void projectile_special_logic(az_space_state_t *state,
         if (az_circle_touches_polygon_trans(
                 polygon, proj->position, proj->angle, 1,
                 state->ship.position)) {
-          state->ship.velocity =
-            az_vadd(state->ship.velocity, az_vmul(proj->velocity, 5 * time));
+          az_vpluseq(&state->ship.velocity, az_vmul(proj->velocity, 5 * time));
         }
       }
       break;

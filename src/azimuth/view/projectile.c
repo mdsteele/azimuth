@@ -336,6 +336,33 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_ORION_BOMB:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, 0);
+        const double radius = 5.0;
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          if (blue) glColor3f(0, 0.5, 0.75); // blue-green
+          else glColor3f(0.5, 0.5, 0.5); // gray
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
+    case AZ_PROJ_ORION_BLAST:
+      glBegin(GL_QUAD_STRIP); {
+        const double factor = proj->age / proj->data->lifetime;
+        const double outer = proj->data->splash_radius * factor * factor;
+        const double inner = fmax(0.0, outer - 100 * (1.0 - factor));
+        for (int i = 0; i <= 360; i += 10) {
+          glColor4f(1, 1, 1, 0.7);
+          glVertex2d(outer * cos(AZ_DEG2RAD(i)),
+                     0.7 * outer * sin(AZ_DEG2RAD(i)));
+          glColor4f(0.5, 0.75, 1, 0.3);
+          glVertex2d(inner * cos(AZ_DEG2RAD(i)),
+                     0.7 * inner * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
       glBegin(GL_TRIANGLE_FAN); {
