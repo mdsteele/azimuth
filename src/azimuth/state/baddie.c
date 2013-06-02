@@ -287,7 +287,6 @@ static const az_vector_t forcefiend_segment3_vertices[] = {
 static const az_vector_t forcefiend_stinger_vertices[] = {
   {14, 5}, {-20, 0}, {14, -5}
 };
-
 static az_component_data_t forcefiend_components[] = {
   // Pincers:
   { .polygon = AZ_INIT_POLYGON(forcefiend_left_pincer_vertices),
@@ -328,6 +327,42 @@ static az_component_data_t forcefiend_components[] = {
     .init_position = {-90, 0}, .impact_damage = 4.0 },
   { .polygon = AZ_INIT_POLYGON(forcefiend_stinger_vertices),
     .init_position = {-120, 0}, .immunities = ~0, .impact_damage = 10.0 }
+};
+
+static az_vector_t stalk_plant_base_vertices[] = {
+  {14, 4}, {8, 11}, {0, 14}, {0, -14}, {8, -11}, {14, -4}
+};
+static const az_vector_t stalk_plant_left_pincer_vertices[] = {
+  {23, 0}, {26,  2}, {23,  8}, {20,  11}, {9,  14}, {-5, 10}, {-8,  6}, {-9, 0}
+};
+static const az_vector_t stalk_plant_right_pincer_vertices[] = {
+  {23, 0}, {26, -2}, {23, -7}, {19, -10}, {7, -13}, {-6, -9}, {-8, -5}, {-9, 0}
+};
+static az_vector_t stalk_segment_vertices[] = {
+  {15, 0}, {12, 4}, {-12, 4}, {-15, 0}, {-12, -4}, {12, -4}
+};
+static az_component_data_t stalk_plant_components[] = {
+  // Base:
+  { .polygon = AZ_INIT_POLYGON(stalk_plant_base_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
+                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET),
+    .init_position = {-190, 0}, .impact_damage = 4.0 },
+  // Pincers:
+  { .polygon = AZ_INIT_POLYGON(stalk_plant_left_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 12.0 },
+  { .polygon = AZ_INIT_POLYGON(stalk_plant_right_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 12.0 },
+  // Stalk:
+#define STALK_SEGMENT(x) \
+  { .polygon = AZ_INIT_POLYGON(stalk_segment_vertices), \
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
+                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET), \
+    .init_position = {x, 0}, .impact_damage = 4.0 }
+
+  STALK_SEGMENT(-10), STALK_SEGMENT(-30), STALK_SEGMENT(-50),
+  STALK_SEGMENT(-70), STALK_SEGMENT(-90), STALK_SEGMENT(-110),
+  STALK_SEGMENT(-130), STALK_SEGMENT(-150), STALK_SEGMENT(-170)
+#undef STALK_SEGMENT
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -622,6 +657,13 @@ static az_baddie_data_t baddie_datas[] = {
                                   AZ_DMGF_REACTIVE),
                    .impact_damage = 4.0 },
     DECL_COMPONENTS(forcefiend_components)
+  },
+  [AZ_BAD_STALK_PLANT] = {
+    .max_health = 14.0, .overall_bounding_radius = 250.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {32, 128, 0, 255},
+    .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
+    DECL_COMPONENTS(stalk_plant_components)
   }
 };
 
