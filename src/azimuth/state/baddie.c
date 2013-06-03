@@ -677,6 +677,11 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
                                   AZ_DMGF_REACTIVE), .impact_damage = 8.0 }
+  },
+  [AZ_BAD_URCHIN] = {
+    .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
   }
 };
 

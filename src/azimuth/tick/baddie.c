@@ -1322,6 +1322,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_URCHIN:
+      drift_towards_ship(state, baddie, time, 250, 300, 500);
+      baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(50) * time);
+      break;
   }
 
   // Move cargo with the baddie.

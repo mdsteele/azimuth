@@ -538,6 +538,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_BAD_SPINE_MINE:
+    case AZ_BAD_URCHIN:
       for (int i = 0; i < 18; ++i) {
         glPushMatrix(); {
           glRotated(i * 20, 0, 0, 1);
