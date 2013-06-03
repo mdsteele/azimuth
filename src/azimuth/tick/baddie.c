@@ -1301,6 +1301,27 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->components[2].angle = -new_angle;
       }
       break;
+    case AZ_BAD_COPTER:
+      if (baddie->cooldown <= 0.0) {
+        const double max_speed = 150.0, accel = 50.0;
+        const double min_dist = 100.0, max_dist = 200.0;
+        const double rel_angle =
+          (baddie->state == 0 ? AZ_HALF_PI : -AZ_HALF_PI);
+        const double dist =
+          dist_until_hit_wall(state, baddie, max_dist + 1.0, rel_angle);
+        const double fraction =
+          fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
+        const double speed_limit = max_speed * sqrt(fraction);
+        const double speed =
+          fmin(speed_limit, az_vnorm(baddie->velocity) + accel * time);
+        baddie->velocity = az_vpolar(speed, baddie->angle + rel_angle);
+        if (fraction <= 0.0) {
+          baddie->velocity = AZ_VZERO;
+          baddie->state = (baddie->state == 0 ? 1 : 0);
+          baddie->cooldown = 1.0;
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie.

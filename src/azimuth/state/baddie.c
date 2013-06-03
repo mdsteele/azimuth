@@ -365,6 +365,10 @@ static az_component_data_t stalk_plant_components[] = {
 #undef STALK_SEGMENT
 };
 
+static az_vector_t copter_vertices[] = {
+  {14, 21}, {-14, 21}, {-14, -21}, {14, -21}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -664,6 +668,15 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(stalk_plant_components)
+  },
+  [AZ_BAD_COPTER] = {
+    .max_health = 40.0,
+    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_REACTIVE), .impact_damage = 8.0 }
   }
 };
 
