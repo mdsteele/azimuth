@@ -572,7 +572,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
                 door->kind == AZ_DOOR_ALWAYS_OPEN) {
               SCRIPT_ERROR("invalid door kind");
             }
-            door->kind = (door->kind == AZ_DOOR_LOCKED ?
+            door->kind = (door->kind == AZ_DOOR_LOCKED ||
+                          door->kind == AZ_DOOR_BOSS ?
                           AZ_DOOR_UNLOCKED : AZ_DOOR_NORMAL);
           }
         }
