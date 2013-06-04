@@ -174,6 +174,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     case AZ_IMP_BADDIE:
       {
         az_baddie_t *baddie = impact->target.baddie.baddie;
+        assert(baddie->kind != AZ_BAD_NOTHING);
         const az_component_data_t *component = impact->target.baddie.component;
         // If the ship is in C-plus mode, we will kill the baddie outright and
         // keep going without taking damage (unless the baddie is immune to
@@ -219,6 +220,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       }
       break;
     case AZ_IMP_DOOR_INSIDE:
+      assert(impact->target.door->kind != AZ_DOOR_NOTHING);
       ship->tractor_beam.active = false;
       state->mode = AZ_MODE_DOORWAY;
       memset(&state->mode_data.doorway, 0, sizeof(state->mode_data.doorway));
@@ -230,6 +232,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       break;
     case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
     case AZ_IMP_WALL:
+      assert(impact->target.wall->kind != AZ_WALL_NOTHING);
       // If C-plus is active, maybe we can just bust right through the wall.
       // Otherwise, the ship hits the wall and bounces off.
       if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
