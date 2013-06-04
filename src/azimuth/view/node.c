@@ -776,6 +776,43 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(1, 0); glVertex2f(8, 0);
       } glEnd();
       break;
+    case AZ_UPG_FUSION_REACTOR:
+      glPushMatrix(); {
+        const double spin1 = 3 * (frame - 1);
+        const double spin2 = 3 * (((frame + 2) % 4) - 1);
+        glRotatef(215.0f + 22.5f * frame, 0, 0, 1);
+        glColor4f(1, 1, 1, 0.5);
+        glBegin(GL_LINE_STRIP); {
+          for (int i = 0; i <= 180; i += 20) {
+            glVertex2d(12 * cos(AZ_DEG2RAD(i)), spin1 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        glBegin(GL_LINE_STRIP); {
+          for (int i = -90; i <= 90; i += 20) {
+            glVertex2d(spin2 * cos(AZ_DEG2RAD(i)), 12 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(1, 0.25, 0);
+          glVertex2f(0, 0);
+          glColor3f(0.3, 0.07, 0);
+          for (int i = 0; i <= 360; i += 20) {
+            glVertex2d(5.5 * cos(AZ_DEG2RAD(i)), 5.5 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        glColor4f(1, 1, 1, 0.5);
+        glBegin(GL_LINE_STRIP); {
+          for (int i = 180; i <= 360; i += 20) {
+            glVertex2d(12 * cos(AZ_DEG2RAD(i)), spin1 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        glBegin(GL_LINE_STRIP); {
+          for (int i = 90; i <= 270; i += 20) {
+            glVertex2d(spin2 * cos(AZ_DEG2RAD(i)), 12 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+      } glPopMatrix();
+      break;
     case AZ_UPG_QUANTUM_REACTOR:
       for (int i = -1; i <= 1; i += 2) {
         glPushMatrix(); {
@@ -819,7 +856,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     // TODO: Draw other upgrade icons.
     case AZ_UPG_HIGH_EXPLOSIVES:
     case AZ_UPG_ATTUNED_EXPLOSIVES:
-    case AZ_UPG_FUSION_REACTOR:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
       glBegin(GL_QUADS); {
         glVertex2d(12, 12);
