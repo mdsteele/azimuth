@@ -600,25 +600,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       } glEnd();
       break;
-    case AZ_UPG_RETRO_THRUSTERS:
-      glBegin(GL_TRIANGLE_FAN); {
-        const GLfloat zig = 3 * (frame == 3 ? 1 : frame);
-        glColor4f(1, 0.75, 0, 0.9); // orange
-        glVertex2f(-3, 0);
-        glColor4f(1, 0.5, 0, 0); // transparent orange
-        glVertex2f(-3, 5);
-        glVertex2f(6 + zig, 0);
-        glVertex2f(-3, -5);
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f(-12, 7); glVertex2f(-2, 6);
-        glColor3f(0.5, 0.5, 0.5); // gray
-        glVertex2f(-12, 0); glVertex2f(-2, 0);
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f(-12, -7); glVertex2f(-2, -6);
-      } glEnd();
-      break;
     case AZ_UPG_TRACTOR_BEAM:
       glPushMatrix(); {
         glTranslatef(-6, 6, 0);
@@ -677,6 +658,25 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       }
       break;
+    case AZ_UPG_RETRO_THRUSTERS:
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat zig = 3 * (frame == 3 ? 1 : frame);
+        glColor4f(1, 0.75, 0, 0.9); // orange
+        glVertex2f(-3, 0);
+        glColor4f(1, 0.5, 0, 0); // transparent orange
+        glVertex2f(-3, 5);
+        glVertex2f(6 + zig, 0);
+        glVertex2f(-3, -5);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2f(-12, 7); glVertex2f(-2, 6);
+        glColor3f(0.5, 0.5, 0.5); // gray
+        glVertex2f(-12, 0); glVertex2f(-2, 0);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2f(-12, -7); glVertex2f(-2, -6);
+      } glEnd();
+      break;
     case AZ_UPG_CPLUS_DRIVE:
       glBegin(GL_TRIANGLES); {
         for (int i = 1; i < 4; ++i) {
@@ -686,6 +686,31 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           glVertex2f(left + 6, 0);
         }
       } glEnd();
+      break;
+    case AZ_UPG_ORION_BOOSTER:
+      glBegin(GL_QUAD_STRIP); {
+        const int offset = (frame == 3 ? 1 : 0);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2f(-2, 12); glVertex2f(3 - offset, 7 + offset);
+        glColor3f(0.5, 0.5, 0.5); // gray
+        glVertex2f(-12, 12); glVertex2f(-3 - offset, 3 + offset);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2f(-12, 2); glVertex2f(-7 - offset, -3 + offset);
+      } glEnd();
+      glPushMatrix(); {
+        glTranslatef(3, -3, 0);
+        glRotatef(-45, 0, 0, 1);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(0.5, 0.75, 1, 0.3);
+          glVertex2f(0, 0);
+          glColor4f(1, 1, 1, 0.7);
+          const double radius = 2.5 * (frame + 1);
+          for (int i = 0; i <= 360; i += 20) {
+            glVertex2d(radius * cos(AZ_DEG2RAD(i)),
+                       0.7 * radius * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+      } glPopMatrix();
       break;
     case AZ_UPG_HARDENED_ARMOR:
       draw_armor();
@@ -794,7 +819,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     // TODO: Draw other upgrade icons.
     case AZ_UPG_HIGH_EXPLOSIVES:
     case AZ_UPG_ATTUNED_EXPLOSIVES:
-    case AZ_UPG_ORION_BOOSTER:
     case AZ_UPG_FUSION_REACTOR:
       glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
       glBegin(GL_QUADS); {
