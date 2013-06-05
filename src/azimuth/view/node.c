@@ -483,54 +483,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2i( -6, -12); glVertex2i(12,  6);
       } glEnd();
       break;
-    case AZ_UPG_ROCKET_AMMO_00:
-    case AZ_UPG_ROCKET_AMMO_01:
-    case AZ_UPG_ROCKET_AMMO_02:
-    case AZ_UPG_ROCKET_AMMO_03:
-    case AZ_UPG_ROCKET_AMMO_04:
-    case AZ_UPG_ROCKET_AMMO_05:
-    case AZ_UPG_ROCKET_AMMO_06:
-    case AZ_UPG_ROCKET_AMMO_07:
-    case AZ_UPG_ROCKET_AMMO_08:
-    case AZ_UPG_ROCKET_AMMO_09:
-    case AZ_UPG_ROCKET_AMMO_10:
-    case AZ_UPG_ROCKET_AMMO_11:
-    case AZ_UPG_ROCKET_AMMO_12:
-    case AZ_UPG_ROCKET_AMMO_13:
-    case AZ_UPG_ROCKET_AMMO_14:
-    case AZ_UPG_ROCKET_AMMO_15:
-    case AZ_UPG_ROCKET_AMMO_16:
-    case AZ_UPG_ROCKET_AMMO_17:
-    case AZ_UPG_ROCKET_AMMO_18:
-    case AZ_UPG_ROCKET_AMMO_19:
-      glColor3f(0.5, 0, 0); // dark red
-      glBegin(GL_QUADS); {
-        const int x = 4 - 3 * frame;
-        glVertex2i(x, -10);
-        glVertex2i(x + 4, -10);
-        glVertex2i(x + 4, -2);
-        glVertex2i(x, -2);
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(-4, -9);
-        glVertex2i(-4, 6);
-        glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2i(0, -9);
-        glVertex2i(0, 10);
-        glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2i(4, -9);
-        glVertex2i(4, 6);
-      } glEnd();
-      glColor3f(0.5, 0, 0); // dark red
-      glBegin(GL_QUADS); {
-        const int x = -8 + 3 * frame;
-        glVertex2i(x, -10);
-        glVertex2i(x + 4, -10);
-        glVertex2i(x + 4, -2);
-        glVertex2i(x, -2);
-      } glEnd();
-      break;
     case AZ_UPG_HYPER_ROCKETS:
       glPushMatrix(); {
         glRotatef(-90, 0, 0, 1);
@@ -563,28 +515,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         } glEnd();
       } glPopMatrix();
       break;
-    case AZ_UPG_BOMB_AMMO_00:
-    case AZ_UPG_BOMB_AMMO_01:
-    case AZ_UPG_BOMB_AMMO_02:
-    case AZ_UPG_BOMB_AMMO_03:
-    case AZ_UPG_BOMB_AMMO_04:
-    case AZ_UPG_BOMB_AMMO_05:
-    case AZ_UPG_BOMB_AMMO_06:
-    case AZ_UPG_BOMB_AMMO_07:
-    case AZ_UPG_BOMB_AMMO_08:
-    case AZ_UPG_BOMB_AMMO_09:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2i(0, 0);
-        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
-          const double radius = 8;
-          const double theta = AZ_DEG2RAD(i - 30 * frame);
-          if (blue) glColor3f(0, 0, 0.75); // blue
-          else glColor3f(0.5, 0.5, 0.5); // gray
-          glVertex2d(radius * cos(theta), radius * sin(theta));
-        }
-      } glEnd();
-      break;
     case AZ_UPG_MEGA_BOMBS:
       glBegin(GL_TRIANGLE_FAN); {
         if (frame == 0) glColor3f(1, 1, 0.5); // yellow
@@ -599,64 +529,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           glVertex2d(radius * cos(theta), radius * sin(theta));
         }
       } glEnd();
-      break;
-    case AZ_UPG_TRACTOR_BEAM:
-      glPushMatrix(); {
-        glTranslatef(-6, 6, 0);
-        glScalef(0.5, 0.5, 1);
-        draw_tractor_node(AZ_NS_ACTIVE, 0);
-      } glPopMatrix();
-      glBegin(GL_QUAD_STRIP); {
-        const GLfloat green = (frame % 2 == 0 ? 0.75f : 0.25f);
-        glColor4f(1, green, 1, 0);
-        glVertex2f(-5, 9); glVertex2f(12, -8);
-        glColor4f(1, green, 1, 0.5);
-        glVertex2f(-7, 7); glVertex2f(12, -12);
-        glColor4f(1, green, 1, 0);
-        glVertex2f(-9, 5); glVertex2f(8, -12);
-      } glEnd();
-      break;
-    case AZ_UPG_INFRASCANNER:
-      glBegin(GL_QUAD_STRIP); {
-        glColor4f(1, 1, 0.5, 0.25);
-        const GLfloat r1 = 6.0f + 0.5f * (frame == 3 ? 1 : frame);
-        const GLfloat r2 = r1 + 1.5f;
-        for (int i = 0; i <= 360; i += 20) {
-          glVertex2f(r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
-          glVertex2f(r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        const GLfloat outer = 12 + (frame == 3 ? 1 : frame);
-        const GLfloat inner = 2 + (frame == 3 ? 1 : frame);
-        glColor3f(1, 1, 1);
-        glVertex2f(0, 0);
-        glColor4f(1, 1, 0, 0);
-        glVertex2f(outer, 0); glVertex2f(inner, inner);
-        glVertex2f(0, outer); glVertex2f(-inner, inner);
-        glVertex2f(-outer, 0); glVertex2f(-inner, -inner);
-        glVertex2f(0, -outer); glVertex2f(inner, -inner);
-        glVertex2f(outer, 0);
-      } glEnd();
-      break;
-    case AZ_UPG_MAGNET_SWEEP:
-      glBegin(GL_QUAD_STRIP); {
-        for (int i = -200; i <= 20; i += 20) {
-          const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
-          glColor3f(1, 0, 0); glVertex2d(9 * c, 9 * s - 1);
-          glColor3f(0.7, 0, 0); glVertex2d(5 * c, 5 * s - 1);
-        }
-      } glEnd();
-      glBegin(GL_QUADS); {
-        for (int i = -1; i <= 1; i += 2) {
-          glColor3f(0.5, 0.6, 0.6);
-          glVertex2f(i * 2, 9); glVertex2f(i * 6, 9);
-          glColor3f(1, 0, 0);
-          glVertex2f(i * 8.5, 2);
-          glColor3f(0.7, 0, 0);
-          glVertex2f(i * 4.7, 0.7);
-        }
-      }
       break;
     case AZ_UPG_RETRO_THRUSTERS:
       glBegin(GL_TRIANGLE_FAN); {
@@ -722,24 +594,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(6, -8); glVertex2f(6, 8);
       } glEnd();
       break;
-    case AZ_UPG_THERMAL_ARMOR:
-      draw_armor();
-      if (frame % 2) glColor3f(1, 0, 0);
-      else glColor3f(0, 1, 1);
-      glBegin(GL_LINES); {
-        glVertex2f(-6, 6); glVertex2f(6, 6);
-        glVertex2f(0, 6); glVertex2f(0, -7);
-      } glEnd();
-      break;
-    case AZ_UPG_GRAVITIC_ARMOR:
-      draw_armor();
-      if (frame % 2) glColor3f(0, 0, 1);
-      else glColor3f(0, 0.5, 1);
-      glBegin(GL_LINE_STRIP); {
-        glVertex2f(6, 7); glVertex2f(-6, 7); glVertex2f(-6, -7);
-        glVertex2f(6, -7); glVertex2f(6, 0); glVertex2f(0, 0);
-      } glEnd();
-      break;
     case AZ_UPG_DYNAMIC_ARMOR:
       draw_armor();
       if (frame % 2) glColor3f(0, 1, 0);
@@ -749,6 +603,15 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(6, -3); glVertex2f(6, 3); glVertex2f(2, 7);
       } glEnd();
       break;
+    case AZ_UPG_THERMAL_ARMOR:
+      draw_armor();
+      if (frame % 2) glColor3f(1, 0, 0);
+      else glColor3f(0, 1, 1);
+      glBegin(GL_LINES); {
+        glVertex2f(-6, 6); glVertex2f(6, 6);
+        glVertex2f(0, 6); glVertex2f(0, -7);
+      } glEnd();
+      break;
     case AZ_UPG_REACTIVE_ARMOR:
       draw_armor();
       if (frame % 2) glColor3f(1, 1, 0);
@@ -756,24 +619,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       glBegin(GL_LINE_STRIP); {
         glVertex2f(-6, -7); glVertex2f(-6, 7); glVertex2f(6, 7);
         glVertex2f(6, 0); glVertex2f(-6, 0); glVertex2f(6, -7);
-      } glEnd();
-      break;
-    case AZ_UPG_CAPACITOR_00:
-    case AZ_UPG_CAPACITOR_01:
-    case AZ_UPG_CAPACITOR_02:
-    case AZ_UPG_CAPACITOR_03:
-    case AZ_UPG_CAPACITOR_04:
-    case AZ_UPG_CAPACITOR_05:
-      draw_tank();
-      if (frame % 2) glColor3f(0, 0, 0);
-      else glColor3f(0.5, 0, 0.5);
-      glBegin(GL_LINES); {
-        glVertex2f(-8, 0); glVertex2f(-2, 0);
-        glVertex2f(-2, -4); glVertex2f(-2, 4);
-        glVertex2f(3, 4); glVertex2f(1, 1);
-        glVertex2f(1, 1); glVertex2f(1, -1);
-        glVertex2f(1, -1); glVertex2f(3, -4);
-        glVertex2f(1, 0); glVertex2f(8, 0);
       } glEnd();
       break;
     case AZ_UPG_FUSION_REACTOR:
@@ -831,6 +676,172 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           } glEnd();
         } glPopMatrix();
       }
+      break;
+    case AZ_UPG_TRACTOR_BEAM:
+      glPushMatrix(); {
+        glTranslatef(-6, 6, 0);
+        glScalef(0.5, 0.5, 1);
+        draw_tractor_node(AZ_NS_ACTIVE, 0);
+      } glPopMatrix();
+      glBegin(GL_QUAD_STRIP); {
+        const GLfloat green = (frame % 2 == 0 ? 0.75f : 0.25f);
+        glColor4f(1, green, 1, 0);
+        glVertex2f(-5, 9); glVertex2f(12, -8);
+        glColor4f(1, green, 1, 0.5);
+        glVertex2f(-7, 7); glVertex2f(12, -12);
+        glColor4f(1, green, 1, 0);
+        glVertex2f(-9, 5); glVertex2f(8, -12);
+      } glEnd();
+      break;
+    case AZ_UPG_INFRASCANNER:
+      glBegin(GL_QUAD_STRIP); {
+        glColor4f(1, 1, 0.5, 0.25);
+        const GLfloat r1 = 6.0f + 0.5f * (frame == 3 ? 1 : frame);
+        const GLfloat r2 = r1 + 1.5f;
+        for (int i = 0; i <= 360; i += 20) {
+          glVertex2f(r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
+          glVertex2f(r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat outer = 12 + (frame == 3 ? 1 : frame);
+        const GLfloat inner = 2 + (frame == 3 ? 1 : frame);
+        glColor3f(1, 1, 1);
+        glVertex2f(0, 0);
+        glColor4f(1, 1, 0, 0);
+        glVertex2f(outer, 0); glVertex2f(inner, inner);
+        glVertex2f(0, outer); glVertex2f(-inner, inner);
+        glVertex2f(-outer, 0); glVertex2f(-inner, -inner);
+        glVertex2f(0, -outer); glVertex2f(inner, -inner);
+        glVertex2f(outer, 0);
+      } glEnd();
+      break;
+    case AZ_UPG_MAGNET_SWEEP:
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = -200; i <= 20; i += 20) {
+          const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
+          glColor3f(1, 0, 0); glVertex2d(9 * c, 9 * s - 1);
+          glColor3f(0.7, 0, 0); glVertex2d(5 * c, 5 * s - 1);
+        }
+      } glEnd();
+      glBegin(GL_QUADS); {
+        for (int i = -1; i <= 1; i += 2) {
+          glColor3f(0.5, 0.6, 0.6);
+          glVertex2f(i * 2, 9); glVertex2f(i * 6, 9);
+          glColor3f(1, 0, 0);
+          glVertex2f(i * 8.5, 2);
+          glColor3f(0.7, 0, 0);
+          glVertex2f(i * 4.7, 0.7);
+        }
+      }
+      break;
+    case AZ_UPG_ROCKET_AMMO_00:
+    case AZ_UPG_ROCKET_AMMO_01:
+    case AZ_UPG_ROCKET_AMMO_02:
+    case AZ_UPG_ROCKET_AMMO_03:
+    case AZ_UPG_ROCKET_AMMO_04:
+    case AZ_UPG_ROCKET_AMMO_05:
+    case AZ_UPG_ROCKET_AMMO_06:
+    case AZ_UPG_ROCKET_AMMO_07:
+    case AZ_UPG_ROCKET_AMMO_08:
+    case AZ_UPG_ROCKET_AMMO_09:
+    case AZ_UPG_ROCKET_AMMO_10:
+    case AZ_UPG_ROCKET_AMMO_11:
+    case AZ_UPG_ROCKET_AMMO_12:
+    case AZ_UPG_ROCKET_AMMO_13:
+    case AZ_UPG_ROCKET_AMMO_14:
+    case AZ_UPG_ROCKET_AMMO_15:
+    case AZ_UPG_ROCKET_AMMO_16:
+    case AZ_UPG_ROCKET_AMMO_17:
+    case AZ_UPG_ROCKET_AMMO_18:
+    case AZ_UPG_ROCKET_AMMO_19:
+    case AZ_UPG_ROCKET_AMMO_20:
+    case AZ_UPG_ROCKET_AMMO_21:
+    case AZ_UPG_ROCKET_AMMO_22:
+    case AZ_UPG_ROCKET_AMMO_23:
+    case AZ_UPG_ROCKET_AMMO_24:
+    case AZ_UPG_ROCKET_AMMO_25:
+    case AZ_UPG_ROCKET_AMMO_26:
+    case AZ_UPG_ROCKET_AMMO_27:
+    case AZ_UPG_ROCKET_AMMO_28:
+    case AZ_UPG_ROCKET_AMMO_29:
+      glColor3f(0.5, 0, 0); // dark red
+      glBegin(GL_QUADS); {
+        const int x = 4 - 3 * frame;
+        glVertex2i(x, -10);
+        glVertex2i(x + 4, -10);
+        glVertex2i(x + 4, -2);
+        glVertex2i(x, -2);
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(-4, -9);
+        glVertex2i(-4, 6);
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, -9);
+        glVertex2i(0, 10);
+        glColor3f(0.25, 0.25, 0.25); // dark gray
+        glVertex2i(4, -9);
+        glVertex2i(4, 6);
+      } glEnd();
+      glColor3f(0.5, 0, 0); // dark red
+      glBegin(GL_QUADS); {
+        const int x = -8 + 3 * frame;
+        glVertex2i(x, -10);
+        glVertex2i(x + 4, -10);
+        glVertex2i(x + 4, -2);
+        glVertex2i(x, -2);
+      } glEnd();
+      break;
+    case AZ_UPG_BOMB_AMMO_00:
+    case AZ_UPG_BOMB_AMMO_01:
+    case AZ_UPG_BOMB_AMMO_02:
+    case AZ_UPG_BOMB_AMMO_03:
+    case AZ_UPG_BOMB_AMMO_04:
+    case AZ_UPG_BOMB_AMMO_05:
+    case AZ_UPG_BOMB_AMMO_06:
+    case AZ_UPG_BOMB_AMMO_07:
+    case AZ_UPG_BOMB_AMMO_08:
+    case AZ_UPG_BOMB_AMMO_09:
+    case AZ_UPG_BOMB_AMMO_10:
+    case AZ_UPG_BOMB_AMMO_11:
+    case AZ_UPG_BOMB_AMMO_12:
+    case AZ_UPG_BOMB_AMMO_13:
+    case AZ_UPG_BOMB_AMMO_14:
+    case AZ_UPG_BOMB_AMMO_15:
+    case AZ_UPG_BOMB_AMMO_16:
+    case AZ_UPG_BOMB_AMMO_17:
+    case AZ_UPG_BOMB_AMMO_18:
+    case AZ_UPG_BOMB_AMMO_19:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75); // light gray
+        glVertex2i(0, 0);
+        for (int i = 0, blue = 0; i <= 360; i += 60, blue = !blue) {
+          const double radius = 8;
+          const double theta = AZ_DEG2RAD(i - 30 * frame);
+          if (blue) glColor3f(0, 0, 0.75); // blue
+          else glColor3f(0.5, 0.5, 0.5); // gray
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
+    case AZ_UPG_CAPACITOR_00:
+    case AZ_UPG_CAPACITOR_01:
+    case AZ_UPG_CAPACITOR_02:
+    case AZ_UPG_CAPACITOR_03:
+    case AZ_UPG_CAPACITOR_04:
+    case AZ_UPG_CAPACITOR_05:
+      draw_tank();
+      if (frame % 2) glColor3f(0, 0, 0);
+      else glColor3f(0.5, 0, 0.5);
+      glBegin(GL_LINES); {
+        glVertex2f(-8, 0); glVertex2f(-2, 0);
+        glVertex2f(-2, -4); glVertex2f(-2, 4);
+        glVertex2f(3, 4); glVertex2f(1, 1);
+        glVertex2f(1, 1); glVertex2f(1, -1);
+        glVertex2f(1, -1); glVertex2f(3, -4);
+        glVertex2f(1, 0); glVertex2f(8, 0);
+      } glEnd();
       break;
     case AZ_UPG_SHIELD_BATTERY_00:
     case AZ_UPG_SHIELD_BATTERY_01:

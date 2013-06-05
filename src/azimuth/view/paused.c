@@ -231,20 +231,19 @@ static void draw_upgrades(az_paused_state_t *state) {
                    player->bombs, player->max_bombs);
   }
 
-  draw_upg_box(player, 20, 80, AZ_UPG_HARDENED_ARMOR);
-  draw_upg_box(player, 20, 100, AZ_UPG_THERMAL_ARMOR);
-  draw_upg_box(player, 20, 120, AZ_UPG_DYNAMIC_ARMOR);
-  draw_upg_box(player, 20, 140, AZ_UPG_GRAVITIC_ARMOR);
-  draw_upg_box(player, 20, 160, AZ_UPG_REACTIVE_ARMOR);
+  draw_upg_box(player, 20,  80, AZ_UPG_HARDENED_ARMOR);
+  draw_upg_box(player, 20, 100, AZ_UPG_DYNAMIC_ARMOR);
+  draw_upg_box(player, 20, 120, AZ_UPG_THERMAL_ARMOR);
+  draw_upg_box(player, 20, 140, AZ_UPG_REACTIVE_ARMOR);
 
-  draw_upg_box(player, 20, 200, AZ_UPG_FUSION_REACTOR);
-  draw_upg_box(player, 20, 220, AZ_UPG_QUANTUM_REACTOR);
+  draw_upg_box(player, 20, 180, AZ_UPG_FUSION_REACTOR);
+  draw_upg_box(player, 20, 200, AZ_UPG_QUANTUM_REACTOR);
 
-  draw_upg_box(player, 20, 260, AZ_UPG_TRACTOR_BEAM);
-  draw_upg_box(player, 20, 280, AZ_UPG_INFRASCANNER);
-  draw_upg_box(player, 20, 300, AZ_UPG_MAGNET_SWEEP);
+  draw_upg_box(player, 20, 240, AZ_UPG_TRACTOR_BEAM);
+  draw_upg_box(player, 20, 260, AZ_UPG_INFRASCANNER);
+  draw_upg_box(player, 20, 280, AZ_UPG_MAGNET_SWEEP);
 
-  draw_upg_box(player, 470, 80, AZ_UPG_HYPER_ROCKETS);
+  draw_upg_box(player, 470,  80, AZ_UPG_HYPER_ROCKETS);
   draw_upg_box(player, 470, 100, AZ_UPG_MEGA_BOMBS);
   draw_upg_box(player, 470, 120, AZ_UPG_HIGH_EXPLOSIVES);
   draw_upg_box(player, 470, 140, AZ_UPG_ATTUNED_EXPLOSIVES);

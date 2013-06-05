@@ -92,26 +92,26 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   // increase max capacity.
   if (upgrade >= AZ_UPG_GUN_CHARGE && upgrade <= AZ_UPG_GUN_BEAM) {
     az_select_gun(player, AZ_GUN_CHARGE + (upgrade - AZ_UPG_GUN_CHARGE));
+  } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
+    player->rockets = player->max_rockets;
+  } else if (upgrade == AZ_UPG_MEGA_BOMBS) {
+    player->bombs = player->max_bombs;
   } else if (upgrade >= AZ_UPG_ROCKET_AMMO_00 &&
-             upgrade <= AZ_UPG_ROCKET_AMMO_19) {
+             upgrade <= AZ_UPG_ROCKET_AMMO_29) {
     assert(player->max_rockets >= 0);
     assert(player->rockets <= player->max_rockets);
     const bool first_rockets = (player->max_rockets == 0);
     player->max_rockets += AZ_ROCKETS_PER_AMMO_UPGRADE;
     player->rockets += AZ_ROCKETS_PER_AMMO_UPGRADE;
     if (first_rockets) az_select_ordnance(player, AZ_ORDN_ROCKETS);
-  } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
-    player->rockets = player->max_rockets;
   } else if (upgrade >= AZ_UPG_BOMB_AMMO_00 &&
-             upgrade <= AZ_UPG_BOMB_AMMO_09) {
+             upgrade <= AZ_UPG_BOMB_AMMO_19) {
     assert(player->max_bombs >= 0);
     assert(player->bombs <= player->max_bombs);
     const bool first_bombs = (player->max_bombs == 0);
     player->max_bombs += AZ_BOMBS_PER_AMMO_UPGRADE;
     player->bombs += AZ_BOMBS_PER_AMMO_UPGRADE;
     if (first_bombs) az_select_ordnance(player, AZ_ORDN_BOMBS);
-  } else if (upgrade == AZ_UPG_MEGA_BOMBS) {
-    player->bombs = player->max_bombs;
   } else if (upgrade >= AZ_UPG_CAPACITOR_00 &&
              upgrade <= AZ_UPG_CAPACITOR_05) {
     assert(player->energy <= player->max_energy);

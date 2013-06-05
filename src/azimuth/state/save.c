@@ -29,6 +29,7 @@
 #include "azimuth/state/player.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
@@ -73,7 +74,7 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
   if (fscanf(file, " tt=%lf cr=%d rk=%d bm=%d g1=%d g2=%d or=%d\n",
              &player->total_time, &player->current_room, &rockets, &bombs,
              &gun1, &gun2, &ordnance) < 7) return false;
-  if (player->total_time < 0.0) return false;
+  if (player->total_time < 0.0) player->total_time = 0.0;
   if (player->current_room < 0 ||
       player->current_room >= planet->num_rooms) {
     return false;
@@ -91,10 +92,8 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
     }
   }
   // Validate and set current ammo stock (rockets and bombs).
-  if (rockets < 0 || rockets > player->max_rockets) return false;
-  else player->rockets = rockets;
-  if (bombs < 0 || bombs > player->max_bombs) return false;
-  else player->bombs = bombs;
+  player->rockets = az_imin(az_imax(0, rockets), player->max_rockets);
+  player->bombs = az_imin(az_imax(0, bombs), player->max_bombs);
   // Save points recharge energy and shields, so set shields and energy to
   // their maximums.
   player->shields = player->max_shields;

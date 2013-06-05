@@ -387,13 +387,10 @@ void az_damage_ship(az_space_state_t *state, double damage,
   if (az_has_upgrade(player, AZ_UPG_HARDENED_ARMOR)) {
     damage *= AZ_ARMOR_DAMAGE_FACTOR;
   }
-  if (az_has_upgrade(player, AZ_UPG_THERMAL_ARMOR)) {
-    damage *= AZ_ARMOR_DAMAGE_FACTOR;
-  }
-  if (az_has_upgrade(player, AZ_UPG_GRAVITIC_ARMOR)) {
-    damage *= AZ_ARMOR_DAMAGE_FACTOR;
-  }
   if (az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
+    damage *= AZ_ARMOR_DAMAGE_FACTOR;
+  }
+  if (az_has_upgrade(player, AZ_UPG_THERMAL_ARMOR)) {
     damage *= AZ_ARMOR_DAMAGE_FACTOR;
   }
   if (az_has_upgrade(player, AZ_UPG_REACTIVE_ARMOR)) {
