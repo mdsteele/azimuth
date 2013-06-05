@@ -150,7 +150,39 @@ bool az_load_editor_state(az_editor_state_t *state) {
 }
 
 static void summarize_scenario(const az_planet_t *planet) {
+  bool linebreak = false;
   printf("\n");
+  // Print rooms numbers and destinations of doors that don't have a legitimate
+  // matching exit door:
+  for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+    const az_room_t *room = &planet->rooms[room_index];
+    for (int i = 0; i < room->num_doors; ++i) {
+      const az_door_spec_t *door = &room->doors[i];
+      if (door->kind == AZ_DOOR_FORCEFIELD) continue;
+      if (door->destination == room_index) {
+        printf("\x1b[31m%d -> %d\x1b[m\n", room_index, room_index);
+        linebreak = true;
+      } else {
+        assert(door->destination >= 0);
+        assert(door->destination < planet->num_rooms);
+        const az_room_t *dest = &planet->rooms[door->destination];
+        bool has_exit = false;
+        for (int j = 0; j < dest->num_doors; ++j) {
+          const az_door_spec_t *other_door = &dest->doors[j];
+          if (other_door->kind != AZ_DOOR_FORCEFIELD &&
+              other_door->destination == room_index) {
+            has_exit = true;
+            break;
+          }
+        }
+        if (!has_exit) {
+          printf("\x1b[31m%d -> %d\x1b[m\n", room_index, door->destination);
+          linebreak = true;
+        }
+      }
+    }
+  }
+  if (linebreak) { printf("\n"); linebreak = false; }
   // Print names of upgrades that aren't in the scenario, or that are in the
   // scenario multiple times:
   for (int upg = 0; upg < AZ_NUM_UPGRADES; ++upg) {
@@ -173,11 +205,13 @@ static void summarize_scenario(const az_planet_t *planet) {
     if (num_copies == 0) {
       printf("\x1b[34m(%d) %s\x1b[m\n", upg, az_upgrade_name(upg));
     } else if (num_copies > 1) printf("\x1b[m\n");
+    if (num_copies != 1) linebreak = true;
   }
+  if (linebreak) { printf("\n"); linebreak = false; }
   // Print number of rooms in each zone (both total rooms in that zone, and
   // "populated" rooms in that zone, so we can tell how many more rooms need to
   // be fleshed out):
-  printf("\n\x1b[33;1m        Zone  Pop  TTL  Frac\x1b[m\n");
+  printf("\x1b[33;1m        Zone  Pop  TTL  Frac\x1b[m\n");
   int total_pop_rooms = 0;
   for (int zone_index = 0; zone_index < planet->num_zones; ++zone_index) {
     const az_zone_t *zone = &planet->zones[zone_index];
@@ -195,7 +229,7 @@ static void summarize_scenario(const az_planet_t *planet) {
     printf("%12s  %3d  %3d  %3d%%\n", zone->name, num_pop_rooms, num_rooms,
            (int)(100.0 * (double)num_pop_rooms / (double)num_rooms));
   }
-  printf("\x1b[1m       TOTAL  %3d  %3d  %3d%%\x1b[m\n\n",
+  printf("\x1b[1m       TOTAL  %3d  %3d  %3d%%\x1b[m\n",
          total_pop_rooms, planet->num_rooms,
          (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms));
 }

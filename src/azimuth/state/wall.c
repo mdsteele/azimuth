@@ -569,6 +569,20 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
     .color1 = {64, 64, 80, 255}, .color2 = {32, 32, 32, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_56)
+  },
+  // Long ice wall:
+  [57] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {90, 255, 224, 160}, .color2 = {16, 64, 64, 224},
+    .elasticity = 0.2, .impact_damage_coeff = 5.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_14)
+  },
+  // Ice boulder:
+  [58] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {90, 255, 255, 160}, .color2 = {16, 32, 48, 224},
+    .elasticity = 0.2, .impact_damage_coeff = 5.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_5)
   }
 };
 
