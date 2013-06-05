@@ -304,6 +304,25 @@ static void draw_tractor_node(az_node_status_t status, az_clock_t clock) {
 /*===========================================================================*/
 // Upgrades:
 
+// Helper function for drawing upgrade icons for explosives upgrades.
+static void draw_explosives_casing(void) {
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.25, 0.2, 0.2);
+    glVertex2f(-6, 10); glVertex2f(-6, -10);
+    glColor3f(0.65, 0.6, 0.6);
+    glVertex2f(0, 10); glVertex2f(0, -10);
+    glColor3f(0.25, 0.2, 0.2);
+    glVertex2f(6, 10); glVertex2f(6, -10);
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0, 0, 0);
+    glVertex2f(-6.1, 4); glVertex2f(-6.1, -7);
+    glVertex2f(-2, 7); glVertex2f(-2, -5);
+    glVertex2f(2, 4); glVertex2f(2, -7);
+    glVertex2f(6.1, 6); glVertex2f(6.1, -4);
+  } glEnd();
+}
+
 // Helper function for drawing upgrade icons for armor upgrades.
 static void draw_armor(void) {
   glBegin(GL_TRIANGLE_FAN); {
@@ -527,6 +546,30 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           else if (frame == 0) glColor3f(0.75, 0.75, 0.25); // yellow
           else glColor3f(0.25, 0.25, 0.25); // dark gray
           glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      break;
+    case AZ_UPG_HIGH_EXPLOSIVES:
+      draw_explosives_casing();
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat f = 0.7f + 0.215f * frame;
+        glColor3f(1, 1, 0.2); glVertex2f(0, 0);
+        glColor3f(0.9f, 0.1 + 0.07f * frame, 0);
+        glVertex2f(0, 7*f); glVertex2f(2, 2); glVertex2f(8*f, 4*f);
+        glVertex2f(4, -1); glVertex2f(7*f, -6*f); glVertex2f(2, -4);
+        glVertex2f(1*f, -8*f); glVertex2f(-1, -3); glVertex2f(-6*f, -6*f);
+        glVertex2f(-4, 0); glVertex2f(-7*f, 5*f); glVertex2f(-2, 3);
+        glVertex2f(0, 7*f);
+      } glEnd();
+      break;
+    case AZ_UPG_ATTUNED_EXPLOSIVES:
+      draw_explosives_casing();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(1, 1, 1); glVertex2f(0, 0);
+        const double radius = 6 + 0.95 * (frame == 3 ? 1 : frame);
+        glColor4f(0, 0.5, 1, 0.5);
+        for (int i = 0; i <= 360; i += 10) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
       break;
@@ -862,17 +905,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(4, 4); glVertex2f(-4, 4);
         glVertex2f(-4, 0); glVertex2f(4, 0);
         glVertex2f(4, -4); glVertex2f(-4, -4);
-      } glEnd();
-      break;
-    // TODO: Draw other upgrade icons.
-    case AZ_UPG_HIGH_EXPLOSIVES:
-    case AZ_UPG_ATTUNED_EXPLOSIVES:
-      glColor3f(1, (upgrade % 2), (upgrade % 4) / 2);
-      glBegin(GL_QUADS); {
-        glVertex2d(12, 12);
-        glVertex2d(-12, 12);
-        glVertex2d(-12, -12);
-        glVertex2d(12, -12);
       } glEnd();
       break;
   }
