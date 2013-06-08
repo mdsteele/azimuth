@@ -521,6 +521,7 @@ static void do_add_wall(int x, int y, bool constrained) {
 
 static void do_remove(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  bool any = false;
 #define NUKE_SCRIPTS(obj, script) do { \
     AZ_LIST_LOOP(obj, room->obj##s) { \
       if (!obj->selected) continue; \
@@ -539,7 +540,7 @@ static void do_remove(void) {
     AZ_LIST_INIT(temp_##obj##s, 2); \
     AZ_LIST_LOOP(obj, room->obj##s) { \
       if (!obj->selected) *AZ_LIST_ADD(temp_##obj##s) = *obj; \
-      else set_room_unsaved(room); \
+      else any = true; \
     } \
     AZ_LIST_SWAP(temp_##obj##s, room->obj##s); \
     AZ_LIST_DESTROY(temp_##obj##s); \
@@ -551,6 +552,7 @@ static void do_remove(void) {
   REMOVE(node);
   REMOVE(wall);
 #undef REMOVE
+  if (any) set_room_unsaved(room);
 }
 
 static void do_copy(bool cut) {
