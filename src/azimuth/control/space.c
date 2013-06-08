@@ -120,24 +120,24 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   return az_save_games_to_file(saved_games, path_buffer);
 }
 
-static void update_controls(void) {
-  state.ship.controls.up_held = az_is_key_held(AZ_KEY_UP_ARROW);
-  state.ship.controls.down_held = az_is_key_held(AZ_KEY_DOWN_ARROW);
-  state.ship.controls.left_held = az_is_key_held(AZ_KEY_LEFT_ARROW);
-  state.ship.controls.right_held = az_is_key_held(AZ_KEY_RIGHT_ARROW);
-  state.ship.controls.fire_held = az_is_key_held(AZ_KEY_V);
-  state.ship.controls.ordn_held = az_is_key_held(AZ_KEY_C);
-  state.ship.controls.util_held = az_is_key_held(AZ_KEY_X);
+static void update_controls(const az_preferences_t *prefs) {
+  state.ship.controls.up_held = az_is_key_held(prefs->up_key);
+  state.ship.controls.down_held = az_is_key_held(prefs->down_key);
+  state.ship.controls.left_held = az_is_key_held(prefs->left_key);
+  state.ship.controls.right_held = az_is_key_held(prefs->right_key);
+  state.ship.controls.fire_held = az_is_key_held(prefs->fire_key);
+  state.ship.controls.ordn_held = az_is_key_held(prefs->ordn_key);
+  state.ship.controls.util_held = az_is_key_held(prefs->util_key);
 }
 
-az_space_action_t az_space_event_loop(const az_planet_t *planet,
-                                      az_saved_games_t *saved_games,
-                                      int saved_game_index) {
+az_space_action_t az_space_event_loop(
+    const az_planet_t *planet, az_saved_games_t *saved_games,
+    az_preferences_t *prefs, int saved_game_index) {
   begin_saved_game(planet, saved_games, saved_game_index);
 
   while (true) {
     // Tick the state and redraw the screen.
-    update_controls();
+    update_controls(prefs);
     az_tick_space_state(&state, 1.0/60.0);
     az_tick_audio_mixer(&state.soundboard);
     az_start_screen_redraw(); {
@@ -199,7 +199,7 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
                 state.mode_data.dialog.text->num_lines;
               state.mode_data.dialog.col = 0;
             } else if (state.mode_data.dialog.step == AZ_DLS_PAUSE &&
-                       event.key.name == AZ_KEY_RETURN) {
+                       event.key.id == AZ_KEY_RETURN) {
               az_resume_script(&state, &state.mode_data.dialog.vm);
             }
             break;
@@ -211,19 +211,11 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
             break;
           } else if (state.mode != AZ_MODE_NORMAL) break;
           // Handle the keystroke:
-          switch (event.key.name) {
+          switch (event.key.id) {
             case AZ_KEY_RETURN:
               state.mode = AZ_MODE_PAUSING;
               state.mode_data.pause.progress = 0.0;
               break;
-            case AZ_KEY_UP_ARROW:
-              state.ship.controls.up_pressed = true;
-              break;
-            case AZ_KEY_DOWN_ARROW:
-              state.ship.controls.down_pressed = true;
-              break;
-            case AZ_KEY_V: state.ship.controls.fire_pressed = true; break;
-            case AZ_KEY_X: state.ship.controls.util_pressed = true; break;
             case AZ_KEY_1:
               az_select_gun(&state.ship.player, AZ_GUN_CHARGE);
               break;
@@ -254,7 +246,17 @@ az_space_action_t az_space_event_loop(const az_planet_t *planet,
             case AZ_KEY_0:
               az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
               break;
-            default: break;
+            default:
+              if (event.key.id == prefs->up_key) {
+                state.ship.controls.up_pressed = true;
+              } else if (event.key.id == prefs->down_key) {
+                state.ship.controls.down_pressed = true;
+              } else if (event.key.id == prefs->fire_key) {
+                state.ship.controls.fire_pressed = true;
+              } else if (event.key.id == prefs->util_key) {
+                state.ship.controls.util_pressed = true;
+              }
+              break;
           }
           break;
         default: break;

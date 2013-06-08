@@ -137,46 +137,46 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
   assert(line2_out != NULL);
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
-      *line1_out = "Hold [V] to charge, release to fire.";
+      *line1_out = "Hold [C] to charge, release to fire.";
       *line2_out = "Charged shots can destroy certain walls.";
       break;
     case AZ_UPG_GUN_FREEZE:
       *line1_out = "Shots can freeze enemies.";
-      *line2_out = "Press [2] to select, press [V] to fire.";
+      *line2_out = "Press [2] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_TRIPLE:
       *line1_out = "Fires three shots at once.";
-      *line2_out = "Press [3] to select, press [V] to fire.";
+      *line2_out = "Press [3] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_HOMING:
       *line1_out = "Shots will seek out enemies.";
-      *line2_out = "Press [4] to select, press [V] to fire.";
+      *line2_out = "Press [4] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_PHASE:
       *line1_out = "Shots will pass through walls.";
-      *line2_out = "Press [5] to select, press [V] to fire.";
+      *line2_out = "Press [5] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_BURST:
       *line1_out = "Shots will explode into shrapnel on impact.";
-      *line2_out = "Press [6] to select, press [V] to fire.";
+      *line2_out = "Press [6] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_PIERCE:
       *line1_out = "Shots will pierce through multiple enemies.";
-      *line2_out = "Press [7] to select, press [V] to fire.";
+      *line2_out = "Press [7] to select, press [C] to fire.";
       break;
     case AZ_UPG_GUN_BEAM:
       *line1_out = "Fires a continuous beam.";
-      *line2_out = "Press [8] to select, press [V] to fire.";
+      *line2_out = "Press [8] to select, press [C] to fire.";
       break;
     case AZ_UPG_HYPER_ROCKETS:
       { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_HYPER_ROCKET == 3); }
-      *line1_out = "Press [9] to select rockets, hold [C] to charge,";
-      *line2_out = "and press [V] to fire.  Uses 3 rockets.";
+      *line1_out = "Press [9] to select rockets, hold [X] to charge,";
+      *line2_out = "and press [C] to fire.  Uses 3 rockets.";
       break;
     case AZ_UPG_MEGA_BOMBS:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_MEGA_BOMB == 3); }
-      *line1_out = "Press [0] to select bombs, hold [C] to charge,";
-      *line2_out = "and press [V] to drop.  Uses 3 bombs.";
+      *line1_out = "Press [0] to select bombs, hold [X] to charge,";
+      *line2_out = "and press [C] to drop.  Uses 3 bombs.";
       break;
     case AZ_UPG_HIGH_EXPLOSIVES:
       { AZ_STATIC_ASSERT(AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER == 1.5); }
@@ -189,17 +189,17 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = "as much splash damage to your own ship.";
       break;
     case AZ_UPG_RETRO_THRUSTERS:
-      *line1_out = "Press [DOWN] to accelerate your ship backwards.";
+      *line1_out = "Press [\x12] to accelerate your ship backwards.";
       *line2_out = NULL;
       break;
     case AZ_UPG_CPLUS_DRIVE:
       *line1_out = "Fly straight without stopping to charge, then";
-      *line2_out = "double-tap [UP].  Destroys certain walls on impact.";
+      *line2_out = "double-tap [\x11].  Destroys certain walls on impact.";
       break;
     case AZ_UPG_ORION_BOOSTER:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_ORION_BOOST == 2); }
-      *line1_out = "Press [0] to select bombs, hold [C] to charge,";
-      *line2_out = "then double-tap [DOWN] to boost.  Uses 2 bombs.";
+      *line1_out = "Press [0] to select bombs, hold [X] to charge,";
+      *line2_out = "then double-tap [\x12] to boost.  Uses 2 bombs.";
       break;
     case AZ_UPG_HARDENED_ARMOR:
       { AZ_STATIC_ASSERT(AZ_ARMOR_DAMAGE_FACTOR == 0.8); }
@@ -229,7 +229,7 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
       *line2_out = NULL;
       break;
     case AZ_UPG_TRACTOR_BEAM:
-      *line1_out = "Hold [X] to lock onto flashing tractor nodes.";
+      *line1_out = "Hold [Z] to lock onto flashing tractor nodes.";
       *line2_out = NULL;
       break;
     case AZ_UPG_INFRASCANNER:
@@ -272,7 +272,7 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
     case AZ_UPG_ROCKET_AMMO_29:
       { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_AMMO_UPGRADE == 5); }
       *line1_out = "Maximum rockets increased by 5.";
-      *line2_out = "Press [9] to select, hold [C] and press [V] to fire.";
+      *line2_out = "Press [9] to select, hold [X] and press [C] to fire.";
       break;
     case AZ_UPG_BOMB_AMMO_00:
     case AZ_UPG_BOMB_AMMO_01:
@@ -296,7 +296,7 @@ void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
     case AZ_UPG_BOMB_AMMO_19:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_AMMO_UPGRADE == 3); }
       *line1_out = "Maximum bombs increased by 3.";
-      *line2_out = "Press [0] to select, hold [C] and press [V] to drop.";
+      *line2_out = "Press [0] to select, hold [X] and press [C] to drop.";
       break;
     case AZ_UPG_CAPACITOR_00:
     case AZ_UPG_CAPACITOR_01:

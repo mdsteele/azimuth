@@ -92,7 +92,7 @@ az_title_action_t az_title_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          switch (event.key.name) {
+          switch (event.key.id) {
             case AZ_KEY_1: try_start_game(&state, 0); break;
             case AZ_KEY_2: try_start_game(&state, 1); break;
             case AZ_KEY_3: try_start_game(&state, 2); break;

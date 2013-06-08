@@ -23,11 +23,15 @@
 
 #include <stdbool.h>
 
+#include "azimuth/util/key.h"
+
 /*===========================================================================*/
 
 typedef struct {
   float music_volume;
   float sound_volume;
+  az_key_id_t up_key, down_key, right_key, left_key;
+  az_key_id_t fire_key, ordn_key, util_key;
 } az_preferences_t;
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs);

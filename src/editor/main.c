@@ -1185,7 +1185,7 @@ static void event_loop(void) {
               }
               break;
             }
-            switch (event.key.name) {
+            switch (event.key.id) {
               case AZ_KEY_RETURN:
                 switch (state.text.action) {
                   case AZ_ETA_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -1228,7 +1228,7 @@ static void event_loop(void) {
             break;
           }
           // Otherwise, we're not editing text, so handle key events normally.
-          switch (event.key.name) {
+          switch (event.key.id) {
             case AZ_KEY_1: state.zoom_level = 1.0; break;
             case AZ_KEY_2:
               state.zoom_level = pow(2, (event.key.shift ? -0.5 : 0.5));

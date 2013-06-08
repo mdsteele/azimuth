@@ -39,13 +39,30 @@
 #define AZ_KMOD_CMD KMOD_CTRL
 #endif
 
-static SDLKey az_key_to_sdl_key(az_key_name_t key) {
+static SDLKey az_key_to_sdl_key(az_key_id_t key) {
   assert(key != AZ_KEY_UNKNOWN);
   switch (key) {
     case AZ_KEY_UNKNOWN: AZ_ASSERT_UNREACHABLE();
-    case AZ_KEY_RETURN: return SDLK_RETURN;
     case AZ_KEY_ESCAPE: return SDLK_ESCAPE;
+    case AZ_KEY_BACKTICK: return SDLK_BACKQUOTE;
+    case AZ_KEY_HYPHEN: return SDLK_MINUS;
+    case AZ_KEY_EQUALS: return SDLK_EQUALS;
+    case AZ_KEY_BACKSPACE: return SDLK_BACKSPACE;
+    case AZ_KEY_TAB: return SDLK_TAB;
+    case AZ_KEY_LEFT_BRACKET: return SDLK_LEFTBRACKET;
+    case AZ_KEY_RIGHT_BRACKET: return SDLK_RIGHTBRACKET;
+    case AZ_KEY_BACKSLASH: return SDLK_BACKSLASH;
+    case AZ_KEY_SEMICOLON: return SDLK_SEMICOLON;
+    case AZ_KEY_QUOTE: return SDLK_QUOTE;
+    case AZ_KEY_RETURN: return SDLK_RETURN;
+    case AZ_KEY_COMMA: return SDLK_COMMA;
+    case AZ_KEY_PERIOD: return SDLK_PERIOD;
+    case AZ_KEY_SLASH: return SDLK_SLASH;
     case AZ_KEY_SPACE: return SDLK_SPACE;
+    case AZ_KEY_UP_ARROW: return SDLK_UP;
+    case AZ_KEY_DOWN_ARROW: return SDLK_DOWN;
+    case AZ_KEY_LEFT_ARROW: return SDLK_LEFT;
+    case AZ_KEY_RIGHT_ARROW: return SDLK_RIGHT;
     case AZ_KEY_0: return SDLK_0;
     case AZ_KEY_1: return SDLK_1;
     case AZ_KEY_2: return SDLK_2;
@@ -82,20 +99,22 @@ static SDLKey az_key_to_sdl_key(az_key_name_t key) {
     case AZ_KEY_X: return SDLK_x;
     case AZ_KEY_Y: return SDLK_y;
     case AZ_KEY_Z: return SDLK_z;
-    case AZ_KEY_BACKSPACE: return SDLK_BACKSPACE;
-    case AZ_KEY_UP_ARROW: return SDLK_UP;
-    case AZ_KEY_DOWN_ARROW: return SDLK_DOWN;
-    case AZ_KEY_LEFT_ARROW: return SDLK_LEFT;
-    case AZ_KEY_RIGHT_ARROW: return SDLK_RIGHT;
   }
   AZ_ASSERT_UNREACHABLE();
 }
 
-static az_key_name_t sdl_key_to_az_key(SDLKey key) {
+static az_key_id_t sdl_key_to_az_key(SDLKey key) {
   switch (key) {
+    case SDLK_BACKSPACE: return AZ_KEY_BACKSPACE;
+    case SDLK_TAB: return AZ_KEY_TAB;
     case SDLK_RETURN: return AZ_KEY_RETURN;
     case SDLK_ESCAPE: return AZ_KEY_ESCAPE;
     case SDLK_SPACE: return AZ_KEY_SPACE;
+    case SDLK_QUOTE: return AZ_KEY_QUOTE;
+    case SDLK_COMMA: return AZ_KEY_COMMA;
+    case SDLK_MINUS: return AZ_KEY_HYPHEN;
+    case SDLK_PERIOD: return AZ_KEY_PERIOD;
+    case SDLK_SLASH: return AZ_KEY_SLASH;
     case SDLK_0: return AZ_KEY_0;
     case SDLK_1: return AZ_KEY_1;
     case SDLK_2: return AZ_KEY_2;
@@ -106,6 +125,12 @@ static az_key_name_t sdl_key_to_az_key(SDLKey key) {
     case SDLK_7: return AZ_KEY_7;
     case SDLK_8: return AZ_KEY_8;
     case SDLK_9: return AZ_KEY_9;
+    case SDLK_SEMICOLON: return AZ_KEY_SEMICOLON;
+    case SDLK_EQUALS: return AZ_KEY_EQUALS;
+    case SDLK_LEFTBRACKET: return AZ_KEY_LEFT_BRACKET;
+    case SDLK_BACKSLASH: return AZ_KEY_BACKSLASH;
+    case SDLK_RIGHTBRACKET: return AZ_KEY_RIGHT_BRACKET;
+    case SDLK_BACKQUOTE: return AZ_KEY_BACKTICK;
     case SDLK_a: return AZ_KEY_A;
     case SDLK_b: return AZ_KEY_B;
     case SDLK_c: return AZ_KEY_C;
@@ -132,11 +157,11 @@ static az_key_name_t sdl_key_to_az_key(SDLKey key) {
     case SDLK_x: return AZ_KEY_X;
     case SDLK_y: return AZ_KEY_Y;
     case SDLK_z: return AZ_KEY_Z;
-    case SDLK_BACKSPACE: return AZ_KEY_BACKSPACE;
+    case SDLK_DELETE: return AZ_KEY_BACKSPACE;
     case SDLK_UP: return AZ_KEY_UP_ARROW;
     case SDLK_DOWN: return AZ_KEY_DOWN_ARROW;
-    case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
     case SDLK_RIGHT: return AZ_KEY_RIGHT_ARROW;
+    case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
     default: return AZ_KEY_UNKNOWN;
   }
 }
@@ -186,14 +211,14 @@ bool az_poll_event(az_event_t *event) {
           }
         }
         event->kind = AZ_EVENT_KEY_DOWN;
-        event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
+        event->key.id = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
         event->key.character = sdl_event.key.keysym.unicode;
         return true;
       case SDL_KEYUP:
         event->kind = AZ_EVENT_KEY_UP;
-        event->key.name = sdl_key_to_az_key(sdl_event.key.keysym.sym);
+        event->key.id = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
         event->key.character = sdl_event.key.keysym.unicode;
@@ -244,7 +269,7 @@ bool az_is_mouse_held(void) {
   return (bool)(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT));
 }
 
-bool az_is_key_held(az_key_name_t key) {
+bool az_is_key_held(az_key_id_t key) {
   assert(key != AZ_KEY_UNKNOWN);
   return (bool)SDL_GetKeyState(NULL)[az_key_to_sdl_key(key)];
 }

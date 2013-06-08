@@ -18,24 +18,75 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_CONTROL_SPACE_H_
-#define AZIMUTH_CONTROL_SPACE_H_
-
-#include "azimuth/state/planet.h"
-#include "azimuth/state/save.h"
-#include "azimuth/util/prefs.h"
+#ifndef AZIMUTH_UTIL_KEY_H_
+#define AZIMUTH_UTIL_KEY_H_
 
 /*===========================================================================*/
 
 typedef enum {
-  AZ_SA_EXIT_TO_TITLE,
-  AZ_SA_GAME_OVER
-} az_space_action_t;
+  AZ_KEY_UNKNOWN = 0,
+  AZ_KEY_ESCAPE,
+  AZ_KEY_BACKTICK,
+  AZ_KEY_HYPHEN,
+  AZ_KEY_EQUALS,
+  AZ_KEY_BACKSPACE,
+  AZ_KEY_TAB,
+  AZ_KEY_LEFT_BRACKET,
+  AZ_KEY_RIGHT_BRACKET,
+  AZ_KEY_BACKSLASH,
+  AZ_KEY_SEMICOLON,
+  AZ_KEY_QUOTE,
+  AZ_KEY_RETURN,
+  AZ_KEY_COMMA,
+  AZ_KEY_PERIOD,
+  AZ_KEY_SLASH,
+  AZ_KEY_SPACE,
+  AZ_KEY_UP_ARROW,
+  AZ_KEY_DOWN_ARROW,
+  AZ_KEY_RIGHT_ARROW,
+  AZ_KEY_LEFT_ARROW,
+  AZ_KEY_0,
+  AZ_KEY_1,
+  AZ_KEY_2,
+  AZ_KEY_3,
+  AZ_KEY_4,
+  AZ_KEY_5,
+  AZ_KEY_6,
+  AZ_KEY_7,
+  AZ_KEY_8,
+  AZ_KEY_9,
+  AZ_KEY_A,
+  AZ_KEY_B,
+  AZ_KEY_C,
+  AZ_KEY_D,
+  AZ_KEY_E,
+  AZ_KEY_F,
+  AZ_KEY_G,
+  AZ_KEY_H,
+  AZ_KEY_I,
+  AZ_KEY_J,
+  AZ_KEY_K,
+  AZ_KEY_L,
+  AZ_KEY_M,
+  AZ_KEY_N,
+  AZ_KEY_O,
+  AZ_KEY_P,
+  AZ_KEY_Q,
+  AZ_KEY_R,
+  AZ_KEY_S,
+  AZ_KEY_T,
+  AZ_KEY_U,
+  AZ_KEY_V,
+  AZ_KEY_W,
+  AZ_KEY_X,
+  AZ_KEY_Y,
+  AZ_KEY_Z
+} az_key_id_t;
 
-az_space_action_t az_space_event_loop(
-    const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs, int saved_game_index);
+#define AZ_LAST_KEY_ID AZ_KEY_Z
+
+const char *az_key_name(az_key_id_t key);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_CONTROL_SPACE_H_
+#endif // AZIMUTH_UTIL_KEY_H_

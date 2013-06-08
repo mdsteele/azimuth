@@ -48,7 +48,7 @@ az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          switch (event.key.name) {
+          switch (event.key.id) {
             case AZ_KEY_RETURN:
             case AZ_KEY_ESCAPE:
               return AZ_PA_RESUME;
