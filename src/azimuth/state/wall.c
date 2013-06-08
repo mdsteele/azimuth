@@ -186,6 +186,10 @@ static az_vector_t wall_vertices_56[] = {
   {-80, -30}, {-79.24, -33.83}, {-77.07, -37.07}, {-73.83, -39.24}, {-70, -40},
   {70, -40}, {73.83, -39.24}, {77.07, -37.07}, {79.24, -33.83}, {80, -30}
 };
+static az_vector_t wall_vertices_61[] = {
+  {50, 20}, {27, 18}, {2, 21}, {-24, 15}, {-50, 20},
+  {-50, -40}, {-25, -60}, {0, -46}, {25, -50}, {50, -40}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -583,6 +587,30 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {90, 255, 255, 160}, .color2 = {16, 32, 48, 224},
     .elasticity = 0.2, .impact_damage_coeff = 5.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_5)
+  },
+  // Dust/dirt convex wall:
+  [59] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
+    .color1 = {96, 48, 0, 255}, .color2 = {128, 64, 32, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Dust/dirt concave wall:
+  [60] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.5,
+    .color1 = {96, 48, 0, 255}, .color2 = {0, 0, 0, 255},
+    .color3 = {128, 64, 32, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Dust/dirt straight-ish short wall:
+  [61] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
+    .color1 = {96, 48, 0, 255}, .color2 = {128, 64, 32, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   }
 };
 

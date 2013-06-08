@@ -12,3 +12,4 @@
 12: Opened bomb door between Colony rooms 73 and 75 (around room 74)
 13: Opened rocket door between Colony rooms 125 and 128
 14: Killed boss door in Filimun room 52
+15: Opened hyper rocket door between Filimun room 47 and Nandiar room 48

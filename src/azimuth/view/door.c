@@ -119,19 +119,19 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
       break;
     case AZ_DOOR_ROCKET:
       color1 = (az_color_t){192, 0, 0, 255};
-      color2 = (az_color_t){128, 0, 0, 255};
+      color2 = (az_color_t){96, 0, 0, 255};
       break;
     case AZ_DOOR_HYPER_ROCKET:
       color1 = (az_color_t){255, 0, 128, 255};
-      color2 = (az_color_t){192, 0, 96, 255};
+      color2 = (az_color_t){128, 0, 64, 255};
       break;
     case AZ_DOOR_BOMB:
-      color1 = (az_color_t){0, 0, 192, 255};
-      color2 = (az_color_t){0, 0, 128, 255};
+      color1 = (az_color_t){24, 24, 192, 255};
+      color2 = (az_color_t){12, 12, 96, 255};
       break;
     case AZ_DOOR_MEGA_BOMB:
       color1 = (az_color_t){0, 128, 255, 255};
-      color2 = (az_color_t){0, 96, 192, 255};
+      color2 = (az_color_t){0, 80, 160, 255};
       break;
     case AZ_DOOR_PASSAGE:
       draw_passage();
