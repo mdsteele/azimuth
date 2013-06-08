@@ -1158,6 +1158,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
     if (console != NULL) {
       controls->util_pressed = false;
+      ship->thrusters = AZ_THRUST_NONE;
       state->mode = AZ_MODE_CONSOLE;
       state->mode_data.console.step = AZ_CSS_ALIGN;
       state->mode_data.console.progress = 0.0;

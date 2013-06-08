@@ -156,6 +156,8 @@ static void tick_console_mode(az_space_state_t *state, double time) {
   assert(node != NULL);
   assert(node->kind == AZ_NODE_CONSOLE);
   az_ship_t *ship = &state->ship;
+  assert(az_ship_is_present(ship));
+  assert(ship->thrusters == AZ_THRUST_NONE);
   az_player_t *player = &ship->player;
   double *progress = &state->mode_data.console.progress;
   const double align_time = 0.3; // seconds
