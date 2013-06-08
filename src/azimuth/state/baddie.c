@@ -656,7 +656,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 10.0 }
   },
   [AZ_BAD_FLYER] = {
-    .max_health = 3.0, .color = {255, 64, 0, 255},
+    .max_health = 1.0, .color = {255, 64, 0, 255},
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .properties = AZ_BADF_KAMIKAZE,

@@ -1185,7 +1185,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->state == 0) {
         if (baddie->cooldown > 0.0) {
           // Fire a beam.
-          const double beam_damage = 40.0 * time;
+          const double beam_damage = 38.0 * time;
           const az_vector_t beam_start =
             az_vadd(baddie->position, az_vpolar(15, baddie->angle));
           az_impact_t impact;
