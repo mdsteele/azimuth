@@ -611,6 +611,14 @@ static az_wall_data_t wall_datas[] = {
     .color3 = {0, 0, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
+  },
+  // Grass/dirt straight-ish short wall:
+  [62] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
+    .color1 = {96, 48, 0, 255}, .color2 = {64, 128, 0, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   }
 };
 
