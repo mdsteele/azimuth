@@ -341,11 +341,11 @@ bool az_try_damage_baddie(
     assert(damage_was_dealt);
     // If this was the boss, go into boss-death mode.
     if (baddie->uid == state->boss_uid) {
-      state->mode = AZ_MODE_BOSS_DEATH;
-      state->mode_data.boss_death.step = AZ_BDS_SHAKE;
-      state->mode_data.boss_death.progress = 0.0;
       baddie->health = 0.000001;
-      state->mode_data.boss_death.boss = *baddie;
+      state->mode = AZ_MODE_BOSS_DEATH;
+      state->boss_death_mode = (az_boss_death_mode_data_t){
+        .step = AZ_BDS_SHAKE, .progress = 0.0, .boss = *baddie
+      };
       baddie->kind = AZ_BAD_NOTHING;
       AZ_ARRAY_LOOP(other, state->baddies) {
         if (other->kind == AZ_BAD_NOTHING) continue;
@@ -447,8 +447,9 @@ void az_kill_ship(az_space_state_t *state) {
   ship->player.shields = 0.0;
   // Put us into game-over mode:
   state->mode = AZ_MODE_GAME_OVER;
-  state->mode_data.game_over.step = AZ_GOS_ASPLODE;
-  state->mode_data.game_over.progress = 0.0;
+  state->game_over_mode = (az_game_over_mode_data_t){
+    .step = AZ_GOS_ASPLODE, .progress = 0.0
+  };
 }
 
 /*===========================================================================*/

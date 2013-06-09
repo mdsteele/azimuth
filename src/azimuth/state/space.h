@@ -60,6 +60,64 @@ typedef struct {
   az_script_vm_t vm;
 } az_countdown_t;
 
+/*===========================================================================*/
+
+typedef struct {
+  enum { AZ_BDS_SHAKE, AZ_BDS_BOOM, AZ_BDS_FADE } step;
+  double progress;
+  az_baddie_t boss;
+} az_boss_death_mode_data_t;
+
+typedef struct {
+  enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_FINISH } step;
+  double progress; // 0.0 to 1.0
+  az_uid_t node_uid;
+  az_vector_t position_delta;
+  double angle_delta;
+} az_console_mode_data_t;
+
+typedef struct {
+  enum { AZ_DLS_BEGIN, AZ_DLS_TALK, AZ_DLS_WAIT, AZ_DLS_END } step;
+  double progress; // 0.0 to 1.0
+  bool bottom_next;
+  az_portrait_t top, bottom;
+  const az_text_t *text;
+  int row, col;
+  az_script_vm_t vm;
+} az_dialog_mode_data_t;
+
+typedef struct {
+  enum { AZ_DWS_FADE_OUT, AZ_DWS_SHIFT, AZ_DWS_FADE_IN } step;
+  double progress; // 0.0 to 1.0
+  az_room_key_t destination;
+  struct {
+    az_door_kind_t kind;
+    az_uid_t uid;
+    az_vector_t position;
+    double angle;
+  } entrance, exit;
+  double cam_start_r, cam_start_theta;
+  double cam_delta_r, cam_delta_theta;
+} az_doorway_mode_data_t;
+
+typedef struct {
+  enum { AZ_GOS_ASPLODE, AZ_GOS_FADE_OUT } step;
+  double progress; // 0.0 to 1.0
+} az_game_over_mode_data_t;
+
+typedef struct {
+  enum { AZ_PSS_FADE_OUT, AZ_PSS_FADE_IN } step;
+  double fade_alpha; // 0.0 to 1.0
+} az_pausing_mode_data_t;
+
+typedef struct {
+  enum { AZ_UGS_OPEN, AZ_UGS_MESSAGE, AZ_UGS_CLOSE } step;
+  double progress; // 0.0 to 1.0
+  az_upgrade_t upgrade;
+} az_upgrade_mode_data_t;
+
+/*===========================================================================*/
+
 typedef struct {
   const az_planet_t *planet;
   int save_file_index;
@@ -78,54 +136,16 @@ typedef struct {
     AZ_MODE_DIALOG, // engaged in story dialog
     AZ_MODE_DOORWAY, // waiting while we pass through a door
     AZ_MODE_GAME_OVER, // showing the game over animation
-    AZ_MODE_PAUSING, // entering the pause screen
-    AZ_MODE_RESUMING, // leaving the pause screen
+    AZ_MODE_PAUSING, // entering/leaving the pause screen
     AZ_MODE_UPGRADE // receiving an upgrade
   } mode;
-  union {
-    struct {
-      enum { AZ_BDS_SHAKE, AZ_BDS_BOOM, AZ_BDS_FADE } step;
-      double progress;
-      az_baddie_t boss;
-    } boss_death;
-    struct {
-      enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_FINISH } step;
-      double progress;
-      az_uid_t node_uid;
-      az_vector_t position_delta;
-      double angle_delta;
-    } console;
-    struct {
-      enum { AZ_DLS_BEGIN, AZ_DLS_TALK, AZ_DLS_PAUSE, AZ_DLS_END } step;
-      double progress; // 0.0 to 1.0
-      bool bottom_next;
-      az_portrait_t top, bottom;
-      const az_text_t *text;
-      int row, col;
-      az_script_vm_t vm;
-    } dialog;
-    struct {
-      enum { AZ_DWS_FADE_OUT, AZ_DWS_SHIFT, AZ_DWS_FADE_IN } step;
-      double progress; // 0.0 to 1.0
-      const az_door_t *door;
-      az_vector_t entrance_position;
-      double entrance_angle;
-      double cam_start_r, cam_start_theta;
-      double cam_delta_r, cam_delta_theta;
-    } doorway;
-    struct {
-      enum { AZ_GOS_ASPLODE, AZ_GOS_FADE_OUT } step;
-      double progress; // 0.0 to 1.0
-    } game_over;
-    struct {
-      double progress; // 0.0 to 1.0
-    } pause; // used for both PAUSING and RESUMING mode
-    struct {
-      enum { AZ_UGS_OPEN, AZ_UGS_MESSAGE, AZ_UGS_CLOSE } step;
-      double progress; // 0.0 to 1.0
-      az_upgrade_t upgrade;
-    } upgrade;
-  } mode_data;
+  az_boss_death_mode_data_t boss_death_mode;
+  az_console_mode_data_t console_mode;
+  az_dialog_mode_data_t dialog_mode;
+  az_doorway_mode_data_t doorway_mode;
+  az_game_over_mode_data_t game_over_mode;
+  az_pausing_mode_data_t pausing_mode;
+  az_upgrade_mode_data_t upgrade_mode;
 
   // Space objects (these all get cleared out when we exit a room):
   az_uid_t boss_uid;

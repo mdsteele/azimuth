@@ -641,9 +641,8 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DLOG:
         if (state->mode == AZ_MODE_NORMAL) {
           state->mode = AZ_MODE_DIALOG;
-          memset(&state->mode_data.dialog, 0, sizeof(state->mode_data.dialog));
-          state->mode_data.dialog.step = AZ_DLS_BEGIN;
-          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+          state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_BEGIN};
+          SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("can't start dialog now");
       case AZ_OP_PT:
@@ -652,7 +651,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
           } else {
-            state->mode_data.dialog.top = (az_portrait_t)portrait;
+            state->dialog_mode.top = (az_portrait_t)portrait;
           }
         } else SCRIPT_ERROR("not in dialog");
         break;
@@ -662,7 +661,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
           } else {
-            state->mode_data.dialog.bottom = (az_portrait_t)portrait;
+            state->dialog_mode.bottom = (az_portrait_t)portrait;
           }
         } else SCRIPT_ERROR("not in dialog");
         break;
@@ -673,12 +672,12 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             SCRIPT_ERROR("invalid text index");
           }
           const az_text_t *text = &state->planet->texts[text_index];
-          state->mode_data.dialog.step = AZ_DLS_TALK;
-          state->mode_data.dialog.progress = 0.0;
-          state->mode_data.dialog.bottom_next = false;
-          state->mode_data.dialog.text = text;
-          state->mode_data.dialog.row = state->mode_data.dialog.col = 0;
-          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+          state->dialog_mode.step = AZ_DLS_TALK;
+          state->dialog_mode.progress = 0.0;
+          state->dialog_mode.bottom_next = false;
+          state->dialog_mode.text = text;
+          state->dialog_mode.row = state->dialog_mode.col = 0;
+          SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");
       case AZ_OP_TB:
@@ -688,20 +687,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             SCRIPT_ERROR("invalid text index");
           }
           const az_text_t *text = &state->planet->texts[text_index];
-          state->mode_data.dialog.step = AZ_DLS_TALK;
-          state->mode_data.dialog.progress = 0.0;
-          state->mode_data.dialog.bottom_next = true;
-          state->mode_data.dialog.text = text;
-          state->mode_data.dialog.row = state->mode_data.dialog.col = 0;
-          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+          state->dialog_mode.step = AZ_DLS_TALK;
+          state->dialog_mode.progress = 0.0;
+          state->dialog_mode.bottom_next = true;
+          state->dialog_mode.text = text;
+          state->dialog_mode.row = state->dialog_mode.col = 0;
+          SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");
       case AZ_OP_DEND:
         if (state->mode == AZ_MODE_DIALOG) {
-          state->mode_data.dialog.step = AZ_DLS_END;
-          state->mode_data.dialog.progress = 0.0;
-          state->mode_data.dialog.text = NULL;
-          SUSPEND(vm->script, &state->mode_data.dialog.vm);
+          state->dialog_mode.step = AZ_DLS_END;
+          state->dialog_mode.progress = 0.0;
+          state->dialog_mode.text = NULL;
+          SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");
       // Music/sound:
@@ -794,8 +793,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
 
  halt:
   if (state->mode == AZ_MODE_DIALOG) {
-    memset(&state->mode_data.dialog, 0, sizeof(state->mode_data.dialog));
-    state->mode_data.dialog.step = AZ_DLS_END;
+    state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_END};
   }
   // Now that the script has completed, zero out the VM.  If the resumed script
   // was a timer, this will have the effect of marking the timer as inactive.

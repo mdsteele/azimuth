@@ -23,7 +23,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h> // for NULL
-#include <string.h> // for memset
 
 #include "azimuth/constants.h"
 #include "azimuth/state/door.h"
@@ -73,7 +72,7 @@ static bool is_normal_mode(const az_space_state_t *state) {
   return (state->mode == AZ_MODE_NORMAL ||
           state->mode == AZ_MODE_BOSS_DEATH ||
           (state->mode == AZ_MODE_DOORWAY &&
-           state->mode_data.doorway.step == AZ_DWS_FADE_IN));
+           state->doorway_mode.step == AZ_DWS_FADE_IN));
 }
 
 static bool try_use_energy(az_ship_t *ship, double energy, bool exhaust) {
@@ -223,9 +222,16 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       assert(impact->target.door->kind != AZ_DOOR_NOTHING);
       ship->tractor_beam.active = false;
       state->mode = AZ_MODE_DOORWAY;
-      memset(&state->mode_data.doorway, 0, sizeof(state->mode_data.doorway));
-      state->mode_data.doorway.step = AZ_DWS_FADE_OUT;
-      state->mode_data.doorway.door = impact->target.door;
+      state->doorway_mode = (az_doorway_mode_data_t){
+        .step = AZ_DWS_FADE_OUT, .progress = 0.0,
+        .destination = impact->target.door->destination,
+        .entrance = {
+          .kind = impact->target.door->kind,
+          .uid = impact->target.door->uid,
+          .position = impact->target.door->position,
+          .angle = impact->target.door->angle
+        }
+      };
       return;
     case AZ_IMP_DOOR_OUTSIDE:
       elasticity = AZ_DOOR_ELASTICITY;
@@ -1160,13 +1166,11 @@ void az_tick_ship(az_space_state_t *state, double time) {
       controls->util_pressed = false;
       ship->thrusters = AZ_THRUST_NONE;
       state->mode = AZ_MODE_CONSOLE;
-      state->mode_data.console.step = AZ_CSS_ALIGN;
-      state->mode_data.console.progress = 0.0;
-      state->mode_data.console.node_uid = console->uid;
-      state->mode_data.console.position_delta =
-        az_vsub(ship->position, console->position);
-      state->mode_data.console.angle_delta =
-        az_mod2pi(ship->angle - console->angle);
+      state->console_mode = (az_console_mode_data_t){
+        .step = AZ_CSS_ALIGN, .progress = 0.0, .node_uid = console->uid,
+        .position_delta = az_vsub(ship->position, console->position),
+        .angle_delta = az_mod2pi(ship->angle - console->angle)
+      };
       return;
     }
   }
@@ -1178,13 +1182,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
     if (node->kind != AZ_NODE_UPGRADE) continue;
     if (az_vwithin(ship->position, node->position,
                    AZ_UPGRADE_COLLECTION_RADIUS)) {
-      state->mode = AZ_MODE_UPGRADE;
-      state->mode_data.upgrade.step = AZ_UGS_OPEN;
-      state->mode_data.upgrade.progress = 0.0;
-      state->mode_data.upgrade.upgrade = node->subkind.upgrade;
+      const az_upgrade_t upgrade = node->subkind.upgrade;
       const az_script_t *script = node->on_use;
       node->kind = AZ_NODE_NOTHING;
-      az_give_upgrade(player, node->subkind.upgrade);
+      state->mode = AZ_MODE_UPGRADE;
+      state->upgrade_mode = (az_upgrade_mode_data_t){
+        .step = AZ_UGS_OPEN, .progress = 0.0, .upgrade = upgrade
+      };
+      az_give_upgrade(player, upgrade);
       az_run_script(state, script);
       return;
     }

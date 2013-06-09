@@ -81,9 +81,9 @@ void az_tick_nodes(az_space_state_t *state, double time) {
     closest_console_node->status = AZ_NS_READY;
   }
   if (state->mode == AZ_MODE_CONSOLE &&
-      state->mode_data.console.step != AZ_CSS_ALIGN) {
+      state->console_mode.step != AZ_CSS_ALIGN) {
     az_node_t *node;
-    if (az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
+    if (az_lookup_node(state, state->console_mode.node_uid, &node)) {
       assert(node->kind == AZ_NODE_CONSOLE);
       node->status = AZ_NS_ACTIVE;
     }

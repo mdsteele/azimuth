@@ -25,6 +25,14 @@
 
 /*===========================================================================*/
 
+// In debug mode, print a warning message.  Do nothing in release mode.
+#ifdef NDEBUG
+#define AZ_WARNING_ALWAYS(...)
+#else
+#define AZ_WARNING_ALWAYS(...) \
+  _az_print_warning(__func__, __FILE__, __LINE__, __VA_ARGS__)
+#endif
+
 // In debug mode, print a warning message, but only the first time that this
 // line is executed.  Do nothing in release mode.
 #ifdef NDEBUG

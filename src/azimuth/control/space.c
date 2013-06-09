@@ -151,28 +151,28 @@ az_space_action_t az_space_event_loop(
       // If we're at the end of the game over animation, exit this controller
       // and signal that we should transition to the game over screen
       // controller.
-      if (state.mode_data.game_over.step == AZ_GOS_FADE_OUT &&
-          state.mode_data.game_over.progress >= 1.0) {
+      if (state.game_over_mode.step == AZ_GOS_FADE_OUT &&
+          state.game_over_mode.progress >= 1.0) {
         return AZ_SA_GAME_OVER;
       }
     } else if (state.mode == AZ_MODE_PAUSING) {
-      // If we're at the end of the pausing animation, directly engage the
+      // If we're at the end of the pausing fade-out, directly engage the
       // paused screen controller, and once it's done, either resume the game
       // or exit to the title screen, as appropriate.
-      if (state.mode_data.pause.progress >= 1.0) {
+      if (state.pausing_mode.step == AZ_PSS_FADE_OUT &&
+          state.pausing_mode.fade_alpha == 1.0) {
         switch (az_paused_event_loop(planet, &state.ship.player)) {
           case AZ_PA_RESUME:
-            state.mode = AZ_MODE_RESUMING;
-            state.mode_data.pause.progress = 0.0;
+            state.pausing_mode.step = AZ_PSS_FADE_IN;
             break;
           case AZ_PA_EXIT_TO_TITLE:
             return AZ_SA_EXIT_TO_TITLE;
         }
       }
     } else if (state.mode == AZ_MODE_CONSOLE &&
-               state.mode_data.console.step == AZ_CSS_FINISH) {
+               state.console_mode.step == AZ_CSS_FINISH) {
       az_node_t *node;
-      if (az_lookup_node(&state, state.mode_data.console.node_uid, &node)) {
+      if (az_lookup_node(&state, state.console_mode.node_uid, &node)) {
         assert(node->kind == AZ_NODE_CONSOLE);
         if (node->subkind.console == AZ_CONS_SAVE) {
           // If we need to save the game, do so.
@@ -189,32 +189,33 @@ az_space_action_t az_space_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          // Ignore keystrokes if not in normal mode (except to dismiss
-          // upgrade message box).
           if (state.mode == AZ_MODE_DIALOG) {
-            if (state.mode_data.dialog.step == AZ_DLS_TALK) {
-              state.mode_data.dialog.step = AZ_DLS_PAUSE;
-              state.mode_data.dialog.progress = 0.0;
-              state.mode_data.dialog.row =
-                state.mode_data.dialog.text->num_lines;
-              state.mode_data.dialog.col = 0;
-            } else if (state.mode_data.dialog.step == AZ_DLS_PAUSE &&
+            if (state.dialog_mode.step == AZ_DLS_TALK) {
+              state.dialog_mode.step = AZ_DLS_WAIT;
+              state.dialog_mode.progress = 0.0;
+              state.dialog_mode.row = state.dialog_mode.text->num_lines;
+              state.dialog_mode.col = 0;
+            } else if (state.dialog_mode.step == AZ_DLS_WAIT &&
                        event.key.id == AZ_KEY_RETURN) {
-              az_resume_script(&state, &state.mode_data.dialog.vm);
+              az_resume_script(&state, &state.dialog_mode.vm);
             }
             break;
           } else if (state.mode == AZ_MODE_UPGRADE) {
-            if (state.mode_data.upgrade.step == AZ_UGS_MESSAGE) {
-              state.mode_data.upgrade.step = AZ_UGS_CLOSE;
-              state.mode_data.upgrade.progress = 0.0;
+            if (state.upgrade_mode.step == AZ_UGS_MESSAGE) {
+              state.upgrade_mode.step = AZ_UGS_CLOSE;
+              state.upgrade_mode.progress = 0.0;
             }
             break;
-          } else if (state.mode != AZ_MODE_NORMAL) break;
+          } else if (state.mode == AZ_MODE_GAME_OVER) break;
           // Handle the keystroke:
           switch (event.key.id) {
             case AZ_KEY_RETURN:
-              state.mode = AZ_MODE_PAUSING;
-              state.mode_data.pause.progress = 0.0;
+              if (state.mode == AZ_MODE_NORMAL) {
+                state.mode = AZ_MODE_PAUSING;
+                state.pausing_mode = (az_pausing_mode_data_t){
+                  .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0
+                };
+              }
               break;
             case AZ_KEY_1:
               az_select_gun(&state.ship.player, AZ_GUN_CHARGE);

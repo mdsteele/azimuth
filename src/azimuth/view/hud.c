@@ -392,8 +392,9 @@ static void draw_dialog_text_line(const az_text_line_t *line, int num_chars) {
 
 static void draw_dialog_text(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DIALOG);
+  const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
   glPushMatrix(); {
-    if (!state->mode_data.dialog.bottom_next) {
+    if (!mode_data->bottom_next) {
       glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH +
                     PORTRAIT_BOX_WIDTH) / 2 + DIALOG_BOX_MARGIN,
                    (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING) / 2 -
@@ -405,7 +406,7 @@ static void draw_dialog_text(const az_space_state_t *state) {
                    DIALOG_BOX_MARGIN, 0);
     }
 
-    if (state->mode_data.dialog.step == AZ_DLS_PAUSE) {
+    if (mode_data->step == AZ_DLS_WAIT) {
       if (az_clock_mod(2, 15, state->clock)) glColor4f(0.5, 0.5, 0.5, 0.5);
       else glColor4f(0.25, 0.75, 0.75, 0.5);
       az_draw_string(8, AZ_ALIGN_RIGHT,
@@ -413,14 +414,14 @@ static void draw_dialog_text(const az_space_state_t *state) {
                      DIALOG_BOX_HEIGHT - 2 * DIALOG_BOX_MARGIN - 8, "[ENTER]");
     }
 
-    const az_text_t *text = state->mode_data.dialog.text;
-    for (int i = 0; i < state->mode_data.dialog.row; ++i) {
+    const az_text_t *text = mode_data->text;
+    for (int i = 0; i < mode_data->row; ++i) {
       draw_dialog_text_line(&text->lines[i], text->lines[i].total_length);
       glTranslatef(0, TEXT_LINE_SPACING, 0);
     }
-    if (state->mode_data.dialog.row < text->num_lines) {
-      draw_dialog_text_line(&text->lines[state->mode_data.dialog.row],
-                            state->mode_data.dialog.col);
+    if (mode_data->row < text->num_lines) {
+      draw_dialog_text_line(&text->lines[mode_data->row],
+                            mode_data->col);
     }
   } glPopMatrix();
 }
@@ -453,25 +454,26 @@ static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom,
 
 static void draw_dialog(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DIALOG);
+  const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
   bool talking = false;
-  const bool bottom_next = state->mode_data.dialog.bottom_next;
-  switch (state->mode_data.dialog.step) {
+  const bool bottom_next = mode_data->bottom_next;
+  switch (mode_data->step) {
     case AZ_DLS_BEGIN:
-      draw_dialog_frames(state->mode_data.dialog.progress);
+      draw_dialog_frames(mode_data->progress);
       break;
     case AZ_DLS_TALK:
       talking = true;
       // fallthrough
-    case AZ_DLS_PAUSE:
+    case AZ_DLS_WAIT:
       draw_dialog_frames(1.0);
       draw_dialog_text(state);
-      draw_dialog_portrait(state->mode_data.dialog.top, false,
-                           talking && !bottom_next, state->clock);
-      draw_dialog_portrait(state->mode_data.dialog.bottom, true,
-                           talking && bottom_next, state->clock);
+      draw_dialog_portrait(mode_data->top, false, talking && !bottom_next,
+                           state->clock);
+      draw_dialog_portrait(mode_data->bottom, true, talking && bottom_next,
+                           state->clock);
       break;
     case AZ_DLS_END:
-      draw_dialog_frames(1.0 - state->mode_data.dialog.progress);
+      draw_dialog_frames(1.0 - mode_data->progress);
       break;
   }
 }
@@ -508,16 +510,17 @@ static void draw_upgrade_box_message(az_upgrade_t upgrade) {
 
 static void draw_upgrade_box(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_UPGRADE);
-  switch (state->mode_data.upgrade.step) {
+  const az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
+  switch (mode_data->step) {
     case AZ_UGS_OPEN:
-      draw_upgrade_box_frame(state->mode_data.upgrade.progress);
+      draw_upgrade_box_frame(mode_data->progress);
       break;
     case AZ_UGS_MESSAGE:
       draw_upgrade_box_frame(1.0);
-      draw_upgrade_box_message(state->mode_data.upgrade.upgrade);
+      draw_upgrade_box_message(mode_data->upgrade);
       break;
     case AZ_UGS_CLOSE:
-      draw_upgrade_box_frame(1.0 - state->mode_data.upgrade.progress);
+      draw_upgrade_box_frame(1.0 - mode_data->progress);
       break;
   }
 }

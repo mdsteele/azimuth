@@ -52,24 +52,19 @@ static az_room_flags_t room_properties(const az_space_state_t *state) {
 static double mode_fade_alpha(az_space_state_t *state) {
   switch (state->mode) {
     case AZ_MODE_DOORWAY:
-      switch (state->mode_data.doorway.step) {
-        case AZ_DWS_FADE_OUT:
-          return state->mode_data.doorway.progress;
-        case AZ_DWS_SHIFT:
-          return 1.0;
-        case AZ_DWS_FADE_IN:
-          return 1.0 - state->mode_data.doorway.progress;
+      switch (state->doorway_mode.step) {
+        case AZ_DWS_FADE_OUT: return state->doorway_mode.progress;
+        case AZ_DWS_SHIFT:    return 1.0;
+        case AZ_DWS_FADE_IN:  return 1.0 - state->doorway_mode.progress;
       }
       AZ_ASSERT_UNREACHABLE();
     case AZ_MODE_GAME_OVER:
-      if (state->mode_data.game_over.step == AZ_GOS_FADE_OUT) {
-        return state->mode_data.game_over.progress;
+      if (state->game_over_mode.step == AZ_GOS_FADE_OUT) {
+        return state->game_over_mode.progress;
       }
       return 0.0;
     case AZ_MODE_PAUSING:
-      return state->mode_data.pause.progress;
-    case AZ_MODE_RESUMING:
-      return 1.0 - state->mode_data.pause.progress;
+      return state->pausing_mode.fade_alpha;
     case AZ_MODE_NORMAL:
     case AZ_MODE_BOSS_DEATH:
     case AZ_MODE_CONSOLE:
@@ -194,8 +189,8 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_pickups(state);
   az_draw_projectiles(state);
   if (state->mode == AZ_MODE_BOSS_DEATH &&
-      state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING) {
-    az_draw_baddie(&state->mode_data.boss_death.boss, state->clock);
+      state->boss_death_mode.boss.kind != AZ_BAD_NOTHING) {
+    az_draw_baddie(&state->boss_death_mode.boss, state->clock);
   }
   az_draw_baddies(state);
   az_draw_ship(state);
@@ -206,17 +201,20 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_foreground_nodes(state);
 }
 
-void draw_doorway_transition(const az_space_state_t *state) {
+void draw_doorway_transition(az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DOORWAY);
-  const az_door_t *door = state->mode_data.doorway.door;
-  if (state->mode_data.doorway.step == AZ_DWS_SHIFT) {
-    assert(door != NULL);
-    az_draw_door_shift(state->mode_data.doorway.entrance_position,
-                       state->mode_data.doorway.entrance_angle,
-                       door->position, door->angle,
-                       state->mode_data.doorway.progress);
-  } else if (door != NULL && door->kind != AZ_DOOR_PASSAGE) {
-    az_draw_door(door, state->clock);
+  const az_doorway_mode_data_t *mode_data = &state->doorway_mode;
+  if (mode_data->step == AZ_DWS_SHIFT) {
+    az_draw_door_shift(mode_data->entrance.position, mode_data->entrance.angle,
+                       mode_data->exit.position, mode_data->exit.angle,
+                       mode_data->progress);
+  } else {
+    const az_uid_t uid = (mode_data->step == AZ_DWS_FADE_OUT ?
+                          mode_data->entrance.uid : mode_data->exit.uid);
+    az_door_t *door;
+    if (az_lookup_door(state, uid, &door) && door->kind != AZ_DOOR_PASSAGE) {
+      az_draw_door(door, state->clock);
+    }
   }
 }
 
@@ -266,17 +264,19 @@ void az_space_draw_screen(az_space_state_t *state) {
 
   // If we're in boss-death mode, draw the explosion.
   if (state->mode == AZ_MODE_BOSS_DEATH) {
-    if (state->mode_data.boss_death.step == AZ_BDS_BOOM) {
+    assert(state->boss_death_mode.progress >= 0.0);
+    assert(state->boss_death_mode.progress <= 1.0);
+    if (state->boss_death_mode.step == AZ_BDS_BOOM) {
       glPushMatrix(); {
         transform_to_camera_matrix(state);
-        const az_vector_t position = state->mode_data.boss_death.boss.position;
+        const az_vector_t position = state->boss_death_mode.boss.position;
         glTranslated(position.x, position.y, 0);
         glRotated(AZ_RAD2DEG(az_vtheta(position)), 0, 0, 1);
         glBegin(GL_QUADS); {
           const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
-          const GLfloat inner = outer * state->mode_data.boss_death.progress *
-            state->mode_data.boss_death.progress;
-          glColor4f(1, 1, 1, state->mode_data.boss_death.progress);
+          const GLfloat inner = outer * state->boss_death_mode.progress *
+            state->boss_death_mode.progress;
+          glColor4f(1, 1, 1, state->boss_death_mode.progress);
           glVertex2f(outer, inner); glVertex2f(-outer, inner);
           glVertex2f(-outer, -inner); glVertex2f(outer, -inner);
           glVertex2f(inner, outer); glVertex2f(-inner, outer);
@@ -285,8 +285,8 @@ void az_space_draw_screen(az_space_state_t *state) {
           glVertex2f(-inner, -inner); glVertex2f(inner, -inner);
         } glEnd();
       } glPopMatrix();
-    } else if (state->mode_data.boss_death.step == AZ_BDS_FADE) {
-      tint_screen(1, 1.0 - state->mode_data.boss_death.progress);
+    } else if (state->boss_death_mode.step == AZ_BDS_FADE) {
+      tint_screen(1, 1.0 - state->boss_death_mode.progress);
     }
   }
 

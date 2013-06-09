@@ -41,6 +41,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -77,46 +78,42 @@ void az_after_entering_room(az_space_state_t *state) {
 
 static void tick_boss_death_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_BOSS_DEATH);
+  az_boss_death_mode_data_t *mode_data = &state->boss_death_mode;
   const double shake_time = 1.0; // seconds
   const double boom_time = 1.5; // seconds
   const double fade_time = 1.2; // seconds
-  switch (state->mode_data.boss_death.step) {
+  switch (mode_data->step) {
     case AZ_BDS_SHAKE:
+      assert(mode_data->boss.kind != AZ_BAD_NOTHING);
       az_shake_camera(&state->camera, 4, 4);
-      assert(state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING);
-      state->mode_data.boss_death.progress =
-        fmin(1.0, state->mode_data.boss_death.progress + time / shake_time);
-      if (state->mode_data.boss_death.progress >= 1.0) {
-        state->mode_data.boss_death.step = AZ_BDS_BOOM;
-        state->mode_data.boss_death.progress = 0.0;
+      mode_data->progress = fmin(1.0, mode_data->progress + time / shake_time);
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_BDS_BOOM;
+        mode_data->progress = 0.0;
       }
       break;
     case AZ_BDS_BOOM:
+      assert(mode_data->boss.kind != AZ_BAD_NOTHING);
       az_shake_camera(&state->camera, 3, 3);
-      assert(state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING);
-      state->mode_data.boss_death.progress =
-        fmin(1.0, state->mode_data.boss_death.progress + time / boom_time);
-      if (state->mode_data.boss_death.progress >= 1.0) {
-        state->mode_data.boss_death.step = AZ_BDS_FADE;
-        state->mode_data.boss_death.progress = 0.0;
+      mode_data->progress = fmin(1.0, mode_data->progress + time / boom_time);
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_BDS_FADE;
+        mode_data->progress = 0.0;
         for (int i = 0; i < 20; ++i) {
           const az_vector_t offset = {az_random(-1, 1), az_random(-1, 1)};
           if (az_vdot(offset, offset) > 1.0) continue;
-          az_add_random_pickup(
-              state, ~AZ_PUPF_NOTHING,
-              az_vadd(state->mode_data.boss_death.boss.position,
-                      az_vmul(offset, 100.0)));
+          az_add_random_pickup(state, ~AZ_PUPF_NOTHING,
+              az_vadd(mode_data->boss.position, az_vmul(offset, 100.0)));
         }
-        state->mode_data.boss_death.boss.kind = AZ_BAD_NOTHING;
-        az_run_script(state, state->mode_data.boss_death.boss.on_kill);
+        mode_data->boss.kind = AZ_BAD_NOTHING;
+        az_run_script(state, mode_data->boss.on_kill);
       }
       break;
     case AZ_BDS_FADE:
+      assert(mode_data->boss.kind == AZ_BAD_NOTHING);
       az_shake_camera(&state->camera, 1, 1);
-      assert(state->mode_data.boss_death.boss.kind == AZ_BAD_NOTHING);
-      state->mode_data.boss_death.progress =
-        fmin(1.0, state->mode_data.boss_death.progress + time / fade_time);
-      if (state->mode_data.boss_death.progress >= 1.0) {
+      mode_data->progress = fmin(1.0, mode_data->progress + time / fade_time);
+      if (mode_data->progress >= 1.0) {
         state->mode = AZ_MODE_NORMAL;
       }
       break;
@@ -148,8 +145,9 @@ static const az_text_t refilled_shields_and_ammo_text = {
 
 static void tick_console_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_CONSOLE);
+  az_console_mode_data_t *mode_data = &state->console_mode;
   az_node_t *node = NULL;
-  if (!az_lookup_node(state, state->mode_data.console.node_uid, &node)) {
+  if (!az_lookup_node(state, mode_data->node_uid, &node)) {
     state->mode = AZ_MODE_NORMAL;
     return;
   }
@@ -159,52 +157,51 @@ static void tick_console_mode(az_space_state_t *state, double time) {
   assert(az_ship_is_present(ship));
   assert(ship->thrusters == AZ_THRUST_NONE);
   az_player_t *player = &ship->player;
-  double *progress = &state->mode_data.console.progress;
   const double align_time = 0.3; // seconds
   const double use_time = 1.5; // seconds
-  switch (state->mode_data.console.step) {
+  switch (mode_data->step) {
     case AZ_CSS_ALIGN:
-      assert(*progress >= 0.0);
-      assert(*progress < 1.0);
-      *progress = fmin(1.0, *progress + time / align_time);
+      assert(mode_data->progress >= 0.0);
+      assert(mode_data->progress < 1.0);
+      mode_data->progress = fmin(1.0, mode_data->progress + time / align_time);
       ship->position = az_vadd(
           node->position,
-          az_vmul(state->mode_data.console.position_delta, 1.0 - *progress));
+          az_vmul(mode_data->position_delta, 1.0 - mode_data->progress));
       ship->angle =
-        az_mod2pi(node->angle + state->mode_data.console.angle_delta *
-                  (1.0 - *progress));
+        az_mod2pi(node->angle + mode_data->angle_delta *
+                  (1.0 - mode_data->progress));
       ship->velocity = AZ_VZERO;
-      if (*progress >= 1.0) {
-        state->mode_data.console.step = AZ_CSS_USE;
-        *progress = 0.0;
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_CSS_USE;
+        mode_data->progress = 0.0;
       }
       break;
     case AZ_CSS_USE:
-      assert(*progress >= 0.0);
-      assert(*progress < 1.0);
-      *progress = fmin(1.0, *progress + time / use_time);
+      assert(mode_data->progress >= 0.0);
+      assert(mode_data->progress < 1.0);
+      mode_data->progress = fmin(1.0, mode_data->progress + time / use_time);
       switch (node->subkind.console) {
         case AZ_CONS_COMM: break;
         case AZ_CONS_REFILL:
-          player->rockets =
-            az_imax(player->rockets, *progress * player->max_rockets);
+          player->rockets = az_imax(
+              player->rockets, mode_data->progress * player->max_rockets);
           player->bombs =
-            az_imax(player->bombs, *progress * player->max_bombs);
+            az_imax(player->bombs, mode_data->progress * player->max_bombs);
           // fallthrough
         case AZ_CONS_SAVE:
           player->shields =
-            fmax(player->shields, *progress * player->max_shields);
+            fmax(player->shields, mode_data->progress * player->max_shields);
           player->energy =
-            fmax(player->energy, *progress * player->max_energy);
+            fmax(player->energy, mode_data->progress * player->max_energy);
           break;
       }
-      if (*progress >= 1.0) {
-        state->mode_data.console.step = AZ_CSS_FINISH;
-        *progress = 0.0;
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_CSS_FINISH;
+        mode_data->progress = 0.0;
       }
       break;
     case AZ_CSS_FINISH:
-      assert(*progress == 0.0);
+      assert(mode_data->progress == 0.0);
       if (node->subkind.console == AZ_CONS_REFILL) {
         state->message.time_remaining = 4.0;
         if (player->max_rockets == 0 && player->max_bombs == 0) {
@@ -219,45 +216,45 @@ static void tick_console_mode(az_space_state_t *state, double time) {
 
 static void tick_dialog_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_DIALOG);
+  az_dialog_mode_data_t *mode_data = &state->dialog_mode;
   const double open_close_time = 0.5; // seconds
   const double char_time = 0.03; // seconds
-  switch (state->mode_data.dialog.step) {
+  switch (mode_data->step) {
     case AZ_DLS_BEGIN:
-      assert(state->mode_data.dialog.text == NULL);
-      assert(state->mode_data.dialog.vm.script != NULL);
-      state->mode_data.dialog.progress += time / open_close_time;
-      if (state->mode_data.dialog.progress >= 1.0) {
-        az_resume_script(state, &state->mode_data.dialog.vm);
+      assert(mode_data->text == NULL);
+      assert(mode_data->vm.script != NULL);
+      mode_data->progress += time / open_close_time;
+      if (mode_data->progress >= 1.0) {
+        az_resume_script(state, &mode_data->vm);
       }
       break;
     case AZ_DLS_TALK:
-      assert(state->mode_data.dialog.text != NULL);
-      assert(state->mode_data.dialog.vm.script != NULL);
-      state->mode_data.dialog.progress += time / char_time;
-      if (state->mode_data.dialog.progress >= 1.0) {
-        state->mode_data.dialog.progress = 0.0;
-        const az_text_t *text = state->mode_data.dialog.text;
-        ++state->mode_data.dialog.col;
-        if (state->mode_data.dialog.col >=
-            text->lines[state->mode_data.dialog.row].total_length) {
-          state->mode_data.dialog.col = 0;
-          ++state->mode_data.dialog.row;
-          if (state->mode_data.dialog.row >= text->num_lines) {
-            state->mode_data.dialog.step = AZ_DLS_PAUSE;
+      assert(mode_data->text != NULL);
+      assert(mode_data->vm.script != NULL);
+      mode_data->progress += time / char_time;
+      if (mode_data->progress >= 1.0) {
+        mode_data->progress = 0.0;
+        const az_text_t *text = mode_data->text;
+        ++mode_data->col;
+        if (mode_data->col >= text->lines[mode_data->row].total_length) {
+          mode_data->col = 0;
+          ++mode_data->row;
+          if (mode_data->row >= text->num_lines) {
+            mode_data->step = AZ_DLS_WAIT;
           }
         }
       }
       break;
-    case AZ_DLS_PAUSE:
-      assert(state->mode_data.dialog.text != NULL);
-      assert(state->mode_data.dialog.vm.script != NULL);
+    case AZ_DLS_WAIT:
+      assert(mode_data->text != NULL);
+      assert(mode_data->vm.script != NULL);
       break;
     case AZ_DLS_END:
-      assert(state->mode_data.dialog.text == NULL);
-      state->mode_data.dialog.progress += time / open_close_time;
-      if (state->mode_data.dialog.progress >= 1.0) {
-        if (state->mode_data.dialog.vm.script != NULL) {
-          az_script_vm_t vm = state->mode_data.dialog.vm;
+      assert(mode_data->text == NULL);
+      mode_data->progress += time / open_close_time;
+      if (mode_data->progress >= 1.0) {
+        if (mode_data->vm.script != NULL) {
+          az_script_vm_t vm = mode_data->vm;
           state->mode = AZ_MODE_NORMAL;
           az_resume_script(state, &vm);
         } else state->mode = AZ_MODE_NORMAL;
@@ -268,55 +265,52 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
 
 static void tick_doorway_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_DOORWAY);
+  az_doorway_mode_data_t *mode_data = &state->doorway_mode;
   const double fade_time = 0.25; // seconds
   const double shift_time = 0.5; // seconds
-  switch (state->mode_data.doorway.step) {
+  switch (mode_data->step) {
     case AZ_DWS_FADE_OUT:
-      assert(state->mode_data.doorway.door != NULL);
-      state->mode_data.doorway.progress += time / fade_time;
-      if (state->mode_data.doorway.progress >= 1.0) {
-        // Go on to the next step.
-        state->mode_data.doorway.step =
-          (state->mode_data.doorway.door->kind == AZ_DOOR_PASSAGE ?
-           AZ_DWS_FADE_IN : AZ_DWS_SHIFT);
-        const az_vector_t entrance_position =
-          state->mode_data.doorway.door->position;
-        const double entrance_angle = state->mode_data.doorway.door->angle;
-        state->mode_data.doorway.progress = 0.0;
-        state->mode_data.doorway.entrance_position = entrance_position;
-        state->mode_data.doorway.entrance_angle = entrance_angle;
-        state->mode_data.doorway.cam_start_r = az_vnorm(state->camera.center);
-        state->mode_data.doorway.cam_start_theta =
-          az_vtheta(state->camera.center);
+      assert(mode_data->entrance.kind != AZ_DOOR_NOTHING);
+      assert(mode_data->entrance.kind != AZ_DOOR_FORCEFIELD);
+      assert(mode_data->exit.kind == AZ_DOOR_NOTHING);
+      mode_data->progress += time / fade_time;
+      if (mode_data->progress >= 1.0) {
         // Replace state with new room data.
         const az_room_key_t origin_key = state->ship.player.current_room;
-        const az_room_key_t dest_key =
-          state->mode_data.doorway.door->destination;
-        state->mode_data.doorway.door = NULL;
+        const az_room_key_t dest_key = mode_data->destination;
         az_clear_space(state);
         assert(0 <= dest_key && dest_key < state->planet->num_rooms);
-        az_enter_room(state, &state->planet->rooms[dest_key]);
+        const az_room_t *new_room = &state->planet->rooms[dest_key];
+        az_enter_room(state, new_room);
         state->ship.player.current_room = dest_key;
         // Pick a door to exit out of.
         double best_dist = INFINITY;
         az_door_t *exit = NULL;
         AZ_ARRAY_LOOP(door, state->doors) {
           if (door->kind == AZ_DOOR_NOTHING) continue;
+          if (door->kind == AZ_DOOR_FORCEFIELD) continue;
           if (door->destination != origin_key) continue;
-          const double dist = az_vdist(door->position, entrance_position);
+          const double dist =
+            az_vdist(door->position, mode_data->entrance.position);
           if (dist < best_dist) {
             best_dist = dist;
             exit = door;
           }
         }
         // Set new ship position.
-        if (exit != NULL) {
+        if (exit == NULL) {
+          AZ_WARNING_ALWAYS("No exit when entering room %d from room %d\n",
+                            (int)dest_key, (int)origin_key);
+          state->ship.position = az_vpolar(new_room->camera_bounds.min_r,
+                                           new_room->camera_bounds.min_theta);
+        } else {
           state->ship.position =
             az_vadd(exit->position, az_vpolar(60.0, exit->angle));
           state->ship.velocity =
             az_vpolar(0.25 * az_vnorm(state->ship.velocity), exit->angle);
-          state->ship.angle = az_mod2pi(
-              state->ship.angle + AZ_PI + exit->angle - entrance_angle);
+          state->ship.angle =
+            az_mod2pi(state->ship.angle + AZ_PI + exit->angle -
+                      mode_data->entrance.angle);
           if (exit->kind == AZ_DOOR_ALWAYS_OPEN) {
             assert(exit->is_open);
             assert(exit->openness == 1.0);
@@ -324,49 +318,64 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
             exit->openness = 1.0;
             exit->is_open = false;
           }
-          state->mode_data.doorway.door = exit;
+          mode_data->exit.kind = exit->kind;
+          mode_data->exit.uid = exit->uid;
+          mode_data->exit.position = exit->position;
+          mode_data->exit.angle = exit->angle;
         }
-        // Record that we are now in the new room.
+        // Record that we are now in the new room.  We have to set the ship
+        // position _before_ this, because this will remove destructable walls
+        // that are near the ship.
         const az_vector_t old_camera_center = state->camera.center;
         az_after_entering_room(state);
-        // Set us up for the camera shift animation.
-        if (exit != NULL && state->mode_data.doorway.step == AZ_DWS_SHIFT) {
-          state->mode_data.doorway.cam_delta_r =
-            az_vnorm(state->camera.center) -
-            state->mode_data.doorway.cam_start_r;
-          state->mode_data.doorway.cam_delta_theta =
-            az_mod2pi(az_vtheta(state->camera.center) -
-                      state->mode_data.doorway.cam_start_theta);
+        const az_vector_t new_camera_center = state->camera.center;
+        // Go on to the next step.
+        if (mode_data->entrance.kind != AZ_DOOR_PASSAGE && exit != NULL &&
+            mode_data->exit.kind != AZ_DOOR_PASSAGE) {
+          assert(mode_data->exit.kind != AZ_DOOR_NOTHING);
+          mode_data->step = AZ_DWS_SHIFT;
+          mode_data->progress = 0.0;
+          mode_data->cam_start_r = az_vnorm(old_camera_center);
+          mode_data->cam_start_theta = az_vtheta(old_camera_center);
+          mode_data->cam_delta_r =
+            az_vnorm(new_camera_center) - mode_data->cam_start_r;
+          mode_data->cam_delta_theta =
+            az_mod2pi(az_vtheta(new_camera_center) -
+                      mode_data->cam_start_theta);
           state->camera.center = old_camera_center;
-        } else state->mode_data.doorway.step = AZ_DWS_FADE_IN;
+        } else {
+          mode_data->step = AZ_DWS_FADE_IN;
+          mode_data->progress = 0.0;
+        }
       }
       break;
     case AZ_DWS_SHIFT:
-      assert(state->mode_data.doorway.door != NULL);
-      assert(state->mode_data.doorway.door->kind != AZ_DOOR_PASSAGE);
+      assert(mode_data->entrance.kind != AZ_DOOR_NOTHING);
+      assert(mode_data->entrance.kind != AZ_DOOR_PASSAGE);
+      assert(mode_data->entrance.kind != AZ_DOOR_FORCEFIELD);
+      assert(mode_data->exit.kind != AZ_DOOR_NOTHING);
+      assert(mode_data->exit.kind != AZ_DOOR_PASSAGE);
+      assert(mode_data->exit.kind != AZ_DOOR_FORCEFIELD);
       // Increase progress:
-      state->mode_data.doorway.progress =
-        fmin(1.0, state->mode_data.doorway.progress + time / shift_time);
+      mode_data->progress = fmin(1.0, mode_data->progress + time / shift_time);
       // Shift camera position:
       state->camera.center =
-        az_vpolar((state->mode_data.doorway.cam_start_r +
-                   state->mode_data.doorway.cam_delta_r *
-                   state->mode_data.doorway.progress),
-                  (state->mode_data.doorway.cam_start_theta +
-                   state->mode_data.doorway.cam_delta_theta *
-                   state->mode_data.doorway.progress));
+        az_vpolar((mode_data->cam_start_r +
+                   mode_data->cam_delta_r * mode_data->progress),
+                  (mode_data->cam_start_theta +
+                   mode_data->cam_delta_theta * mode_data->progress));
       // When progress is complete, go to the next step:
-      if (state->mode_data.doorway.progress >= 1.0) {
-        state->mode_data.doorway.step = AZ_DWS_FADE_IN;
-        state->mode_data.doorway.progress = 0.0;
-        if (state->mode_data.doorway.door->kind != AZ_DOOR_ALWAYS_OPEN) {
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_DWS_FADE_IN;
+        mode_data->progress = 0.0;
+        if (mode_data->exit.kind != AZ_DOOR_ALWAYS_OPEN) {
           az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
         }
       }
       break;
     case AZ_DWS_FADE_IN:
-      state->mode_data.doorway.progress += time / fade_time;
-      if (state->mode_data.doorway.progress >= 1.0) {
+      mode_data->progress += time / fade_time;
+      if (mode_data->progress >= 1.0) {
         state->mode = AZ_MODE_NORMAL;
       }
       break;
@@ -375,51 +384,64 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
 
 static void tick_game_over_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_GAME_OVER);
+  az_game_over_mode_data_t *mode_data = &state->game_over_mode;
   const double asplode_time = 0.5; // seconds
   const double fade_time = 2.0; // seconds
-  switch (state->mode_data.game_over.step) {
+  switch (mode_data->step) {
     case AZ_GOS_ASPLODE:
-      state->mode_data.game_over.progress += time / asplode_time;
-      if (state->mode_data.game_over.progress >= 1.0) {
-        state->mode_data.game_over.step = AZ_GOS_FADE_OUT;
-        state->mode_data.game_over.progress = 0.0;
+      mode_data->progress += time / asplode_time;
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_GOS_FADE_OUT;
+        mode_data->progress = 0.0;
         az_stop_music(&state->soundboard, fade_time);
       }
       break;
     case AZ_GOS_FADE_OUT:
-      state->mode_data.game_over.progress =
-        fmin(1.0, state->mode_data.game_over.progress + time / fade_time);
+      mode_data->progress = fmin(1.0, mode_data->progress + time / fade_time);
       break;
   }
 }
 
-static void tick_pause_resume_mode(az_space_state_t *state, double time) {
-  assert(state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING);
-  const double pause_unpause_time = 0.25; // seconds
-  state->mode_data.pause.progress =
-    fmin(1.0, state->mode_data.pause.progress + time / pause_unpause_time);
-  if (state->mode == AZ_MODE_RESUMING &&
-      state->mode_data.pause.progress >= 1.0) {
-    state->mode = AZ_MODE_NORMAL;
+static void tick_pausing_mode(az_space_state_t *state, double time) {
+  assert(state->mode == AZ_MODE_PAUSING);
+  az_pausing_mode_data_t *mode_data = &state->pausing_mode;
+  const double fade_time = 0.25; // seconds
+  switch (mode_data->step) {
+    case AZ_PSS_FADE_OUT:
+      mode_data->fade_alpha =
+        fmin(1.0, mode_data->fade_alpha + time / fade_time);
+      break;
+    case AZ_PSS_FADE_IN:
+      mode_data->fade_alpha =
+        fmax(0.0, mode_data->fade_alpha - time / fade_time);
+      if (mode_data->fade_alpha == 0.0) state->mode = AZ_MODE_NORMAL;
+      break;
   }
 }
 
 static void tick_upgrade_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_UPGRADE);
+  az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
   const double open_close_time = 0.5; // seconds
-  switch (state->mode_data.doorway.step) {
+  switch (mode_data->step) {
     case AZ_UGS_OPEN:
-      state->mode_data.upgrade.progress += time / open_close_time;
-      if (state->mode_data.upgrade.progress >= 1.0) {
-        state->mode_data.upgrade.step = AZ_UGS_MESSAGE;
-        state->mode_data.upgrade.progress = 0.0;
+      assert(mode_data->progress >= 0.0);
+      assert(mode_data->progress < 1.0);
+      mode_data->progress += time / open_close_time;
+      if (mode_data->progress >= 1.0) {
+        mode_data->step = AZ_UGS_MESSAGE;
+        mode_data->progress = 0.0;
       }
       break;
     case AZ_UGS_MESSAGE:
+      assert(mode_data->progress == 0.0);
+      // Do nothing while we wait for the player to press a key.
       break;
     case AZ_UGS_CLOSE:
-      state->mode_data.upgrade.progress += time / open_close_time;
-      if (state->mode_data.upgrade.progress >= 1.0) {
+      assert(mode_data->progress >= 0.0);
+      assert(mode_data->progress < 1.0);
+      mode_data->progress += time / open_close_time;
+      if (mode_data->progress >= 1.0) {
         state->mode = AZ_MODE_NORMAL;
       }
       break;
@@ -487,15 +509,15 @@ void az_tick_space_state(az_space_state_t *state, double time) {
                    AZ_SND_KLAXON : AZ_SND_KLAXON_DIRE));
   }
 
-  // If we're pausing or unpausing, nothing else should happen.
-  if (state->mode == AZ_MODE_PAUSING || state->mode == AZ_MODE_RESUMING) {
-    tick_pause_resume_mode(state, time);
+  // If we're pausing/unpausing, nothing else should happen.
+  if (state->mode == AZ_MODE_PAUSING) {
+    tick_pausing_mode(state, time);
     return;
   }
 
   // If we're in game over mode and the ship is asploding, go into slow-motion:
   if (state->mode == AZ_MODE_GAME_OVER &&
-      state->mode_data.game_over.step == AZ_GOS_ASPLODE) {
+      state->game_over_mode.step == AZ_GOS_ASPLODE) {
     time *= 0.4;
   }
 
@@ -518,7 +540,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
-      if (state->mode_data.doorway.step == AZ_DWS_FADE_IN) {
+      if (state->doorway_mode.step == AZ_DWS_FADE_IN) {
         az_tick_timers(state, time);
         tick_all_objects(state, time);
       }
@@ -534,18 +556,17 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       tick_all_objects(state, time);
       break;
     case AZ_MODE_PAUSING:
-    case AZ_MODE_RESUMING:
-      AZ_ASSERT_UNREACHABLE(); // these modes are handled above
+      AZ_ASSERT_UNREACHABLE(); // this mode is handled above
     case AZ_MODE_UPGRADE:
       tick_upgrade_mode(state, time);
       break;
   }
   if (!(state->mode == AZ_MODE_DOORWAY &&
-        state->mode_data.doorway.step == AZ_DWS_SHIFT)) {
+        state->doorway_mode.step == AZ_DWS_SHIFT)) {
     const az_vector_t goal =
       (state->mode == AZ_MODE_BOSS_DEATH &&
-       state->mode_data.boss_death.boss.kind != AZ_BAD_NOTHING ?
-       state->mode_data.boss_death.boss.position : state->ship.position);
+       state->boss_death_mode.boss.kind != AZ_BAD_NOTHING ?
+       state->boss_death_mode.boss.position : state->ship.position);
     az_tick_camera(state, goal, time);
   }
   tick_message(&state->message, time);
