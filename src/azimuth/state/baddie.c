@@ -58,6 +58,10 @@ static az_component_data_t beam_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
     .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM), .impact_damage = 10.0 }
 };
+static az_component_data_t rocket_turret_components[] = {
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
+};
 
 static const az_vector_t zipper_vertices[] = {
   {20, 3}, {15, 6}, {10, 7}, {-10, 4}, {-15, 2},
@@ -709,6 +713,14 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(boss_door_body_vertices),
                    .impact_damage = 10.0, .immunities = ~0 },
     DECL_COMPONENTS(boss_door_components)
+  },
+  [AZ_BAD_ROCKET_TURRET] = {
+    .max_health = 20.0, .overall_bounding_radius = 30.5,
+    .potential_pickups = AZ_PUPF_ALL, .color = {160, 80, 120, 255},
+    .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+    DECL_COMPONENTS(rocket_turret_components)
   }
 };
 

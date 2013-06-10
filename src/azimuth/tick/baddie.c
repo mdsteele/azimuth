@@ -1426,6 +1426,24 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_BOSS_DOOR:
       tick_boss_door(state, baddie, time);
       break;
+    case AZ_BAD_ROCKET_TURRET:
+      // Aim gun:
+      baddie->components[0].angle =
+        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, 2.0 * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
+      // Fire:
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET, 20.0,
+                        baddie->components[0].angle, 0.0);
+        baddie->cooldown = 1.5;
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

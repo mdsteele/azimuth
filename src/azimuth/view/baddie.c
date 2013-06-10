@@ -1598,6 +1598,23 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glColor3f(0.2, 0.2, 0.2); glVertex2f(4, -23); glVertex2f(8, -22);
       } glEnd();
       break;
+    case AZ_BAD_ROCKET_TURRET:
+      draw_turret(baddie,
+          color3(0.20 + 0.1 * flare - 0.1 * frozen,
+                 0.15 - 0.1 * flare - 0.1 * frozen,
+                 0.15 - 0.1 * flare + 0.1 * frozen),
+          color3(0.30 + 0.15 * flare - 0.15 * frozen,
+                 0.25 - 0.15 * flare - 0.15 * frozen,
+                 0.25 - 0.15 * flare + 0.15 * frozen),
+          color3(0.4 + 0.25 * flare - 0.25 * frozen,
+                 0.3 - 0.20 * flare - 0.20 * frozen,
+                 0.3 - 0.25 * flare + 0.25 * frozen),
+          color3(0.5 + 0.4 * flare - 0.3 * frozen,
+                 0.4 - 0.2 * flare - 0.2 * frozen,
+                 0.4 - 0.3 * flare + 0.4 * frozen),
+          color3(0.2 + 0.25 * flare, 0.15, 0.15 + 0.25 * frozen),
+          color3(0.65 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
+      break;
   }
 }
 
