@@ -630,10 +630,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_ZIPPER:
     case AZ_BAD_ARMORED_ZIPPER:
+    case AZ_BAD_MINI_ARMORED_ZIPPER:
       if (az_vdot(baddie->velocity, az_vpolar(1, baddie->angle)) < 0.0) {
         baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
       }
-      baddie->velocity = az_vpolar(200.0, baddie->angle);
+      baddie->velocity =
+        az_vpolar((baddie->kind == AZ_BAD_MINI_ARMORED_ZIPPER ? 250.0 : 200.0),
+                  baddie->angle);
       break;
     case AZ_BAD_BOUNCER:
       if (az_vnonzero(baddie->velocity)) {

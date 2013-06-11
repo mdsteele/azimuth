@@ -157,6 +157,47 @@ static void draw_box(bool armored, float flare) {
   } glEnd();
 }
 
+static void draw_zipper(
+    az_color_t inner1, az_color_t inner2, az_color_t outer,
+    float flare, float frozen, az_clock_t clock) {
+  // Body:
+  for (int i = -1; i <= 1; i += 2) {
+    glBegin(GL_QUAD_STRIP); {
+      for (int x = 20; x >= -15; x -= 5) {
+        const double y = i * 6.0 * (1 - pow(0.05 * x, 4) + 0.025 * x);
+        if (x % 2) az_gl_color(inner1);
+        else az_gl_color(inner2);
+        glVertex2d(x, 0);
+        az_gl_color(outer);
+        glVertex2d(x, y);
+      }
+    } glEnd();
+  }
+  // Wings:
+  for (int i = 0; i < 2; ++i) {
+    for (double j = 1.8; j < 4.0; j += 2.0) {
+      glPushMatrix(); {
+        glTranslatef(10, 0, 0);
+        glRotated(j * 6.0 * (1 + az_clock_zigzag(4, 1, clock)),
+                  0, 0, 1);
+        glBegin(GL_QUAD_STRIP); {
+          glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
+          glVertex2f(-2.5, 0);
+          glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
+                    1 - flare, 0.35);
+          glVertex2f(2.5, 0);
+          glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
+          glVertex2f(-4.5, 18);
+          glColor4f(flare, 1 - flare, 1 - flare, 0.35);
+          glVertex2f(4.5, 18);
+          glVertex2f(-1, 21); glVertex2f(1, 21);
+        } glEnd();
+      } glPopMatrix();
+    }
+    glScalef(1, -1, 1);
+  }
+}
+
 /*===========================================================================*/
 // Oth baddies:
 
@@ -322,43 +363,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
       break;
     case AZ_BAD_ZIPPER:
-      // Body:
-      for (int i = -1; i <= 1; i += 2) {
-        glBegin(GL_QUAD_STRIP); {
-          for (int x = 20; x >= -15; x -= 5) {
-            if (x % 2) glColor3f(0.5 + 0.5 * flare - 0.5 * frozen,
-                                 1 - flare, frozen);
-            else glColor3f(0.4 - 0.4 * frozen, 0.4, frozen);
-            const double y = i * 6.0 * (1 - pow(0.05 * x, 4) + 0.025 * x);
-            glVertex2d(x, 0);
-            glColor3f(0.4 * flare, 0.5, frozen);
-            glVertex2d(x, y);
-          }
-        } glEnd();
-      }
-      // Wings:
-      for (int i = 0; i < 2; ++i) {
-        for (double j = 1.8; j < 4.0; j += 2.0) {
-          glPushMatrix(); {
-            glTranslatef(10, 0, 0);
-            glRotated(j * 6.0 * (1 + az_clock_zigzag(4, 1, clock)),
-                      0, 0, 1);
-            glBegin(GL_QUAD_STRIP); {
-              glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
-              glVertex2f(-2.5, 0);
-              glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
-                        1 - flare, 0.35);
-              glVertex2f(2.5, 0);
-              glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
-              glVertex2f(-4.5, 18);
-              glColor4f(flare, 1 - flare, 1 - flare, 0.35);
-              glVertex2f(4.5, 18);
-              glVertex2f(-1, 21); glVertex2f(1, 21);
-            } glEnd();
-          } glPopMatrix();
-        }
-        glScalef(1, -1, 1);
-      }
+      draw_zipper(color3(0.5 + 0.5 * flare - 0.5 * frozen, 1 - flare, frozen),
+                  color3(0.4 - 0.4 * frozen, 0.4, frozen),
+                  color3(0.4 * flare, 0.5, frozen), flare, frozen, clock);
       break;
     case AZ_BAD_BOUNCER:
       glBegin(GL_TRIANGLE_FAN); {
@@ -1326,43 +1333,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       }
       break;
     case AZ_BAD_ARMORED_ZIPPER:
-      // Body:
-      for (int i = -1; i <= 1; i += 2) {
-        glBegin(GL_QUAD_STRIP); {
-          for (int x = 20; x >= -15; x -= 5) {
-            if (x % 2) glColor3f(0.7 + 0.25 * flare - 0.5 * frozen,
-                                 0.75 - flare, 0.7 + 0.3 * frozen);
-            else glColor3f(0, 0.4, 0.4 + 0.6 * frozen);
-            const double y = i * 6.0 * (1 - pow(0.05 * x, 4) + 0.025 * x);
-            glVertex2d(x, 0);
-            glColor3f(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen);
-            glVertex2d(x, y);
-          }
-        } glEnd();
-      }
-      // Wings:
-      for (int i = 0; i < 2; ++i) {
-        for (double j = 1.8; j < 4.0; j += 2.0) {
-          glPushMatrix(); {
-            glTranslatef(10, 0, 0);
-            glRotated(j * 6.0 * (1 + az_clock_zigzag(4, 1, clock)),
-                      0, 0, 1);
-            glBegin(GL_QUAD_STRIP); {
-              glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
-              glVertex2f(-2.5, 0);
-              glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
-                        1 - flare, 0.35);
-              glVertex2f(2.5, 0);
-              glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
-              glVertex2f(-4.5, 18);
-              glColor4f(flare, 1 - flare, 1 - flare, 0.35);
-              glVertex2f(4.5, 18);
-              glVertex2f(-1, 21); glVertex2f(1, 21);
-            } glEnd();
-          } glPopMatrix();
-        }
-        glScalef(1, -1, 1);
-      }
+      draw_zipper(color3(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
+                         0.7 + 0.3 * frozen),
+                  color3(0, 0.4, 0.4 + 0.6 * frozen),
+                  color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
+                  flare, frozen, clock);
       break;
     case AZ_BAD_FORCEFIEND:
       // TODO: Make real graphics for the Forcefiend.
@@ -1614,6 +1589,16 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                  0.4 - 0.3 * flare + 0.4 * frozen),
           color3(0.2 + 0.25 * flare, 0.15, 0.15 + 0.25 * frozen),
           color3(0.65 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
+      break;
+    case AZ_BAD_MINI_ARMORED_ZIPPER:
+      glPushMatrix(); {
+        glScalef(0.7, 0.7, 1);
+        draw_zipper(color3(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
+                           0.7 + 0.3 * frozen),
+                    color3(0, 0.4, 0.4 + 0.6 * frozen),
+                    color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
+                    flare, frozen, clock);
+      } glPopMatrix();
       break;
   }
 }

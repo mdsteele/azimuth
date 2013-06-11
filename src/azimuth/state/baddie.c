@@ -392,6 +392,11 @@ static az_component_data_t boss_door_components[] = {
     .immunities = ~0, .impact_damage = 10.0, .init_angle = AZ_DEG2RAD(-90) }
 };
 
+static const az_vector_t mini_zipper_vertices[] = {
+  {14, 2.1}, {10.5, 4.2}, {7, 4.9}, {-7, 2.8}, {-10.5, 1.4}, {-10.5, -1.4},
+  {-7, -2.8}, {7, -4.9}, {10.5, -4.2}, {14, -2.1}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -721,6 +726,14 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(rocket_turret_components)
+  },
+  [AZ_BAD_MINI_ARMORED_ZIPPER] = {
+    .max_health = 4.0, .color = {128, 160, 128, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_SHARDS,
+    .potential_pickups = AZ_PUPF_ALL, .properties = AZ_BADF_BOUNCE_PERP,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mini_zipper_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .impact_damage = 10.0 }
   }
 };
 
