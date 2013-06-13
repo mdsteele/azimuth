@@ -53,7 +53,7 @@ bool az_load_prefs_from_file(const char *filepath,
   double music_volume, sound_volume;
   int keys[7];
   const bool ok = (fscanf(
-      file, "@F mv=%lf sv=%lf uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d uk=%d\n",
+      file, "@F mv=%lf sv=%lf uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
       &music_volume, &sound_volume, &keys[0], &keys[1], &keys[2], &keys[3],
       &keys[4], &keys[5], &keys[6]) >= 9);
   fclose(file);
@@ -88,7 +88,7 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
   FILE *file = fopen(filepath, "w");
   if (file == NULL) return false;
   const bool ok = (fprintf(
-      file, "@F mv=%.03f sv=%.03f uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d uk=%d\n",
+      file, "@F mv=%.03f sv=%.03f uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
       (int)prefs->up_key, (int)prefs->down_key, (int)prefs->right_key,
       (int)prefs->left_key, (int)prefs->fire_key, (int)prefs->ordn_key,

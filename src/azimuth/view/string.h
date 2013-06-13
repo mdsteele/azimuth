@@ -23,6 +23,7 @@
 
 #include <stddef.h> // for size_t
 
+#include "azimuth/util/prefs.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -48,6 +49,32 @@ void az_draw_chars(double height, az_alignment_t align, double x, double top,
 void az_draw_printf(double height, az_alignment_t align, double x, double top,
                     const char *format, ...)
   __attribute__((__format__(__printf__,5,6)));
+
+// Draw a paragraph of text, and interpret special $-escapes to set colors and
+// insert keyboard key names.  The initial color is white.  Stops just before
+// the end_col-th character on the end_row-th line; set these to -1 to print
+// the whole paragraph.  The permitted escapes are:
+//   $$ - insert a literal '$' character
+//   $W - set color to white
+//   $A - set color to gray
+//   $R - set color to red
+//   $G - set color to green
+//   $B - set color to blue
+//   $M - set color to magenta
+//   $Y - set color to yellow
+//   $C - set color to cyan
+//   $Xrrggbb - set color to {rr, gg, bb}, where rrggbb are hex digits
+//   $u - insert name of prefs->up_key
+//   $d - insert name of prefs->down_key
+//   $r - insert name of prefs->right_key
+//   $l - insert name of prefs->left_key
+//   $f - insert name of prefs->fire_key
+//   $o - insert name of prefs->ordn_key
+//   $t - insert name of prefs->util_key
+void az_draw_paragraph(
+    double height, az_alignment_t align, double x, double top, double spacing,
+    int end_row, int end_col, const az_preferences_t *prefs,
+    const char *string);
 
 /*===========================================================================*/
 

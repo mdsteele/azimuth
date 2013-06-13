@@ -58,8 +58,8 @@ typedef struct {
   az_text_line_t *lines;
 } az_text_t;
 
-// Serialize the text to a file and  return true, or return false on error
-// (e.g. file I/O fails).
+// Serialize the text to a file and return true, or return false on error
+// (e.g. if file I/O fails).
 bool az_fprint_text(const az_text_t *text, FILE *file);
 
 // Parse the text and return true, or return false on error.

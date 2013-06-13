@@ -22,6 +22,7 @@
 /*===========================================================================*/
 
 const az_color_t AZ_WHITE = {255, 255, 255, 255};
+const az_color_t AZ_GRAY = {128, 128, 128, 255};
 const az_color_t AZ_RED = {255, 0, 0, 255};
 const az_color_t AZ_GREEN = {0, 255, 0, 255};
 const az_color_t AZ_BLUE = {0, 0, 255, 255};

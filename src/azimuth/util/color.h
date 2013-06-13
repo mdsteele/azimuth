@@ -32,6 +32,7 @@ typedef struct {
 
 // Color constants:
 extern const az_color_t AZ_WHITE;
+extern const az_color_t AZ_GRAY;
 extern const az_color_t AZ_RED;
 extern const az_color_t AZ_GREEN;
 extern const az_color_t AZ_BLUE;

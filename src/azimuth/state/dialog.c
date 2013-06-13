@@ -37,6 +37,7 @@ static bool same_color(az_color_t color1, az_color_t color2) {
 
 static char color_escape(az_color_t color) {
   if (same_color(color, AZ_WHITE)) return 'W';
+  if (same_color(color, AZ_GRAY)) return 'A';
   if (same_color(color, AZ_RED)) return 'R';
   if (same_color(color, AZ_GREEN)) return 'G';
   if (same_color(color, AZ_BLUE)) return 'B';
@@ -138,6 +139,7 @@ bool az_sscan_text(const char *string, int length, az_text_t *text_out) {
         if (start >= length) goto error;
         switch (string[start]) {
           case 'W': color = AZ_WHITE; break;
+          case 'A': color = AZ_GRAY; break;
           case 'R': color = AZ_RED; break;
           case 'G': color = AZ_GREEN; break;
           case 'B': color = AZ_BLUE; break;
