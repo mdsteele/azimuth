@@ -44,6 +44,7 @@
 #include "azimuth/state/wall.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/prefs.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -120,6 +121,7 @@ typedef struct {
 
 typedef struct {
   const az_planet_t *planet;
+  const az_preferences_t *prefs;
   int save_file_index;
   az_clock_t clock;
   az_camera_t camera;

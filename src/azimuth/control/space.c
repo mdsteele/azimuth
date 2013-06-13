@@ -69,15 +69,16 @@ static const az_text_t save_success_text = {
 
 static az_space_state_t state;
 
-static void begin_saved_game(const az_planet_t *planet,
-                             const az_saved_games_t *saved_games,
-                             int saved_game_index) {
+static void begin_saved_game(
+    const az_planet_t *planet, const az_saved_games_t *saved_games,
+    const az_preferences_t *prefs, int saved_game_index) {
   assert(saved_game_index >= 0);
   assert(saved_game_index < AZ_ARRAY_SIZE(saved_games->games));
   const az_saved_game_t *saved_game = &saved_games->games[saved_game_index];
 
   memset(&state, 0, sizeof(state));
   state.planet = planet;
+  state.prefs = prefs;
   state.save_file_index = saved_game_index;
   state.mode = AZ_MODE_NORMAL;
 
@@ -133,7 +134,7 @@ static void update_controls(const az_preferences_t *prefs) {
 az_space_action_t az_space_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs, int saved_game_index) {
-  begin_saved_game(planet, saved_games, saved_game_index);
+  begin_saved_game(planet, saved_games, prefs, saved_game_index);
 
   while (true) {
     // Tick the state and redraw the screen.

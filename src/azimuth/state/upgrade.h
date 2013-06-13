@@ -150,8 +150,9 @@ typedef enum {
 // Return the name of the upgrade as a NUL-terminted string.
 const char *az_upgrade_name(az_upgrade_t upgrade);
 
-void az_get_upgrade_description(az_upgrade_t upgrade, const char **line1_out,
-                                const char **line2_out);
+// Return the description string for the upgrade, to be passed directly to
+// az_draw_paragraph.
+const char *az_upgrade_description(az_upgrade_t upgrade);
 
 /*===========================================================================*/
 

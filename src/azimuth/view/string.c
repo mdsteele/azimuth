@@ -229,6 +229,8 @@ void az_draw_paragraph(
     double height, az_alignment_t align, double x, double top, double spacing,
     int end_row, int end_col, const az_preferences_t *prefs,
     const char *string) {
+  assert(prefs != NULL);
+  assert(string != NULL);
   // Start out with white text.
   glColor3f(1, 1, 1);
   // Draw each line of text, one per outer loop iteration.  We will return from

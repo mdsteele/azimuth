@@ -493,19 +493,15 @@ static void draw_upgrade_box_frame(double openness) {
   draw_box(left, top, width, height);
 }
 
-static void draw_upgrade_box_message(az_upgrade_t upgrade) {
+static void draw_upgrade_box_message(const az_preferences_t *prefs,
+                                     az_upgrade_t upgrade) {
   const char *name = az_upgrade_name(upgrade);
-  const char *line1 = NULL, *line2 = NULL;
-  az_get_upgrade_description(upgrade, &line1, &line2);
-  assert(name != NULL);
-  assert(line1 != NULL);
+  const char *description = az_upgrade_description(upgrade);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - UPGRADE_BOX_HEIGHT);
   glColor3f(1, 1, 1); // white
   az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 18, name);
-  az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, line1);
-  if (line2 != NULL) {
-    az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 68, line2);
-  }
+  az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, 20,
+                    -1, -1, prefs, description);
 }
 
 static void draw_upgrade_box(const az_space_state_t *state) {
@@ -517,7 +513,7 @@ static void draw_upgrade_box(const az_space_state_t *state) {
       break;
     case AZ_UGS_MESSAGE:
       draw_upgrade_box_frame(1.0);
-      draw_upgrade_box_message(mode_data->upgrade);
+      draw_upgrade_box_message(state->prefs, mode_data->upgrade);
       break;
     case AZ_UGS_CLOSE:
       draw_upgrade_box_frame(1.0 - mode_data->progress);
