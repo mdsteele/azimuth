@@ -27,6 +27,7 @@
 
 #include <GL/gl.h>
 
+#include "azimuth/state/dialog.h"
 #include "azimuth/util/key.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/prefs.h"
@@ -227,17 +228,17 @@ static bool hex_parse(char c1, char c2, uint8_t *out) {
 
 void az_draw_paragraph(
     double height, az_alignment_t align, double x, double top, double spacing,
-    int end_row, int end_col, const az_preferences_t *prefs,
-    const char *string) {
+    int max_chars, const az_preferences_t *prefs, const char *paragraph) {
   assert(prefs != NULL);
-  assert(string != NULL);
+  assert(paragraph != NULL);
   // Start out with white text.
   glColor3f(1, 1, 1);
   // Draw each line of text, one per outer loop iteration.  We will return from
-  // this function when we reach the end (NUL character) of the string, or when
-  // we reach the (end_row, end_col) position.
-  int row = 0; // current line number
-  int line_start = 0; // index into string for first character of current line
+  // this function when we reach the end (NUL character) of the paragraph, or
+  // after printing max_chars characters.
+  int chars_printed = 0; // how many chars we've printed so far
+  int chars_before_line = 0; // how many chars we'd printed when line started
+  int line_start = 0; // index into paragraph for first char of current line
   double line_top = top; // y-position of top of the current line
   while (true) {
     // Determine the x-position of the left side of this line.  For alignments
@@ -245,58 +246,8 @@ void az_draw_paragraph(
     // the line.
     double line_left = x;
     if (align != AZ_ALIGN_LEFT) {
-      int line_end = line_start;
-      int line_length = 0;
-      while (string[line_end] != '\0' && string[line_end] != '\n') {
-        ++line_end;
-        // If we see a $-escape, we need to determine its expanded length.
-        if (string[line_end - 1] == '$') {
-          az_key_id_t key_id = AZ_KEY_UNKNOWN;
-          switch (string[line_end]) {
-            case '\0': break;
-            // A "$$" escape inserts a literal '$' character, so that adds 1 to
-            // the length of the line.
-            case '$': ++line_length; break;
-            // A "$X" escape adds no length, but we need to skip over the six
-            // hex digits that come after it.  However, we must take care not
-            // to advance line_end past the end of the string if the escape is
-            // incomplete.
-            case 'X':
-              ++line_end;
-              for (int stop = line_end + 6; line_end < stop &&
-                     string[line_end] != '\0'; ++line_end) {}
-              break;
-            // The key name escapes add the length of the key name to the line.
-            // Note for now which key_id we need to insert the name of, and
-            // we'll handle it below.
-            case 'u': key_id = prefs->up_key; break;
-            case 'd': key_id = prefs->down_key; break;
-            case 'r': key_id = prefs->right_key; break;
-            case 'l': key_id = prefs->left_key; break;
-            case 'f': key_id = prefs->fire_key; break;
-            case 'o': key_id = prefs->ordn_key; break;
-            case 't': key_id = prefs->util_key; break;
-            // All other escapes are just a single letter after the '$', which
-            // we should skip over without increasing the line length.
-            default:
-              ++line_end;
-              break;
-          }
-          // If the escape we just saw was for a key name, look up the name of
-          // that key and add its length to the line length.  Also, increment
-          // line_end to skip over the escape, since we didn't do that above
-          // for the key name escapes.
-          if (key_id != AZ_KEY_UNKNOWN) {
-            ++line_end;
-            line_length += strlen(az_key_name(key_id));
-          }
-        }
-        // Each literal character (i.e. not a $-escape) increments the line
-        // length.
-        else ++line_length;
-      }
-      // Now that we know the length of the line, we can calculate the
-      // x-position of the left side of the line.
+      const int line_length =
+        az_paragraph_line_length(prefs, paragraph, line_start);
       if (align == AZ_ALIGN_RIGHT) line_left -= line_length * height;
       else {
         assert(align == AZ_ALIGN_CENTER);
@@ -305,38 +256,40 @@ void az_draw_paragraph(
     }
     // Draw the individual fragments of text making up this line, one per loop
     // iteration.  Fragments are bounded by $-escapes.
-    int col = 0;
     int fragment_start = line_start;
     while (true) {
-      const double fragment_left = line_left + height * col;
+      const double fragment_left =
+        line_left + height * (chars_printed - chars_before_line);
       // Determine where the fragment ends.  It ends at the next $-escape, at
-      // the end of the line (or of the whole string), or when we reach our
-      // end_row/end_col position -- whichever comes first.
+      // the end of the line (or of the whole string), or when we reach
+      // max_chars printed characters -- whichever comes first.
       int fragment_end = fragment_start;
-      while (string[fragment_end] != '\0' && string[fragment_end] != '\n' &&
-             string[fragment_end] != '$') {
-        if (row == end_row && col == end_col) break;
-        ++col;
+      while (paragraph[fragment_end] != '\0' &&
+             paragraph[fragment_end] != '\n' &&
+             paragraph[fragment_end] != '$') {
+        if (chars_printed == max_chars) break;
+        ++chars_printed;
         ++fragment_end;
       }
       // Draw the fragment (if it's non-empty).
       if (fragment_end > fragment_start) {
         az_draw_chars(height, AZ_ALIGN_LEFT, fragment_left, line_top,
-                      string + fragment_start, fragment_end - fragment_start);
+                      paragraph + fragment_start,
+                      fragment_end - fragment_start);
       }
-      // If we've reached the final row/col, or the end of the string, we're
-      // completely done.
-      if (row == end_row && col == end_col) return;
-      if (string[fragment_end] == '\0') return;
+      // If we've printed max_chars characters, or we're at the end of the
+      // string, we're completely done.
+      if (chars_printed == max_chars) return;
+      if (paragraph[fragment_end] == '\0') return;
       // Otherwise, check if this is the end of the line; if so, the next line
       // will begin at fragment_start.
       fragment_start = fragment_end + 1;
-      if (string[fragment_end] == '\n') break;
+      if (paragraph[fragment_end] == '\n') break;
       // Otherwise, we must be at a $-escape.  Interpret the escape by setting
       // the current color or inserting a key name or whatever's needed.
-      assert(string[fragment_end] == '$');
+      assert(paragraph[fragment_end] == '$');
       az_key_id_t key_id = AZ_KEY_UNKNOWN;
-      const char escape = string[fragment_start];
+      const char escape = paragraph[fragment_start];
       ++fragment_start;
       switch (escape) {
         // If the opening '$' of the escape was the last character in the
@@ -362,9 +315,9 @@ void az_draw_paragraph(
           // read the next six characters after the "$X".  If we will, print a
           // warning and quit.
           for (int i = 0; i < 6; ++i) {
-            if (string[fragment_start + i] == '\0') {
+            if (paragraph[fragment_start + i] == '\0') {
               AZ_WARNING_ONCE("Incomplete $X escape: $X%s\n",
-                              string + fragment_start);
+                              paragraph + fragment_start);
               return;
             }
           }
@@ -373,16 +326,16 @@ void az_draw_paragraph(
           // $Xrrggbb escape.
           {
             uint8_t red, green, blue;
-            if (hex_parse(string[fragment_start + 0],
-                          string[fragment_start + 1], &red) &&
-                hex_parse(string[fragment_start + 2],
-                          string[fragment_start + 3], &green) &&
-                hex_parse(string[fragment_start + 4],
-                          string[fragment_start + 5], &blue)) {
+            if (hex_parse(paragraph[fragment_start + 0],
+                          paragraph[fragment_start + 1], &red) &&
+                hex_parse(paragraph[fragment_start + 2],
+                          paragraph[fragment_start + 3], &green) &&
+                hex_parse(paragraph[fragment_start + 4],
+                          paragraph[fragment_start + 5], &blue)) {
               glColor3ub(red, green, blue);
             } else {
               AZ_WARNING_ONCE("Malformed $X escape: $X%.6s\n",
-                              string + fragment_start);
+                              paragraph + fragment_start);
             }
             fragment_start += 6;
           }
@@ -403,22 +356,23 @@ void az_draw_paragraph(
           break;
       }
       // If the escape we just saw was for a key name, look up the name of that
-      // key and print it, advancing the current col by the length of the name.
-      // Of course, if our end_col falls in the middle of the key name, we'll
+      // key and print it, advancing chars_printed by the length of the name.
+      // Of course, if our max_chars falls in the middle of the key name, we'll
       // have to cut the key name short.
       if (key_id != AZ_KEY_UNKNOWN) {
         const char *key_name = az_key_name(key_id);
         int len = strlen(key_name);
-        if (row == end_row && col < end_col && end_col - col < len) {
-          len = end_col - col;
+        if (chars_printed < max_chars && max_chars - chars_printed < len) {
+          len = max_chars - chars_printed;
         }
-        az_draw_chars(height, AZ_ALIGN_LEFT, line_left + height * col,
+        az_draw_chars(height, AZ_ALIGN_LEFT,
+                      line_left + height * (chars_printed - chars_before_line),
                       line_top, key_name, len);
-        col += len;
+        chars_printed += len;
       }
     }
     // Advance to the next line.
-    ++row;
+    chars_before_line = chars_printed;
     line_start = fragment_start;
     line_top += spacing;
   }

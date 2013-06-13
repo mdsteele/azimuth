@@ -41,31 +41,8 @@
 
 /*===========================================================================*/
 
-static az_text_fragment_t save_failed_fragments[] = {
-  {.color = {255, 255, 255, 255}, .length = 5, .chars = "Save "},
-  {.color = {255, 0, 0, 255}, .length = 6, .chars = "failed"},
-  {.color = {255, 255, 255, 255}, .length = 1, .chars = "."}
-};
-static az_text_line_t save_failed_lines[] = {
-  {.total_length = 12, .num_fragments = 3, .fragments = save_failed_fragments}
-};
-static const az_text_t save_failed_text = {
-  .num_lines = 1, .lines = save_failed_lines
-};
-
-static az_text_fragment_t save_success_fragments[] = {
-  {.color = {255, 255, 255, 255}, .length = 14, .chars = "Game has been "},
-  {.color = {0, 255, 0, 255}, .length = 5, .chars = "saved"},
-  {.color = {255, 255, 255, 255}, .length = 1, .chars = "."}
-};
-static az_text_line_t save_success_lines[] = {
-  {.total_length = 20, .num_fragments = 3, .fragments = save_success_fragments}
-};
-static const az_text_t save_success_text = {
-  .num_lines = 1, .lines = save_success_lines
-};
-
-/*===========================================================================*/
+static const char save_failed_paragraph[] = "Save $Rfailed$W.";
+static const char save_success_paragraph[] = "Game has been $Gsaved$W.";
 
 static az_space_state_t state;
 
@@ -178,9 +155,8 @@ az_space_action_t az_space_event_loop(
         if (node->subkind.console == AZ_CONS_SAVE) {
           // If we need to save the game, do so.
           const bool ok = save_current_game(saved_games);
-          state.message.time_remaining = 4.0;
-          if (ok) state.message.text = &save_success_text;
-          else state.message.text = &save_failed_text;
+          if (ok) az_set_message(&state, save_success_paragraph);
+          else az_set_message(&state, save_failed_paragraph);
         }
       }
     }
@@ -194,8 +170,8 @@ az_space_action_t az_space_event_loop(
             if (state.dialog_mode.step == AZ_DLS_TALK) {
               state.dialog_mode.step = AZ_DLS_WAIT;
               state.dialog_mode.progress = 0.0;
-              state.dialog_mode.row = state.dialog_mode.text->num_lines;
-              state.dialog_mode.col = 0;
+              state.dialog_mode.chars_to_print =
+                state.dialog_mode.paragraph_length;
             } else if (state.dialog_mode.step == AZ_DLS_WAIT &&
                        event.key.id == AZ_KEY_RETURN) {
               az_resume_script(&state, &state.dialog_mode.vm);

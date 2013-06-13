@@ -164,6 +164,15 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
 
 /*===========================================================================*/
 
+void az_set_message(az_space_state_t *state, const char *paragraph) {
+  state->message = (az_message_t){
+    .time_remaining =
+        2.5 + 0.05 * az_paragraph_total_length(state->prefs, paragraph),
+    .paragraph = paragraph,
+    .num_lines = az_paragraph_num_lines(paragraph)
+  };
+}
+
 az_baddie_t *az_add_baddie(az_space_state_t *state, az_baddie_kind_t kind,
                            az_vector_t position, double angle) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {

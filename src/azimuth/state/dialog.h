@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdio.h> // for FILE
 
-#include "azimuth/util/color.h"
+#include "azimuth/util/prefs.h"
 
 /*===========================================================================*/
 
@@ -41,36 +41,27 @@ typedef enum {
   AZ_POR_TRICHORD
 } az_portrait_t;
 
-typedef struct {
-  az_color_t color;
-  int length;
-  char *chars; // not NUL-terminated; owned by text-fragment object
-} az_text_fragment_t;
+/*===========================================================================*/
 
-typedef struct {
-  int total_length; // sum of lengths of fragments
-  int num_fragments;
-  az_text_fragment_t *fragments;
-} az_text_line_t;
-
-typedef struct {
-  int num_lines;
-  az_text_line_t *lines;
-} az_text_t;
-
-// Serialize the text to a file and return true, or return false on error
+// Serialize the paragraph to a file and return true, or return false on error
 // (e.g. if file I/O fails).
-bool az_fprint_text(const az_text_t *text, FILE *file);
+bool az_fprint_paragraph(const char *paragraph, FILE *file);
 
-// Parse the text and return true, or return false on error.
-bool az_sscan_text(const char *string, int length, az_text_t *text_out);
+// Parse and allocate the paragraph.
+char *az_sscan_paragraph(const char *string, int length);
 
-// Make a deep copy of a text object (so that destroying one will not affect
-// the other).  The argument pointers must not be equal.
-void az_clone_text(const az_text_t *text, az_text_t *copy_out);
+// Return the number of lines in the paragraph.  This will be at least 1,
+// even for an empty string.
+int az_paragraph_num_lines(const char *paragraph);
 
-// Delete the data arrays owned by a text (but not the text object itself).
-void az_destroy_text(az_text_t *text);
+// Return the length, in printed characters, of the line in the paragraph
+// starting at paragraph[start].
+int az_paragraph_line_length(
+    const az_preferences_t *prefs, const char *paragraph, int start);
+
+// Return the total length, in printed characters, of the paragraph.
+int az_paragraph_total_length(
+    const az_preferences_t *prefs, const char *paragraph);
 
 /*===========================================================================*/
 

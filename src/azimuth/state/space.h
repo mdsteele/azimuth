@@ -51,7 +51,8 @@
 
 typedef struct {
   double time_remaining; // seconds
-  const az_text_t *text;
+  const char *paragraph;
+  int num_lines;
 } az_message_t;
 
 typedef struct {
@@ -82,8 +83,8 @@ typedef struct {
   double progress; // 0.0 to 1.0
   bool bottom_next;
   az_portrait_t top, bottom;
-  const az_text_t *text;
-  int row, col;
+  const char *paragraph;
+  int paragraph_length, chars_to_print;
   az_script_vm_t vm;
 } az_dialog_mode_data_t;
 
@@ -174,6 +175,11 @@ void az_clear_space(az_space_state_t *state);
 // there is room for the new objects.  Note that this function does not make
 // any changes to the ship or any other fields.
 void az_enter_room(az_space_state_t *state, const az_room_t *room);
+
+// Set the current message (displayed at the bottom of the screen) to the given
+// paragraph.  This will automatically intialize the various fields of
+// state->message appropriately.
+void az_set_message(az_space_state_t *state, const char *paragraph);
 
 // Add and init a new baddie and return a pointer to it, or return NULL if the
 // baddie array is already full.

@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "azimuth/state/dialog.h"
 #include "azimuth/state/object.h"
 #include "azimuth/state/script.h"
 #include "azimuth/state/space.h"
@@ -625,17 +626,12 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       // Messages/dialog:
       case AZ_OP_MSG:
         {
-          const int text_index = (int)ins.immediate;
-          if (text_index < 0 || text_index >= state->planet->num_texts) {
-            SCRIPT_ERROR("invalid text index");
+          const int paragraph_index = (int)ins.immediate;
+          if (paragraph_index < 0 ||
+              paragraph_index >= state->planet->num_paragraphs) {
+            SCRIPT_ERROR("invalid paragraph index");
           }
-          const az_text_t *text = &state->planet->texts[text_index];
-          state->message.text = text;
-          state->message.time_remaining = 2.5;
-          for (int i = 0; i < text->num_lines; ++i) {
-            state->message.time_remaining +=
-              0.05 * text->lines[i].total_length;
-          }
+          az_set_message(state, state->planet->paragraphs[paragraph_index]);
         }
         break;
       case AZ_OP_DLOG:
@@ -667,31 +663,37 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         break;
       case AZ_OP_TT:
         if (state->mode == AZ_MODE_DIALOG) {
-          const int text_index = (int)ins.immediate;
-          if (text_index < 0 || text_index >= state->planet->num_texts) {
-            SCRIPT_ERROR("invalid text index");
+          const int paragraph_index = (int)ins.immediate;
+          if (paragraph_index < 0 ||
+              paragraph_index >= state->planet->num_paragraphs) {
+            SCRIPT_ERROR("invalid paragraph index");
           }
-          const az_text_t *text = &state->planet->texts[text_index];
+          const char *paragraph = state->planet->paragraphs[paragraph_index];
           state->dialog_mode.step = AZ_DLS_TALK;
           state->dialog_mode.progress = 0.0;
           state->dialog_mode.bottom_next = false;
-          state->dialog_mode.text = text;
-          state->dialog_mode.row = state->dialog_mode.col = 0;
+          state->dialog_mode.paragraph = paragraph;
+          state->dialog_mode.paragraph_length =
+            az_paragraph_total_length(state->prefs, paragraph);
+          state->dialog_mode.chars_to_print = 0;
           SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");
       case AZ_OP_TB:
         if (state->mode == AZ_MODE_DIALOG) {
-          const int text_index = (int)ins.immediate;
-          if (text_index < 0 || text_index >= state->planet->num_texts) {
-            SCRIPT_ERROR("invalid text index");
+          const int paragraph_index = (int)ins.immediate;
+          if (paragraph_index < 0 ||
+              paragraph_index >= state->planet->num_paragraphs) {
+            SCRIPT_ERROR("invalid paragraph index");
           }
-          const az_text_t *text = &state->planet->texts[text_index];
+          const char *paragraph = state->planet->paragraphs[paragraph_index];
           state->dialog_mode.step = AZ_DLS_TALK;
           state->dialog_mode.progress = 0.0;
           state->dialog_mode.bottom_next = true;
-          state->dialog_mode.text = text;
-          state->dialog_mode.row = state->dialog_mode.col = 0;
+          state->dialog_mode.paragraph = paragraph;
+          state->dialog_mode.paragraph_length =
+            az_paragraph_total_length(state->prefs, paragraph);
+          state->dialog_mode.chars_to_print = 0;
           SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");
@@ -699,7 +701,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         if (state->mode == AZ_MODE_DIALOG) {
           state->dialog_mode.step = AZ_DLS_END;
           state->dialog_mode.progress = 0.0;
-          state->dialog_mode.text = NULL;
+          state->dialog_mode.paragraph = NULL;
+          state->dialog_mode.paragraph_length = 0;
+          state->dialog_mode.chars_to_print = 0;
           SUSPEND(vm->script, &state->dialog_mode.vm);
         }
         SCRIPT_ERROR("not in dialog");

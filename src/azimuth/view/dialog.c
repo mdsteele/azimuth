@@ -27,6 +27,7 @@
 
 #include "azimuth/state/dialog.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"

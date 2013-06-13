@@ -120,28 +120,9 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
   }
 }
 
-static az_text_fragment_t refilled_shields_only_fragments[] = {
-  {.color = {255, 255, 255, 255}, .length = 17, .chars = "Shields refilled."}
-};
-static az_text_line_t refilled_shields_only_lines[] = {
-  {.total_length = 17, .num_fragments = 1,
-   .fragments = refilled_shields_only_fragments}
-};
-static const az_text_t refilled_shields_only_text = {
-  .num_lines = 1, .lines = refilled_shields_only_lines
-};
-
-static az_text_fragment_t refilled_shields_and_ammo_fragments[] = {
-  {.color = {255, 255, 255, 255}, .length = 32,
-   .chars = "Shields and ammunition refilled."}
-};
-static az_text_line_t refilled_shields_and_ammo_lines[] = {
-  {.total_length = 32, .num_fragments = 1,
-   .fragments = refilled_shields_and_ammo_fragments}
-};
-static const az_text_t refilled_shields_and_ammo_text = {
-  .num_lines = 1, .lines = refilled_shields_and_ammo_lines
-};
+static const char refilled_shields_only_paragraph[] = "Shields refilled.";
+static const char refilled_shields_and_ammo_paragraph[] =
+  "Shields and ammunition refilled.";
 
 static void tick_console_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_CONSOLE);
@@ -203,10 +184,9 @@ static void tick_console_mode(az_space_state_t *state, double time) {
     case AZ_CSS_FINISH:
       assert(mode_data->progress == 0.0);
       if (node->subkind.console == AZ_CONS_REFILL) {
-        state->message.time_remaining = 4.0;
         if (player->max_rockets == 0 && player->max_bombs == 0) {
-          state->message.text = &refilled_shields_only_text;
-        } else state->message.text = &refilled_shields_and_ammo_text;
+          az_set_message(state, refilled_shields_only_paragraph);
+        } else az_set_message(state, refilled_shields_and_ammo_paragraph);
       }
       state->mode = AZ_MODE_NORMAL;
       az_run_script(state, node->on_use);
@@ -221,7 +201,7 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
   const double char_time = 0.03; // seconds
   switch (mode_data->step) {
     case AZ_DLS_BEGIN:
-      assert(mode_data->text == NULL);
+      assert(mode_data->paragraph == NULL);
       assert(mode_data->vm.script != NULL);
       mode_data->progress += time / open_close_time;
       if (mode_data->progress >= 1.0) {
@@ -229,28 +209,26 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
       }
       break;
     case AZ_DLS_TALK:
-      assert(mode_data->text != NULL);
+      assert(mode_data->paragraph != NULL);
       assert(mode_data->vm.script != NULL);
       mode_data->progress += time / char_time;
       if (mode_data->progress >= 1.0) {
         mode_data->progress = 0.0;
-        const az_text_t *text = mode_data->text;
-        ++mode_data->col;
-        if (mode_data->col >= text->lines[mode_data->row].total_length) {
-          mode_data->col = 0;
-          ++mode_data->row;
-          if (mode_data->row >= text->num_lines) {
-            mode_data->step = AZ_DLS_WAIT;
-          }
+        ++mode_data->chars_to_print;
+        if (mode_data->chars_to_print == mode_data->paragraph_length) {
+          mode_data->step = AZ_DLS_WAIT;
         }
       }
       break;
     case AZ_DLS_WAIT:
-      assert(mode_data->text != NULL);
+      assert(mode_data->paragraph != NULL);
+      assert(mode_data->chars_to_print == mode_data->paragraph_length);
       assert(mode_data->vm.script != NULL);
       break;
     case AZ_DLS_END:
-      assert(mode_data->text == NULL);
+      assert(mode_data->paragraph == NULL);
+      assert(mode_data->paragraph_length == 0);
+      assert(mode_data->chars_to_print == 0);
       mode_data->progress += time / open_close_time;
       if (mode_data->progress >= 1.0) {
         if (mode_data->vm.script != NULL) {
@@ -452,13 +430,15 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
 
 static void tick_message(az_message_t *message, double time) {
   if (message->time_remaining == 0.0) {
-    assert(message->text == NULL);
+    assert(message->paragraph == NULL);
+    assert(message->num_lines == 0);
   } else {
     assert(message->time_remaining > 0.0);
     message->time_remaining -= time;
     if (message->time_remaining <= 0.0) {
       message->time_remaining = 0.0;
-      message->text = NULL;
+      message->paragraph = NULL;
+      message->num_lines = 0;
     }
   }
 }

@@ -234,16 +234,18 @@ static void draw_hud_boss_health(az_space_state_t *state) {
   }
 }
 
-static void draw_hud_message(const az_message_t *message) {
+static void draw_hud_message(const az_preferences_t *prefs,
+                             const az_message_t *message) {
   if (message->time_remaining <= 0.0) {
-    assert(message->text == NULL);
+    assert(message->paragraph == NULL);
+    assert(message->num_lines == 0);
     return;
   }
-  assert(message->text != NULL);
-  assert(message->text->num_lines > 0);
+  assert(message->paragraph != NULL);
+  assert(message->num_lines > 0);
   glPushMatrix(); {
     const int width = AZ_SCREEN_WIDTH - 20;
-    const int height = 6 + 20 * message->text->num_lines;
+    const int height = 6 + 20 * message->num_lines;
     const double slide_time = 0.5; // seconds
     const int top = AZ_SCREEN_HEIGHT -
       (message->time_remaining >= slide_time ? height :
@@ -256,18 +258,8 @@ static void draw_hud_message(const az_message_t *message) {
       glVertex2i(width, height); glVertex2i(width, 0);
     } glEnd();
 
-    for (int i = 0; i < message->text->num_lines; ++i) {
-      const az_text_line_t *line = &message->text->lines[i];
-      int left = AZ_SCREEN_WIDTH / 2 - 8 * line->total_length;
-      for (int j = 0; j < line->num_fragments; ++j) {
-        const az_text_fragment_t *fragment = &line->fragments[j];
-        const az_color_t color = fragment->color;
-        glColor4ub(color.r, color.g, color.b, color.a);
-        az_draw_chars(16, AZ_ALIGN_LEFT, left, 6 + 20 * i,
-                      fragment->chars, fragment->length);
-        left += fragment->length * 16;
-      }
-    }
+    az_draw_paragraph(16, AZ_ALIGN_CENTER, width/2, 6, 20, -1,
+                      prefs, message->paragraph);
   } glPopMatrix();
 }
 
@@ -378,18 +370,6 @@ static void draw_dialog_frames(double openness) {
   }
 }
 
-static void draw_dialog_text_line(const az_text_line_t *line, int num_chars) {
-  for (int i = 0, left = 0; i < line->num_fragments && num_chars > 0; ++i) {
-    const az_text_fragment_t *fragment = &line->fragments[i];
-    const az_color_t color = fragment->color;
-    glColor4ub(color.r, color.g, color.b, color.a);
-    az_draw_chars(8, AZ_ALIGN_LEFT, left, 0, fragment->chars,
-                  az_imin(fragment->length, num_chars));
-    left += 8 * fragment->length;
-    num_chars -= fragment->length;
-  }
-}
-
 static void draw_dialog_text(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DIALOG);
   const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
@@ -414,15 +394,9 @@ static void draw_dialog_text(const az_space_state_t *state) {
                      DIALOG_BOX_HEIGHT - 2 * DIALOG_BOX_MARGIN - 8, "[ENTER]");
     }
 
-    const az_text_t *text = mode_data->text;
-    for (int i = 0; i < mode_data->row; ++i) {
-      draw_dialog_text_line(&text->lines[i], text->lines[i].total_length);
-      glTranslatef(0, TEXT_LINE_SPACING, 0);
-    }
-    if (mode_data->row < text->num_lines) {
-      draw_dialog_text_line(&text->lines[mode_data->row],
-                            mode_data->col);
-    }
+    az_draw_paragraph(8, AZ_ALIGN_LEFT, 0, 0, TEXT_LINE_SPACING,
+                      mode_data->chars_to_print, state->prefs,
+                      mode_data->paragraph);
   } glPopMatrix();
 }
 
@@ -500,8 +474,8 @@ static void draw_upgrade_box_message(const az_preferences_t *prefs,
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - UPGRADE_BOX_HEIGHT);
   glColor3f(1, 1, 1); // white
   az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 18, name);
-  az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, 20,
-                    -1, -1, prefs, description);
+  az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, 20, -1,
+                    prefs, description);
 }
 
 static void draw_upgrade_box(const az_space_state_t *state) {
@@ -530,7 +504,7 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);
   draw_hud_boss_health(state);
-  draw_hud_message(&state->message);
+  draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);
   if (state->mode == AZ_MODE_DIALOG) {
     draw_dialog(state);

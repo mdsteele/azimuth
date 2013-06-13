@@ -40,8 +40,8 @@ typedef struct {
   az_room_key_t start_room;
   az_vector_t start_position;
   double start_angle;
-  int num_texts;
-  az_text_t *texts;
+  int num_paragraphs;
+  char **paragraphs;
   int num_zones;
   az_zone_t *zones;
   int num_rooms;

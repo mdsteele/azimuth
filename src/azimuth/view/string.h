@@ -51,9 +51,9 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
   __attribute__((__format__(__printf__,5,6)));
 
 // Draw a paragraph of text, and interpret special $-escapes to set colors and
-// insert keyboard key names.  The initial color is white.  Stops just before
-// the end_col-th character on the end_row-th line; set these to -1 to print
-// the whole paragraph.  The permitted escapes are:
+// insert keyboard key names.  The initial color is white.  Stops after
+// printing max_chars characters; set this to -1 to print the whole paragraph.
+// The permitted escapes are:
 //   $$ - insert a literal '$' character
 //   $W - set color to white
 //   $A - set color to gray
@@ -73,8 +73,7 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 //   $t - insert name of prefs->util_key
 void az_draw_paragraph(
     double height, az_alignment_t align, double x, double top, double spacing,
-    int end_row, int end_col, const az_preferences_t *prefs,
-    const char *string);
+    int max_chars, const az_preferences_t *prefs, const char *paragraph);
 
 /*===========================================================================*/
 

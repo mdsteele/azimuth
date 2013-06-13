@@ -34,13 +34,13 @@
 /*===========================================================================*/
 
 // Arbitrary limit to enforce sanity:
-#define AZ_MAX_NUM_TEXTS 50000
+#define AZ_MAX_NUM_PARAGRAPHS 50000
 
 typedef struct {
   FILE *file;
   bool success;
   jmp_buf jump;
-  int num_zones, num_texts;
+  int num_zones, num_paragraphs;
   az_planet_t *planet;
 } az_load_planet_t;
 
@@ -95,40 +95,40 @@ static char *scan_string(az_load_planet_t *loader) {
 }
 
 static void parse_planet_header(az_load_planet_t *loader) {
-  int num_zones, num_rooms, num_texts, start_room_num;
+  int num_zones, num_rooms, num_paragraphs, start_room_num;
   double start_x, start_y, start_angle;
   READ("@P z%d r%d t%d s%d x%lf y%lf a%lf\n",
-       &num_zones, &num_rooms, &num_texts, &start_room_num,
+       &num_zones, &num_rooms, &num_paragraphs, &start_room_num,
        &start_x, &start_y, &start_angle);
   if (num_zones < 1 || num_zones > AZ_MAX_NUM_ZONES ||
       num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
-      num_texts < 0 || num_texts > AZ_MAX_NUM_TEXTS ||
+      num_paragraphs < 0 || num_paragraphs > AZ_MAX_NUM_PARAGRAPHS ||
       start_room_num < 0 || start_room_num >= num_rooms) FAIL();
   loader->num_zones = num_zones;
-  loader->num_texts = num_texts;
+  loader->num_paragraphs = num_paragraphs;
   loader->planet->num_zones = 0;
   loader->planet->zones = AZ_ALLOC(num_zones, az_zone_t);
   loader->planet->num_rooms = num_rooms;
   loader->planet->rooms = AZ_ALLOC(num_rooms, az_room_t);
-  loader->planet->num_texts = 0;
-  loader->planet->texts = AZ_ALLOC(num_texts, az_text_t);
+  loader->planet->num_paragraphs = 0;
+  loader->planet->paragraphs = AZ_ALLOC(num_paragraphs, char*);
   loader->planet->start_room = start_room_num;
   loader->planet->start_position = (az_vector_t){.x = start_x, .y = start_y};
   loader->planet->start_angle = start_angle;
   scan_to_bang(loader);
 }
 
-static void parse_text_directive(az_load_planet_t *loader) {
-  if (loader->planet->num_texts >= loader->num_texts) FAIL();
-  int text_index;
-  READ("%d", &text_index);
-  if (text_index != loader->planet->num_texts) FAIL();
-  az_text_t *text = &loader->planet->texts[loader->planet->num_texts];
+static void parse_paragraph_directive(az_load_planet_t *loader) {
+  if (loader->planet->num_paragraphs >= loader->num_paragraphs) FAIL();
+  int paragraph_index;
+  READ("%d", &paragraph_index);
+  if (paragraph_index != loader->planet->num_paragraphs) FAIL();
   char *string = scan_string(loader);
-  const bool ok = az_sscan_text(string, strlen(string), text);
+  char *paragraph = az_sscan_paragraph(string, strlen(string));
   free(string);
-  if (!ok) FAIL();
-  ++loader->planet->num_texts;
+  if (paragraph == NULL) FAIL();
+  loader->planet->paragraphs[loader->planet->num_paragraphs] = paragraph;
+  ++loader->planet->num_paragraphs;
   scan_to_bang(loader);
 }
 
@@ -148,7 +148,7 @@ static void parse_zone_directive(az_load_planet_t *loader) {
 
 static bool parse_directive(az_load_planet_t *loader) {
   switch (fgetc(loader->file)) {
-    case 'T': parse_text_directive(loader); return true;
+    case 'T': parse_paragraph_directive(loader); return true;
     case 'Z': parse_zone_directive(loader); return true;
     case EOF: return false;
     default: FAIL();
@@ -158,7 +158,7 @@ static bool parse_directive(az_load_planet_t *loader) {
 
 static void validate_planet_basis(az_load_planet_t *loader) {
   if (loader->planet->num_zones != loader->num_zones ||
-      loader->planet->num_texts != loader->num_texts) FAIL();
+      loader->planet->num_paragraphs != loader->num_paragraphs) FAIL();
 }
 
 #undef READ
@@ -215,7 +215,7 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
 
 static bool write_planet_header(const az_planet_t *planet, FILE *file) {
   WRITE("@P z%d r%d t%d s%d x%.02f y%.02f a%f\n",
-        planet->num_zones, planet->num_rooms, planet->num_texts,
+        planet->num_zones, planet->num_rooms, planet->num_paragraphs,
         planet->start_room, planet->start_position.x, planet->start_position.y,
         planet->start_angle);
   for (int i = 0; i < planet->num_zones; ++i) {
@@ -231,10 +231,10 @@ static bool write_planet_header(const az_planet_t *planet, FILE *file) {
     WRITE("\" c(%d,%d,%d) m%d\n", (int)zone->color.r, (int)zone->color.g,
           (int)zone->color.b, (int)zone->music);
   }
-  for (int i = 0; i < planet->num_texts; ++i) {
-    const az_text_t *text = &planet->texts[i];
+  for (int i = 0; i < planet->num_paragraphs; ++i) {
+    const char *paragraph = planet->paragraphs[i];
     WRITE("!T%d\"", i);
-    if (!az_fprint_text(text, file)) return false;
+    if (!az_fprint_paragraph(paragraph, file)) return false;
     WRITE("\"\n");
   }
   return true;
@@ -273,10 +273,10 @@ bool az_save_planet(
 
 void az_destroy_planet(az_planet_t *planet) {
   assert(planet != NULL);
-  for (int i = 0; i < planet->num_texts; ++i) {
-    az_destroy_text(&planet->texts[i]);
+  for (int i = 0; i < planet->num_paragraphs; ++i) {
+    free(planet->paragraphs[i]);
   }
-  free(planet->texts);
+  free(planet->paragraphs);
   for (int i = 0; i < planet->num_zones; ++i) {
     free(planet->zones[i].name);
   }

@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
   RUN_TEST(test_convex_polygon_contains);
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
+  RUN_TEST(test_paragraph_length);
+  RUN_TEST(test_paragraph_scan);
   RUN_TEST(test_persist_sound);
   RUN_TEST(test_player_flags);
   RUN_TEST(test_player_give_upgrade);
@@ -72,9 +74,6 @@ int main(int argc, char **argv) {
   RUN_TEST(test_script_scan);
   RUN_TEST(test_select_gun);
   RUN_TEST(test_signmod);
-  RUN_TEST(test_text_clone);
-  RUN_TEST(test_text_scan1);
-  RUN_TEST(test_text_scan2);
   RUN_TEST(test_uids);
   RUN_TEST(test_vcaplen);
   RUN_TEST(test_vpolar);
