@@ -271,10 +271,11 @@ static az_sound_entry_t sound_entries[] = {
   },
   [AZ_SND_CHARGING_ORDNANCE] = {
     .wave_kind = TRIANGLE,
-    .env_attack = 1.0, .env_sustain = 0.34507, .env_decay = 0.246478870511,
+    .env_attack = 0.2, .env_sustain = 1.0,
     .start_freq = 0.0897183, .freq_slide = 0.118591,
     .freq_delta_slide = 0.056338,
-    .square_duty = 0.40368, .duty_sweep = 0.0140844583511
+    .square_duty = 0.40368, .duty_sweep = 0.0140844583511,
+    .volume_adjust = -0.4
   },
   [AZ_SND_CPLUS_ACTIVE] = {
     .wave_kind = NOISE,
@@ -863,38 +864,63 @@ static void free_all_sounds(void) {
 
 static void tick_sounds(const az_soundboard_t *soundboard) {
   static struct {
-    enum { INACTIVE = 0, PLAYING, FINISHED } status;
+    enum { INACTIVE = 0, PLAYING, PAUSED, FINISHED } status;
     az_sound_key_t sound;
     int channel;
   } persisting_sounds[NUM_MIXER_CHANNELS];
 
-  // Clean up unpersisted sounds.
-  bool done[soundboard->num_persists];
-  memset(done, 0, sizeof(bool) * soundboard->num_persists);
+  // First, go through each of the active persisting_sounds and update their
+  // status based on the soundboard.
+  bool already_active[soundboard->num_persists];
+  memset(already_active, 0, sizeof(bool) * soundboard->num_persists);
   AZ_ARRAY_LOOP(persisting, persisting_sounds) {
     if (persisting->status == INACTIVE) continue;
-    bool halt = true;
+    // Check if this sound is in the soundboard's persists array.  If not, we
+    // will implicitly halt and reset the sound.
+    bool reset = true;
     for (int i = 0; i < soundboard->num_persists; ++i) {
       if (soundboard->persists[i].sound == persisting->sound) {
-        halt = false;
-        done[i] = true;
+        // We only need to worry about play/pause right now if we're not
+        // resetting the sound.  If reset and play are both true, we'll still
+        // halt the sound here, and then start it again below.
+        if (!soundboard->persists[i].reset) {
+          reset = false;
+          already_active[i] = true;
+          // Resume or pause the sound as needed.
+          if (soundboard->persists[i].play) {
+            if (persisting->status == PAUSED) {
+              Mix_Resume(persisting->channel);
+              persisting->status = PLAYING;
+            }
+          } else {
+            if (persisting->status == PLAYING) {
+              Mix_Pause(persisting->channel);
+              persisting->status = PAUSED;
+            }
+          }
+        }
         break;
       }
     }
-    if (halt) {
-      if (persisting->status == PLAYING) {
+    // If the sound has finished playing on its own (meaning its channel is
+    // available for use by another sound), mark it as FINISHED so we'll know
+    // not to mess with that channel later if we need to halt/pause this sound.
+    if (persisting->status == PLAYING && !Mix_Playing(persisting->channel)) {
+      persisting->status = FINISHED;
+    }
+    // If we're supposed to reset this sound, halt it.
+    if (reset) {
+      if (persisting->status == PLAYING || persisting->status == PAUSED) {
         Mix_HaltChannel(persisting->channel);
       }
       persisting->status = INACTIVE;
-    } else if (persisting->status == PLAYING &&
-               !Mix_Playing(persisting->channel)) {
-      persisting->status = FINISHED;
     }
   }
 
-  // Play new persistent sounds.
+  // Second, go through the soundboard and start playing any new persistent
+  // sounds that need to be started.
   for (int i = 0; i < soundboard->num_persists; ++i) {
-    if (done[i]) continue;
+    if (already_active[i] || !soundboard->persists[i].play) continue;
     AZ_ARRAY_LOOP(persisting, persisting_sounds) {
       if (persisting->status == INACTIVE) {
         const az_sound_key_t sound = soundboard->persists[i].sound;
@@ -911,7 +937,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
     }
   }
 
-  // Play one-shot sounds.
+  // Third, start playing any new one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
     Mix_PlayChannel(-1, sound_entries[soundboard->oneshots[i]].chunk, 0);
   }

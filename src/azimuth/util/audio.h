@@ -103,7 +103,12 @@ typedef struct {
   int num_oneshots;
   az_sound_key_t oneshots[10];
   int num_persists;
-  struct { az_sound_key_t sound; bool loop; } persists[10];
+  struct {
+    az_sound_key_t sound;
+    bool play;
+    bool loop;
+    bool reset;
+  } persists[10];
 } az_soundboard_t;
 
 /*===========================================================================*/
@@ -116,7 +121,7 @@ void az_change_music(az_soundboard_t *soundboard, az_music_key_t music);
 void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds);
 
 // Indicate that we should play the given sound (once).  The sound will not
-// loop, and cannot be cancelled once started.
+// loop, and cannot be cancelled or paused once started.
 void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 // Indicate that we should start playing, or continue to play, the given sound.
@@ -128,9 +133,20 @@ void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
 // same sound, otherwise the sound will stop.  The sound will play only once,
-// and won't restart until we stop calling this function for at least one frame
-// before calling it again.
+// and won't restart until we either stop calling this function for at least
+// one frame before calling it again, or we call az_reset_sound.
 void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
+
+// Indicate that, if the given persisted or looped sound is currently playing,
+// we should pause it for this frame.  To keep the sound from resetting, we
+// must call this function every frame with the same sound; the sound will
+// resume once we start calling az_persist_sound or az_loop_sound again.
+void az_hold_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
+
+// Indicate that the given persisted or looped sound should restart from the
+// beginning, even if we also call az_persist_sound or az_loop_sound this frame
+// to keep the sound going.
+void az_reset_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 /*===========================================================================*/
 

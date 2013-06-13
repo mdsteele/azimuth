@@ -499,9 +499,18 @@ static void tick_all_objects(az_space_state_t *state, double time) {
   az_tick_nodes(state, time);
 }
 
+// Hold the ship's persisted sounds for a frame while we're effectively paused
+// (e.g. for PAUSING mode or DOORWAY mode) so that they don't implicitly reset.
+static void hold_ship_sounds(az_space_state_t *state) {
+  az_hold_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
+  az_hold_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
+  az_hold_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+}
+
 /*===========================================================================*/
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  // Loop a klaxon sound if the ship's shields are low.
   if (az_ship_is_present(&state->ship) &&
       state->ship.player.shields <= AZ_SHIELDS_LOW_THRESHOLD) {
     az_loop_sound(&state->soundboard,
@@ -511,6 +520,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
 
   // If we're pausing/unpausing, nothing else should happen.
   if (state->mode == AZ_MODE_PAUSING) {
+    hold_ship_sounds(state);
     tick_pausing_mode(state, time);
     return;
   }
@@ -543,7 +553,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       if (state->doorway_mode.step == AZ_DWS_FADE_IN) {
         az_tick_timers(state, time);
         tick_all_objects(state, time);
-      }
+      } else hold_ship_sounds(state);
       break;
     case AZ_MODE_GAME_OVER:
       tick_game_over_mode(state, time);
@@ -558,6 +568,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     case AZ_MODE_PAUSING:
       AZ_ASSERT_UNREACHABLE(); // this mode is handled above
     case AZ_MODE_UPGRADE:
+      hold_ship_sounds(state);
       tick_upgrade_mode(state, time);
       break;
   }

@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -49,24 +50,41 @@ void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
 }
 
 static void persist_sound_internal(
-    az_soundboard_t *soundboard, az_sound_key_t sound, bool loop) {
-  if (soundboard->num_persists < AZ_ARRAY_SIZE(soundboard->persists)) {
-    // Don't persist the same sound more than once in the same frame.
-    for (int i = 0; i < soundboard->num_persists; ++i) {
-      if (soundboard->persists[i].sound == sound) return;
-    }
-    soundboard->persists[soundboard->num_persists].sound = sound;
-    soundboard->persists[soundboard->num_persists].loop = loop;
-    ++soundboard->num_persists;
+    az_soundboard_t *soundboard, az_sound_key_t sound,
+    bool play, bool loop, bool reset) {
+  int index;
+  for (index = 0; index < soundboard->num_persists; ++index) {
+    if (soundboard->persists[index].sound == sound) goto merge;
   }
+  if (soundboard->num_persists == AZ_ARRAY_SIZE(soundboard->persists)) {
+    AZ_WARNING_ONCE("No room to persist sound %d\n", (int)sound);
+    return;
+  }
+  assert(index == soundboard->num_persists);
+  assert(soundboard->num_persists < AZ_ARRAY_SIZE(soundboard->persists));
+  ++soundboard->num_persists;
+  soundboard->persists[index].sound = sound;
+ merge:
+  assert(soundboard->persists[index].sound == sound);
+  soundboard->persists[index].play |= play;
+  soundboard->persists[index].loop |= loop;
+  soundboard->persists[index].reset |= reset;
 }
 
 void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, true);
+  persist_sound_internal(soundboard, sound, true, true, false);
 }
 
 void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, false);
+  persist_sound_internal(soundboard, sound, true, false, false);
+}
+
+void az_hold_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+  persist_sound_internal(soundboard, sound, false, false, false);
+}
+
+void az_reset_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+  persist_sound_internal(soundboard, sound, false, false, true);
 }
 
 /*===========================================================================*/

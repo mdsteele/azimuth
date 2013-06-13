@@ -264,6 +264,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     rel_velocity = az_vsub(rel_velocity, ship->velocity);
     ship->velocity = az_vmul(ship->velocity, 0.3);
     az_vpluseq(&rel_velocity, ship->velocity);
+    az_reset_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
     az_play_sound(&state->soundboard, AZ_SND_CPLUS_IMPACT);
   }
 
@@ -553,10 +554,11 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
   az_loop_sound(&state->soundboard, sound);
 }
 
-static void fire_weapons(az_space_state_t *state, double time) {
+static void charge_weapons(az_space_state_t *state, double time) {
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
+  // Charge gun:
   assert(player->gun2 != AZ_GUN_CHARGE);
   if (player->gun1 == AZ_GUN_CHARGE) {
     if (controls->fire_held) {
@@ -568,13 +570,15 @@ static void fire_weapons(az_space_state_t *state, double time) {
         az_loop_sound(&state->soundboard, AZ_SND_CHARGED_GUN);
       }
     }
-  } else ship->gun_charge = 0.0;
-  const bool has_hyper_rockets =
-    az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS);
-  const bool has_mega_bombs =
-    az_has_upgrade(player, AZ_UPG_MEGA_BOMBS);
-  if ((has_hyper_rockets && player->ordnance == AZ_ORDN_ROCKETS) ||
-      (has_mega_bombs && player->ordnance == AZ_ORDN_BOMBS)) {
+  } else {
+    ship->gun_charge = 0.0;
+    az_reset_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
+  }
+  // Charge ordnance:
+  if ((az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS) &&
+       player->ordnance == AZ_ORDN_ROCKETS) ||
+      (az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) &&
+       player->ordnance == AZ_ORDN_BOMBS)) {
     if (controls->ordn_held) {
       if (ship->ordn_charge < 1.0) {
         ship->ordn_charge = fmin(1.0, ship->ordn_charge +
@@ -584,7 +588,16 @@ static void fire_weapons(az_space_state_t *state, double time) {
         az_loop_sound(&state->soundboard, AZ_SND_CHARGED_ORDNANCE);
       }
     }
-  } else ship->ordn_charge = 0.0;
+  } else {
+    ship->ordn_charge = 0.0;
+    az_reset_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
+  }
+}
+
+static void fire_weapons(az_space_state_t *state, double time) {
+  az_ship_t *ship = &state->ship;
+  az_player_t *player = &ship->player;
+  az_controls_t *controls = &ship->controls;
 
   // If the ordnance key is held, we should be firing ordnance.
   if (controls->fire_pressed && controls->ordn_held) {
@@ -592,7 +605,8 @@ static void fire_weapons(az_space_state_t *state, double time) {
     switch (player->ordnance) {
       case AZ_ORDN_NONE: return;
       case AZ_ORDN_ROCKETS:
-        if (ship->ordn_charge >= 1.0 && has_hyper_rockets &&
+        if (ship->ordn_charge >= 1.0 &&
+            az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS) &&
             player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) {
           player->rockets -= AZ_ROCKETS_PER_HYPER_ROCKET;
           fire_ordn_single(state, AZ_PROJ_HYPER_ROCKET, true,
@@ -604,9 +618,11 @@ static void fire_weapons(az_space_state_t *state, double time) {
                            AZ_SND_FIRE_ROCKET, 20);
         }
         ship->ordn_charge = 0.0;
+        az_reset_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
         return;
       case AZ_ORDN_BOMBS:
-        if (ship->ordn_charge >= 1.0 && has_mega_bombs &&
+        if (ship->ordn_charge >= 1.0 &&
+            az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) &&
             player->bombs >= AZ_BOMBS_PER_MEGA_BOMB) {
           player->bombs -= AZ_BOMBS_PER_MEGA_BOMB;
           fire_ordn_single(state, AZ_PROJ_MEGA_BOMB, false,
@@ -617,6 +633,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           fire_ordn_single(state, AZ_PROJ_BOMB, false, AZ_SND_DROP_BOMB, 0);
         }
         ship->ordn_charge = 0.0;
+        az_reset_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
         return;
     }
     AZ_ASSERT_UNREACHABLE();
@@ -624,6 +641,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
 
   if (!controls->ordn_held || controls->fire_pressed) {
     ship->ordn_charge = 0.0;
+    az_reset_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
   }
 
   // If we're not firing ordnance, we should be firing our gun.  If the gun is
@@ -636,7 +654,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
       if (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
           player->ordnance == AZ_ORDN_ROCKETS &&
           player->rockets >= AZ_ROCKETS_PER_MISSILE_COMBO) {
-        assert(has_hyper_rockets);
+        assert(az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS));
         player->rockets -= AZ_ROCKETS_PER_MISSILE_COMBO;
         switch (player->gun2) {
           case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
@@ -871,6 +889,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
     ship->cplus.state = AZ_CPLUS_INACTIVE;
     ship->cplus.charge = 0.0;
     ship->cplus.tap_time = 0.0;
+    az_reset_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
     return;
   }
 
@@ -961,6 +980,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       if (controls->down_held || !controls->up_held ||
           !try_use_energy(ship, energy_cost, true)) {
         ship->cplus.state = AZ_CPLUS_INACTIVE;
+        az_reset_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
       } else {
         // As long as the C-plus drive is active, the ship moves at a constant
         // (fast) speed, and leaves a trail of green smoke behind it.
@@ -1093,6 +1113,12 @@ void az_tick_ship(az_space_state_t *state, double time) {
     recharge_ship_energy(player, time);
   }
 
+  // Allow weapons to charge up, and maintain persisted sounds, as necessary.
+  charge_weapons(state, time);
+  if (ship->cplus.state == AZ_CPLUS_ACTIVE) {
+    az_hold_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+  }
+
   // Deactivate tractor beam if necessary, otherwise get the node it is locked
   // onto.
   az_node_t *tractor_node = NULL;
@@ -1164,7 +1190,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
     if (console != NULL) {
       controls->util_pressed = false;
+      ship->gun_charge = ship->ordn_charge = 0.0;
+      ship->temp_invincibility = 0.0;
       ship->thrusters = AZ_THRUST_NONE;
+      ship->cplus.state = AZ_CPLUS_INACTIVE;
+      ship->cplus.charge = 0.0;
+      ship->cplus.tap_time = 0.0;
+      ship->orion.tap_time = 0.0;
+      ship->tractor_beam.active = false;
       state->mode = AZ_MODE_CONSOLE;
       state->console_mode = (az_console_mode_data_t){
         .step = AZ_CSS_ALIGN, .progress = 0.0, .node_uid = console->uid,
