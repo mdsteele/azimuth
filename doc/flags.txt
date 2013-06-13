@@ -1,3 +1,4 @@
+0: Used one of the first two save points (Colony rooms 10 and 25)
 1: Killed Snapdragon (Colony boss)
 2: Met first AI, upper armory door unlocked
 3: Opened door to Filimun zone
