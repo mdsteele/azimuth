@@ -1008,7 +1008,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.2 + 0.25 * flare, 0.25, 0.2 + 0.25 * frozen),
           color3(0.6 + 0.25 * flare, 0.75, 0.6 + 0.25 * frozen));
       break;
-    case AZ_BAD_OTH_CRAB:
+    case AZ_BAD_OTH_CRAB_1:
+    case AZ_BAD_OTH_CRAB_2:
       draw_oth(baddie, flare, frozen, clock, oth_crab_triangles,
                AZ_ARRAY_SIZE(oth_crab_triangles));
       break;

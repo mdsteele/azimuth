@@ -40,7 +40,7 @@
 #define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 46
+#define AZ_NUM_BADDIE_KINDS 47
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -70,7 +70,7 @@ typedef enum {
   AZ_BAD_SWOOPER,
   AZ_BAD_ICE_CRAWLER,
   AZ_BAD_BEAM_TURRET,
-  AZ_BAD_OTH_CRAB,
+  AZ_BAD_OTH_CRAB_1,
   AZ_BAD_OTH_ORB,
   AZ_BAD_OTH_SNAPDRAGON,
   AZ_BAD_OTH_RAZOR,
@@ -89,7 +89,8 @@ typedef enum {
   AZ_BAD_URCHIN,
   AZ_BAD_BOSS_DOOR,
   AZ_BAD_ROCKET_TURRET,
-  AZ_BAD_MINI_ARMORED_ZIPPER
+  AZ_BAD_MINI_ARMORED_ZIPPER,
+  AZ_BAD_OTH_CRAB_2
 } az_baddie_kind_t;
 
 typedef enum {
