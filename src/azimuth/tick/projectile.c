@@ -97,7 +97,8 @@ static void on_projectile_impact(az_space_state_t *state,
       az_projectile_t *shrapnel = az_add_projectile(
           state, proj->data->shrapnel_kind, false,
           az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power);
-      if (shrapnel != NULL && shrapnel->data->homing_rate == 0.0) {
+      if (shrapnel != NULL &&
+          !(proj->data->properties & AZ_PROJF_FAST_SHRAPNEL)) {
         shrapnel->velocity = az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
       }
     }
@@ -383,7 +384,8 @@ static void projectile_special_logic(az_space_state_t *state,
           for (int i = -2; i <= 2; ++i) {
             const double theta =
               proj->angle + 0.1 * AZ_PI * (i + az_random(-.5, .5));
-            az_add_projectile(state, AZ_PROJ_GUN_PIERCE_SHRAPNEL, false,
+            assert(proj->data->shrapnel_kind != AZ_PROJ_NOTHING);
+            az_add_projectile(state, proj->data->shrapnel_kind, false,
                               proj->position, theta, proj->power);
           }
           proj->kind = AZ_PROJ_NOTHING;

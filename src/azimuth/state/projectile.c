@@ -130,12 +130,15 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 1.5,
-    .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL
+    .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL,
+    .properties = AZ_PROJF_FAST_SHRAPNEL
   },
   [AZ_PROJ_GUN_BURST_PIERCE] = {
     .speed = 900.0,
     .lifetime = 2.0,
-    .impact_damage = 3.0
+    .impact_damage = 3.0,
+    .shrapnel_kind = AZ_PROJ_GUN_PIERCE_SHRAPNEL,
+    .properties = AZ_PROJF_FAST_SHRAPNEL
   },
   [AZ_PROJ_GUN_SHRAPNEL] = {
     .speed = 500.0,
