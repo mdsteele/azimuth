@@ -848,7 +848,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 2.0;
       }
       break;
-    case AZ_BAD_CRAWLER:
+    case AZ_BAD_CAVE_CRAWLER:
       crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
       break;
     case AZ_BAD_CRAWLING_TURRET:
@@ -1469,6 +1469,40 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
         baddie->param = 0.9;
       }
+      break;
+    case AZ_BAD_SPINED_CRAWLER:
+      if (baddie->state == 0) {
+        baddie->param = baddie->angle;
+        baddie->state = az_randint(1, 2);
+      }
+      if (baddie->state == 1 || baddie->state == 2) {
+        const double angle = fabs(az_mod2pi(baddie->angle - baddie->param));
+        crawl_around(state, baddie, time, (baddie->state == 1), 3.0,
+                     50.0 - 40.0 * fmin(1.0, angle / AZ_HALF_PI), 100.0);
+        if (angle > AZ_DEG2RAD(80) && baddie->cooldown <= 0.0) {
+          baddie->state = (baddie->state == 1 ? 2 : 1);
+          baddie->cooldown = 1.0;
+        }
+        if (baddie->cooldown <= 0.0 && az_ship_is_present(&state->ship) &&
+            az_vwithin(state->ship.position, baddie->position, 90.0) &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          const az_vector_t center =
+            az_vadd(baddie->position, az_vpolar(-13, baddie->angle));
+          for (int i = -2; i <= 2; ++i) {
+            const double theta = baddie->angle + i * AZ_DEG2RAD(41);
+            az_add_projectile(
+                state, AZ_PROJ_STINGER, true,
+                az_vadd(center, az_vpolar(10.0, theta)),
+                theta + az_random(-1, 1) * AZ_DEG2RAD(20), 1.0);
+          }
+          baddie->velocity = AZ_VZERO;
+          baddie->state = 3;
+          baddie->cooldown = 2.5;
+        }
+      } else if (baddie->state == 3) {
+        baddie->velocity = AZ_VZERO;
+        if (baddie->cooldown <= 0.0) baddie->state = az_randint(1, 2);
+      } else baddie->state = 0;
       break;
   }
 

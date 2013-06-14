@@ -648,7 +648,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glScalef(1, -1, 1);
       }
       break;
-    case AZ_BAD_CRAWLER:
+    case AZ_BAD_CAVE_CRAWLER:
       // Feet:
       glBegin(GL_QUADS); {
         const GLfloat offset = 0.8f * (az_clock_zigzag(5, 5, clock) - 2.0f);
@@ -1599,6 +1599,49 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                     color3(0, 0.4, 0.4 + 0.6 * frozen),
                     color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
                     flare, frozen, clock);
+      } glPopMatrix();
+      break;
+    case AZ_BAD_SPINED_CRAWLER:
+      // Feet:
+      glBegin(GL_QUADS); {
+        const GLfloat offset = 0.8f * (baddie->state == 3 ? 0.0f :
+                                       (az_clock_zigzag(5, 5, clock) - 2.0f));
+        for (int i = 0; i < 4; ++i) {
+          glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
+          glVertex2f(0, 5); glVertex2f(0, -5);
+          const GLfloat x = (i == 0 || i == 3 ? -18.0f : -20.0f);
+          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
+          glVertex2f(x, y - 2);
+          glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
+          glVertex2f(x, y + 2);
+        }
+      } glEnd();
+      // Body:
+      glPushMatrix(); {
+        glTranslatef((baddie->state == 3 ? -2.5f :
+                      -0.5f * az_clock_zigzag(5, 5, clock)), 0, 0);
+        for (int i = -82; i <= 82; i += 41) {
+          glPushMatrix(); {
+            glTranslatef(-12, 0, 0);
+            glScalef(1, 0.85, 1);
+            glRotatef(i, 0, 0, 1);
+            glTranslatef((baddie->state == 3 ? 21 : 18), 0, 0);
+            glScalef(0.7, 1, 1);
+            draw_spiner_spine(flare, frozen);
+          } glPopMatrix();
+        }
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.2f + 0.8f * flare, 0.6f - 0.3f * flare,
+                    0.4f + 0.6f * frozen);
+          glVertex2f(-13, 0);
+          glColor3f(0.06 + 0.5f * flare, 0.24f - 0.1f * flare,
+                    0.12f + 0.5f * frozen);
+          glVertex2f(-15, 0);
+          for (int i = -120; i <= 120; i += 30) {
+            glVertex2d(13 * cos(AZ_DEG2RAD(i)) - 7, 16 * sin(AZ_DEG2RAD(i)));
+          }
+          glVertex2f(-15, 0);
+        } glEnd();
       } glPopMatrix();
       break;
   }

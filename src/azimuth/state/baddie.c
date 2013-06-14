@@ -114,7 +114,7 @@ static const az_vector_t dragonfly_vertices[] = {
   {-15, -1}, {0, -5}, {4, -10}, {10, -5}, {20, -2}
 };
 
-static const az_vector_t crawler_vertices[] = {
+static const az_vector_t cave_crawler_vertices[] = {
   {10, -8}, {10, 8}, {-2, 18}, {-15, 10}, {-15, -10}, {-2, -18}
 };
 
@@ -397,6 +397,11 @@ static const az_vector_t mini_zipper_vertices[] = {
   {-7, -2.8}, {7, -4.9}, {10.5, -4.2}, {14, -2.1}
 };
 
+static const az_vector_t spined_crawler_vertices[] = {
+  {-14.5, -11}, {-8, -16}, {-1.5, -13.8564}, {3.25833, -8}, {5, 0},
+  {3.25833, 8}, {-1.5, 13.8564}, {-8, 16}, {-14.5, 11}, {-18, 0}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -506,11 +511,11 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 8.0 }
   },
-  [AZ_BAD_CRAWLER] = {
+  [AZ_BAD_CAVE_CRAWLER] = {
     .max_health = 7.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .color = {128, 0, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .main_body = { .polygon = AZ_INIT_POLYGON(crawler_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(cave_crawler_vertices),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_CRAWLING_TURRET] = {
@@ -740,6 +745,12 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
+  },
+  [AZ_BAD_SPINED_CRAWLER] = {
+    .max_health = 9.0, .potential_pickups = AZ_PUPF_ALL,
+    .color = {32, 128, 64, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(spined_crawler_vertices),
+                   .impact_damage = 12.0 }
   }
 };
 
