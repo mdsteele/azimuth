@@ -24,13 +24,17 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/prefs.h"
 
 /*===========================================================================*/
 
 typedef struct {
   const az_planet_t *planet;
+  const az_preferences_t *prefs;
   az_player_t *player;
   az_clock_t clock;
+  bool show_upgrades_drawer;
+  double drawer_openness; // 0.0 to 1.0
 } az_paused_state_t;
 
 void az_paused_draw_screen(az_paused_state_t *state);

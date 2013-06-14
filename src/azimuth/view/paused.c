@@ -51,7 +51,7 @@ static void draw_rect(double x, double y, double w, double h) {
 
 /*===========================================================================*/
 
-#define MINIMAP_ZOOM 100.0
+#define MINIMAP_ZOOM 75.0
 
 static void draw_minimap_rooms(az_paused_state_t *state) {
   // Draw planet surface outline:
@@ -146,11 +146,14 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
 static void draw_minimap(az_paused_state_t *state) {
   const az_room_key_t current_room = state->player->current_room;
   assert(current_room < state->planet->num_rooms);
-  const az_vector_t center =
-    az_bounds_center(&state->planet->rooms[current_room].camera_bounds);
+  const az_camera_bounds_t *bounds =
+    &state->planet->rooms[current_room].camera_bounds;
+  const double rho = fmin(bounds->min_r + 0.5 * bounds->r_span,
+                          AZ_PLANETOID_RADIUS - 180 * MINIMAP_ZOOM);
+  const az_vector_t center = az_vpolar(rho, AZ_HALF_PI);
 
   glEnable(GL_SCISSOR_TEST); {
-    glScissor(190, 110, 260, 260);
+    glScissor(30, 50, 580, 400);
     glPushMatrix(); {
       // Make positive Y be up instead of down.
       glScaled(1, -1, 1);
@@ -166,8 +169,8 @@ static void draw_minimap(az_paused_state_t *state) {
     } glPopMatrix();
   } glDisable(GL_SCISSOR_TEST);
 
-  glColor3f(1, 1, 1);
-  draw_rect(190, 110, 260, 260);
+  glColor3f(0.75, 0.75, 0.75);
+  draw_rect(30, 30, 580, 400);
 }
 
 /*===========================================================================*/
@@ -192,15 +195,29 @@ static int round_towards_middle(double amount, double maximum) {
   return (int)(amount - offset) + offset;
 }
 
+static const az_vector_t drawer_vertices[] = {
+  {12.5, 480.5}, {12.5, 18.5}, {22.5, 8.5}, {200.5, 8.5}, {204.5, 12.5},
+  {423.5, 12.5}, {427.5, 8.5}, {627.5, 8.5}, {627.5, 480.5}
+};
+
 static void draw_upgrades(az_paused_state_t *state) {
   const az_player_t *player = state->player;
 
+  glColor4f(0, 0, 0, 0.9); // black tint
+  glBegin(GL_POLYGON); {
+    AZ_ARRAY_LOOP(vertex, drawer_vertices) glVertex2d(vertex->x, vertex->y);
+  } glEnd();
+  glColor3f(0.75, 0.75, 0.75); // light gray
+  glBegin(GL_LINE_LOOP); {
+    AZ_ARRAY_LOOP(vertex, drawer_vertices) glVertex2d(vertex->x, vertex->y);
+  } glEnd();
+
   glColor3f(1, 0, 1);
-  draw_rect(20, 26, 150, 15);
+  draw_rect(24, 26, 150, 15);
   az_draw_printf(8, AZ_ALIGN_CENTER, 95, 30, "SHIELD: %3d/%-3d",
                  round_towards_middle(player->shields, player->max_shields),
                  (int)player->max_shields);
-  draw_rect(20, 46, 150, 15);
+  draw_rect(24, 46, 150, 15);
   az_draw_printf(8, AZ_ALIGN_CENTER, 95, 50, "ENERGY: %3d/%-3d",
                  round_towards_middle(player->energy, player->max_energy),
                  (int)player->max_energy);
@@ -211,58 +228,71 @@ static void draw_upgrades(az_paused_state_t *state) {
     const az_gun_t gun = AZ_GUN_CHARGE + i;
     set_weapon_box_color(state->player->gun1 == gun ||
                          state->player->gun2 == gun);
-    draw_rect(185 + 70 * col, 26 + 20 * row, 60, 15);
+    draw_rect(191 + 66 * col, 26 + 20 * row, 60, 15);
     if (az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) {
-      az_draw_string(8, AZ_ALIGN_CENTER, 215 + 70 * col, 30 + 20 * row,
+      az_draw_string(8, AZ_ALIGN_CENTER, 221 + 66 * col, 30 + 20 * row,
                      az_gun_name(gun));
     }
   }
 
   set_weapon_box_color(state->player->ordnance == AZ_ORDN_ROCKETS);
-  draw_rect(470, 26, 150, 15);
+  draw_rect(466, 26, 150, 15);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 30, "ROCKETS:%3d/%-3d",
                    player->rockets, player->max_rockets);
   }
   set_weapon_box_color(state->player->ordnance == AZ_ORDN_BOMBS);
-  draw_rect(470, 46, 150, 15);
+  draw_rect(466, 46, 150, 15);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 50, "  BOMBS:%3d/%-3d",
                    player->bombs, player->max_bombs);
   }
 
-  draw_upg_box(player, 20,  80, AZ_UPG_HARDENED_ARMOR);
-  draw_upg_box(player, 20, 100, AZ_UPG_DYNAMIC_ARMOR);
-  draw_upg_box(player, 20, 120, AZ_UPG_THERMAL_ARMOR);
-  draw_upg_box(player, 20, 140, AZ_UPG_REACTIVE_ARMOR);
+  if (state->drawer_openness <= 0.0) return;
 
-  draw_upg_box(player, 20, 180, AZ_UPG_FUSION_REACTOR);
-  draw_upg_box(player, 20, 200, AZ_UPG_QUANTUM_REACTOR);
+  draw_upg_box(player, 24,  80, AZ_UPG_HARDENED_ARMOR);
+  draw_upg_box(player, 24, 100, AZ_UPG_DYNAMIC_ARMOR);
+  draw_upg_box(player, 24, 120, AZ_UPG_THERMAL_ARMOR);
+  draw_upg_box(player, 24, 140, AZ_UPG_REACTIVE_ARMOR);
 
-  draw_upg_box(player, 20, 240, AZ_UPG_TRACTOR_BEAM);
-  draw_upg_box(player, 20, 260, AZ_UPG_INFRASCANNER);
-  draw_upg_box(player, 20, 280, AZ_UPG_MAGNET_SWEEP);
+  draw_upg_box(player, 24, 180, AZ_UPG_FUSION_REACTOR);
+  draw_upg_box(player, 24, 200, AZ_UPG_QUANTUM_REACTOR);
 
-  draw_upg_box(player, 470,  80, AZ_UPG_HYPER_ROCKETS);
-  draw_upg_box(player, 470, 100, AZ_UPG_MEGA_BOMBS);
-  draw_upg_box(player, 470, 120, AZ_UPG_HIGH_EXPLOSIVES);
-  draw_upg_box(player, 470, 140, AZ_UPG_ATTUNED_EXPLOSIVES);
+  draw_upg_box(player, 24, 240, AZ_UPG_TRACTOR_BEAM);
+  draw_upg_box(player, 24, 260, AZ_UPG_INFRASCANNER);
+  draw_upg_box(player, 24, 280, AZ_UPG_MAGNET_SWEEP);
 
-  draw_upg_box(player, 470, 180, AZ_UPG_RETRO_THRUSTERS);
-  draw_upg_box(player, 470, 200, AZ_UPG_CPLUS_DRIVE);
-  draw_upg_box(player, 470, 220, AZ_UPG_ORION_BOOSTER);
+  draw_upg_box(player, 466,  80, AZ_UPG_HYPER_ROCKETS);
+  draw_upg_box(player, 466, 100, AZ_UPG_MEGA_BOMBS);
+  draw_upg_box(player, 466, 120, AZ_UPG_HIGH_EXPLOSIVES);
+  draw_upg_box(player, 466, 140, AZ_UPG_ATTUNED_EXPLOSIVES);
+
+  draw_upg_box(player, 466, 180, AZ_UPG_RETRO_THRUSTERS);
+  draw_upg_box(player, 466, 200, AZ_UPG_CPLUS_DRIVE);
+  draw_upg_box(player, 466, 220, AZ_UPG_ORION_BOOSTER);
 }
 
 /*===========================================================================*/
 
 void az_paused_draw_screen(az_paused_state_t *state) {
   draw_minimap(state);
-  draw_upgrades(state);
+  glPushMatrix(); {
+    glTranslated(0, 410 * (1 - state->drawer_openness), 0);
+    draw_upgrades(state);
+  } glPopMatrix();
   az_draw_cursor();
 }
 
 void az_tick_paused_state(az_paused_state_t *state, double time) {
   ++state->clock;
+  const double drawer_time = 0.3;
+  if (state->show_upgrades_drawer) {
+    state->drawer_openness =
+      fmin(1.0, state->drawer_openness + time / drawer_time);
+  } else {
+    state->drawer_openness =
+      fmax(0.0, state->drawer_openness - time / drawer_time);
+  }
 }
 
 /*===========================================================================*/

@@ -110,7 +110,7 @@ static void update_controls(const az_preferences_t *prefs) {
 
 az_space_action_t az_space_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs, int saved_game_index) {
+    const az_preferences_t *prefs, int saved_game_index) {
   begin_saved_game(planet, saved_games, prefs, saved_game_index);
 
   while (true) {
@@ -139,7 +139,7 @@ az_space_action_t az_space_event_loop(
       // or exit to the title screen, as appropriate.
       if (state.pausing_mode.step == AZ_PSS_FADE_OUT &&
           state.pausing_mode.fade_alpha == 1.0) {
-        switch (az_paused_event_loop(planet, &state.ship.player)) {
+        switch (az_paused_event_loop(planet, prefs, &state.ship.player)) {
           case AZ_PA_RESUME:
             state.pausing_mode.step = AZ_PSS_FADE_IN;
             break;

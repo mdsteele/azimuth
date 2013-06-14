@@ -29,11 +29,13 @@
 
 /*===========================================================================*/
 
-az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
-                                        az_player_t *player) {
+az_paused_action_t az_paused_event_loop(
+    const az_planet_t *planet, const az_preferences_t *prefs,
+    az_player_t *player) {
   static az_paused_state_t state;
   memset(&state, 0, sizeof(state));
   state.planet = planet;
+  state.prefs = prefs;
   state.player = player;
 
   while (true) {
@@ -66,7 +68,13 @@ az_paused_action_t az_paused_event_loop(const az_planet_t *planet,
             case AZ_KEY_0:
               az_select_ordnance(state.player, AZ_ORDN_BOMBS);
               break;
-            default: break;
+            default:
+              if (event.key.id == state.prefs->up_key) {
+                state.show_upgrades_drawer = true;
+              } else if (event.key.id == state.prefs->down_key) {
+                state.show_upgrades_drawer = false;
+              }
+              break;
           }
           break;
         default: break;
