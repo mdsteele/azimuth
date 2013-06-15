@@ -127,22 +127,23 @@ static void transform_to_camera_matrix(const az_space_state_t *state) {
 
 static void draw_darkness(az_space_state_t *state) {
   const GLfloat blue = 0.11;
+  const GLfloat alpha = 1.0;
   if (az_has_upgrade(&state->ship.player, AZ_UPG_INFRASCANNER)) {
     const double radius = 100.0;
     glBegin(GL_TRIANGLE_FAN); {
       glColor4f(0, 0, blue, 0);
       glVertex2f(0, 0);
-      glColor4f(0, 0, blue, 1);
+      glColor4f(0, 0, blue, alpha);
       for (int i = 90; i <= 270; i += 10) {
         glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
     glBegin(GL_QUAD_STRIP); {
-      glColor4f(0, 0, blue, 1);
+      glColor4f(0, 0, blue, alpha);
       glVertex2f(0, radius); glVertex2f(1000, radius + 300);
       glColor4f(0, 0, blue, 0);
       glVertex2f(0, 0); glVertex2f(1000, 0);
-      glColor4f(0, 0, blue, 1);
+      glColor4f(0, 0, blue, alpha);
       glVertex2f(0, -radius); glVertex2f(1000, -radius - 300);
     } glEnd();
     glBegin(GL_QUAD_STRIP); {
@@ -161,7 +162,7 @@ static void draw_darkness(az_space_state_t *state) {
     glBegin(GL_TRIANGLE_FAN); {
       glColor4f(0, 0, blue, 0);
       glVertex2f(0, 0);
-      glColor4f(0, 0, blue, 1);
+      glColor4f(0, 0, blue, alpha);
       for (int i = 0; i <= 360; i += 10) {
         glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
       }
