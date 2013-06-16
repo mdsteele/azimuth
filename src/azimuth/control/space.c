@@ -139,7 +139,7 @@ az_space_action_t az_space_event_loop(
       // or exit to the title screen, as appropriate.
       if (state.pausing_mode.step == AZ_PSS_FADE_OUT &&
           state.pausing_mode.fade_alpha == 1.0) {
-        switch (az_paused_event_loop(planet, prefs, &state.ship.player)) {
+        switch (az_paused_event_loop(planet, prefs, &state.ship)) {
           case AZ_PA_RESUME:
             state.pausing_mode.step = AZ_PSS_FADE_IN;
             break;

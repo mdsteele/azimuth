@@ -22,7 +22,7 @@
 #define AZIMUTH_CONTROL_PAUSED_H_
 
 #include "azimuth/state/planet.h"
-#include "azimuth/state/player.h"
+#include "azimuth/state/ship.h"
 #include "azimuth/util/prefs.h"
 
 /*===========================================================================*/
@@ -34,7 +34,7 @@ typedef enum {
 
 az_paused_action_t az_paused_event_loop(
     const az_planet_t *planet, const az_preferences_t *prefs,
-    az_player_t *player);
+    az_ship_t *ship);
 
 /*===========================================================================*/
 

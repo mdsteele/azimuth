@@ -206,7 +206,8 @@ static void parse_node_directive(az_load_room_t *loader) {
   int kind;
   READ("%d", &kind);
   if (kind <= 0 || kind > AZ_NUM_NODE_KINDS) FAIL();
-  az_node_spec_t *node = &loader->room->nodes[loader->room->num_nodes];
+  az_room_t *room = loader->room;
+  az_node_spec_t *node = &room->nodes[loader->room->num_nodes];
   node->kind = (az_node_kind_t)kind;
   if (node->kind != AZ_NODE_TRACTOR) {
     int subkind;
@@ -218,6 +219,11 @@ static void parse_node_directive(az_load_room_t *loader) {
       case AZ_NODE_CONSOLE:
         if (subkind < 0 || subkind >= AZ_NUM_CONSOLE_KINDS) FAIL();
         node->subkind.console = (az_console_kind_t)subkind;
+        switch (node->subkind.console) {
+          case AZ_CONS_COMM:   room->properties |= AZ_ROOMF_WITH_COMM;   break;
+          case AZ_CONS_REFILL: room->properties |= AZ_ROOMF_WITH_REFILL; break;
+          case AZ_CONS_SAVE:   room->properties |= AZ_ROOMF_WITH_SAVE;   break;
+        }
         break;
       case AZ_NODE_UPGRADE:
         if (subkind < 0 || subkind >= AZ_NUM_UPGRADES) FAIL();

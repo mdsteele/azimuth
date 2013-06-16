@@ -25,18 +25,20 @@
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
+#include "azimuth/state/ship.h"
 #include "azimuth/view/paused.h"
 
 /*===========================================================================*/
 
 az_paused_action_t az_paused_event_loop(
     const az_planet_t *planet, const az_preferences_t *prefs,
-    az_player_t *player) {
+    az_ship_t *ship) {
   static az_paused_state_t state;
   memset(&state, 0, sizeof(state));
   state.planet = planet;
   state.prefs = prefs;
-  state.player = player;
+  state.ship = ship;
+  az_player_t *player = &ship->player;
 
   while (true) {
     // Tick the state and redraw the screen.
@@ -54,20 +56,16 @@ az_paused_action_t az_paused_event_loop(
             case AZ_KEY_RETURN:
             case AZ_KEY_ESCAPE:
               return AZ_PA_RESUME;
-            case AZ_KEY_1: az_select_gun(state.player, AZ_GUN_CHARGE); break;
-            case AZ_KEY_2: az_select_gun(state.player, AZ_GUN_FREEZE); break;
-            case AZ_KEY_3: az_select_gun(state.player, AZ_GUN_TRIPLE); break;
-            case AZ_KEY_4: az_select_gun(state.player, AZ_GUN_HOMING); break;
-            case AZ_KEY_5: az_select_gun(state.player, AZ_GUN_PHASE);  break;
-            case AZ_KEY_6: az_select_gun(state.player, AZ_GUN_BURST);  break;
-            case AZ_KEY_7: az_select_gun(state.player, AZ_GUN_PIERCE); break;
-            case AZ_KEY_8: az_select_gun(state.player, AZ_GUN_BEAM);   break;
-            case AZ_KEY_9:
-              az_select_ordnance(state.player, AZ_ORDN_ROCKETS);
-              break;
-            case AZ_KEY_0:
-              az_select_ordnance(state.player, AZ_ORDN_BOMBS);
-              break;
+            case AZ_KEY_1: az_select_gun(player, AZ_GUN_CHARGE); break;
+            case AZ_KEY_2: az_select_gun(player, AZ_GUN_FREEZE); break;
+            case AZ_KEY_3: az_select_gun(player, AZ_GUN_TRIPLE); break;
+            case AZ_KEY_4: az_select_gun(player, AZ_GUN_HOMING); break;
+            case AZ_KEY_5: az_select_gun(player, AZ_GUN_PHASE);  break;
+            case AZ_KEY_6: az_select_gun(player, AZ_GUN_BURST);  break;
+            case AZ_KEY_7: az_select_gun(player, AZ_GUN_PIERCE); break;
+            case AZ_KEY_8: az_select_gun(player, AZ_GUN_BEAM);   break;
+            case AZ_KEY_9: az_select_ordnance(player, AZ_ORDN_ROCKETS); break;
+            case AZ_KEY_0: az_select_ordnance(player, AZ_ORDN_BOMBS);   break;
             default:
               if (event.key.id == state.prefs->up_key) {
                 state.show_upgrades_drawer = true;

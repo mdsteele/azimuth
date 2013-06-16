@@ -28,6 +28,7 @@
 #include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
+#include "azimuth/state/ship.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
@@ -53,6 +54,23 @@ static void draw_rect(double x, double y, double w, double h) {
 
 #define MINIMAP_ZOOM 75.0
 
+static void begin_map_marker(az_color_t color, az_vector_t center) {
+  glPushMatrix();
+  glTranslated(center.x, center.y, 0);
+  glScaled(MINIMAP_ZOOM, MINIMAP_ZOOM, 0);
+  glColor4ub(color.r, color.g, color.b, color.a);
+  glBegin(GL_QUADS); {
+    glVertex2f(4, 4); glVertex2f(-4, 4); glVertex2f(-4, -4); glVertex2f(4, -4);
+  } glEnd();
+  glColor3f(0, 0, 0);
+  glBegin(GL_LINE_STRIP);
+}
+
+static void end_map_marker(void) {
+  glEnd();
+  glPopMatrix();
+}
+
 static void draw_minimap_rooms(az_paused_state_t *state) {
   // Draw planet surface outline:
   glColor3f(1, 1, 0); // yellow
@@ -65,7 +83,8 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
 
   // Draw explored rooms:
   const az_planet_t *planet = state->planet;
-  const az_player_t *player = state->player;
+  const az_ship_t *ship = state->ship;
+  const az_player_t *player = &ship->player;
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
     const bool visited = az_test_room_visited(player, i);
@@ -87,9 +106,7 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
     const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
 
     // Fill room with color:
-    if (i == player->current_room && az_clock_mod(2, 20, state->clock)) {
-      glColor3f(1, 1, 1);
-    } else if (!visited) {
+    if (!visited) {
       assert(mapped);
       glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
     } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
@@ -140,11 +157,50 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
         }
       } glEnd();
     }
+
+    // Draw a console marker (if any).  We mark all save rooms on the map, but
+    // only mark refill/comm rooms if we've actually visited them.
+    if (az_clock_mod(2, 30, state->clock) == 0) {
+      const az_vector_t center = az_bounds_center(bounds);
+      if (room->properties & AZ_ROOMF_WITH_SAVE) {
+        begin_map_marker((az_color_t){128, 255, 128, 255}, center); {
+          glVertex2f(2, 2); glVertex2f(-2, 2); glVertex2f(-2, 0);
+          glVertex2f(2, 0); glVertex2f(2, -2); glVertex2f(-2, -2);
+        } end_map_marker();
+      } else if (visited) {
+        if (room->properties & AZ_ROOMF_WITH_REFILL) {
+          begin_map_marker((az_color_t){255, 255, 128, 255}, center); {
+            glVertex2f(-2, -2); glVertex2f(-2, 2); glVertex2f(2, 2);
+            glVertex2f(2, 0); glVertex2f(-2, 0); glVertex2f(2, -2);
+          } end_map_marker();
+        } else if (room->properties & AZ_ROOMF_WITH_COMM) {
+          begin_map_marker((az_color_t){128, 128, 255, 255}, center); {
+            glVertex2f(2, 2); glVertex2f(-2, 2);
+            glVertex2f(-2, -2); glVertex2f(2, -2);
+          } end_map_marker();
+        }
+      }
+    }
+  }
+
+  // Draw a marker for the current ship position:
+  if (az_clock_mod(2, 12, state->clock) == 0) {
+    glPushMatrix(); {
+      glTranslated(ship->position.x, ship->position.y, 0);
+      glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(0, 1, 1);
+        glVertex2f(700, 0); glVertex2f(100, 100);
+        glVertex2f(0, 700); glVertex2f(-100, 100);
+        glVertex2f(-700, 0); glVertex2f(-100, -100);
+        glVertex2f(0, -700); glVertex2f(100, -100);
+      } glEnd();
+    } glPopMatrix();
   }
 }
 
 static void draw_minimap(az_paused_state_t *state) {
-  const az_room_key_t current_room = state->player->current_room;
+  const az_room_key_t current_room = state->ship->player.current_room;
   assert(current_room < state->planet->num_rooms);
   const az_camera_bounds_t *bounds =
     &state->planet->rooms[current_room].camera_bounds;
@@ -201,7 +257,7 @@ static const az_vector_t drawer_vertices[] = {
 };
 
 static void draw_upgrades(az_paused_state_t *state) {
-  const az_player_t *player = state->player;
+  const az_player_t *player = &state->ship->player;
 
   glColor4f(0, 0, 0, 0.9); // black tint
   glBegin(GL_POLYGON); {
@@ -226,8 +282,7 @@ static void draw_upgrades(az_paused_state_t *state) {
     const int row = i / 4;
     const int col = i % 4;
     const az_gun_t gun = AZ_GUN_CHARGE + i;
-    set_weapon_box_color(state->player->gun1 == gun ||
-                         state->player->gun2 == gun);
+    set_weapon_box_color(player->gun1 == gun || player->gun2 == gun);
     draw_rect(191 + 66 * col, 26 + 20 * row, 60, 15);
     if (az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) {
       az_draw_string(8, AZ_ALIGN_CENTER, 221 + 66 * col, 30 + 20 * row,
@@ -235,13 +290,13 @@ static void draw_upgrades(az_paused_state_t *state) {
     }
   }
 
-  set_weapon_box_color(state->player->ordnance == AZ_ORDN_ROCKETS);
+  set_weapon_box_color(player->ordnance == AZ_ORDN_ROCKETS);
   draw_rect(466, 26, 150, 15);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 30, "ROCKETS:%3d/%-3d",
                    player->rockets, player->max_rockets);
   }
-  set_weapon_box_color(state->player->ordnance == AZ_ORDN_BOMBS);
+  set_weapon_box_color(player->ordnance == AZ_ORDN_BOMBS);
   draw_rect(466, 46, 150, 15);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 50, "  BOMBS:%3d/%-3d",

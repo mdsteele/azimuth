@@ -92,11 +92,15 @@ typedef struct {
 // Bitset of flags dictating special room behavior:
 typedef uint_fast8_t az_room_flags_t;
 // DARK: the room is very dark, and requires the Infrascanner to see well
-#define AZ_ROOMF_DARK     ((az_room_flags_t)(1u << 0))
+#define AZ_ROOMF_DARK        ((az_room_flags_t)(1u << 0))
 // HEATED: the room is very hot, and deals damage unless you have Thermal Armor
-#define AZ_ROOMF_HEATED   ((az_room_flags_t)(1u << 1))
+#define AZ_ROOMF_HEATED      ((az_room_flags_t)(1u << 1))
 // UNMAPPED: the room is not included in the map data for the room's zone
-#define AZ_ROOMF_UNMAPPED ((az_room_flags_t)(1u << 2))
+#define AZ_ROOMF_UNMAPPED    ((az_room_flags_t)(1u << 2))
+// WITH_*: the room should be marked on the map as containing the given console
+#define AZ_ROOMF_WITH_COMM   ((az_room_flags_t)(1u << 3))
+#define AZ_ROOMF_WITH_REFILL ((az_room_flags_t)(1u << 4))
+#define AZ_ROOMF_WITH_SAVE   ((az_room_flags_t)(1u << 5))
 
 // Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
