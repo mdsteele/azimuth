@@ -1167,6 +1167,28 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(100, 78); glVertex2f(85, 64);
       } glEnd();
       break;
+    case AZ_DOOD_OCTO_WINDOW:
+      // Glass:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 1, 0.5); glVertex2f(-0, 0); glColor4f(1, 1, 1, 0.2);
+        glVertex2f(47, 68); glVertex2f(-47, 68); glVertex2f(-74, 41);
+        glVertex2f(-74, -41); glVertex2f(-47, -68); glVertex2f(47, -68);
+        glVertex2f(74, -41); glVertex2f(74, 41); glVertex2f(47, 68);
+      } glEnd();
+      // Siding:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.75, 0.75, 0.375);
+        glVertex2f(47, 68); glVertex2f(37, 48);
+        glVertex2f(-47, 68); glVertex2f(-37, 48);
+        glVertex2f(-74, 41); glVertex2f(-54, 31);
+        glVertex2f(-74, -41); glVertex2f(-54, -31);
+        glVertex2f(-47, -68); glVertex2f(-37, -48);
+        glVertex2f(47, -68); glVertex2f(37, -48);
+        glVertex2f(74, -41); glVertex2f(54, -31);
+        glVertex2f(74, 41); glVertex2f(54, 31);
+        glVertex2f(47, 68); glVertex2f(37, 48);
+      } glEnd();
+      break;
   }
 }
 

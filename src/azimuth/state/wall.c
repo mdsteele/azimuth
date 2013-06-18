@@ -190,6 +190,10 @@ static az_vector_t wall_vertices_61[] = {
   {50, 20}, {27, 18}, {2, 21}, {-24, 15}, {-50, 20},
   {-50, -40}, {-25, -60}, {0, -46}, {25, -50}, {50, -40}
 };
+static az_vector_t wall_vertices_63[] = {
+  {20, 25}, {-10.710678, 25}, {-31.8198, 3.5355339}, {3.5355339, -31.8198},
+  {10, -25}, {20, -25}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -619,6 +623,13 @@ static az_wall_data_t wall_datas[] = {
     .color3 = {0, 0, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
+  },
+  // Yellowish-gray short angle pipe:
+  [63] = {
+    .style = AZ_WSTY_QUADSTRIP_213,
+    .color1 = {192, 192, 96, 255}, .color2 = {48, 48, 32, 255},
+    .color3 = {48, 48, 32, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
   }
 };
 
