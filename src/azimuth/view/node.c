@@ -976,12 +976,12 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_DOOD_PIPE_CORNER:
-      for (int i = 180; i < 270; i += 30) {
+      for (int i = 180; i < 270; i += 15) {
         glBegin(GL_QUAD_STRIP); {
           const double c1 = cos(AZ_DEG2RAD(i));
           const double s1 = sin(AZ_DEG2RAD(i));
-          const double c2 = cos(AZ_DEG2RAD(i + 30));
-          const double s2 = sin(AZ_DEG2RAD(i + 30));
+          const double c2 = cos(AZ_DEG2RAD(i + 15));
+          const double s2 = sin(AZ_DEG2RAD(i + 15));
           glColor3f(0.1, 0.4, 0.1);
           glVertex2d(3 * c1, 3 * s1); glVertex2d(3 * c2, 3 * s2);
           glColor3f(0.65, 0.9, 0.65);
@@ -1188,6 +1188,47 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(74, 41); glVertex2f(54, 31);
         glVertex2f(47, 68); glVertex2f(37, 48);
       } glEnd();
+      break;
+    case AZ_DOOD_PIPE_ELBOW:
+      for (int i = 180; i < 225; i += 15) {
+        glBegin(GL_QUAD_STRIP); {
+          const double c1 = cos(AZ_DEG2RAD(i));
+          const double s1 = sin(AZ_DEG2RAD(i));
+          const double c2 = cos(AZ_DEG2RAD(i + 15));
+          const double s2 = sin(AZ_DEG2RAD(i + 15));
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(3 * c1, 3 * s1); glVertex2d(3 * c2, 3 * s2);
+          glColor3f(0.65, 0.9, 0.65);
+          glVertex2d(8 * c1, 8 * s1); glVertex2d(8 * c2, 8 * s2);
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(13 * c1, 13 * s1); glVertex2d(13 * c2, 13 * s2);
+        } glEnd();
+      }
+      glPushMatrix(); {
+        for (int i = 0; i < 2; ++i) {
+          if (i != 0) {
+            glScalef(1, -1, 1);
+            glRotatef(-45, 0, 0, 1);
+          }
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0.1, 0.4, 0.1);
+            glVertex2f(-3, 0); glVertex2f(-3, 5);
+            glColor3f(0.65, 0.9, 0.65);
+            glVertex2f(-8, 0); glVertex2f(-8, 5);
+            glColor3f(0.1, 0.4, 0.1);
+            glVertex2f(-13, 0); glVertex2f(-13, 5);
+          } glEnd();
+          // Coupling:
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0.2, 0.35, 0.2);
+            glVertex2f(-2, 5); glVertex2f(-2, 11);
+            glColor3f(0.75, 0.85, 0.75);
+            glVertex2f(-8, 5); glVertex2f(-8, 11);
+            glColor3f(0.2, 0.35, 0.2);
+            glVertex2f(-14, 5); glVertex2f(-14, 11);
+          } glEnd();
+        }
+      } glPopMatrix();
       break;
   }
 }
