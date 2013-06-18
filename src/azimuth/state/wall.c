@@ -630,6 +630,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {192, 192, 96, 255}, .color2 = {48, 48, 32, 255},
     .color3 = {48, 48, 32, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
+  },
+  // Reddish-gray short angle pipe:
+  [64] = {
+    .style = AZ_WSTY_QUADSTRIP_213,
+    .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
+    .color3 = {32, 24, 24, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
   }
 };
 
