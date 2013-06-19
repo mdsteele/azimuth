@@ -41,6 +41,10 @@
 
 /*===========================================================================*/
 
+static inline void az_gl_vertex(az_vector_t v) {
+  glVertex2d(v.x, v.y);
+}
+
 static void arc_vertices(double r, double start_theta, double end_theta) {
   const double diff = end_theta - start_theta;
   if (diff == 0.0) return;
@@ -83,30 +87,50 @@ static void draw_zone_swatch(az_editor_state_t *state,
   const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
   const double min_theta = bounds->min_theta;
   const double max_theta = min_theta + bounds->theta_span;
+
+  const az_vector_t offset1 =
+    az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
+  const az_vector_t bot_right = az_vadd(offset1, az_vpolar(min_r, min_theta));
+  const az_vector_t top_right = az_vadd(offset1, az_vpolar(max_r, min_theta));
+  const az_vector_t offset2 =
+    az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
+  const az_vector_t bot_left = az_vadd(offset2, az_vpolar(min_r, max_theta));
+  const az_vector_t top_left = az_vadd(offset2, az_vpolar(max_r, max_theta));
+
   const az_color_t color =
     AZ_LIST_GET(state->planet.zones, room->zone_key)->color;
   if (room->properties & AZ_ROOMF_UNMAPPED) {
     glColor3ub(color.r / 4, color.g / 4, color.b / 4);
   } else glColor3ub(color.r / 2, color.g / 2, color.b / 2);
   glBegin(GL_QUAD_STRIP); {
-    const az_vector_t offset1 =
-      az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
-    glVertex2d(min_r * cos(min_theta) + offset1.x,
-               min_r * sin(min_theta) + offset1.y);
-    glVertex2d(max_r * cos(min_theta) + offset1.x,
-               max_r * sin(min_theta) + offset1.y);
+    az_gl_vertex(top_right);
+    az_gl_vertex(bot_right);
     const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
     for (double theta = min_theta; theta <= max_theta; theta += step) {
-      glVertex2d(min_r * cos(theta), min_r * sin(theta));
       glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      glVertex2d(min_r * cos(theta), min_r * sin(theta));
     }
-    const az_vector_t offset2 =
-      az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
-    glVertex2d(min_r * cos(max_theta) + offset2.x,
-               min_r * sin(max_theta) + offset2.y);
-    glVertex2d(max_r * cos(max_theta) + offset2.x,
-               max_r * sin(max_theta) + offset2.y);
+    az_gl_vertex(top_left);
+    az_gl_vertex(bot_left);
   } glEnd();
+  // Draw a red X if the room is heated.
+  if (room->properties & AZ_ROOMF_HEATED) {
+    glColor3f(1, 0, 0);
+    glBegin(GL_LINES); {
+      az_gl_vertex(top_left); az_gl_vertex(bot_right);
+      az_gl_vertex(bot_left); az_gl_vertex(top_right);
+    } glEnd();
+  }
+  // Draw a black + if the room is dark.
+  if (room->properties & AZ_ROOMF_DARK) {
+    glColor3f(0, 0, 0);
+    glBegin(GL_LINES); {
+      az_gl_vertex(az_vmul(az_vadd(bot_right, top_right), 0.5));
+      az_gl_vertex(az_vmul(az_vadd(bot_left, top_left), 0.5));
+      az_gl_vertex(az_vpolar(min_r, min_theta + 0.5 * bounds->theta_span));
+      az_gl_vertex(az_vpolar(max_r, min_theta + 0.5 * bounds->theta_span));
+    } glEnd();
+  }
 }
 
 // Draw the (approximate) bounds of what the camera can actually see within the
@@ -445,8 +469,8 @@ static void draw_selection_circle(az_vector_t position, double angle,
     glColor3f(1, 1, 1); // white
     glBegin(GL_LINE_STRIP); {
       glVertex2f(0, 0);
-      for (int i = 0; i <= 36; ++i) {
-        glVertex2d(cos(i * AZ_PI / 18.0), sin(i * AZ_PI / 18.0));
+      for (int i = 0; i <= 360; i += 10) {
+        glVertex2d(cos(AZ_DEG2RAD(i)), sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
   } glPopMatrix();
@@ -504,7 +528,7 @@ static void draw_camera_view(az_editor_state_t *state) {
   draw_camera_center_bounds(room);
   glColor4f(1, 0, 0, 0.75); // red tint
   glBegin(GL_POINTS); {
-    glVertex2d(state->camera.x, state->camera.y);
+    az_gl_vertex(state->camera);
   } glEnd();
 
   // Draw selection circles:

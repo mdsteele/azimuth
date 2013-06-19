@@ -23,7 +23,7 @@ OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
-CFLAGS = -Wall -Wempty-body -Wmissing-field-initializers \
+CFLAGS = -Wall -Wempty-body -Winline -Wmissing-field-initializers \
          -Wold-style-definition -Woverride-init -Wshadow -Wsign-compare \
          -Wstrict-prototypes -Wundef -Werror -O1 -I$(SRCDIR)
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
