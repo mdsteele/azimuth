@@ -194,6 +194,12 @@ static az_vector_t wall_vertices_63[] = {
   {20, 25}, {-10.710678, 25}, {-31.8198, 3.5355339}, {3.5355339, -31.8198},
   {10, -25}, {20, -25}
 };
+static const az_vector_t wall_vertices_65[] = {
+  {34.641016151377549, 0}, {-34.641016151377549, 0}, {0, -20}
+};
+static const az_vector_t wall_vertices_66[] = {
+  {23.094010767585, 0}, {-11.547005383792511, 20}, {-11.547005383792511, -20}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -364,7 +370,7 @@ static az_wall_data_t wall_datas[] = {
   // Green/purple hexagonal block:
   [24] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 20.0,
-    .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},
+    .color1 = {64, 160, 8, 255}, .color2 = {90, 20, 60, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_24)
   },
   // Large green/purple hexagonal block:
@@ -637,6 +643,18 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
     .color3 = {32, 24, 24, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
+  },
+  // Green/purple wedge:
+  [65] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 6.0,
+    .color1 = {64, 160, 8, 255}, .color2 = {90, 20, 60, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_65)
+  },
+  // Green/purple triangle:
+  [66] = {
+    .style = AZ_WSTY_BEZEL_12, .bezel = 10.0,
+    .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_66)
   }
 };
 
