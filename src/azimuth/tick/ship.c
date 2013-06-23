@@ -575,10 +575,11 @@ static void charge_weapons(az_space_state_t *state, double time) {
     az_reset_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
   }
   // Charge ordnance:
-  if ((az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS) &&
-       player->ordnance == AZ_ORDN_ROCKETS) ||
-      (az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) &&
-       player->ordnance == AZ_ORDN_BOMBS)) {
+  if ((player->ordnance == AZ_ORDN_ROCKETS &&
+       az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS)) ||
+      (player->ordnance == AZ_ORDN_BOMBS &&
+       (az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) ||
+        az_has_upgrade(player, AZ_UPG_ORION_BOOSTER)))) {
     if (controls->ordn_held) {
       if (ship->ordn_charge < 1.0) {
         ship->ordn_charge = fmin(1.0, ship->ordn_charge +
