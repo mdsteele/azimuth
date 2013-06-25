@@ -151,6 +151,7 @@ typedef struct {
   az_upgrade_mode_data_t upgrade_mode;
 
   // Space objects (these all get cleared out when we exit a room):
+  double darkness, dark_goal;
   az_uid_t boss_uid;
   az_baddie_t baddies[AZ_MAX_NUM_BADDIES];
   az_door_t doors[AZ_MAX_NUM_DOORS];

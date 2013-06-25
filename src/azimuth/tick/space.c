@@ -428,6 +428,16 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
 
 /*===========================================================================*/
 
+static void tick_darkness(az_space_state_t *state, double time) {
+  if (state->darkness == state->dark_goal) return;
+  const double tracking_base = 0.00003; // smaller = faster tracking
+  const double change =
+    (state->dark_goal - state->darkness) * (1.0 - pow(tracking_base, time));
+  if (fabs(change) > 0.001) {
+    state->darkness = fmin(fmax(0.0, state->darkness + change), 1.0);
+  } else state->darkness = state->dark_goal;
+}
+
 static void tick_message(az_message_t *message, double time) {
   if (message->time_remaining == 0.0) {
     assert(message->paragraph == NULL);
@@ -462,6 +472,7 @@ static void check_countdown(az_space_state_t *state, double time) {
 }
 
 static void tick_most_objects(az_space_state_t *state, double time) {
+  tick_darkness(state, time);
   az_tick_pickups(state, time);
   az_tick_gravfields(state, time);
   az_tick_walls(state, time);

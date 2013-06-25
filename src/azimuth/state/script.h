@@ -91,6 +91,7 @@ typedef enum {
   AZ_OP_SSTR, // pop top, set strength of gravfield i to a
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
+  AZ_OP_DARK, // set room darkness goal to i
   AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen

@@ -126,8 +126,10 @@ static void transform_to_camera_matrix(const az_space_state_t *state) {
 }
 
 static void draw_darkness(az_space_state_t *state) {
+  assert(state->darkness > 0.0);
+  assert(state->darkness <= 1.0);
   const GLfloat blue = 0.11;
-  const GLfloat alpha = 1.0;
+  const GLfloat alpha = state->darkness;
   if (az_has_upgrade(&state->ship.player, AZ_UPG_INFRASCANNER)) {
     const double radius = 100.0;
     glBegin(GL_TRIANGLE_FAN); {
@@ -249,8 +251,8 @@ void az_space_draw_screen(az_space_state_t *state) {
       } glEnd();
     }
 
-    // If we're in a dark room, draw darkness around the ship.
-    if (properties & AZ_ROOMF_DARK) {
+    // If the room is darkened, draw darkness around the ship.
+    if (state->darkness > 0.0) {
       glPushMatrix(); {
         transform_to_camera_matrix(state);
         glTranslated(state->ship.position.x, state->ship.position.y, 0);
