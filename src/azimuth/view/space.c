@@ -30,6 +30,7 @@
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie.h"
+#include "azimuth/view/cutscene.h"
 #include "azimuth/view/door.h"
 #include "azimuth/view/gravfield.h"
 #include "azimuth/view/hud.h"
@@ -222,6 +223,15 @@ void draw_doorway_transition(az_space_state_t *state) {
 }
 
 void az_space_draw_screen(az_space_state_t *state) {
+  // If we're watching a cutscene, draw that instead of our normal camera view.
+  if (state->cutscene.scene != AZ_SCENE_NOTHING) {
+    az_draw_cutscene(state);
+    if (state->mode == AZ_MODE_DIALOG) {
+      az_draw_dialog(state);
+    }
+    return;
+  }
+
   // Check if we're in a mode where we should be tinting the camera view black.
   const double fade_alpha = mode_fade_alpha(state);
   assert(fade_alpha >= 0.0);

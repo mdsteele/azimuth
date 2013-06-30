@@ -637,6 +637,19 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_set_message(state, state->planet->paragraphs[paragraph_index]);
         }
         break;
+      case AZ_OP_SCENE:
+        {
+          const int scene_index = (int)ins.immediate;
+          if (scene_index < 0 || scene_index > AZ_NUM_SCENES) {
+            SCRIPT_ERROR("invalid scene index");
+          }
+          state->cutscene.next = (az_scene_t)scene_index;
+          if (state->cutscene.scene == AZ_SCENE_NOTHING) {
+            state->cutscene.scene = state->cutscene.next;
+            state->cutscene.fade_alpha = 1.0;
+          }
+        }
+        break;
       case AZ_OP_DLOG:
         if (state->mode == AZ_MODE_NORMAL) {
           state->mode = AZ_MODE_DIALOG;
@@ -799,6 +812,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
   }
 
  halt:
+  state->cutscene.next = AZ_SCENE_NOTHING;
   if (state->mode == AZ_MODE_DIALOG) {
     state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_END};
   }

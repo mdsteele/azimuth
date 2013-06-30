@@ -27,6 +27,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie.h"
 #include "azimuth/tick/camera.h"
+#include "azimuth/tick/cutscene.h"
 #include "azimuth/tick/door.h"
 #include "azimuth/tick/gravfield.h"
 #include "azimuth/tick/node.h"
@@ -516,14 +517,33 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     return;
   }
 
+  // Advance the animation clock.
+  ++state->clock;
+
+  // If we're watching a cutscene, allow dialog and timer scripts to proceed,
+  // but don't do anything else.
+  if (state->cutscene.scene != AZ_SCENE_NOTHING) {
+    az_tick_cutscene(&state->cutscene, time);
+    if (state->mode == AZ_MODE_DIALOG) {
+      tick_dialog_mode(state, time);
+    } else {
+      az_tick_timers(state, time);
+    }
+    return;
+  }
+
   // If we're in game over mode and the ship is asploding, go into slow-motion:
   if (state->mode == AZ_MODE_GAME_OVER &&
       state->game_over_mode.step == AZ_GOS_ASPLODE) {
     time *= 0.4;
   }
 
-  state->ship.player.total_time += time;
-  ++state->clock;
+  // Advance the speedrun timer.
+  if (state->mode != AZ_MODE_DIALOG && state->mode != AZ_MODE_UPGRADE) {
+    state->ship.player.total_time += time;
+  }
+
+  // Tick game objects depending on what mode we're in:
   az_tick_particles(state, time);
   az_tick_specks(state, time);
   switch (state->mode) {

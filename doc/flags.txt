@@ -17,3 +17,4 @@
 16: Opened hyper rocket door between Filimun room 43 and Nandiar room 44
 17: Opened bomb door between Filimun rooms 110 and 117
 18: Opened hyper rocket door between Colony rooms 137 and 165
+19: Watched opening cutscene (Colony room 6)

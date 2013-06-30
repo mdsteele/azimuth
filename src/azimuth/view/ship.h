@@ -21,11 +21,15 @@
 #ifndef AZIMUTH_VIEW_SHIP_H_
 #define AZIMUTH_VIEW_SHIP_H_
 
+#include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
 void az_draw_ship(az_space_state_t* state);
+
+void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock);
 
 /*===========================================================================*/
 

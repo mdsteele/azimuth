@@ -88,6 +88,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_DARK:   return "dark";
     case AZ_OP_NPS:    return "nps";
     case AZ_OP_MSG:    return "msg";
+    case AZ_OP_SCENE:  return "scene";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
     case AZ_OP_PB:     return "pb";
@@ -191,6 +192,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_DARK:
     case AZ_OP_NPS:
     case AZ_OP_MSG:
+    case AZ_OP_SCENE:
     case AZ_OP_PT:
     case AZ_OP_PB:
     case AZ_OP_TT:

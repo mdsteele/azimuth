@@ -18,17 +18,20 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_HUD_H_
-#define AZIMUTH_VIEW_HUD_H_
+#ifndef AZIMUTH_VIEW_CUTSCENE_H_
+#define AZIMUTH_VIEW_CUTSCENE_H_
 
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
 
-void az_draw_dialog(const az_space_state_t *state);
+void az_draw_planet_starfield(az_clock_t clock);
 
-void az_draw_hud(az_space_state_t* state);
+void az_draw_zenith_planet(az_clock_t clock);
+
+void az_draw_cutscene(const az_space_state_t *state);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_HUD_H_
+#endif // AZIMUTH_VIEW_CUTSCENE_H_

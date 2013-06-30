@@ -1,4 +1,4 @@
-@P z8 r367 t24 s6 x0.00 y49700.00 a-1.570796
+@P z8 r367 t34 s6 x0.00 y49700.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -89,3 +89,50 @@
   while near a save point."
 !T23"
   Hydroponics Lab"
+!T24"
+  \"HQ, this is Major Shawna Jemison reporting in.
+  I'm reading what sounds like a general distress
+  signal coming from somewhere in Sector L32ADA,
+  about 7 or 8 marks from my current position.
+  The signal is extremely faint from here, I can't
+  make it out clearly.  Moving to investigate,
+  over.\""
+!T25"
+  \"Copy that, please stand by.  Hey there,
+  Hopper.\""
+!T26"
+  \"Oh, hey there, G.  Didn't expect to hear you
+  on this line.\""
+!T27"
+  \"Yeah, new assignment.  ...Here we go, I see it
+  too, we're picking it up on the navsats now.
+  Looks like...Zenith remote research colony,
+  Lovelace system.  Sheesh, you're way out on the
+  frontier, aren't you?\""
+!T28"
+  \"Aw, shiii...this doesn't look good.  Automated
+  last-ditch failsafe signal broadcast by the
+  colony's central computer.\""
+!T29"
+  \"An automated failsafe.  Which means...\""
+!T30"
+  \"...that things are so fubarred down there that
+  no one was around to manually send or even
+  confirm the broadcast.  ...Aaand the signal just
+  went dead.  Not even a carrier ping anymore.  So
+  their whole transmitter array must have gone
+  down.  What in the hell could...oh here, I've
+  got your...yeah, they're sending you in, all
+  right.\""
+!T31"
+  \"Roger that, G.  I'm priming the C-jump as we
+  speak; be there in six.\""
+!T32"
+  \"Listen, it looks like you're the only patrol
+  within a week of there right now, so it's all on
+  you.  Get in there fast, figure out what the
+  hell happened, rescue anyone who's still alive
+  and get them out safely.\""
+!T33"
+  \"...hey, and make sure you get yourself out
+  safely too, Hopper!  Good luck.\""

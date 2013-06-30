@@ -426,7 +426,7 @@ static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom,
   } glPopMatrix();
 }
 
-static void draw_dialog(const az_space_state_t *state) {
+void az_draw_dialog(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DIALOG);
   const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
   bool talking = false;
@@ -507,7 +507,7 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);
   if (state->mode == AZ_MODE_DIALOG) {
-    draw_dialog(state);
+    az_draw_dialog(state);
   } else if (state->mode == AZ_MODE_UPGRADE) {
     draw_upgrade_box(state);
   }

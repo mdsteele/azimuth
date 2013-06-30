@@ -18,17 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_HUD_H_
-#define AZIMUTH_VIEW_HUD_H_
+#ifndef AZIMUTH_TICK_CUTSCENE_H_
+#define AZIMUTH_TICK_CUTSCENE_H_
 
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_draw_dialog(const az_space_state_t *state);
-
-void az_draw_hud(az_space_state_t* state);
+void az_tick_cutscene(az_cutscene_state_t *cutscene, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_HUD_H_
+#endif // AZIMUTH_TICK_CUTSCENE_H_

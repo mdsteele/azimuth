@@ -187,7 +187,8 @@ az_space_action_t az_space_event_loop(
           // Handle the keystroke:
           switch (event.key.id) {
             case AZ_KEY_RETURN:
-              if (state.mode == AZ_MODE_NORMAL) {
+              if (state.mode == AZ_MODE_NORMAL &&
+                  state.cutscene.scene == AZ_SCENE_NOTHING) {
                 state.mode = AZ_MODE_PAUSING;
                 state.pausing_mode = (az_pausing_mode_data_t){
                   .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0

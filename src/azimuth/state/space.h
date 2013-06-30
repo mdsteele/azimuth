@@ -49,6 +49,26 @@
 
 /*===========================================================================*/
 
+// The number of different cutscenes there are, not counting AZ_SCENE_NOTHING:
+#define AZ_NUM_SCENES 5
+
+typedef enum {
+  AZ_SCENE_NOTHING = 0,
+  AZ_SCENE_CRUISING,
+  AZ_SCENE_MOVE_OUT,
+  AZ_SCENE_ARRIVAL,
+  AZ_SCENE_ESCAPE,
+  AZ_SCENE_HOMECOMING
+} az_scene_t;
+
+typedef struct {
+  az_scene_t scene;
+  az_scene_t next;
+  double fade_alpha; // 0.0 to 1.0
+  double time;
+  double param1, param2;
+} az_cutscene_state_t;
+
 typedef struct {
   double time_remaining; // seconds
   const char *paragraph;
@@ -127,6 +147,7 @@ typedef struct {
   az_clock_t clock;
   az_camera_t camera;
   az_ship_t ship;
+  az_cutscene_state_t cutscene;
   az_message_t message;
   az_countdown_t countdown;
   az_soundboard_t soundboard;

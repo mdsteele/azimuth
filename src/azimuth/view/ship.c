@@ -99,15 +99,19 @@ void az_draw_ship(az_space_state_t* state) {
   }
 
   // Draw the ship itself:
+  az_draw_ship_body(ship, state->clock);
+}
+
+void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
 
     if (ship->temp_invincibility <= 0.0 ||
-        az_clock_mod(4, 1, state->clock) != 0) {
+        az_clock_mod(4, 1, clock) != 0) {
       // Exhaust:
       if (ship->thrusters != AZ_THRUST_NONE) {
-        const double zig = az_clock_zigzag(10, 1, state->clock);
+        const double zig = az_clock_zigzag(10, 1, clock);
         // For forward thrusters:
         if (ship->thrusters == AZ_THRUST_FORWARD) {
           // From port engine:
@@ -162,8 +166,8 @@ void az_draw_ship(az_space_state_t* state) {
         glPushMatrix(); {
           glTranslated(20, 0, 0);
           const double mid_radius = ship->ordn_charge *
-            (4.0 + 0.6 * az_clock_zigzag(10, 1, state->clock));
-          const int offset = 6 * az_clock_mod(60, 1, state->clock);
+            (4.0 + 0.6 * az_clock_zigzag(10, 1, clock));
+          const int offset = 6 * az_clock_mod(60, 1, clock);
           glBegin(GL_TRIANGLE_FAN); {
             if (ship->ordn_charge >= 1.0) glColor4f(1, 1, 0.25, 0.7);
             else glColor4f(1, 0.25, 0.25, 0.7);
@@ -184,8 +188,8 @@ void az_draw_ship(az_space_state_t* state) {
         glPushMatrix(); {
           glTranslated(20, 0, 0);
           const double radius = ship->gun_charge *
-            (7.0 + 0.3 * az_clock_zigzag(10, 1, state->clock));
-          const int offset = 6 * az_clock_mod(60, 1, state->clock);
+            (7.0 + 0.3 * az_clock_zigzag(10, 1, clock));
+          const int offset = 6 * az_clock_mod(60, 1, clock);
           for (int n = 0; n < 2; ++n) {
             glBegin(GL_TRIANGLE_FAN); {
               if (ship->gun_charge >= 1.0) glColor4f(1, 1, 0.5, 0.4);
@@ -262,7 +266,7 @@ void az_draw_ship(az_space_state_t* state) {
     if (ship->cplus.state == AZ_CPLUS_READY) {
       assert(ship->cplus.charge > 0.0);
       assert(ship->cplus.charge <= 1.0);
-      glColor4f(0, 1, 0, (az_clock_mod(2, 3, state->clock) ? 0.25 : 0.5) *
+      glColor4f(0, 1, 0, (az_clock_mod(2, 3, clock) ? 0.25 : 0.5) *
                 (1.0 - pow(ship->cplus.charge, 4.0)));
       glBegin(GL_POLYGON); {
         for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {

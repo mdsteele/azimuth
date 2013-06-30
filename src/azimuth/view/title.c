@@ -33,6 +33,7 @@
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/cursor.h"
+#include "azimuth/view/cutscene.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -47,70 +48,9 @@ static void do_polygon(GLenum mode, az_polygon_t polygon) {
 
 /*===========================================================================*/
 
-#define PLANET_RADIUS 130.0
-#define STAR_SPACING 12
-
-// Below is a simple random number generator based on the MWC algorithm from:
-//   http://www.bobwheeler.com/statistics/Password/MarsagliaPost.txt
-// Using this rather than az_random() allows us to easily produce the same
-// "random" sequence over and over, which we use to generate a starfield that
-// looks random, but can be consistently regenerated on each frame.
-static uint32_t sr_z, sr_w;
-static void reset_simple_random(void) { sr_z = sr_w = 1; }
-static double simple_random(void) {
-  sr_z = 36969 * (sr_z & 0xffff) + (sr_z >> 16);
-  sr_w = 18000 * (sr_w & 0xffff) + (sr_w >> 16);
-  return ((sr_z << 16) + sr_w + 1.0) * 2.328306435454494e-10;
-}
-
 static void draw_background(const az_title_state_t *state) {
-  // Draw stars:
-  glBegin(GL_POINTS); {
-    reset_simple_random();
-    int i = 0;
-    for (int xoff = 0; xoff < AZ_SCREEN_WIDTH; xoff += STAR_SPACING) {
-      for (int yoff = 0; yoff < AZ_SCREEN_HEIGHT; yoff += STAR_SPACING) {
-        const int twinkle = az_clock_zigzag(10, 4, state->clock + i);
-        glColor4f(1, 1, 1, (twinkle * 0.02) + 0.3 * simple_random());
-        const double x = xoff + 3 * STAR_SPACING * simple_random();
-        const double y = yoff + 3 * STAR_SPACING * simple_random();
-        glVertex2d(x, y);
-        ++i;
-      }
-    }
-  } glEnd();
-
-  // Draw the planet:
-  glPushMatrix(); {
-    glTranslated(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
-
-    // Draw the planet itself:
-    glBegin(GL_TRIANGLE_FAN); {
-      glColor4f(0.1, 0, 0.1, 1);
-      glVertex2d(0.15 * PLANET_RADIUS, -0.23 * PLANET_RADIUS);
-      glColor4f(0.25, 0.15, 0.15, 1);
-      for (int theta = 0; theta <= 360; theta += 6) {
-        glVertex2d(PLANET_RADIUS * cos(AZ_DEG2RAD(theta)),
-                   PLANET_RADIUS * sin(AZ_DEG2RAD(theta)));
-      }
-    } glEnd();
-
-    // Draw planet "atmosphere":
-    const double atmosphere_thickness =
-      18.0 + az_clock_zigzag(10, 8, state->clock);
-    glBegin(GL_TRIANGLE_STRIP); {
-      for (int theta = 0; theta <= 360; theta += 6) {
-        glColor4f(0, 1, 1, 0.5);
-        glVertex2d(PLANET_RADIUS * cos(AZ_DEG2RAD(theta)),
-                   PLANET_RADIUS * sin(AZ_DEG2RAD(theta)));
-        glColor4f(0, 1, 1, 0);
-        glVertex2d((PLANET_RADIUS + atmosphere_thickness) *
-                   cos(AZ_DEG2RAD(theta + 3)),
-                   (PLANET_RADIUS + atmosphere_thickness) *
-                   sin(AZ_DEG2RAD(theta + 3)));
-      }
-    } glEnd();
-  } glPopMatrix();
+  az_draw_planet_starfield(state->clock);
+  az_draw_zenith_planet(state->clock);
 
   // Draw game title:
   glColor3f(1, 1, 1); // white
