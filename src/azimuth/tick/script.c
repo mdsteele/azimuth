@@ -647,7 +647,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (state->cutscene.scene == AZ_SCENE_NOTHING) {
             state->cutscene.scene = state->cutscene.next;
             state->cutscene.fade_alpha = 1.0;
-          }
+          } else SUSPEND(vm->script, &state->cutscene.vm);
         }
         break;
       case AZ_OP_DLOG:

@@ -23,31 +23,36 @@
 #include <math.h>
 
 #include "azimuth/state/space.h"
+#include "azimuth/tick/script.h"
 
 /*===========================================================================*/
 
 #define FADE_TIME 0.75
 
-static void next_scene(az_cutscene_state_t *cutscene, bool reset) {
+static void next_scene(az_space_state_t *state, bool reset) {
+  az_cutscene_state_t *cutscene = &state->cutscene;
   const az_scene_t next = cutscene->next;
   assert(reset || next != AZ_SCENE_NOTHING);
   if (reset) {
-    *cutscene = (az_cutscene_state_t){
-      .scene = next, .next = next, .fade_alpha = 1.0
-    };
-  } else cutscene->scene = cutscene->next;
+    cutscene->fade_alpha = 1.0;
+    cutscene->time = cutscene->param1 = cutscene->param2 = 0.0;
+  }
+  cutscene->scene = cutscene->next;
+  if (cutscene->vm.script != NULL) az_resume_script(state, &cutscene->vm);
 }
 
-static void fade_to_next_scene(az_cutscene_state_t *cutscene, double time) {
+static void fade_to_next_scene(az_space_state_t *state, double time) {
+  az_cutscene_state_t *cutscene = &state->cutscene;
   cutscene->fade_alpha = fmin(1.0, cutscene->fade_alpha + time / FADE_TIME);
-  if (cutscene->fade_alpha == 1.0) next_scene(cutscene, true);
+  if (cutscene->fade_alpha == 1.0) next_scene(state, true);
 }
 
 static void fade_in(az_cutscene_state_t *cutscene, double time) {
   cutscene->fade_alpha = fmax(0.0, cutscene->fade_alpha - time / FADE_TIME);
 }
 
-void az_tick_cutscene(az_cutscene_state_t *cutscene, double time) {
+void az_tick_cutscene(az_space_state_t *state, double time) {
+  az_cutscene_state_t *cutscene = &state->cutscene;
   switch (cutscene->scene) {
     case AZ_SCENE_NOTHING:
       assert(cutscene->next == AZ_SCENE_NOTHING);
@@ -62,10 +67,10 @@ void az_tick_cutscene(az_cutscene_state_t *cutscene, double time) {
           fade_in(cutscene, time);
           break;
         case AZ_SCENE_MOVE_OUT:
-          next_scene(cutscene, false);
+          next_scene(state, false);
           break;
         default:
-          fade_to_next_scene(cutscene, time);
+          fade_to_next_scene(state, time);
           break;
       }
       break;
@@ -76,20 +81,20 @@ void az_tick_cutscene(az_cutscene_state_t *cutscene, double time) {
         cutscene->param2 = fmin(1.0, cutscene->param2 + time / 1.5);
       }
       if (cutscene->next != AZ_SCENE_MOVE_OUT && cutscene->param2 >= 1.0) {
-        fade_to_next_scene(cutscene, time);
+        fade_to_next_scene(state, time);
       } else fade_in(cutscene, time);
       break;
     case AZ_SCENE_ARRIVAL:
       cutscene->param1 = fmin(1.0, cutscene->param1 + time / 5.0);
       if (cutscene->next != AZ_SCENE_ARRIVAL && cutscene->param1 >= 1.0) {
-        fade_to_next_scene(cutscene, time);
+        fade_to_next_scene(state, time);
       } else fade_in(cutscene, time);
       break;
     // TODO: implement other cutscenes
     case AZ_SCENE_ESCAPE:
     case AZ_SCENE_HOMECOMING:
       if (cutscene->next == cutscene->scene) fade_in(cutscene, time);
-      else fade_to_next_scene(cutscene, time);
+      else fade_to_next_scene(state, time);
       break;
   }
 }

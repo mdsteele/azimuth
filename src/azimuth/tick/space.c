@@ -523,7 +523,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   // If we're watching a cutscene, allow dialog and timer scripts to proceed,
   // but don't do anything else.
   if (state->cutscene.scene != AZ_SCENE_NOTHING) {
-    az_tick_cutscene(&state->cutscene, time);
+    az_tick_cutscene(state, time);
     if (state->mode == AZ_MODE_DIALOG) {
       tick_dialog_mode(state, time);
     } else {

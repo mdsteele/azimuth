@@ -25,7 +25,7 @@
 
 /*===========================================================================*/
 
-void az_tick_cutscene(az_cutscene_state_t *cutscene, double time);
+void az_tick_cutscene(az_space_state_t *state, double time);
 
 /*===========================================================================*/
 

@@ -67,6 +67,7 @@ typedef struct {
   double fade_alpha; // 0.0 to 1.0
   double time;
   double param1, param2;
+  az_script_vm_t vm;
 } az_cutscene_state_t;
 
 typedef struct {
