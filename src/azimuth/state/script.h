@@ -50,6 +50,7 @@ typedef enum {
   AZ_OP_VMULI, // pop top two, push (a * i) and (b * i)
   AZ_OP_VNORM, // pop top two, push hypot(a, b)
   AZ_OP_VTHETA, // pop top two, push atan2(b, a)
+  AZ_OP_VPOLAR, // pop top two, push a*cos(b) and a*sin(b)
   // Comparisons:
   AZ_OP_EQ, // pop top two, push (a == b ? 1 : 0)
   AZ_OP_EQI, // pop top, push (a == i ? 1 : 0)
@@ -77,6 +78,9 @@ typedef enum {
   AZ_OP_SANG, // pop top, set angle of obj i (of any type) to a
   AZ_OP_GSTAT, // push state of object i (meaning of "state" depends on type)
   AZ_OP_SSTAT, // pop top, set state of object i to a
+  // Ship:
+  AZ_OP_GVEL, // push (x, y) velocity of ship
+  AZ_OP_SVEL, // pop top two, set velocity of ship to (a, b)
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_SBADK, // pop top, transform baddie i to kind a

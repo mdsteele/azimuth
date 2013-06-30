@@ -51,6 +51,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_VMULI:  return "vmuli";
     case AZ_OP_VNORM:  return "vnorm";
     case AZ_OP_VTHETA: return "vtheta";
+    case AZ_OP_VPOLAR: return "vpolar";
     case AZ_OP_EQ:     return "eq";
     case AZ_OP_EQI:    return "eqi";
     case AZ_OP_NE:     return "ne";
@@ -75,6 +76,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SANG:   return "sang";
     case AZ_OP_GSTAT:  return "gstat";
     case AZ_OP_SSTAT:  return "sstat";
+    case AZ_OP_GVEL:   return "gvel";
+    case AZ_OP_SVEL:   return "svel";
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_SBADK:  return "sbadk";
     case AZ_OP_BOSS:   return "boss";
@@ -136,12 +139,15 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_VMUL:
     case AZ_OP_VNORM:
     case AZ_OP_VTHETA:
+    case AZ_OP_VPOLAR:
     case AZ_OP_EQ:
     case AZ_OP_NE:
     case AZ_OP_LT:
     case AZ_OP_GT:
     case AZ_OP_LE:
     case AZ_OP_GE:
+    case AZ_OP_GVEL:
+    case AZ_OP_SVEL:
     case AZ_OP_BAD:
     case AZ_OP_GCAM:
     case AZ_OP_DLOG:

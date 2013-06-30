@@ -268,6 +268,14 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         break;
       case AZ_OP_VNORM: BINARY_OP(hypot(a, b)); break;
       case AZ_OP_VTHETA: BINARY_OP(atan2(b, a)); break;
+      case AZ_OP_VPOLAR:
+        {
+          double magnitude, theta;
+          STACK_POP(&magnitude, &theta);
+          const az_vector_t vec = az_vpolar(magnitude, theta);
+          STACK_PUSH(vec.x, vec.y);
+        }
+        break;
       // Comparisons:
       case AZ_OP_EQ: BINARY_OP(a == b ? 1.0 : 0.0); break;
       case AZ_OP_EQI: UNARY_OP(a == ins.immediate ? 1.0 : 0.0); break;
@@ -357,7 +365,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           az_object_t object;
           GET_OBJECT(&object);
           const az_vector_t position =
-            (object.type == AZ_OBJ_NODE ? AZ_VZERO :
+            (object.type == AZ_OBJ_NOTHING ? AZ_VZERO :
              az_get_object_position(&object));
           STACK_PUSH(position.x, position.y);
         }
@@ -468,6 +476,17 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
               SCRIPT_ERROR("invalid object type");
               break;
           }
+        }
+        break;
+      // Ship:
+      case AZ_OP_GVEL:
+        STACK_PUSH(state->ship.velocity.x, state->ship.velocity.y);
+        break;
+      case AZ_OP_SVEL:
+        {
+          az_vector_t new_velocity;
+          STACK_POP(&new_velocity.x, &new_velocity.y);
+          state->ship.velocity = new_velocity;
         }
         break;
       // Baddies:
