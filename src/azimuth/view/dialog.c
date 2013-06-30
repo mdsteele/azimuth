@@ -39,11 +39,13 @@ static GLuint portrait_display_lists_start;
 // Offsets from portrait_display_lists_start for various portraits:
 #define HOPPER_PAUSED_INDEX 0
 #define HOPPER_TALKING_INDEX 1
-#define CPU_A_PAUSED_INDEX 2
-#define CPU_B_PAUSED_INDEX 3
-#define TRICHORD_PAUSED_INDEX 4
-#define TRICHORD_TALKING_INDEX 5
-#define NUM_PORTRAIT_DISPLAY_LISTS 6
+#define HQ_PAUSED_INDEX 2
+#define HQ_TALKING_INDEX 3
+#define CPU_A_PAUSED_INDEX 4
+#define CPU_B_PAUSED_INDEX 5
+#define TRICHORD_PAUSED_INDEX 6
+#define TRICHORD_TALKING_INDEX 7
+#define NUM_PORTRAIT_DISPLAY_LISTS 8
 
 /*===========================================================================*/
 
@@ -162,6 +164,52 @@ static const az_vector_t hopper_talking_vertices[] = {
   {68, 14}, {65, 10}, {72, 5}, {77, 0},
   // Border:
   {100, 0}, {100, 100}, {0, 100}, {0, 0}
+};
+
+static const az_vector_t hq_paused1_vertices[] = {
+  // Left neck/shoulder:
+  {10, 6}, {20, 10}, {30, 18}, {31, 25},
+  // Left earpiece:
+  {31, 28}, {27, 29}, {25, 30}, {24, 32}, {23, 38},
+  {22, 38}, {19.5, 42}, {19, 51}, {21, 55},
+  // Top of head:
+  {24, 57}, {27, 73}, {30, 82}, {36, 88}, {41, 89}, {50, 90},
+  {59, 89}, {64, 88}, {70, 82}, {73, 73}, {76, 57},
+  // Right earpiece:
+  {79, 55}, {81, 51}, {80.5, 42}, {78, 39}, {74, 37}, {70, 37},
+  // Right neck/shoulder:
+  {69, 25}, {70, 18}, {80, 10}, {90, 6},
+  // Border:
+  {100, 0}, {100, 100}, {0, 100}, {0, 0}
+};
+static const az_vector_t hq_paused2_vertices[] = {
+  {30, 37}, {25, 37.5}, {25.5, 34}, {27, 31}, {31, 30}
+};
+static const az_vector_t hq_paused3_vertices[] = {
+  {72, 59}, {74, 58}, {72, 68}
+};
+static const az_vector_t hq_paused4_vertices[] = {
+  {26, 58}, {28, 59}, {28, 68}
+};
+
+static const az_vector_t hq_talking1_vertices[] = {
+  // Left neck/shoulder:
+  {10, 6}, {20, 10}, {30, 18}, {31, 25},
+  // Left earpiece:
+  {31, 27}, {27, 28}, {25, 29}, {24, 31}, {23, 38},
+  {22, 38}, {19.5, 42}, {19, 51}, {21, 55},
+  // Top of head:
+  {24, 57}, {27, 73}, {30, 82}, {36, 88}, {41, 89}, {50, 90},
+  {59, 89}, {64, 88}, {70, 82}, {73, 73}, {76, 57},
+  // Right earpiece:
+  {79, 55}, {81, 51}, {80.5, 42}, {78, 39}, {74, 37}, {70, 37},
+  // Right neck/shoulder:
+  {69, 25}, {70, 18}, {80, 10}, {90, 6},
+  // Border:
+  {100, 0}, {100, 100}, {0, 100}, {0, 0}
+};
+static const az_vector_t hq_talking2_vertices[] = {
+  {30, 37}, {25, 37.5}, {25.5, 33}, {27, 30}, {31, 29}
 };
 
 static const az_vector_t cpu_a1_vertices[] = {
@@ -290,6 +338,31 @@ void az_init_portrait_drawing(void) {
     draw_portrait_polygon(5, (az_color_t){0, 255, 255, 255},
                           (az_color_t){255, 32, 0, 0}, polygon);
   } glEndList();
+  // Compile HQ portrait:
+  glNewList(portrait_display_lists_start + HQ_PAUSED_INDEX, GL_COMPILE); {
+    const az_color_t color1 = {255, 255, 0, 255};
+    const az_color_t color2 = {0, 128, 128, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(hq_paused1_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(hq_paused2_vertices);
+    draw_portrait_polygon(3, color1, color2, polygon2);
+    const az_polygon_t polygon3 = AZ_INIT_POLYGON(hq_paused3_vertices);
+    draw_portrait_polygon(1, color1, color2, polygon3);
+    const az_polygon_t polygon4 = AZ_INIT_POLYGON(hq_paused4_vertices);
+    draw_portrait_polygon(1, color1, color2, polygon4);
+  } glEndList();
+  glNewList(portrait_display_lists_start + HQ_TALKING_INDEX, GL_COMPILE); {
+    const az_color_t color1 = {255, 255, 0, 255};
+    const az_color_t color2 = {0, 128, 128, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(hq_talking1_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(hq_talking2_vertices);
+    draw_portrait_polygon(3, color1, color2, polygon2);
+    const az_polygon_t polygon3 = AZ_INIT_POLYGON(hq_paused3_vertices);
+    draw_portrait_polygon(1, color1, color2, polygon3);
+    const az_polygon_t polygon4 = AZ_INIT_POLYGON(hq_paused4_vertices);
+    draw_portrait_polygon(1, color1, color2, polygon4);
+  } glEndList();
   // Compile CPU A portrait:
   glNewList(portrait_display_lists_start + CPU_A_PAUSED_INDEX, GL_COMPILE); {
     const az_color_t color1 = {255, 128, 255, 255};
@@ -370,7 +443,10 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
       display_list += (talking && az_clock_mod(3, 3, clock) != 0 ?
                        HOPPER_TALKING_INDEX : HOPPER_PAUSED_INDEX);
       break;
-    case AZ_POR_HQ: return; // TODO
+    case AZ_POR_HQ:
+      display_list += (talking && az_clock_mod(3, 4, clock) != 0 ?
+                       HQ_TALKING_INDEX : HQ_PAUSED_INDEX);
+      break;
     case AZ_POR_CPU_A:
       display_list += CPU_A_PAUSED_INDEX;
       if (az_clock_mod(2, (talking ? 3 : 25), clock)) {
