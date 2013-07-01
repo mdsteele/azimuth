@@ -54,7 +54,7 @@ void test_paragraph_length(void) {
   EXPECT_INT_EQ(31, az_paragraph_line_length(&prefs, paragraph, 0));
   EXPECT_INT_EQ(55, az_paragraph_total_length(&prefs, paragraph));
 
-  prefs.up_key = AZ_KEY_TAB;
+  prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
   EXPECT_INT_EQ(57, az_paragraph_total_length(&prefs, paragraph));
 }
 

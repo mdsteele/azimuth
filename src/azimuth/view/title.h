@@ -25,6 +25,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/prefs.h"
 
 /*===========================================================================*/
 
@@ -45,6 +46,12 @@ typedef struct {
 } az_title_slider_t;
 
 typedef struct {
+  az_title_button_t button;
+  bool selected;
+  az_key_id_t key;
+} az_title_key_picker_t;
+
+typedef struct {
   const az_planet_t *planet;
   const az_saved_games_t *saved_games;
   az_clock_t clock;
@@ -56,11 +63,13 @@ typedef struct {
     AZ_TMODE_PREFS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_ERASING,
+    AZ_TMODE_PICK_KEY,
     AZ_TMODE_STARTING,
     AZ_TMODE_QUITTING
   } mode;
   union {
     struct { int slot_index; bool do_erase; } erasing;
+    struct { int picker_index; } pick_key;
     struct { double progress; int slot_index; } starting;
   } mode_data;
 
@@ -68,6 +77,7 @@ typedef struct {
   az_title_button_t confirm_button, cancel_button;
   az_title_button_t prefs_button, about_button, quit_button;
   az_title_slider_t music_slider, sound_slider;
+  az_title_key_picker_t pickers[AZ_PREFS_NUM_KEYS];
 } az_title_state_t;
 
 void az_title_draw_screen(const az_title_state_t *state);

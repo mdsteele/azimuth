@@ -121,13 +121,13 @@ static int paragraph_line_length_internal(
         // The key name escapes add the length of the key name to the line.
         // Note for now which key_id we need to insert the name of, and we'll
         // handle it below.
-        case 'u': key_id = prefs->up_key; break;
-        case 'd': key_id = prefs->down_key; break;
-        case 'r': key_id = prefs->right_key; break;
-        case 'l': key_id = prefs->left_key; break;
-        case 'f': key_id = prefs->fire_key; break;
-        case 'o': key_id = prefs->ordn_key; break;
-        case 't': key_id = prefs->util_key; break;
+        case 'u': key_id = prefs->keys[AZ_PREFS_UP_KEY_INDEX]; break;
+        case 'd': key_id = prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]; break;
+        case 'r': key_id = prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX]; break;
+        case 'l': key_id = prefs->keys[AZ_PREFS_LEFT_KEY_INDEX]; break;
+        case 'f': key_id = prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]; break;
+        case 'o': key_id = prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]; break;
+        case 't': key_id = prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]; break;
         // All other escapes are just a single letter after the '$', which
         // we should skip over without increasing the line length.
         default:

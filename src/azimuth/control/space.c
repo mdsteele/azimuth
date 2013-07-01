@@ -99,13 +99,20 @@ static bool save_current_game(az_saved_games_t *saved_games) {
 }
 
 static void update_controls(const az_preferences_t *prefs) {
-  state.ship.controls.up_held = az_is_key_held(prefs->up_key);
-  state.ship.controls.down_held = az_is_key_held(prefs->down_key);
-  state.ship.controls.left_held = az_is_key_held(prefs->left_key);
-  state.ship.controls.right_held = az_is_key_held(prefs->right_key);
-  state.ship.controls.fire_held = az_is_key_held(prefs->fire_key);
-  state.ship.controls.ordn_held = az_is_key_held(prefs->ordn_key);
-  state.ship.controls.util_held = az_is_key_held(prefs->util_key);
+  state.ship.controls.up_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
+  state.ship.controls.down_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
+  state.ship.controls.right_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX]);
+  state.ship.controls.left_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_LEFT_KEY_INDEX]);
+  state.ship.controls.fire_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]);
+  state.ship.controls.ordn_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]);
+  state.ship.controls.util_held =
+    az_is_key_held(prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]);
 }
 
 az_space_action_t az_space_event_loop(
@@ -226,13 +233,16 @@ az_space_action_t az_space_event_loop(
               az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
               break;
             default:
-              if (event.key.id == prefs->up_key) {
+              if (event.key.id == prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
                 state.ship.controls.up_pressed = true;
-              } else if (event.key.id == prefs->down_key) {
+              } else if (event.key.id ==
+                         prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {
                 state.ship.controls.down_pressed = true;
-              } else if (event.key.id == prefs->fire_key) {
+              } else if (event.key.id ==
+                         prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]) {
                 state.ship.controls.fire_pressed = true;
-              } else if (event.key.id == prefs->util_key) {
+              } else if (event.key.id ==
+                         prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) {
                 state.ship.controls.util_pressed = true;
               }
               break;

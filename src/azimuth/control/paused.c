@@ -67,9 +67,10 @@ az_paused_action_t az_paused_event_loop(
             case AZ_KEY_9: az_select_ordnance(player, AZ_ORDN_ROCKETS); break;
             case AZ_KEY_0: az_select_ordnance(player, AZ_ORDN_BOMBS);   break;
             default:
-              if (event.key.id == state.prefs->up_key) {
+              if (event.key.id == state.prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
                 state.show_upgrades_drawer = true;
-              } else if (event.key.id == state.prefs->down_key) {
+              } else if (event.key.id ==
+                         state.prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {
                 state.show_upgrades_drawer = false;
               }
               break;

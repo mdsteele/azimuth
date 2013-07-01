@@ -26,7 +26,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
-#include "azimuth/gui/event.h" // for az_is_mouse_held
+#include "azimuth/gui/event.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/save.h"
 #include "azimuth/util/misc.h"
@@ -59,9 +59,9 @@ static void draw_background(const az_title_state_t *state) {
 
 /*===========================================================================*/
 
-#define PREFS_BOX_TOP 260
+#define PREFS_BOX_TOP 220
 #define PREFS_BOX_WIDTH 512
-#define PREFS_BOX_HEIGHT 146
+#define PREFS_BOX_HEIGHT 186
 
 #define SLIDER_WIDTH 300
 #define SLIDER_THICKNESS 10
@@ -86,10 +86,10 @@ static const az_polygon_t slider_handle_polygon =
 
 static az_vector_t slider_midleft(az_slider_id_t slider_id) {
   const double x = 0.5 * (AZ_SCREEN_WIDTH - SLIDER_WIDTH);
-  double y = PREFS_BOX_TOP + 50.0;
+  double y = PREFS_BOX_TOP + 30.0;
   switch (slider_id) {
     case AZ_SLIDER_MUSIC: break;
-    case AZ_SLIDER_SOUND: y += 50.0; break;
+    case AZ_SLIDER_SOUND: y += 32.0; break;
   }
   return (az_vector_t){x, y};
 }
@@ -149,6 +149,55 @@ static void draw_slider(const az_title_state_t *state,
   } glPopMatrix();
 }
 
+#define PICKER_WIDTH 30
+#define PICKER_HEIGHT 12
+#define PICKER_HORZ_SPACING 130
+#define PICKER_VERT_SPACING 8
+
+static az_vector_t key_picker_topleft(int picker_index) {
+  const int top = PREFS_BOX_TOP + 90;
+  const int left = AZ_SCREEN_WIDTH / 2 - 120;
+  const int row = picker_index % 4;
+  const int col = picker_index / 4;
+  return (az_vector_t){
+    left + col * (PICKER_WIDTH + PICKER_HORZ_SPACING),
+    top + row * (PICKER_HEIGHT + PICKER_VERT_SPACING)};
+}
+
+static bool point_in_key_picker(int picker_index, int x, int y) {
+  const az_vector_t topleft = key_picker_topleft(picker_index);
+  return (x >= topleft.x && x <= topleft.x + PICKER_WIDTH &&
+          y >= topleft.y && y <= topleft.y + PICKER_HEIGHT);
+}
+
+static void draw_key_picker(const az_title_state_t *state, int picker_index,
+                            const char *name) {
+  const az_vector_t topleft = key_picker_topleft(picker_index);
+  glPushMatrix(); {
+    glTranslated(topleft.x, topleft.y, 0);
+    const az_title_key_picker_t *picker = &state->pickers[picker_index];
+    const GLfloat pulse = picker->button.hover_pulse;
+    glColor4f(0.7f * pulse, pulse, pulse, 0.7f);
+    glBegin(GL_QUADS); {
+      glVertex2f(0.5f, 0.5f);
+      glVertex2f(0.5f, PICKER_HEIGHT + 0.5f);
+      glVertex2f(PICKER_WIDTH + 0.5f, PICKER_HEIGHT + 0.5f);
+      glVertex2f(PICKER_WIDTH + 0.5f, 0.5f);
+    } glEnd();
+    glColor3f(0.75, 0.75, 0.75);
+    glBegin(GL_LINE_LOOP); {
+      glVertex2f(0.5f, 0.5f);
+      glVertex2f(0.5f, PICKER_HEIGHT + 0.5f);
+      glVertex2f(PICKER_WIDTH + 0.5f, PICKER_HEIGHT + 0.5f);
+      glVertex2f(PICKER_WIDTH + 0.5f, 0.5f);
+    } glEnd();
+    glColor3f(1, 1, 1);
+    az_draw_string(8, AZ_ALIGN_CENTER, PICKER_WIDTH/2, 3,
+                   az_key_name(picker->key));
+    az_draw_string(8, AZ_ALIGN_LEFT, PICKER_WIDTH + 8, 3, name);
+  } glPopMatrix();
+}
+
 static const az_vector_t prefs_box_vertices[] = {
   {0.5, 0.5}, {PREFS_BOX_WIDTH - 0.5, 0.5},
   {PREFS_BOX_WIDTH - 0.5, PREFS_BOX_HEIGHT - 0.5},
@@ -168,6 +217,14 @@ static void draw_prefs_box(const az_title_state_t *state) {
 
   draw_slider(state, AZ_SLIDER_MUSIC);
   draw_slider(state, AZ_SLIDER_SOUND);
+
+  draw_key_picker(state, AZ_PREFS_UP_KEY_INDEX, "Thrust");
+  draw_key_picker(state, AZ_PREFS_DOWN_KEY_INDEX, "Reverse");
+  draw_key_picker(state, AZ_PREFS_RIGHT_KEY_INDEX, "Turn right");
+  draw_key_picker(state, AZ_PREFS_LEFT_KEY_INDEX, "Turn left");
+  draw_key_picker(state, AZ_PREFS_FIRE_KEY_INDEX, "Fire");
+  draw_key_picker(state, AZ_PREFS_ORDN_KEY_INDEX, "Ordnance");
+  draw_key_picker(state, AZ_PREFS_UTIL_KEY_INDEX, "Utility");
 }
 
 /*===========================================================================*/
@@ -415,6 +472,7 @@ static bool button_is_active(const az_title_state_t *state,
               state->mode == AZ_TMODE_ABOUT);
     case AZ_BUTTON_QUIT:
       return (state->mode == AZ_TMODE_NORMAL ||
+              state->mode == AZ_TMODE_PICK_KEY ||
               state->mode == AZ_TMODE_PREFS ||
               state->mode == AZ_TMODE_ABOUT ||
               state->mode == AZ_TMODE_ERASING);
@@ -470,7 +528,7 @@ void az_title_draw_screen(const az_title_state_t *state) {
   draw_background(state);
 
   // Draw save slots:
-  if (state->mode == AZ_TMODE_PREFS) {
+  if (state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) {
     draw_prefs_box(state);
   } else if (state->mode == AZ_TMODE_ABOUT) {
     draw_about_box();
@@ -571,6 +629,14 @@ static void tick_slider(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void tick_key_picker(
+    az_title_state_t *state, az_title_key_picker_t *picker, double time) {
+  if (!picker->selected) {
+    update_hover_pulse(state, &picker->button, (state->mode == AZ_TMODE_PREFS),
+                       time);
+  }
+}
+
 void az_tick_title_state(az_title_state_t *state, double time) {
   ++state->clock;
   tick_mode(state, time);
@@ -587,6 +653,9 @@ void az_tick_title_state(az_title_state_t *state, double time) {
   tick_button(state, &state->cancel_button, AZ_BUTTON_CANCEL, time);
   tick_slider(state, &state->music_slider, AZ_SLIDER_MUSIC, time);
   tick_slider(state, &state->sound_slider, AZ_SLIDER_SOUND, time);
+  AZ_ARRAY_LOOP(picker, state->pickers) {
+    tick_key_picker(state, picker, time);
+  }
 }
 
 /*===========================================================================*/
@@ -633,6 +702,14 @@ static void slider_on_hover(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void picker_on_hover(
+    az_title_state_t *state, int picker_index, int x, int y) {
+  const bool active = (state->mode == AZ_TMODE_PREFS ||
+                       state->mode == AZ_TMODE_PICK_KEY);
+  set_hovering(state, &state->pickers[picker_index].button, active,
+               point_in_key_picker(picker_index, x, y));
+}
+
 void az_title_on_hover(az_title_state_t *state, int x, int y) {
   for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
     az_title_save_slot_t *slot = &state->slots[i];
@@ -648,6 +725,9 @@ void az_title_on_hover(az_title_state_t *state, int x, int y) {
   button_on_hover(state, &state->cancel_button, AZ_BUTTON_CANCEL, x, y);
   slider_on_hover(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
   slider_on_hover(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    picker_on_hover(state, i, x, y);
+  }
 }
 
 /*===========================================================================*/
@@ -692,6 +772,19 @@ static void slider_on_click(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void picker_on_click(
+    az_title_state_t *state, int picker_index, int x, int y) {
+  if ((state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) &&
+      point_in_key_picker(picker_index, x, y)) {
+    AZ_ARRAY_LOOP(picker, state->pickers) picker->selected = false;
+    az_title_key_picker_t *picker = &state->pickers[picker_index];
+    picker->selected = true;
+    picker->button.hover_pulse = HOVER_PULSE_CLICK;
+    state->mode = AZ_TMODE_PICK_KEY;
+    state->mode_data.pick_key.picker_index = picker_index;
+  }
+}
+
 void az_title_on_click(az_title_state_t *state, int x, int y) {
   if (state->mode == AZ_TMODE_NORMAL) {
     for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
@@ -715,6 +808,9 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
   button_on_click(state, AZ_BUTTON_CANCEL, x, y);
   slider_on_click(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
   slider_on_click(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    picker_on_click(state, i, x, y);
+  }
 }
 
 /*===========================================================================*/

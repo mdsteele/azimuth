@@ -27,11 +27,19 @@
 
 /*===========================================================================*/
 
+#define AZ_PREFS_UP_KEY_INDEX 0
+#define AZ_PREFS_DOWN_KEY_INDEX 1
+#define AZ_PREFS_RIGHT_KEY_INDEX 2
+#define AZ_PREFS_LEFT_KEY_INDEX 3
+#define AZ_PREFS_FIRE_KEY_INDEX 4
+#define AZ_PREFS_ORDN_KEY_INDEX 5
+#define AZ_PREFS_UTIL_KEY_INDEX 6
+#define AZ_PREFS_NUM_KEYS 7
+
 typedef struct {
   float music_volume;
   float sound_volume;
-  az_key_id_t up_key, down_key, right_key, left_key;
-  az_key_id_t fire_key, ordn_key, util_key;
+  az_key_id_t keys[AZ_PREFS_NUM_KEYS];
 } az_preferences_t;
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs);
@@ -45,6 +53,9 @@ bool az_load_prefs_from_file(const char *filepath,
 // Return true on success, or false on failure.
 bool az_save_prefs_to_file(const az_preferences_t *prefs,
                            const char *filepath);
+
+// Return true if this key may be used for one of the game controls.
+bool az_is_valid_prefs_key(az_key_id_t key_id);
 
 /*===========================================================================*/
 

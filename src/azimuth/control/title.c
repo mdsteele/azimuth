@@ -19,6 +19,7 @@
 
 #include "azimuth/control/title.h"
 
+#include <assert.h>
 #include <stdio.h> // for sprintf
 #include <string.h> // for memset
 
@@ -56,6 +57,28 @@ static void try_start_game(az_title_state_t *state, int slot_index) {
   }
 }
 
+static bool try_pick_key(az_title_state_t *state, az_preferences_t *prefs,
+                         az_key_id_t key_id) {
+  assert(state->mode == AZ_TMODE_PICK_KEY);
+  const int picker_index = state->mode_data.pick_key.picker_index;
+  assert(picker_index >= 0 && picker_index < AZ_PREFS_NUM_KEYS);
+  az_title_key_picker_t *picker = &state->pickers[picker_index];
+  picker->selected = false;
+  state->mode = AZ_TMODE_PREFS;
+  if (az_is_valid_prefs_key(key_id)) {
+    for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+      if (i == picker_index) continue;
+      const az_key_id_t other_key = prefs->keys[i];
+      if (key_id == other_key) {
+        prefs->keys[i] = state->pickers[i].key = picker->key;
+        break;
+      }
+    }
+    prefs->keys[picker_index] = picker->key = key_id;
+    return true;
+  } else return false;
+}
+
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs) {
@@ -65,6 +88,9 @@ az_title_action_t az_title_event_loop(
   state.saved_games = saved_games;
   state.music_slider.value = prefs->music_volume;
   state.sound_slider.value = prefs->sound_volume;
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    state.pickers[i].key = prefs->keys[i];
+  }
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   bool prefs_changed = false;
@@ -92,6 +118,12 @@ az_title_action_t az_title_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
+          if (state.mode == AZ_TMODE_PICK_KEY) {
+            if (try_pick_key(&state, prefs, event.key.id)) {
+              prefs_changed = true;
+            }
+            break;
+          }
           switch (event.key.id) {
             case AZ_KEY_1: try_start_game(&state, 0); break;
             case AZ_KEY_2: try_start_game(&state, 1); break;

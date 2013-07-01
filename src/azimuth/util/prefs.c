@@ -33,13 +33,17 @@
 void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   *prefs = (az_preferences_t){
     .music_volume = 0.8, .sound_volume = 0.8,
-    .up_key = AZ_KEY_UP_ARROW, .down_key = AZ_KEY_DOWN_ARROW,
-    .right_key = AZ_KEY_RIGHT_ARROW, .left_key = AZ_KEY_LEFT_ARROW,
-    .fire_key = AZ_KEY_C, .ordn_key = AZ_KEY_X, .util_key = AZ_KEY_Z
+    .keys = {
+      [AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_UP_ARROW,
+      [AZ_PREFS_DOWN_KEY_INDEX] = AZ_KEY_DOWN_ARROW,
+      [AZ_PREFS_RIGHT_KEY_INDEX] = AZ_KEY_RIGHT_ARROW,
+      [AZ_PREFS_LEFT_KEY_INDEX] = AZ_KEY_LEFT_ARROW,
+      [AZ_PREFS_FIRE_KEY_INDEX] = AZ_KEY_C,
+      [AZ_PREFS_ORDN_KEY_INDEX] = AZ_KEY_X,
+      [AZ_PREFS_UTIL_KEY_INDEX] = AZ_KEY_Z
+    }
   };
 }
-
-/*===========================================================================*/
 
 bool az_load_prefs_from_file(const char *filepath,
                              az_preferences_t *prefs_out) {
@@ -51,17 +55,20 @@ bool az_load_prefs_from_file(const char *filepath,
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
   double music_volume, sound_volume;
-  int keys[7];
+  int keys[AZ_PREFS_NUM_KEYS];
   const bool ok = (fscanf(
       file, "@F mv=%lf sv=%lf uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
-      &music_volume, &sound_volume, &keys[0], &keys[1], &keys[2], &keys[3],
-      &keys[4], &keys[5], &keys[6]) >= 9);
+      &music_volume, &sound_volume, &keys[AZ_PREFS_UP_KEY_INDEX],
+      &keys[AZ_PREFS_DOWN_KEY_INDEX], &keys[AZ_PREFS_RIGHT_KEY_INDEX],
+      &keys[AZ_PREFS_LEFT_KEY_INDEX], &keys[AZ_PREFS_FIRE_KEY_INDEX],
+      &keys[AZ_PREFS_ORDN_KEY_INDEX], &keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 9);
   fclose(file);
   if (!ok) return false;
 
   // Require all keys to be valid and different.
   for (int i = 0; i < AZ_ARRAY_SIZE(keys); ++i) {
     if (keys[i] <= 0 || keys[i] > (int)AZ_LAST_KEY_ID) return false;
+    if (!az_is_valid_prefs_key((az_key_id_t)keys[i])) return false;
     for (int j = 0; j < i; ++j) {
       if (keys[i] == keys[j]) return false;
     }
@@ -69,17 +76,11 @@ bool az_load_prefs_from_file(const char *filepath,
 
   prefs_out->music_volume = (float)fmin(fmax(0.0, music_volume), 1.0);
   prefs_out->sound_volume = (float)fmin(fmax(0.0, sound_volume), 1.0);
-  prefs_out->up_key = (az_key_id_t)keys[0];
-  prefs_out->down_key = (az_key_id_t)keys[1];
-  prefs_out->right_key = (az_key_id_t)keys[2];
-  prefs_out->left_key = (az_key_id_t)keys[3];
-  prefs_out->fire_key = (az_key_id_t)keys[4];
-  prefs_out->ordn_key = (az_key_id_t)keys[5];
-  prefs_out->util_key = (az_key_id_t)keys[6];
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    prefs_out->keys[i] = (az_key_id_t)keys[i];
+  }
   return true;
 }
-
-/*===========================================================================*/
 
 bool az_save_prefs_to_file(const az_preferences_t *prefs,
                            const char *filepath) {
@@ -90,11 +91,36 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
   const bool ok = (fprintf(
       file, "@F mv=%.03f sv=%.03f uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
-      (int)prefs->up_key, (int)prefs->down_key, (int)prefs->right_key,
-      (int)prefs->left_key, (int)prefs->fire_key, (int)prefs->ordn_key,
-      (int)prefs->util_key) >= 0);
+      (int)prefs->keys[AZ_PREFS_UP_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_DOWN_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_LEFT_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_FIRE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_ORDN_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 0);
   fclose(file);
   return ok;
+}
+
+bool az_is_valid_prefs_key(az_key_id_t key_id) {
+  switch (key_id) {
+    case AZ_KEY_UNKNOWN:
+    case AZ_KEY_ESCAPE:
+    case AZ_KEY_RETURN:
+    case AZ_KEY_1:
+    case AZ_KEY_2:
+    case AZ_KEY_3:
+    case AZ_KEY_4:
+    case AZ_KEY_5:
+    case AZ_KEY_6:
+    case AZ_KEY_7:
+    case AZ_KEY_8:
+    case AZ_KEY_9:
+    case AZ_KEY_0:
+      return false;
+    default:
+      return true;
+  }
 }
 
 /*===========================================================================*/
