@@ -19,3 +19,4 @@
 18: Opened hyper rocket door between Colony rooms 137 and 165
 19: Watched opening cutscene (Colony room 6)
 20: Opened first door (Colony room 6)
+21: Opened bomb door between Colony rooms 155 and 156
