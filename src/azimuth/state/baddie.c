@@ -751,6 +751,13 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {32, 128, 64, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(spined_crawler_vertices),
                    .impact_damage = 12.0 }
+  },
+  [AZ_BAD_DEATH_RAY] = {
+    .max_health = 100.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
+                   .immunities = ~(AZ_DMGF_CPLUS | AZ_DMGF_HYPER_ROCKET) }
   }
 };
 

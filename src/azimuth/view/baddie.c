@@ -198,6 +198,41 @@ static void draw_zipper(
   }
 }
 
+static void draw_heat_ray(
+    const az_baddie_t *baddie, az_clock_t clock, bool lamp,
+    az_color_t dark, az_color_t medium, az_color_t light) {
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(dark); glVertex2f(0, 7); glVertex2f(15, 7);
+    az_gl_color(light); glVertex2f(0, 0); glVertex2f(15, 0);
+    az_gl_color(dark); glVertex2f(0, -7); glVertex2f(15, -7);
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(dark); glVertex2f(-10, 20); glVertex2f(0, 15);
+    az_gl_color(light); glVertex2f(-10, 8); glVertex2f(0, 5);
+    az_gl_color(dark); glVertex2f(-10, -20); glVertex2f(0, -15);
+  } glEnd();
+  glPushMatrix(); {
+    glTranslatef(2, -7, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      if (lamp) glColor3f(1, 0.2, 0.1);
+      else glColor3f(0.3, 0.3, 0.3);
+      glVertex2f(0, 0);
+      glColor3f(0.1, 0.1, 0.1);
+      for (int i = 0; i <= 360; i += 20) {
+        glVertex2d(5 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_QUAD_STRIP); {
+      for (int i = 0; i <= 360; i += 20) {
+        az_gl_color(dark);
+        glVertex2d(7 * cos(AZ_DEG2RAD(i)), 7 * sin(AZ_DEG2RAD(i)));
+        az_gl_color(medium);
+        glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 /*===========================================================================*/
 // Oth baddies:
 
@@ -1163,44 +1198,12 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_HEAT_RAY:
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.35 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
-        glVertex2f(0, 7); glVertex2f(15, 7);
-        glColor3f(0.85 + 0.15 * flare, 0.65, 0.65 + 0.35 * frozen);
-        glVertex2f(0, 0); glVertex2f(15, 0);
-        glColor3f(0.35 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
-        glVertex2f(0, -7); glVertex2f(15, -7);
-      } glEnd();
-      glBegin(GL_QUAD_STRIP); {
-        glColor3f(0.35 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
-        glVertex2f(-10, 20); glVertex2f(0, 15);
-        glColor3f(0.85 + 0.15 * flare, 0.65, 0.65 + 0.35 * frozen);
-        glVertex2f(-10, 8); glVertex2f(0, 5);
-        glColor3f(0.35 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
-        glVertex2f(-10, -20); glVertex2f(0, -15);
-      } glEnd();
-      glPushMatrix(); {
-        glTranslatef(2, -7, 0);
-        glBegin(GL_TRIANGLE_FAN); {
-          if (baddie->state == 0 ||
-              (baddie->cooldown <= 1.0 && az_clock_mod(2, 4, clock) == 0)) {
-            glColor3f(1, 0.2, 0.1);
-          } else glColor3f(0.3, 0.3, 0.3);
-          glVertex2f(0, 0);
-          glColor3f(0.1, 0.1, 0.1);
-          for (int i = 0; i <= 360; i += 20) {
-            glVertex2d(5 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
-          }
-        } glEnd();
-        glBegin(GL_QUAD_STRIP); {
-          for (int i = 0; i <= 360; i += 20) {
-            glColor3f(0.35 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen);
-            glVertex2d(7 * cos(AZ_DEG2RAD(i)), 7 * sin(AZ_DEG2RAD(i)));
-            glColor3f(0.55 + 0.25 * flare, 0.45, 0.45 + 0.25 * frozen);
-            glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
-          }
-        } glEnd();
-      } glPopMatrix();
+      assert(frozen == 0.0);
+      draw_heat_ray(baddie, clock, baddie->state == 0 ||
+                    (baddie->cooldown <= 1.0 && az_clock_mod(2, 4, clock)),
+                    color3(0.35 + 0.25 * flare, 0.25, 0.25),
+                    color3(0.55 + 0.25 * flare, 0.45, 0.45),
+                    color3(0.85 + 0.15 * flare, 0.65, 0.65));
       break;
     case AZ_BAD_NUCLEAR_MINE:
       // Arms:
@@ -1643,6 +1646,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           glVertex2f(-15, 0);
         } glEnd();
       } glPopMatrix();
+      break;
+    case AZ_BAD_DEATH_RAY:
+      assert(frozen == 0.0);
+      draw_heat_ray(baddie, clock, baddie->state == 1 ||
+                    (baddie->state == 0 && az_clock_mod(2, 10, clock)),
+                    color3(0.2 + 0.25 * flare, 0.2, 0.1),
+                    color3(0.3 + 0.25 * flare, 0.3, 0.2),
+                    color3(0.4 + 0.15 * flare, 0.4, 0.3));
       break;
   }
 }
