@@ -1188,13 +1188,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->state == 0) {
         if (baddie->cooldown > 0.0) {
           // Fire a beam.
-          const double beam_damage = 38.0 * time;
+          double beam_damage = 38.0 * time;
           const az_vector_t beam_start =
             az_vadd(baddie->position, az_vpolar(15, baddie->angle));
           az_impact_t impact;
           az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
                         AZ_IMPF_NOTHING, baddie->uid, &impact);
           if (impact.type == AZ_IMP_BADDIE) {
+            if (impact.target.baddie.baddie->kind == AZ_BAD_BEAM_WALL) {
+              beam_damage /= 3;
+            }
             az_try_damage_baddie(state, impact.target.baddie.baddie,
                 impact.target.baddie.component, AZ_DMGF_BEAM, beam_damage);
           } else if (impact.type == AZ_IMP_SHIP) {
