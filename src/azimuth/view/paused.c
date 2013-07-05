@@ -33,6 +33,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/cursor.h"
+#include "azimuth/view/hud.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -71,7 +72,7 @@ static void end_map_marker(void) {
   glPopMatrix();
 }
 
-static void draw_minimap_rooms(az_paused_state_t *state) {
+static void draw_minimap_rooms(const az_paused_state_t *state) {
   // Draw planet surface outline:
   glColor3f(1, 1, 0); // yellow
   glBegin(GL_LINE_LOOP); {
@@ -91,77 +92,13 @@ static void draw_minimap_rooms(az_paused_state_t *state) {
     const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
       az_test_zone_mapped(player, room->zone_key);
     if (!visited && !mapped) continue;
-    const az_camera_bounds_t *bounds = &room->camera_bounds;
-    const az_color_t zone_color = planet->zones[room->zone_key].color;
 
-    const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
-    const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
-    const double min_theta = bounds->min_theta;
-    const double max_theta = min_theta + bounds->theta_span;
-
-    const az_vector_t offset1 =
-      az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
-    const az_vector_t offset2 =
-      az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
-    const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
-
-    // Fill room with color:
-    if (!visited) {
-      assert(mapped);
-      glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
-    } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
-    if (bounds->theta_span >= 6.28) {
-      glBegin(GL_POLYGON); {
-        for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
-          glVertex2d(max_r * cos(theta), max_r * sin(theta));
-        }
-      } glEnd();
-    } else {
-      glBegin(GL_QUAD_STRIP); {
-        glVertex2d(min_r * cos(min_theta) + offset1.x,
-                   min_r * sin(min_theta) + offset1.y);
-        glVertex2d(max_r * cos(min_theta) + offset1.x,
-                   max_r * sin(min_theta) + offset1.y);
-        for (double theta = min_theta; theta <= max_theta; theta += step) {
-          glVertex2d(min_r * cos(theta), min_r * sin(theta));
-          glVertex2d(max_r * cos(theta), max_r * sin(theta));
-        }
-        glVertex2d(min_r * cos(max_theta) + offset2.x,
-                   min_r * sin(max_theta) + offset2.y);
-        glVertex2d(max_r * cos(max_theta) + offset2.x,
-                   max_r * sin(max_theta) + offset2.y);
-      } glEnd();
-    }
-
-    // Draw outline:
-    glColor3f(1, 1, 1); // white
-    glBegin(GL_LINE_LOOP); {
-      if (bounds->theta_span >= 6.28) {
-        for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
-          glVertex2d(max_r * cos(theta), max_r * sin(theta));
-        }
-      } else {
-        glVertex2d(min_r * cos(min_theta) + offset1.x,
-                   min_r * sin(min_theta) + offset1.y);
-        glVertex2d(max_r * cos(min_theta) + offset1.x,
-                   max_r * sin(min_theta) + offset1.y);
-        for (double theta = min_theta; theta <= max_theta; theta += step) {
-          glVertex2d(max_r * cos(theta), max_r * sin(theta));
-        }
-        glVertex2d(max_r * cos(max_theta) + offset2.x,
-                   max_r * sin(max_theta) + offset2.y);
-        glVertex2d(min_r * cos(max_theta) + offset2.x,
-                   min_r * sin(max_theta) + offset2.y);
-        for (double theta = max_theta; theta >= min_theta; theta -= step) {
-          glVertex2d(min_r * cos(theta), min_r * sin(theta));
-        }
-      } glEnd();
-    }
+    az_draw_minimap_room(planet, room, visited, false);
 
     // Draw a console marker (if any).  We mark all save rooms on the map, but
     // only mark refill/comm rooms if we've actually visited them.
     if (az_clock_mod(2, 30, state->clock) == 0) {
-      const az_vector_t center = az_bounds_center(bounds);
+      const az_vector_t center = az_bounds_center(&room->camera_bounds);
       if (room->properties & AZ_ROOMF_WITH_SAVE) {
         begin_map_marker((az_color_t){128, 255, 128, 255}, center); {
           glVertex2f(2, 2); glVertex2f(-2, 2); glVertex2f(-2, 0);

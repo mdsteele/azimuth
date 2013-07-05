@@ -30,10 +30,31 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/dialog.h"
 #include "azimuth/view/string.h"
+
+/*===========================================================================*/
+
+static void draw_box(double left, double top, double width, double height,
+                     az_color_t frame_color) {
+  glColor4f(0, 0, 0, 0.875); // black tint
+  glBegin(GL_QUADS); {
+    glVertex2d(left, top);
+    glVertex2d(left + width, top);
+    glVertex2d(left + width, top + height);
+    glVertex2d(left, top + height);
+  } glEnd();
+  glColor3ub(frame_color.r, frame_color.g, frame_color.b);
+  glBegin(GL_LINE_LOOP); {
+    glVertex2d(left, top);
+    glVertex2d(left + width, top);
+    glVertex2d(left + width, top + height);
+    glVertex2d(left, top + height);
+  } glEnd();
+}
 
 /*===========================================================================*/
 
@@ -97,7 +118,152 @@ static void draw_hud_shields_energy(const az_player_t *player,
 
 /*===========================================================================*/
 
+void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
+                          bool visited, bool blink) {
+  const az_camera_bounds_t *bounds = &room->camera_bounds;
+  const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+  const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
+  const double min_theta = bounds->min_theta;
+  const double max_theta = min_theta + bounds->theta_span;
+  const az_vector_t offset1 =
+    az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
+  const az_vector_t offset2 =
+    az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
+  const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
+
+  // Fill room with color:
+  const az_color_t zone_color = planet->zones[room->zone_key].color;
+  if (blink) {
+    glColor3f(0.75, 0.75, 0.75);
+  } else if (!visited) {
+    glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
+  } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
+  if (bounds->theta_span >= 6.28) {
+    glBegin(GL_POLYGON); {
+      for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+    } glEnd();
+  } else {
+    glBegin(GL_QUAD_STRIP); {
+      glVertex2d(min_r * cos(min_theta) + offset1.x,
+                 min_r * sin(min_theta) + offset1.y);
+      glVertex2d(max_r * cos(min_theta) + offset1.x,
+                 max_r * sin(min_theta) + offset1.y);
+      for (double theta = min_theta; theta <= max_theta; theta += step) {
+        glVertex2d(min_r * cos(theta), min_r * sin(theta));
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+      glVertex2d(min_r * cos(max_theta) + offset2.x,
+                 min_r * sin(max_theta) + offset2.y);
+      glVertex2d(max_r * cos(max_theta) + offset2.x,
+                 max_r * sin(max_theta) + offset2.y);
+    } glEnd();
+  }
+
+  // Draw outline:
+  glColor3f(0.9, 0.9, 0.9); // white
+  glBegin(GL_LINE_LOOP); {
+    if (bounds->theta_span >= 6.28) {
+      for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+    } else {
+      glVertex2d(min_r * cos(min_theta) + offset1.x,
+                 min_r * sin(min_theta) + offset1.y);
+      glVertex2d(max_r * cos(min_theta) + offset1.x,
+                 max_r * sin(min_theta) + offset1.y);
+      for (double theta = min_theta; theta <= max_theta; theta += step) {
+        glVertex2d(max_r * cos(theta), max_r * sin(theta));
+      }
+      glVertex2d(max_r * cos(max_theta) + offset2.x,
+                 max_r * sin(max_theta) + offset2.y);
+      glVertex2d(min_r * cos(max_theta) + offset2.x,
+                 min_r * sin(max_theta) + offset2.y);
+      for (double theta = max_theta; theta >= min_theta; theta -= step) {
+        glVertex2d(min_r * cos(theta), min_r * sin(theta));
+      }
+    } glEnd();
+  }
+}
+
+#define MINIMAP_ZOOM 100.0
+#define MINIMAP_WIDTH 44
+#define MINIMAP_HEIGHT 44
+#define MINIMAP_TOP 3
+#define MINIMAP_LEFT (AZ_SCREEN_WIDTH - MINIMAP_WIDTH - 3)
+
+static void draw_minimap_rooms(const az_space_state_t *state) {
+  const az_planet_t *planet = state->planet;
+  const az_ship_t *ship = &state->ship;
+  const az_player_t *player = &ship->player;
+  const double camera_radius =
+    0.5 * MINIMAP_ZOOM * hypot(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+  const double camera_rho = az_vnorm(state->camera.center);
+  const double camera_theta = az_vtheta(state->camera.center);
+  const double camera_theta_span = (camera_rho <= camera_radius ? AZ_TWO_PI :
+                                    2.0 * asin(camera_radius / camera_rho));
+  // Draw explored rooms:
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    const az_room_t *room = &planet->rooms[i];
+
+    // If the room isn't on our map yet, don't draw it.
+    const bool visited = az_test_room_visited(player, i);
+    const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
+      az_test_zone_mapped(player, room->zone_key);
+    if (!visited && !mapped) continue;
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
+
+    // If the room is definitely not within the rectangle of the minimap view,
+    // don't bother drawing it.
+    const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+    const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
+    if (min_r > camera_rho + MINIMAP_HEIGHT * MINIMAP_ZOOM ||
+        max_r < camera_rho - MINIMAP_HEIGHT * MINIMAP_ZOOM) continue;
+    const double extra_theta_span = camera_theta_span +
+      (bounds->min_r <= AZ_SCREEN_RADIUS ? AZ_TWO_PI :
+       2.0 * asin(AZ_SCREEN_RADIUS / bounds->min_r));
+    if (az_mod2pi_nonneg(camera_theta -
+                         (bounds->min_theta - 0.5 * extra_theta_span)) >
+        bounds->theta_span + extra_theta_span) continue;
+
+    az_draw_minimap_room(planet, room, visited, i == player->current_room &&
+                         az_clock_mod(2, 15, state->clock));
+  }
+}
+
+static void draw_minimap(const az_space_state_t *state) {
+  draw_box(MINIMAP_LEFT - 0.5, MINIMAP_TOP - 0.5,
+           MINIMAP_WIDTH + 1, MINIMAP_HEIGHT + 1,
+           (az_color_t){0, 0, 0, 255});
+
+  glEnable(GL_SCISSOR_TEST); {
+    glScissor(MINIMAP_LEFT, AZ_SCREEN_HEIGHT - MINIMAP_TOP - MINIMAP_HEIGHT,
+              MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    glPushMatrix(); {
+      // Make positive Y be up instead of down.
+      glScaled(1, -1, 1);
+      // Put the center of the minimap on position (0, 0).
+      glTranslated(MINIMAP_LEFT + MINIMAP_WIDTH/2,
+                   -(MINIMAP_TOP + MINIMAP_HEIGHT/2), 0);
+      // Zoom out.
+      glScaled(1.0 / MINIMAP_ZOOM, 1.0 / MINIMAP_ZOOM, 1);
+      // Move the screen to the camera pose.
+      glTranslated(0, -az_vnorm(state->camera.center), 0);
+      glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera.center)), 0, 0, 1);
+      // Draw what the camera sees.
+      draw_minimap_rooms(state);
+    } glPopMatrix();
+  } glDisable(GL_SCISSOR_TEST);
+}
+
+/*===========================================================================*/
+
+#define WEAPONS_TOP HUD_MARGIN
+#define WEAPONS_RIGHT (MINIMAP_LEFT - 5)
+
 static void set_gun_color(az_gun_t gun) {
+  assert(gun != AZ_GUN_NONE);
   switch (gun) {
     case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_CHARGE: glColor3f(1, 1, 1); break;
@@ -179,7 +345,7 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   const int height = (tall ? 25 : 10) + 2 * HUD_PADDING;
   const int width = (wide ? 115 : 55) + 2 * HUD_PADDING;
   glPushMatrix(); {
-    glTranslatef(AZ_SCREEN_WIDTH - HUD_MARGIN - width, HUD_MARGIN, 0);
+    glTranslatef(WEAPONS_RIGHT - width, WEAPONS_TOP, 0);
 
     glColor4f(0, 0, 0, 0.75); // tinted-black
     glBegin(GL_QUADS);
@@ -304,25 +470,6 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
 
 /*===========================================================================*/
 
-static void draw_box(double left, double top, double width, double height) {
-  glColor4f(0, 0, 0, 0.875); // black tint
-  glBegin(GL_QUADS); {
-    glVertex2d(left, top);
-    glVertex2d(left + width, top);
-    glVertex2d(left + width, top + height);
-    glVertex2d(left, top + height);
-  } glEnd();
-  glColor3f(0, 1, 0); // green
-  glBegin(GL_LINE_LOOP); {
-    glVertex2d(left, top);
-    glVertex2d(left + width, top);
-    glVertex2d(left + width, top + height);
-    glVertex2d(left, top + height);
-  } glEnd();
-}
-
-/*===========================================================================*/
-
 #define TEXT_LINE_SPACING 12
 #define DIALOG_BOX_WIDTH 404
 #define DIALOG_BOX_HEIGHT 116
@@ -344,13 +491,13 @@ static void draw_dialog_frames(double openness) {
       (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH) / 2;
     const int tcy =
       (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - PORTRAIT_BOX_HEIGHT) / 2;
-    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2);
+    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2, AZ_GREEN);
     // Bottom portrait:
     const int bcx =
       (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + DIALOG_BOX_WIDTH) / 2;
     const int bcy =
       (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + PORTRAIT_BOX_HEIGHT) / 2;
-    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2);
+    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2, AZ_GREEN);
   }
   { // Dialog boxes:
     const double sw = 0.5 * DIALOG_BOX_WIDTH * openness;
@@ -360,13 +507,13 @@ static void draw_dialog_frames(double openness) {
       (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + PORTRAIT_BOX_WIDTH) / 2;
     const int tcy =
       (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - DIALOG_BOX_HEIGHT) / 2;
-    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2);
+    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2, AZ_GREEN);
     // Bottom dialog box:
     const int bcx =
       (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - PORTRAIT_BOX_WIDTH) / 2;
     const int bcy =
       (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + DIALOG_BOX_HEIGHT) / 2;
-    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2);
+    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2, AZ_GREEN);
   }
 }
 
@@ -464,7 +611,7 @@ static void draw_upgrade_box_frame(double openness) {
   const double height = openness * openness * UPGRADE_BOX_HEIGHT;
   const double left = 0.5 * (AZ_SCREEN_WIDTH - width);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
-  draw_box(left, top, width, height);
+  draw_box(left, top, width, height, AZ_GREEN);
 }
 
 static void draw_upgrade_box_message(const az_preferences_t *prefs,
@@ -500,6 +647,7 @@ static void draw_upgrade_box(const az_space_state_t *state) {
 void az_draw_hud(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
+  draw_minimap(state);
   const az_player_t *player = &ship->player;
   draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);

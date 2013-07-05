@@ -21,9 +21,16 @@
 #ifndef AZIMUTH_VIEW_HUD_H_
 #define AZIMUTH_VIEW_HUD_H_
 
+#include <stdbool.h>
+
+#include "azimuth/state/planet.h"
+#include "azimuth/state/room.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
+
+void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
+                          bool visited, bool blink);
 
 void az_draw_dialog(const az_space_state_t *state);
 
