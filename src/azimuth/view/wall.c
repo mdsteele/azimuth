@@ -34,6 +34,10 @@
 
 /*===========================================================================*/
 
+static inline void az_gl_vertex(az_vector_t v) {
+  glVertex2d(v.x, v.y);
+}
+
 static void draw_bezel(double bezel, bool alt, az_color_t color1,
                        az_color_t color2, az_polygon_t polygon) {
   // Draw background color:
@@ -210,39 +214,61 @@ static void draw_metal(bool alt, az_color_t color1, az_color_t color2,
       if ((i % 2 != 0) ^ alt) {
         glColor4ub(color1.r, color1.g, color1.b, color1.a);
       } else glColor4ub(color2.r, color2.g, color2.b, color2.a);
-      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+      az_gl_vertex(polygon.vertices[i]);
     }
   } glEnd();
 }
 
-static void draw_quadstrip(double param, az_color_t color1, az_color_t color2,
-                           az_color_t color3, az_polygon_t polygon) {
+static void draw_quadstrip(
+    bool alt, double param, az_color_t color1, az_color_t color2,
+    az_color_t color3, az_polygon_t polygon) {
   assert(param > -1.0 && param < 1.0);
   assert(polygon.num_vertices % 2 == 0);
-  const int n = polygon.num_vertices / 2;
+  assert(polygon.num_vertices >= 4);
+  const int n = polygon.num_vertices / 2 - (alt ? 1 : 0);
   az_vector_t midpoints[n];
   for (int i = 0; i < n; ++i) {
-    const az_vector_t p1 = polygon.vertices[i];
+    const az_vector_t p1 = polygon.vertices[alt ? i + 1 : i];
     const az_vector_t p2 = polygon.vertices[polygon.num_vertices - i - 1];
     midpoints[i] = az_vadd(p2, az_vmul(az_vsub(p1, p2), 0.5 * (1.0 + param)));
   }
   glBegin(GL_QUAD_STRIP); {
     for (int i = 0; i < n; ++i) {
       glColor4ub(color1.r, color1.g, color1.b, color1.a);
-      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+      az_gl_vertex(polygon.vertices[alt ? i + 1 : i]);
       glColor4ub(color2.r, color2.g, color2.b, color2.a);
-      glVertex2d(midpoints[i].x, midpoints[i].y);
+      az_gl_vertex(midpoints[i]);
     }
   } glEnd();
   glBegin(GL_QUAD_STRIP); {
     for (int i = 0; i < n; ++i) {
       glColor4ub(color3.r, color3.g, color3.b, color3.a);
-      glVertex2d(polygon.vertices[polygon.num_vertices - i - 1].x,
-                 polygon.vertices[polygon.num_vertices - i - 1].y);
+      az_gl_vertex(polygon.vertices[polygon.num_vertices - i - 1]);
       glColor4ub(color2.r, color2.g, color2.b, color2.a);
-      glVertex2d(midpoints[i].x, midpoints[i].y);
+      az_gl_vertex(midpoints[i]);
     }
   } glEnd();
+  if (alt) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      az_gl_vertex(polygon.vertices[1]);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      az_gl_vertex(polygon.vertices[0]);
+      az_gl_vertex(midpoints[0]);
+      glColor4ub(color3.r, color3.g, color3.b, color3.a);
+      az_gl_vertex(polygon.vertices[polygon.num_vertices - 1]);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      const int halfway = polygon.num_vertices / 2;
+      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      az_gl_vertex(polygon.vertices[halfway - 1]);
+      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      az_gl_vertex(polygon.vertices[halfway]);
+      az_gl_vertex(midpoints[n - 1]);
+      glColor4ub(color3.r, color3.g, color3.b, color3.a);
+      az_gl_vertex(polygon.vertices[halfway + 1]);
+    } glEnd();
+  }
 }
 
 static void draw_trifan(az_color_t color1, az_color_t color2,
@@ -255,6 +281,20 @@ static void draw_trifan(az_color_t color1, az_color_t color2,
          i < polygon.num_vertices; i = j++) {
       glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
     }
+  } glEnd();
+}
+
+static void draw_trifan_alt(az_color_t color1, az_color_t color2,
+                            az_polygon_t polygon) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2d(polygon.vertices[0].x, polygon.vertices[0].y);
+    glColor4ub(color2.r, color2.g, color2.b, color2.a);
+    for (int i = 1; i < polygon.num_vertices; i++) {
+      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
+    }
+    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    glVertex2d(polygon.vertices[0].x, polygon.vertices[0].y);
   } glEnd();
 }
 
@@ -303,19 +343,34 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         draw_metal(true, data->color1, data->color2, data->polygon);
         break;
       case AZ_WSTY_QUADSTRIP_123:
-        draw_quadstrip(data->bezel, data->color1, data->color2, data->color3,
-                       data->polygon);
+        draw_quadstrip(false, data->bezel, data->color1, data->color2,
+                       data->color3, data->polygon);
         break;
       case AZ_WSTY_QUADSTRIP_213:
-        draw_quadstrip(data->bezel, data->color2, data->color1, data->color3,
-                       data->polygon);
+        draw_quadstrip(false, data->bezel, data->color2, data->color1,
+                       data->color3, data->polygon);
         break;
       case AZ_WSTY_QUADSTRIP_321:
-        draw_quadstrip(data->bezel, data->color3, data->color2, data->color1,
-                       data->polygon);
+        draw_quadstrip(false, data->bezel, data->color3, data->color2,
+                       data->color1, data->polygon);
+        break;
+      case AZ_WSTY_QUADSTRIP_ALT_123:
+        draw_quadstrip(true, data->bezel, data->color1, data->color2,
+                       data->color3, data->polygon);
+        break;
+      case AZ_WSTY_QUADSTRIP_ALT_213:
+        draw_quadstrip(true, data->bezel, data->color2, data->color1,
+                       data->color3, data->polygon);
+        break;
+      case AZ_WSTY_QUADSTRIP_ALT_321:
+        draw_quadstrip(true, data->bezel, data->color3, data->color2,
+                       data->color1, data->polygon);
         break;
       case AZ_WSTY_TRIFAN:
         draw_trifan(data->color1, data->color2, data->polygon);
+        break;
+      case AZ_WSTY_TRIFAN_ALT:
+        draw_trifan_alt(data->color1, data->color2, data->polygon);
         break;
     }
   } glEndList();

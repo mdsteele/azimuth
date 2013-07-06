@@ -20,7 +20,7 @@
 #include "azimuth/state/wall.h"
 
 #include <assert.h>
-#include <math.h> // for fmax
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
@@ -199,6 +199,26 @@ static const az_vector_t wall_vertices_65[] = {
 };
 static const az_vector_t wall_vertices_66[] = {
   {23.094010767585, 0}, {-11.547005383792511, 20}, {-11.547005383792511, -20}
+};
+static az_vector_t wall_vertices_67[] = {
+  {0, 30}, {-8, 24}, {0, -30}, {8, 24}
+};
+static az_vector_t wall_vertices_68[] = {
+  {8, -20}, {8, 1}, {9, 5}, {9, 20}, {-7, 20}, {-7, 3}, {-8, 2}, {-8, -20}
+};
+static az_vector_t wall_vertices_69[] = {
+  {0, 30}, {-12, 14}, {-8, -24}, {0, -30}, {8, -24}, {12, 14}
+};
+static az_vector_t wall_vertices_70[] = {
+  {16, -30}, {16, -2}, {17, 14}, {17, 30},
+  {-15, 30}, {-15, 5}, {-16, 0}, {-16, -30}
+};
+static az_vector_t wall_vertices_71[] = {
+  {0, 60}, {-24, 28}, {-16, -48}, {0, -60}, {16, -48}, {24, 28}
+};
+static az_vector_t wall_vertices_72[] = {
+  {32, -60}, {31, -35}, {32, -4}, {34, 28}, {33, 44}, {34, 60},
+  {-30, 60}, {-29, 27}, {-30, 10}, {-32, 0}, {-33, -40}, {-32, -60}
 };
 
 static az_wall_data_t wall_datas[] = {
@@ -423,9 +443,8 @@ static az_wall_data_t wall_datas[] = {
   },
   // Yellowish-gray pipe:
   [33] = {
-    .style = AZ_WSTY_QUADSTRIP_213,
-    .color1 = {192, 192, 96, 255}, .color2 = {48, 48, 32, 255},
-    .color3 = {48, 48, 32, 255},
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {192, 192, 96, 255},
+    .color2 = {48, 48, 32, 255}, .color3 = {48, 48, 32, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   },
   // Yellow triangle block:
@@ -463,9 +482,8 @@ static az_wall_data_t wall_datas[] = {
   },
   // Reddish-gray pipe:
   [39] = {
-    .style = AZ_WSTY_QUADSTRIP_213,
-    .color1 = {128, 112, 112, 255}, .color2 = {32, 24, 24, 255},
-    .color3 = {32, 24, 24, 255},
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {128, 112, 112, 255},
+    .color2 = {32, 24, 24, 255}, .color3 = {32, 24, 24, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   },
   // Red/gray triangle block:
@@ -655,6 +673,48 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 10.0,
     .color1 = {64, 160, 8, 255}, .color2 = {60, 20, 90, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_66)
+  },
+  // Brown tree twig:
+  [67] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {80, 70, 70, 255}, .color2 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_67)
+  },
+  // Brown tree branch:
+  [68] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {80, 70, 70, 255},
+    .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_68)
+  },
+  // Brown tree branch base:
+  [69] = {
+    .style = AZ_WSTY_QUADSTRIP_ALT_213, .color1 = {80, 70, 70, 255},
+    .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_69)
+  },
+  // Brown tree bough:
+  [70] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {80, 70, 70, 255},
+    .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_70)
+  },
+  // Brown tree bough base:
+  [71] = {
+    .style = AZ_WSTY_QUADSTRIP_ALT_213, .color1 = {80, 70, 70, 255},
+    .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_71)
+  },
+  // Brown tree trunk:
+  [72] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {80, 70, 70, 255},
+    .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 3.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_72)
   }
 };
 
