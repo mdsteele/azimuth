@@ -35,6 +35,10 @@
 
 /*===========================================================================*/
 
+static inline void az_gl_vertex(az_vector_t v) {
+  glVertex2d(v.x, v.y);
+}
+
 void az_draw_ship(az_space_state_t* state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
@@ -49,14 +53,12 @@ void az_draw_ship(az_space_state_t* state) {
           const az_vector_t offset = az_vwithlen(az_vrot90ccw(
               az_vsub(pickup->position, ship->position)), 6.0);
           glColor4f(1, 1, 0.5, 0);
-          glVertex2d(pickup->position.x + offset.x,
-                     pickup->position.y + offset.y);
+          az_gl_vertex(az_vadd(pickup->position, offset));
           glColor4f(1, 1, 0.5, 0.2);
-          glVertex2d(ship->position.x, ship->position.y);
-          glVertex2d(pickup->position.x, pickup->position.y);
+          az_gl_vertex(ship->position);
+          az_gl_vertex(pickup->position);
           glColor4f(1, 1, 0.5, 0);
-          glVertex2d(pickup->position.x - offset.x,
-                     pickup->position.y - offset.y);
+          az_gl_vertex(az_vsub(pickup->position, offset));
         } glEnd();
       }
     }
@@ -117,22 +119,22 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
           // From port engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(-10, 12);
+            glVertex2f(-10, 12);
             glColor4f(1, 0.75, 0, 0.9); // orange
-            glVertex2d(-10, 9);
+            glVertex2f(-10, 9);
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(-20 - zig, 9);
-            glVertex2d(-10, 7);
+            glVertex2f(-20 - zig, 9);
+            glVertex2f(-10, 7);
           } glEnd();
           // From starboard engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(-10, -12);
+            glVertex2f(-10, -12);
             glColor4f(1, 0.75, 0, 0.9); // orange
-            glVertex2d(-10, -9);
+            glVertex2f(-10, -9);
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(-20 - zig, -9);
-            glVertex2d(-10, -7);
+            glVertex2f(-20 - zig, -9);
+            glVertex2f(-10, -7);
           } glEnd();
         }
         // For reverse thrusters:
@@ -141,22 +143,22 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
           // From port engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(6, 12);
+            glVertex2f(6, 12);
             glColor4f(1, 0.75, 0, 0.9); // orange
-            glVertex2d(6, 9);
+            glVertex2f(6, 9);
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(16 + zig, 9);
-            glVertex2d(6, 7);
+            glVertex2f(16 + zig, 9);
+            glVertex2f(6, 7);
           } glEnd();
           // From starboard engine:
           glBegin(GL_TRIANGLE_STRIP); {
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(6, -12);
+            glVertex2f(6, -12);
             glColor4f(1, 0.75, 0, 0.9); // orange
-            glVertex2d(6, -9);
+            glVertex2f(6, -9);
             glColor4f(1, 0.5, 0, 0); // transparent orange
-            glVertex2d(16 + zig, -9);
-            glVertex2d(6, -7);
+            glVertex2f(16 + zig, -9);
+            glVertex2f(6, -7);
           } glEnd();
         }
       }
@@ -209,44 +211,44 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
       glBegin(GL_QUADS); {
         // Struts:
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2d( 1,  9);
-        glVertex2d(-7,  9);
-        glVertex2d(-7, -9);
-        glVertex2d( 1, -9);
+        glVertex2f( 1,  9);
+        glVertex2f(-7,  9);
+        glVertex2f(-7, -9);
+        glVertex2f( 1, -9);
         // Port engine:
-        glVertex2d(-10,  12);
-        glVertex2d(  6,  12);
+        glVertex2f(-10,  12);
+        glVertex2f(  6,  12);
         glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2d(  8,   7);
-        glVertex2d(-11,   7);
+        glVertex2f(  8,   7);
+        glVertex2f(-11,   7);
         // Starboard engine:
-        glVertex2d(  8,  -7);
-        glVertex2d(-11,  -7);
+        glVertex2f(  8,  -7);
+        glVertex2f(-11,  -7);
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2d(-10, -12);
-        glVertex2d(  6, -12);
+        glVertex2f(-10, -12);
+        glVertex2f(  6, -12);
       } glEnd();
       // Main body:
       glBegin(GL_QUAD_STRIP); {
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2d( 15,  4);
-        glVertex2d(-14,  4);
+        glVertex2f( 15,  4);
+        glVertex2f(-14,  4);
         glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2d( 20,  0);
-        glVertex2d(-14,  0);
+        glVertex2f( 20,  0);
+        glVertex2f(-14,  0);
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2d( 15, -4);
-        glVertex2d(-14, -4);
+        glVertex2f( 15, -4);
+        glVertex2f(-14, -4);
       } glEnd();
       // Windshield:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0, 0.5, 0.5); // dim cyan
-        glVertex2d(14,  2);
+        glVertex2f(15,  2);
         glColor3f(0, 1, 1); // cyan
-        glVertex2d(18,  0);
-        glVertex2d(12,  0);
+        glVertex2f(18,  0);
+        glVertex2f(12,  0);
         glColor3f(0, 0.5, 0.5); // dim cyan
-        glVertex2d(15, -2);
+        glVertex2f(15, -2);
       } glEnd();
     }
 
@@ -256,8 +258,7 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
       glColor4f(1, 0.25, 0, 0.5 * ship->reactive_flare);
       glBegin(GL_POLYGON); {
         for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
-          glVertex2d(AZ_SHIP_POLYGON.vertices[i].x,
-                     AZ_SHIP_POLYGON.vertices[i].y);
+          az_gl_vertex(AZ_SHIP_POLYGON.vertices[i]);
         }
       } glEnd();
     }
@@ -270,8 +271,7 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
                 (1.0 - pow(ship->cplus.charge, 4.0)));
       glBegin(GL_POLYGON); {
         for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
-          glVertex2d(AZ_SHIP_POLYGON.vertices[i].x,
-                     AZ_SHIP_POLYGON.vertices[i].y);
+          az_gl_vertex(AZ_SHIP_POLYGON.vertices[i]);
         }
       } glEnd();
     }
@@ -285,11 +285,10 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
         for (int i = AZ_SHIP_POLYGON.num_vertices - 1, j = 0;
              j <= AZ_SHIP_POLYGON.num_vertices; i = j++) {
           glColor4f(0, 1, 1, alpha);
-          const az_vector_t v1 = AZ_SHIP_POLYGON.vertices[i];
-          glVertex2d(v1.x, v1.y);
+          const az_vector_t vertex = AZ_SHIP_POLYGON.vertices[i];
+          az_gl_vertex(vertex);
           glColor4f(0, 1, 1, 0);
-          const az_vector_t v2 = az_vmul(v1, scale);
-          glVertex2d(v2.x, v2.y);
+          az_gl_vertex(az_vmul(vertex, scale));
         }
       } glEnd();
     }

@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include <GL/gl.h>
 
@@ -37,6 +38,10 @@
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
+
+static inline void az_gl_vertex(az_vector_t v) {
+  glVertex2d(v.x, v.y);
+}
 
 static void draw_rect(double x, double y, double w, double h) {
   x += 0.5;
@@ -168,17 +173,120 @@ static void draw_minimap(az_paused_state_t *state) {
 
 /*===========================================================================*/
 
-static void set_weapon_box_color(bool selected) {
+static void draw_ship_schematic(void) {
+  glColor3f(0, 1, 0);
+  // Struts:
+  glBegin(GL_LINES); {
+    glVertex2f(1, 4); glVertex2f(1, 7);
+    glVertex2f(-7, 4); glVertex2f(-7, 7);
+    glVertex2f(1, -4); glVertex2f(1, -7);
+    glVertex2f(-7, -4); glVertex2f(-7, -7);
+  } glEnd();
+  // Port engine:
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f(-10, 12); glVertex2f(6, 12);
+    glVertex2f(8, 7); glVertex2f(-11, 7);
+  } glEnd();
+  // Starboard engine:
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f(8, -7); glVertex2f(-11, -7);
+    glVertex2f(-10, -12); glVertex2f(6, -12);
+  } glEnd();
+  // Main body:
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f(20, 0); glVertex2f(15, -4); glVertex2f(-14, -4);
+    glVertex2f(-14, 4); glVertex2f(15, 4);
+  } glEnd();
+  // Windshield:
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f(18, 0); glVertex2f(15, -2);
+    glVertex2f(12, 0); glVertex2f(15, 2);
+  } glEnd();
+}
+
+static const az_vector_t gun_line_vertices[] = {
+  {320, 65}, {320, 95}, {301, 95}, {301, 129}
+};
+static const az_vector_t armor_line_vertices[] = {
+  {176, 117}, {255, 117}, {255, 185}, {310, 185}
+};
+static const az_vector_t reactor_line_vertices[] = {
+  {176, 197}, {230, 197}, {230, 260}, {290, 260}
+};
+static const az_vector_t misc_line_vertices[] = {
+  {176, 267}, {205, 267}, {205, 338}, {330, 338}, {330, 290}
+};
+static const az_vector_t ordnance_line_vertices[] = {
+  {464, 117}, {320, 117}, {320, 145}
+};
+static const az_vector_t engines_line_vertices[] = {
+  {464, 207}, {430, 207}, {430, 245}, {380, 245}
+};
+
+static void vertex_between(az_vector_t v0, az_vector_t v1, double amount) {
+  az_gl_vertex(az_vadd(az_vmul(v0, 1.0 - amount), az_vmul(v1, amount)));
+}
+
+static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
+                                int num_vertices) {
+  assert(num_vertices > 0);
+  const double span = 0.35;
+  const double sweep = 0.01 + 0.02 * az_clock_mod(50, 1, clock);
+  assert(0.0 < sweep && sweep < 1.0);
+  const GLfloat glow = (sweep < span ? 1.0 - sweep / span :
+                        sweep > 1.0 - span ? 1.0 - (1.0 - sweep) / span : 0.0);
+  glBegin(GL_LINE_STRIP); {
+    for (int i = 0; ; ++i) {
+      glColor3f(0.75f * glow, 0.75f + 0.25f * glow, 0.25f + 0.5f * glow);
+      az_gl_vertex(vertices[i]);
+      if (i == num_vertices - 1) break;
+      if (sweep > 1.0 - span) {
+        glColor3f(0, 0.75, 0.25);
+        vertex_between(vertices[i], vertices[i + 1], sweep - 1.0 + span);
+      }
+      if (sweep > span) {
+        glColor3f(0, 0.75, 0.25);
+        vertex_between(vertices[i], vertices[i + 1], sweep - span);
+      }
+      glColor3f(0.75, 1, 0.75);
+      vertex_between(vertices[i], vertices[i + 1], sweep);
+      if (sweep < 1.0 - span) {
+        glColor3f(0, 0.75, 0.25);
+        vertex_between(vertices[i], vertices[i + 1], sweep + span);
+      }
+      if (sweep < span) {
+        glColor3f(0, 0.75, 0.25);
+        vertex_between(vertices[i], vertices[i + 1], sweep + 1.0 - span);
+      }
+    }
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    const az_vector_t center = vertices[num_vertices - 1];
+    az_gl_vertex(center);
+    const double radius = 3.0;
+    for (int i = 0; i <= 360; i += 30) {
+      glVertex2d(center.x + radius * cos(AZ_DEG2RAD(i)),
+                 center.y + radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
+static void set_weapon_box_color(bool has, bool selected) {
+  assert(has || !selected);
   if (selected) glColor3f(1, 1, 1);
-  else glColor3f(1, 0, 1);
+  else if (has) glColor3f(1, 0, 1);
+  else glColor3f(0.5, 0, 0.5);
 }
 
 static void draw_upg_box(const az_player_t *player, double x, double y,
-                         az_upgrade_t upgrade) {
-  glColor3f(0, 1, 1);
+                         az_upgrade_t upgrade, bool *has_upgrade_out) {
+  const bool has_upgrade = az_has_upgrade(player, upgrade);
+  if (has_upgrade) glColor3f(0, 1, 1);
+  else glColor3f(0, 0.5, 0.5);
   draw_rect(x, y, 150, 15);
-  if (!az_has_upgrade(player, upgrade)) return;
+  if (!has_upgrade) return;
   az_draw_string(8, AZ_ALIGN_CENTER, x + 75, y + 4, az_upgrade_name(upgrade));
+  *has_upgrade_out = true;
 }
 
 static int round_towards_middle(double amount, double maximum) {
@@ -198,11 +306,11 @@ static void draw_upgrades(az_paused_state_t *state) {
 
   glColor4f(0, 0, 0, 0.9); // black tint
   glBegin(GL_POLYGON); {
-    AZ_ARRAY_LOOP(vertex, drawer_vertices) glVertex2d(vertex->x, vertex->y);
+    AZ_ARRAY_LOOP(vertex, drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
   glColor3f(0.75, 0.75, 0.75); // light gray
   glBegin(GL_LINE_LOOP); {
-    AZ_ARRAY_LOOP(vertex, drawer_vertices) glVertex2d(vertex->x, vertex->y);
+    AZ_ARRAY_LOOP(vertex, drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
 
   glColor3f(1, 0, 1);
@@ -215,25 +323,30 @@ static void draw_upgrades(az_paused_state_t *state) {
                  round_towards_middle(player->energy, player->max_energy),
                  (int)player->max_energy);
 
+  bool has_guns = false;
   for (int i = 0; i < 8; ++i) {
     const int row = i / 4;
     const int col = i % 4;
     const az_gun_t gun = AZ_GUN_CHARGE + i;
-    set_weapon_box_color(player->gun1 == gun || player->gun2 == gun);
+    const bool has_gun = az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i);
+    set_weapon_box_color(has_gun, player->gun1 == gun || player->gun2 == gun);
     draw_rect(191 + 66 * col, 26 + 20 * row, 60, 15);
-    if (az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) {
+    if (has_gun) {
       az_draw_string(8, AZ_ALIGN_CENTER, 221 + 66 * col, 30 + 20 * row,
                      az_gun_name(gun));
+      has_guns = true;
     }
   }
 
-  set_weapon_box_color(player->ordnance == AZ_ORDN_ROCKETS);
+  set_weapon_box_color(player->max_rockets > 0,
+                       player->ordnance == AZ_ORDN_ROCKETS);
   draw_rect(466, 26, 150, 15);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 30, "ROCKETS:%3d/%-3d",
                    player->rockets, player->max_rockets);
   }
-  set_weapon_box_color(player->ordnance == AZ_ORDN_BOMBS);
+  set_weapon_box_color(player->max_bombs > 0,
+                       player->ordnance == AZ_ORDN_BOMBS);
   draw_rect(466, 46, 150, 15);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 545, 50, "  BOMBS:%3d/%-3d",
@@ -242,26 +355,63 @@ static void draw_upgrades(az_paused_state_t *state) {
 
   if (state->drawer_openness <= 0.0) return;
 
-  draw_upg_box(player, 24,  80, AZ_UPG_HARDENED_ARMOR);
-  draw_upg_box(player, 24, 100, AZ_UPG_DYNAMIC_ARMOR);
-  draw_upg_box(player, 24, 120, AZ_UPG_THERMAL_ARMOR);
-  draw_upg_box(player, 24, 140, AZ_UPG_REACTIVE_ARMOR);
+  glPushMatrix(); {
+    glTranslatef(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
+    glRotatef(-100, 0, 0, 1);
+    glScalef(6, 6, 1);
+    draw_ship_schematic();
+  } glPopMatrix();
 
-  draw_upg_box(player, 24, 180, AZ_UPG_FUSION_REACTOR);
-  draw_upg_box(player, 24, 200, AZ_UPG_QUANTUM_REACTOR);
+  if (has_guns) {
+    draw_schematic_line(state->clock, gun_line_vertices,
+                        AZ_ARRAY_SIZE(gun_line_vertices));
+  }
 
-  draw_upg_box(player, 24, 240, AZ_UPG_TRACTOR_BEAM);
-  draw_upg_box(player, 24, 260, AZ_UPG_INFRASCANNER);
-  draw_upg_box(player, 24, 280, AZ_UPG_MAGNET_SWEEP);
+  bool has_armor = false;
+  draw_upg_box(player, 24,  80, AZ_UPG_HARDENED_ARMOR, &has_armor);
+  draw_upg_box(player, 24, 100, AZ_UPG_DYNAMIC_ARMOR, &has_armor);
+  draw_upg_box(player, 24, 120, AZ_UPG_THERMAL_ARMOR, &has_armor);
+  draw_upg_box(player, 24, 140, AZ_UPG_REACTIVE_ARMOR, &has_armor);
+  if (has_armor) {
+    draw_schematic_line(state->clock, armor_line_vertices,
+                        AZ_ARRAY_SIZE(armor_line_vertices));
+  }
 
-  draw_upg_box(player, 466,  80, AZ_UPG_HYPER_ROCKETS);
-  draw_upg_box(player, 466, 100, AZ_UPG_MEGA_BOMBS);
-  draw_upg_box(player, 466, 120, AZ_UPG_HIGH_EXPLOSIVES);
-  draw_upg_box(player, 466, 140, AZ_UPG_ATTUNED_EXPLOSIVES);
+  bool has_reactor = false;
+  draw_upg_box(player, 24, 180, AZ_UPG_FUSION_REACTOR, &has_reactor);
+  draw_upg_box(player, 24, 200, AZ_UPG_QUANTUM_REACTOR, &has_reactor);
+  if (has_reactor) {
+    draw_schematic_line(state->clock, reactor_line_vertices,
+                        AZ_ARRAY_SIZE(reactor_line_vertices));
+  }
 
-  draw_upg_box(player, 466, 180, AZ_UPG_RETRO_THRUSTERS);
-  draw_upg_box(player, 466, 200, AZ_UPG_CPLUS_DRIVE);
-  draw_upg_box(player, 466, 220, AZ_UPG_ORION_BOOSTER);
+  bool has_misc = false;
+  draw_upg_box(player, 24, 240, AZ_UPG_TRACTOR_BEAM, &has_misc);
+  draw_upg_box(player, 24, 260, AZ_UPG_INFRASCANNER, &has_misc);
+  draw_upg_box(player, 24, 280, AZ_UPG_MAGNET_SWEEP, &has_misc);
+  if (has_misc) {
+    draw_schematic_line(state->clock, misc_line_vertices,
+                        AZ_ARRAY_SIZE(misc_line_vertices));
+  }
+
+  bool has_ordnance = false;
+  draw_upg_box(player, 466,  80, AZ_UPG_HYPER_ROCKETS, &has_ordnance);
+  draw_upg_box(player, 466, 100, AZ_UPG_MEGA_BOMBS, &has_ordnance);
+  draw_upg_box(player, 466, 120, AZ_UPG_HIGH_EXPLOSIVES, &has_ordnance);
+  draw_upg_box(player, 466, 140, AZ_UPG_ATTUNED_EXPLOSIVES, &has_ordnance);
+  if (has_ordnance) {
+    draw_schematic_line(state->clock, ordnance_line_vertices,
+                        AZ_ARRAY_SIZE(ordnance_line_vertices));
+  }
+
+  bool has_engines = false;
+  draw_upg_box(player, 466, 180, AZ_UPG_RETRO_THRUSTERS, &has_engines);
+  draw_upg_box(player, 466, 200, AZ_UPG_CPLUS_DRIVE, &has_engines);
+  draw_upg_box(player, 466, 220, AZ_UPG_ORION_BOOSTER, &has_engines);
+  if (has_engines) {
+    draw_schematic_line(state->clock, engines_line_vertices,
+                        AZ_ARRAY_SIZE(engines_line_vertices));
+  }
 }
 
 /*===========================================================================*/
