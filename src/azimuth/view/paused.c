@@ -43,16 +43,14 @@ static inline void az_gl_vertex(az_vector_t v) {
   glVertex2d(v.x, v.y);
 }
 
-static void draw_rect(double x, double y, double w, double h) {
-  x += 0.5;
-  y += 0.5;
-  w -= 1.0;
-  h -= 1.0;
+static void draw_bezel_box(double bezel, double x, double y,
+                           double w, double h) {
+  x += 0.5; y += 0.5; w -= 1.0; h -= 1.0;
   glBegin(GL_LINE_LOOP); {
-    glVertex2d(x, y);
-    glVertex2d(x + w, y);
-    glVertex2d(x + w, y + h);
-    glVertex2d(x, y + h);
+    glVertex2d(x + bezel, y); glVertex2d(x + w - bezel, y);
+    glVertex2d(x + w, y + bezel); glVertex2d(x + w, y + h - bezel);
+    glVertex2d(x + w - bezel, y + h); glVertex2d(x + bezel, y + h);
+    glVertex2d(x, y + h - bezel); glVertex2d(x, y + bezel);
   } glEnd();
 }
 
@@ -141,7 +139,7 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
   }
 }
 
-static void draw_minimap(az_paused_state_t *state) {
+static void draw_minimap(const az_paused_state_t *state) {
   const az_room_key_t current_room = state->ship->player.current_room;
   assert(current_room < state->planet->num_rooms);
   const az_camera_bounds_t *bounds =
@@ -168,7 +166,7 @@ static void draw_minimap(az_paused_state_t *state) {
   } glDisable(GL_SCISSOR_TEST);
 
   glColor3f(0.75, 0.75, 0.75);
-  draw_rect(30, 30, 580, 400);
+  draw_bezel_box(2, 30, 30, 580, 400);
 }
 
 /*===========================================================================*/
@@ -271,6 +269,39 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
   } glEnd();
 }
 
+/*===========================================================================*/
+
+#define GUN_BOX_WIDTH 60
+#define UPG_BOX_WIDTH 150
+#define UPG_BOX_HEIGHT 15
+
+static const az_vector_t upgrade_toplefts[] = {
+  [AZ_UPG_GUN_CHARGE] = {191, 26},
+  [AZ_UPG_GUN_FREEZE] = {257, 26},
+  [AZ_UPG_GUN_TRIPLE] = {323, 26},
+  [AZ_UPG_GUN_HOMING] = {389, 26},
+  [AZ_UPG_GUN_PHASE] = {191, 46},
+  [AZ_UPG_GUN_BURST] = {257, 46},
+  [AZ_UPG_GUN_PIERCE] = {323, 46},
+  [AZ_UPG_GUN_BEAM] = {389, 46},
+  [AZ_UPG_HYPER_ROCKETS] = {466, 80},
+  [AZ_UPG_MEGA_BOMBS] = {466, 100},
+  [AZ_UPG_HIGH_EXPLOSIVES] = {466, 120},
+  [AZ_UPG_ATTUNED_EXPLOSIVES] = {466, 140},
+  [AZ_UPG_RETRO_THRUSTERS] = {466, 180},
+  [AZ_UPG_CPLUS_DRIVE] = {466, 200},
+  [AZ_UPG_ORION_BOOSTER] = {466, 220},
+  [AZ_UPG_HARDENED_ARMOR] = {24, 80},
+  [AZ_UPG_DYNAMIC_ARMOR] = {24, 100},
+  [AZ_UPG_THERMAL_ARMOR] = {24, 120},
+  [AZ_UPG_REACTIVE_ARMOR] = {24, 140},
+  [AZ_UPG_FUSION_REACTOR] = {24, 180},
+  [AZ_UPG_QUANTUM_REACTOR] = {24, 200},
+  [AZ_UPG_TRACTOR_BEAM] = {24, 240},
+  [AZ_UPG_INFRASCANNER] = {24, 260},
+  [AZ_UPG_MAGNET_SWEEP] = {24, 280}
+};
+
 static void set_weapon_box_color(bool has, bool selected) {
   assert(has || !selected);
   if (selected) glColor3f(1, 1, 1);
@@ -278,14 +309,16 @@ static void set_weapon_box_color(bool has, bool selected) {
   else glColor3f(0.5, 0, 0.5);
 }
 
-static void draw_upg_box(const az_player_t *player, double x, double y,
-                         az_upgrade_t upgrade, bool *has_upgrade_out) {
+static void draw_upg_box(const az_player_t *player, az_upgrade_t upgrade,
+                         bool *has_upgrade_out) {
+  const az_vector_t topleft = upgrade_toplefts[upgrade];
   const bool has_upgrade = az_has_upgrade(player, upgrade);
   if (has_upgrade) glColor3f(0, 1, 1);
   else glColor3f(0, 0.5, 0.5);
-  draw_rect(x, y, 150, 15);
+  draw_bezel_box(2, topleft.x, topleft.y, UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (!has_upgrade) return;
-  az_draw_string(8, AZ_ALIGN_CENTER, x + 75, y + 4, az_upgrade_name(upgrade));
+  az_draw_string(8, AZ_ALIGN_CENTER, topleft.x + UPG_BOX_WIDTH/2,
+                 topleft.y + 4, az_upgrade_name(upgrade));
   *has_upgrade_out = true;
 }
 
@@ -301,7 +334,7 @@ static const az_vector_t drawer_vertices[] = {
   {423.5, 12.5}, {427.5, 8.5}, {627.5, 8.5}, {627.5, 480.5}
 };
 
-static void draw_upgrades(az_paused_state_t *state) {
+static void draw_upgrades(const az_paused_state_t *state) {
   const az_player_t *player = &state->ship->player;
 
   glColor4f(0, 0, 0, 0.9); // black tint
@@ -314,43 +347,45 @@ static void draw_upgrades(az_paused_state_t *state) {
   } glEnd();
 
   glColor3f(1, 0, 1);
-  draw_rect(24, 26, 150, 15);
-  az_draw_printf(8, AZ_ALIGN_CENTER, 95, 30, "SHIELD: %3d/%-3d",
+  draw_bezel_box(2, 24, 26, 150, 15);
+  az_draw_printf(8, AZ_ALIGN_CENTER, 24 + UPG_BOX_WIDTH/2, 30,
+                 "SHIELD: %3d/%-3d",
                  round_towards_middle(player->shields, player->max_shields),
                  (int)player->max_shields);
-  draw_rect(24, 46, 150, 15);
-  az_draw_printf(8, AZ_ALIGN_CENTER, 95, 50, "ENERGY: %3d/%-3d",
+  draw_bezel_box(2, 24, 46, 150, 15);
+  az_draw_printf(8, AZ_ALIGN_CENTER, 24 + UPG_BOX_WIDTH/2, 50,
+                 "ENERGY: %3d/%-3d",
                  round_towards_middle(player->energy, player->max_energy),
                  (int)player->max_energy);
 
   bool has_guns = false;
   for (int i = 0; i < 8; ++i) {
-    const int row = i / 4;
-    const int col = i % 4;
     const az_gun_t gun = AZ_GUN_CHARGE + i;
-    const bool has_gun = az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i);
+    const az_upgrade_t upgrade = AZ_UPG_GUN_CHARGE + i;
+    const az_vector_t topleft = upgrade_toplefts[upgrade];
+    const bool has_gun = az_has_upgrade(player, upgrade);
     set_weapon_box_color(has_gun, player->gun1 == gun || player->gun2 == gun);
-    draw_rect(191 + 66 * col, 26 + 20 * row, 60, 15);
+    draw_bezel_box(2, topleft.x, topleft.y, GUN_BOX_WIDTH, UPG_BOX_HEIGHT);
     if (has_gun) {
-      az_draw_string(8, AZ_ALIGN_CENTER, 221 + 66 * col, 30 + 20 * row,
-                     az_gun_name(gun));
+      az_draw_string(8, AZ_ALIGN_CENTER, topleft.x + GUN_BOX_WIDTH/2,
+                     topleft.y + 4, az_gun_name(gun));
       has_guns = true;
     }
   }
 
   set_weapon_box_color(player->max_rockets > 0,
                        player->ordnance == AZ_ORDN_ROCKETS);
-  draw_rect(466, 26, 150, 15);
+  draw_bezel_box(2, 466, 26, UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_rockets > 0) {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 545, 30, "ROCKETS:%3d/%-3d",
-                   player->rockets, player->max_rockets);
+    az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 30,
+                   "ROCKETS:%3d/%-3d", player->rockets, player->max_rockets);
   }
   set_weapon_box_color(player->max_bombs > 0,
                        player->ordnance == AZ_ORDN_BOMBS);
-  draw_rect(466, 46, 150, 15);
+  draw_bezel_box(2, 466, 46, UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_bombs > 0) {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 545, 50, "  BOMBS:%3d/%-3d",
-                   player->bombs, player->max_bombs);
+    az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 50,
+                   "  BOMBS:%3d/%-3d", player->bombs, player->max_bombs);
   }
 
   if (state->drawer_openness <= 0.0) return;
@@ -368,55 +403,66 @@ static void draw_upgrades(az_paused_state_t *state) {
   }
 
   bool has_armor = false;
-  draw_upg_box(player, 24,  80, AZ_UPG_HARDENED_ARMOR, &has_armor);
-  draw_upg_box(player, 24, 100, AZ_UPG_DYNAMIC_ARMOR, &has_armor);
-  draw_upg_box(player, 24, 120, AZ_UPG_THERMAL_ARMOR, &has_armor);
-  draw_upg_box(player, 24, 140, AZ_UPG_REACTIVE_ARMOR, &has_armor);
+  draw_upg_box(player, AZ_UPG_HARDENED_ARMOR, &has_armor);
+  draw_upg_box(player, AZ_UPG_DYNAMIC_ARMOR, &has_armor);
+  draw_upg_box(player, AZ_UPG_THERMAL_ARMOR, &has_armor);
+  draw_upg_box(player, AZ_UPG_REACTIVE_ARMOR, &has_armor);
   if (has_armor) {
     draw_schematic_line(state->clock, armor_line_vertices,
                         AZ_ARRAY_SIZE(armor_line_vertices));
   }
 
   bool has_reactor = false;
-  draw_upg_box(player, 24, 180, AZ_UPG_FUSION_REACTOR, &has_reactor);
-  draw_upg_box(player, 24, 200, AZ_UPG_QUANTUM_REACTOR, &has_reactor);
+  draw_upg_box(player, AZ_UPG_FUSION_REACTOR, &has_reactor);
+  draw_upg_box(player, AZ_UPG_QUANTUM_REACTOR, &has_reactor);
   if (has_reactor) {
     draw_schematic_line(state->clock, reactor_line_vertices,
                         AZ_ARRAY_SIZE(reactor_line_vertices));
   }
 
   bool has_misc = false;
-  draw_upg_box(player, 24, 240, AZ_UPG_TRACTOR_BEAM, &has_misc);
-  draw_upg_box(player, 24, 260, AZ_UPG_INFRASCANNER, &has_misc);
-  draw_upg_box(player, 24, 280, AZ_UPG_MAGNET_SWEEP, &has_misc);
+  draw_upg_box(player, AZ_UPG_TRACTOR_BEAM, &has_misc);
+  draw_upg_box(player, AZ_UPG_INFRASCANNER, &has_misc);
+  draw_upg_box(player, AZ_UPG_MAGNET_SWEEP, &has_misc);
   if (has_misc) {
     draw_schematic_line(state->clock, misc_line_vertices,
                         AZ_ARRAY_SIZE(misc_line_vertices));
   }
 
   bool has_ordnance = false;
-  draw_upg_box(player, 466,  80, AZ_UPG_HYPER_ROCKETS, &has_ordnance);
-  draw_upg_box(player, 466, 100, AZ_UPG_MEGA_BOMBS, &has_ordnance);
-  draw_upg_box(player, 466, 120, AZ_UPG_HIGH_EXPLOSIVES, &has_ordnance);
-  draw_upg_box(player, 466, 140, AZ_UPG_ATTUNED_EXPLOSIVES, &has_ordnance);
+  draw_upg_box(player, AZ_UPG_HYPER_ROCKETS, &has_ordnance);
+  draw_upg_box(player, AZ_UPG_MEGA_BOMBS, &has_ordnance);
+  draw_upg_box(player, AZ_UPG_HIGH_EXPLOSIVES, &has_ordnance);
+  draw_upg_box(player, AZ_UPG_ATTUNED_EXPLOSIVES, &has_ordnance);
   if (has_ordnance) {
     draw_schematic_line(state->clock, ordnance_line_vertices,
                         AZ_ARRAY_SIZE(ordnance_line_vertices));
   }
 
   bool has_engines = false;
-  draw_upg_box(player, 466, 180, AZ_UPG_RETRO_THRUSTERS, &has_engines);
-  draw_upg_box(player, 466, 200, AZ_UPG_CPLUS_DRIVE, &has_engines);
-  draw_upg_box(player, 466, 220, AZ_UPG_ORION_BOOSTER, &has_engines);
+  draw_upg_box(player, AZ_UPG_RETRO_THRUSTERS, &has_engines);
+  draw_upg_box(player, AZ_UPG_CPLUS_DRIVE, &has_engines);
+  draw_upg_box(player, AZ_UPG_ORION_BOOSTER, &has_engines);
   if (has_engines) {
     draw_schematic_line(state->clock, engines_line_vertices,
                         AZ_ARRAY_SIZE(engines_line_vertices));
+  }
+
+  glColor3f(1, 1, 0.5);
+  draw_bezel_box(8, 50, 370, AZ_SCREEN_WIDTH - 100, 82);
+  if (state->hovering_over_upgrade) {
+    glColor3f(1, 0.5, 0.5);
+    az_draw_printf(8, AZ_ALIGN_LEFT, 88, 387, "%s:",
+                   az_upgrade_name(state->hovered_upgrade));
+    az_draw_paragraph(
+        8, AZ_ALIGN_LEFT, 94, 409, 16, -1, state->prefs,
+        az_upgrade_description(state->hovered_upgrade));
   }
 }
 
 /*===========================================================================*/
 
-void az_paused_draw_screen(az_paused_state_t *state) {
+void az_paused_draw_screen(const az_paused_state_t *state) {
   draw_minimap(state);
   glPushMatrix(); {
     glTranslated(0, 410 * (1 - state->drawer_openness), 0);
@@ -434,7 +480,27 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
   } else {
     state->drawer_openness =
       fmax(0.0, state->drawer_openness - time / drawer_time);
+    state->hovering_over_upgrade = false;
   }
+}
+
+void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
+  if (!state->show_upgrades_drawer || state->drawer_openness < 1.0) return;
+  state->hovering_over_upgrade = false;
+  for (int i = 0; i < AZ_ARRAY_SIZE(upgrade_toplefts); ++i) {
+    const az_upgrade_t upgrade = (az_upgrade_t)i;
+    if (!az_has_upgrade(&state->ship->player, upgrade)) continue;
+    const az_vector_t topleft = upgrade_toplefts[i];
+    const double right =
+      topleft.x + (upgrade <= AZ_UPG_GUN_BEAM ? GUN_BOX_WIDTH : UPG_BOX_WIDTH);
+    const double bottom = topleft.y + UPG_BOX_HEIGHT;
+    if (x >= topleft.x && x <= right && y >= topleft.y && y <= bottom) {
+      state->hovering_over_upgrade = true;
+      state->hovered_upgrade = upgrade;
+      break;
+    }
+  }
+  // TODO: Also show a description if hovering over the rockets/bombs boxes.
 }
 
 /*===========================================================================*/

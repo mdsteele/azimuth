@@ -21,8 +21,11 @@
 #ifndef AZIMUTH_VIEW_PAUSED_H_
 #define AZIMUTH_VIEW_PAUSED_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/planet.h"
 #include "azimuth/state/ship.h"
+#include "azimuth/state/upgrade.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/prefs.h"
 
@@ -35,11 +38,15 @@ typedef struct {
   az_clock_t clock;
   bool show_upgrades_drawer;
   double drawer_openness; // 0.0 to 1.0
+  bool hovering_over_upgrade;
+  az_upgrade_t hovered_upgrade;
 } az_paused_state_t;
 
-void az_paused_draw_screen(az_paused_state_t *state);
+void az_paused_draw_screen(const az_paused_state_t *state);
 
 void az_tick_paused_state(az_paused_state_t *state, double time);
+
+void az_paused_on_hover(az_paused_state_t *state, int x, int y);
 
 /*===========================================================================*/
 

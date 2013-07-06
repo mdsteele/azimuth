@@ -76,6 +76,9 @@ az_paused_action_t az_paused_event_loop(
               break;
           }
           break;
+        case AZ_EVENT_MOUSE_MOVE:
+          az_paused_on_hover(&state, event.mouse.x, event.mouse.y);
+          break;
         default: break;
       }
     }
