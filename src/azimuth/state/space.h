@@ -92,7 +92,7 @@ typedef struct {
 } az_boss_death_mode_data_t;
 
 typedef struct {
-  enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_FINISH } step;
+  enum { AZ_CSS_ALIGN, AZ_CSS_USE, AZ_CSS_SAVE } step;
   double progress; // 0.0 to 1.0
   az_uid_t node_uid;
   az_vector_t position_delta;

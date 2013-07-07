@@ -155,17 +155,11 @@ az_space_action_t az_space_event_loop(
         }
       }
     } else if (state.mode == AZ_MODE_CONSOLE &&
-               state.console_mode.step == AZ_CSS_FINISH) {
-      az_node_t *node;
-      if (az_lookup_node(&state, state.console_mode.node_uid, &node)) {
-        assert(node->kind == AZ_NODE_CONSOLE);
-        if (node->subkind.console == AZ_CONS_SAVE) {
-          // If we need to save the game, do so.
-          const bool ok = save_current_game(saved_games);
-          if (ok) az_set_message(&state, save_success_paragraph);
-          else az_set_message(&state, save_failed_paragraph);
-        }
-      }
+               state.console_mode.step == AZ_CSS_SAVE) {
+      // If we need to save the game, do so.
+      const bool ok = save_current_game(saved_games);
+      if (ok) az_set_message(&state, save_success_paragraph);
+      else az_set_message(&state, save_failed_paragraph);
     }
 
     // Handle the event queue.
