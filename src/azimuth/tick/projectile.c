@@ -337,6 +337,7 @@ static void projectile_special_logic(az_space_state_t *state,
   // the projectile (e.g. homing projectiles will home in).
   switch (proj->kind) {
     case AZ_PROJ_GUN_CHARGED_NORMAL:
+    case AZ_PROJ_GUN_CHARGED_TRIPLE:
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
                            (az_color_t){255, 255, 255, 128}, 0.1, 6.0, 0.0);
       break;

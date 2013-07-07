@@ -706,9 +706,8 @@ static void fire_weapons(az_space_state_t *state, double time) {
                             AZ_SND_FIRE_GUN_FREEZE);
             break;
           case AZ_GUN_TRIPLE:
-            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,
-                           AZ_TRIPLE_DAMAGE_MULT, 3, AZ_DEG2RAD(10), 0,
-                           AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE, 1.0,
+                           3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
             break;
           case AZ_GUN_HOMING:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING, 1.0,

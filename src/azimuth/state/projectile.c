@@ -38,6 +38,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 800.0,
     .lifetime = 2.0,
     .impact_damage = 8.0,
+    .homing_rate = AZ_DEG2RAD(40),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_FREEZE] = {
@@ -50,7 +51,15 @@ static const az_proj_data_t proj_data[] = {
     .speed = 850.0,
     .lifetime = 2.0,
     .impact_damage = 8.0,
+    .homing_rate = AZ_DEG2RAD(40),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE
+  },
+  [AZ_PROJ_GUN_CHARGED_TRIPLE] = {
+    .speed = 800.0,
+    .lifetime = 2.0,
+    .impact_damage = 6.5,
+    .homing_rate = 0, // unlike normal charged shots, these don't home at all
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
   [AZ_PROJ_GUN_HOMING] = {
     .speed = 500.0,

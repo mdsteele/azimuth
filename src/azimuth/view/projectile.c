@@ -111,20 +111,17 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_NORMAL:
+    case AZ_PROJ_GUN_CHARGED_TRIPLE:
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1, 1, 1, 0.75); // white
-        glVertex2f( 0.0,  0.0);
-        glVertex2f( 4.0,  0.0);
-        glVertex2f( 3.0,  3.0);
-        glVertex2f( 0.0,  4.0);
-        glVertex2f(-3.0,  3.0);
+        glVertex2f( 0,  0);
+        glVertex2f( 4,  0); glVertex2f( 3,  3);
+        glVertex2f( 0,  4); glVertex2f(-3,  3);
         glColor4f(1, 1, 1, 0); // transparent white
-        glVertex2f(-20.0 * proj->power, 0.0);
+        glVertex2f(-20 * proj->power, 0);
         glColor3f(1, 1, 1); // white
-        glVertex2f(-3.0, -3.0);
-        glVertex2f( 0.0, -4.0);
-        glVertex2f( 3.0, -3.0);
-        glVertex2f( 4.0,  0.0);
+        glVertex2f(-3, -3); glVertex2f( 0, -4);
+        glVertex2f( 3, -3); glVertex2f( 4,  0);
       } glEnd();
       break;
     case AZ_PROJ_GUN_FREEZE:
@@ -149,17 +146,13 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_HOMING_SHRAPNEL:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0.25, 1);
-        glVertex2f(4, 0);
-        glVertex2f(-4, 2);
-        glVertex2f(-4, -2);
+        glVertex2f(4, 0); glVertex2f(-4, 2); glVertex2f(-4, -2);
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
       glBegin(GL_TRIANGLES); {
         glColor3f(0, 0.25, 1);
-        glVertex2f(8, 0);
-        glVertex2f(-8, 4);
-        glVertex2f(-8, -4);
+        glVertex2f(8, 0); glVertex2f(-8, 4); glVertex2f(-8, -4);
       } glEnd();
       break;
     case AZ_PROJ_GUN_PHASE:

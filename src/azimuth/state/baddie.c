@@ -647,6 +647,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 40.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~(AZ_DMGF_CPLUS | AZ_DMGF_HYPER_ROCKET) }
   },
@@ -756,6 +757,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 100.0,
     .potential_pickups = AZ_PUPF_ALL,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~AZ_DMGF_CPLUS }
   }
