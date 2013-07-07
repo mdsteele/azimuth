@@ -29,32 +29,22 @@ void az_draw_cursor(void) {
   int x = 0, y = 0;
   if (!az_get_mouse_position(&x, &y)) return;
   glPushMatrix(); {
-    glTranslated(0.5, 0.5, 0);
+    glTranslatef(x + 0.5f, y + 0.5f, 0);
     glColor4f(0, 1, 0, 0.5); // green tint
     glBegin(GL_QUAD_STRIP); {
-      glVertex2i(x, y);
-      glVertex2i(x + 2, y + 5);
-      glVertex2i(x + 20, y + 20);
-      glVertex2i(x + 11, y + 14);
-      glVertex2i(x + 6, y + 14);
-      glVertex2i(x + 5, y + 11);
-      glVertex2i(x, y + 20);
-      glVertex2i(x + 2, y + 14);
-      glVertex2i(x, y);
-      glVertex2i(x + 2, y + 5);
+      glVertex2i(0, 0); glVertex2i(2, 5); glVertex2i(20, 20);
+      glVertex2i(11, 14); glVertex2i(6, 14); glVertex2i(5, 11);
+      glVertex2i(0, 20); glVertex2i(2, 14); glVertex2i(0, 0);
+      glVertex2i(2, 5);
     } glEnd();
     glColor3f(0, 1, 0); // green
     glBegin(GL_LINE_LOOP); {
-      glVertex2i(x, y);
-      glVertex2i(x + 20, y + 20);
-      glVertex2i(x + 6, y + 14);
-      glVertex2i(x, y + 20);
+      glVertex2i(0, 0); glVertex2i(20, 20);
+      glVertex2i(6, 14); glVertex2i(0, 20);
     } glEnd();
     glBegin(GL_LINE_LOOP); {
-      glVertex2i(x + 2, y + 5);
-      glVertex2i(x + 11, y + 14);
-      glVertex2i(x + 5, y + 11);
-      glVertex2i(x + 2, y + 14);
+      glVertex2i(2, 5); glVertex2i(11, 14);
+      glVertex2i(5, 11); glVertex2i(2, 14);
     } glEnd();
   } glPopMatrix();
 }
