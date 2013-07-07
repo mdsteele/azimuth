@@ -1,7 +1,7 @@
 0: Used one of the first two save points (Colony rooms 10 and 25)
 1: Killed Snapdragon (Colony boss)
 2: Met first AI, upper armory door unlocked
-3: Opened door to Filimun zone
+3: Opened rocket door between Colony room 21 and Filimun room 26
 4: Opened door to Core zone
 5: Killed security drone in Colony room 14
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
