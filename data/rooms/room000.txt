@@ -1,6 +1,6 @@
-@R z7 p0 b9 d1 g1 n3 w32
+@R z7 p0 b9 d1 g1 n3 w31
   c(279.05,0.00,4.712389,6.283185)
-$s:boss1,mus9,wait0.12,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz4,gstat4,isub0,sstat4,jump-15;
+$s:test23,beqz3,nix1,halt,lock3,boss1,mus9,wait0.12,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz4,gstat4,isub0,sstat4,jump-15;
 !W1 d0 x102.20 y503.10 a0.000000 u0
 !W1 d0 x290.60 y424.59 a-0.787340 u0
 !W1 d0 x-98.10 y503.10 a0.000000 u0
@@ -25,15 +25,14 @@ $s:boss1,mus9,wait0.12,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1
 !W1 d0 x282.65 y-430.08 a0.784684 u0
 !W1 d0 x94.08 y-507.62 a0.000000 u0
 !W1 d2 x204.08 y-507.62 a-3.141484 u0
-!W1 d0 x-7.92 y-508.62 a0.000000 u0
-!W1 d0 x-6.92 y-507.62 a0.000000 u0
+!W1 d0 x-6.89 y-507.62 a0.000000 u0
 !W1 d0 x-107.92 y-508.62 a0.000000 u0
 !W1 d2 x-217.92 y-508.62 a2.362951 u0
 !W1 d0 x-426.92 y-290.62 a-0.780270 u0
 !W1 d0 x-361.92 y-360.62 a-0.784425 u0
 !W1 d0 x-295.92 y-430.62 a-0.782410 u0
 !W1 d0 x1.95 y503.21 a0.000000 u0
-!D2 x368.15 y360.60 a-2.360076 r2 u3
+!D1 x368.15 y360.60 a-2.360076 r2 u3
 !G3 x0.00 y0.00 a0.000000 s-600.00 w0.00 i100.00 t427.00 u2
 !N8/1 x104.82 y561.01 a0.000000 u4
 !N2 x1.00 y123.05 a1.570796 u19
@@ -47,4 +46,4 @@ $s:boss1,mus9,wait0.12,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1
 !B14 x456.08 y-190.88 a2.754856 u0
 !B14 x460.08 y190.12 a-2.647651 u0
 !B13 x0.00 y0.00 a0.000000 u1:19:20
-$k:unlock3;
+$k:set23,unlock3;

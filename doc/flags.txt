@@ -1,5 +1,5 @@
 0: Used one of the first two save points (Colony rooms 10 and 25)
-1: Killed Snapdragon (Colony boss)
+1: Killed Snapdragon (Colony boss, room 20)
 2: Met first AI, upper armory door unlocked
 3: Opened rocket door between Colony room 21 and Filimun room 26
 4: Opened door to Core zone
@@ -7,7 +7,7 @@
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 7: Entered upper armory (room 23)
 8: Reversed grav-corridor in Colony room 24
-9: Killed Rockwyrm (Filimun boss)
+9: Killed Rockwyrm (Filimun boss, room 30)
 10: Met AI after Rockwyrm, lower armory door unlocked
 11: Opened bomb door between Filimun rooms 108 and 109
 12: Opened bomb door between Colony rooms 73 and 75 (around room 74)
@@ -21,3 +21,6 @@
 20: Opened first door (Colony room 6)
 21: Opened bomb door between Colony rooms 155 and 156
 22: Turned off death rays in Core room 146
+23: Killed Zenith Core (Core boss, room 0)
+24: Opened mega bomb door bewteen Colony rooms 156 and 302
+25: Burst through rock face in Colony room 370
