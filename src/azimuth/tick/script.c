@@ -164,8 +164,7 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
 #define GET_OBJECT(object_out) do { \
     az_uuid_t uuid; \
     GET_UUID(&uuid); \
-    if (uuid.type == AZ_UUID_NOTHING) SCRIPT_ERROR("invalid uuid type"); \
-    else az_lookup_object(state, uuid, (object_out)); \
+    az_lookup_object(state, uuid, (object_out)); \
   } while (0)
 
 /*===========================================================================*/
