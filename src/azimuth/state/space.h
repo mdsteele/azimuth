@@ -171,6 +171,7 @@ typedef struct {
   az_game_over_mode_data_t game_over_mode;
   az_pausing_mode_data_t pausing_mode;
   az_upgrade_mode_data_t upgrade_mode;
+  bool victory; // true if we just won the game
 
   // Space objects (these all get cleared out when we exit a room):
   double darkness, dark_goal;

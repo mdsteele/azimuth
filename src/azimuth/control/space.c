@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "azimuth/control/paused.h"
+#include "azimuth/control/victory.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
@@ -132,7 +133,10 @@ az_space_action_t az_space_event_loop(
 
     // Check the current mode; we may need to do something before we move on to
     // handling events.
-    if (state.mode == AZ_MODE_GAME_OVER) {
+    if (state.victory) {
+      az_victory_event_loop(&state.ship.player);
+      return AZ_SA_EXIT_TO_TITLE;
+    } else if (state.mode == AZ_MODE_GAME_OVER) {
       // If we're at the end of the game over animation, exit this controller
       // and signal that we should transition to the game over screen
       // controller.

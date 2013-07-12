@@ -120,6 +120,7 @@ typedef enum {
   AZ_OP_HALT, // halt script successfully
   AZ_OP_HEQZ, // pop top, halt script successfully if a is zero
   AZ_OP_HNEZ, // pop top, halt script successfully if a is not zero
+  AZ_OP_VICT, // halt script and end the game in victory
   AZ_OP_ERROR // halt script and printf execution state
 } az_opcode_t;
 

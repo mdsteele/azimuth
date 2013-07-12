@@ -823,6 +823,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           if (p != 0) goto halt;
         }
         break;
+      case AZ_OP_VICT:
+        state->victory = true;
+        goto halt;
       case AZ_OP_ERROR: SCRIPT_ERROR("ERROR opcode");
     }
     ++vm->pc;

@@ -109,6 +109,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_HALT:   return "halt";
     case AZ_OP_HEQZ:   return "heqz";
     case AZ_OP_HNEZ:   return "hnez";
+    case AZ_OP_VICT:   return "vict";
     case AZ_OP_ERROR:  return "error";
   }
   AZ_ASSERT_UNREACHABLE();
@@ -156,6 +157,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_HALT:
     case AZ_OP_HEQZ:
     case AZ_OP_HNEZ:
+    case AZ_OP_VICT:
     case AZ_OP_ERROR:
       return false;
     case AZ_OP_POP:
