@@ -382,6 +382,7 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
         fire_projectile(state, baddie, AZ_PROJ_STINGER,
                         baddie->data->main_body.bounding_radius, 0.0,
                         theta);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         theta = -theta;
         if (i % 2 == 0) theta += AZ_DEG2RAD(10);
       }
@@ -440,6 +441,7 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
         fire_projectile(state, baddie, AZ_PROJ_STINGER,
                         baddie->data->main_body.bounding_radius, 0.0,
                         AZ_DEG2RAD(i * az_random(0, 10)));
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
       }
       baddie->cooldown = 0.1;
       --baddie->state;

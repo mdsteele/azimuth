@@ -529,6 +529,7 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
   // damage would be able to destroy this wall).
   else {
     wall->flare = 1.0;
+    az_play_sound(&state->soundboard, AZ_SND_METAL_CLINK);
     return false;
   }
 }

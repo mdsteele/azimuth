@@ -61,7 +61,9 @@ static struct {
   [AZ_MUS_BARRAG_ZONE] = { .filename = "barrag-zone.ogg" },
   [AZ_MUS_SARVARI_ZONE] = { .filename = "sarvari-zone.ogg" },
   [AZ_MUS_CORE_ZONE] = { .filename = "core-zone.ogg" },
-  [AZ_MUS_ZENITH_CORE] = { .filename = "zenith-core.mp3" }
+  [AZ_MUS_ZENITH_CORE] = { .filename = "zenith-core.mp3" },
+  [AZ_MUS_BOSS1] = { .filename = "boss1.ogg" },
+  [AZ_MUS_BOSS2] = { .filename = "boss2.ogg" }
 };
 
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(music_entries) == AZ_NUM_MUSIC_KEYS);
@@ -439,6 +441,11 @@ static az_sound_entry_t sound_entries[] = {
     .phaser_offset = -0.09300001, .phaser_sweep = -0.19305,
     .volume_adjust = -0.42592590332
   },
+  [AZ_SND_FIRE_STINGER] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.2112676, .env_punch = 0.2112676, .env_decay = 0.28873238,
+    .start_freq = 0.3653719, .freq_slide = 0.49295771122
+  },
   [AZ_SND_HEAT_DAMAGE] = {
     .wave_kind = NOISE,
     .env_sustain = 0.605633795261, .freq_slide = 0.591549277306,
@@ -508,6 +515,11 @@ static az_sound_entry_t sound_entries[] = {
     .repeat_speed = 0.58450704813, .phaser_sweep = 0.563380241394,
     .lpf_cutoff = 0.781690120697, .lpf_ramp = -0.464788734913,
     .lpf_resonance = 0.274647891521
+  },
+  [AZ_SND_METAL_CLINK] = {
+    .wave_kind = SAWTOOTH,
+    .env_decay = 0.260563373566, .start_freq = 0.407042229176,
+    .phaser_offset = -0.197183, .lpf_cutoff = 0.2253521, .lpf_resonance = 1.0
   },
   [AZ_SND_ORION_BOOSTER] = {
     .wave_kind = NOISE,
