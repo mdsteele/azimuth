@@ -875,12 +875,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 1.5;
       }
       break;
-    case AZ_BAD_STINGER:
+    case AZ_BAD_HORNET:
       // Fire (when the ship is behind us):
       if (baddie->cooldown <= 0.0 &&
           angle_to_ship_within(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
           has_line_of_sight_to_ship(state, baddie)) {
         fire_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         baddie->cooldown = 0.5;
       }
       // Chase ship if state 0, flee in state 1:
@@ -1500,6 +1501,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                 az_vadd(center, az_vpolar(10.0, theta)),
                 theta + az_random(-1, 1) * AZ_DEG2RAD(20), 1.0);
           }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
           baddie->velocity = AZ_VZERO;
           baddie->state = 3;
           baddie->cooldown = 2.5;

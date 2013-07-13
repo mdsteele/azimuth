@@ -526,7 +526,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(crawling_turret_components)
   },
-  [AZ_BAD_STINGER] = {
+  [AZ_BAD_HORNET] = {
     .max_health = 8.0, .color = {192, 192, 0, 255},
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL,

@@ -718,7 +718,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glEnd();
       } glPopMatrix();
       break;
-    case AZ_BAD_STINGER:
+    case AZ_BAD_HORNET:
       // Antennae:
       glColor3f(0.5, 0.5, 0.25);
       glBegin(GL_LINE_STRIP); {
