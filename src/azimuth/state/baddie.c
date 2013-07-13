@@ -410,7 +410,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_TURRET] = {
-    .max_health = 12.0, .overall_bounding_radius = 30.5,
+    .max_health = 5.0, .overall_bounding_radius = 30.5,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
@@ -480,7 +480,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BROKEN_TURRET] = {
-    .max_health = 5.0, .overall_bounding_radius = 30.5,
+    .max_health = 3.0, .overall_bounding_radius = 30.5,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
@@ -496,7 +496,7 @@ static az_baddie_data_t baddie_datas[] = {
                                   AZ_DMGF_REACTIVE) }
   },
   [AZ_BAD_ARMORED_TURRET] = {
-    .max_health = 12.0, .overall_bounding_radius = 30.5,
+    .max_health = 8.0, .overall_bounding_radius = 30.5,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {80, 80, 160, 255},
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
@@ -519,7 +519,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_CRAWLING_TURRET] = {
-    .max_health = 12.0, .overall_bounding_radius = 30.5,
+    .max_health = 10.0, .overall_bounding_radius = 30.5,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
@@ -627,7 +627,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(gun_sensor_components)
   },
   [AZ_BAD_SECURITY_DRONE] = {
-    .max_health = 20.0, .overall_bounding_radius = 31.7,
+    .max_health = 15.0, .overall_bounding_radius = 31.7,
     .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),

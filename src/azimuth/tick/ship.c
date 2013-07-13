@@ -43,7 +43,7 @@
 // Constants:
 
 // How long after using energy we are unable to recharge, in seconds:
-#define AZ_RECHARGE_COOLDOWN_TIME 0.15
+#define AZ_RECHARGE_COOLDOWN_TIME 0.5
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 0.6
 // The time needed to charge up hyper/mega ordnance, in seconds:
@@ -355,7 +355,7 @@ static void fire_gun_multi(
   az_ship_t *ship = &state->ship;
   // Consume energy for this shot (or return early if we can't afford it).
   if (energy_mult > 0.0) {
-    const double energy_cost = 10.0 * energy_mult;
+    const double energy_cost = 5.0 * energy_mult;
     if (!try_use_energy(ship, energy_cost, false)) return;
   }
   fire_projectiles(state, kind, base_power * gun_power_mult(&ship->player),
