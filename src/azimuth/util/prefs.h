@@ -37,9 +37,8 @@
 #define AZ_PREFS_NUM_KEYS 7
 
 typedef struct {
-  float music_volume;
-  float sound_volume;
-  bool show_timer;
+  float music_volume, sound_volume;
+  bool speedrun_timer, fullscreen_on_startup;
   az_key_id_t keys[AZ_PREFS_NUM_KEYS];
 } az_preferences_t;
 

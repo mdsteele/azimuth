@@ -149,14 +149,70 @@ static void draw_slider(const az_title_state_t *state,
   } glPopMatrix();
 }
 
+#define CHECKBOX_WIDTH 12
+#define CHECKBOX_HEIGHT 12
+#define CHECKBOX_SPACING 8
+
+typedef enum {
+  AZ_CHECKBOX_SPEEDRUN_TIMER = 0,
+  AZ_CHECKBOX_FULLSCREEN = 1
+} az_checkbox_id_t;
+
+static az_vector_t checkbox_topleft(az_checkbox_id_t checkbox_id) {
+  const int top = PREFS_BOX_TOP + 105;
+  const int left = AZ_SCREEN_WIDTH / 2 + 50;
+  const int row = (int)checkbox_id;
+  return (az_vector_t){left, top + row * (CHECKBOX_HEIGHT + CHECKBOX_SPACING)};
+}
+
+static bool point_in_checkbox(az_checkbox_id_t checkbox_id, int x, int y) {
+  const az_vector_t topleft = checkbox_topleft(checkbox_id);
+  return (x >= topleft.x && x <= topleft.x + CHECKBOX_WIDTH &&
+          y >= topleft.y && y <= topleft.y + CHECKBOX_HEIGHT);
+}
+
+static void draw_checkbox(const az_title_checkbox_t *checkbox,
+                          az_checkbox_id_t checkbox_id, const char *name) {
+  const az_vector_t topleft = checkbox_topleft(checkbox_id);
+  glPushMatrix(); {
+    glTranslated(topleft.x, topleft.y, 0);
+    const GLfloat pulse = checkbox->button.hover_pulse;
+    glColor4f(0.7f * pulse, pulse, pulse, 0.7f);
+    glBegin(GL_QUADS); {
+      glVertex2f(0.5f, 0.5f);
+      glVertex2f(0.5f, CHECKBOX_HEIGHT + 0.5f);
+      glVertex2f(CHECKBOX_WIDTH + 0.5f, CHECKBOX_HEIGHT + 0.5f);
+      glVertex2f(CHECKBOX_WIDTH + 0.5f, 0.5f);
+    } glEnd();
+    if (checkbox->checked) {
+      glColor3f(0, 1, 0);
+      glBegin(GL_LINES); {
+        glVertex2f(2.5f, 2.5f);
+        glVertex2f(CHECKBOX_WIDTH - 1.5f, CHECKBOX_HEIGHT - 1.5f);
+        glVertex2f(2.5f, CHECKBOX_HEIGHT - 1.5f);
+        glVertex2f(CHECKBOX_WIDTH - 1.5f, 2.5f);
+      } glEnd();
+    }
+    glColor3f(0.75, 0.75, 0.75);
+    glBegin(GL_LINE_LOOP); {
+      glVertex2f(0.5f, 0.5f);
+      glVertex2f(0.5f, CHECKBOX_HEIGHT + 0.5f);
+      glVertex2f(CHECKBOX_WIDTH + 0.5f, CHECKBOX_HEIGHT + 0.5f);
+      glVertex2f(CHECKBOX_WIDTH + 0.5f, 0.5f);
+    } glEnd();
+    glColor3f(1, 1, 1);
+    az_draw_string(8, AZ_ALIGN_LEFT, CHECKBOX_WIDTH + 8, 3, name);
+  } glPopMatrix();
+}
+
 #define PICKER_WIDTH 30
 #define PICKER_HEIGHT 12
-#define PICKER_HORZ_SPACING 130
+#define PICKER_HORZ_SPACING 108
 #define PICKER_VERT_SPACING 8
 
 static az_vector_t key_picker_topleft(int picker_index) {
-  const int top = PREFS_BOX_TOP + 90;
-  const int left = AZ_SCREEN_WIDTH / 2 - 120;
+  const int top = PREFS_BOX_TOP + 85;
+  const int left = AZ_SCREEN_WIDTH / 2 - 222;
   const int row = picker_index % 4;
   const int col = picker_index / 4;
   return (az_vector_t){
@@ -217,6 +273,11 @@ static void draw_prefs_box(const az_title_state_t *state) {
 
   draw_slider(state, AZ_SLIDER_MUSIC);
   draw_slider(state, AZ_SLIDER_SOUND);
+
+  draw_checkbox(&state->speedrun_timer_checkbox, AZ_CHECKBOX_SPEEDRUN_TIMER,
+                "Show speedrun timer");
+  draw_checkbox(&state->fullscreen_checkbox, AZ_CHECKBOX_FULLSCREEN,
+                "Fullscreen on startup");
 
   draw_key_picker(state, AZ_PREFS_UP_KEY_INDEX, "Thrust");
   draw_key_picker(state, AZ_PREFS_DOWN_KEY_INDEX, "Reverse");
@@ -629,6 +690,12 @@ static void tick_slider(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void tick_checkbox(
+    az_title_state_t *state, az_title_checkbox_t *checkbox, double time) {
+  update_hover_pulse(state, &checkbox->button, (state->mode == AZ_TMODE_PREFS),
+                     time);
+}
+
 static void tick_key_picker(
     az_title_state_t *state, az_title_key_picker_t *picker, double time) {
   if (!picker->selected) {
@@ -653,6 +720,8 @@ void az_tick_title_state(az_title_state_t *state, double time) {
   tick_button(state, &state->cancel_button, AZ_BUTTON_CANCEL, time);
   tick_slider(state, &state->music_slider, AZ_SLIDER_MUSIC, time);
   tick_slider(state, &state->sound_slider, AZ_SLIDER_SOUND, time);
+  tick_checkbox(state, &state->speedrun_timer_checkbox, time);
+  tick_checkbox(state, &state->fullscreen_checkbox, time);
   AZ_ARRAY_LOOP(picker, state->pickers) {
     tick_key_picker(state, picker, time);
   }
@@ -702,6 +771,14 @@ static void slider_on_hover(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void checkbox_on_hover(
+    az_title_state_t *state, az_title_checkbox_t *checkbox,
+    az_checkbox_id_t checkbox_id, int x, int y) {
+  const bool active = (state->mode == AZ_TMODE_PREFS);
+  set_hovering(state, &checkbox->button, active,
+               point_in_checkbox(checkbox_id, x, y));
+}
+
 static void picker_on_hover(
     az_title_state_t *state, int picker_index, int x, int y) {
   const bool active = (state->mode == AZ_TMODE_PREFS ||
@@ -725,6 +802,10 @@ void az_title_on_hover(az_title_state_t *state, int x, int y) {
   button_on_hover(state, &state->cancel_button, AZ_BUTTON_CANCEL, x, y);
   slider_on_hover(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
   slider_on_hover(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
+  checkbox_on_hover(state, &state->speedrun_timer_checkbox,
+                    AZ_CHECKBOX_SPEEDRUN_TIMER, x, y);
+  checkbox_on_hover(state, &state->fullscreen_checkbox,
+                    AZ_CHECKBOX_FULLSCREEN, x, y);
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
     picker_on_hover(state, i, x, y);
   }
@@ -772,6 +853,15 @@ static void slider_on_click(az_title_state_t *state, az_title_slider_t *slider,
   }
 }
 
+static void checkbox_on_click(
+    az_title_state_t *state, az_title_checkbox_t *checkbox,
+    az_checkbox_id_t checkbox_id, int x, int y) {
+  if (state->mode == AZ_TMODE_PREFS && point_in_checkbox(checkbox_id, x, y)) {
+    checkbox->checked = !checkbox->checked;
+    checkbox->button.hover_pulse = HOVER_PULSE_CLICK;
+  }
+}
+
 static void picker_on_click(
     az_title_state_t *state, int picker_index, int x, int y) {
   if ((state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) &&
@@ -808,6 +898,10 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
   button_on_click(state, AZ_BUTTON_CANCEL, x, y);
   slider_on_click(state, &state->music_slider, AZ_SLIDER_MUSIC, x, y);
   slider_on_click(state, &state->sound_slider, AZ_SLIDER_SOUND, x, y);
+  checkbox_on_click(state, &state->speedrun_timer_checkbox,
+                    AZ_CHECKBOX_SPEEDRUN_TIMER, x, y);
+  checkbox_on_click(state, &state->fullscreen_checkbox,
+                    AZ_CHECKBOX_FULLSCREEN, x, y);
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
     picker_on_click(state, i, x, y);
   }

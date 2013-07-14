@@ -644,7 +644,7 @@ void az_draw_hud(az_space_state_t *state) {
   const az_player_t *player = &ship->player;
   draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);
-  if (state->prefs->show_timer) draw_hud_speedrun_timer(player);
+  if (state->prefs->speedrun_timer) draw_hud_speedrun_timer(player);
   draw_hud_boss_health(state);
   draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);

@@ -47,6 +47,11 @@ typedef struct {
 
 typedef struct {
   az_title_button_t button;
+  bool checked;
+} az_title_checkbox_t;
+
+typedef struct {
+  az_title_button_t button;
   bool selected;
   az_key_id_t key;
 } az_title_key_picker_t;
@@ -77,6 +82,7 @@ typedef struct {
   az_title_button_t confirm_button, cancel_button;
   az_title_button_t prefs_button, about_button, quit_button;
   az_title_slider_t music_slider, sound_slider;
+  az_title_checkbox_t speedrun_timer_checkbox, fullscreen_checkbox;
   az_title_key_picker_t pickers[AZ_PREFS_NUM_KEYS];
 } az_title_state_t;
 

@@ -32,7 +32,8 @@
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   *prefs = (az_preferences_t){
-    .music_volume = 0.8, .sound_volume = 0.8, .show_timer = false,
+    .music_volume = 0.8, .sound_volume = 0.8,
+    .speedrun_timer = false, .fullscreen_on_startup = true,
     .keys = {
       [AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_UP_ARROW,
       [AZ_PREFS_DOWN_KEY_INDEX] = AZ_KEY_DOWN_ARROW,
@@ -55,14 +56,15 @@ bool az_load_prefs_from_file(const char *filepath,
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
   double music_volume, sound_volume;
-  int show_timer, keys[AZ_PREFS_NUM_KEYS];
+  int speedrun_timer, fullscreen, keys[AZ_PREFS_NUM_KEYS];
   const bool ok = (fscanf(
-      file, "@F mv=%lf sv=%lf st=%d\n"
+      file, "@F mv=%lf sv=%lf st=%d fs=%d\n"
       "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
-      &music_volume, &sound_volume, &show_timer, &keys[AZ_PREFS_UP_KEY_INDEX],
-      &keys[AZ_PREFS_DOWN_KEY_INDEX], &keys[AZ_PREFS_RIGHT_KEY_INDEX],
-      &keys[AZ_PREFS_LEFT_KEY_INDEX], &keys[AZ_PREFS_FIRE_KEY_INDEX],
-      &keys[AZ_PREFS_ORDN_KEY_INDEX], &keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 10);
+      &music_volume, &sound_volume, &speedrun_timer, &fullscreen,
+      &keys[AZ_PREFS_UP_KEY_INDEX], &keys[AZ_PREFS_DOWN_KEY_INDEX],
+      &keys[AZ_PREFS_RIGHT_KEY_INDEX], &keys[AZ_PREFS_LEFT_KEY_INDEX],
+      &keys[AZ_PREFS_FIRE_KEY_INDEX], &keys[AZ_PREFS_ORDN_KEY_INDEX],
+      &keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 11);
   fclose(file);
   if (!ok) return false;
 
@@ -77,7 +79,8 @@ bool az_load_prefs_from_file(const char *filepath,
 
   prefs_out->music_volume = (float)fmin(fmax(0.0, music_volume), 1.0);
   prefs_out->sound_volume = (float)fmin(fmax(0.0, sound_volume), 1.0);
-  prefs_out->show_timer = (show_timer != 0);
+  prefs_out->speedrun_timer = (speedrun_timer != 0);
+  prefs_out->fullscreen_on_startup = (fullscreen != 0);
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
     prefs_out->keys[i] = (az_key_id_t)keys[i];
   }
@@ -91,10 +94,10 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
   FILE *file = fopen(filepath, "w");
   if (file == NULL) return false;
   const bool ok = (fprintf(
-      file, "@F mv=%.03f sv=%.03f st=%d\n"
+      file, "@F mv=%.03f sv=%.03f st=%d fs=%d\n"
       "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
-      (prefs->show_timer ? 1 : 0),
+      (prefs->speedrun_timer ? 1 : 0), (prefs->fullscreen_on_startup ? 1 : 0),
       (int)prefs->keys[AZ_PREFS_UP_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_DOWN_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX],

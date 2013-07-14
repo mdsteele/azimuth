@@ -69,8 +69,6 @@ static void load_preferences(void) {
   if (!az_load_prefs_from_file(path_buffer, &preferences)) {
     az_reset_prefs_to_defaults(&preferences);
   }
-  az_set_global_music_volume(preferences.music_volume);
-  az_set_global_sound_volume(preferences.sound_volume);
 }
 
 typedef enum {
@@ -85,7 +83,6 @@ int main(int argc, char **argv) {
   az_init_wall_datas();
   az_register_gl_init_func(az_init_portrait_drawing);
   az_register_gl_init_func(az_init_wall_drawing);
-  az_init_gui(false, true);
 
   if (!load_scenario()) {
     printf("Failed to load scenario.\n");
@@ -93,6 +90,9 @@ int main(int argc, char **argv) {
   }
   load_saved_games();
   load_preferences();
+  az_init_gui(preferences.fullscreen_on_startup, true);
+  az_set_global_music_volume(preferences.music_volume);
+  az_set_global_sound_volume(preferences.sound_volume);
 
   az_controller_t controller = AZ_CONTROLLER_TITLE;
   int saved_game_slot_index = 0;

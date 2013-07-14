@@ -88,6 +88,8 @@ az_title_action_t az_title_event_loop(
   state.saved_games = saved_games;
   state.music_slider.value = prefs->music_volume;
   state.sound_slider.value = prefs->sound_volume;
+  state.speedrun_timer_checkbox.checked = prefs->speedrun_timer;
+  state.fullscreen_checkbox.checked = prefs->fullscreen_on_startup;
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
     state.pickers[i].key = prefs->keys[i];
   }
@@ -160,6 +162,12 @@ az_title_action_t az_title_event_loop(
     if (prefs->sound_volume != state.sound_slider.value) {
       prefs->sound_volume = state.sound_slider.value;
       az_set_global_sound_volume(prefs->sound_volume);
+      prefs_changed = true;
+    }
+    if (prefs->speedrun_timer != state.speedrun_timer_checkbox.checked ||
+        prefs->fullscreen_on_startup != state.fullscreen_checkbox.checked) {
+      prefs->speedrun_timer = state.speedrun_timer_checkbox.checked;
+      prefs->fullscreen_on_startup = state.fullscreen_checkbox.checked;
       prefs_changed = true;
     }
     if (prefs_changed && !state.music_slider.grabbed &&
