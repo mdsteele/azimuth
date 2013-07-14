@@ -39,6 +39,7 @@
 typedef struct {
   float music_volume;
   float sound_volume;
+  bool show_timer;
   az_key_id_t keys[AZ_PREFS_NUM_KEYS];
 } az_preferences_t;
 

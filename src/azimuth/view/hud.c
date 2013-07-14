@@ -56,48 +56,48 @@ static void draw_box(double left, double top, double width, double height,
   } glEnd();
 }
 
+static void tint_hud_rect(GLfloat width, GLfloat height) {
+  glColor4f(0, 0, 0, 0.75);
+  glBegin(GL_QUADS); {
+    glVertex2f(0, 0);
+    glVertex2f(0, height);
+    glVertex2f(width, height);
+    glVertex2f(width, 0);
+  } glEnd();
+}
+
 /*===========================================================================*/
 
 #define HUD_MARGIN 2
 #define HUD_PADDING 4
 #define HUD_BAR_HEIGHT 9
+#define SHIELDS_ENERGY_HEIGHT (25 + 2 * HUD_PADDING)
 
 static void draw_hud_bar(float left, float top, float cur, float max) {
   // Draw bar:
-  glBegin(GL_QUADS);
-  glVertex2f(left, top);
-  glVertex2f(left, top + HUD_BAR_HEIGHT);
-  glVertex2f(left + cur, top + HUD_BAR_HEIGHT);
-  glVertex2f(left + cur, top);
-  glEnd();
+  glBegin(GL_QUADS); {
+    glVertex2f(left, top);
+    glVertex2f(left, top + HUD_BAR_HEIGHT);
+    glVertex2f(left + cur, top + HUD_BAR_HEIGHT);
+    glVertex2f(left + cur, top);
+  } glEnd();
   // Draw outline:
   glColor3f(1, 1, 1); // white
-  glBegin(GL_LINE_LOOP);
-  glVertex2f(left + 0.5f, top + 0.5f);
-  glVertex2f(left + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
-  glVertex2f(left + max + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
-  glVertex2f(left + max + 0.5f, top + 0.5f);
-  glEnd();
+  glBegin(GL_LINE_LOOP); {
+    glVertex2f(left + 0.5f, top + 0.5f);
+    glVertex2f(left + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
+    glVertex2f(left + max + 0.5f, top + HUD_BAR_HEIGHT + 0.5f);
+    glVertex2f(left + max + 0.5f, top + 0.5f);
+  } glEnd();
 }
 
 static void draw_hud_shields_energy(const az_player_t *player,
                                     az_clock_t clock) {
   const int max_power = (player->max_shields > player->max_energy ?
                          player->max_shields : player->max_energy);
-  const int height = 25 + 2 * HUD_PADDING;
-  const int width = 50 + 2 * HUD_PADDING + max_power;
-
   glPushMatrix(); {
     glTranslatef(HUD_MARGIN, HUD_MARGIN, 0);
-
-    glColor4f(0, 0, 0, 0.75); // tinted-black
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(0, height);
-    glVertex2i(width, height);
-    glVertex2i(width, 0);
-    glEnd();
-
+    tint_hud_rect(50 + 2 * HUD_PADDING + max_power, SHIELDS_ENERGY_HEIGHT);
     glTranslatef(HUD_PADDING, HUD_PADDING, 0);
 
     glColor3f(1, 1, 1); // white
@@ -346,15 +346,7 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
   const int width = (wide ? 115 : 55) + 2 * HUD_PADDING;
   glPushMatrix(); {
     glTranslatef(WEAPONS_RIGHT - width, WEAPONS_TOP, 0);
-
-    glColor4f(0, 0, 0, 0.75); // tinted-black
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(0, height);
-    glVertex2i(width, height);
-    glVertex2i(width, 0);
-    glEnd();
-
+    tint_hud_rect(width, height);
     glTranslatef(HUD_PADDING, HUD_PADDING, 0);
 
     draw_hud_gun_name(0, 0, player->gun1);
@@ -368,6 +360,23 @@ static void draw_hud_weapons_selection(const az_player_t *player) {
 
 /*===========================================================================*/
 
+static void draw_hud_speedrun_timer(const az_player_t *player) {
+  const int total_seconds = (int)player->total_time;
+  const int hours = total_seconds / 3600;
+  const int minutes = (total_seconds % 3600) / 60;
+  const int seconds = total_seconds % 60;
+  const int num_chars = 6 + snprintf(NULL, 0, "%d", hours);
+  glPushMatrix(); {
+    glTranslatef(HUD_MARGIN, HUD_MARGIN + SHIELDS_ENERGY_HEIGHT + 2, 0);
+    tint_hud_rect(HUD_PADDING * 2 + 8 * num_chars, HUD_PADDING * 2 + 7);
+    glColor3f(1, 1, 1);
+    az_draw_printf(8, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING, "%d:%02d:%02d",
+                   hours, minutes, seconds);
+  } glPopMatrix();
+}
+
+/*===========================================================================*/
+
 #define BOSS_BAR_WIDTH 400
 
 static void draw_hud_boss_health(az_space_state_t *state) {
@@ -376,17 +385,8 @@ static void draw_hud_boss_health(az_space_state_t *state) {
     glPushMatrix(); {
       glTranslatef(HUD_MARGIN, AZ_SCREEN_HEIGHT - HUD_MARGIN -
                    2 * HUD_PADDING - 10, 0);
-
-      const int height = 10 + 2 * HUD_PADDING;
-      const int width = 2 * HUD_PADDING + 35 + BOSS_BAR_WIDTH;
-      glColor4f(0, 0, 0, 0.75); // tinted-black
-      glBegin(GL_QUADS);
-      glVertex2i(0, 0);
-      glVertex2i(0, height);
-      glVertex2i(width, height);
-      glVertex2i(width, 0);
-      glEnd();
-
+      tint_hud_rect(2 * HUD_PADDING + 35 + BOSS_BAR_WIDTH,
+                    10 + 2 * HUD_PADDING);
       glTranslatef(HUD_PADDING, HUD_PADDING, 0);
 
       glColor3f(1, 1, 1); // white
@@ -444,14 +444,7 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
     const double offset = fmax(0.0, countdown->active_for - 2.5) * speed;
     glTranslatef(az_imin(xend, xstart + offset),
                  az_imin(yend, ystart + offset), 0);
-
-    glColor4f(0, 0, 0, 0.75); // tinted-black
-    glBegin(GL_QUADS); {
-      glVertex2i(0, 0);
-      glVertex2i(0, height);
-      glVertex2i(width, height);
-      glVertex2i(width, 0);
-    } glEnd();
+    tint_hud_rect(width, height);
 
     assert(countdown->time_remaining >= 0.0);
     if (countdown->time_remaining >= 10.0) {
@@ -651,14 +644,12 @@ void az_draw_hud(az_space_state_t *state) {
   const az_player_t *player = &ship->player;
   draw_hud_shields_energy(player, state->clock);
   draw_hud_weapons_selection(player);
+  if (state->prefs->show_timer) draw_hud_speedrun_timer(player);
   draw_hud_boss_health(state);
   draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);
-  if (state->mode == AZ_MODE_DIALOG) {
-    az_draw_dialog(state);
-  } else if (state->mode == AZ_MODE_UPGRADE) {
-    draw_upgrade_box(state);
-  }
+  if (state->mode == AZ_MODE_DIALOG) az_draw_dialog(state);
+  else if (state->mode == AZ_MODE_UPGRADE) draw_upgrade_box(state);
 }
 
 /*===========================================================================*/
