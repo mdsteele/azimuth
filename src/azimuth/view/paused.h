@@ -47,6 +47,7 @@ void az_paused_draw_screen(const az_paused_state_t *state);
 void az_tick_paused_state(az_paused_state_t *state, double time);
 
 void az_paused_on_hover(az_paused_state_t *state, int x, int y);
+void az_paused_on_click(az_paused_state_t *state, int x, int y);
 
 /*===========================================================================*/
 

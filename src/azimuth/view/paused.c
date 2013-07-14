@@ -275,6 +275,10 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
 #define UPG_BOX_WIDTH 150
 #define UPG_BOX_HEIGHT 15
 
+#define ORDN_BOX_LEFT 466
+#define ROCKETS_BOX_TOP 26
+#define BOMBS_BOX_TOP 46
+
 static const az_vector_t upgrade_toplefts[] = {
   [AZ_UPG_GUN_CHARGE] = {191, 26},
   [AZ_UPG_GUN_FREEZE] = {257, 26},
@@ -375,14 +379,16 @@ static void draw_upgrades(const az_paused_state_t *state) {
 
   set_weapon_box_color(player->max_rockets > 0,
                        player->ordnance == AZ_ORDN_ROCKETS);
-  draw_bezel_box(2, 466, 26, UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  draw_bezel_box(2, ORDN_BOX_LEFT, ROCKETS_BOX_TOP,
+                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 30,
                    "ROCKETS:%3d/%-3d", player->rockets, player->max_rockets);
   }
   set_weapon_box_color(player->max_bombs > 0,
                        player->ordnance == AZ_ORDN_BOMBS);
-  draw_bezel_box(2, 466, 46, UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  draw_bezel_box(2, ORDN_BOX_LEFT, BOMBS_BOX_TOP,
+                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 50,
                    "  BOMBS:%3d/%-3d", player->bombs, player->max_bombs);
@@ -462,10 +468,12 @@ static void draw_upgrades(const az_paused_state_t *state) {
 
 /*===========================================================================*/
 
+#define DRAWER_SLIDE_DISTANCE 410
+
 void az_paused_draw_screen(const az_paused_state_t *state) {
   draw_minimap(state);
   glPushMatrix(); {
-    glTranslated(0, 410 * (1 - state->drawer_openness), 0);
+    glTranslated(0, DRAWER_SLIDE_DISTANCE * (1 - state->drawer_openness), 0);
     draw_upgrades(state);
   } glPopMatrix();
   az_draw_cursor();
@@ -501,6 +509,27 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
     }
   }
   // TODO: Also show a description if hovering over the rockets/bombs boxes.
+}
+
+void az_paused_on_click(az_paused_state_t *state, int x, int y) {
+  if (state->drawer_openness == (state->show_upgrades_drawer ? 1.0 : 0.0)) {
+    for (int i = 0; i < 8; ++i) {
+      az_vector_t topleft = upgrade_toplefts[AZ_UPG_GUN_CHARGE + i];
+      if (!state->show_upgrades_drawer) topleft.y += DRAWER_SLIDE_DISTANCE;
+      if (x >= topleft.x && x <= topleft.x + GUN_BOX_WIDTH &&
+          y >= topleft.y && y <= topleft.y + UPG_BOX_HEIGHT) {
+        az_select_gun(&state->ship->player, AZ_GUN_CHARGE + i);
+      }
+    }
+    for (int i = 0; i < 2; ++i) {
+      int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
+      if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
+      if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + GUN_BOX_WIDTH &&
+          y >= top && y <= top + UPG_BOX_HEIGHT) {
+        az_select_ordnance(&state->ship->player, AZ_ORDN_ROCKETS + i);
+      }
+    }
+  }
 }
 
 /*===========================================================================*/
