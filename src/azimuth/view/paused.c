@@ -462,7 +462,11 @@ static void draw_upgrades(const az_paused_state_t *state) {
                    az_upgrade_name(state->hovered_upgrade));
     az_draw_paragraph(
         8, AZ_ALIGN_LEFT, 94, 409, 16, -1, state->prefs,
-        az_upgrade_description(state->hovered_upgrade));
+        (state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
+         "Press [9] to select, hold [$o] and press [$f] to fire." :
+         state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?
+         "Press [0] to select, hold [$o] and press [$f] to drop." :
+         az_upgrade_description(state->hovered_upgrade)));
   }
 }
 
@@ -508,7 +512,16 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
       break;
     }
   }
-  // TODO: Also show a description if hovering over the rockets/bombs boxes.
+  for (int i = 0; i < 2; ++i) {
+    int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
+    if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
+        y >= top && y <= top + UPG_BOX_HEIGHT) {
+      state->hovering_over_upgrade = true;
+      state->hovered_upgrade =
+        (i == 0 ? AZ_UPG_ROCKET_AMMO_00 : AZ_UPG_BOMB_AMMO_00);
+      break;
+    }
+  }
 }
 
 void az_paused_on_click(az_paused_state_t *state, int x, int y) {
@@ -524,7 +537,7 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
     for (int i = 0; i < 2; ++i) {
       int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
       if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
-      if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + GUN_BOX_WIDTH &&
+      if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
           y >= top && y <= top + UPG_BOX_HEIGHT) {
         az_select_ordnance(&state->ship->player, AZ_ORDN_ROCKETS + i);
       }

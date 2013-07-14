@@ -365,13 +365,14 @@ static void draw_hud_speedrun_timer(const az_player_t *player) {
   const int hours = total_seconds / 3600;
   const int minutes = (total_seconds % 3600) / 60;
   const int seconds = total_seconds % 60;
-  const int num_chars = 6 + snprintf(NULL, 0, "%d", hours);
+  const int tenths = ((int)(player->total_time * 10)) % 10;
+  const int num_chars = 8 + snprintf(NULL, 0, "%d", hours);
   glPushMatrix(); {
     glTranslatef(HUD_MARGIN, HUD_MARGIN + SHIELDS_ENERGY_HEIGHT + 2, 0);
     tint_hud_rect(HUD_PADDING * 2 + 8 * num_chars, HUD_PADDING * 2 + 7);
     glColor3f(1, 1, 1);
-    az_draw_printf(8, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING, "%d:%02d:%02d",
-                   hours, minutes, seconds);
+    az_draw_printf(8, AZ_ALIGN_LEFT, HUD_PADDING, HUD_PADDING,
+                   "%d:%02d:%02d.%01d", hours, minutes, seconds, tenths);
   } glPopMatrix();
 }
 
