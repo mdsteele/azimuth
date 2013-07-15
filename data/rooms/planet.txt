@@ -1,4 +1,4 @@
-@P z8 r401 t45 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t59 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -189,3 +189,63 @@
   Survey map data is available for download.
   
   >>><"
+!T45"
+  Link established.  Merging new database
+  contents.               
+  
+  ERR**####...error corrected."
+!T46"
+  \"Computer, I still haven't found any trace of
+  the survivors, just wildlife and automated
+  systems.  And whatever the hell those glowing
+  things are.  Is anyone still alive?  Where'd
+  they all go?\""
+!T47"
+  It seems that most of the colonists have
+  relocated deeper down into the planetoid.  They
+  may be waiting there for the central colony
+  computer to restore emergency safety systems.
+  However, all communication with that area is
+  completely cut off at this time."
+!T48"
+  \"Aren't $/you$| the colony computer?  And what
+  safety systems?\""
+!T49"
+  Logs indicate there were unexpected effects from
+  the experiments into Nonlinear Paradimensional
+  Shear in the past several days.  Uncontrolled
+  NPS wormholes are likely responsible for the
+  widespread systems damage."
+!T50"
+  According to records, the researches attributed
+  this to operator error, and most recently, the
+  central colony computer was put directly in
+  charge of stabilizing the NPS catalysis devices,
+  to prevent further indident."
+!T51"
+  \"So then what happened?  Why has everything gone
+  haywire?\""
+!T52"
+  The NPS catalysis devices are currently running
+  undriven.  The central colony computer is no
+  longer functioning."
+!T53"
+  \"What do you mean, the colony computer isn't
+  functioning?  So what are you, then?\""
+!T54"
+  Unknown."
+!T55"
+  \"And you're saying...that the colonists are all
+  trapped down there, waiting for these systems to
+  be brought back under control, by the computer
+  that they have no way of knowing isn't even
+  working anymore?\""
+!T56"
+  That is correct."
+!T57"
+  \"I need to reach them.  Fast.  But I keep
+  running into blast doors I can't bust open.\""
+!T58"
+  There is some $Mexperimental ordnance$W in the
+  armory beyond here.  I will unlock the security
+  doors."
