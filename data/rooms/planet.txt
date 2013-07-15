@@ -1,4 +1,4 @@
-@P z8 r401 t36 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t45 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -75,7 +75,7 @@
 !T16"
   Armory $Asecurity doors$W have been $Yunlocked$W."
 !T17"
-  Survey map data is available for download."
+  Lower Armory"
 !T18"
   Energy Recycling Unit"
 !T19"
@@ -93,7 +93,7 @@
   \"HQ, this is Major Shawna Jemison reporting in.
   I'm reading what sounds like a general distress
   signal coming from somewhere in Sector L32ADA,
-  about 7 or 8 marks from my current position.
+  maybe 7 or 8 marks from my current position.
   The signal is extremely faint from here, I can't
   make it out clearly.  Moving to investigate,
   over.\""
@@ -114,9 +114,9 @@
   last-ditch failsafe signal broadcast by the
   colony's central computer.\""
 !T29"
-  \"An automated failsafe.  Which means...\""
+  \"An automated failsafe.  Which means-\""
 !T30"
-  \"...that things are so fubarred down there that
+  \"-that things are so botched up down there that
   no one was around to manually send or even
   confirm the broadcast.  ...Aaand the signal just
   went dead.  Not even a carrier ping anymore.  So
@@ -140,3 +140,52 @@
   Use [$l] [$u] [$r] keys to fly."
 !T35"
   Shoot with [$f] to open doors."
+!T36"
+  \"Looks like another uplink.  Computer, where
+  are the surviving colonists?\""
+!T37"
+  Welcome, visitor, to Zenith Colony!            
+  
+  Query: Historical log patterns indicate that at
+  any given time the majority of the colonists are
+  located in the outer habitation areas.
+  
+  >>><"
+!T38"
+  \"No!  They're not there anymore, they've
+  evacuated downwards!  Where are they now?  And
+  just what happened here, anyway?\""
+!T39"
+  Query: Zenith Colony is one of eight deep-space
+  research efforts supported directly by the Joint
+  Federation of Sentient Races, and of those it is
+  the only institution run jointly between the
+  United Human Planets and the Trichord
+  Interstellar Alliance."
+!T40"
+  Recent research and development efforts at
+  Zenith Colony have focused on studying
+  Gravometric Waves, Nonlinear Paradimensional
+  Shear, and Experimental Propulsion Technologies.
+  Donations to support future research can be made
+  by contacting the JSFR science liason office.
+  
+  >>><"
+!T41"
+  \"That's not what I...no!  Gah!  There's been
+  some kind of disaster here.  What went wrong?\""
+!T42"
+  Query: ...                               
+  
+  No information is available on that topic.
+  
+  >>><"
+!T43"
+  \"Look, I'm here to answer the distress call
+  sent from here a few hours ago, and I need to
+  find the surviving colonists immediately.  Isn't
+  there anything $/useful$| you can do to help?\""
+!T44"
+  Survey map data is available for download.
+  
+  >>><"

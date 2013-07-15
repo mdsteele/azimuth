@@ -55,6 +55,8 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 // printing max_chars characters; set this to -1 to print the whole paragraph.
 // The permitted escapes are:
 //   $$ - insert a literal '$' character
+//   $/ - switch to italic font
+//   $| - switch back to roman (non-italic) font
 //   $W - set color to white
 //   $A - set color to gray
 //   $R - set color to red

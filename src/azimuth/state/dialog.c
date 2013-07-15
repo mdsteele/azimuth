@@ -128,7 +128,7 @@ static int paragraph_line_length_internal(
         case 'f': key_id = prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]; break;
         case 'o': key_id = prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]; break;
         case 't': key_id = prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]; break;
-        // All other escapes are just a single letter after the '$', which
+        // All other escapes are just a single character after the '$', which
         // we should skip over without increasing the line length.
         default:
           ++line_end;

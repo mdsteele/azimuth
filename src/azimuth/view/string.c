@@ -171,15 +171,9 @@ static void draw_char(int c) {
   }
 }
 
-/*===========================================================================*/
-
-void az_draw_string(double height, az_alignment_t align, double x, double top,
-                    const char* string) {
-  az_draw_chars(height, align, x, top, string, strlen(string));
-}
-
-void az_draw_chars(double height, az_alignment_t align, double x, double top,
-                   const char* chars, size_t len) {
+static void draw_chars_internal(
+    double height, az_alignment_t align, double x, double top, bool italic,
+    const char* chars, size_t len) {
   double left = x;
   switch (align) {
     case AZ_ALIGN_LEFT: break;
@@ -189,11 +183,31 @@ void az_draw_chars(double height, az_alignment_t align, double x, double top,
   glPushMatrix(); {
     glTranslated(left + 0.5, top + 0.5, 0);
     glScaled(height / FONT_SIZE, height / FONT_SIZE, 1);
+    if (italic) {
+      static const GLfloat italic_matrix[16] = {
+        1,    0, 0, 0,
+        -0.5, 1, 0, 0,
+        0,    0, 1, 0,
+        2,    0, 0, 1};
+      glMultMatrixf(italic_matrix);
+    }
     for (size_t i = 0; i < len; ++i) {
       draw_char(chars[i]);
       glTranslated(FONT_SIZE, 0, 0);
     }
   } glPopMatrix();
+}
+
+/*===========================================================================*/
+
+void az_draw_string(double height, az_alignment_t align, double x, double top,
+                    const char* string) {
+  draw_chars_internal(height, align, x, top, false, string, strlen(string));
+}
+
+void az_draw_chars(double height, az_alignment_t align, double x, double top,
+                   const char* chars, size_t len) {
+  draw_chars_internal(height, align, x, top, false, chars, len);
 }
 
 void az_draw_printf(double height, az_alignment_t align, double x, double top,
@@ -206,7 +220,7 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
   va_start(args, format);
   vsprintf(buffer, format, args);
   va_end(args);
-  az_draw_chars(height, align, x, top, buffer, size);
+  draw_chars_internal(height, align, x, top, false, buffer, size);
 }
 
 /*===========================================================================*/
@@ -231,8 +245,9 @@ void az_draw_paragraph(
     int max_chars, const az_preferences_t *prefs, const char *paragraph) {
   assert(prefs != NULL);
   assert(paragraph != NULL);
-  // Start out with white text.
+  // Start out with white, non-italic text.
   glColor3f(1, 1, 1);
+  bool italic = false;
   // Draw each line of text, one per outer loop iteration.  We will return from
   // this function when we reach the end (NUL character) of the paragraph, or
   // after printing max_chars characters.
@@ -273,9 +288,9 @@ void az_draw_paragraph(
       }
       // Draw the fragment (if it's non-empty).
       if (fragment_end > fragment_start) {
-        az_draw_chars(height, AZ_ALIGN_LEFT, fragment_left, line_top,
-                      paragraph + fragment_start,
-                      fragment_end - fragment_start);
+        draw_chars_internal(height, AZ_ALIGN_LEFT, fragment_left, line_top,
+                            italic, paragraph + fragment_start,
+                            fragment_end - fragment_start);
       }
       // If we've printed max_chars characters, or we're at the end of the
       // string, we're completely done.
@@ -301,6 +316,9 @@ void az_draw_paragraph(
         // can just back up fragment_start by one so that the second '$' is
         // included as the beginning of the next fragment.
         case '$': --fragment_start; break;
+        // Handle italics controls:
+        case '/': italic = true; break;
+        case '|': italic = false; break;
         // Handle color escapes:
         case 'W': glColor3f(1, 1, 1); break;
         case 'A': glColor3f(0.5, 0.5, 0.5); break;
@@ -365,9 +383,10 @@ void az_draw_paragraph(
         if (chars_printed < max_chars && max_chars - chars_printed < len) {
           len = max_chars - chars_printed;
         }
-        az_draw_chars(height, AZ_ALIGN_LEFT,
-                      line_left + height * (chars_printed - chars_before_line),
-                      line_top, key_name, len);
+        draw_chars_internal(
+            height, AZ_ALIGN_LEFT,
+            line_left + height * (chars_printed - chars_before_line),
+            line_top, italic, key_name, len);
         chars_printed += len;
       }
     }

@@ -1,6 +1,6 @@
 0: Used one of the first two save points (Colony rooms 10 and 25)
 1: Killed Snapdragon (Colony boss, room 20)
-2: Met first AI, upper armory door unlocked
+2: Met first AI (Colony room 19), upper armory door unlocked
 3: Opened rocket door between Colony room 21 and Filimun room 26
 4: Opened door to Core zone
 5: Killed security drone in Colony room 14
@@ -24,3 +24,4 @@
 23: Killed Zenith Core (Core boss, room 0)
 24: Opened mega bomb door bewteen Colony rooms 156 and 302
 25: Burst through rock face in Colony room 370
+26: Used comm console in Filimun room 28
