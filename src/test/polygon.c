@@ -970,3 +970,25 @@ void test_polygons_collide(void) {
 }
 
 /*===========================================================================*/
+
+void test_lead_target(void) {
+  az_vector_t impact = nix;
+
+  // Check az_lead_target works with NULL for out arg:
+  EXPECT_TRUE(az_lead_target(
+      (az_vector_t){5, 0}, (az_vector_t){0, 2.5 * sqrt(3)}, 5, NULL));
+
+  // Check case where it is possible to lead the target:
+  impact = nix;
+  EXPECT_TRUE(az_lead_target(
+      (az_vector_t){5, 0}, (az_vector_t){0, 2.5 * sqrt(3)}, 5, &impact));
+  EXPECT_VAPPROX(((az_vector_t){5, 5 * sqrt(3)}), impact);
+
+  // Check case where it is not possible to lead the target:
+  impact = nix;
+  EXPECT_FALSE(az_lead_target(
+      (az_vector_t){5, 0}, (az_vector_t){0, 100}, 1, &impact));
+  EXPECT_VAPPROX(nix, impact);
+}
+
+/*===========================================================================*/

@@ -744,6 +744,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       on_projectile_hit_wall(state, proj, impact.normal);
       break;
     case AZ_IMP_DOOR_INSIDE:
+      on_projectile_hit_wall(state, proj, impact.normal);
+      break;
     case AZ_IMP_WALL:
       az_try_break_wall(state, impact.target.wall, proj->data->damage_kind,
                         proj->position);

@@ -28,7 +28,6 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/object.h"
 #include "azimuth/tick/script.h"
-#include "azimuth/tick/ship.h" // for az_on_baddie_hit_ship
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
@@ -53,6 +52,15 @@ static bool has_line_of_sight_to_ship(az_space_state_t *state,
   return (impact.type == AZ_IMP_SHIP);
 }
 
+static bool has_clear_path_to_position(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t position) {
+  az_impact_t impact;
+  az_circle_impact(state, baddie->data->main_body.bounding_radius,
+                   baddie->position, az_vsub(position, baddie->position),
+                   (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+  return (impact.type == AZ_IMP_NOTHING);
+}
+
 static double dist_until_hit_wall(az_space_state_t *state, az_baddie_t *baddie,
                                   double max_dist, double rel_angle) {
   az_impact_t impact;
@@ -72,7 +80,37 @@ static az_projectile_t *fire_projectile(
       theta + proj_angle_offset, 1.0);
 }
 
-static az_vector_t force_field(
+/*===========================================================================*/
+
+static void apply_walls_to_force_field(
+    az_space_state_t *state, az_baddie_t *baddie,
+    double wall_far_coeff, double wall_near_coeff, az_vector_t *drift) {
+  const az_vector_t pos = baddie->position;
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
+    const az_vector_t delta = az_vsub(pos, door->position);
+    const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) {
+      az_vpluseq(drift, az_vwithlen(delta, wall_near_coeff));
+    } else {
+      az_vpluseq(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+    }
+  }
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    const az_vector_t delta = az_vsub(pos, wall->position);
+    const double dist = az_vnorm(delta) - wall->data->bounding_radius -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) {
+      az_vpluseq(drift, az_vwithlen(delta, wall_near_coeff));
+    } else {
+      az_vpluseq(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+    }
+  }
+}
+
+static az_vector_t force_field_to_ship(
     az_space_state_t *state, az_baddie_t *baddie,
     double ship_coeff, double ship_min_range, double ship_max_range,
     double wall_far_coeff, double wall_near_coeff) {
@@ -86,54 +124,36 @@ static az_vector_t force_field(
       drift = az_vwithlen(az_vsub(state->ship.position, pos), ship_coeff);
     }
   }
-  AZ_ARRAY_LOOP(door, state->doors) {
-    if (door->kind == AZ_DOOR_NOTHING) continue;
-    const az_vector_t delta = az_vsub(pos, door->position);
-    const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
-      baddie->data->overall_bounding_radius;
-    if (dist <= 0.0) {
-      az_vpluseq(&drift, az_vwithlen(delta, wall_near_coeff));
-    } else {
-      az_vpluseq(&drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
-    }
-  }
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_WALL_NOTHING) continue;
-    const az_vector_t delta = az_vsub(pos, wall->position);
-    const double dist = az_vnorm(delta) - wall->data->bounding_radius -
-      baddie->data->overall_bounding_radius;
-    if (dist <= 0.0) {
-      az_vpluseq(&drift, az_vwithlen(delta, wall_near_coeff));
-    } else {
-      az_vpluseq(&drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
-    }
-  }
+  apply_walls_to_force_field(state, baddie, wall_far_coeff,
+                             wall_near_coeff, &drift);
   return drift;
 }
+
+static az_vector_t force_field_to_position(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t goal,
+    double goal_coeff, double wall_far_coeff, double wall_near_coeff) {
+  az_vector_t drift = az_vwithlen(az_vsub(goal, baddie->position), goal_coeff);
+  apply_walls_to_force_field(state, baddie, wall_far_coeff,
+                             wall_near_coeff, &drift);
+  return drift;
+}
+
+/*===========================================================================*/
 
 static void drift_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double max_speed, double ship_force, double wall_force) {
-  const az_vector_t drift = force_field(state, baddie, ship_force, 0.0, 1000.0,
-                                        wall_force, 2.0 * wall_force);
+  const az_vector_t drift = force_field_to_ship(
+      state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
   baddie->velocity =
     az_vcaplen(az_vadd(baddie->velocity, az_vmul(drift, time)), max_speed);
 }
 
-static void fly_towards_ship(
+static void fly_common(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double turn_rate, double max_speed, double forward_accel,
-    double lateral_decel_rate, double attack_range, double ship_coeff) {
+    double lateral_decel_rate, az_vector_t drift, double goal_theta) {
   const double backward_accel = 80.0;
-  const az_vector_t drift =
-    (baddie->cooldown > 1.0 ?
-     force_field(state, baddie, -100.0, 0.0, 500.0, 100.0, 200.0) :
-     force_field(state, baddie, ship_coeff, attack_range, 1000.0, 100.0,
-                 200.0));
-  const double goal_theta =
-    az_vtheta(baddie->cooldown <= 0.0 &&
-              az_vwithin(baddie->position, state->ship.position, 120.0) ?
-              az_vsub(state->ship.position, baddie->position) : drift);
   baddie->angle =
     az_angle_towards(baddie->angle, turn_rate * time, goal_theta);
   const az_vector_t unit = az_vpolar(1, baddie->angle);
@@ -144,6 +164,35 @@ static void fly_towards_ship(
              az_vmul(unit, forward_accel * time) :
              az_vmul(unit, -backward_accel * time)));
   baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
+}
+
+
+static void fly_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double turn_rate, double max_speed, double forward_accel,
+    double lateral_decel_rate, double attack_range, double ship_coeff) {
+  const az_vector_t drift =
+    (baddie->cooldown > 1.0 ?
+     force_field_to_ship(state, baddie, -100.0, 0.0, 500.0, 100.0, 200.0) :
+     force_field_to_ship(state, baddie, ship_coeff, attack_range, 1000.0,
+                         100.0, 200.0));
+  const double goal_theta =
+    az_vtheta(baddie->cooldown <= 0.0 &&
+              az_vwithin(baddie->position, state->ship.position, 120.0) ?
+              az_vsub(state->ship.position, baddie->position) : drift);
+  fly_common(state, baddie, time, turn_rate, max_speed, forward_accel,
+             lateral_decel_rate, drift, goal_theta);
+}
+
+static void fly_towards_position(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    az_vector_t goal, double turn_rate, double max_speed,
+    double forward_accel, double lateral_decel_rate, double goal_coeff) {
+  const az_vector_t drift =
+    force_field_to_position(state, baddie, goal, goal_coeff, 100.0, 200.0);
+  const double goal_theta = az_vtheta(drift);
+  fly_common(state, baddie, time, turn_rate, max_speed, forward_accel,
+             lateral_decel_rate, drift, goal_theta);
 }
 
 static bool perch_on_ceiling(
@@ -450,6 +499,163 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
   // Chase ship; get slightly slower as we get hurt.
   snake_along(state, baddie, time, 2, 40.0, 130.0 - 10.0 * hurt, 50.0,
               state->ship.position);
+}
+
+static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
+                             double time) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  switch (baddie->state) {
+    // State 0: Intro.
+    case 0:
+      baddie->cooldown = 10.0;
+      baddie->state = 3; // TODO
+      break;
+    // State 1: Flee from ship.
+    case 1: {
+      // Out of all marker nodes the Oth Gunship can see, pick the one farthest
+      // from the ship.
+      double best_dist = 0.0;
+      az_vector_t target = baddie->position;
+      AZ_ARRAY_LOOP(node, state->nodes) {
+        if (node->kind != AZ_NODE_MARKER) continue;
+        if (has_clear_path_to_position(state, baddie, node->position)) {
+          const double dist = az_vdist(node->position, state->ship.position);
+          if (dist > best_dist) {
+            best_dist = dist;
+            target = node->position;
+          }
+        }
+      }
+      // If we've reached the target position (or if the cooldown expires), go
+      // to state 2.  Otherwise, fly towards the target position.
+      if (baddie->cooldown <= 0.0 ||
+          az_vwithin(baddie->position, target, 50.0)) {
+        if (!az_vwithin(baddie->position, state->ship.position, 800)) {
+          baddie->cooldown = 3.0;
+          baddie->state = 3;
+        } else baddie->state = 2;
+      } else {
+        fly_towards_position(state, baddie, time, target,
+                             5.0, 300, 300, 200, 100);
+      }
+    } break;
+    // State 2: Pursue the ship.
+    case 2: {
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (az_vwithin(baddie->position, state->ship.position, 300.0)) {
+        baddie->state = 5;
+      }
+    } break;
+    // State 3: Line up for C-plus dash.
+    case 3: {
+      baddie->velocity = AZ_VZERO;
+      az_vector_t rel_impact;
+      if (az_lead_target(az_vsub(state->ship.position, baddie->position),
+                         state->ship.velocity, 1000.0, &rel_impact)) {
+        const double goal_theta = az_vtheta(rel_impact);
+        baddie->angle =
+          az_angle_towards(baddie->angle, AZ_DEG2RAD(360) * time, goal_theta);
+        if (fabs(az_mod2pi(baddie->angle - goal_theta)) <= AZ_DEG2RAD(1) &&
+            has_clear_path_to_position(
+                state, baddie, az_vadd(baddie->position, rel_impact))) {
+          baddie->velocity = az_vpolar(1000.0, baddie->angle);
+          baddie->state = 4;
+          break;
+        }
+      }
+      if (baddie->cooldown <= 0.0) baddie->state = 2;
+    } break;
+    // State 4: Use C-plus drive.
+    case 4:
+      if (fabs(az_mod2pi(az_vtheta(baddie->velocity) -
+                         baddie->angle)) > AZ_DEG2RAD(5)) {
+        baddie->state = 1;
+      } else {
+        // TODO: do another az_lead_target, and steer towards new position
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_EMBER;
+          particle->color = (az_color_t){64, 255, 64, 255};
+          particle->position =
+            az_vadd(baddie->position, az_vpolar(-15.0, baddie->angle));
+          particle->velocity = AZ_VZERO;
+          particle->lifetime = 0.3;
+          particle->param1 = 20;
+        }
+      }
+      break;
+    // State 5: Dogfight.
+    case 5: {
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(3)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0, 0.0, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+        baddie->cooldown = 0.1;
+        if (az_random(0, 1) < 0.1) {
+          baddie->state = 6 + az_randint(0, az_imin(3, (int)(4.0 * hurt)));
+        }
+      }
+    } break;
+    // State 6: Fire a charged triple shot.
+    case 6:
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        for (int i = -1; i <= 1; ++i) {
+          fire_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                          20.0, 0.0, i * AZ_DEG2RAD(10));
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+        baddie->cooldown = 6.0;
+        baddie->state = 1;
+      }
+      break;
+    // State 7: Fire a hyper rocket.
+    case 7:
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(3)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET, 20.0, 0.0, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
+        baddie->cooldown = 6.0;
+        baddie->state = 1;
+      }
+      break;
+    // State 8: Fire a charged homing shot.
+    case 8:
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (baddie->cooldown <= 0.0 &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        for (int i = 0; i < 4; ++i) {
+          fire_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_HOMING,
+                          20.0, 0.0, AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+        baddie->cooldown = 6.0;
+        baddie->state = 1;
+      }
+      break;
+    // State 9: Fire a missile barrage.
+    case 9:
+      fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_MISSILE_BARRAGE,
+                        20.0, 0.0, 0.0);
+        baddie->cooldown = 6.0;
+        baddie->state = 1;
+      }
+      break;
+    default:
+      baddie->state = 0;
+      break;
+  }
 }
 
 static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
@@ -1547,10 +1753,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_OTH_GUNSHIP:
+      tick_oth_gunship(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
-  if (baddie->kind != AZ_BAD_NOTHING) {
+  if (baddie->kind != AZ_BAD_NOTHING &&
+      (baddie->data->properties & AZ_BADF_CARRIES_CARGO)) {
     az_move_baddie_cargo(
         state, baddie,
         az_vsub(baddie->position, old_baddie_position),

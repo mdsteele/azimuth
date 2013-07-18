@@ -35,7 +35,7 @@
 /*===========================================================================*/
 
 // Maximum number of each kind of object that can be in one room:
-#define AZ_MAX_NUM_BADDIES 100
+#define AZ_MAX_NUM_BADDIES 60
 #define AZ_MAX_NUM_DOORS 20
 #define AZ_MAX_NUM_GRAVFIELDS 50
 #define AZ_MAX_NUM_NODES 100

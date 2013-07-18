@@ -402,11 +402,16 @@ static const az_vector_t spined_crawler_vertices[] = {
   {3.25833, 8}, {-1.5, 13.8564}, {-8, 16}, {-14.5, 11}, {-18, 0}
 };
 
+static const az_vector_t oth_gunship_vertices[] = {
+  {20, 0}, {15, 4}, {6, 12}, {-10, 12}, {-14, 4},
+  {-14, -4}, {-10, -12}, {6, -12}, {15, -4}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
-    .properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
-                   AZ_BADF_NO_HOMING_PROJ),
+    .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_INCORPOREAL |
+                   AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_TURRET] = {
@@ -491,6 +496,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ZENITH_CORE] = {
     .max_health = 1000.0, .color = {255, 0, 255, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
                                   AZ_DMGF_REACTIVE) }
@@ -609,7 +615,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_OTH_SNAPDRAGON] = {
     .max_health = 60.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
-    .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0 }
+    .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0,
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
   },
   [AZ_BAD_OTH_RAZOR] = {
     .max_health = 0.1, .color = {255, 255, 255, 255},
@@ -638,6 +645,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 40.0,
     .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_truck_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
@@ -704,9 +712,9 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(stalk_plant_components)
   },
   [AZ_BAD_COPTER] = {
-    .max_health = 40.0,
-    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .max_health = 40.0, .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
@@ -754,12 +762,18 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 12.0 }
   },
   [AZ_BAD_DEATH_RAY] = {
-    .max_health = 100.0,
-    .potential_pickups = AZ_PUPF_ALL,
+    .max_health = 100.0, .potential_pickups = AZ_PUPF_ALL,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~AZ_DMGF_CPLUS }
+  },
+  [AZ_BAD_OTH_GUNSHIP] = {
+    .max_health = 250.0,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
+                   .impact_damage = 5.0 }
   }
 };
 

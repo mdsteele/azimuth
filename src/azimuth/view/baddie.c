@@ -316,19 +316,43 @@ static const az_vector_t oth_razor_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_triangles) % 3 == 0);
 
+static const az_vector_t oth_gunship_triangles[] = {
+  // Main body:
+  {20, 0}, {15, -4}, {5, 0},
+  {15, 4}, {20, 0}, {5, 0},
+  {-14, 4}, {5, 0}, {15, 4},
+  {5, 0}, {-14, -4}, {15, -4},
+  {-14, -4}, {5, 0}, {-14, 4},
+  // Port strut:
+  {-7, 7}, {-7, 4}, {1, 7},
+  {1, 4}, {1, 7}, {-7, 4},
+  // Starboard strut:
+  {-7, -4}, {-7, -7}, {1, -7},
+  {1, -7}, {1, -4}, {-7, -4},
+  // Port engine:
+  {6, 12}, {8, 7}, {-10, 12},
+  {-10, 12}, {-11, 7}, {8, 7},
+  // Starboard engine:
+  {8, -7}, {6, -12}, {-10, -12},
+  {-10, -12}, {8, -7}, {-11, -7}
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_gunship_triangles) % 3 == 0);
+
 static void draw_oth(
     const az_baddie_t *baddie, GLfloat flare, GLfloat frozen, az_clock_t clock,
     const az_vector_t *vertices, int num_vertices) {
+  assert(baddie->kind != AZ_BAD_NOTHING);
   assert(num_vertices % 3 == 0);
   const int num_triangles = num_vertices / 3;
+  const bool spin = (baddie->kind != AZ_BAD_OTH_GUNSHIP);
   for (int i = 0; i < num_triangles; ++i) {
     const az_vector_t *vs = vertices + i * 3;
     const az_vector_t center =
       az_vdiv(az_vadd(az_vadd(vs[0], vs[1]), vs[2]), 3);
     glPushMatrix(); {
       glTranslated(center.x, center.y, 0);
-      glRotated(az_clock_mod(360, 1, clock) -
-                AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
+      if (spin) glRotated(az_clock_mod(360, 1, clock) -
+                          AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
       glBegin(GL_TRIANGLES); {
         for (int j = 0; j < 3; ++j) {
           const az_clock_t clk = clock + 2 * j;
@@ -1654,6 +1678,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                     color3(0.2 + 0.25 * flare, 0.2, 0.1),
                     color3(0.3 + 0.25 * flare, 0.3, 0.2),
                     color3(0.4 + 0.15 * flare, 0.4, 0.3));
+      break;
+    case AZ_BAD_OTH_GUNSHIP:
+      draw_oth(baddie, flare, frozen, clock, oth_gunship_triangles,
+               AZ_ARRAY_SIZE(oth_gunship_triangles));
       break;
   }
 }

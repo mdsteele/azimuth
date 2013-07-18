@@ -40,7 +40,7 @@
 #define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 49
+#define AZ_NUM_BADDIE_KINDS 50
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -92,7 +92,8 @@ typedef enum {
   AZ_BAD_MINI_ARMORED_ZIPPER,
   AZ_BAD_OTH_CRAB_2,
   AZ_BAD_SPINED_CRAWLER,
-  AZ_BAD_DEATH_RAY
+  AZ_BAD_DEATH_RAY,
+  AZ_BAD_OTH_GUNSHIP
 } az_baddie_kind_t;
 
 typedef enum {
@@ -114,14 +115,16 @@ typedef struct {
 typedef uint_fast8_t az_baddie_flags_t;
 // BOUNCE_PERP: when bouncing, pretend normal is perpendicular to velocity
 #define AZ_BADF_BOUNCE_PERP    ((az_baddie_flags_t)(1u << 0))
+// CARRIES_CARGO: objects in cargo_uuids are moved along with the baddie
+#define AZ_BADF_CARRIES_CARGO  ((az_baddie_flags_t)(1u << 1))
 // INCORPOREAL: baddie cannot be hit by ship or by weapons
-#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 1))
+#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 2))
 // KAMIKAZE: baddie dies when it hits the ship
-#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 2))
+#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 3))
 // NO_HOMING_BEAM: homing beam ignores this baddie
-#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 3))
+#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 4))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
-#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 4))
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 5))
 
 typedef struct {
   double overall_bounding_radius;

@@ -19,7 +19,11 @@
 
 #include "azimuth/util/color.h"
 
+#include "azimuth/util/misc.h"
+
 /*===========================================================================*/
+
+AZ_STATIC_ASSERT(sizeof(az_color_t) == sizeof(int32_t));
 
 const az_color_t AZ_WHITE = {255, 255, 255, 255};
 const az_color_t AZ_GRAY = {128, 128, 128, 255};

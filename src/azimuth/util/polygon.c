@@ -925,4 +925,19 @@ bool az_polygons_collide(az_polygon_t s_polygon, az_vector_t s_position,
   return false;
 }
 
+bool az_lead_target(az_vector_t rel_position, az_vector_t rel_velocity,
+                    double proj_speed, az_vector_t *rel_impact_out) {
+  assert(proj_speed > 0.0);
+  double t1, t2;
+  if (!solve_quadratic(
+          az_vdot(rel_velocity, rel_velocity) - proj_speed * proj_speed,
+          2.0 * az_vdot(rel_position, rel_velocity),
+          az_vdot(rel_position, rel_position), &t1, &t2)) return false;
+  if (rel_impact_out != NULL) {
+    const double t = (0.0 <= t1 && (t1 <= t2 || t2 < 0.0) ? t1 : t2);
+    *rel_impact_out = az_vadd(rel_position, az_vmul(rel_velocity, t));
+  }
+  return true;
+}
+
 /*===========================================================================*/

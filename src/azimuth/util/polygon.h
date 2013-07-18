@@ -271,4 +271,14 @@ bool az_polygons_collide(az_polygon_t s_polygon, az_vector_t s_position,
 
 /*===========================================================================*/
 
+// Given the position and velocity of a target relative to the shooter, and the
+// speed of a projectile, determine if it's possible to fire the projectile
+// such that it will hit the target.  If so, store the position (relative to
+// the shooter) at which the projectile will hit the target in *rel_impact_out
+// (if rel_impact_out is non-NULL).
+bool az_lead_target(az_vector_t rel_position, az_vector_t rel_velocity,
+                    double proj_speed, az_vector_t *rel_impact_out);
+
+/*===========================================================================*/
+
 #endif // AZIMUTH_UTIL_POLYGON_H_
