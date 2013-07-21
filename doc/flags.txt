@@ -25,3 +25,4 @@
 24: Opened mega bomb door bewteen Colony rooms 156 and 302
 25: Burst through rock face in Colony room 370
 26: Used comm console in Filimun room 28
+27: Used comm console in Colony room 138

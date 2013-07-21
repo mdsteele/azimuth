@@ -1,4 +1,4 @@
-@P z8 r401 t59 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t68 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -25,7 +25,8 @@
   
   Status: Automated emergency disaster-control
   systems are active, although many of them have
-  been badly damaged.
+  been badly damaged.  Security IFF scanners
+  appear to be malfunctioning.
   
   No colonists are currently in the outer
   habitation areas."
@@ -249,3 +250,56 @@
   There is some $Mexperimental ordnance$W in the
   armory beyond here.  I will unlock the security
   doors."
+!T59"
+  Transmitter Control Room"
+!T60"
+  \"This whole facility's abandoned...no one left
+  up here.  Eerie.\""
+!T61"
+  Terminal online.  Awaiting command.
+  
+  >>><"
+!T62"
+  \"Hmm, this looks like the controls for the
+  colony's transmitter array.  Maybe I can get a
+  message to HQ, let them know what's going on?\"
+  
+  \"Computer, open a comm link to the nearest IPF
+  navsat.\""
+!T63"
+  ERROR: ENODEV
+  
+  Cannot comply with request.  The planetary
+  transmitter array is currently non-functional.
+  
+  >>><"
+!T64"
+  \"Blast it.  My ship can't broadcast far enough
+  from here, and I can't risk taking three hours
+  just to fly back out to range; not until I know
+  the survivors are safe.\"
+  
+  \"Computer, what's wrong with the transmitter?
+  Can you bring it back online?\""
+!T65"
+  Query: The planetary transmitter array has been
+  rendered non-functional due to severe damage to
+  the ansibular rods.  Preliminary analysis
+  indicates that the proximate cause of the damage
+  was a high-pressure fuel line explosion just
+  outside the antenna housing.  Prognosis: the
+  entire ansible assembly requires replacement.
+  >>><"
+!T66"
+  \"Crap.  I'll take that as a 'no' to my second
+  question.  At least now I know why the distress
+  signal cut out.\"
+  
+  \"Computer, can I at least get a map of the
+  facility?  This place is bigger than I
+  expected.\""
+!T67"
+  Accessing database.  Map data is available for
+  download.
+  
+  >>><"
