@@ -579,10 +579,13 @@ static void draw_hud(az_editor_state_t* state) {
   // Draw room properties:
   glColor3f(1, 1, 1);
   if (room->properties & AZ_ROOMF_DARK) {
-    az_draw_string(8, AZ_ALIGN_LEFT, 600, 5, "D");
+    az_draw_string(8, AZ_ALIGN_LEFT, 590, 5, "D");
   }
   if (room->properties & AZ_ROOMF_HEATED) {
-    az_draw_string(8, AZ_ALIGN_LEFT, 610, 5, "H");
+    az_draw_string(8, AZ_ALIGN_LEFT, 600, 5, "H");
+  }
+  if (room->properties & AZ_ROOMF_MARKER) {
+    az_draw_string(8, AZ_ALIGN_LEFT, 610, 5, "K");
   }
   if (room->properties & AZ_ROOMF_UNMAPPED) {
     az_draw_string(8, AZ_ALIGN_LEFT, 620, 5, "U");

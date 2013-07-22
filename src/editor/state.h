@@ -53,6 +53,7 @@ typedef enum {
   AZ_ETA_SET_CARGO_SLOTS,
   AZ_ETA_SET_CURRENT_ROOM,
   AZ_ETA_SET_DOOR_DEST,
+  AZ_ETA_SET_MARKER_FLAG,
   AZ_ETA_SET_UUID_SLOT
 } az_editor_text_action_t;
 
@@ -116,6 +117,7 @@ typedef struct {
   az_editor_room_label_t label;
   az_zone_key_t zone_key;
   az_room_flags_t properties;
+  az_flag_t marker_flag;
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start;
   AZ_LIST_DECLARE(az_editor_baddie_t, baddies);

@@ -1060,6 +1060,34 @@ static void try_set_door_dest(void) {
   }
 }
 
+static void begin_set_marker_flag(void) {
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  if (room->properties & AZ_ROOMF_MARKER) {
+    az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "%d",
+                        (int)room->marker_flag);
+  } else az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, " ");
+}
+
+static void try_set_marker_flag(void) {
+  assert(state.text.action == AZ_ETA_SET_MARKER_FLAG);
+  assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
+  assert(state.text.buffer[state.text.length] == '\0');
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  if (state.text.length == 0) {
+    room->properties &= ~AZ_ROOMF_MARKER;
+    room->marker_flag = 0;
+  } else {
+    int flag, count;
+    if (sscanf(state.text.buffer, "%d%n", &flag, &count) < 1) return;
+    if (count != state.text.length) return;
+    if (flag < 0 || flag >= AZ_MAX_NUM_FLAGS) return;
+    room->properties |= AZ_ROOMF_MARKER;
+    room->marker_flag = (az_flag_t)flag;
+  }
+  set_room_unsaved(room);
+  state.text.action = AZ_ETA_NOTHING;
+}
+
 static void begin_set_uuid_slot(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   int uuid_slot = -1;
@@ -1196,6 +1224,7 @@ static void event_loop(void) {
                   case AZ_ETA_SET_CARGO_SLOTS: try_set_cargo_slots(); break;
                   case AZ_ETA_SET_CURRENT_ROOM: try_set_current_room(); break;
                   case AZ_ETA_SET_DOOR_DEST: try_set_door_dest(); break;
+                  case AZ_ETA_SET_MARKER_FLAG: try_set_marker_flag(); break;
                   case AZ_ETA_SET_UUID_SLOT: try_set_uuid_slot(); break;
                 }
                 break;
@@ -1290,6 +1319,9 @@ static void event_loop(void) {
             case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
             case AZ_KEY_H:
               if (event.key.shift) do_toggle_property(AZ_ROOMF_HEATED);
+              break;
+            case AZ_KEY_K:
+              if (event.key.command) begin_set_marker_flag();
               break;
             case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:

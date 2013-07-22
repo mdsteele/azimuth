@@ -97,15 +97,18 @@ typedef uint_fast8_t az_room_flags_t;
 #define AZ_ROOMF_HEATED      ((az_room_flags_t)(1u << 1))
 // UNMAPPED: the room is not included in the map data for the room's zone
 #define AZ_ROOMF_UNMAPPED    ((az_room_flags_t)(1u << 2))
+// MARKER: the room should have a map marker until the marker_flag flag is set
+#define AZ_ROOMF_MARKER      ((az_room_flags_t)(1u << 3))
 // WITH_*: the room should be marked on the map as containing the given console
-#define AZ_ROOMF_WITH_COMM   ((az_room_flags_t)(1u << 3))
-#define AZ_ROOMF_WITH_REFILL ((az_room_flags_t)(1u << 4))
-#define AZ_ROOMF_WITH_SAVE   ((az_room_flags_t)(1u << 5))
+#define AZ_ROOMF_WITH_COMM   ((az_room_flags_t)(1u << 4))
+#define AZ_ROOMF_WITH_REFILL ((az_room_flags_t)(1u << 5))
+#define AZ_ROOMF_WITH_SAVE   ((az_room_flags_t)(1u << 6))
 
 // Represents one room of the planetoid.  This sturct owns all of its pointers.
 typedef struct {
   az_zone_key_t zone_key;
   az_room_flags_t properties;
+  az_flag_t marker_flag; // if MARKER, show marker until this flag is set
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start; // NULL if no script
   // Initial room objects:

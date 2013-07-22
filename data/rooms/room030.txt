@@ -1,4 +1,4 @@
-@R z1 p0 b1 d3 g2 n10 w33
+@R z1 p8/9 b1 d3 g2 n10 w33
   c(36861.76,396.12,1.410287,0.010454)
 $s:test9,beqz3,nix1,halt,mus11,lock2,lock3,wait2,boss1;
 !W1 d12 x5951.31 y37007.82 a0.092992 u0

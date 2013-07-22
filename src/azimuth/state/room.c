@@ -87,11 +87,21 @@ static az_script_t *maybe_parse_script(az_load_room_t *loader, char ch) {
 static void parse_room_header(az_load_room_t *loader) {
   int zone_index;
   unsigned int properties;
-  double min_r, r_span, min_theta, theta_span;
+  READ("@R z%d p%u", &zone_index, &properties);
+  if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
+  loader->room->zone_key = (az_zone_key_t)zone_index;
+  loader->room->properties = (az_room_flags_t)properties;
+  if (loader->room->properties & AZ_ROOMF_MARKER) {
+    int marker_flag;
+    READ("/%d", &marker_flag);
+    if (marker_flag < 0 || marker_flag >= AZ_MAX_NUM_FLAGS) FAIL();
+    loader->room->marker_flag = (az_flag_t)marker_flag;
+  }
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
-  READ("@R z%d p%u b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n",
-       &zone_index, &properties, &num_baddies, &num_doors, &num_gravfields,
-       &num_nodes, &num_walls, &min_r, &r_span, &min_theta, &theta_span);
+  double min_r, r_span, min_theta, theta_span;
+  READ(" b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n",
+       &num_baddies, &num_doors, &num_gravfields, &num_nodes, &num_walls,
+       &min_r, &r_span, &min_theta, &theta_span);
   if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
   loader->room->zone_key = (az_zone_key_t)zone_index;
   loader->room->properties = (az_room_flags_t)properties;
@@ -341,8 +351,11 @@ static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
   } while (false)
 
 static bool write_room(const az_room_t *room, FILE *file) {
-  WRITE("@R z%d p%u b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",
-        (int)room->zone_key, (unsigned int)room->properties,
+  WRITE("@R z%d p%u", (int)room->zone_key, (unsigned int)room->properties);
+  if (room->properties & AZ_ROOMF_MARKER) {
+    WRITE("/%d", (int)room->marker_flag);
+  }
+  WRITE(" b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",
         room->num_baddies, room->num_doors, room->num_gravfields,
         room->num_nodes, room->num_walls, room->camera_bounds.min_r,
         room->camera_bounds.r_span, room->camera_bounds.min_theta,
