@@ -220,6 +220,18 @@ static az_vector_t wall_vertices_72[] = {
   {32, -60}, {31, -35}, {32, -4}, {34, 28}, {33, 44}, {34, 60},
   {-30, 60}, {-29, 27}, {-30, 10}, {-32, 0}, {-33, -40}, {-32, -60}
 };
+static az_vector_t wall_vertices_73[] = {
+  {50, -8}, {30, 30}, {10, 50}, {-10, 53}, {-25, 30},
+  {-50, 0}, {-40, -45}, {-10, -65}, {10, -60}, {40, -35}
+};
+static az_vector_t wall_vertices_74[] = {
+  {100, -10}, {60, 40}, {-20, 70}, {-50, 40},
+  {-100, 0}, {-80, -60}, {-20, -90}, {20, -90}, {80, -46}
+};
+static az_vector_t wall_vertices_75[] = {
+  {40, 6}, {67, 40}, {70, 60}, {58, 80}, {15, 90}, {-30, 56},
+  {-50, 18}, {-46, -16}, {-10, -56}, {20, -52}, {50, -35}, {52, -20}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -715,6 +727,48 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {40, 32, 24, 255}, .color3 = {40, 32, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 3.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_72)
+  },
+  // Yellow/blue seashell:
+  [73] = {
+    .style = AZ_WSTY_CELL_TRI, .color1 = {128, 128, 32, 255},
+    .color2 = {64, 64, 0, 255}, .color3 = {0, 64, 64, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+  },
+  // Yellow/purple seashell:
+  [74] = {
+    .style = AZ_WSTY_CELL_TRI, .color1 = {128, 128, 32, 255},
+    .color2 = {96, 64, 0, 255}, .color3 = {64, 0, 96, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+  },
+  // Yellow/green seashell:
+  [75] = {
+    .style = AZ_WSTY_CELL_TRI, .color1 = {160, 128, 32, 255},
+    .color2 = {96, 64, 32, 255}, .color3 = {0, 96, 0, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_75)
+  },
+  // Yellow/green seashell:
+  [76] = {
+    .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 128, 32, 255},
+    .color2 = {64, 64, 0, 255}, .color3 = {0, 64, 0, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+  },
+  // Yellow/purple seashell:
+  [77] = {
+    .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 160, 32, 255},
+    .color2 = {96, 64, 32, 255}, .color3 = {64, 0, 96, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_75)
+  },
+  // Yellow/blue seashell:
+  [78] = {
+    .style = AZ_WSTY_CELL_TRI, .color1 = {128, 128, 32, 255},
+    .color2 = {64, 96, 0, 255}, .color3 = {0, 64, 96, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_74)
   }
 };
 
