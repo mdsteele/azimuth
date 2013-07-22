@@ -43,9 +43,10 @@ static GLuint portrait_display_lists_start;
 #define HQ_TALKING_INDEX 3
 #define CPU_A_PAUSED_INDEX 4
 #define CPU_B_PAUSED_INDEX 5
-#define TRICHORD_PAUSED_INDEX 6
-#define TRICHORD_TALKING_INDEX 7
-#define NUM_PORTRAIT_DISPLAY_LISTS 8
+#define CPU_C_PAUSED_INDEX 6
+#define TRICHORD_PAUSED_INDEX 7
+#define TRICHORD_TALKING_INDEX 8
+#define NUM_PORTRAIT_DISPLAY_LISTS 9
 
 /*===========================================================================*/
 
@@ -256,6 +257,27 @@ static const az_vector_t cpu_b5_vertices[] = {
   {44, 60}, {56, 60}, {56, 63}, {57, 63}, {57, 100}
 };
 
+static const az_vector_t cpu_c1_vertices[] = {
+  {0, 100}, {0, 53}, {27, 53}, {27, 54}, {30, 54},
+  {30, 60}, {36, 60}, {36, 63}, {37, 63}, {37, 100}
+};
+static const az_vector_t cpu_c2_vertices[] = {
+  {100, 100}, {43, 100}, {43, 63}, {44, 63}, {44, 60}, {56, 60},
+  {56, 63}, {57, 63}, {57, 73}, {58, 75}, {60, 76}, {100, 76}
+};
+static const az_vector_t cpu_c3_vertices[] = {
+  {100, 70}, {63, 70}, {63, 63}, {64, 63}, {64, 60}, {70, 60},
+  {70, 54}, {73, 54}, {73, 53}, {83, 53}, {100, 53}
+};
+static const az_vector_t cpu_c4_vertices[] = {
+  {100, 0}, {100, 47}, {73, 47}, {73, 46}, {70, 46}, {70, 40}, {54, 40},
+  {54, 37}, {53, 37}, {53, 20}, {52, 18}, {50, 17}, {33, 17}, {33, 0}
+};
+static const az_vector_t cpu_c5_vertices[] = {
+  {0, 0}, {27, 0}, {27, 20}, {28, 22}, {30, 23}, {47, 23}, {47, 37},
+  {46, 37}, {46, 40}, {30, 40}, {30, 46}, {27, 46}, {27, 47}, {0, 47}
+};
+
 static const az_vector_t trichord_paused1_vertices[] = {
   {100, 100},
   // Right side of top arm:
@@ -395,6 +417,22 @@ void az_init_portrait_drawing(void) {
     draw_portrait_polygon(6, color1, color2, polygon5);
     draw_computer_circle(60, 50, color1, (az_color_t){0, 255, 0, 128});
   } glEndList();
+  // Compile CPU C portrait:
+  glNewList(portrait_display_lists_start + CPU_C_PAUSED_INDEX, GL_COMPILE); {
+    const az_color_t color1 = {192, 192, 255, 255};
+    const az_color_t color2 = {64, 64, 255, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(cpu_c1_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(cpu_c2_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon2);
+    const az_polygon_t polygon3 = AZ_INIT_POLYGON(cpu_c3_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon3);
+    const az_polygon_t polygon4 = AZ_INIT_POLYGON(cpu_c4_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon4);
+    const az_polygon_t polygon5 = AZ_INIT_POLYGON(cpu_c5_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon5);
+    draw_computer_circle(50, 50, color1, (az_color_t){64, 64, 255, 128});
+  } glEndList();
   // Compile Trichord portrait:
   glNewList(portrait_display_lists_start + TRICHORD_PAUSED_INDEX,
             GL_COMPILE); {
@@ -459,7 +497,12 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
         draw_computer_blinkenlight(60, 50, (az_color_t){128, 255, 128, 255});
       }
       break;
-    case AZ_POR_CPU_C: return; // TODO
+    case AZ_POR_CPU_C:
+      display_list += CPU_C_PAUSED_INDEX;
+      if (az_clock_mod(2, (talking ? 3 : 25), clock)) {
+        draw_computer_blinkenlight(50, 50, (az_color_t){192, 192, 255, 255});
+      }
+      break;
     case AZ_POR_TRICHORD:
       display_list += (talking && az_clock_mod(2, 5, clock) != 0 ?
                        TRICHORD_TALKING_INDEX : TRICHORD_PAUSED_INDEX);
