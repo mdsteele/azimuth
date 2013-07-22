@@ -1,4 +1,4 @@
-@P z8 r401 t68 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t78 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -303,3 +303,48 @@
   download.
   
   >>><"
+!T68"
+  Storage Room"
+!T69"
+  An unknown visitor.  Please identify yourself."
+!T70"
+  \"Huh, is this computer different?  I'm Major
+  Shawna Jemison, of the United Human Planets
+  Interstellar Patrol Force.  ...You can call me
+  Hopper, I guess.  I'm responding to this
+  colony's distress signal.  Do you know where the
+  survivors are?\""
+!T71"
+  Greetings Hopper.  Checking sensors...         
+  
+  $Xff8800[WARN]$W Most planetary sensors are cut off.
+  There appear to be numerous damaged links
+  throughout the data net.  Sensors available to
+  this relay are limited to the upper portion of
+  the Nandiar region.  No Humans or Trichords are
+  currently present in that area."
+!T72"
+  \"Figures.  Any idea where I can find them?\""
+!T73"
+  It is possible that there may be researchers
+  down in the Lower Nandiar Laboratory, but
+  sensors for that section are not currently
+  available."
+!T74"
+  \"Wait, there's another lab all the way down
+  there?  Way underground?  What is it even for?\""
+!T75"
+  Politically, it serves the same purpose as the
+  rest of Zenith Research Colony: to give the
+  Humans and Trichords something to cooperate on,
+  to help ease the tense relations between them.
+  
+  Scientifically, the Lower Nandiar Laboratory is
+  where many of the high-energy NPS experiments
+  are conducted."
+!T76"
+  \"All right, I'd better check it out, see if
+  anyone's still in there.  Can you put it on my
+  map?\""
+!T77"
+  Nandiar map data has been uploaded to your ship."
