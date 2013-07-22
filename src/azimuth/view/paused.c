@@ -231,19 +231,19 @@ static const az_vector_t gun_line_vertices[] = {
   {320, 65}, {320, 95}, {301, 95}, {301, 129}
 };
 static const az_vector_t armor_line_vertices[] = {
-  {176, 117}, {255, 117}, {255, 185}, {310, 185}
+  {176, 123}, {255, 123}, {255, 185}, {310, 185}
 };
 static const az_vector_t reactor_line_vertices[] = {
-  {176, 197}, {230, 197}, {230, 260}, {290, 260}
+  {176, 203}, {230, 203}, {230, 260}, {290, 260}
 };
 static const az_vector_t misc_line_vertices[] = {
-  {176, 267}, {205, 267}, {205, 338}, {330, 338}, {330, 290}
+  {176, 273}, {205, 273}, {205, 338}, {330, 338}, {330, 290}
 };
 static const az_vector_t ordnance_line_vertices[] = {
-  {464, 117}, {320, 117}, {320, 145}
+  {464, 123}, {320, 123}, {320, 145}
 };
 static const az_vector_t engines_line_vertices[] = {
-  {464, 207}, {430, 207}, {430, 245}, {380, 245}
+  {464, 213}, {430, 213}, {430, 245}, {380, 245}
 };
 
 static void vertex_between(az_vector_t v0, az_vector_t v1, double amount) {
@@ -313,22 +313,22 @@ static const az_vector_t upgrade_toplefts[] = {
   [AZ_UPG_GUN_BURST] = {257, 46},
   [AZ_UPG_GUN_PIERCE] = {323, 46},
   [AZ_UPG_GUN_BEAM] = {389, 46},
-  [AZ_UPG_HYPER_ROCKETS] = {466, 80},
-  [AZ_UPG_MEGA_BOMBS] = {466, 100},
-  [AZ_UPG_HIGH_EXPLOSIVES] = {466, 120},
-  [AZ_UPG_ATTUNED_EXPLOSIVES] = {466, 140},
-  [AZ_UPG_RETRO_THRUSTERS] = {466, 180},
-  [AZ_UPG_CPLUS_DRIVE] = {466, 200},
-  [AZ_UPG_ORION_BOOSTER] = {466, 220},
-  [AZ_UPG_HARDENED_ARMOR] = {24, 80},
-  [AZ_UPG_DYNAMIC_ARMOR] = {24, 100},
-  [AZ_UPG_THERMAL_ARMOR] = {24, 120},
-  [AZ_UPG_REACTIVE_ARMOR] = {24, 140},
-  [AZ_UPG_FUSION_REACTOR] = {24, 180},
-  [AZ_UPG_QUANTUM_REACTOR] = {24, 200},
-  [AZ_UPG_TRACTOR_BEAM] = {24, 240},
-  [AZ_UPG_INFRASCANNER] = {24, 260},
-  [AZ_UPG_MAGNET_SWEEP] = {24, 280}
+  [AZ_UPG_HYPER_ROCKETS] = {466, 86},
+  [AZ_UPG_MEGA_BOMBS] = {466, 106},
+  [AZ_UPG_HIGH_EXPLOSIVES] = {466, 126},
+  [AZ_UPG_ATTUNED_EXPLOSIVES] = {466, 146},
+  [AZ_UPG_RETRO_THRUSTERS] = {466, 186},
+  [AZ_UPG_CPLUS_DRIVE] = {466, 206},
+  [AZ_UPG_ORION_BOOSTER] = {466, 226},
+  [AZ_UPG_HARDENED_ARMOR] = {24, 86},
+  [AZ_UPG_DYNAMIC_ARMOR] = {24, 106},
+  [AZ_UPG_THERMAL_ARMOR] = {24, 126},
+  [AZ_UPG_REACTIVE_ARMOR] = {24, 146},
+  [AZ_UPG_FUSION_REACTOR] = {24, 186},
+  [AZ_UPG_QUANTUM_REACTOR] = {24, 206},
+  [AZ_UPG_TRACTOR_BEAM] = {24, 246},
+  [AZ_UPG_INFRASCANNER] = {24, 266},
+  [AZ_UPG_MAGNET_SWEEP] = {24, 286}
 };
 
 static void set_weapon_box_color(bool has, bool selected) {

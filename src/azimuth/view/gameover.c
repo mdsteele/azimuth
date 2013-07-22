@@ -30,6 +30,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/view/cursor.h"
+#include "azimuth/view/cutscene.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -120,6 +121,8 @@ void az_gameover_draw_screen(const az_gameover_state_t *state) {
     glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
     glVertex2i(0, AZ_SCREEN_HEIGHT);
   } glEnd();
+
+  az_draw_planet_starfield(state->clock);
 
   // Draw fixed text:
   glColor3f(1, 1, 1);
