@@ -1092,10 +1092,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               az_baddie_t *razor = az_add_baddie(
                   state, AZ_BAD_OTH_RAZOR, baddie->position,
                   baddie->angle + AZ_PI + i * AZ_DEG2RAD(45));
-              if (razor != NULL) {
-                razor->velocity =
-                  az_vpolar(az_random(300, 500), razor->angle);
-              } else break;
+              if (razor == NULL) break;
             }
             az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
             baddie->cooldown = az_random(2.0, 4.0);
@@ -1106,10 +1103,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               az_baddie_t *razor = az_add_baddie(
                   state, AZ_BAD_OTH_RAZOR, baddie->position,
                   baddie->angle + AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
-              if (razor != NULL) {
-                razor->state = 1;
-                razor->velocity = az_vpolar(300, razor->angle);
-              } else break;
+              if (razor != NULL) razor->state = 1;
+              else break;
             }
             az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
             baddie->cooldown = az_random(2.0, 4.0);
@@ -1120,12 +1115,19 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_OTH_RAZOR:
       if (baddie->state == 0) {
+        baddie->velocity = az_vpolar(az_random(300, 500), baddie->angle);
+        baddie->state = 2;
+      } else if (baddie->state == 1) {
+        baddie->velocity = az_vpolar(300, baddie->angle);
+        baddie->state = 3;
+      }
+      if (baddie->state == 2) {
         drift_towards_ship(state, baddie, time, 400, 500, 100);
         baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(180) * time);
-      } else {
+      } else if (baddie->state == 3) {
         baddie->velocity = az_vwithlen(baddie->velocity, 300.0);
         baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(180) * time);
-      }
+      } else baddie->state = 0;
       break;
     case AZ_BAD_SECURITY_DRONE:
       // Chase ship:

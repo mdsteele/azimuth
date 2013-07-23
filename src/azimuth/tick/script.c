@@ -181,6 +181,11 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
     STACK_PUSH(expr); \
   } while (0)
 
+static double modulo(double a, double b) {
+  // If b is zero, return NaN (which will trigger an error).
+  return (b == 0.0 ? NAN : az_signmod(a, b, b));
+}
+
 /*===========================================================================*/
 
 void az_run_script(az_space_state_t *state, const az_script_t *script) {
@@ -204,27 +209,23 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_PUSH:
         STACK_PUSH(ins.immediate);
         break;
-      case AZ_OP_POP:
-        {
-          const int num = az_imax(1, (int)ins.immediate);
-          if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
-          vm->stack_size -= num;
+      case AZ_OP_POP: {
+        const int num = az_imax(1, (int)ins.immediate);
+        if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
+        vm->stack_size -= num;
+      } break;
+      case AZ_OP_DUP: {
+        const int num = az_imax(1, (int)ins.immediate);
+        if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
+        if (vm->stack_size + num > AZ_ARRAY_SIZE(vm->stack)) {
+          SCRIPT_ERROR("stack overflow");
         }
-        break;
-      case AZ_OP_DUP:
-        {
-          const int num = az_imax(1, (int)ins.immediate);
-          if (vm->stack_size < num) SCRIPT_ERROR("stack underflow");
-          if (vm->stack_size + num > AZ_ARRAY_SIZE(vm->stack)) {
-            SCRIPT_ERROR("stack overflow");
-          }
-          for (int i = 0; i < num; ++i) {
-            vm->stack[vm->stack_size + i] =
-              vm->stack[vm->stack_size - num + i];
-          }
-          vm->stack_size += num;
+        for (int i = 0; i < num; ++i) {
+          vm->stack[vm->stack_size + i] =
+            vm->stack[vm->stack_size - num + i];
         }
-        break;
+        vm->stack_size += num;
+      } break;
       // Arithmetic:
       case AZ_OP_ADD: BINARY_OP(a + b); break;
       case AZ_OP_ADDI: UNARY_OP(a + ins.immediate); break;
@@ -236,45 +237,37 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DIV: BINARY_OP(a / b); break;
       case AZ_OP_DIVI: UNARY_OP(a / ins.immediate); break;
       case AZ_OP_IDIV: UNARY_OP(ins.immediate / a); break;
+      case AZ_OP_MOD: BINARY_OP(modulo(a, b)); break;
+      case AZ_OP_MODI: UNARY_OP(modulo(a, ins.immediate)); break;
       // Vectors:
-      case AZ_OP_VADD:
-        {
-          double xa, ya, xb, yb;
-          STACK_POP(&xa, &ya, &xb, &yb);
-          STACK_PUSH(xa + xb, ya + yb);
-        }
-        break;
-      case AZ_OP_VSUB:
-        {
-          double xa, ya, xb, yb;
-          STACK_POP(&xa, &ya, &xb, &yb);
-          STACK_PUSH(xa - xb, ya - yb);
-        }
-        break;
-      case AZ_OP_VMUL:
-        {
-          double x, y, f;
-          STACK_POP(&x, &y, &f);
-          STACK_PUSH(x * f, y * f);
-        }
-        break;
-      case AZ_OP_VMULI:
-        {
-          double x, y;
-          STACK_POP(&x, &y);
-          STACK_PUSH(x * ins.immediate, y * ins.immediate);
-        }
-        break;
+      case AZ_OP_VADD: {
+        double xa, ya, xb, yb;
+        STACK_POP(&xa, &ya, &xb, &yb);
+        STACK_PUSH(xa + xb, ya + yb);
+      } break;
+      case AZ_OP_VSUB: {
+        double xa, ya, xb, yb;
+        STACK_POP(&xa, &ya, &xb, &yb);
+        STACK_PUSH(xa - xb, ya - yb);
+      } break;
+      case AZ_OP_VMUL: {
+        double x, y, f;
+        STACK_POP(&x, &y, &f);
+        STACK_PUSH(x * f, y * f);
+      } break;
+      case AZ_OP_VMULI: {
+        double x, y;
+        STACK_POP(&x, &y);
+        STACK_PUSH(x * ins.immediate, y * ins.immediate);
+      } break;
       case AZ_OP_VNORM: BINARY_OP(hypot(a, b)); break;
       case AZ_OP_VTHETA: BINARY_OP(atan2(b, a)); break;
-      case AZ_OP_VPOLAR:
-        {
-          double magnitude, theta;
-          STACK_POP(&magnitude, &theta);
-          const az_vector_t vec = az_vpolar(magnitude, theta);
-          STACK_PUSH(vec.x, vec.y);
-        }
-        break;
+      case AZ_OP_VPOLAR: {
+        double magnitude, theta;
+        STACK_POP(&magnitude, &theta);
+        const az_vector_t vec = az_vpolar(magnitude, theta);
+        STACK_PUSH(vec.x, vec.y);
+      } break;
       // Comparisons:
       case AZ_OP_EQ: BINARY_OP(a == b ? 1.0 : 0.0); break;
       case AZ_OP_EQI: UNARY_OP(a == ins.immediate ? 1.0 : 0.0); break;
@@ -289,336 +282,304 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_GE: BINARY_OP(a >= b ? 1.0 : 0.0); break;
       case AZ_OP_GEI: UNARY_OP(a >= ins.immediate ? 1.0 : 0.0); break;
       // Flags:
-      case AZ_OP_TEST:
-        {
-          const int flag_index = (int)ins.immediate;
-          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
-            SCRIPT_ERROR("invalid flag index");
-          }
-          STACK_PUSH(az_test_flag(&state->ship.player, (az_flag_t)flag_index) ?
-                     1.0 : 0.0);
+      case AZ_OP_TEST: {
+        const int flag_index = (int)ins.immediate;
+        if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+          SCRIPT_ERROR("invalid flag index");
         }
-        break;
-      case AZ_OP_SET:
-        {
-          const int flag_index = (int)ins.immediate;
-          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
-            SCRIPT_ERROR("invalid flag index");
-          }
-          az_set_flag(&state->ship.player, (az_flag_t)flag_index);
+        STACK_PUSH(az_test_flag(&state->ship.player, (az_flag_t)flag_index) ?
+                   1.0 : 0.0);
+      } break;
+      case AZ_OP_SET: {
+        const int flag_index = (int)ins.immediate;
+        if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+          SCRIPT_ERROR("invalid flag index");
         }
-        break;
-      case AZ_OP_CLR:
-        {
-          const int flag_index = (int)ins.immediate;
-          if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
-            SCRIPT_ERROR("invalid flag index");
-          }
-          az_clear_flag(&state->ship.player, (az_flag_t)flag_index);
+        az_set_flag(&state->ship.player, (az_flag_t)flag_index);
+      } break;
+      case AZ_OP_CLR: {
+        const int flag_index = (int)ins.immediate;
+        if (flag_index < 0 || flag_index >= AZ_MAX_NUM_FLAGS) {
+          SCRIPT_ERROR("invalid flag index");
         }
-        break;
-      case AZ_OP_MAP:
-        {
-          const int zone_index = (int)ins.immediate;
-          if (zone_index < 0 || zone_index >= state->planet->num_zones) {
-            SCRIPT_ERROR("invalid zone index");
-          }
-          az_set_zone_mapped(&state->ship.player, (az_zone_key_t)zone_index);
+        az_clear_flag(&state->ship.player, (az_flag_t)flag_index);
+      } break;
+      case AZ_OP_MAP: {
+        const int zone_index = (int)ins.immediate;
+        if (zone_index < 0 || zone_index >= state->planet->num_zones) {
+          SCRIPT_ERROR("invalid zone index");
         }
-        break;
+        az_set_zone_mapped(&state->ship.player, (az_zone_key_t)zone_index);
+      } break;
       // Objects:
-      case AZ_OP_NIX:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          switch (object.type) {
-            case AZ_OBJ_NOTHING: break;
-            case AZ_OBJ_BADDIE:
-              object.obj.baddie->kind = AZ_BAD_NOTHING;
-              break;
-            case AZ_OBJ_DOOR:
-              object.obj.door->kind = AZ_DOOR_NOTHING;
-              break;
-            case AZ_OBJ_GRAVFIELD:
-              object.obj.gravfield->kind = AZ_GRAV_NOTHING;
-              break;
-            case AZ_OBJ_NODE:
-              object.obj.node->kind = AZ_NODE_NOTHING;
-              break;
-            case AZ_OBJ_SHIP: SCRIPT_ERROR("invalid object type");
-            case AZ_OBJ_WALL:
-              object.obj.wall->kind = AZ_WALL_NOTHING;
-              break;
-          }
+      case AZ_OP_NIX: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        switch (object.type) {
+          case AZ_OBJ_NOTHING: break;
+          case AZ_OBJ_BADDIE:
+            object.obj.baddie->kind = AZ_BAD_NOTHING;
+            break;
+          case AZ_OBJ_DOOR:
+            object.obj.door->kind = AZ_DOOR_NOTHING;
+            break;
+          case AZ_OBJ_GRAVFIELD:
+            object.obj.gravfield->kind = AZ_GRAV_NOTHING;
+            break;
+          case AZ_OBJ_NODE:
+            object.obj.node->kind = AZ_NODE_NOTHING;
+            break;
+          case AZ_OBJ_SHIP: SCRIPT_ERROR("invalid object type");
+          case AZ_OBJ_WALL:
+            object.obj.wall->kind = AZ_WALL_NOTHING;
+            break;
         }
-        break;
-      case AZ_OP_KILL:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          az_kill_object(state, &object);
+      } break;
+      case AZ_OP_KILL: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        az_kill_object(state, &object);
+      } break;
+      case AZ_OP_GPOS: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        const az_vector_t position =
+          (object.type == AZ_OBJ_NOTHING ? AZ_VZERO :
+           az_get_object_position(&object));
+        STACK_PUSH(position.x, position.y);
+      } break;
+      case AZ_OP_SPOS: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        az_vector_t new_position;
+        STACK_POP(&new_position.x, &new_position.y);
+        if (object.type != AZ_OBJ_NOTHING) {
+          const az_vector_t old_position = az_get_object_position(&object);
+          az_move_object(state, &object, az_vsub(new_position, old_position),
+                         0.0);
         }
-        break;
-      case AZ_OP_GPOS:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          const az_vector_t position =
-            (object.type == AZ_OBJ_NOTHING ? AZ_VZERO :
-             az_get_object_position(&object));
-          STACK_PUSH(position.x, position.y);
+      } break;
+      case AZ_OP_GANG: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        STACK_PUSH(object.type == AZ_OBJ_NOTHING ? 0.0 :
+                   az_get_object_angle(&object));
+      } break;
+      case AZ_OP_SANG: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        double new_angle;
+        STACK_POP(&new_angle);
+        if (object.type != AZ_OBJ_NOTHING) {
+          const double old_angle = az_get_object_angle(&object);
+          az_move_object(state, &object, AZ_VZERO,
+                         az_mod2pi(new_angle - old_angle));
         }
-        break;
-      case AZ_OP_SPOS:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          az_vector_t new_position;
-          STACK_POP(&new_position.x, &new_position.y);
-          if (object.type != AZ_OBJ_NOTHING) {
-            const az_vector_t old_position = az_get_object_position(&object);
-            az_move_object(state, &object, az_vsub(new_position, old_position),
-                           0.0);
-          }
+      } break;
+      case AZ_OP_GSTAT: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        double value = 0.0;
+        switch (object.type) {
+          case AZ_OBJ_NOTHING: break;
+          case AZ_OBJ_BADDIE:
+            assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
+            value = (double)object.obj.baddie->state;
+            break;
+          case AZ_OBJ_DOOR:
+            assert(object.obj.door->kind != AZ_DOOR_NOTHING);
+            if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
+              SCRIPT_ERROR("invalid door kind");
+            }
+            value = (object.obj.door->is_open ? 1.0 : 0.0);
+            break;
+          case AZ_OBJ_GRAVFIELD:
+            assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
+            value = (object.obj.gravfield->script_fired ? 1.0 : 0.0);
+            break;
+          case AZ_OBJ_NODE:
+            assert(object.obj.node->kind != AZ_NODE_NOTHING);
+            if (object.obj.node->kind == AZ_NODE_MARKER) {
+              value = (double)object.obj.node->subkind.marker;
+            } else SCRIPT_ERROR("invalid node kind");
+            break;
+          case AZ_OBJ_SHIP:
+          case AZ_OBJ_WALL:
+            SCRIPT_ERROR("invalid object type");
+            break;
         }
-        break;
-      case AZ_OP_GANG:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          STACK_PUSH(object.type == AZ_OBJ_NOTHING ? 0.0 :
-                     az_get_object_angle(&object));
+        STACK_PUSH(value);
+      } break;
+      case AZ_OP_SSTAT: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        double value;
+        STACK_POP(&value);
+        switch (object.type) {
+          case AZ_OBJ_NOTHING: break;
+          case AZ_OBJ_BADDIE:
+            assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
+            object.obj.baddie->state = (int)value;
+            break;
+          case AZ_OBJ_DOOR:
+            assert(object.obj.door->kind != AZ_DOOR_NOTHING);
+            if (object.obj.door->kind == AZ_DOOR_PASSAGE ||
+                object.obj.door->kind == AZ_DOOR_ALWAYS_OPEN) {
+              SCRIPT_ERROR("invalid door kind");
+            }
+            object.obj.door->is_open = (value != 0.0);
+            object.obj.door->openness = (value != 0.0 ? 1.0 : 0.0);
+            break;
+          case AZ_OBJ_GRAVFIELD:
+            assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
+            object.obj.gravfield->script_fired = (value != 0.0);
+            break;
+          case AZ_OBJ_NODE:
+            assert(object.obj.node->kind != AZ_NODE_NOTHING);
+            if (object.obj.node->kind == AZ_NODE_MARKER) {
+              object.obj.node->subkind.marker = (int)value;
+            } else SCRIPT_ERROR("invalid node kind");
+            break;
+          case AZ_OBJ_SHIP:
+          case AZ_OBJ_WALL:
+            SCRIPT_ERROR("invalid object type");
+            break;
         }
-        break;
-      case AZ_OP_SANG:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          double new_angle;
-          STACK_POP(&new_angle);
-          if (object.type != AZ_OBJ_NOTHING) {
-            const double old_angle = az_get_object_angle(&object);
-            az_move_object(state, &object, AZ_VZERO,
-                           az_mod2pi(new_angle - old_angle));
-          }
-        }
-        break;
-      case AZ_OP_GSTAT:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          double value = 0.0;
-          switch (object.type) {
-            case AZ_OBJ_NOTHING: break;
-            case AZ_OBJ_BADDIE:
-              assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
-              value = (double)object.obj.baddie->state;
-              break;
-            case AZ_OBJ_DOOR:
-              assert(object.obj.door->kind != AZ_DOOR_NOTHING);
-              if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
-                SCRIPT_ERROR("invalid door kind");
-              }
-              value = (object.obj.door->is_open ? 1.0 : 0.0);
-              break;
-            case AZ_OBJ_GRAVFIELD:
-              assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
-              value = (object.obj.gravfield->script_fired ? 1.0 : 0.0);
-              break;
-            case AZ_OBJ_NODE:
-              assert(object.obj.node->kind != AZ_NODE_NOTHING);
-              if (object.obj.node->kind == AZ_NODE_MARKER) {
-                value = (double)object.obj.node->subkind.marker;
-              } else SCRIPT_ERROR("invalid node kind");
-              break;
-            case AZ_OBJ_SHIP:
-            case AZ_OBJ_WALL:
-              SCRIPT_ERROR("invalid object type");
-              break;
-          }
-          STACK_PUSH(value);
-        }
-        break;
-      case AZ_OP_SSTAT:
-        {
-          az_object_t object;
-          GET_OBJECT(&object);
-          double value;
-          STACK_POP(&value);
-          switch (object.type) {
-            case AZ_OBJ_NOTHING: break;
-            case AZ_OBJ_BADDIE:
-              assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
-              object.obj.baddie->state = (int)value;
-              break;
-            case AZ_OBJ_DOOR:
-              assert(object.obj.door->kind != AZ_DOOR_NOTHING);
-              if (object.obj.door->kind == AZ_DOOR_PASSAGE ||
-                  object.obj.door->kind == AZ_DOOR_ALWAYS_OPEN) {
-                SCRIPT_ERROR("invalid door kind");
-              }
-              object.obj.door->is_open = (value != 0.0);
-              object.obj.door->openness = (value != 0.0 ? 1.0 : 0.0);
-              break;
-            case AZ_OBJ_GRAVFIELD:
-              assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
-              object.obj.gravfield->script_fired = (value != 0.0);
-              break;
-            case AZ_OBJ_NODE:
-              assert(object.obj.node->kind != AZ_NODE_NOTHING);
-              if (object.obj.node->kind == AZ_NODE_MARKER) {
-                object.obj.node->subkind.marker = (int)value;
-              } else SCRIPT_ERROR("invalid node kind");
-              break;
-            case AZ_OBJ_SHIP:
-            case AZ_OBJ_WALL:
-              SCRIPT_ERROR("invalid object type");
-              break;
-          }
-        }
-        break;
+      } break;
       // Ship:
       case AZ_OP_GVEL:
         STACK_PUSH(state->ship.velocity.x, state->ship.velocity.y);
         break;
-      case AZ_OP_SVEL:
-        {
-          az_vector_t new_velocity;
-          STACK_POP(&new_velocity.x, &new_velocity.y);
-          state->ship.velocity = new_velocity;
-        }
-        break;
+      case AZ_OP_SVEL: {
+        az_vector_t new_velocity;
+        STACK_POP(&new_velocity.x, &new_velocity.y);
+        state->ship.velocity = new_velocity;
+      } break;
       // Baddies:
-      case AZ_OP_BAD:
-        {
-          double k, x, y, angle;
-          STACK_POP(&k, &x, &y, &angle);
-          int kind = (int)k;
-          if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
-            SCRIPT_ERROR("invalid baddie kind");
-          }
-          az_add_baddie(state, kind, (az_vector_t){x, y}, angle);
+      case AZ_OP_BAD: {
+        const int slot = (int)ins.immediate;
+        if (slot < 0 || slot > AZ_NUM_UUID_SLOTS) {
+          SCRIPT_ERROR("invalid uuid index");
         }
-        break;
-      case AZ_OP_SBADK:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_BADDIE, &uid);
-          double argument;
-          STACK_POP(&argument);
-          const int kind = (int)argument;
-          if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
-            SCRIPT_ERROR("invalid baddie kind");
-          }
-          az_baddie_t *baddie;
-          if (az_lookup_baddie(state, uid, &baddie)) {
-            const az_script_t *baddie_script = baddie->on_kill;
-            az_init_baddie(baddie, (az_baddie_kind_t)kind, baddie->position,
-                           baddie->angle);
-            baddie->on_kill = baddie_script;
-          }
+        double k, x, y, angle;
+        STACK_POP(&k, &x, &y, &angle);
+        int kind = (int)k;
+        if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
+          SCRIPT_ERROR("invalid baddie kind");
         }
-        break;
-      case AZ_OP_BOSS:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_BADDIE, &uid);
-          state->boss_uid = uid;
+        const az_baddie_t *baddie = az_add_baddie(
+            state, kind, (az_vector_t){x, y}, angle);
+        if (slot > 0) {
+          if (baddie != NULL) {
+            state->uuids[slot - 1] = (az_uuid_t){
+              .type = AZ_UUID_BADDIE, .uid = baddie->uid
+            };
+          } else state->uuids[slot - 1] = AZ_NULL_UUID;
         }
-        break;
+      } break;
+      case AZ_OP_SBADK: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_BADDIE, &uid);
+        double argument;
+        STACK_POP(&argument);
+        const int kind = (int)argument;
+        if (kind < 1 || kind > AZ_NUM_BADDIE_KINDS) {
+          SCRIPT_ERROR("invalid baddie kind");
+        }
+        az_baddie_t *baddie;
+        if (az_lookup_baddie(state, uid, &baddie)) {
+          const az_script_t *baddie_script = baddie->on_kill;
+          az_init_baddie(baddie, (az_baddie_kind_t)kind, baddie->position,
+                         baddie->angle);
+          baddie->on_kill = baddie_script;
+        }
+      } break;
+      case AZ_OP_BOSS: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_BADDIE, &uid);
+        state->boss_uid = uid;
+      } break;
       // Doors:
-      case AZ_OP_OPEN:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_DOOR, &uid);
-          az_door_t *door;
-          if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_ALWAYS_OPEN) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            if (!door->is_open) {
-              az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
-              door->is_open = true;
-            }
+      case AZ_OP_OPEN: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_DOOR, &uid);
+        az_door_t *door;
+        if (az_lookup_door(state, uid, &door)) {
+          if (door->kind == AZ_DOOR_PASSAGE ||
+              door->kind == AZ_DOOR_ALWAYS_OPEN) {
+            SCRIPT_ERROR("invalid door kind");
+          }
+          if (!door->is_open) {
+            az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
+            door->is_open = true;
           }
         }
-        break;
-      case AZ_OP_CLOSE:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_DOOR, &uid);
-          az_door_t *door;
-          if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_ALWAYS_OPEN) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            if (door->is_open) {
-              az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
-              door->is_open = false;
-            }
+      } break;
+      case AZ_OP_CLOSE: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_DOOR, &uid);
+        az_door_t *door;
+        if (az_lookup_door(state, uid, &door)) {
+          if (door->kind == AZ_DOOR_PASSAGE ||
+              door->kind == AZ_DOOR_ALWAYS_OPEN) {
+            SCRIPT_ERROR("invalid door kind");
+          }
+          if (door->is_open) {
+            az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+            door->is_open = false;
           }
         }
-        break;
-      case AZ_OP_LOCK:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_DOOR, &uid);
-          az_door_t *door;
-          if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_FORCEFIELD ||
-                door->kind == AZ_DOOR_ALWAYS_OPEN) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            door->kind = AZ_DOOR_LOCKED;
-            if (door->is_open) {
-              az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
-              door->is_open = false;
-            }
+      } break;
+      case AZ_OP_LOCK: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_DOOR, &uid);
+        az_door_t *door;
+        if (az_lookup_door(state, uid, &door)) {
+          if (door->kind == AZ_DOOR_PASSAGE ||
+              door->kind == AZ_DOOR_FORCEFIELD ||
+              door->kind == AZ_DOOR_ALWAYS_OPEN) {
+            SCRIPT_ERROR("invalid door kind");
+          }
+          door->kind = AZ_DOOR_LOCKED;
+          if (door->is_open) {
+            az_play_sound(&state->soundboard, AZ_SND_DOOR_CLOSE);
+            door->is_open = false;
           }
         }
-        break;
-      case AZ_OP_UNLOCK:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_DOOR, &uid);
-          az_door_t *door;
-          if (az_lookup_door(state, uid, &door)) {
-            if (door->kind == AZ_DOOR_PASSAGE ||
-                door->kind == AZ_DOOR_FORCEFIELD ||
-                door->kind == AZ_DOOR_ALWAYS_OPEN) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            door->kind = (door->kind == AZ_DOOR_LOCKED ||
-                          door->kind == AZ_DOOR_BOSS ?
-                          AZ_DOOR_UNLOCKED : AZ_DOOR_NORMAL);
+      } break;
+      case AZ_OP_UNLOCK: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_DOOR, &uid);
+        az_door_t *door;
+        if (az_lookup_door(state, uid, &door)) {
+          if (door->kind == AZ_DOOR_PASSAGE ||
+              door->kind == AZ_DOOR_FORCEFIELD ||
+              door->kind == AZ_DOOR_ALWAYS_OPEN) {
+            SCRIPT_ERROR("invalid door kind");
           }
+          door->kind = (door->kind == AZ_DOOR_LOCKED ||
+                        door->kind == AZ_DOOR_BOSS ?
+                        AZ_DOOR_UNLOCKED : AZ_DOOR_NORMAL);
         }
-        break;
+      } break;
       // Gravfields:
-      case AZ_OP_GSTR:
-        {
-          az_uid_t uid;
-          GET_UID(AZ_UUID_GRAVFIELD, &uid);
-          az_gravfield_t *gravfield;
-          STACK_PUSH(az_lookup_gravfield(state, uid, &gravfield) ?
-                     gravfield->strength : 0.0);
+      case AZ_OP_GSTR: {
+        az_uid_t uid;
+        GET_UID(AZ_UUID_GRAVFIELD, &uid);
+        az_gravfield_t *gravfield;
+        STACK_PUSH(az_lookup_gravfield(state, uid, &gravfield) ?
+                   gravfield->strength : 0.0);
+      } break;
+      case AZ_OP_SSTR: {
+        double value;
+        STACK_POP(&value);
+        az_uid_t uid;
+        GET_UID(AZ_UUID_GRAVFIELD, &uid);
+        az_gravfield_t *gravfield;
+        if (az_lookup_gravfield(state, uid, &gravfield)) {
+          gravfield->strength = value;
         }
-        break;
-      case AZ_OP_SSTR:
-        {
-          double value;
-          STACK_POP(&value);
-          az_uid_t uid;
-          GET_UID(AZ_UUID_GRAVFIELD, &uid);
-          az_gravfield_t *gravfield;
-          if (az_lookup_gravfield(state, uid, &gravfield)) {
-            gravfield->strength = value;
-          }
-        }
-        break;
+      } break;
       // Camera:
       case AZ_OP_GCAM:
         STACK_PUSH(state->camera.center.x, state->camera.center.y);
@@ -626,48 +587,42 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
-      case AZ_OP_NPS:
-        {
-          double x, y;
-          STACK_POP(&x, &y);
-          state->camera.wobble_goal = 0.5 * ins.immediate;
-          az_particle_t *particle;
-          if (az_insert_particle(state, &particle)) {
-            particle->kind = AZ_PAR_NPS_PORTAL;
-            particle->color = (az_color_t){128, 64, 255, 255};
-            particle->position.x = x;
-            particle->position.y = y;
-            particle->velocity = AZ_VZERO;
-            particle->angle = 0.0;
-            particle->lifetime = ins.immediate;
-            particle->param1 = 50.0 * sqrt(ins.immediate);
-          }
+      case AZ_OP_NPS: {
+        double x, y;
+        STACK_POP(&x, &y);
+        state->camera.wobble_goal = 0.5 * ins.immediate;
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_NPS_PORTAL;
+          particle->color = (az_color_t){128, 64, 255, 255};
+          particle->position.x = x;
+          particle->position.y = y;
+          particle->velocity = AZ_VZERO;
+          particle->angle = 0.0;
+          particle->lifetime = ins.immediate;
+          particle->param1 = 50.0 * sqrt(ins.immediate);
         }
-        break;
+      } break;
       // Messages/dialog:
-      case AZ_OP_MSG:
-        {
-          const int paragraph_index = (int)ins.immediate;
-          if (paragraph_index < 0 ||
-              paragraph_index >= state->planet->num_paragraphs) {
-            SCRIPT_ERROR("invalid paragraph index");
-          }
-          az_set_message(state, state->planet->paragraphs[paragraph_index]);
+      case AZ_OP_MSG: {
+        const int paragraph_index = (int)ins.immediate;
+        if (paragraph_index < 0 ||
+            paragraph_index >= state->planet->num_paragraphs) {
+          SCRIPT_ERROR("invalid paragraph index");
         }
-        break;
-      case AZ_OP_SCENE:
-        {
-          const int scene_index = (int)ins.immediate;
-          if (scene_index < 0 || scene_index > AZ_NUM_SCENES) {
-            SCRIPT_ERROR("invalid scene index");
-          }
-          state->cutscene.next = (az_scene_t)scene_index;
-          if (state->cutscene.scene == AZ_SCENE_NOTHING) {
-            state->cutscene.scene = state->cutscene.next;
-            state->cutscene.fade_alpha = 1.0;
-          } else SUSPEND(vm->script, &state->cutscene.vm);
+        az_set_message(state, state->planet->paragraphs[paragraph_index]);
+      } break;
+      case AZ_OP_SCENE: {
+        const int scene_index = (int)ins.immediate;
+        if (scene_index < 0 || scene_index > AZ_NUM_SCENES) {
+          SCRIPT_ERROR("invalid scene index");
         }
-        break;
+        state->cutscene.next = (az_scene_t)scene_index;
+        if (state->cutscene.scene == AZ_SCENE_NOTHING) {
+          state->cutscene.scene = state->cutscene.next;
+          state->cutscene.fade_alpha = 1.0;
+        } else SUSPEND(vm->script, &state->cutscene.vm);
+      } break;
       case AZ_OP_DLOG:
         if (state->mode == AZ_MODE_NORMAL) {
           state->mode = AZ_MODE_DIALOG;
@@ -742,24 +697,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         SCRIPT_ERROR("not in dialog");
       // Music/sound:
-      case AZ_OP_MUS:
-        {
-          const int music_index = (int)ins.immediate;
-          if (music_index < 0 || music_index >= AZ_NUM_MUSIC_KEYS) {
-            SCRIPT_ERROR("invalid music index");
-          }
-          az_change_music(&state->soundboard, (az_music_key_t)music_index);
+      case AZ_OP_MUS: {
+        const int music_index = (int)ins.immediate;
+        if (music_index < 0 || music_index >= AZ_NUM_MUSIC_KEYS) {
+          SCRIPT_ERROR("invalid music index");
         }
-        break;
-      case AZ_OP_SND:
-        {
-          const int sound_index = (int)ins.immediate;
-          if (sound_index < 0 || sound_index >= AZ_NUM_SOUND_KEYS) {
-            SCRIPT_ERROR("invalid sound index");
-          }
-          az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
+        az_change_music(&state->soundboard, (az_music_key_t)music_index);
+      } break;
+      case AZ_OP_SND: {
+        const int sound_index = (int)ins.immediate;
+        if (sound_index < 0 || sound_index >= AZ_NUM_SOUND_KEYS) {
+          SCRIPT_ERROR("invalid sound index");
         }
-        break;
+        az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
+      } break;
       // Timers:
       case AZ_OP_WAIT:
         if (state->mode == AZ_MODE_DIALOG) {
@@ -793,35 +744,27 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_JUMP:
         DO_JUMP();
         break;
-      case AZ_OP_BEQZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p == 0) DO_JUMP();
-        }
-        break;
-      case AZ_OP_BNEZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p != 0) DO_JUMP();
-        }
-        break;
+      case AZ_OP_BEQZ: {
+        double p;
+        STACK_POP(&p);
+        if (p == 0) DO_JUMP();
+      } break;
+      case AZ_OP_BNEZ: {
+        double p;
+        STACK_POP(&p);
+        if (p != 0) DO_JUMP();
+      } break;
       case AZ_OP_HALT: goto halt;
-      case AZ_OP_HEQZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p == 0) goto halt;
-        }
-        break;
-      case AZ_OP_HNEZ:
-        {
-          double p;
-          STACK_POP(&p);
-          if (p != 0) goto halt;
-        }
-        break;
+      case AZ_OP_HEQZ: {
+        double p;
+        STACK_POP(&p);
+        if (p == 0) goto halt;
+      } break;
+      case AZ_OP_HNEZ: {
+        double p;
+        STACK_POP(&p);
+        if (p != 0) goto halt;
+      } break;
       case AZ_OP_VICT:
         state->victory = true;
         goto halt;

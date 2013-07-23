@@ -34,15 +34,17 @@ typedef enum {
   AZ_OP_DUP, // duplicate top i values on the stack (minimum of 1)
   // Arithmetic:
   AZ_OP_ADD, // pop top two, push (a + b)
-  AZ_OP_ADDI, // pop top, push a + i
+  AZ_OP_ADDI, // pop top, push (a + i)
   AZ_OP_SUB, // pop top two, push (a - b)
-  AZ_OP_SUBI, // pop top, push a - i
-  AZ_OP_ISUB, // pop top, push i - a
+  AZ_OP_SUBI, // pop top, push (a - i)
+  AZ_OP_ISUB, // pop top, push (i - a)
   AZ_OP_MUL, // pop top two, push (a * b)
-  AZ_OP_MULI, // pop top, push a * i
+  AZ_OP_MULI, // pop top, push (a * i)
   AZ_OP_DIV, // pop top two, push (a / b)
-  AZ_OP_DIVI, // pop top, push a / i
-  AZ_OP_IDIV, // pop top, push i / a
+  AZ_OP_DIVI, // pop top, push (a / i)
+  AZ_OP_IDIV, // pop top, push (i / a)
+  AZ_OP_MOD, // pop top two, push (a mod b)
+  AZ_OP_MODI, // pop top, push (a mod i)
   // Vectors:
   AZ_OP_VADD, // pop top four, push (a + c) and (b + d)
   AZ_OP_VSUB, // pop top four, push (a - c) and (b - d)

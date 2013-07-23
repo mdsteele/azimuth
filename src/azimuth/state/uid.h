@@ -36,6 +36,7 @@ typedef uint64_t az_uid_t;
 // A zeroed az_uid_t struct; a UID that will never be created by a call to
 // az_assign_uid.
 extern const az_uid_t AZ_NULL_UID;
+
 // A special UID that represents the ship; it will never be created by a call
 // to az_assign_uid.
 extern const az_uid_t AZ_SHIP_UID;
@@ -66,6 +67,9 @@ typedef struct {
   az_uuid_type_t type;
   az_uid_t uid;
 } az_uuid_t;
+
+// A zeroed az_uuid_t struct; a UUID that represents nothing.
+extern const az_uuid_t AZ_NULL_UUID;
 
 // The unique UUID that represents the ship.
 extern const az_uuid_t AZ_SHIP_UUID;
