@@ -19,7 +19,7 @@
 18: Opened hyper rocket door between Colony rooms 137 and 165
 19: Watched opening cutscene (Colony room 6)
 20: Opened first door (Colony room 6)
-21: Opened bomb door between Colony rooms 155 and 156
+21: Opened bomb door between Nandiar rooms 140 and 211
 22: Turned off death rays in Core room 146
 23: Killed Zenith Core (Core boss, room 0)
 24: Opened mega bomb door bewteen Colony rooms 156 and 302
