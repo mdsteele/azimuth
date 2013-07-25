@@ -1672,7 +1672,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_BAD_DEATH_RAY:
-      assert(frozen == 0.0);
+      assert(frozen == 0.0f);
       draw_heat_ray(baddie, clock, baddie->state == 1 ||
                     (baddie->state == 0 && az_clock_mod(2, 10, clock)),
                     color3(0.2 + 0.25 * flare, 0.2, 0.1),
@@ -1682,6 +1682,45 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_OTH_GUNSHIP:
       draw_oth(baddie, flare, frozen, clock, oth_gunship_triangles,
                AZ_ARRAY_SIZE(oth_gunship_triangles));
+      break;
+    case AZ_BAD_FIREBALL_MINE:
+      glPushMatrix(); {
+        glScalef(1, 1.07, 1);
+        const GLfloat blink =
+          fmax(flare, (baddie->state == 1 &&
+                       az_clock_mod(2, 4, clock) == 0 ? 0.5 : 0.0));
+        const double radius = baddie->data->main_body.bounding_radius;
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.6f + 0.4f * blink, 0.6f, 0.6f);
+          glVertex2d(-0.15 * radius, 0.2 * radius);
+          glColor3f(0.2f + 0.3f * blink, 0.2f, 0.2f);
+          for (int i = 0; i <= 360; i += 15) {
+            glVertex2d(radius * cos(AZ_DEG2RAD(i)),
+                       radius * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+        for (int i = 0; i < 10; ++i) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.4f + 0.3f * blink, 0.4f, 0.4f);
+            glVertex2d(radius - 4, 0);
+            glColor3f(0.2f + 0.3f * blink, 0.2f, 0.2f);
+            glVertex2d(radius - 1, 2); glVertex2d(radius + 6, 0);
+            glVertex2d(radius - 1, -2);
+          } glEnd();
+          glRotatef(36, 0, 0, 1);
+        }
+        glRotatef(18, 0, 0, 1);
+        for (int i = 0; i < 5; ++i) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.6f + 0.4f * blink, 0.6f, 0.6f);
+            glVertex2d(radius - 9, 0);
+            glColor3f(0.4f + 0.3f * blink, 0.4f, 0.4f);
+            glVertex2d(radius - 8, 2); glVertex2d(radius - 3, 0);
+            glVertex2d(radius - 8, -2);
+          } glEnd();
+          glRotatef(72, 0, 0, 1);
+        }
+      } glPopMatrix();
       break;
   }
 }
