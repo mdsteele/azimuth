@@ -1317,7 +1317,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glEnd();
       break;
-    case AZ_BAD_FLYER:
+    case AZ_BAD_MOSQUITO:
       // Antennae:
       glColor3f(0.5, 0.25, 0.25);
       glBegin(GL_LINE_STRIP); {

@@ -28,3 +28,4 @@
 27: Used comm console in Colony room 138
 28: Killed boss door in Nandiar room 178
 29: Killed Oth Gunship (Nandiar boss, room 134)
+30: Turned off secondary reactor in Barrag room 274

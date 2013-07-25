@@ -1,4 +1,4 @@
-@P z8 r401 t78 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t80 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -343,8 +343,12 @@
   where many of the high-energy NPS experiments
   are conducted."
 !T76"
-  \"All right, I'd better check it out, see if
-  anyone's still in there.  Can you put it on my
-  map?\""
+  \"Hmm.  All right, I'd better check it out, see
+  if anyone's still in there.  Can you put it on
+  my map?\""
 !T77"
   Nandiar map data has been uploaded to your ship."
+!T78"
+  Primary Reactor Core"
+!T79"
+  Secondary Reactor Core"

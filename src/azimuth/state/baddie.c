@@ -678,7 +678,7 @@ static az_baddie_data_t baddie_datas[] = {
                    AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 10.0 }
   },
-  [AZ_BAD_FLYER] = {
+  [AZ_BAD_MOSQUITO] = {
     .max_health = 1.0, .color = {255, 64, 0, 255},
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,

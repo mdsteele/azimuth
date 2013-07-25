@@ -232,6 +232,10 @@ static az_vector_t wall_vertices_75[] = {
   {40, 6}, {67, 40}, {70, 60}, {58, 80}, {15, 90}, {-30, 56},
   {-50, 18}, {-46, -16}, {-10, -56}, {20, -52}, {50, -35}, {52, -20}
 };
+static az_vector_t wall_vertices_79[] = {
+  {54, 14}, {42, 18}, {-42, 18}, {-54, 14},
+  {-54, -14}, {-42, -18}, {42, -18}, {54, -14}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -769,6 +773,12 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {64, 96, 0, 255}, .color3 = {0, 64, 96, 255},
     .elasticity = 0.3, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+  },
+  // Silver bezel pipe:
+  [79] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {179, 179, 179, 255},
+    .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_79)
   }
 };
 

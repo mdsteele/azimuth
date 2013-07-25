@@ -1468,7 +1468,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
-    case AZ_BAD_FLYER:
+    case AZ_BAD_MOSQUITO:
       {
         baddie->angle = az_vtheta(baddie->velocity);
         const double speed = 200.0;
@@ -1486,8 +1486,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (!chasing_ship) {
           bool avoiding = false;
           AZ_ARRAY_LOOP(other, state->baddies) {
-            if (other == baddie) continue;
-            if (other->kind != AZ_BAD_FLYER) continue;
+            if (other->kind != AZ_BAD_MOSQUITO || other == baddie) continue;
             if (az_vwithin(baddie->position, other->position,
                            2.0 * baddie->data->overall_bounding_radius)) {
               const double rel = az_mod2pi(az_vtheta(az_vsub(

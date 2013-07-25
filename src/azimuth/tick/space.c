@@ -73,6 +73,7 @@ void az_after_entering_room(az_space_state_t *state) {
   const az_zone_t *zone = &state->planet->zones[room->zone_key];
   az_change_music(&state->soundboard, zone->music);
   az_run_script(state, room->on_start);
+  state->darkness = state->dark_goal;
 }
 
 /*===========================================================================*/
@@ -434,7 +435,7 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
 
 static void tick_darkness(az_space_state_t *state, double time) {
   if (state->darkness == state->dark_goal) return;
-  const double tracking_base = 0.00003; // smaller = faster tracking
+  const double tracking_base = 0.05; // smaller = faster tracking
   const double change =
     (state->dark_goal - state->darkness) * (1.0 - pow(tracking_base, time));
   if (fabs(change) > 0.001) {
