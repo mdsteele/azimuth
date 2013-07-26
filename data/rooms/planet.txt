@@ -1,4 +1,4 @@
-@P z8 r401 t80 s6 x0.00 y50000.00 a-1.570796
+@P z8 r401 t83 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(255,0,255) m2
 !Z"Cnidam" c(0,255,255) m3
@@ -352,3 +352,9 @@
   Primary Reactor Core"
 !T79"
   Secondary Reactor Core"
+!T80"
+  Ordnance Locker"
+!T81"
+  Petrified Forest"
+!T82"
+  Wind Tunnel"
