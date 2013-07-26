@@ -29,3 +29,5 @@
 28: Killed boss door in Nandiar room 178
 29: Killed Oth Gunship (Nandiar boss, room 134)
 30: Turned off secondary reactor in Barrag room 274
+31: Opened eastern hyper rocket door between Nandiar rooms 204 and 215
+32: Opened western hyper rocket door between Nandiar rooms 204 and 215

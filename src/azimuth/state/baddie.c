@@ -727,7 +727,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_URCHIN] = {
     .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
+    .main_body = { .bounding_radius = 9.0, .impact_damage = 12.0 }
   },
   [AZ_BAD_BOSS_DOOR] = {
     .max_health = 24.0, .overall_bounding_radius = 55.0,
