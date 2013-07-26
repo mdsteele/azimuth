@@ -407,6 +407,10 @@ static const az_vector_t oth_gunship_vertices[] = {
   {-14, -4}, {-10, -12}, {6, -12}, {15, -4}
 };
 
+static const az_vector_t leaper_vertices[] = {
+  {8, 0}, {12, 15}, {-10, 17}, {-13, 0}, {-10, -17}, {12, -15}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -781,6 +785,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 8.0,
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE) }
+  },
+  [AZ_BAD_LEAPER] = {
+    .max_health = 12.0, .color = {0, 255, 128, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .polygon = AZ_INIT_POLYGON(leaper_vertices),
+                   .impact_damage = 9.0 }
   }
 };
 

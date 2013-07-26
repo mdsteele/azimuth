@@ -197,36 +197,15 @@ static void fly_towards_position(
              lateral_decel_rate, drift, goal_theta);
 }
 
-static bool perch_on_ceiling(
+static bool perch_on_wall_ahead(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
-  const double turn_rate = 4.0;
   const double max_speed = 500.0;
   const double accel = 200.0;
   const double lateral_decel_rate = 250.0;
-  // Pick a ceiling to perch on.
-  const double baddie_norm = az_vnorm(baddie->position);
-  const double baddie_theta = az_vtheta(baddie->position);
-  az_vector_t goal = AZ_VZERO;
-  double best_dist = INFINITY;
-  AZ_ARRAY_LOOP(wall, state->walls) {
-    if (wall->kind == AZ_WALL_NOTHING) continue;
-    if (az_vnorm(wall->position) < baddie_norm) continue;
-    const az_vector_t delta = az_vsub(wall->position, baddie->position);
-    const double dist = az_vnorm(delta) +
-      150.0 * fabs(az_mod2pi(az_vtheta(delta) - baddie_theta));
-    if (dist < best_dist) {
-      goal = wall->position;
-      best_dist = dist;
-    }
-  }
-  // Turn towards that wall.
-  const double goal_theta = az_vtheta(az_vsub(goal, baddie->position));
-  baddie->angle =
-    az_angle_towards(baddie->angle, turn_rate * time, goal_theta);
   // If we kept going straight, what's the distance until we hit a wall?
   az_impact_t impact;
   az_circle_impact(state, baddie->data->main_body.bounding_radius,
-                   baddie->position, az_vsub(goal, baddie->position),
+                   baddie->position, az_vpolar(1000, baddie->angle),
                    (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
   const double dist = az_vdist(baddie->position, impact.position);
   // If we're there, stop.
@@ -248,6 +227,33 @@ static bool perch_on_ceiling(
              az_vmul(unit, -accel * time)));
   baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
   return false;
+}
+
+static bool perch_on_ceiling(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  const double turn_rate = 4.0;
+  // Pick a ceiling to perch on.
+  const double baddie_norm = az_vnorm(baddie->position);
+  const double baddie_theta = az_vtheta(baddie->position);
+  az_vector_t goal = AZ_VZERO;
+  double best_dist = INFINITY;
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    if (az_vnorm(wall->position) < baddie_norm) continue;
+    const az_vector_t delta = az_vsub(wall->position, baddie->position);
+    const double dist = az_vnorm(delta) +
+      150.0 * fabs(az_mod2pi(az_vtheta(delta) - baddie_theta));
+    if (dist < best_dist) {
+      goal = wall->position;
+      best_dist = dist;
+    }
+  }
+  // Turn towards that wall.
+  const double goal_theta = az_vtheta(az_vsub(goal, baddie->position));
+  baddie->angle =
+    az_angle_towards(baddie->angle, turn_rate * time, goal_theta);
+  // Try to perch.
+  return perch_on_wall_ahead(state, baddie, time);
 }
 
 static void crawl_around(
@@ -1760,6 +1766,33 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         az_try_damage_baddie(state, baddie, &baddie->data->main_body,
                              AZ_DMGF_BOMB, baddie->data->max_health);
         assert(baddie->kind == AZ_BAD_NOTHING);
+      }
+      break;
+    case AZ_BAD_LEAPER:
+      if (baddie->state == 0) {
+        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500)) {
+          if (has_clear_path_to_position(state, baddie,
+                                         state->ship.position)) {
+            baddie->angle =
+              az_vtheta(az_vsub(state->ship.position, baddie->position));
+            baddie->velocity = az_vpolar(500, baddie->angle);
+            baddie->state = 1;
+          } else {
+            crawl_around(
+                state, baddie, time, az_ship_is_present(&state->ship) &&
+                az_vcross(az_vsub(state->ship.position, baddie->position),
+                          az_vpolar(1.0, baddie->angle)) > 0.0,
+                1.0, 20.0, 100.0);
+          }
+        }
+      } else {
+        baddie->angle =
+          az_angle_towards(baddie->angle, AZ_DEG2RAD(20) * time,
+                           az_vtheta(az_vneg(baddie->position)));
+        if (perch_on_wall_ahead(state, baddie, time)) {
+          baddie->state = 0;
+          baddie->cooldown = 1.0;
+        }
       }
       break;
   }

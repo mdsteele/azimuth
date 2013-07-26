@@ -211,34 +211,25 @@ void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
       glBegin(GL_QUADS); {
         // Struts:
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f( 1,  9);
-        glVertex2f(-7,  9);
-        glVertex2f(-7, -9);
-        glVertex2f( 1, -9);
+        glVertex2f( 1,  9); glVertex2f(-7,  9);
+        glVertex2f(-7, -9); glVertex2f( 1, -9);
         // Port engine:
-        glVertex2f(-10,  12);
-        glVertex2f(  6,  12);
+        glVertex2f(-10,  12); glVertex2f(  6,  12);
         glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2f(  8,   7);
-        glVertex2f(-11,   7);
+        glVertex2f(  8,   7); glVertex2f(-11,   7);
         // Starboard engine:
-        glVertex2f(  8,  -7);
-        glVertex2f(-11,  -7);
+        glVertex2f(  8,  -7); glVertex2f(-11,  -7);
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f(-10, -12);
-        glVertex2f(  6, -12);
+        glVertex2f(-10, -12); glVertex2f(  6, -12);
       } glEnd();
       // Main body:
       glBegin(GL_QUAD_STRIP); {
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f( 15,  4);
-        glVertex2f(-14,  4);
+        glVertex2f( 15,  4); glVertex2f(-14,  4);
         glColor3f(0.75, 0.75, 0.75); // light gray
-        glVertex2f( 20,  0);
-        glVertex2f(-14,  0);
+        glVertex2f( 20,  0); glVertex2f(-14,  0);
         glColor3f(0.25, 0.25, 0.25); // dark gray
-        glVertex2f( 15, -4);
-        glVertex2f(-14, -4);
+        glVertex2f( 15, -4); glVertex2f(-14, -4);
       } glEnd();
       // Windshield:
       glBegin(GL_TRIANGLE_STRIP); {

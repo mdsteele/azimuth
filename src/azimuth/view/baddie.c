@@ -1722,6 +1722,106 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glPopMatrix();
       break;
+    case AZ_BAD_LEAPER: {
+      const double tilt_degrees =
+        (baddie->state != 0 ? 0.0 :
+         (1.0 - fmin(baddie->cooldown / 0.5, 1.0)) * 10.0 +
+         az_clock_zigzag(3, 8, clock));
+      // Legs:
+      for (int flip = 0; flip < 2; ++flip) {
+        glPushMatrix(); {
+          if (flip) glScalef(1, -1, 1);
+          // Upper leg:
+          glPushMatrix(); {
+            glTranslated(-0.5 * tilt_degrees, 0, 0);
+            if (baddie->state == 0) glRotatef(48 - tilt_degrees, 0, 0, 1);
+            else glRotatef(70, 0, 0, 1);
+            glBegin(GL_QUAD_STRIP); {
+              glColor3f(0, 0.2, 0.1); glVertex2d(0, 5); glVertex2d(21, 2);
+              glColor3f(0, 0.3, 0.2); glVertex2d(0, 0); glVertex2d(23, 0);
+              glColor3f(0, 0.2, 0.1); glVertex2d(0, -4); glVertex2d(21, -3);
+            } glEnd();
+          } glPopMatrix();
+          // Lower leg:
+          if (baddie->state == 0) {
+            glTranslated(-20, 20 + az_clock_zigzag(3, 8, clock), 0);
+            glRotated(-tilt_degrees, 0, 0, 1);
+          } else {
+            glTranslated(-30, 18, 0);
+            glRotated(5, 0, 0, 1);
+          }
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0, 0.25, 0.1); glVertex2d(2, 5);
+            glColor3f(0.25, 0.15, 0); glVertex2d(35, 4);
+            glColor3f(0.5f * flare, 0.6, 0.4f + 0.6f * frozen);
+            glVertex2d(0, 0);
+            glColor3f(0.3f + 0.3f * flare, 0.2, frozen);
+            glVertex2d(35, 0);
+            glColor3f(0, 0.25, 0.1); glVertex2d(2, -6);
+            glColor3f(0.25, 0.15, 0); glVertex2d(35, -4);
+          } glEnd();
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0, 0.25, 0.1); glVertex2d(18, 6); glVertex2d(35, 4);
+            glColor3f(0.5f * flare, 0.6f + 0.4f * flare, 0.4f + 0.6f * frozen);
+            glVertex2d(16, 0); glVertex2d(35, 0);
+            glColor3f(0, 0.25, 0.1); glVertex2d(18, -6); glVertex2d(35, -4);
+          } glEnd();
+          // Foot:
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5, 0.5, 0.5); glVertex2d(0, -1);
+            glColor3f(0.2, 0.3, 0.3);
+            for (int i = -105; i <= 105; i += 30) {
+              glVertex2d(5 * cos(AZ_DEG2RAD(i)), 7 * sin(AZ_DEG2RAD(i)) - 1);
+            }
+          } glEnd();
+          // Knee knob:
+          glTranslatef(35, 0, 0);
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5f * flare, 0.6, 0.4 + 0.6f * frozen);
+            glVertex2d(0, 0);
+            glColor3f(0, 0.25, 0.1);
+            for (int i = -135; i <= 135; i += 30) {
+              glVertex2d(6 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
+            }
+          } glEnd();
+          // Knee spike:
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5, 0.5, 0.5); glVertex2f(4, 0);
+            glColor3f(0.25, 0.25, 0.25);
+            glVertex2f(5, 2); glVertex2f(10, 0); glVertex2f(5, -2);
+          } glEnd();
+        } glPopMatrix();
+      }
+      glPushMatrix(); {
+        glTranslated(-0.5 * tilt_degrees, 0, 0);
+        // Teeth:
+        const int x = (baddie->state == 0 ? 0 : 3);
+        for (int y = -2; y <= 2; y += 4) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5, 0.5, 0.5); glVertex2i(8 + x, y);
+            glColor3f(0.25, 0.25, 0.25);
+              glVertex2i(9 + x, 2 + y); glVertex2i(15 + x, y);
+              glVertex2i(9 + x, -2 + y);
+          } glEnd();
+        }
+        // Body:
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(flare, 0.9, 0.5f + 0.5f * frozen); glVertex2d(-3, 0);
+          glColor3f(0.5f * flare, 0.25, 0.1f + 0.9f * frozen);
+          glVertex2d(-10, 0);
+          for (int i = -135; i <= 135; i += 30) {
+            glVertex2d(12 * cos(AZ_DEG2RAD(i)), 9 * sin(AZ_DEG2RAD(i)));
+          }
+          glVertex2d(-10, 0);
+        } glEnd();
+        // Eye:
+        glBegin(GL_POLYGON); {
+          glColor4f(1, 0, 0, 0.4);
+          glVertex2f(10, 1); glVertex2f(9, 2); glVertex2f(7, 0);
+          glVertex2f(9, -2), glVertex2f(10, -1);
+        } glEnd();
+      } glPopMatrix();
+    } break;
   }
 }
 
