@@ -31,3 +31,5 @@
 30: Turned off secondary reactor in Barrag room 274
 31: Opened eastern hyper rocket door between Nandiar rooms 204 and 215
 32: Opened western hyper rocket door between Nandiar rooms 204 and 215
+33: Opened rocket door between Filimun rooms 26 and 29
+34: Opened hyper rocket door between Filimun rooms 26 and 40
