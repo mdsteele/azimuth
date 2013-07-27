@@ -471,27 +471,25 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         } glEnd();
       } glPopMatrix();
       break;
-    case AZ_UPG_GUN_PIERCE:
-      {
-        const int offset = frame - 3;
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor4f(1, 0, 1, 0.75); // magenta
-          glVertex2f(9 + offset, -9 - offset);
-          glColor4f(1, 0, 1, 0); // transparent magenta
-          glVertex2f(9 + offset, -3 - offset);
-          glVertex2f(-10 - offset, 10 + offset);
-          glVertex2f(3 + offset, -9 - offset);
-        } glEnd();
-        glBegin(GL_TRIANGLE_FAN); {
-          const GLfloat wiggle = 7 + frame;
-          glVertex2f(6 + offset, -6 - offset);
-          glColor4f(1, 0, 1, 0.75); // magenta
-          glVertex2f(wiggle + offset, 4 - offset);
-          glVertex2f(10 + offset, -10 - offset);
-          glVertex2f(-4 + offset, -wiggle - offset);
-        } glEnd();
-      }
-      break;
+    case AZ_UPG_GUN_PIERCE: {
+      const int offset = frame - 3;
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0, 1, 0.75); // magenta
+        glVertex2f(9 + offset, -9 - offset);
+        glColor4f(1, 0, 1, 0); // transparent magenta
+        glVertex2f(9 + offset, -3 - offset);
+        glVertex2f(-10 - offset, 10 + offset);
+        glVertex2f(3 + offset, -9 - offset);
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat wiggle = 7 + frame;
+        glVertex2f(6 + offset, -6 - offset);
+        glColor4f(1, 0, 1, 0.75); // magenta
+        glVertex2f(wiggle + offset, 4 - offset);
+        glVertex2f(10 + offset, -10 - offset);
+        glVertex2f(-4 + offset, -wiggle - offset);
+      } glEnd();
+    } break;
     case AZ_UPG_GUN_BEAM:
       glBegin(GL_QUAD_STRIP); {
         glColor4f(1, 0, 0, 0.2 * (frame == 3 ? 1 : frame));
@@ -1237,6 +1235,93 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glColor3f(0.2, 0.2, 0.15); glVertex2f(-65,  0); glVertex2f(65,   0);
         glColor3f(0.4, 0.4, 0.3); glVertex2f(-67, -45); glVertex2f(67, -45);
         glColor3f(0.6, 0.6, 0.5); glVertex2f(-70, -70); glVertex2f(70, -70);
+      } glEnd();
+      break;
+    case AZ_DOOD_NPS_ENGINE:
+      // Siding:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-25, -25);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-30, -30);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(25, -25);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(28, -30);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(33, -17);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(38, -20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(33, 17);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(38, 20);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(25, 25);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(28, 30);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-25, 25);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-30, 30);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-25, -25);
+        glColor3f(0.15, 0.15, 0.15); glVertex2f(-30, -30);
+      } glEnd();
+      // Front panel:
+      glBegin(GL_POLYGON); {
+        glColor3f(0.28, 0.28, 0.28);
+        glVertex2f(-25, -25); glVertex2f(25, -25); glVertex2f(33, -17);
+        glVertex2f(33, 17); glVertex2f(25, 25); glVertex2f(-25, 25);
+      } glEnd();
+      // Pistons:
+      for (int i = 0; i < 2; ++i) {
+        glBegin(GL_QUAD_STRIP); {
+          const double pump = (1.0 / 60) * az_clock_mod(60, 1, clock + 30 * i);
+          const GLfloat x = (pump < 0.9 ? pump * 30.0 : (1.0 - pump) * 270.0);
+          const GLfloat y = 20 * i - 10;
+          glColor3f(0.2, 0.2, 0.2);
+          glVertex2f(37, y + 6); glVertex2f(36 + x, y + 6);
+          glColor3f(0.6, 0.6, 0.6); glVertex2f(36, y); glVertex2f(36 + x, y);
+          glColor3f(0.2, 0.2, 0.2);
+          glVertex2f(37, y - 6); glVertex2f(36 + x, y - 6);
+        } glEnd();
+      }
+      // Lights:
+      for (int i = -1; i <= 1; i += 2) {
+        for (int j = -1; j <= 1; j += 2) {
+          glPushMatrix(); {
+            glTranslatef(14 * i, 14 * j, 0);
+            // Light bulb:
+            glBegin(GL_TRIANGLE_FAN); {
+              if ((i * j < 0) ^ (az_clock_mod(2, 37, clock) == 0)) {
+                glColor3f(1, 0.25, 0);
+              } else glColor3f(0.2, 0.2, 0.2);
+              glVertex2f(0, 0);
+              glColor3f(0, 0, 0);
+              for (int k = 0; k <= 360; k += 20) {
+                glVertex2d(4 * cos(AZ_DEG2RAD(k)), 4 * sin(AZ_DEG2RAD(k)));
+              }
+            } glEnd();
+            // Rim:
+            glBegin(GL_QUAD_STRIP); {
+              for (int k = 0; k <= 360; k += 20) {
+                glColor3f(0.45, 0.45, 0.45);
+                glVertex2d(4 * cos(AZ_DEG2RAD(k)), 4 * sin(AZ_DEG2RAD(k)));
+                glColor3f(0.35, 0.35, 0.35);
+                glVertex2d(6 * cos(AZ_DEG2RAD(k)), 6 * sin(AZ_DEG2RAD(k)));
+              }
+            } glEnd();
+          } glPopMatrix();
+        }
+      }
+      // Spinner:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.3, 0.3, 0.3); glVertex2f(0, 0); glColor3f(0, 0, 0);
+        for (int k = 0; k <= 360; k += 90) {
+          glVertex2d(7 * cos(AZ_DEG2RAD(k)), 7 * sin(AZ_DEG2RAD(k)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLES); {
+        const int k = -90 * az_clock_mod(8, 14, clock);
+        glColor3f(0.7, 0.7, 0); glVertex2d(0, 0); glColor3f(0.4, 0.4, 0);
+        glVertex2d(6 * cos(AZ_DEG2RAD(k)), 6 * sin(AZ_DEG2RAD(k)));
+        glVertex2d(6 * cos(AZ_DEG2RAD(k + 90)), 6 * sin(AZ_DEG2RAD(k + 90)));
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        for (int k = 0; k <= 360; k += 90) {
+          glColor3f(0.45, 0.45, 0.45);
+          glVertex2d(7 * cos(AZ_DEG2RAD(k)), 7 * sin(AZ_DEG2RAD(k)));
+          glColor3f(0.35, 0.35, 0.35);
+          glVertex2d(10 * cos(AZ_DEG2RAD(k)), 10 * sin(AZ_DEG2RAD(k)));
+        }
       } glEnd();
       break;
   }
