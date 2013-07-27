@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <GL/gl.h>
 
@@ -192,6 +193,17 @@ static void draw_minimap(const az_paused_state_t *state) {
 
   glColor3f(0.75, 0.75, 0.75);
   draw_bezel_box(2, 30, 30, 580, 400);
+
+  const az_zone_t *current_zone =
+    &state->planet->zones[state->planet->rooms[current_room].zone_key];
+  glColor3f(1, 1, 1);
+  az_draw_string(8, AZ_ALIGN_LEFT, 38, 18, "Zenith Planetoid");
+  az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 46 -
+                 8 * strlen(current_zone->name), 18, "Current location:");
+  const az_color_t color = current_zone->color;
+  glColor3ub(color.r, color.g, color.b);
+  az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 38, 18,
+                 current_zone->name);
 }
 
 /*===========================================================================*/
