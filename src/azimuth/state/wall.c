@@ -236,6 +236,22 @@ static az_vector_t wall_vertices_79[] = {
   {54, 14}, {42, 18}, {-42, 18}, {-54, 14},
   {-54, -14}, {-42, -18}, {42, -18}, {54, -14}
 };
+static az_vector_t wall_vertices_80[] = {
+  {-100, 40}, {-92, 2}, {-80, -40}, {20, -38}, {80, -40}, {88, -6},
+  {100, 40}, {5, 38}
+};
+static az_vector_t wall_vertices_81[] = {
+  {-140, 30}, {-164, 2}, {-180, -30}, {-20, -28}, {180, -30}, {156, -6},
+  {140, 30}, {0, 28}
+};
+static az_vector_t wall_vertices_82[] = {
+  {-115, 20}, {-101, 2}, {-77, -20}, {-7, -18}, {113, -20}, {119, -4},
+  {103, 20}, {13, 18}
+};
+static az_vector_t wall_vertices_83[] = {
+  {-60, 40}, {-55, 2}, {-44, -40}, {20, -38}, {58, -40}, {59, -6},
+  {58, 40}, {9, 38}
+};
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -779,6 +795,65 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_QUADSTRIP_213, .color1 = {179, 179, 179, 255},
     .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_79)
+  },
+
+  // Blue shale rock:
+  [80] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {80, 80, 82, 255}, .color2 = {38, 40, 42, 255},
+    .color3 = {70, 70, 72, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_80)
+  },
+  [81] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {80, 80, 82, 255}, .color2 = {38, 40, 42, 255},
+    .color3 = {70, 70, 72, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_81)
+  },
+  [82] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {80, 80, 82, 255}, .color2 = {38, 40, 43, 255},
+    .color3 = {70, 70, 72, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_82)
+  },
+  [83] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {80, 80, 82, 255}, .color2 = {38, 40, 42, 255},
+    .color3 = {70, 70, 72, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_83)
+  },
+  // Brown shale rock:
+  [84] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {81, 80, 80, 255}, .color2 = {42, 40, 38, 255},
+    .color3 = {71, 70, 70, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_80)
+  },
+  [85] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {81, 80, 80, 255}, .color2 = {42, 40, 38, 255},
+    .color3 = {71, 70, 70, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_81)
+  },
+  [86] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {81, 80, 80, 255}, .color2 = {42, 40, 38, 255},
+    .color3 = {71, 70, 70, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_82)
+  },
+  [87] = {
+    .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
+    .color1 = {81, 80, 80, 255}, .color2 = {42, 40, 38, 255},
+    .color3 = {71, 70, 70, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_83)
   }
 };
 

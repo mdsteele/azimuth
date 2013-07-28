@@ -199,7 +199,8 @@ bool az_poll_event(az_event_t *event) {
         }
         continue;
       case SDL_KEYDOWN:
-        if (sdl_event.key.keysym.mod & AZ_KMOD_CMD) {
+        if ((sdl_event.key.keysym.mod & AZ_KMOD_CMD) &&
+            !(sdl_event.key.keysym.mod & KMOD_SHIFT)) {
           // For Command/Ctrl-M, toggle fullscreen, then get the next event.
           if (sdl_event.key.keysym.sym == SDLK_m) {
             az_set_fullscreen(!az_is_fullscreen());

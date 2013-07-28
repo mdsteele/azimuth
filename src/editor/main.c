@@ -1325,8 +1325,9 @@ static void event_loop(void) {
               break;
             case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:
-              if (event.key.shift) state.tool = AZ_TOOL_MASS_MOVE;
-              else state.tool = AZ_TOOL_MOVE;
+              if (event.key.command && event.key.shift) {
+                state.tool = AZ_TOOL_MASS_MOVE;
+              } else state.tool = AZ_TOOL_MOVE;
               break;
             case AZ_KEY_N:
               if (event.key.command) add_new_room();
@@ -1335,9 +1336,10 @@ static void event_loop(void) {
             case AZ_KEY_O: do_change_data(1, event.key.shift); break;
             case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
             case AZ_KEY_R:
-              if (event.key.command) begin_set_current_room();
-              else if (event.key.shift) state.tool = AZ_TOOL_MASS_ROTATE;
-              else state.tool = AZ_TOOL_ROTATE;
+              if (event.key.command) {
+                if (event.key.shift) state.tool = AZ_TOOL_MASS_ROTATE;
+                else begin_set_current_room();
+              } else state.tool = AZ_TOOL_ROTATE;
               break;
             case AZ_KEY_S:
               if (event.key.command) do_save(event.key.shift);
