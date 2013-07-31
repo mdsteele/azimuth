@@ -921,6 +921,35 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
 /*===========================================================================*/
 // Doodads:
 
+static void draw_drill_spikes(double angle_offset, az_clock_t clock) {
+  for (int i = 0; i < 4; ++i) {
+    const double radians =
+      3.0 * AZ_DEG2RAD(az_clock_mod(60, 1, clock + 15 * i)) + angle_offset;
+    const GLfloat x = 37.5f - 25.0f * i;
+    const GLfloat y = 30 * sin(radians);
+    const GLfloat c = 0.5f + 0.5f * cos(radians);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.7f * c, 0.7f * c, 0.7f * c);
+      glVertex2d(x, 45 * sin(radians));
+      glColor3f(0.3f * c, 0.3f * c, 0.3f * c);
+      const GLfloat dy = 9 * cos(radians) * copysign(1, y);
+      glVertex2f(x + 8, y); glVertex2f(x, y + dy);
+      glVertex2f(x - 8, y); glVertex2f(x, y - dy);
+      glVertex2f(x + 8, y);
+    } glEnd();
+  }
+}
+
+static void draw_drill_shaft(az_clock_t clock) {
+  draw_drill_spikes(AZ_HALF_PI, clock);
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.1, 0.1, 0.1); glVertex2d(-50,  30); glVertex2d(50,  30);
+    glColor3f(0.4, 0.4, 0.4); glVertex2d(-50,   0); glVertex2d(50,   0);
+    glColor3f(0.1, 0.1, 0.1); glVertex2d(-50, -30); glVertex2d(50, -30);
+  } glEnd();
+  draw_drill_spikes(-AZ_HALF_PI, clock);
+}
+
 static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
   assert(0 <= (int)doodad_kind && (int)doodad_kind < AZ_NUM_DOODAD_KINDS);
   switch (doodad_kind) {
@@ -1323,6 +1352,18 @@ static void draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
           glVertex2d(10 * cos(AZ_DEG2RAD(k)), 10 * sin(AZ_DEG2RAD(k)));
         }
       } glEnd();
+      break;
+    case AZ_DOOD_DRILL_TIP:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.4, 0.4, 0.4); glVertex2d(0, 0); glColor3f(0.1, 0.1, 0.1);
+        glVertex2d(0, 30); glVertex2d(-30, 0); glVertex2d(0, -30);
+      } glEnd();
+      break;
+    case AZ_DOOD_DRILL_SHAFT_STILL:
+      draw_drill_shaft(3);
+      break;
+    case AZ_DOOD_DRILL_SHAFT_SPIN:
+      draw_drill_shaft(clock);
       break;
   }
 }
