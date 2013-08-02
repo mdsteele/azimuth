@@ -35,3 +35,5 @@
 34: Opened hyper rocket door between Filimun rooms 26 and 40
 35: Opened hyper rocket door between Filimun rooms 122 and 124
 36: Opened rocket door between Filimun rooms 49 and 50
+37: Opened bomb door between Filimun rooms 83 and 85
+38: Opened hyper rocket door between Filimun rooms 83 and 102
