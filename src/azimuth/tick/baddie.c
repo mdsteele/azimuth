@@ -796,6 +796,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   // Apply velocity.
   const az_vector_t old_baddie_position = baddie->position;
   const double old_baddie_angle = baddie->angle;
+  bool bounced = false;
   if (az_vnonzero(baddie->velocity)) {
     az_impact_t impact;
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
@@ -816,6 +817,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       baddie->velocity =
         az_vsub(baddie->velocity,
                 az_vmul(az_vproj(baddie->velocity, impact.normal), 1.5));
+      bounced = true;
     }
   }
 
@@ -845,9 +847,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_ZIPPER:
     case AZ_BAD_ARMORED_ZIPPER:
     case AZ_BAD_MINI_ARMORED_ZIPPER:
-      if (az_vdot(baddie->velocity, az_vpolar(1, baddie->angle)) < 0.0) {
-        baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
-      }
+      if (bounced) baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
       baddie->velocity =
         az_vpolar((baddie->kind == AZ_BAD_MINI_ARMORED_ZIPPER ? 250.0 : 200.0),
                   baddie->angle);
@@ -1794,6 +1794,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->cooldown = 1.0;
         }
       }
+      break;
+    case AZ_BAD_BOUNCER_90:
+      if (az_vnonzero(baddie->velocity)) {
+        if (bounced) {
+          baddie->velocity =
+            az_vflatten(baddie->velocity, az_vpolar(1, baddie->angle));
+        }
+        baddie->angle = az_vtheta(baddie->velocity);
+      }
+      baddie->velocity = az_vpolar(170.0, baddie->angle);
       break;
   }
 
