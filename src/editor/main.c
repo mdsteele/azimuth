@@ -1443,12 +1443,12 @@ int main(int argc, char **argv) {
   az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_wall_drawing);
-  az_init_gui(false, false);
-
   if (!az_load_editor_state(&state)) {
     printf("Failed to load scenario.\n");
     return EXIT_FAILURE;
   }
+  az_init_gui(false, false);
+
   event_loop();
   az_destroy_editor_state(&state);
 
