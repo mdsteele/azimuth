@@ -401,6 +401,10 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             assert(object.obj.node->kind != AZ_NODE_NOTHING);
             if (object.obj.node->kind == AZ_NODE_MARKER) {
               value = (double)object.obj.node->subkind.marker;
+            } else if (object.obj.node->kind == AZ_NODE_DOODAD_FG ||
+                       object.obj.node->kind == AZ_NODE_DOODAD_BG) {
+              value = (object.obj.node->subkind.doodad ==
+                       AZ_DOOD_DRILL_SHAFT_SPIN ? 1.0 : 0.0);
             } else SCRIPT_ERROR("invalid node kind");
             break;
           case AZ_OBJ_SHIP:
@@ -434,12 +438,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
             object.obj.gravfield->script_fired = (value != 0.0);
             break;
-          case AZ_OBJ_NODE:
-            assert(object.obj.node->kind != AZ_NODE_NOTHING);
-            if (object.obj.node->kind == AZ_NODE_MARKER) {
-              object.obj.node->subkind.marker = (int)value;
+          case AZ_OBJ_NODE: {
+            az_node_t *node = object.obj.node;
+            assert(node->kind != AZ_NODE_NOTHING);
+            if (node->kind == AZ_NODE_MARKER) {
+              node->subkind.marker = (int)value;
+            } else if (node->kind == AZ_NODE_DOODAD_FG ||
+                       node->kind == AZ_NODE_DOODAD_BG) {
+              if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_STILL) {
+                if (value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_SPIN;
+              } else if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN) {
+                if (!value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_STILL;
+              }
             } else SCRIPT_ERROR("invalid node kind");
-            break;
+          } break;
           case AZ_OBJ_SHIP:
           case AZ_OBJ_WALL:
             SCRIPT_ERROR("invalid object type");
@@ -603,6 +615,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           particle->param1 = 50.0 * sqrt(ins.immediate);
         }
       } break;
+      case AZ_OP_QUAKE:
+        state->camera.quake_vert = fmax(0, ins.immediate);
+        break;
       // Messages/dialog:
       case AZ_OP_MSG: {
         const int paragraph_index = (int)ins.immediate;

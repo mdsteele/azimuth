@@ -68,6 +68,7 @@ void az_after_entering_room(az_space_state_t *state) {
     &state->planet->rooms[state->ship.player.current_room];
   state->camera.center =
     az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
+  state->camera.quake_vert = 0.0;
   // Set the music and run the room script (if any).
   assert(0 <= room->zone_key && room->zone_key < state->planet->num_zones);
   const az_zone_t *zone = &state->planet->zones[room->zone_key];

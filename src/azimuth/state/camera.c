@@ -47,9 +47,10 @@ az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
 
 az_vector_t az_camera_shake_offset(const az_camera_t *camera,
                                    az_clock_t clock) {
+  const double vert = camera->shake_vert + camera->quake_vert;
   return (az_vector_t){
     (az_clock_mod(2, 1, clock) ? camera->shake_horz : -camera->shake_horz),
-    (az_clock_mod(2, 2, clock) ? camera->shake_vert : -camera->shake_vert)
+    (az_clock_mod(2, 2, clock) ? vert : -vert)
   };
 }
 

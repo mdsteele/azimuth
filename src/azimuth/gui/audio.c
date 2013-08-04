@@ -328,6 +328,12 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.246478870511, .freq_slide = 0.197183,
     .square_duty = 0.53694, .volume_adjust = -0.5
   },
+  [AZ_SND_DRILLING] = {
+    .wave_kind = NOISE,
+    .env_sustain = 0.74, .start_freq = 0.1056338,
+    .vibrato_depth = 0.640845, .vibrato_speed = 0.56338,
+    .volume_adjust = -0.5
+  },
   [AZ_SND_DROP_BOMB] = {
     .wave_kind = SINE,
     .env_sustain = 0.15671, .env_decay = 0.00384,

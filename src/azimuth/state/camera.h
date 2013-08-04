@@ -44,7 +44,12 @@ az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
 
 typedef struct {
   az_vector_t center;
+  // Camera shake/quake shakes the screen.  A "shake" dies down over a short
+  // time, and use used for e.g. rocket impacts.  A "quake" persists until we
+  // turn it off (e.g. via a script) or until we change rooms.
   double shake_horz, shake_vert;
+  double quake_vert;
+  // Camera wobble is used to wobble the screen for NPS portals.
   double wobble_intensity;
   double wobble_goal;
   double wobble_theta;
