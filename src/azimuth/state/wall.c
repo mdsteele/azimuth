@@ -29,76 +29,76 @@
 
 /*===========================================================================*/
 
-static az_vector_t wall_vertices_0[] = {
+static const az_vector_t wall_vertices_0[] = {
   {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
 };
-static az_vector_t wall_vertices_1[] = {
+static const az_vector_t wall_vertices_1[] = {
   {50, -50}, {50, 50}, {-50, 50}, {-50, -50}
 };
-static az_vector_t wall_vertices_2[] = {
+static const az_vector_t wall_vertices_2[] = {
   {60, 25}, {-10.710678, 25}, {-60.710678, -25}, {-25.355339, -60.355339},
   {10, -25}, {60, -25}
 };
-static az_vector_t wall_vertices_3[] = {
+static const az_vector_t wall_vertices_3[] = {
   {-20, -8}, {15, -10}, {25, 0}, {15, 10}, {-20, 8}
 };
-static az_vector_t wall_vertices_4[] = {
+static const az_vector_t wall_vertices_4[] = {
   {-30, -10}, {15, -15}, {35, 0}, {15, 15}, {-30, 10}
 };
-static az_vector_t wall_vertices_5[] = {
+static const az_vector_t wall_vertices_5[] = {
   {31, 10}, {33, 30}, {20, 43}, {-2, 44}, {-7, 42}, {-30, 30}, {-48, 30},
   {-59, 0}, {-41, -34}, {-28, -35}, {-20, -29}, {-5, -42}, {4, -42}, {19, -27},
   {35, -28}, {40, 0}
 };
-static az_vector_t wall_vertices_girder_long[] = {
+static const az_vector_t wall_vertices_girder_long[] = {
   {25, 0}, {50, 25}, {-50, 25}, {-25, 0}, {-50, -25}, {50, -25}
 };
-static az_vector_t wall_vertices_girder_long_capped[] = {
+static const az_vector_t wall_vertices_girder_long_capped[] = {
   {25, 0}, {50, 25}, {-50, 25}, {-50, -25}, {50, -25}
 };
-static az_vector_t wall_vertices_girder_long_double_capped[] = {
+static const az_vector_t wall_vertices_girder_long_double_capped[] = {
   {50, -25}, {50, 25}, {-50, 25}, {-50, -25}
 };
-static az_vector_t wall_vertices_girder_short[] = {
+static const az_vector_t wall_vertices_girder_short[] = {
   {2, 0}, {27, 25}, {-27, 25}, {-2, 0}, {-27, -25}, {27, -25}
 };
-static az_vector_t wall_vertices_girder_skinny[] = {
+static const az_vector_t wall_vertices_girder_skinny[] = {
   {39, 0}, {59, 20}, {-59, 20}, {-39, 0}, {-59, -20}, {59, -20}
 };
-static az_vector_t wall_vertices_girder_skinny_capped[] = {
+static const az_vector_t wall_vertices_girder_skinny_capped[] = {
   {39, 0}, {59, 20}, {-59, 20}, {-59, -20}, {59, -20}
 };
-static az_vector_t wall_vertices_11[] = {
+static const az_vector_t wall_vertices_11[] = {
   {17, 4}, {23, 10}, {20, 21}, {8, 28}, {-2, 22}, {-20, 18}, {-20, 0},
   {-27, -10}, {-19, -21}, {-3, -18}, {7, -26}, {16, -20}
 };
-static az_vector_t wall_vertices_12[] = {
+static const az_vector_t wall_vertices_12[] = {
   {6, 36}, {-10, 42}, {-20, 38}, {-50, 35}, {-54, 5}, {-50, -30}, {-35, -37},
   {-25, -32}, {-5, -41}, {25, -31}, {50, -34}, {53, -3}, {50, 35}, {32, 41}
 };
-static az_vector_t wall_vertices_13[] = {
+static const az_vector_t wall_vertices_13[] = {
   {77, 20}, {81, 60}, {55, 86}, {11, 88}, {1, 84}, {-45, 60}, {-81, 60},
   {-103, 0}, {-72, -65}, {-41, -70}, {-25, -64}, {5, -84}, {23, -84},
   {53, -66}, {85, -56}, {95, -10}
 };
-static az_vector_t wall_vertices_14[] = {
+static const az_vector_t wall_vertices_14[] = {
   {12, 36}, {-20, 42}, {-40, 38}, {-100, 35}, {-108, 5}, {-100, -30},
   {-70, -37}, {-50, -32}, {-10, -41}, {50, -31}, {100, -34}, {106, -3},
   {100, 35}, {64, 41}
 };
-static az_vector_t wall_vertices_18[] = {
+static const az_vector_t wall_vertices_18[] = {
   {0, 30}, {-8, 28}, {0, -30}, {8, 28}
 };
-static az_vector_t wall_vertices_19[] = {
+static const az_vector_t wall_vertices_19[] = {
   {0, 20}, {-6, 18}, {0, -20}, {6, 18}
 };
-static az_vector_t wall_vertices_21[] = {
+static const az_vector_t wall_vertices_21[] = {
   {125, 50}, {-125, 50}, {-125, -50}, {125, -50}
 };
-static az_vector_t wall_vertices_22[] = {
+static const az_vector_t wall_vertices_22[] = {
   {50, 33}, {-50, 33}, {-50, -33}, {50, -33}
 };
-static az_vector_t wall_vertices_23[] = {
+static const az_vector_t wall_vertices_23[] = {
   {25, 33}, {-25, 33}, {-25, -33}, {25, -33}
 };
 static const az_vector_t wall_vertices_24[] = {
@@ -109,13 +109,13 @@ static const az_vector_t wall_vertices_25[] = {
   {80, 0}, {40, 69.282032302755098}, {-40, 69.282032302755098},
   {-80, 0}, {-40, -69.282032302755098}, {40, -69.282032302755098}
 };
-static az_vector_t wall_vertices_26[] = {
+static const az_vector_t wall_vertices_26[] = {
   {40, 30}, {39.24, 33.83}, {37.07, 37.07}, {33.83, 39.24}, {30, 40},
   {-30, 40}, {-33.83, 39.24}, {-37.07, 37.07}, {-39.24, 33.83}, {-40, 30},
   {-40, -30}, {-39.24, -33.83}, {-37.07, -37.07}, {-33.83, -39.24}, {-30, -40},
   {30, -40}, {33.83, -39.24}, {37.07, -37.07}, {39.24, -33.83}, {40, -30}
 };
-static az_vector_t wall_vertices_27[] = {
+static const az_vector_t wall_vertices_27[] = {
   // Rounded corner for {16.57, 40}:
   {16.57, 26.93}, {14.98, 30.76}, {11.16, 32.35}, {7.33, 30.76},
   // Rounded corner for {-40, -16.57}:
@@ -125,72 +125,72 @@ static az_vector_t wall_vertices_27[] = {
   {9.09, -31.94}, {11.16, -32.35}, {13.23, -31.94},
   {14.99, -30.76}, {16.16, -29.01}, {16.57, -26.93}
 };
-static az_vector_t wall_vertices_31[] = {
+static const az_vector_t wall_vertices_31[] = {
   {25, 55}, {-25, 55}, {-25, -55}, {25, -55}
 };
-static az_vector_t wall_vertices_32[] = {
+static const az_vector_t wall_vertices_32[] = {
   {28, 28}, {-28, 28}, {-28, -28}, {28, -28}
 };
-static az_vector_t wall_vertices_34[] = {
+static const az_vector_t wall_vertices_34[] = {
   {28, 28}, {-28, 28}, {-28, 11.6}, {11.6, -28}, {28, -28}
 };
-static az_vector_t wall_vertices_37[] = {
+static const az_vector_t wall_vertices_37[] = {
   {0, 45}, {-20, 42}, {-10, 0}, {-7, -3}, {0, -45}, {22, 42}
 };
-static az_vector_t wall_vertices_41[] = {
+static const az_vector_t wall_vertices_41[] = {
   {0, -80}, {24, -94}, {47, -93}, {98, -98}, {120, -50}, {110, -15},
   {118, 20}, {119, 52}, {102, 95}, {75, 90}, {30, 88}, {0, 80}, {-30, 97},
   {-80, 90}, {-105, 60}, {-103, 37}, {-120, 20}, {-110, -40}, {-115, -70},
   {-100, -90}, {-40, -95}
 };
-static az_vector_t wall_vertices_42[] = {
+static const az_vector_t wall_vertices_42[] = {
   {100, 20}, {50, 15}, {0, 23}, {-50, 10}, {-100, 20},
   {-100, -40}, {-50, -80}, {0, -46}, {50, -50}, {100, -40}
 };
-static az_vector_t wall_vertices_43[] = {
+static const az_vector_t wall_vertices_43[] = {
   {35, 34}, {9, 32}, {-20, 20}, {-31, -8}, {-33, -35},
   {30, -35}, {30, -33}, {31, -31}, {33, -30}, {35, -30}
 };
-static az_vector_t wall_vertices_47[] = {
+static const az_vector_t wall_vertices_47[] = {
   {33, -30}, {33, 30}, {-32, 30}, {-32, -30}
 };
-static az_vector_t wall_vertices_50[] = {
+static const az_vector_t wall_vertices_50[] = {
   {20, 0}, {40, 20}, {-40, 20}, {-20, 0}, {-40, -20}, {40, -20}
 };
-static az_vector_t wall_vertices_51[] = {
+static const az_vector_t wall_vertices_51[] = {
   {47.5, 0}, {72.5, 25}, {-72.5, 25}, {-47.5, 0}, {-72.5, -25}, {72.5, -25}
 };
-static az_vector_t wall_vertices_52[] = {
+static const az_vector_t wall_vertices_52[] = {
   {90, 5}, {42, 60}, {-30, 60}, {-87, 0}, {-50, -62}, {40, -60}
 };
-static az_vector_t wall_vertices_53[] = {
+static const az_vector_t wall_vertices_53[] = {
   {45, 2}, {21, 30}, {-15, 33}, {-44, 0}, {-25, -36}, {20, -30}
 };
-static az_vector_t wall_vertices_54[] = {
+static const az_vector_t wall_vertices_54[] = {
   {20, 15}, {19.62, 16.915}, {18.535, 18.535}, {16.915, 19.62}, {15, 20},
   {-15, 20}, {-16.915, 19.62}, {-18.535, 18.535}, {-19.62, 16.915},
   {-20, 15}, {-20, -15}, {-19.62, -16.915}, {-18.535, -18.535},
   {-16.915, -19.62}, {-15, -20}, {15, -20}, {16.915, -19.62},
   {18.535, -18.535}, {19.62, -16.915}, {20, -15}
 };
-static az_vector_t wall_vertices_55[] = {
+static const az_vector_t wall_vertices_55[] = {
   {80, 15}, {79.62, 16.915}, {78.535, 18.535}, {76.915, 19.62}, {75, 20},
   {-75, 20}, {-76.915, 19.62}, {-78.535, 18.535}, {-79.62, 16.915},
   {-80, 15}, {-80, -15}, {-79.62, -16.915}, {-78.535, -18.535},
   {-76.915, -19.62}, {-75, -20}, {75, -20}, {76.915, -19.62},
   {78.535, -18.535}, {79.62, -16.915}, {80, -15}
 };
-static az_vector_t wall_vertices_56[] = {
+static const az_vector_t wall_vertices_56[] = {
   {80, 30}, {79.24, 33.83}, {77.07, 37.07}, {73.83, 39.24}, {70, 40},
   {-70, 40}, {-73.83, 39.24}, {-77.07, 37.07}, {-79.24, 33.83}, {-80, 30},
   {-80, -30}, {-79.24, -33.83}, {-77.07, -37.07}, {-73.83, -39.24}, {-70, -40},
   {70, -40}, {73.83, -39.24}, {77.07, -37.07}, {79.24, -33.83}, {80, -30}
 };
-static az_vector_t wall_vertices_61[] = {
+static const az_vector_t wall_vertices_61[] = {
   {50, 20}, {27, 18}, {2, 21}, {-24, 15}, {-50, 20},
   {-50, -40}, {-25, -60}, {0, -46}, {25, -50}, {50, -40}
 };
-static az_vector_t wall_vertices_63[] = {
+static const az_vector_t wall_vertices_63[] = {
   {20, 25}, {-10.710678, 25}, {-31.8198, 3.5355339}, {3.5355339, -31.8198},
   {10, -25}, {20, -25}
 };
@@ -200,58 +200,84 @@ static const az_vector_t wall_vertices_65[] = {
 static const az_vector_t wall_vertices_66[] = {
   {23.094010767585, 0}, {-11.547005383792511, 20}, {-11.547005383792511, -20}
 };
-static az_vector_t wall_vertices_67[] = {
+static const az_vector_t wall_vertices_67[] = {
   {0, 30}, {-8, 24}, {0, -30}, {8, 24}
 };
-static az_vector_t wall_vertices_68[] = {
+static const az_vector_t wall_vertices_68[] = {
   {8, -20}, {8, 1}, {9, 5}, {9, 20}, {-7, 20}, {-7, 3}, {-8, 2}, {-8, -20}
 };
-static az_vector_t wall_vertices_69[] = {
+static const az_vector_t wall_vertices_69[] = {
   {0, 30}, {-12, 14}, {-8, -24}, {0, -30}, {8, -24}, {12, 14}
 };
-static az_vector_t wall_vertices_70[] = {
+static const az_vector_t wall_vertices_70[] = {
   {16, -30}, {16, -2}, {17, 14}, {17, 30},
   {-15, 30}, {-15, 5}, {-16, 0}, {-16, -30}
 };
-static az_vector_t wall_vertices_71[] = {
+static const az_vector_t wall_vertices_71[] = {
   {0, 60}, {-24, 28}, {-16, -48}, {0, -60}, {16, -48}, {24, 28}
 };
-static az_vector_t wall_vertices_72[] = {
+static const az_vector_t wall_vertices_72[] = {
   {32, -60}, {31, -35}, {32, -4}, {34, 28}, {33, 44}, {34, 60},
   {-30, 60}, {-29, 27}, {-30, 10}, {-32, 0}, {-33, -40}, {-32, -60}
 };
-static az_vector_t wall_vertices_73[] = {
+static const az_vector_t wall_vertices_73[] = {
   {50, -8}, {30, 30}, {10, 50}, {-10, 53}, {-25, 30},
   {-50, 0}, {-40, -45}, {-10, -65}, {10, -60}, {40, -35}
 };
-static az_vector_t wall_vertices_74[] = {
+static const az_vector_t wall_vertices_74[] = {
   {100, -10}, {60, 40}, {-20, 70}, {-50, 40},
   {-100, 0}, {-80, -60}, {-20, -90}, {20, -90}, {80, -46}
 };
-static az_vector_t wall_vertices_75[] = {
+static const az_vector_t wall_vertices_75[] = {
   {40, 6}, {67, 40}, {70, 60}, {58, 80}, {15, 90}, {-30, 56},
   {-50, 18}, {-46, -16}, {-10, -56}, {20, -52}, {50, -35}, {52, -20}
 };
-static az_vector_t wall_vertices_79[] = {
+static const az_vector_t wall_vertices_79[] = {
   {54, 14}, {42, 18}, {-42, 18}, {-54, 14},
   {-54, -14}, {-42, -18}, {42, -18}, {54, -14}
 };
-static az_vector_t wall_vertices_80[] = {
+static const az_vector_t wall_vertices_80[] = {
   {-100, 40}, {-92, 2}, {-80, -40}, {20, -38}, {80, -40}, {88, -6},
   {100, 40}, {5, 38}
 };
-static az_vector_t wall_vertices_81[] = {
+static const az_vector_t wall_vertices_81[] = {
   {-140, 30}, {-164, 2}, {-180, -30}, {-20, -28}, {180, -30}, {156, -6},
   {140, 30}, {0, 28}
 };
-static az_vector_t wall_vertices_82[] = {
+static const az_vector_t wall_vertices_82[] = {
   {-115, 20}, {-101, 2}, {-77, -20}, {-7, -18}, {113, -20}, {119, -4},
   {103, 20}, {13, 18}
 };
-static az_vector_t wall_vertices_83[] = {
+static const az_vector_t wall_vertices_83[] = {
   {-60, 40}, {-55, 2}, {-44, -40}, {20, -38}, {58, -40}, {59, -6},
   {58, 40}, {9, 38}
 };
+static az_vector_t wall_vertices_88[] = {
+  // for deg in xrange(0, 360, 15):
+  //   (c, s) = (cos(radians(deg)), sin(radians(deg)))
+  //   print('{%.04g, %.04g},' % (60*c*exp(0.2*s), 45*s*exp(0.2*c)))
+  {60, 0}, {61.03, 14.13}, {57.43, 26.75}, {48.87, 36.65}, {35.67, 43.07},
+  {18.84, 45.78}, {4.487e-15, 45}, {-18.84, 41.27}, {-35.67, 35.26},
+  {-48.87, 27.62}, {-57.43, 18.92}, {-61.03, 9.601}, {-60, 0},
+  {-55.03, -9.601}, {-47.02, -18.92}, {-36.83, -27.62}, {-25.23, -35.26},
+  {-12.8, -41.27}, {0, -45}, {12.8, -45.78}, {25.23, -43.07}, {36.83, -36.65},
+  {47.02, -26.75}, {55.03, -14.13}
+};
+static az_vector_t wall_vertices_89[] = {
+  // for deg in xrange(0, 360, 10):
+  //   (c, s) = (cos(radians(deg)), sin(radians(deg)))
+  //   print('{%.04g, %.04g},' % (100*c*exp(0.2*s), 80*s*exp(-0.5*c)))
+  {100, 0}, {102, 8.49}, {100.6, 17.1}, {95.71, 25.94}, {87.11, 35.06},
+  {74.92, 44.44}, {59.46, 53.96}, {41.27, 63.36}, {21.15, 72.23}, {0, 80},
+  {-21.15, 85.93}, {-41.27, 89.2}, {-59.46, 88.96}, {-74.92, 84.51},
+  {-87.11, 75.42}, {-95.71, 61.68}, {-100.6, 43.77}, {-102, 22.73}, {-100, 0},
+  {-95.12, -22.73}, {-87.76, -43.77}, {-78.36, -61.68}, {-67.36, -75.42},
+  {-55.15, -84.51}, {-42.05, -88.96}, {-28.34, -89.2}, {-14.26, -85.93},
+  {0, -80}, {14.26, -72.23}, {28.34, -63.36}, {42.05, -53.96}, {55.15, -44.44},
+  {67.36, -35.06}, {78.36, -25.94}, {87.76, -17.1}, {95.12, -8.49}
+};
+
+/*===========================================================================*/
 
 static az_wall_data_t wall_datas[] = {
   // Yellow rectangle block:
@@ -854,6 +880,20 @@ static az_wall_data_t wall_datas[] = {
     .color3 = {71, 70, 70, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_83)
+  },
+  // Water-smoothed boulder:
+  [88] = {
+    .style = AZ_WSTY_TFQS_123, .bezel = 0.5, .color1 = {90, 85, 100, 255},
+    .color2 = {56, 49, 57, 255}, .color3 = {36, 30, 37, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_88)
+  },
+  // Large water-smoothed boulder:
+  [89] = {
+    .style = AZ_WSTY_TFQS_123, .bezel = 0.4, .color1 = {85, 80, 90, 255},
+    .color2 = {57, 52, 59, 255}, .color3 = {31, 27, 32, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_89)
   }
 };
 
