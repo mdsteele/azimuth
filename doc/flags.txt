@@ -38,3 +38,4 @@
 37: Opened bomb door between Filimun rooms 83 and 85
 38: Opened hyper rocket door between Filimun rooms 83 and 102
 39: Turned on drill in Filimun room 84
+40: Opened bomb door between Filimun rooms 80 and 81
