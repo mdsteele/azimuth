@@ -894,6 +894,29 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {57, 52, 59, 255}, .color3 = {31, 27, 32, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_89)
+  },
+  // Sand straight-ish long wall:
+  [90] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.0,
+    .color1 = {175, 150, 132, 255}, .color2 = {117, 100, 90, 255},
+    .color3 = {237, 201, 175, 255},
+    .elasticity = 0.05, .impact_damage_coeff = 1.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_42)
+  },
+  // Sand straight-ish short wall:
+  [91] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.0,
+    .color1 = {175, 150, 132, 255}, .color2 = {117, 100, 90, 255},
+    .color3 = {237, 201, 175, 255},
+    .elasticity = 0.05, .impact_damage_coeff = 1.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_61)
+  },
+  // Solid-colored sand rectangle:
+  [92] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {237, 201, 175, 255}, .color2 = {237, 201, 175, 255},
+    .elasticity = 0.05, .impact_damage_coeff = 1.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
   }
 };
 
