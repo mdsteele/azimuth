@@ -233,6 +233,20 @@ static void draw_heat_ray(
   } glPopMatrix();
 }
 
+static void draw_piston_segment(az_color_t inner, az_color_t outer,
+                                GLfloat max_x, GLfloat sw) {
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(outer); glVertex2f(-15,  6 + sw); glVertex2f(max_x,  6 + sw);
+    az_gl_color(inner); glVertex2f(-15,  6);      glVertex2f(max_x,  6);
+    az_gl_color(outer); glVertex2f(-15,  6 - sw); glVertex2f(max_x,  6 - sw);
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(outer); glVertex2f(-15, -6 + sw); glVertex2f(max_x, -6 + sw);
+    az_gl_color(inner); glVertex2f(-15, -6);      glVertex2f(max_x, -6);
+    az_gl_color(outer); glVertex2f(-15, -6 - sw); glVertex2f(max_x, -6 - sw);
+  } glEnd();
+}
+
 /*===========================================================================*/
 // Oth baddies:
 
@@ -1841,6 +1855,25 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         glVertex2f(-3, 2); glVertex2f(3, 2);
       } glEnd();
       break;
+    case AZ_BAD_PISTON: {
+      const az_color_t inner =
+        color3(0.65f + 0.35f * flare, 0.65f + 0.2f * frozen,
+               0.7f + 0.3f * frozen);
+      const az_color_t outer =
+        color3(0.25f + 0.5f * flare, 0.25f + 0.15f * frozen,
+               0.3f + 0.2f * frozen);
+      draw_piston_segment(inner, outer, 21, 3);
+      glBegin(GL_QUAD_STRIP); {
+        az_gl_color(inner); glVertex2f(21, -10); glVertex2f(21, 10);
+        az_gl_color(outer); glVertex2f(27, -9); glVertex2f(27, 9);
+      } glEnd();
+      for (int i = 0; i < 3; ++i) {
+        glPushMatrix(); {
+          glTranslated(baddie->components[i].position.x, 0, 0);
+          draw_piston_segment(inner, outer, 19 - 2 * i, 4 + i);
+        } glPopMatrix();
+      }
+    } break;
   }
 }
 

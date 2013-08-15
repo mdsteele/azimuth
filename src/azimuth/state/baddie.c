@@ -411,6 +411,28 @@ static const az_vector_t leaper_vertices[] = {
   {8, 0}, {12, 15}, {-10, 17}, {-13, 0}, {-10, -17}, {12, -15}
 };
 
+static const az_vector_t piston_head_vertices[] = {
+  {27, 9}, {21, 10}, {21, 9}, {-15, 9},
+  {-15, -9}, {21, -9}, {21, -10}, {27, -9}
+};
+static const az_vector_t piston_segment0_vertices[] = {
+  {19, 10}, {-15, 10}, {-15, -10}, {19, -10}
+};
+static const az_vector_t piston_segment1_vertices[] = {
+  {17, 11}, {-15, 11}, {-15, -11}, {17, -11}
+};
+static const az_vector_t piston_segment2_vertices[] = {
+  {15, 12}, {-15, 12}, {-15, -12}, {15, -12}
+};
+static az_component_data_t piston_components[] = {
+  { .polygon = AZ_INIT_POLYGON(piston_segment0_vertices),
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+  { .polygon = AZ_INIT_POLYGON(piston_segment1_vertices),
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+  { .polygon = AZ_INIT_POLYGON(piston_segment2_vertices),
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -798,6 +820,15 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 12.0 }
+  },
+  [AZ_BAD_PISTON] = {
+    .max_health = 14.0, .overall_bounding_radius = 106.0,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_NO_HOMING_BEAM |
+                   AZ_BADF_NO_HOMING_PROJ), .color = {96, 96, 128, 255},
+    .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
+                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+    DECL_COMPONENTS(piston_components)
   }
 };
 

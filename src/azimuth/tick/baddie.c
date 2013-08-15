@@ -1805,6 +1805,42 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       baddie->velocity = az_vpolar(170.0, baddie->angle);
       break;
+    case AZ_BAD_PISTON: {
+      const az_vector_t base_pos =
+        az_vadd(baddie->position, az_vrotate(baddie->components[2].position,
+                                             baddie->angle));
+      const double old_extension = fabs(baddie->components[2].position.x);
+      const double max_extension = 90.0;
+      // Change how extended the piston is:
+      double goal_extension;
+      if (baddie->state >= 0 && baddie->state <= 8) {
+        goal_extension = max_extension * 0.125 * baddie->state;
+      } else goal_extension = old_extension;
+      const double tracking_base = 0.05; // smaller = faster tracking
+      const double change =
+        (goal_extension - old_extension) * (1.0 - pow(tracking_base, time));
+      const double new_extension =
+        (fabs(change) < 0.001 ? goal_extension :
+         fmin(fmax(0.0, old_extension + change), max_extension));
+      // Update positions of segments:
+      if (new_extension != old_extension) {
+        const az_vector_t new_head_pos =
+          az_vadd(base_pos, az_vpolar(new_extension, baddie->angle));
+        for (int i = 0; i < 3; ++i) {
+          baddie->components[i].position.x = -new_extension * (i + 1) / 3.0;
+        }
+        baddie->position = new_head_pos;
+      }
+      // If any of the piston's cargo is destroyed, the piston is destroyed:
+      AZ_ARRAY_LOOP(uuid, baddie->cargo_uuids) {
+        if (uuid->type == AZ_UUID_NOTHING) continue;
+        az_object_t object;
+        if (!az_lookup_object(state, *uuid, &object)) {
+          az_kill_baddie(state, baddie);
+          break;
+        }
+      }
+    } break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
