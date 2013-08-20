@@ -181,7 +181,8 @@ static const az_vector_t trapdoor_door_vertices[] = {
 };
 static az_component_data_t trapdoor_components[] = {
   { .polygon = AZ_INIT_POLYGON(trapdoor_door_vertices),
-    .immunities = ~AZ_DMGF_HYPER_ROCKET }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET) }
 };
 
 static const az_vector_t swooper_vertices[] = {
@@ -601,7 +602,8 @@ static az_baddie_data_t baddie_datas[] = {
                           AZ_PUPF_BOMBS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(trapdoor_hinge_vertices),
-                   .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_HYPER_ROCKET) },
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_PIERCE | AZ_DMGF_ROCKET) },
     DECL_COMPONENTS(trapdoor_components)
   },
   [AZ_BAD_SWOOPER] = {

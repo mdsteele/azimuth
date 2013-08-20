@@ -917,6 +917,38 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {237, 201, 175, 255}, .color2 = {237, 201, 175, 255},
     .elasticity = 0.05, .impact_damage_coeff = 1.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Snow/ice straight-ish wall:
+  [93] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {96, 32, 192, 255}, .color2 = {192, 176, 192, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_42)
+  },
+  // Snow/ice straight-ish short wall:
+  [94] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {96, 32, 192, 255}, .color2 = {192, 176, 192, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_61)
+  },
+  // Snow/icw convex wall:
+  [95] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {96, 32, 192, 255}, .color2 = {192, 176, 192, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Snow/ice concave wall:
+  [96] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.6,
+    .color1 = {96, 32, 192, 255}, .color3 = {192, 176, 192, 255},
+    .color2 = {0, 0, 0, 255},
+    .elasticity = 0.15, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   }
 };
 

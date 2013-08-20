@@ -40,3 +40,4 @@
 39: Turned on drill in Filimun room 84
 40: Opened bomb door between Filimun rooms 80 and 81
 41: Opened rocket door between Barrag rooms 241 and 244
+42: Opened hyper rocket door between Cnidam rooms 37 and 38
