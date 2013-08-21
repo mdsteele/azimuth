@@ -116,9 +116,9 @@ static void apply_gravity_to_ship(az_space_state_t *state, double time,
 
 static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
                                double time) {
-  const bool dynamic = az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR);
   const double max_speed = AZ_SHIP_BASE_MAX_SPEED *
-    (is_in_water ? (dynamic ? 0.8 : 0.4) : (dynamic ? 1.35 : 1.0));
+    (az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR) ?
+     (is_in_water ? 1.0 : 1.1) : (is_in_water ? 0.4 : 1.0));
   const double drag_coeff =
     AZ_SHIP_BASE_THRUST_ACCEL / (max_speed * max_speed);
   const az_vector_t drag_force =
@@ -1065,7 +1065,7 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   // Retro thrusters:
   else if (controls->down_held && !controls->up_held &&
       az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
-    az_vpluseq(&ship->velocity, az_vpolar(-impulse/2, ship->angle));
+    az_vpluseq(&ship->velocity, az_vpolar(-0.8 * impulse, ship->angle));
     ship->thrusters = AZ_THRUST_REVERSE;
   } else ship->thrusters = AZ_THRUST_NONE;
 }
