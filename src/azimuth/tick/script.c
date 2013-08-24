@@ -172,13 +172,15 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
 #define UNARY_OP(expr) do { \
     double a; \
     STACK_POP(&a); \
-    STACK_PUSH(expr); \
+    const double result = (expr); \
+    STACK_PUSH(result); \
   } while (0)
 
 #define BINARY_OP(expr) do { \
     double a, b; \
     STACK_POP(&a, &b); \
-    STACK_PUSH(expr); \
+    const double result = (expr); \
+    STACK_PUSH(result); \
   } while (0)
 
 static double modulo(double a, double b) {
@@ -239,6 +241,10 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_IDIV: UNARY_OP(ins.immediate / a); break;
       case AZ_OP_MOD: BINARY_OP(modulo(a, b)); break;
       case AZ_OP_MODI: UNARY_OP(modulo(a, ins.immediate)); break;
+      // Math:
+      case AZ_OP_ABS: UNARY_OP(fabs(a)); break;
+      case AZ_OP_MTAU: UNARY_OP(az_mod2pi(a)); break;
+      case AZ_OP_SQRT: UNARY_OP(a < 0.0 ? NAN : sqrt(a)); break;
       // Vectors:
       case AZ_OP_VADD: {
         double xa, ya, xb, yb;

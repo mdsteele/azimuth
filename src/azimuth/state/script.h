@@ -45,6 +45,10 @@ typedef enum {
   AZ_OP_IDIV, // pop top, push (i / a)
   AZ_OP_MOD, // pop top two, push (a mod b)
   AZ_OP_MODI, // pop top, push (a mod i)
+  // Math:
+  AZ_OP_ABS, // pop top, push fabs(a)
+  AZ_OP_MTAU, // pop top, push az_mod2pi(a)
+  AZ_OP_SQRT, // pop top, push sqrt(a)
   // Vectors:
   AZ_OP_VADD, // pop top four, push (a + c) and (b + d)
   AZ_OP_VSUB, // pop top four, push (a - c) and (b - d)
