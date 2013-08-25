@@ -1805,7 +1805,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       baddie->velocity = az_vpolar(170.0, baddie->angle);
       break;
-    case AZ_BAD_PISTON: {
+    case AZ_BAD_PISTON:
+    case AZ_BAD_ARMORED_PISTON:
+    case AZ_BAD_INCORPOREAL_PISTON:
+    case AZ_BAD_INCORPOREAL_PISTON_EXT: {
       const az_vector_t base_pos =
         az_vadd(baddie->position, az_vrotate(baddie->components[2].position,
                                              baddie->angle));
@@ -1815,6 +1818,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       double goal_extension;
       if (baddie->state >= 0 && baddie->state <= 8) {
         goal_extension = max_extension * 0.125 * baddie->state;
+        if (baddie->kind == AZ_BAD_INCORPOREAL_PISTON_EXT) {
+          goal_extension = max_extension - goal_extension;
+        }
       } else goal_extension = old_extension;
       const double tracking_base = 0.05; // smaller = faster tracking
       const double change =
