@@ -1853,6 +1853,28 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
     } break;
+    case AZ_BAD_CRAWLING_MORTAR:
+      crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+                   az_vcross(az_vsub(state->ship.position, baddie->position),
+                             az_vpolar(1.0, baddie->angle)) > 0.0,
+                   1.0, 20.0, 100.0);
+      // Aim gun:
+      baddie->components[0].angle =
+        fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
+      // Fire:
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_GRENADE, 30.0,
+                        baddie->components[0].angle, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+        baddie->cooldown = 1.5;
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

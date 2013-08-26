@@ -151,6 +151,7 @@ static void on_projectile_impact(az_space_state_t *state,
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
     case AZ_PROJ_BOMB:
+    case AZ_PROJ_GRENADE:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
       break;
     case AZ_PROJ_MEGA_BOMB:
@@ -598,6 +599,16 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
       break;
+    case AZ_PROJ_GRENADE: {
+      const double per_second = 15.0;
+      if (ceil(per_second * proj->age) >
+          ceil(per_second * (proj->age - time))) {
+        leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                             (az_color_t){128, 128, 128, 128}, 0.5, 8.0, 0);
+      }
+      az_vpluseq(&proj->velocity, az_vwithlen(proj->position, -150 * time));
+      proj->angle = az_mod2pi(proj->angle + AZ_DEG2RAD(360) * time);
+    } break;
     case AZ_PROJ_GRAVITY_TORPEDO:
       leave_missile_trail(state, proj, time, (az_color_t){64, 64, 192, 255});
       proj->velocity = az_vrotate((az_vector_t){proj->data->speed,

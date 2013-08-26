@@ -382,6 +382,20 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         glVertex2f(-150 * factor, -50 * factor);
       } glEnd();
       break;
+    case AZ_PROJ_GRENADE:
+      glBegin(GL_QUADS); {
+        glColor3f(0.4, 0.25, 0.25); glVertex2f(2, 3); glVertex2f(-2, 3);
+        glVertex2f(-2, -3); glVertex2f(2, -3);
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.7, 0.7, 0.7); glVertex2f(2, 0); glColor3f(0.5, 0.5, 0.5);
+        glVertex2f(2, 4); glVertex2f(4, 0); glVertex2f(2, -4);
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.7, 0.7, 0.7); glVertex2f(-2, 0); glColor3f(0.5, 0.5, 0.5);
+        glVertex2f(-2, 4); glVertex2f(-4, 0); glVertex2f(-2, -4);
+      } glEnd();
+      break;
     case AZ_PROJ_GRAVITY_TORPEDO:
       draw_spark(proj->age, 8.0, (az_color_t){0, 128, 255, 0});
       break;

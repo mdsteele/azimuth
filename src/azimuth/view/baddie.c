@@ -41,6 +41,24 @@ static void az_gl_color(az_color_t color) {
   glColor4ub(color.r, color.g, color.b, color.a);
 }
 
+static void draw_crawling_turret_legs(float flare, float frozen,
+                                      az_clock_t clock) {
+  glBegin(GL_QUADS); {
+    const az_color_t dark = color3(
+        0.25 + 0.1 * flare - 0.1 * frozen,
+        0.25 - 0.1 * flare - 0.1 * frozen,
+        0.25 - 0.1 * flare + 0.1 * frozen);
+    const int zig = az_clock_zigzag(5, 6, clock);
+    az_gl_color(dark); glVertex2f(0, 10); glVertex2f(-21, -10 + zig);
+    glColor3f(0.4 + 0.25 * flare - 0.25 * frozen,
+              0.4 - 0.25 * flare - 0.25 * frozen,
+              0.4 - 0.25 * flare + 0.25 * frozen);
+    glVertex2f(-20, -20 + zig); glVertex2f(0, -10);
+    glVertex2f(0, 10); glVertex2f(-20, 20 - zig);
+    az_gl_color(dark); glVertex2f(-21, 10 - zig); glVertex2f(0, -10);
+  } glEnd();
+}
+
 static void draw_turret_body_outer_edge(
     const az_baddie_t *baddie, az_color_t far_edge, az_color_t mid_edge) {
   glBegin(GL_QUAD_STRIP); {
@@ -416,22 +434,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_CRAWLING_TURRET:
-      glBegin(GL_QUADS); {
-        const int zig = az_clock_zigzag(5, 6, clock);
-        glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
-                  0.25 - 0.1 * flare - 0.1 * frozen,
-                  0.25 - 0.1 * flare + 0.1 * frozen);
-        glVertex2f(0, 10); glVertex2f(-21, -10 + zig);
-        glColor3f(0.4 + 0.25 * flare - 0.25 * frozen,
-                  0.4 - 0.25 * flare - 0.25 * frozen,
-                  0.4 - 0.25 * flare + 0.25 * frozen);
-        glVertex2f(-20, -20 + zig); glVertex2f(0, -10);
-        glVertex2f(0, 10); glVertex2f(-20, 20 - zig);
-        glColor3f(0.25 + 0.1 * flare - 0.1 * frozen,
-                  0.25 - 0.1 * flare - 0.1 * frozen,
-                  0.25 - 0.1 * flare + 0.1 * frozen);
-        glVertex2f(-21, 10 - zig); glVertex2f(0, -10);
-      } glEnd();
+      draw_crawling_turret_legs(flare, frozen, clock);
       // fallthrough
     case AZ_BAD_TURRET:
       draw_turret(baddie,
@@ -1888,6 +1891,20 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_INCORPOREAL_PISTON:
     case AZ_BAD_INCORPOREAL_PISTON_EXT:
       draw_piston(baddie, color3(0.2, 0.2, 0.2), color3(0.1, 0.1, 0.1));
+      break;
+    case AZ_BAD_CRAWLING_MORTAR:
+      draw_crawling_turret_legs(flare, frozen, clock);
+      draw_turret(baddie,
+          color3(0.1 + 0.1 * flare - 0.1 * frozen, 0.1 - 0.05 * flare,
+                 0.1 - 0.1 * flare + 0.1 * frozen),
+          color3(0.2 + 0.15 * flare - 0.15 * frozen, 0.2 - 0.1 * flare,
+                 0.2 - 0.15 * flare + 0.15 * frozen),
+          color3(0.3 + 0.25 * flare - 0.25 * frozen, 0.3 - 0.15 * flare,
+                 0.3 - 0.25 * flare + 0.25 * frozen),
+          color3(0.4 + 0.4 * flare - 0.3 * frozen, 0.4 - 0.2 * flare,
+                 0.4 - 0.3 * flare + 0.4 * frozen),
+          color3(0.1 + 0.25 * flare, 0.1, 0.1 + 0.25 * frozen),
+          color3(0.5 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
       break;
   }
 }

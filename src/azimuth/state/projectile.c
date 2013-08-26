@@ -347,6 +347,15 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 3.0,
     .properties = AZ_PROJF_NO_HIT
   },
+  [AZ_PROJ_GRENADE] = {
+    .speed = 500.0,
+    .lifetime = 5.0,
+    .impact_damage = 5.0,
+    .splash_damage = 15.0,
+    .splash_radius = 50.0,
+    .impact_shake = 1.5,
+    .damage_kind = AZ_DMGF_BOMB
+  },
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,
     .lifetime = 2.0,
