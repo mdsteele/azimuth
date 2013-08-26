@@ -1807,6 +1807,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_PISTON:
     case AZ_BAD_ARMORED_PISTON:
+    case AZ_BAD_ARMORED_PISTON_EXT:
     case AZ_BAD_INCORPOREAL_PISTON:
     case AZ_BAD_INCORPOREAL_PISTON_EXT: {
       const az_vector_t base_pos =
@@ -1818,7 +1819,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       double goal_extension;
       if (baddie->state >= 0 && baddie->state <= 8) {
         goal_extension = max_extension * 0.125 * baddie->state;
-        if (baddie->kind == AZ_BAD_INCORPOREAL_PISTON_EXT) {
+        if (baddie->kind == AZ_BAD_ARMORED_PISTON_EXT ||
+            baddie->kind == AZ_BAD_INCORPOREAL_PISTON_EXT) {
           goal_extension = max_extension - goal_extension;
         }
       } else goal_extension = old_extension;

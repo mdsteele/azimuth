@@ -35,6 +35,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_PUSH:   return "push";
     case AZ_OP_POP:    return "pop";
     case AZ_OP_DUP:    return "dup";
+    case AZ_OP_SWAP:   return "swap";
     case AZ_OP_ADD:    return "add";
     case AZ_OP_ADDI:   return "addi";
     case AZ_OP_SUB:    return "sub";
@@ -47,6 +48,10 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_IDIV:   return "idiv";
     case AZ_OP_MOD:    return "mod";
     case AZ_OP_MODI:   return "modi";
+    case AZ_OP_MIN:    return "min";
+    case AZ_OP_MINI:   return "mini";
+    case AZ_OP_MAX:    return "max";
+    case AZ_OP_MAXI:   return "maxi";
     case AZ_OP_ABS:    return "abs";
     case AZ_OP_MTAU:   return "mtau";
     case AZ_OP_SQRT:   return "sqrt";
@@ -142,6 +147,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MUL:
     case AZ_OP_DIV:
     case AZ_OP_MOD:
+    case AZ_OP_MIN:
+    case AZ_OP_MAX:
     case AZ_OP_ABS:
     case AZ_OP_MTAU:
     case AZ_OP_SQRT:
@@ -171,6 +178,7 @@ static bool should_print_immediate(az_instruction_t ins) {
       return false;
     case AZ_OP_POP:
     case AZ_OP_DUP:
+    case AZ_OP_SWAP:
     case AZ_OP_KILL:
     case AZ_OP_GPOS:
     case AZ_OP_SPOS:
@@ -187,6 +195,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MULI:
     case AZ_OP_DIVI:
     case AZ_OP_IDIV:
+    case AZ_OP_MINI:
+    case AZ_OP_MAXI:
     case AZ_OP_MODI:
     case AZ_OP_VMULI:
     case AZ_OP_EQI:

@@ -39,7 +39,7 @@
 
 // How many instructions a script is allowed to execute before we terminate it
 // with an error (to avoid infinite loops).
-#define AZ_MAX_SCRIPT_STEPS 100
+#define AZ_MAX_SCRIPT_STEPS 1000
 
 #ifdef NDEBUG
 #define SCRIPT_ERROR(msg) do { goto halt; } while (0)
@@ -228,6 +228,26 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         vm->stack_size += num;
       } break;
+      case AZ_OP_SWAP: {
+        const int size = vm->stack_size;
+        int cycle = (int)ins.immediate;
+        if (cycle == 0) cycle = 2;
+        if (cycle < 0) {
+          if (cycle < -size) SCRIPT_ERROR("stack underflow");
+          const double temp = vm->stack[size - 1];
+          for (int i = 1; i < -cycle; ++i) {
+            vm->stack[size - i] = vm->stack[size - (i + 1)];
+          }
+          vm->stack[size + cycle] = temp;
+        } else {
+          if (cycle > size) SCRIPT_ERROR("stack underflow");
+          const double temp = vm->stack[size - cycle];
+          for (int i = cycle - 1; i >= 1; --i) {
+            vm->stack[size - (i + 1)] = vm->stack[size - i];
+          }
+          vm->stack[size - 1] = temp;
+        }
+      } break;
       // Arithmetic:
       case AZ_OP_ADD: BINARY_OP(a + b); break;
       case AZ_OP_ADDI: UNARY_OP(a + ins.immediate); break;
@@ -241,6 +261,10 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_IDIV: UNARY_OP(ins.immediate / a); break;
       case AZ_OP_MOD: BINARY_OP(modulo(a, b)); break;
       case AZ_OP_MODI: UNARY_OP(modulo(a, ins.immediate)); break;
+      case AZ_OP_MIN: BINARY_OP(fmin(a, b)); break;
+      case AZ_OP_MINI: UNARY_OP(fmin(a, ins.immediate)); break;
+      case AZ_OP_MAX: BINARY_OP(fmax(a, b)); break;
+      case AZ_OP_MAXI: UNARY_OP(fmax(a, ins.immediate)); break;
       // Math:
       case AZ_OP_ABS: UNARY_OP(fabs(a)); break;
       case AZ_OP_MTAU: UNARY_OP(az_mod2pi(a)); break;

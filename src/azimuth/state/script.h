@@ -32,6 +32,7 @@ typedef enum {
   AZ_OP_PUSH, // push i onto the stack
   AZ_OP_POP, // pop i values from the stack (minimum of 1)
   AZ_OP_DUP, // duplicate top i values on the stack (minimum of 1)
+  AZ_OP_SWAP, // cycle top i values on the stack (defaults to 2)
   // Arithmetic:
   AZ_OP_ADD, // pop top two, push (a + b)
   AZ_OP_ADDI, // pop top, push (a + i)
@@ -45,6 +46,10 @@ typedef enum {
   AZ_OP_IDIV, // pop top, push (i / a)
   AZ_OP_MOD, // pop top two, push (a mod b)
   AZ_OP_MODI, // pop top, push (a mod i)
+  AZ_OP_MIN, // pop top two, push min(a, b)
+  AZ_OP_MINI, // pop top, push min(a, i)
+  AZ_OP_MAX, // pop top two, push max(a, b)
+  AZ_OP_MAXI, // pop top, push max(a, i)
   // Math:
   AZ_OP_ABS, // pop top, push fabs(a)
   AZ_OP_MTAU, // pop top, push az_mod2pi(a)

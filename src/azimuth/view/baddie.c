@@ -1863,8 +1863,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         }
       } glEnd();
       glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.5, 0.25, 1);
-        glVertex2f(0, 7);
+        glColor3f(0.5, 0.25, 1); glVertex2f(0, 7);
         glColor4f(0.5, 0.25, 1, 0);
         glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
         glVertex2f(-3, 2); glVertex2f(3, 2);
@@ -1878,6 +1877,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                          0.3f + 0.2f * frozen));
       break;
     case AZ_BAD_ARMORED_PISTON:
+    case AZ_BAD_ARMORED_PISTON_EXT:
       draw_piston(baddie,
                   color3(0.7f + 0.3f * flare, 0.65f + 0.2f * frozen,
                          0.65f + 0.35f * frozen),
