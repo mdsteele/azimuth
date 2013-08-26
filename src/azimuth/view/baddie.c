@@ -1504,7 +1504,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glPopMatrix();
       }
       break;
-    case AZ_BAD_COPTER:
+    case AZ_BAD_COPTER_HORZ:
+    case AZ_BAD_COPTER_VERT:
       // Rotor blades:
       glBegin(GL_QUADS); {
         GLfloat y = 6 * az_clock_zigzag(5, 1, clock);

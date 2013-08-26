@@ -1608,12 +1608,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->components[2].angle = -new_angle;
       }
       break;
-    case AZ_BAD_COPTER:
+    case AZ_BAD_COPTER_HORZ:
+    case AZ_BAD_COPTER_VERT:
       if (baddie->cooldown <= 0.0) {
-        const double max_speed = 150.0, accel = 50.0;
-        const double min_dist = 100.0, max_dist = 200.0;
+        const double max_speed = 150.0, accel = 50.0, max_dist = 200.0;
+        const double min_dist =
+          (baddie->kind == AZ_BAD_COPTER_VERT ? 50.0 : 100.0);
         const double rel_angle =
-          (baddie->state == 0 ? AZ_HALF_PI : -AZ_HALF_PI);
+          (baddie->kind == AZ_BAD_COPTER_VERT ?
+           (baddie->state == 0 ? 0 : AZ_PI) :
+           (baddie->state == 0 ? AZ_HALF_PI : -AZ_HALF_PI));
         const double dist =
           dist_until_hit_wall(state, baddie, max_dist + 1.0, rel_angle);
         const double fraction =
