@@ -1887,6 +1887,28 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 0.1;
       }
       break;
+    case AZ_BAD_FIRE_ZIPPER:
+      if (bounced) baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
+      baddie->velocity = az_vpolar(150.0 - 25.0 * baddie->cooldown,
+                                   baddie->angle);
+      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 300)) {
+        const az_vector_t rel_position =
+          az_vsub(state->ship.position, baddie->position);
+        if (az_vdot(rel_position, baddie->velocity) <= 0.0 &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          az_vector_t rel_impact;
+          if (az_lead_target(rel_position, state->ship.velocity, 260,
+                             &rel_impact)) {
+            const double center_angle = az_vtheta(rel_impact) - baddie->angle;
+            for (int i = -1; i <= 1; ++i) {
+              fire_projectile(state, baddie, AZ_PROJ_FIREBALL_SLOW, 0.0,
+                              center_angle, i * AZ_DEG2RAD(10));
+            }
+            baddie->cooldown = 2.2;
+          }
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

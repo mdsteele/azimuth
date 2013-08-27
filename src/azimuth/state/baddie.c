@@ -927,6 +927,13 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 50.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
+  },
+  [AZ_BAD_FIRE_ZIPPER] = {
+    .max_health = 20.0, .color = {128, 0, 255, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = AZ_PUPF_ALL, .properties = AZ_BADF_BOUNCE_PERP,
+    .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
+                   .impact_damage = 12.0 }
   }
 };
 

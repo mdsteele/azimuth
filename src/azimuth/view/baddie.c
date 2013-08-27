@@ -1818,6 +1818,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0.1 + 0.25 * flare, 0.1, 0.1 + 0.25 * frozen),
           color3(0.5 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
       break;
+    case AZ_BAD_FIRE_ZIPPER:
+      draw_zipper(color3(0.5f + 0.5f * flare - 0.5f * frozen, 0.5f * frozen,
+                         1.0f - flare),
+                  color3(0.6f - 0.6f * frozen, 0.4f, frozen),
+                  color3(0.25f + 0.25f * flare, 0.25f * frozen,
+                         0.5f - 0.5f * flare),
+                  flare, frozen, clock);
+      break;
   }
 }
 

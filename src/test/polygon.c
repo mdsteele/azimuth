@@ -989,6 +989,13 @@ void test_lead_target(void) {
   EXPECT_FALSE(az_lead_target(
       (az_vector_t){5, 0}, (az_vector_t){0, 100}, 1, &impact));
   EXPECT_VAPPROX(nix, impact);
+
+  // Check case where it is possible to lead the target backwards in time, but
+  // not forwards:
+  impact = nix;
+  EXPECT_FALSE(az_lead_target(
+      (az_vector_t){5, 0}, (az_vector_t){100, 0}, 1, &impact));
+  EXPECT_VAPPROX(nix, impact);
 }
 
 /*===========================================================================*/
