@@ -1247,14 +1247,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
-    case AZ_BAD_OTH_ORB:
+    case AZ_BAD_OTH_ORB_1:
       drift_towards_ship(state, baddie, time, 80, 20, 100);
-      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_OTH_HOMING,
-                        baddie->data->main_body.bounding_radius,
-                        az_random(-AZ_PI, AZ_PI), 0.0);
-        baddie->cooldown = 0.1;
+      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500)) {
+        for (int i = 0; i < 360; i += 15) {
+          fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
+                          baddie->data->main_body.bounding_radius,
+                          AZ_DEG2RAD(i), 0.0);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
+        baddie->cooldown = 2.0;
       }
       break;
     case AZ_BAD_OTH_SNAPDRAGON:
@@ -1873,6 +1875,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         baddie->components[0].angle, 0.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
         baddie->cooldown = 1.5;
+      }
+      break;
+    case AZ_BAD_OTH_ORB_2:
+      drift_towards_ship(state, baddie, time, 80, 20, 100);
+      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_OTH_HOMING,
+                        baddie->data->main_body.bounding_radius,
+                        az_random(-AZ_PI, AZ_PI), 0.0);
+        baddie->cooldown = 0.1;
       }
       break;
   }

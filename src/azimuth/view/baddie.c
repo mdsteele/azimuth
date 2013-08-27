@@ -1104,7 +1104,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       draw_oth(baddie, flare, frozen, clock, oth_crab_triangles,
                AZ_ARRAY_SIZE(oth_crab_triangles));
       break;
-    case AZ_BAD_OTH_ORB:
+    case AZ_BAD_OTH_ORB_1:
+    case AZ_BAD_OTH_ORB_2:
       draw_oth(baddie, flare, frozen, clock, oth_orb_triangles,
                AZ_ARRAY_SIZE(oth_orb_triangles));
       break;

@@ -671,8 +671,8 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
   },
-  [AZ_BAD_OTH_ORB] = {
-    .max_health = 50.0,
+  [AZ_BAD_OTH_ORB_1] = {
+    .max_health = 40.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
@@ -922,6 +922,11 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 },
     DECL_COMPONENTS(crawling_mortar_components)
+  },
+  [AZ_BAD_OTH_ORB_2] = {
+    .max_health = 50.0,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   }
 };
 
