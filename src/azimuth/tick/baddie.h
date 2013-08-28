@@ -21,11 +21,18 @@
 #ifndef AZIMUTH_TICK_BADDIE_H_
 #define AZIMUTH_TICK_BADDIE_H_
 
+#include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
 void az_tick_baddies(az_space_state_t *state, double time);
+
+// Called after a baddie has been killed and removed, but before its script is
+// run.  Not called if the baddie dies in a way that wouldn't run its script.
+void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
+                         az_vector_t position, double angle);
 
 /*===========================================================================*/
 

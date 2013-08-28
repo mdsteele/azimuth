@@ -771,6 +771,9 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
 
 static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         double time) {
+  // End the baddie's invincibility frame.
+  baddie->invincible = false;
+
   // Allow the armor flare to die down a bit.
   assert(baddie->armor_flare >= 0.0);
   assert(baddie->armor_flare <= 1.0);
@@ -1909,6 +1912,30 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_SUPER_SPINER:
+      drift_towards_ship(state, baddie, time, 50, 20, 100);
+      baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
+      if (baddie->cooldown <= 0.0 &&
+          ship_in_range(state, baddie, 200) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        for (int i = 0; i < 360; i += 45) {
+          fire_projectile(state, baddie, AZ_PROJ_SPINE,
+                          baddie->data->main_body.bounding_radius,
+                          AZ_DEG2RAD(i), 0.0);
+        }
+        baddie->cooldown = 1.0;
+        baddie->state = 1;
+      }
+      if (baddie->state == 1 && baddie->cooldown <= 0.75) {
+        for (int i = 0; i < 360; i += 45) {
+          fire_projectile(state, baddie, AZ_PROJ_SPINE,
+                          baddie->data->main_body.bounding_radius,
+                          AZ_DEG2RAD(i + 22.5), 0.0);
+        }
+        baddie->cooldown = 1.0;
+        baddie->state = 0;
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
@@ -1926,6 +1953,22 @@ void az_tick_baddies(az_space_state_t *state, double time) {
     if (baddie->kind == AZ_BAD_NOTHING) continue;
     assert(baddie->health > 0.0);
     tick_baddie(state, baddie, time);
+  }
+}
+
+/*===========================================================================*/
+
+void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
+                         az_vector_t position, double angle) {
+  switch (kind) {
+    case AZ_BAD_SUPER_SPINER:
+      for (int i = 0; i < 3; ++i) {
+        const double theta = angle + i * AZ_DEG2RAD(120);
+        az_add_baddie(state, AZ_BAD_URCHIN,
+                      az_vadd(position, az_vpolar(10, theta)), theta);
+      }
+      break;
+    default: break;
   }
 }
 

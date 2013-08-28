@@ -32,6 +32,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/wall.h"
+#include "azimuth/tick/baddie.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
@@ -225,11 +226,17 @@ static void kill_baddie_internal(
     az_add_random_pickup(state, baddie->data->potential_pickups,
                          baddie->position);
   }
+  const az_baddie_kind_t kind = baddie->kind;
+  const az_vector_t position = baddie->position;
+  const double angle = baddie->angle;
   const az_script_t *script = baddie->on_kill;
   // Remove the baddie.  After this point, we can no longer use the baddie
   // object.
   baddie->kind = AZ_BAD_NOTHING;
-  if (pickups_and_scripts) az_run_script(state, script);
+  if (pickups_and_scripts) {
+    az_on_baddie_killed(state, kind, position, angle);
+    az_run_script(state, script);
+  }
 }
 
 static void kill_object_internal(
@@ -307,8 +314,10 @@ bool az_try_damage_baddie(
   assert(baddie->health > 0.0);
   assert(damage_amount >= 0.0);
 
-  // If the damage is zero, we can quit early.
+  // If the damage is zero or the baddie is temporarily invincible, we can quit
+  // early.
   if (damage_amount <= 0.0) return false;
+  if (baddie->invincible) return false;
 
   // Determine if the baddie is susceptible to this kind of damage; if so,
   // damage the baddie.

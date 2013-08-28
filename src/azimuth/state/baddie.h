@@ -40,7 +40,7 @@
 #define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 62
+#define AZ_NUM_BADDIE_KINDS 63
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -106,6 +106,7 @@ typedef enum {
   AZ_BAD_CRAWLING_MORTAR,
   AZ_BAD_OTH_ORB_2,
   AZ_BAD_FIRE_ZIPPER,
+  AZ_BAD_SUPER_SPINER,
 } az_baddie_kind_t;
 
 typedef enum {
@@ -172,6 +173,7 @@ typedef struct {
   double cooldown; // time until baddie can attack again, in seconds
   double param; // the meaning of this is baddie-kind-specific
   int state; // the meaning of this is baddie-kind-specific
+  bool invincible; // if true, baddie cannot be damaged (for one frame)
   az_component_t components[AZ_MAX_BADDIE_COMPONENTS];
   az_uuid_t cargo_uuids[AZ_MAX_BADDIE_CARGO_UUIDS];
 } az_baddie_t;

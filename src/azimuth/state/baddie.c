@@ -934,6 +934,11 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL, .properties = AZ_BADF_BOUNCE_PERP,
     .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
                    .impact_damage = 12.0 }
+  },
+  [AZ_BAD_SUPER_SPINER] = {
+    .max_health = 25.0, .color = {0, 192, 64, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .bounding_radius = 18.0, .impact_damage = 25.0 }
   }
 };
 
@@ -1018,6 +1023,7 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->position = position;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
+  baddie->invincible = true;
   for (int i = 0; i < baddie->data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
     baddie->components[i].position = baddie->data->components[i].init_position;
