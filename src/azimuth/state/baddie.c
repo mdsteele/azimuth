@@ -672,7 +672,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_ORB_1] = {
-    .max_health = 40.0,
+    .max_health = 30.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
