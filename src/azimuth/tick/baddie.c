@@ -1253,7 +1253,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_OTH_ORB_1:
       drift_towards_ship(state, baddie, time, 80, 20, 100);
       if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500)) {
-        for (int i = 0; i < 360; i += 15) {
+        for (int i = 0; i < 360; i += 20) {
           fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
                           baddie->data->main_body.bounding_radius,
                           AZ_DEG2RAD(i), 0.0);
