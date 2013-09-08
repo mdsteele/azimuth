@@ -41,6 +41,9 @@ static const az_vector_t turret_vertices[] = {
 static const az_vector_t turret_cannon_vertices[] = {
   {30, 5}, {0, 5}, {0, -5}, {30, -5}
 };
+static const az_vector_t double_turret_cannon_vertices[] = {
+  {30, 10}, {0, 10}, {0, -10}, {30, -10}, {30, -2}, {0, -2}, {0, 2}, {30, 2}
+};
 static az_component_data_t turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 10.0 }
 };
@@ -65,6 +68,10 @@ static az_component_data_t rocket_turret_components[] = {
 static az_component_data_t crawling_mortar_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
     .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 }
+};
+static az_component_data_t heavy_turret_components[] = {
+  { .polygon = AZ_INIT_POLYGON(double_turret_cannon_vertices),
+    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
 };
 
 static const az_vector_t zipper_vertices[] = {
@@ -477,7 +484,7 @@ static az_baddie_data_t baddie_datas[] = {
                    AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 20.0 }
   },
-  [AZ_BAD_TURRET] = {
+  [AZ_BAD_NORMAL_TURRET] = {
     .max_health = 5.0, .overall_bounding_radius = 30.5,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
@@ -939,6 +946,14 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 25.0, .color = {0, 192, 64, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 18.0, .impact_damage = 25.0 }
+  },
+  [AZ_BAD_HEAVY_TURRET] = {
+    .max_health = 16.0, .overall_bounding_radius = 31.7,
+    .potential_pickups = AZ_PUPF_ALL, .color = {80, 80, 160, 255},
+    .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
+                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+    DECL_COMPONENTS(heavy_turret_components)
   }
 };
 

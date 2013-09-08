@@ -828,12 +828,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   switch (baddie->kind) {
     case AZ_BAD_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_BAD_MARKER: break; // Do nothing.
-    case AZ_BAD_TURRET:
+    case AZ_BAD_NORMAL_TURRET:
     case AZ_BAD_ARMORED_TURRET:
       // Aim gun:
       baddie->components[0].angle =
-        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, 2.0 * time,
+        fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
           az_vtheta(az_vsub(state->ship.position, baddie->position))) -
                                        baddie->angle)));
       // Fire:
@@ -1934,6 +1934,31 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
         baddie->cooldown = 1.0;
         baddie->state = 0;
+      }
+      break;
+    case AZ_BAD_HEAVY_TURRET:
+      // Aim gun:
+      baddie->components[0].angle =
+        fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
+          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
+          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                       baddie->angle)));
+      // State 0: cooling off for next salvo:
+      if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+                               AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        baddie->state = 4;
+      }
+      // State N: firing salvo, N shots left until next cooldown.
+      if (baddie->state > 0 && baddie->cooldown <= 0.0) {
+        const double offset =
+          (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
+        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
+                        baddie->components[0].angle - offset, offset);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
+        --baddie->state;
+        baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
       }
       break;
   }
