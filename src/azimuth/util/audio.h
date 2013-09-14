@@ -44,7 +44,7 @@ typedef enum {
 } az_music_key_t;
 
 // The number of different sound keys there are:
-#define AZ_NUM_SOUND_KEYS 48
+#define AZ_NUM_SOUND_KEYS 49
 
 typedef enum {
   // Sounds used in scripts:
@@ -95,6 +95,7 @@ typedef enum {
   AZ_SND_ORION_BOOSTER,
   AZ_SND_PICKUP_ORDNANCE,
   AZ_SND_PICKUP_SHIELDS,
+  AZ_SND_SONIC_SCREECH,
   AZ_SND_SPLASH,
   AZ_SND_TRACTOR_BEAM
 } az_sound_key_t;

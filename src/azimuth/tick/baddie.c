@@ -1961,6 +1961,46 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
       }
       break;
+    case AZ_BAD_ECHO_SWOOPER:
+      // State 0: Perch on the nearest wall, then go to state 1.
+      if (baddie->state == 0) {
+        if (perch_on_ceiling(state, baddie, time)) {
+          baddie->cooldown = 2.0;
+          baddie->state = 1;
+        }
+      }
+      // State 1: Sit and wait until the ship is nearby, then go to state 2.
+      else if (baddie->state == 1) {
+        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 250) &&
+            has_line_of_sight_to_ship(state, baddie)) {
+          baddie->param = 6.0;
+          baddie->state = 2;
+          baddie->cooldown = 0.5;
+        }
+      }
+      // State 2: Chase the ship for up to a few seconds, then go to state 0.
+      else if (baddie->state == 2) {
+        if (az_ship_is_present(&state->ship)) {
+          if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 200) &&
+              angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(10))) {
+            double theta = 0.0;
+            for (int i = 0; i < 25; ++i) {
+              az_projectile_t *proj = fire_projectile(
+                  state, baddie, AZ_PROJ_SONIC_WAVE, 8, 0, theta);
+              if (proj == NULL) break;
+              theta = -theta;
+              if (i % 2 == 0) theta += AZ_DEG2RAD(1);
+            }
+            az_play_sound(&state->soundboard, AZ_SND_SONIC_SCREECH);
+            baddie->cooldown = 2.0;
+          }
+          fly_towards_ship(state, baddie, time,
+                           5.0, 350.0, 300.0, 250.0, 50.0, 100.0);
+          baddie->param = fmax(0.0, baddie->param - time);
+        } else baddie->param = 0.0;
+        if (baddie->param <= 0.0) baddie->state = 0;
+      } else baddie->state = 0;
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

@@ -112,6 +112,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_GUN_HOMING_PHASE:
     case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_PHASE_PIERCE:
+    case AZ_PROJ_SONIC_WAVE:
       az_add_speck(state, AZ_WHITE, 1.0, proj->position,
                    az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
       break;

@@ -266,6 +266,62 @@ static void draw_piston(const az_baddie_t *baddie, az_color_t inner,
   }
 }
 
+static void draw_swooper_feet(const az_baddie_t *baddie, float frozen) {
+  glBegin(GL_QUADS); {
+    for (int i = 0; i < 2; ++i) {
+      glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
+      glVertex2f(0, 2); glVertex2f(0, -2);
+      const GLfloat x = (baddie->state == 1 ? -20.0f : -17.0f);
+      const GLfloat y = -4.0f + 8.0f * i;
+      glVertex2f(x, y - 2);
+      glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
+      glVertex2f(x, y + 2);
+    }
+  } glEnd();
+}
+
+static void draw_swooper_body(az_color_t inner, az_color_t outer) {
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(inner);
+    glVertex2f(-6, 0);
+    az_gl_color(outer);
+    glVertex2f(8, 0); glVertex2f(7, 3);
+    glVertex2f(-10, 8); glVertex2f(-16, 6);
+    glVertex2f(-14, 0);
+    glVertex2f(-16, -6); glVertex2f(-10, -8);
+    glVertex2f(7, -3); glVertex2f(8, 0);
+  } glEnd();
+}
+
+static void draw_swooper_eyes(float frozen) {
+  glBegin(GL_TRIANGLES); {
+    glColor3f(0.6, 0, frozen);
+    glVertex2f(6, 2); glVertex2f(4, 3); glVertex2f(4, 1);
+    glVertex2f(6, -2); glVertex2f(4, -3); glVertex2f(4, -1);
+  } glEnd();
+}
+
+static void draw_swooper_wings(
+    const az_baddie_t *baddie, az_clock_t clock,
+    az_color_t thumb, az_color_t tips, az_color_t folds) {
+  for (int i = -1; i <= 1; i += 2) {
+    const GLfloat expand =
+      (baddie->state == 1 ? 0.0f :
+       (baddie->state == 0 ? 1.0f : 2.0f) *
+       (GLfloat)sin((AZ_PI / 48.0) * az_clock_zigzag(24, 1, clock)));
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(thumb);
+      glVertex2f(15.0f - 3.5f * expand, i * (2.0f + 6.0f * expand));
+      for (int j = 0; j < 7; ++j) {
+        if (j % 2) az_gl_color(folds);
+        else az_gl_color(tips);
+        glVertex2f((j % 2 ? -10.0f : -14.0f) + 0.5f * j,
+                   i * (1.0f + (3.0f + expand) * j * j * 0.2f));
+      }
+    } glEnd();
+  }
+}
+
 /*===========================================================================*/
 // Oth baddies:
 
@@ -837,52 +893,14 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_BAD_SWOOPER:
-      // Feet:
-      glBegin(GL_QUADS); {
-        for (int i = 0; i < 2; ++i) {
-          glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
-          glVertex2f(0, 2); glVertex2f(0, -2);
-          const GLfloat x = (baddie->state == 1 ? -20.0f : -17.0f);
-          const GLfloat y = -4.0f + 8.0f * i;
-          glVertex2f(x, y - 2);
-          glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
-          glVertex2f(x, y + 2);
-        }
-      } glEnd();
-      // Body:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.2f + 0.8f * flare, 0.4, 0.3f + 0.7f * frozen);
-        glVertex2f(-6, 0);
-        glColor3f(0.2 + 0.4f * flare, 0.25, 0.4f * frozen);
-        glVertex2f(8, 0); glVertex2f(7, 3);
-        glVertex2f(-10, 8); glVertex2f(-16, 6);
-        glVertex2f(-14, 0);
-        glVertex2f(-16, -6); glVertex2f(-10, -8);
-        glVertex2f(7, -3); glVertex2f(8, 0);
-      } glEnd();
-      // Eyes:
-      glBegin(GL_TRIANGLES); {
-        glColor3f(0.6, 0, frozen);
-        glVertex2f(6, 2); glVertex2f(4, 3); glVertex2f(4, 1);
-        glVertex2f(6, -2); glVertex2f(4, -3); glVertex2f(4, -1);
-      } glEnd();
-      // Wings:
-      for (int i = -1; i <= 1; i += 2) {
-        const GLfloat expand =
-          (baddie->state == 1 ? 0.0f :
-           (baddie->state == 0 ? 1.0f : 2.0f) *
-           (GLfloat)sin((AZ_PI / 48.0) * az_clock_zigzag(24, 1, clock)));
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor3f(0.4f + 0.6f * flare, 0.6, 0.4 + 0.6f * frozen);
-          glVertex2f(15.0f - 3.5f * expand, i * (2.0f + 6.0f * expand));
-          for (int j = 0; j < 7; ++j) {
-            if (j % 2) glColor3f(0, 0.2, 0.1);
-            else glColor3f(0.2f + 0.4f * flare, 0.5, 0.2f + 0.4f * frozen);
-            glVertex2f((j % 2 ? -10.0f : -14.0f) + 0.5f * j,
-                       i * (1.0f + (3.0f + expand) * j * j * 0.2f));
-          }
-        } glEnd();
-      }
+      draw_swooper_feet(baddie, frozen);
+      draw_swooper_body(color3(0.2f + 0.8f * flare, 0.4, 0.3f + 0.7f * frozen),
+                        color3(0.2f + 0.4f * flare, 0.25, 0.4f * frozen));
+      draw_swooper_eyes(frozen);
+      draw_swooper_wings(baddie, clock,
+          color3(0.4f + 0.6f * flare, 0.6, 0.4 + 0.6f * frozen),
+          color3(0.2f + 0.4f * flare, 0.5, 0.2f + 0.4f * frozen),
+          color3(0, 0.2, 0.1));
       break;
     case AZ_BAD_ICE_CRAWLER:
       // Feet:
@@ -1650,6 +1668,19 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_HEAVY_TURRET:
       az_draw_bad_heavy_turret(baddie, frozen, clock);
+      break;
+    case AZ_BAD_ECHO_SWOOPER:
+      draw_swooper_feet(baddie, frozen);
+      draw_swooper_body(
+          color3(0.3f + 0.7f * flare - 0.1f * frozen, 0.2f,
+                 0.4f + 0.6f * frozen),
+          color3(0.1f + 0.4f * flare, 0.25f * frozen, 0.25 + 0.25f * frozen));
+      draw_swooper_eyes(frozen);
+      draw_swooper_wings(baddie, clock,
+          color3(0.4f + 0.6f * flare - 0.2f * frozen, 0.4,
+                 0.6 + 0.4f * frozen),
+          color3(0.2f + 0.4f * flare, 0.2, 0.5f + 0.4f * frozen),
+          color3(0.1, 0, 0.2));
       break;
   }
 }

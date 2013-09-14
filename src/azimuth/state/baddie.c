@@ -198,7 +198,7 @@ static az_component_data_t trapdoor_components[] = {
 
 static const az_vector_t swooper_vertices[] = {
   {8, 0}, {7, 3}, {0, 12}, {-10, 8}, {-16, 6}, {-14, 0}, {-16, -6},
-  {-10, -8}, {0, -12}, {7, -3}, {8, 0}
+  {-10, -8}, {0, -12}, {7, -3}
 };
 
 static const az_vector_t ice_crawler_body_vertices[] = {
@@ -650,8 +650,9 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(trapdoor_components)
   },
   [AZ_BAD_SWOOPER] = {
-    .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .color = {0, 128, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .max_health = 5.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {0, 128, 0, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .impact_damage = 8.0 }
   },
@@ -954,6 +955,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(heavy_turret_components)
+  },
+  [AZ_BAD_ECHO_SWOOPER] = {
+    .max_health = 10.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {105, 0, 192, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
+                   .impact_damage = 8.0 }
   }
 };
 

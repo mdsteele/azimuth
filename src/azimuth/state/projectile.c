@@ -389,6 +389,12 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 5.0,
     .homing_rate = AZ_DEG2RAD(40)
   },
+  [AZ_PROJ_SONIC_WAVE] = {
+    .speed = 600.0,
+    .lifetime = 0.5,
+    .impact_damage = 0.4,
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
+  },
   [AZ_PROJ_SPARK] = {
     .speed = 100.0,
     .lifetime = 4.0,

@@ -160,6 +160,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
     case AZ_PROJ_GUN_HOMING_PHASE:
     case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_PHASE_PIERCE:
+    case AZ_PROJ_SONIC_WAVE:
       glBegin(GL_QUADS); {
         const double r1 = proj->age * proj->data->speed;
         const double w1 = r1 * tan(AZ_DEG2RAD(0.5));
@@ -167,12 +168,14 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
         const double r2 = fmin(r1, 30.0 * (1.0 - a * a));
         const double w2 = (r1 - r2) * tan(AZ_DEG2RAD(0.5));
         if (proj->kind == AZ_PROJ_GUN_FREEZE_PHASE) glColor3f(0.5, 0.75, 1);
+        else if (proj->kind == AZ_PROJ_SONIC_WAVE) glColor4f(1, 1, 1, 0.5);
         else if (proj->kind == AZ_PROJ_GUN_PHASE_PIERCE &&
                  az_clock_mod(2, 2, clock)) glColor3f(1, 0, 1);
         else glColor3f(1, 1, 0.5);
         glVertex2d(0, -w1);
         glVertex2d(0, w1);
         if (proj->kind == AZ_PROJ_GUN_FREEZE_PHASE) glColor4f(0, 0.5, 1, 0);
+        else if (proj->kind == AZ_PROJ_SONIC_WAVE) glColor4f(1, 1, 1, 0);
         else if (proj->kind == AZ_PROJ_GUN_PHASE_PIERCE &&
                  az_clock_mod(2, 2, clock)) glColor4f(1, 0, 1, 0);
         else glColor4f(1, 0.5, 0, 0);

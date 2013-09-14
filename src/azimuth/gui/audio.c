@@ -546,6 +546,15 @@ static az_sound_entry_t sound_entries[] = {
     .start_freq = 0.225352108479, .freq_slide = 0.2832,
     .repeat_speed = 0.542253494263
   },
+  [AZ_SND_SONIC_SCREECH] = {
+    .wave_kind = SAWTOOTH,
+    .env_sustain = 0.24708, .env_punch = 0.1941, .env_decay = 0.36444,
+    .start_freq = 0.6959, .freq_limit = 0.28848,
+    .freq_slide = -0.29102, .freq_delta_slide = 0.352112650871,
+    .vibrato_depth = 0.316901415586, .vibrato_speed = 0.563380300999,
+    .phaser_offset = 0.521126747131, .phaser_sweep = -0.239436626434,
+    .hpf_cutoff = 0.394366204739
+  },
   [AZ_SND_SPLASH] = {
     .wave_kind = NOISE,
     .env_attack = 0.302816897631, .env_decay = 0.464788734913,
