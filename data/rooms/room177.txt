@@ -1,4 +1,4 @@
-@R z3 p0 b9 d1 g1 n2 w15
+@R z3 p0 b9 d1 g1 n1 w15
   c(34802.74,0.00,1.680400,0.039188)
 !W1 d0 x-4491.19 y34455.55 a-3.014298 u0
 !W1 d0 x-4581.05 y34444.05 a-3.014298 u0
@@ -19,7 +19,6 @@
 !G1 x-4722.58 y34548.51 a0.141083 s0.00 o0.00 f100.00 r100.00 l500.00 u12
 $e:gpos,gpos11,vsub,vnorm,push8,dup2,muli50,sub,subi300,abs,subi75,maxi0,divi5,isub8,maxi0,mini8,swap-3,subi1,dup,bnez-14,pop2,sstat1,sstat2,sstat3,sstat4,sstat5,sstat6,sstat7,sstat8,wait0.25,push0,sstat12;
 !N8/0 x-5189.22 y34459.42 a0.141083 u11
-!N1/2 x-4286.08 y34372.35 a-3.012366 u0
 !B56 x-4863.07 y34467.83 a-1.437039 u1
 !B56 x-4821.18 y34544.27 a1.709466 u2
 !B56 x-4762.88 y34480.58 a-1.434142 u3
