@@ -962,6 +962,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .impact_damage = 8.0 }
+  },
+  [AZ_BAD_SUPER_HORNET] = {
+    .max_health = 20.0, .color = {128, 255, 0, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
+                   .impact_damage = 12.0 }
   }
 };
 

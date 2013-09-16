@@ -1103,13 +1103,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // Switch from state 0 to state 1 if we're close to the ship; switch from
       // state 1 to state 0 if we're far from the ship.
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 200)) {
-          baddie->state = 1;
-        }
+        if (ship_in_range(state, baddie, 200)) baddie->state = 1;
       } else if (baddie->state == 1) {
-        if (!ship_in_range(state, baddie, 400)) {
-          baddie->state = 0;
-        }
+        if (!ship_in_range(state, baddie, 400)) baddie->state = 0;
       } else baddie->state = 0;
       break;
     case AZ_BAD_BEAM_SENSOR:
@@ -1999,6 +1995,27 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->param = fmax(0.0, baddie->param - time);
         } else baddie->param = 0.0;
         if (baddie->param <= 0.0) baddie->state = 0;
+      } else baddie->state = 0;
+      break;
+    case AZ_BAD_SUPER_HORNET:
+      // Fire (when the ship is behind us):
+      if (baddie->cooldown <= 0.0 &&
+          angle_to_ship_within(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+          has_line_of_sight_to_ship(state, baddie)) {
+        fire_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI,
+                        az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)));
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
+        baddie->cooldown = 0.1;
+      }
+      // Chase ship if state 0, flee in state 1:
+      fly_towards_ship(state, baddie, time, 8.0, 200.0, 300.0, 200.0,
+                       0.0, (baddie->state == 0 ? 100.0 : -100.0));
+      // Switch from state 0 to state 1 if we're close to the ship; switch from
+      // state 1 to state 0 if we're far from the ship.
+      if (baddie->state == 0) {
+        if (ship_in_range(state, baddie, 200)) baddie->state = 1;
+      } else if (baddie->state == 1) {
+        if (!ship_in_range(state, baddie, 400)) baddie->state = 0;
       } else baddie->state = 0;
       break;
   }

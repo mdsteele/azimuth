@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_turret.h"
+#include "azimuth/view/baddie_zipper.h"
 
 /*===========================================================================*/
 
@@ -143,63 +144,6 @@ static void draw_box(bool armored, float flare) {
     glVertex2f(-10, -7); glVertex2f(-16,  -8); glVertex2f(-11, -13);
     glVertex2f( 10, -7); glVertex2f( 11, -13); glVertex2f( 16,  -8);
   } glEnd();
-}
-
-static void draw_zipper_antennae(az_color_t color) {
-  az_gl_color(color);
-  glBegin(GL_LINE_STRIP); {
-    glVertex2f(23, 4); glVertex2f(16, 0); glVertex2f(23, -4);
-  } glEnd();
-}
-
-static void draw_zipper_body(
-    az_color_t inner1, az_color_t inner2, az_color_t outer, double yscale) {
-  for (int i = -1; i <= 1; i += 2) {
-    glBegin(GL_QUAD_STRIP); {
-      for (int x = 20; x >= -15; x -= 5) {
-        const double y = i * yscale * (1 - pow(0.05 * x, 4) + 0.025 * x);
-        if (x % 2) az_gl_color(inner1);
-        else az_gl_color(inner2);
-        glVertex2d(x, 0);
-        az_gl_color(outer);
-        glVertex2d(x, y);
-      }
-    } glEnd();
-  }
-}
-
-static void draw_zipper_wings(
-    GLfloat xcenter, double theta1, double theta2,
-    float flare, float frozen, az_clock_t clock) {
-  for (int i = 0; i < 2; ++i) {
-    for (int j = 0; j < 2; ++j) {
-      glPushMatrix(); {
-        glTranslatef(xcenter, 0, 0);
-        glRotated((j ? theta2 : theta1) * 6.0 *
-                  (1 + az_clock_zigzag(4, 1, clock)), 0, 0, 1);
-        glBegin(GL_QUAD_STRIP); {
-          glColor4f(1 - frozen, 1 - flare, 1 - flare, 0.25);
-          glVertex2f(-2.5, 0);
-          glColor4f(0.5 - 0.5 * frozen + 0.5 * flare, 1 - flare,
-                    1 - flare, 0.35);
-          glVertex2f(2.5, 0);
-          glVertex2f(-5.5, 14); glVertex2f(5.5, 14);
-          glVertex2f(-4.5, 18);
-          glColor4f(flare, 1 - flare, 1 - flare, 0.35);
-          glVertex2f(4.5, 18);
-          glVertex2f(-1, 21); glVertex2f(1, 21);
-        } glEnd();
-      } glPopMatrix();
-    }
-    glScalef(1, -1, 1);
-  }
-}
-
-static void draw_zipper(
-    az_color_t inner1, az_color_t inner2, az_color_t outer,
-    float flare, float frozen, az_clock_t clock) {
-  draw_zipper_body(inner1, inner2, outer, 6.0);
-  draw_zipper_wings(10, 1.8, 3.8, flare, frozen, clock);
 }
 
 static void draw_heat_ray(
@@ -479,9 +423,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_normal_turret(baddie, frozen, clock);
       break;
     case AZ_BAD_ZIPPER:
-      draw_zipper(color3(0.5 + 0.5 * flare - 0.5 * frozen, 1 - flare, frozen),
-                  color3(0.4 - 0.4 * frozen, 0.4, frozen),
-                  color3(0.4 * flare, 0.5, frozen), flare, frozen, clock);
+      az_draw_bad_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_BOUNCER:
       glBegin(GL_TRIANGLE_FAN); {
@@ -662,13 +604,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_ARMORED_TURRET:
       az_draw_bad_armored_turret(baddie, frozen, clock);
       break;
-    case AZ_BAD_DRAGONFLY: {
-      draw_zipper_antennae(color3(0.5, 0.25, 0.25));
-      draw_zipper_body(color3(1 - frozen, 0.5 - 0.5 * flare, frozen),
-                       color3(1 - frozen, 0.25, frozen),
-                       color3(0.4 + 0.4 * flare, 0, frozen), 4);
-      draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
-    } break;
+    case AZ_BAD_DRAGONFLY:
+      az_draw_bad_dragonfly(baddie, frozen, clock);
+      break;
     case AZ_BAD_CAVE_CRAWLER:
       // Feet:
       glBegin(GL_QUADS); {
@@ -707,13 +645,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_CRAWLING_TURRET:
       az_draw_bad_crawling_turret(baddie, frozen, clock);
       break;
-    case AZ_BAD_HORNET: {
-      draw_zipper_antennae(color3(0.5, 0.5, 0.25));
-      draw_zipper_body(color3(1 - frozen, 1 - flare, frozen),
-                       color3(1 - frozen, 0.5, frozen),
-                       color3(0.4 + 0.4 * flare, 0.4, frozen), 4);
-      draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
-    } break;
+    case AZ_BAD_HORNET:
+      az_draw_bad_hornet(baddie, frozen, clock);
+      break;
     case AZ_BAD_BEAM_SENSOR:
       glBegin(GL_TRIANGLE_FAN); {
         if (baddie->state == 0) {
@@ -1154,21 +1088,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_MOSQUITO:
-      glPushMatrix(); {
-        glScalef(0.5, 0.5, 1);
-        draw_zipper_antennae(color3(0.5, 0.25, 0.25));
-        draw_zipper_body(color3(1 - frozen, 0.5 - 0.5 * flare, frozen),
-                         color3(1 - frozen, 0.25, frozen),
-                         color3(0.4 + 0.4 * flare, 0, frozen), 8);
-        draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
-      } glPopMatrix();
+      az_draw_bad_mosquito(baddie, frozen, clock);
       break;
     case AZ_BAD_ARMORED_ZIPPER:
-      draw_zipper(color3(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
-                         0.7 + 0.3 * frozen),
-                  color3(0, 0.4, 0.4 + 0.6 * frozen),
-                  color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
-                  flare, frozen, clock);
+      az_draw_bad_armored_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_FORCEFIEND:
       // TODO: Make real graphics for the Forcefiend.
@@ -1409,14 +1332,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_rocket_turret(baddie, frozen, clock);
       break;
     case AZ_BAD_MINI_ARMORED_ZIPPER:
-      glPushMatrix(); {
-        glScalef(0.7, 0.7, 1);
-        draw_zipper(color3(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
-                           0.7 + 0.3 * frozen),
-                    color3(0, 0.4, 0.4 + 0.6 * frozen),
-                    color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
-                    flare, frozen, clock);
-      } glPopMatrix();
+      az_draw_bad_mini_armored_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_SPINED_CRAWLER:
       // Feet:
@@ -1653,12 +1569,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_crawling_mortar(baddie, frozen, clock);
       break;
     case AZ_BAD_FIRE_ZIPPER:
-      draw_zipper(color3(0.5f + 0.5f * flare - 0.5f * frozen, 0.5f * frozen,
-                         1.0f - flare),
-                  color3(0.6f - 0.6f * frozen, 0.4f, frozen),
-                  color3(0.25f + 0.25f * flare, 0.25f * frozen,
-                         0.5f - 0.5f * flare),
-                  flare, frozen, clock);
+      az_draw_bad_fire_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_SUPER_SPINER:
       draw_spiner(color3(0.5 + 0.5 * flare - 0.5 * frozen, 0.25 + 0.5 * frozen,
@@ -1681,6 +1592,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                  0.6 + 0.4f * frozen),
           color3(0.2f + 0.4f * flare, 0.2, 0.5f + 0.4f * frozen),
           color3(0.1, 0, 0.2));
+      break;
+    case AZ_BAD_SUPER_HORNET:
+      az_draw_bad_super_hornet(baddie, frozen, clock);
       break;
   }
 }
