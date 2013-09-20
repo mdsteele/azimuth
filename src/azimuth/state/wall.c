@@ -949,6 +949,20 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {0, 0, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Small green/gray boulder:
+  [97] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 30.0,
+    .color1 = {68, 96, 84, 255}, .color2 = {16, 48, 32, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+  },
+  // Large green/gray boulder:
+  [98] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 50.0,
+    .color1 = {68, 96, 84, 255}, .color2 = {16, 48, 32, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_74)
   }
 };
 
