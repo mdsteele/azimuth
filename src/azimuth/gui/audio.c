@@ -32,15 +32,16 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 // Constants:
 
-// We use 16-bit stereo at 22050 samples/sec and a buffer size of 4096 samples.
+// We use 16-bit stereo at 22050 samples/sec and a buffer size of 1024 samples.
 #define AUDIO_FORMAT AUDIO_S16SYS
 #define AUDIO_CHANNELS 2
 #define AUDIO_RATE 22050
-#define AUDIO_BUFFERSIZE 4096
+#define AUDIO_BUFFERSIZE 1024
 
 // How many sound effects we can play simultaneously:
 #define NUM_MIXER_CHANNELS 16
@@ -958,6 +959,8 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
           persisting->status = PLAYING;
           persisting->sound = sound;
           persisting->channel = channel;
+        } else {
+          AZ_WARNING_ONCE("Could not play persistent sound (%d)", (int)sound);
         }
         break;
       }
@@ -966,7 +969,11 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 
   // Third, start playing any new one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
-    Mix_PlayChannel(-1, sound_entries[soundboard->oneshots[i]].chunk, 0);
+    const az_sound_key_t sound = soundboard->oneshots[i];
+    const int channel = Mix_PlayChannel(-1, sound_entries[sound].chunk, 0);
+    if (channel < 0) {
+      AZ_WARNING_ONCE("Could not play sound effect (%d)", (int)sound);
+    }
   }
 }
 
