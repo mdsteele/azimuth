@@ -26,6 +26,9 @@
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/baddie_turret.h"
+#include "azimuth/tick/baddie_util.h"
+#include "azimuth/tick/baddie_zipper.h"
 #include "azimuth/tick/object.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
@@ -33,31 +36,6 @@
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
-
-static bool ship_in_range(const az_space_state_t *state,
-                          const az_baddie_t *baddie, double range) {
-  return (az_ship_is_present(&state->ship) &&
-          az_vwithin(baddie->position, state->ship.position, range));
-}
-
-static bool angle_to_ship_within(
-    const az_space_state_t *state, const az_baddie_t *baddie,
-    double offset, double angle) {
-  return (az_ship_is_present(&state->ship) &&
-          fabs(az_mod2pi(baddie->angle + offset -
-                         az_vtheta(az_vsub(state->ship.position,
-                                           baddie->position)))) <= angle);
-}
-
-static bool has_line_of_sight_to_ship(az_space_state_t *state,
-                                      az_baddie_t *baddie) {
-  if (!az_ship_is_present(&state->ship)) return false;
-  az_impact_t impact;
-  az_ray_impact(state, baddie->position,
-                az_vsub(state->ship.position, baddie->position),
-                AZ_IMPF_BADDIE, baddie->uid, &impact);
-  return (impact.type == AZ_IMP_SHIP);
-}
 
 static bool has_clear_path_to_position(
     az_space_state_t *state, az_baddie_t *baddie, az_vector_t position) {
@@ -76,15 +54,6 @@ static double dist_until_hit_wall(az_space_state_t *state, az_baddie_t *baddie,
       az_vpolar(max_dist, baddie->angle + rel_angle),
       (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
   return az_vdist(baddie->position, impact.position);
-}
-
-static az_projectile_t *fire_projectile(
-    az_space_state_t *state, az_baddie_t *baddie, az_proj_kind_t kind,
-    double forward, double firing_angle, double proj_angle_offset) {
-  const double theta = firing_angle + baddie->angle;
-  return az_add_projectile(
-      state, kind, true, az_vadd(baddie->position, az_vpolar(forward, theta)),
-      theta + proj_angle_offset, 1.0);
 }
 
 /*===========================================================================*/
@@ -122,9 +91,9 @@ static az_vector_t force_field_to_ship(
     double ship_coeff, double ship_min_range, double ship_max_range,
     double wall_far_coeff, double wall_near_coeff) {
   az_vector_t drift = AZ_VZERO;
-  if (ship_in_range(state, baddie, ship_max_range)) {
+  if (az_ship_in_range(state, baddie, ship_max_range)) {
     drift = az_vwithlen(az_vsub(state->ship.position, baddie->position),
-                        (ship_in_range(state, baddie, ship_min_range) ?
+                        (az_ship_in_range(state, baddie, ship_min_range) ?
                          -ship_coeff : ship_coeff));
   }
   apply_walls_to_force_field(state, baddie, wall_far_coeff,
@@ -180,7 +149,7 @@ static void fly_towards_ship(
      force_field_to_ship(state, baddie, ship_coeff, attack_range, 1000.0,
                          100.0, 200.0));
   const double goal_theta =
-    az_vtheta(baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 120) ?
+    az_vtheta(baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 120) ?
               az_vsub(state->ship.position, baddie->position) : drift);
   fly_common(state, baddie, time, turn_rate, max_speed, forward_accel,
              lateral_decel_rate, drift, goal_theta);
@@ -256,29 +225,6 @@ static bool perch_on_ceiling(
   return perch_on_wall_ahead(state, baddie, time);
 }
 
-static void crawl_around(
-    az_space_state_t *state, az_baddie_t *baddie, double time,
-    bool rightwards, double turn_rate, double max_speed, double accel) {
-  // Adjust velocity in crawling direction.
-  const az_vector_t unit =
-    az_vpolar(1.0, baddie->angle + AZ_DEG2RAD(rightwards ? -115 : 115));
-  az_vpluseq(&baddie->velocity, az_vmul(unit, accel * time));
-  const double drag_coeff = accel / (max_speed * max_speed);
-  const az_vector_t drag_force =
-    az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
-  az_vpluseq(&baddie->velocity, az_vmul(drag_force, time));
-  // Rotate to point away from wall.
-  az_impact_t impact;
-  az_circle_impact(
-      state, baddie->data->main_body.bounding_radius, baddie->position,
-      az_vmul(unit, 100000.0), (AZ_IMPF_BADDIE | AZ_IMPF_SHIP),
-      baddie->uid, &impact);
-  if (impact.type != AZ_IMP_NOTHING) {
-    baddie->angle = az_angle_towards(baddie->angle, turn_rate * time,
-                                     az_vtheta(impact.normal));
-  }
-}
-
 static void snake_along(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     int first_component, double spacing, double speed, double wiggle,
@@ -331,14 +277,14 @@ static void tick_boss_door(az_space_state_t *state, az_baddie_t *baddie,
       (fabs(az_mod2pi(az_vtheta(az_vsub(
            state->ship.position, baddie->position)) -
                       baddie->angle)) <= max_angle) &&
-      has_line_of_sight_to_ship(state, baddie);
+      az_can_see_ship(state, baddie);
     const double eyelid_turn = AZ_DEG2RAD(360) * time;
     // State 0: Wait for ship to get in sight.
     if (baddie->state == 0) {
       baddie->components[1].angle =
         az_angle_towards(baddie->components[1].angle, eyelid_turn, 0);
       baddie->param = fmax(0.0, baddie->param - 2.0 * time);
-      if (can_see_ship && ship_in_range(state, baddie, 200)) {
+      if (can_see_ship && az_ship_in_range(state, baddie, 200)) {
         baddie->state = 1;
       }
     }
@@ -350,7 +296,7 @@ static void tick_boss_door(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->cooldown <= 0.0) {
         baddie->param = fmin(1.0, baddie->param + time);
       }
-      if (!(can_see_ship && ship_in_range(state, baddie, 300))) {
+      if (!(can_see_ship && az_ship_in_range(state, baddie, 300))) {
         baddie->state = 0;
       } else if (baddie->param >= 1.0 &&
                  baddie->components[1].angle >= max_angle) {
@@ -428,15 +374,15 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
   // State 0: Shoot a spread of bullets:
   if (baddie->state == 0) {
     if (baddie->cooldown <= 0.0 &&
-        angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(20)) &&
-        has_line_of_sight_to_ship(state, baddie)) {
+        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20)) &&
+        az_can_see_ship(state, baddie)) {
       // Fire bullets.  The lower our health, the more bullets we fire.
       const int num_projectiles = 3 + 2 * (int)floor(4 * hurt);
       double theta = 0.0;
       for (int i = 0; i < num_projectiles; ++i) {
-        fire_projectile(state, baddie, AZ_PROJ_STINGER,
-                        baddie->data->main_body.bounding_radius, 0.0,
-                        theta);
+        az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_STINGER,
+            baddie->data->main_body.bounding_radius, 0.0, theta);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         theta = -theta;
         if (i % 2 == 0) theta += AZ_DEG2RAD(10);
@@ -484,8 +430,8 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
   // State 20: Wait until we have line of sight:
   else if (baddie->state == 20) {
     if (baddie->cooldown <= 0.0 &&
-        angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
-        has_line_of_sight_to_ship(state, baddie)) {
+        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
+        az_can_see_ship(state, baddie)) {
       --baddie->state;
     }
   }
@@ -493,9 +439,10 @@ static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
   else if (2 <= baddie->state && baddie->state <= 19) {
     if (baddie->cooldown <= 0.0) {
       for (int i = -1; i <= 1; ++i) {
-        fire_projectile(state, baddie, AZ_PROJ_STINGER,
-                        baddie->data->main_body.bounding_radius, 0.0,
-                        AZ_DEG2RAD(i * az_random(0, 10)));
+        az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_STINGER,
+            baddie->data->main_body.bounding_radius, 0.0,
+            AZ_DEG2RAD(i * az_random(0, 10)));
         az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
       }
       baddie->cooldown = 0.1;
@@ -537,7 +484,7 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
       // to state 2.  Otherwise, fly towards the target position.
       if (baddie->cooldown <= 0.0 ||
           az_vwithin(baddie->position, target, 50.0)) {
-        if (!ship_in_range(state, baddie, 800)) {
+        if (!az_ship_in_range(state, baddie, 800)) {
           baddie->cooldown = 3.0;
           baddie->state = 3;
         } else baddie->state = 2;
@@ -549,7 +496,7 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     // State 2: Pursue the ship.
     case 2: {
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (ship_in_range(state, baddie, 300)) {
+      if (az_ship_in_range(state, baddie, 300)) {
         baddie->state = 5;
       }
     } break;
@@ -595,9 +542,10 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     case 5: {
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(3)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_GUN_NORMAL, 20.0, 0.0, 0.0);
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_GUN_NORMAL,
+                                  20.0, 0.0, 0.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
         baddie->cooldown = 0.1;
         if (az_random(0, 1) < 0.1) {
@@ -609,11 +557,11 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     case 6:
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
+          az_can_see_ship(state, baddie)) {
         for (int i = -1; i <= 1; ++i) {
-          fire_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_TRIPLE,
-                          20.0, 0.0, i * AZ_DEG2RAD(10));
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                                    20.0, 0.0, i * AZ_DEG2RAD(10));
         }
         az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
         baddie->cooldown = 6.0;
@@ -624,9 +572,10 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     case 7:
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(3)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET, 20.0, 0.0, 0.0);
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET,
+                                  20.0, 0.0, 0.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
         baddie->cooldown = 6.0;
         baddie->state = 1;
@@ -635,11 +584,11 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     // State 8: Fire a charged homing shot.
     case 8:
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (baddie->cooldown <= 0.0 &&
-          has_line_of_sight_to_ship(state, baddie)) {
+      if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
         for (int i = 0; i < 4; ++i) {
-          fire_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_HOMING,
-                          20.0, 0.0, AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_GUN_CHARGED_HOMING,
+              20.0, 0.0, AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
         }
         az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
         baddie->cooldown = 6.0;
@@ -650,10 +599,10 @@ static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
     case 9:
       fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_MISSILE_BARRAGE,
-                        20.0, 0.0, 0.0);
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_MISSILE_BARRAGE,
+                                  20.0, 0.0, 0.0);
         baddie->cooldown = 6.0;
         baddie->state = 1;
       }
@@ -689,9 +638,10 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   if (baddie->state == 0) {
     snake_along(state, baddie, time, 8, 30, 130 + 130 * hurt, 150,
                 state->ship.position);
-    if (baddie->cooldown <= 0.0 && has_line_of_sight_to_ship(state, baddie)) {
+    if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
       if (az_random(0, 1) < 0.5) {
-        fire_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO, 20, 0, 0);
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
+                                  20, 0, 0);
         if (az_random(0, 1) < 0.5) {
           if (az_mod2pi(az_vtheta(state->ship.position) -
                         (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
@@ -699,7 +649,8 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
           } else baddie->state = 2;
         }
       } else {
-        fire_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO, 20, 0, 0);
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
+                                  20, 0, 0);
       }
       baddie->cooldown = 2.0 - 0.8 * hurt;
     }
@@ -716,7 +667,8 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         az_vwithin(baddie->position, dest, 100.0)) {
       baddie->state = 3;
       if (hurt > 0.5) {
-        fire_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO, 20, 0, 0);
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
+                                  20, 0, 0);
       }
     }
   }
@@ -725,9 +677,9 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
         az_vtheta(az_vsub(state->ship.position, baddie->position)));
     if (baddie->cooldown <= 0.0 &&
-        angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(60))) {
-      fire_projectile(state, baddie, AZ_PROJ_FORCE_WAVE, 0, 0,
-                      az_random(-1.3, 1.3));
+        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(60))) {
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_FORCE_WAVE, 0, 0,
+                                az_random(-1.3, 1.3));
       baddie->cooldown = 0.3;
       if (az_random(0, 1) < 0.05) baddie->state = 0;
     }
@@ -830,30 +782,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_MARKER: break; // Do nothing.
     case AZ_BAD_NORMAL_TURRET:
     case AZ_BAD_ARMORED_TURRET:
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // Fire:
-      if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
-                        baddie->components[0].angle, 0.0);
-        baddie->cooldown = 1.5;
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
-      }
+      az_tick_bad_turret(state, baddie, time);
       break;
     case AZ_BAD_ZIPPER:
     case AZ_BAD_ARMORED_ZIPPER:
     case AZ_BAD_MINI_ARMORED_ZIPPER:
-      if (bounced) baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
-      baddie->velocity =
-        az_vpolar((baddie->kind == AZ_BAD_MINI_ARMORED_ZIPPER ? 250.0 : 200.0),
-                  baddie->angle);
+      az_tick_bad_zipper(state, baddie, bounced);
       break;
     case AZ_BAD_BOUNCER:
       if (az_vnonzero(baddie->velocity)) {
@@ -875,12 +809,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SPINER:
       drift_towards_ship(state, baddie, time, 40, 10, 100);
       baddie->angle = az_mod2pi(baddie->angle + 0.4 * time);
-      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 200) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+      if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 200) &&
+          az_can_see_ship(state, baddie)) {
         for (int i = 0; i < 360; i += 45) {
-          fire_projectile(state, baddie, AZ_PROJ_SPINE,
-                          baddie->data->main_body.bounding_radius,
-                          AZ_DEG2RAD(i), 0.0);
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_SPINE,
+              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
         }
         baddie->cooldown = 2.0;
       }
@@ -900,7 +834,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         const double new_angle =
           (baddie->cooldown <= 0.0 &&
            fabs(az_mod2pi(baddie->angle - ship_theta)) < AZ_DEG2RAD(10) &&
-           has_line_of_sight_to_ship(state, baddie) ?
+           az_can_see_ship(state, baddie) ?
            fmin(max_angle, max_angle -
                 (max_angle - old_angle) * pow(0.00003, time)) :
            fmax(0.0, old_angle - 1.0 * time));
@@ -908,7 +842,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->components[1].angle = -new_angle;
         if (baddie->cooldown <= 0.0 && new_angle >= 0.95 * max_angle) {
           for (int i = -1; i <= 1; ++i) {
-            fire_projectile(state, baddie,
+            az_fire_baddie_projectile(state, baddie,
                 (i == 0 ? AZ_PROJ_FIREBALL_SLOW : AZ_PROJ_FIREBALL_FAST),
                 0.5 * baddie->data->main_body.bounding_radius,
                 AZ_DEG2RAD(i * 5), 0.0);
@@ -922,17 +856,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                        3.0, 40.0, 100.0, 20.0, 100.0, 100.0);
       if (baddie->state == 0) {
         baddie->param = fmax(0.0, baddie->param - time / 3.5);
-        if (baddie->cooldown < 0.5 && ship_in_range(state, baddie, 250) &&
-            angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(3)) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (baddie->cooldown < 0.5 && az_ship_in_range(state, baddie, 250) &&
+            az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
+            az_can_see_ship(state, baddie)) {
           baddie->state = 1;
         }
       } else if (baddie->state == 1) {
         baddie->param = fmin(1.0, baddie->param + time / 0.5);
         if (baddie->cooldown <= 0.0 && baddie->param == 1.0) {
           for (int i = 0; i < 2; ++i) {
-            fire_projectile(state, baddie, AZ_PROJ_FIREBALL_FAST, 20.0, 0.0,
-                            az_random(-AZ_DEG2RAD(10), AZ_DEG2RAD(10)));
+            az_fire_baddie_projectile(
+                state, baddie, AZ_PROJ_FIREBALL_FAST, 20.0, 0.0,
+                az_random(-AZ_DEG2RAD(10), AZ_DEG2RAD(10)));
           }
           baddie->cooldown = 5.0;
           baddie->state = 0;
@@ -942,10 +877,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SPINE_MINE:
       drift_towards_ship(state, baddie, time, 20, 20, 20);
       baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
-      if (ship_in_range(state, baddie, 150) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+      if (az_ship_in_range(state, baddie, 150) &&
+          az_can_see_ship(state, baddie)) {
         for (int i = 0; i < 360; i += 20) {
-          fire_projectile(state, baddie, AZ_PROJ_SPINE,
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_SPINE,
               baddie->data->main_body.bounding_radius,
               AZ_DEG2RAD(i) + az_random(AZ_DEG2RAD(-10), AZ_DEG2RAD(10)), 0.0);
         }
@@ -953,56 +888,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_BROKEN_TURRET:
-      if (baddie->state == 2) {
-        baddie->components[0].angle -= 5.0 * time;
-        if (baddie->components[0].angle <= -1.0) {
-          baddie->components[0].angle = -1.0;
-          baddie->state = 0;
-        }
-      } else if (baddie->state == 1) {
-        baddie->components[0].angle += 5.0 * time;
-        if (baddie->components[0].angle >= 1.0) {
-          baddie->components[0].angle = 1.0;
-          baddie->state = 0;
-        }
-      } else if (baddie->state == 0) {
-        // Try to aim gun (but sometimes twitch randomly):
-        const int aim = az_randint(-1, 1);
-        baddie->components[0].angle = fmax(-1.0, fmin(1.0, az_mod2pi(
-            (aim == 0 ?
-             az_angle_towards(
-                baddie->angle + baddie->components[0].angle, 2 * time,
-                az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-               baddie->angle :
-             baddie->components[0].angle + aim * 2 * time))));
-        // Fire:
-        if (baddie->cooldown <= 0.0 &&
-            angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                                 AZ_DEG2RAD(6)) &&
-            has_line_of_sight_to_ship(state, baddie)) {
-          fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
-                          baddie->components[0].angle, 0.0);
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
-          baddie->cooldown = 1.0;
-        }
-        // Randomly go crazy:
-        if (az_random(0.0, 2.5) < time) {
-          baddie->state = az_randint(1, 2);
-          const az_vector_t spark_start =
-            az_vadd(baddie->position,
-                    az_vpolar(20, baddie->angle +
-                              baddie->components[0].angle));
-          const double spark_angle =
-            baddie->angle + baddie->components[0].angle +
-            (baddie->state == 1 ? -AZ_DEG2RAD(65) : AZ_DEG2RAD(65));
-          for (int i = 0; i < 8; ++i) {
-            const double theta =
-              spark_angle + az_random(-AZ_DEG2RAD(25), AZ_DEG2RAD(25));
-            az_add_speck(state, (az_color_t){255, 200, 100, 255}, 4.0,
-                         spark_start, az_vpolar(az_random(10, 70), theta));
-          }
-        }
-      } else baddie->state = 0;
+      az_tick_bad_broken_turret(state, baddie, time);
       break;
     case AZ_BAD_ZENITH_CORE:
       // Lie dormant for 31 seconds.
@@ -1064,36 +950,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_CAVE_CRAWLER:
-      crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
+      az_crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
       break;
     case AZ_BAD_CRAWLING_TURRET:
-      crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
-                   az_vcross(az_vsub(state->ship.position, baddie->position),
-                             az_vpolar(1.0, baddie->angle)) > 0.0,
-                   1.0, 20.0, 100.0);
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(100) * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // Fire:
-      if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
-                        baddie->components[0].angle, 0.0);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
-        baddie->cooldown = 1.5;
-      }
+      az_tick_bad_crawling_turret(state, baddie, time);
       break;
     case AZ_BAD_HORNET:
       // Fire (when the ship is behind us):
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI, 0.0);
+          az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_STINGER,
+                                  15.0, AZ_PI, 0.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         baddie->cooldown = 0.5;
       }
@@ -1103,9 +971,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // Switch from state 0 to state 1 if we're close to the ship; switch from
       // state 1 to state 0 if we're far from the ship.
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 200)) baddie->state = 1;
+        if (az_ship_in_range(state, baddie, 200)) baddie->state = 1;
       } else if (baddie->state == 1) {
-        if (!ship_in_range(state, baddie, 400)) baddie->state = 0;
+        if (!az_ship_in_range(state, baddie, 400)) baddie->state = 0;
       } else baddie->state = 0;
       break;
     case AZ_BAD_BEAM_SENSOR:
@@ -1132,8 +1000,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 0: Wait for ship to draw near.
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 200) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (az_ship_in_range(state, baddie, 200) &&
+            az_can_see_ship(state, baddie)) {
           baddie->state = 1;
           baddie->cooldown = 2.0;
         }
@@ -1153,11 +1021,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                   state->ship.position);
       break;
     case AZ_BAD_TRAPDOOR:
-      if (!ship_in_range(state, baddie, baddie->data->overall_bounding_radius +
-                         AZ_SHIP_DEFLECTOR_RADIUS)) {
+      if (!az_ship_in_range(state, baddie,
+                            baddie->data->overall_bounding_radius +
+                            AZ_SHIP_DEFLECTOR_RADIUS)) {
         baddie->components[0].angle =
           az_angle_towards(baddie->components[0].angle, AZ_DEG2RAD(600) * time,
-                           (ship_in_range(state, baddie, 210) ?
+                           (az_ship_in_range(state, baddie, 210) ?
                             AZ_DEG2RAD(90) : 0));
       }
       break;
@@ -1171,8 +1040,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 1: Sit and wait until the ship is nearby, then go to state 2.
       else if (baddie->state == 1) {
-        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 250) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 250) &&
+            az_can_see_ship(state, baddie)) {
           baddie->param = 3.5;
           baddie->state = 2;
         }
@@ -1188,59 +1057,19 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else baddie->state = 0;
       break;
     case AZ_BAD_ICE_CRAWLER:
-      crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
+      az_crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
       break;
     case AZ_BAD_BEAM_TURRET:
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(30) * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // If we can see the ship, turn on the beam:
-      if (angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(20)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        baddie->cooldown = 0.5;
-      }
-      // If beam is still turned on, fire:
-      if (baddie->cooldown > 0.0) {
-        // Fire a beam.
-        const double beam_damage = 60.0 * time;
-        const double beam_theta = baddie->angle + baddie->components[0].angle;
-        const az_vector_t beam_start =
-          az_vadd(baddie->position, az_vpolar(30, beam_theta));
-        az_impact_t impact;
-        az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
-                      AZ_IMPF_NOTHING, baddie->uid, &impact);
-        if (impact.type == AZ_IMP_BADDIE) {
-          az_try_damage_baddie(state, impact.target.baddie.baddie,
-              impact.target.baddie.component, AZ_DMGF_BEAM, beam_damage);
-        } else if (impact.type == AZ_IMP_SHIP) {
-          az_damage_ship(state, beam_damage, false);
-        }
-        // Add particles for the beam.
-        const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
-        const az_color_t beam_color = {alt/2, 255, alt, 192};
-        az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
-                    2.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
-        az_add_speck(state, (impact.type == AZ_IMP_WALL ?
-                             impact.target.wall->data->color1 :
-                             AZ_WHITE), 1.0, impact.position,
-                     az_vpolar(az_random(20.0, 70.0),
-                               az_vtheta(impact.normal) +
-                               az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-        az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
-      }
+      az_tick_bad_beam_turret(state, baddie, time);
       break;
     case AZ_BAD_OTH_CRAB_1:
       fly_towards_ship(state, baddie, time,
                        2.0, 40.0, 100.0, 20.0, 100.0, 100.0);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        if (fire_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
-                            15.0, 0.0, 0.0) != NULL) {
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6)) &&
+          az_can_see_ship(state, baddie)) {
+        if (az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                      15.0, 0.0, 0.0) != NULL) {
           az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
           baddie->cooldown = 2.0;
         }
@@ -1248,11 +1077,11 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_OTH_ORB_1:
       drift_towards_ship(state, baddie, time, 80, 20, 100);
-      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500)) {
+      if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 500)) {
         for (int i = 0; i < 360; i += 20) {
-          fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
-                          baddie->data->main_body.bounding_radius,
-                          AZ_DEG2RAD(i), 0.0);
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_OTH_SPRAY,
+              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
         }
         az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
         baddie->cooldown = 2.0;
@@ -1268,8 +1097,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           case 2:
           case 4:
           case 6:
-            if (angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6))) {
-              az_projectile_t *proj = fire_projectile(
+            if (az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6))) {
+              az_projectile_t *proj = az_fire_baddie_projectile(
                   state, baddie, AZ_PROJ_OTH_ROCKET, 30.0, 0.0, 0.0);
               if (proj != NULL) {
                 proj->power = 0.7;
@@ -1282,9 +1111,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           case 3:
           case 7:
             for (int i = 0; i < 360; i += 15) {
-              fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
-                              baddie->data->main_body.bounding_radius,
-                              AZ_DEG2RAD(i), 0.0);
+              az_fire_baddie_projectile(
+                  state, baddie, AZ_PROJ_OTH_SPRAY,
+                  baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
             }
             az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
             baddie->cooldown = 2.0;
@@ -1335,7 +1164,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SECURITY_DRONE:
       // Chase ship:
       drift_towards_ship(state, baddie, time, 300,
-                         (ship_in_range(state, baddie, 200) ? -300 : 300),
+                         (az_ship_in_range(state, baddie, 200) ? -300 : 300),
                          100);
       // Orient body:
       baddie->angle = az_vtheta(baddie->position);
@@ -1346,17 +1175,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                             baddie->position))) - baddie->angle);
       // State 0: cooling off for next salvo:
       if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
+          az_ship_within_angle(state, baddie, baddie->components[0].angle,
                                AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+          az_can_see_ship(state, baddie)) {
         baddie->state = 10;
       }
       // State N: firing salvo, N shots left until next cooldown.
       if (baddie->state > 0 && baddie->cooldown <= 0.0) {
         const double offset =
           (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
-        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
-                        baddie->components[0].angle - offset, offset);
+        az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
+            baddie->components[0].angle - offset, offset);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
         --baddie->state;
         baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
@@ -1440,8 +1270,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(90) * time);
       // State 0: Wait for ship.
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 150) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (az_ship_in_range(state, baddie, 150) &&
+            az_can_see_ship(state, baddie)) {
           baddie->state = 1;
           baddie->cooldown = 0.75;
           az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
@@ -1450,8 +1280,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // State 1: Explode when cooldown reaches zero.
       else {
         if (baddie->cooldown <= 0.0) {
-          fire_projectile(state, baddie, AZ_PROJ_NUCLEAR_EXPLOSION,
-                          0.0, 0.0, 0.0);
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_NUCLEAR_EXPLOSION,
+                                    0.0, 0.0, 0.0);
           az_kill_baddie(state, baddie);
         }
       }
@@ -1466,7 +1296,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       if (az_random(0, 1) < time) {
         const double angle = az_random(AZ_DEG2RAD(-135), AZ_DEG2RAD(135));
-        fire_projectile(state, baddie, AZ_PROJ_SPARK, 0.0, 0.0, angle);
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_SPARK,
+                                  0.0, 0.0, angle);
         for (int i = 0; i < 5; ++i) {
           az_add_speck(
               state, (az_color_t){0, 255, 0, 255}, 1.0, baddie->position,
@@ -1481,11 +1312,11 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         const double speed = 200.0;
         const double turn = AZ_DEG2RAD(120) * time;
         bool chasing_ship = false;
-        if (ship_in_range(state, baddie, 200)) {
+        if (az_ship_in_range(state, baddie, 200)) {
           const double goal_theta =
             az_vtheta(az_vsub(state->ship.position, baddie->position));
           if (fabs(az_mod2pi(goal_theta - baddie->angle)) <= AZ_DEG2RAD(45) &&
-              has_line_of_sight_to_ship(state, baddie)) {
+              az_can_see_ship(state, baddie)) {
             baddie->angle = az_angle_towards(baddie->angle, turn, goal_theta);
             chasing_ship = true;
           }
@@ -1527,7 +1358,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
         const double base_angle = az_mod2pi(baddie->angle + base->angle);
         // Pick a new position for the head.
-        const bool line_of_sight = has_line_of_sight_to_ship(state, baddie);
+        const bool line_of_sight = az_can_see_ship(state, baddie);
         const az_vector_t ship_pos = state->ship.position;
         const double head_angle = az_angle_towards(baddie->angle,
             (line_of_sight ? AZ_DEG2RAD(120) : AZ_DEG2RAD(60)) * time,
@@ -1642,41 +1473,26 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       tick_boss_door(state, baddie, time);
       break;
     case AZ_BAD_ROCKET_TURRET:
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, 2.0 * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // Fire:
-      if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET, 20.0,
-                        baddie->components[0].angle, 0.0);
-        baddie->cooldown = 1.5;
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
-      }
+      az_tick_bad_rocket_turret(state, baddie, time);
       break;
     case AZ_BAD_OTH_CRAB_2:
       fly_towards_ship(state, baddie, time,
                        2.0, 100.0, 200.0, 50.0, 100.0, 100.0);
       baddie->param = fmax(0.0, baddie->param - time);
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(6))) {
-        if (fire_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
-                            15.0, 0.0, 0.0) != NULL) {
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6))) {
+        if (az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                      15.0, 0.0, 0.0) != NULL) {
           az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
           baddie->cooldown = 1.5;
         }
       }
       if (baddie->param <= 0.0 &&
-          angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(8)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
+          az_can_see_ship(state, baddie)) {
         for (int i = -1; i <= 1; i += 2) {
-          fire_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
-                          15.0, AZ_DEG2RAD(14 * i), 0.0);
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
+                                    15.0, AZ_DEG2RAD(14 * i), 0.0);
         }
         az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
         baddie->param = 0.9;
@@ -1689,14 +1505,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       if (baddie->state == 1 || baddie->state == 2) {
         const double angle = fabs(az_mod2pi(baddie->angle - baddie->param));
-        crawl_around(state, baddie, time, (baddie->state == 1), 3.0,
-                     50.0 - 40.0 * fmin(1.0, angle / AZ_HALF_PI), 100.0);
+        az_crawl_around(state, baddie, time, (baddie->state == 1), 3.0,
+                        50.0 - 40.0 * fmin(1.0, angle / AZ_HALF_PI), 100.0);
         if (angle > AZ_DEG2RAD(80) && baddie->cooldown <= 0.0) {
           baddie->state = (baddie->state == 1 ? 2 : 1);
           baddie->cooldown = 1.0;
         }
-        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 90) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 90) &&
+            az_can_see_ship(state, baddie)) {
           const az_vector_t center =
             az_vadd(baddie->position, az_vpolar(-13, baddie->angle));
           for (int i = -2; i <= 2; ++i) {
@@ -1755,14 +1571,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_FIREBALL_MINE:
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 200) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (az_ship_in_range(state, baddie, 200) &&
+            az_can_see_ship(state, baddie)) {
           baddie->cooldown = 0.9;
           baddie->state = 1;
         }
       } else if (baddie->cooldown <= 0.0) {
         for (int i = 0; i < 360; i += 10) {
-          fire_projectile(
+          az_fire_baddie_projectile(
               state, baddie, (az_randint(0, 1) ? AZ_PROJ_FIREBALL_SLOW :
                               AZ_PROJ_FIREBALL_FAST),
               baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
@@ -1775,7 +1591,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_LEAPER:
       if (baddie->state == 0) {
-        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500)) {
+        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 500)) {
           if (has_clear_path_to_position(state, baddie,
                                          state->ship.position)) {
             baddie->angle =
@@ -1783,7 +1599,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             baddie->velocity = az_vpolar(500, baddie->angle);
             baddie->state = 1;
           } else {
-            crawl_around(
+            az_crawl_around(
                 state, baddie, time, az_ship_is_present(&state->ship) &&
                 az_vcross(az_vsub(state->ship.position, baddie->position),
                           az_vpolar(1.0, baddie->angle)) > 0.0,
@@ -1855,107 +1671,49 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
     } break;
     case AZ_BAD_CRAWLING_MORTAR:
-      crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
-                   az_vcross(az_vsub(state->ship.position, baddie->position),
-                             az_vpolar(1.0, baddie->angle)) > 0.0,
-                   1.0, 20.0, 100.0);
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // Fire:
-      if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_GRENADE, 30.0,
-                        baddie->components[0].angle, 0.0);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
-        baddie->cooldown = 1.5;
-      }
+      az_tick_bad_crawling_mortar(state, baddie, time);
       break;
     case AZ_BAD_OTH_ORB_2:
       drift_towards_ship(state, baddie, time, 80, 20, 100);
-      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 500) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_OTH_HOMING,
-                        baddie->data->main_body.bounding_radius,
-                        az_random(-AZ_PI, AZ_PI), 0.0);
+      if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 500) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_OTH_HOMING,
+            baddie->data->main_body.bounding_radius,
+            az_random(-AZ_PI, AZ_PI), 0.0);
         baddie->cooldown = 0.1;
       }
       break;
     case AZ_BAD_FIRE_ZIPPER:
-      if (bounced) baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
-      baddie->velocity = az_vpolar(150.0 - 25.0 * baddie->cooldown,
-                                   baddie->angle);
-      if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 300)) {
-        const az_vector_t rel_position =
-          az_vsub(state->ship.position, baddie->position);
-        if (az_vdot(rel_position, baddie->velocity) <= 0.0 &&
-            has_line_of_sight_to_ship(state, baddie)) {
-          az_vector_t rel_impact;
-          if (az_lead_target(rel_position, state->ship.velocity, 260,
-                             &rel_impact)) {
-            const double center_angle = az_vtheta(rel_impact) - baddie->angle;
-            for (int i = -1; i <= 1; ++i) {
-              fire_projectile(state, baddie, AZ_PROJ_FIREBALL_SLOW, 0.0,
-                              center_angle, i * AZ_DEG2RAD(10));
-            }
-            baddie->cooldown = 2.2;
-          }
-        }
-      }
+      az_tick_bad_fire_zipper(state, baddie, bounced);
       break;
     case AZ_BAD_SUPER_SPINER:
       drift_towards_ship(state, baddie, time, 50, 20, 100);
       baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
       if (baddie->cooldown <= 0.0 &&
-          ship_in_range(state, baddie, 200) &&
-          has_line_of_sight_to_ship(state, baddie)) {
+          az_ship_in_range(state, baddie, 200) &&
+          az_can_see_ship(state, baddie)) {
         for (int i = 0; i < 360; i += 45) {
-          fire_projectile(state, baddie, AZ_PROJ_SPINE,
-                          baddie->data->main_body.bounding_radius,
-                          AZ_DEG2RAD(i), 0.0);
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_SPINE,
+              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
         }
         baddie->cooldown = 1.0;
         baddie->state = 1;
       }
       if (baddie->state == 1 && baddie->cooldown <= 0.75) {
         for (int i = 0; i < 360; i += 45) {
-          fire_projectile(state, baddie, AZ_PROJ_SPINE,
-                          baddie->data->main_body.bounding_radius,
-                          AZ_DEG2RAD(i + 22.5), 0.0);
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_SPINE,
+              baddie->data->main_body.bounding_radius,
+              AZ_DEG2RAD(i + 22.5), 0.0);
         }
         baddie->cooldown = 1.0;
         baddie->state = 0;
       }
       break;
     case AZ_BAD_HEAVY_TURRET:
-      // Aim gun:
-      baddie->components[0].angle =
-        fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
-          baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-          az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                       baddie->angle)));
-      // State 0: cooling off for next salvo:
-      if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, baddie->components[0].angle,
-                               AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        baddie->state = 4;
-      }
-      // State N: firing salvo, N shots left until next cooldown.
-      if (baddie->state > 0 && baddie->cooldown <= 0.0) {
-        const double offset =
-          (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
-        fire_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
-                        baddie->components[0].angle - offset, offset);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
-        --baddie->state;
-        baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
-      }
+      az_tick_bad_heavy_turret(state, baddie, time);
       break;
     case AZ_BAD_ECHO_SWOOPER:
       // State 0: Perch on the nearest wall, then go to state 1.
@@ -1967,8 +1725,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 1: Sit and wait until the ship is nearby, then go to state 2.
       else if (baddie->state == 1) {
-        if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 250) &&
-            has_line_of_sight_to_ship(state, baddie)) {
+        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 250) &&
+            az_can_see_ship(state, baddie)) {
           baddie->param = 6.0;
           baddie->state = 2;
           baddie->cooldown = 0.5;
@@ -1977,11 +1735,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // State 2: Chase the ship for up to a few seconds, then go to state 0.
       else if (baddie->state == 2) {
         if (az_ship_is_present(&state->ship)) {
-          if (baddie->cooldown <= 0.0 && ship_in_range(state, baddie, 200) &&
-              angle_to_ship_within(state, baddie, 0, AZ_DEG2RAD(10))) {
+          if (baddie->cooldown <= 0.0 &&
+              az_ship_in_range(state, baddie, 200) &&
+              az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(10))) {
             double theta = 0.0;
             for (int i = 0; i < 25; ++i) {
-              az_projectile_t *proj = fire_projectile(
+              az_projectile_t *proj = az_fire_baddie_projectile(
                   state, baddie, AZ_PROJ_SONIC_WAVE, 8, 0, theta);
               if (proj == NULL) break;
               theta = -theta;
@@ -2000,10 +1759,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SUPER_HORNET:
       // Fire (when the ship is behind us):
       if (baddie->cooldown <= 0.0 &&
-          angle_to_ship_within(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
-          has_line_of_sight_to_ship(state, baddie)) {
-        fire_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI,
-                        az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)));
+          az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+          az_can_see_ship(state, baddie)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI,
+                                  az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)));
         az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         baddie->cooldown = 0.1;
       }
@@ -2013,9 +1772,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // Switch from state 0 to state 1 if we're close to the ship; switch from
       // state 1 to state 0 if we're far from the ship.
       if (baddie->state == 0) {
-        if (ship_in_range(state, baddie, 200)) baddie->state = 1;
+        if (az_ship_in_range(state, baddie, 200)) baddie->state = 1;
       } else if (baddie->state == 1) {
-        if (!ship_in_range(state, baddie, 400)) baddie->state = 0;
+        if (!az_ship_in_range(state, baddie, 400)) baddie->state = 0;
       } else baddie->state = 0;
       break;
   }
