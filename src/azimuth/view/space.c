@@ -187,16 +187,17 @@ static void draw_camera_view(az_space_state_t *state) {
     tint_screen(0, 0.5);
   } glPopMatrix();
   az_draw_gravfields(state);
-  az_draw_upgrade_nodes(state);
+  az_draw_console_and_upgrade_nodes(state);
+  az_draw_background_baddies(state);
   az_draw_walls(state);
-  az_draw_middle_nodes(state);
+  az_draw_tractor_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
   if (state->mode == AZ_MODE_BOSS_DEATH &&
       state->boss_death_mode.boss.kind != AZ_BAD_NOTHING) {
     az_draw_baddie(&state->boss_death_mode.boss, state->clock);
   }
-  az_draw_baddies(state);
+  az_draw_foreground_baddies(state);
   az_draw_ship(state);
   az_draw_particles(state);
   az_draw_doors(state);

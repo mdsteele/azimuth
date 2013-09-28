@@ -1422,17 +1422,17 @@ void az_draw_background_nodes(const az_space_state_t *state) {
   }
 }
 
-void az_draw_upgrade_nodes(const az_space_state_t *state) {
+void az_draw_console_and_upgrade_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_UPGRADE) {
+    if (node->kind == AZ_NODE_CONSOLE || node->kind == AZ_NODE_UPGRADE) {
       az_draw_node(node, state->clock);
     }
   }
 }
 
-void az_draw_middle_nodes(const az_space_state_t *state) {
+void az_draw_tractor_nodes(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind == AZ_NODE_CONSOLE || node->kind == AZ_NODE_TRACTOR) {
+    if (node->kind == AZ_NODE_TRACTOR) {
       az_draw_node(node, state->clock);
     }
   }

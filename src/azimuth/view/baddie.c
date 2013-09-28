@@ -1608,10 +1608,20 @@ void az_draw_baddie(const az_baddie_t *baddie, az_clock_t clock) {
   } glPopMatrix();
 }
 
-void az_draw_baddies(const az_space_state_t *state) {
+void az_draw_background_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING ||
         baddie->kind == AZ_BAD_MARKER) continue;
+    if (!(baddie->data->properties & AZ_BADF_DRAW_BG)) continue;
+    az_draw_baddie(baddie, state->clock);
+  }
+}
+
+void az_draw_foreground_baddies(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING ||
+        baddie->kind == AZ_BAD_MARKER) continue;
+    if (baddie->data->properties & AZ_BADF_DRAW_BG) continue;
     az_draw_baddie(baddie, state->clock);
   }
 }

@@ -133,14 +133,16 @@ typedef uint_fast8_t az_baddie_flags_t;
 #define AZ_BADF_BOUNCE_PERP    ((az_baddie_flags_t)(1u << 0))
 // CARRIES_CARGO: objects in cargo_uuids are moved along with the baddie
 #define AZ_BADF_CARRIES_CARGO  ((az_baddie_flags_t)(1u << 1))
+// DRAW_BG: the baddie is drawn behind walls rather than in front of them
+#define AZ_BADF_DRAW_BG        ((az_baddie_flags_t)(1u << 2))
 // INCORPOREAL: baddie cannot be hit by ship or by weapons
-#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 2))
+#define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 3))
 // KAMIKAZE: baddie dies when it hits the ship
-#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 3))
+#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 4))
 // NO_HOMING_BEAM: homing beam ignores this baddie
-#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 4))
+#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 5))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
-#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 5))
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 6))
 
 typedef struct {
   double overall_bounding_radius;

@@ -30,8 +30,10 @@
 // Draw a single baddie.  The GL matrix should be at the camera position.
 void az_draw_baddie(const az_baddie_t *baddie, az_clock_t clock);
 
-// Draw all baddies.  The GL matrix should be at the camera position.
-void az_draw_baddies(const az_space_state_t *state);
+// Draw all baddies in a particular layer.  The GL matrix should be at the
+// camera position.
+void az_draw_background_baddies(const az_space_state_t *state);
+void az_draw_foreground_baddies(const az_space_state_t *state);
 
 /*===========================================================================*/
 

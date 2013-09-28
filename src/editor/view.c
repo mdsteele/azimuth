@@ -268,6 +268,20 @@ static void draw_gravfield_border(const az_gravfield_spec_t *gravfield) {
   } glPopMatrix();
 }
 
+static void draw_baddie(const az_editor_state_t *state,
+                        az_editor_baddie_t *editor_baddie, bool draw_bg) {
+  az_baddie_t real_baddie;
+  az_init_baddie(&real_baddie, editor_baddie->spec.kind,
+                 editor_baddie->spec.position, editor_baddie->spec.angle);
+  const bool is_bg = (real_baddie.data->properties & AZ_BADF_DRAW_BG);
+  if (is_bg != draw_bg) return;
+  if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
+  az_draw_baddie(&real_baddie, state->clock);
+  draw_script_and_uuid_slot(
+      state, real_baddie.position, editor_baddie->spec.on_kill,
+      editor_baddie->spec.uuid_slot);
+}
+
 static void draw_node(const az_editor_state_t *state,
                       az_editor_node_t *editor_node) {
   const az_node_t real_node = {
@@ -311,6 +325,9 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
         state, real_gravfield.position, editor_gravfield->spec.on_enter,
         editor_gravfield->spec.uuid_slot);
   }
+  AZ_LIST_LOOP(editor_baddie, room->baddies) {
+    draw_baddie(state, editor_baddie, true);
+  }
   AZ_LIST_LOOP(editor_wall, room->walls) {
     const az_wall_t real_wall = {
       .kind = editor_wall->spec.kind,
@@ -332,14 +349,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     draw_node(state, editor_node);
   }
   AZ_LIST_LOOP(editor_baddie, room->baddies) {
-    az_baddie_t real_baddie;
-    az_init_baddie(&real_baddie, editor_baddie->spec.kind,
-                   editor_baddie->spec.position, editor_baddie->spec.angle);
-    if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
-    az_draw_baddie(&real_baddie, state->clock);
-    draw_script_and_uuid_slot(
-        state, real_baddie.position, editor_baddie->spec.on_kill,
-        editor_baddie->spec.uuid_slot);
+    draw_baddie(state, editor_baddie, false);
   }
   AZ_LIST_LOOP(editor_door, room->doors) {
     const az_door_t real_door = {
