@@ -45,3 +45,4 @@
 44: Killed boss door in Barrag room 233
 45: Killed Forcefiend (Barrag boss, room 231)
 46: Opened hyper rocket door between Nandiar rooms 178 and 179
+47: Opened rocket door between Nandiar rooms 176 and 403
