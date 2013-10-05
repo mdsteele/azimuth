@@ -145,6 +145,10 @@ typedef struct {
   } text;
   az_editor_tool_t tool;
   struct {
+    bool active;
+    az_vector_t corner1, corner2;
+  } selection_sector;
+  struct {
     double angle;
     az_baddie_kind_t baddie_kind;
     az_door_kind_t door_kind;

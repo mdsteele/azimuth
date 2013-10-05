@@ -261,8 +261,37 @@ static void do_select(int x, int y, bool multi) {
     state.brush.gravfield_strength = best_gravfield->spec.strength;
     state.brush.gravfield_size = best_gravfield->spec.size;
   } else if (!multi) {
-    select_all(room, false);
+    state.selection_sector.active = true;
+    state.selection_sector.corner1 = state.selection_sector.corner2 = pt;
   }
+}
+
+static void do_select_from_sector(int x, int y, bool multi) {
+  assert(state.selection_sector.active);
+  state.selection_sector.corner2 = az_pixel_to_position(&state, x, y);
+  const double r1 = az_vnorm(state.selection_sector.corner1);
+  const double r2 = az_vnorm(state.selection_sector.corner2);
+  const double min_r = fmin(r1, r2);
+  const double max_r = fmax(r1, r2);
+  double theta0 = az_vtheta(state.selection_sector.corner1);
+  double sweep =
+    az_mod2pi(az_vtheta(state.selection_sector.corner2) - theta0);
+  if (sweep < 0.0) {
+    theta0 += sweep;
+    sweep = fabs(sweep);
+  }
+  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  AZ_EDITOR_OBJECT_LOOP(object, room) {
+    const double obj_r = az_vnorm(*object.position);
+    const double obj_theta = az_vtheta(*object.position);
+    if (obj_r >= min_r && obj_r <= max_r &&
+        az_mod2pi_nonneg(obj_theta - theta0) <= sweep) {
+      *object.selected = (multi ? !*object.selected : true);
+    } else if (!multi) {
+      *object.selected = false;
+    }
+  }
+  state.selection_sector.active = false;
 }
 
 static az_vector_t constrain_vector(az_vector_t vector, bool relative) {
@@ -1401,8 +1430,19 @@ static void event_loop(void) {
             }
           }
           break;
+        case AZ_EVENT_MOUSE_UP:
+          if (state.selection_sector.active) {
+            do_select_from_sector(event.mouse.x, event.mouse.y,
+                                  az_is_shift_key_held());
+          }
+          break;
         case AZ_EVENT_MOUSE_MOVE:
           if (state.text.action != AZ_ETA_NOTHING) break;
+          if (state.selection_sector.active) {
+            state.selection_sector.corner2 =
+              az_pixel_to_position(&state, event.mouse.x, event.mouse.y);
+            break;
+          }
           if (event.mouse.pressed) {
             switch (state.tool) {
               case AZ_TOOL_MOVE:

@@ -568,6 +568,23 @@ static void draw_camera_view(az_editor_state_t *state) {
     draw_selection_circle(door->spec.position, door->spec.angle,
                           AZ_DOOR_BOUNDING_RADIUS);
   }
+
+  // Draw selection sector:
+  if (state->selection_sector.active) {
+    const double r1 = az_vnorm(state->selection_sector.corner1);
+    const double r2 = az_vnorm(state->selection_sector.corner2);
+    const double min_r = fmin(r1, r2);
+    const double max_r = fmax(r1, r2);
+    const double theta0 = az_vtheta(state->selection_sector.corner1);
+    const double sweep =
+      az_mod2pi(az_vtheta(state->selection_sector.corner2) - theta0);
+    glColor3f(0.5, 1, 1);
+    glBegin(GL_LINE_LOOP); {
+      arc_vertices(max_r, theta0, theta0 + sweep);
+      if (min_r > 0.0) arc_vertices(min_r, theta0 + sweep, theta0);
+      else glVertex2f(0, 0);
+    } glEnd();
+  }
 }
 
 static void draw_hud(az_editor_state_t* state) {
