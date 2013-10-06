@@ -20,6 +20,7 @@
 #include "editor/state.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -153,6 +154,40 @@ bool az_load_editor_state(az_editor_state_t *state) {
 static void summarize_scenario(const az_planet_t *planet) {
   bool linebreak = false;
   printf("\n");
+  // Print walls/nodes that have a duplicate wall/node right on top.
+  for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+    const az_room_t *room = &planet->rooms[room_index];
+    for (int i = 0; i < room->num_walls; ++i) {
+      const az_wall_spec_t *wall = &room->walls[i];
+      for (int j = i + 1; j < room->num_walls; ++j) {
+        const az_wall_spec_t *other_wall = &room->walls[j];
+        if (other_wall->data == wall->data &&
+            az_vwithin(other_wall->position, wall->position, 10.0) &&
+            fabs(az_mod2pi(other_wall->angle - wall->angle)) < AZ_DEG2RAD(1)) {
+          printf("\x1b[31mRoom %d: duplicate wall at (%.02f, %.02f)\x1b[m\n",
+                 room_index, wall->position.x, wall->position.y);
+          linebreak = true;
+        }
+      }
+    }
+    for (int i = 0; i < room->num_nodes; ++i) {
+      const az_node_spec_t *node = &room->nodes[i];
+      if (node->kind != AZ_NODE_FAKE_WALL_FG &&
+          node->kind != AZ_NODE_FAKE_WALL_BG) continue;
+      for (int j = i + 1; j < room->num_nodes; ++j) {
+        const az_node_spec_t *other_node = &room->nodes[j];
+        if (other_node->kind == node->kind &&
+            other_node->subkind.fake_wall == node->subkind.fake_wall &&
+            az_vwithin(other_node->position, node->position, 10.0) &&
+            fabs(az_mod2pi(other_node->angle - node->angle)) < AZ_DEG2RAD(1)) {
+          printf("\x1b[31mRoom %d: duplicate node at (%.02f, %.02f)\x1b[m\n",
+                 room_index, node->position.x, node->position.y);
+          linebreak = true;
+        }
+      }
+    }
+  }
+  if (linebreak) { printf("\n"); linebreak = false; }
   // Print rooms numbers and destinations of doors that don't have a legitimate
   // matching exit door:
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
