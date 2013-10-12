@@ -510,8 +510,7 @@ bool az_try_break_wall(az_space_state_t *state, az_wall_t *wall,
     case AZ_WALL_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_WALL_INDESTRUCTIBLE: return false;
     case AZ_WALL_DESTRUCTIBLE_CHARGED:
-      vulnerability = (AZ_DMGF_CHARGED | AZ_DMGF_HYPER_ROCKET |
-                       AZ_DMGF_MEGA_BOMB | AZ_DMGF_CPLUS);
+      vulnerability = AZ_DMGF_WALL_FLARE;
       break;
     case AZ_WALL_DESTRUCTIBLE_ROCKET:
       vulnerability = AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET;

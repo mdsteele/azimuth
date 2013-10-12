@@ -276,6 +276,10 @@ static az_vector_t wall_vertices_89[] = {
   {0, -80}, {14.26, -72.23}, {28.34, -63.36}, {42.05, -53.96}, {55.15, -44.44},
   {67.36, -35.06}, {78.36, -25.94}, {87.76, -17.1}, {95.12, -8.49}
 };
+static az_vector_t wall_vertices_99[] = {
+  {30, 5}, {10, 5}, {-10, 5}, {-30, 5},
+  {-30, -6}, {-10, -4}, {12, -8}, {30, -6}
+};
 
 /*===========================================================================*/
 
@@ -963,6 +967,13 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {68, 96, 84, 255}, .color2 = {16, 48, 32, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+  },
+  // Frozen layer of water:
+  [99] = {
+    .style = AZ_WSTY_QUADSTRIP_123, .color1 = {160, 255, 224, 160},
+    .color2 = {224, 224, 255, 80}, .color3 = {225, 225, 225, 0},
+    .elasticity = 0.2, .impact_damage_coeff = 5.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_99)
   }
 };
 
