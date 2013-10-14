@@ -85,8 +85,8 @@ az_projectile_t *az_fire_baddie_projectile(
     double forward, double firing_angle, double proj_angle_offset) {
   const double theta = firing_angle + baddie->angle;
   return az_add_projectile(
-      state, kind, true, az_vadd(baddie->position, az_vpolar(forward, theta)),
-      theta + proj_angle_offset, 1.0);
+      state, kind, az_vadd(baddie->position, az_vpolar(forward, theta)),
+      theta + proj_angle_offset, 1.0, baddie->uid);
 }
 
 /*===========================================================================*/

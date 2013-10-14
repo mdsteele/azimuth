@@ -41,20 +41,25 @@ static void on_projectile_impact(az_space_state_t *state,
   const double radius = proj->data->splash_radius;
   // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
-    // Damage the ship if it's within the blast.
+    // Damage the ship if it's within the blast (even if this projectile was
+    // fired by the ship).
     if (az_ship_is_present(&state->ship) &&
         az_vwithin(state->ship.position, proj->position, radius)) {
       double damage = proj->data->splash_damage * proj->power;
-      if (!proj->fired_by_enemy &&
+      // The Attuned Explosives upgrade reduces the splash damage the ship
+      // takes from its own explosives.
+      if (proj->fired_by == AZ_SHIP_UID &&
           az_has_upgrade(&state->ship.player, AZ_UPG_ATTUNED_EXPLOSIVES)) {
         damage *= AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR;
       }
       az_damage_ship(state, damage, false);
     }
-    // Damage baddies that are within the blast.
+    // Damage baddies that are within the blast (except that a baddie is not
+    // damaged by its own projectiles).
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+      if (baddie->uid == proj->fired_by) continue;
       const az_component_data_t *component;
       if (az_circle_touches_baddie(baddie, radius, proj->position,
                                    &component)) {
@@ -68,7 +73,7 @@ static void on_projectile_impact(az_space_state_t *state,
       }
     }
     // Open doors that are within the blast.
-    if (!proj->fired_by_enemy) {
+    if (proj->fired_by == AZ_SHIP_UID) {
       AZ_ARRAY_LOOP(door, state->doors) {
         if (door->kind == AZ_DOOR_NOTHING) continue;
         if (az_circle_touches_door_outside(door, radius, proj->position)) {
@@ -95,8 +100,9 @@ static void on_projectile_impact(az_space_state_t *state,
     for (int i = -2; i <= 2; ++i) {
       const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random(-.5, .5));
       az_projectile_t *shrapnel = az_add_projectile(
-          state, proj->data->shrapnel_kind, false,
-          az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power);
+          state, proj->data->shrapnel_kind,
+          az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power,
+          proj->fired_by);
       if (shrapnel != NULL &&
           !(proj->data->properties & AZ_PROJF_FAST_SHRAPNEL)) {
         shrapnel->velocity = az_vmul(shrapnel->velocity, az_random(0.5, 1.0));
@@ -165,9 +171,8 @@ static void on_projectile_impact(az_space_state_t *state,
   // Gravity torpedos are special: on impact, they create a temporary gravity
   // well that pulls the ship in.
   if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO) {
-    assert(proj->fired_by_enemy);
-    az_add_projectile(state, AZ_PROJ_GRAVITY_TORPEDO_WELL, true,
-                      proj->position, proj->angle, proj->power);
+    az_add_projectile(state, AZ_PROJ_GRAVITY_TORPEDO_WELL, proj->position,
+                      proj->angle, proj->power, proj->fired_by);
   }
 }
 
@@ -232,7 +237,7 @@ static void on_projectile_hit_baddie(
     az_space_state_t *state, az_projectile_t *proj, az_baddie_t *baddie,
     const az_component_data_t *component, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
-  assert(!proj->fired_by_enemy);
+  assert(proj->fired_by == AZ_SHIP_UID || proj->fired_by == AZ_NULL_UID);
   proj->last_hit_uid = baddie->uid;
   az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
                        proj->data->impact_damage * proj->power);
@@ -245,7 +250,7 @@ static void on_projectile_hit_baddie(
 static void on_projectile_hit_ship(
     az_space_state_t *state, az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
-  assert(proj->fired_by_enemy);
+  assert(proj->fired_by != AZ_SHIP_UID);
   az_ship_t *ship = &state->ship;
   assert(az_ship_is_present(ship));
   proj->last_hit_uid = AZ_SHIP_UID;
@@ -266,7 +271,7 @@ static void projectile_home_in(az_space_state_t *state,
   // First, figure out what position we're homing in on.
   bool found_target = false;
   az_vector_t goal = AZ_VZERO;
-  if (proj->fired_by_enemy) {
+  if (proj->fired_by != AZ_SHIP_UID) {
     if (az_ship_is_present(&state->ship)) {
       found_target = true;
       goal = state->ship.position;
@@ -388,22 +393,22 @@ static void projectile_special_logic(az_space_state_t *state,
             const double theta =
               proj->angle + 0.1 * AZ_PI * (i + az_random(-.5, .5));
             assert(proj->data->shrapnel_kind != AZ_PROJ_NOTHING);
-            az_add_projectile(state, proj->data->shrapnel_kind, false,
-                              proj->position, theta, proj->power);
+            az_add_projectile(state, proj->data->shrapnel_kind, proj->position,
+                              theta, proj->power, proj->fired_by);
           }
           proj->kind = AZ_PROJ_NOTHING;
         }
       }
       break;
     case AZ_PROJ_GUN_CHARGED_BEAM:
-      assert(!proj->fired_by_enemy);
+      assert(proj->fired_by == AZ_SHIP_UID);
       {
         const double radius =
           proj->data->splash_radius * (proj->age / proj->data->lifetime);
         // Destroy enemy projectiles within the blast:
         AZ_ARRAY_LOOP(other_proj, state->projectiles) {
           if (other_proj->kind == AZ_PROJ_NOTHING) continue;
-          if (other_proj->fired_by_enemy &&
+          if (other_proj->fired_by != AZ_SHIP_UID &&
               !(other_proj->data->properties & AZ_PROJF_NO_HIT) &&
               az_vwithin(other_proj->position, proj->position, radius)) {
             az_add_speck(state, AZ_WHITE, 1.0, other_proj->position,
@@ -449,10 +454,10 @@ static void projectile_special_logic(az_space_state_t *state,
           const double offset = 24 * i;
           for (int j = (i == 0); j <= 1; ++j) {
             az_add_projectile(
-                state, AZ_PROJ_MISSILE_TRIPLE, proj->fired_by_enemy,
+                state, AZ_PROJ_MISSILE_TRIPLE,
                 az_vadd(proj->position, az_vpolar((j ? offset : -offset),
                                                   proj->angle + AZ_HALF_PI)),
-                proj->angle, proj->power);
+                proj->angle, proj->power, proj->fired_by);
           }
         }
       }
@@ -479,9 +484,9 @@ static void projectile_special_logic(az_space_state_t *state,
         if (impact.type != AZ_IMP_NOTHING ||
             proj->age >= proj->data->lifetime) {
           for (int i = 0; i < 360; i += 40) {
-            az_add_projectile(
-                state, AZ_PROJ_ROCKET, proj->fired_by_enemy, proj->position,
-                az_mod2pi(proj->angle + AZ_DEG2RAD(i)), proj->power);
+            az_add_projectile(state, AZ_PROJ_ROCKET, proj->position,
+                              az_mod2pi(proj->angle + AZ_DEG2RAD(i)),
+                              proj->power, proj->fired_by);
           }
           proj->kind = AZ_PROJ_NOTHING;
           az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
@@ -537,8 +542,8 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_ORION_BOMB:
       if (proj->age >= proj->data->lifetime) {
         az_projectile_t *blast = az_add_projectile(
-            state, AZ_PROJ_ORION_BLAST, proj->fired_by_enemy,
-            proj->position, proj->angle, proj->power);
+            state, AZ_PROJ_ORION_BLAST, proj->position, proj->angle,
+            proj->power, proj->fired_by);
         if (blast != NULL) {
           blast->velocity = az_vmul(az_vsub(
               proj->velocity, az_vpolar(proj->data->speed, proj->angle)), 0.5);
@@ -616,7 +621,7 @@ static void projectile_special_logic(az_space_state_t *state,
             proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
       break;
     case AZ_PROJ_GRAVITY_TORPEDO_WELL:
-      assert(proj->fired_by_enemy);
+      assert(proj->fired_by != AZ_SHIP_UID);
       if (az_ship_is_present(&state->ship) &&
           az_vwithin(proj->position, state->ship.position, 100.0)) {
         az_vpluseq(&state->ship.velocity, az_vwithlen(
@@ -646,17 +651,18 @@ static void projectile_special_logic(az_space_state_t *state,
         az_vadd(proj->velocity, az_vwithlen(proj->position, -600 * time));
       break;
     case AZ_PROJ_TRINE_TORPEDO:
-      assert(proj->fired_by_enemy);
+      assert(proj->fired_by != AZ_SHIP_UID);
       if (az_ship_is_present(&state->ship) &&
           az_vwithin(proj->position, state->ship.position, 100.0)) {
         const az_vector_t position = proj->position;
         const double power = proj->power;
-        proj->kind = AZ_PROJ_NOTHING;
+        const az_uid_t fired_by = proj->fired_by;
+        proj->kind = AZ_PROJ_NOTHING; // We cannot use proj after this point.
         const double base_angle = az_random(0, AZ_TWO_PI);
         for (int i = 0; i < 3; ++i) {
           az_projectile_t *expander = az_add_projectile(
-              state, AZ_PROJ_TRINE_TORPEDO_EXPANDER, true,
-              position, base_angle + i * AZ_DEG2RAD(120), power);
+              state, AZ_PROJ_TRINE_TORPEDO_EXPANDER, position,
+              base_angle + i * AZ_DEG2RAD(120), power, fired_by);
           if (expander != NULL) expander->age += 0.1 * i;
         }
       } else {
@@ -666,17 +672,18 @@ static void projectile_special_logic(az_space_state_t *state,
       }
       break;
     case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
-      assert(proj->fired_by_enemy);
+      assert(proj->fired_by != AZ_SHIP_UID);
       if (proj->age >= proj->data->lifetime) {
         const az_vector_t position = proj->position;
         const double power = proj->power;
+        const az_uid_t fired_by = proj->fired_by;
         double goal_angle = proj->angle + AZ_PI;
-        proj->kind = AZ_PROJ_NOTHING;
+        proj->kind = AZ_PROJ_NOTHING; // We cannot use proj after this point.
         if (az_ship_is_present(&state->ship)) {
           goal_angle = az_vtheta(az_vsub(state->ship.position, position));
         }
-        az_add_projectile(state, AZ_PROJ_TRINE_TORPEDO_FIREBALL, true,
-                          position, goal_angle, power);
+        az_add_projectile(state, AZ_PROJ_TRINE_TORPEDO_FIREBALL, position,
+                          goal_angle, power, fired_by);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
       } else {
         leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
@@ -709,7 +716,8 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     impact.position = az_vadd(proj->position, az_vmul(proj->velocity, time));
   } else {
     az_impact_flags_t skip_types =
-      (proj->fired_by_enemy ? AZ_IMPF_BADDIE : AZ_IMPF_SHIP);
+      (proj->fired_by == AZ_SHIP_UID ? AZ_IMPF_SHIP :
+       proj->fired_by == AZ_NULL_UID ? 0 : AZ_IMPF_BADDIE);
     if (proj->data->properties & AZ_PROJF_PHASED) {
       skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE | AZ_IMPF_DOOR_OUTSIDE;
     }
@@ -719,7 +727,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
 
     // If this is a phased projectile fired by the ship, also hit all doors
     // along the way.
-    if (!proj->fired_by_enemy &&
+    if (proj->fired_by == AZ_SHIP_UID &&
         (proj->data->properties & AZ_PROJF_PHASED)) {
       assert(impact.type != AZ_IMP_DOOR_OUTSIDE);
       AZ_ARRAY_LOOP(door, state->doors) {
@@ -750,7 +758,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
       on_projectile_hit_ship(state, proj, impact.normal);
       break;
     case AZ_IMP_DOOR_OUTSIDE:
-      if (!proj->fired_by_enemy) {
+      if (proj->fired_by == AZ_SHIP_UID) {
         az_try_open_door(state, impact.target.door, proj->data->damage_kind);
       }
       on_projectile_hit_wall(state, proj, impact.normal);

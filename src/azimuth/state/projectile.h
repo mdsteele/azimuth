@@ -121,13 +121,16 @@ typedef struct {
 typedef struct {
   az_proj_kind_t kind; // if AZ_PROJ_NOTHING, this projectile is not present
   const az_proj_data_t *data;
-  bool fired_by_enemy; // if true, this projectile can hit the ship
   az_vector_t position;
   az_vector_t velocity;
   double angle;
   double power; // damage multiplier
   double age; // seconds
   int param; // the meaning of this is projectile-kind-specific
+  // Who fired this projectile?  Shots fired by the ship cannot hit the ship,
+  // and shots fired by a baddie cannot hit baddies.  Moreover, baddie-fired
+  // projectiles don't do splash damage to the baddie that fired them.
+  az_uid_t fired_by;
   // For projectiles that can hit multiple baddies (e.g. those from the PIERCE
   // gun), this records the UID of the last baddie hit.  The projectile cannot
   // immediately hit this same baddie again.  This can also be AZ_SHIP_UID if
@@ -138,8 +141,8 @@ typedef struct {
 // Set reasonable initial field values for a projectile of the given kind,
 // fired from the given position at the given angle.
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
-                        bool fired_by_enemy, az_vector_t position,
-                        double angle, double power);
+                        az_vector_t position, double angle, double power,
+                        az_uid_t fired_by);
 
 /*===========================================================================*/
 

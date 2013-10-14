@@ -337,8 +337,8 @@ static void fire_projectiles(
   double theta = 0.0;
   for (int i = 0; i < num_shots; ++i) {
     az_projectile_t *proj = az_add_projectile(
-        state, kind, false, gun_position,
-        ship->angle + theta_offset + theta, power);
+        state, kind, gun_position, ship->angle + theta_offset + theta, power,
+        AZ_SHIP_UID);
     if (proj == NULL) break;
     if (alt_params) proj->param = (i % 2 ? 1 : -1);
     theta = -theta;
@@ -1019,9 +1019,9 @@ static void apply_orion_booster(az_space_state_t *state, double time) {
     if (ship->orion.tap_time > 0.0 && ship->ordn_charge >= 1.0 &&
         player->bombs >= AZ_BOMBS_PER_ORION_BOOST) {
       az_projectile_t *proj = az_add_projectile(
-          state, AZ_PROJ_ORION_BOMB, false,
+          state, AZ_PROJ_ORION_BOMB,
           az_vadd(ship->position, az_vpolar(-15, ship->angle)),
-          ship->angle + AZ_PI, ordn_power_mult(player));
+          ship->angle + AZ_PI, ordn_power_mult(player), AZ_SHIP_UID);
       if (proj != NULL) {
         az_vpluseq(&proj->velocity, ship->velocity);
         player->bombs -= AZ_BOMBS_PER_ORION_BOOST;

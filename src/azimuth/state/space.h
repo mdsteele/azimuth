@@ -221,8 +221,8 @@ void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
 // Add a new projectile object and return a pointer to it, or return NULL if
 // the projectile array is full.
 az_projectile_t *az_add_projectile(
-    az_space_state_t *state, az_proj_kind_t kind, bool fired_by_enemy,
-    az_vector_t position, double angle, double power);
+    az_space_state_t *state, az_proj_kind_t kind, az_vector_t position,
+    double angle, double power, az_uid_t fired_by);
 
 // Add a pickup of a randomly chosen kind, among those kinds allowed by the
 // potential_pickups argument.

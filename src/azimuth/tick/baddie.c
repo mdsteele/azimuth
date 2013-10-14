@@ -1521,9 +1521,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           for (int i = -2; i <= 2; ++i) {
             const double theta = baddie->angle + i * AZ_DEG2RAD(41);
             az_add_projectile(
-                state, AZ_PROJ_STINGER, true,
+                state, AZ_PROJ_STINGER,
                 az_vadd(center, az_vpolar(10.0, theta)),
-                theta + az_random(-1, 1) * AZ_DEG2RAD(20), 1.0);
+                theta + az_random(-1, 1) * AZ_DEG2RAD(20), 1.0, baddie->uid);
           }
           az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
           baddie->velocity = AZ_VZERO;

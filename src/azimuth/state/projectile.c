@@ -437,8 +437,8 @@ static const az_proj_data_t proj_data[] = {
 };
 
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
-                        bool fired_by_enemy, az_vector_t position,
-                        double angle, double power) {
+                        az_vector_t position, double angle, double power,
+                        az_uid_t fired_by) {
   assert(kind != AZ_PROJ_NOTHING);
   assert(power > 0.0);
   memset(proj, 0, sizeof(*proj));
@@ -446,11 +446,11 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
   const int data_index = (int)kind;
   assert(0 <= data_index && data_index < AZ_ARRAY_SIZE(proj_data));
   proj->data = &proj_data[data_index];
-  proj->fired_by_enemy = fired_by_enemy;
   proj->position = position;
   proj->velocity = az_vpolar(proj->data->speed, angle);
   proj->angle = angle;
   proj->power = power;
+  proj->fired_by = fired_by;
   proj->last_hit_uid = AZ_NULL_UID;
 }
 
