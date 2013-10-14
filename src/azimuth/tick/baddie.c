@@ -1091,19 +1091,22 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       fly_towards_ship(state, baddie, time,
                        5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
       if (baddie->cooldown <= 0.0) {
+        const bool crazy = (baddie->health <= 0.15 * baddie->data->max_health);
+        if (crazy) baddie->state = 0;
         switch (baddie->state) {
           case 0:
           case 1:
           case 2:
           case 4:
           case 6:
-            if (az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6))) {
+            if (crazy ||
+                az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6))) {
               az_projectile_t *proj = az_fire_baddie_projectile(
                   state, baddie, AZ_PROJ_OTH_ROCKET, 30.0, 0.0, 0.0);
               if (proj != NULL) {
-                proj->power = 0.7;
+                proj->power = (crazy ? 0.5 : 0.7);
                 az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
-                baddie->cooldown = 2.0;
+                baddie->cooldown = (crazy ? 0.75 : 2.0);
                 ++baddie->state;
               }
             }
