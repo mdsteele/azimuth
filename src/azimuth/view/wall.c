@@ -157,8 +157,9 @@ static void draw_cell_quad(az_color_t color1, az_color_t color2,
   }
 }
 
-static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
-                        az_polygon_t polygon, bool cap1, bool cap2) {
+static void draw_girder(
+    float bezel, float strut, az_color_t color1, az_color_t color2,
+    az_polygon_t polygon, bool cap1, bool cap2) {
   glBegin(GL_QUADS); {
     assert(polygon.num_vertices >= 3);
     const float top = polygon.vertices[1].y;
@@ -167,7 +168,6 @@ static void draw_girder(float bezel, az_color_t color1, az_color_t color2,
     const float left = polygon.vertices[2].x;
     // Struts:
     const float breadth = top - bottom;
-    const float strut = bezel * 0.66666;
     for (float x = left; x < right - breadth; x += breadth - strut) {
       for (int j = 0; j < 2; ++j) {
         const float y_1 = (j ? bottom : top);
@@ -348,16 +348,20 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
                        data->polygon);
         break;
       case AZ_WSTY_GIRDER:
-        draw_girder(data->bezel, data->color1, data->color2, data->polygon,
-                    false, false);
+        draw_girder(data->bezel, data->bezel * 0.66666f, data->color1,
+                    data->color2, data->polygon, false, false);
         break;
       case AZ_WSTY_GIRDER_CAP:
-        draw_girder(data->bezel, data->color1, data->color2, data->polygon,
-                    true, false);
+        draw_girder(data->bezel, data->bezel * 0.66666f, data->color1,
+                    data->color2, data->polygon, true, false);
         break;
       case AZ_WSTY_GIRDER_CAPS:
-        draw_girder(data->bezel, data->color1, data->color2, data->polygon,
-                    true, true);
+        draw_girder(data->bezel, data->bezel * 0.66666f, data->color1,
+                    data->color2, data->polygon, true, true);
+        break;
+      case AZ_WSTY_HEAVY_GIRDER:
+        draw_girder(data->bezel, data->bezel * 3.5f, data->color1,
+                    data->color2, data->polygon, false, false);
         break;
       case AZ_WSTY_METAL:
         draw_metal(false, data->color1, data->color2, data->polygon);
@@ -391,6 +395,14 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         break;
       case AZ_WSTY_TFQS_123:
         draw_tfqs(data->bezel, data->color1, data->color2, data->color3,
+                  data->polygon);
+        break;
+      case AZ_WSTY_TFQS_213:
+        draw_tfqs(data->bezel, data->color2, data->color1, data->color3,
+                  data->polygon);
+        break;
+      case AZ_WSTY_TFQS_321:
+        draw_tfqs(data->bezel, data->color3, data->color2, data->color1,
                   data->polygon);
         break;
       case AZ_WSTY_TRIFAN:

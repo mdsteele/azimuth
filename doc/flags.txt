@@ -47,3 +47,5 @@
 46: Opened hyper rocket door between Nandiar rooms 178 and 179
 47: Opened rocket door between Nandiar rooms 176 and 403
 48: Opened rocket door between Cnidam rooms 262 and 397
+49: Cnidam bomb started (Cnidam room 265)
+50: Cnidam bomb defused (Cnidam room 323)

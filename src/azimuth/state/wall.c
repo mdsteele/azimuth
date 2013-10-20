@@ -280,6 +280,12 @@ static az_vector_t wall_vertices_99[] = {
   {30, 5}, {10, 5}, {-10, 5}, {-30, 5},
   {-30, -6}, {-10, -4}, {12, -8}, {30, -6}
 };
+static const az_vector_t wall_vertices_101[] = {
+  {65, 25}, {-15, 25}, {-65, -25}, {15, -25}
+};
+static const az_vector_t wall_vertices_105[] = {
+  {25, 25}, {-15, 25}, {-65, -25}, {25, -25}
+};
 
 /*===========================================================================*/
 
@@ -826,7 +832,6 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_79)
   },
-
   // Blue shale rock:
   [80] = {
     .style = AZ_WSTY_CELL_QUAD, .bezel = 5.0,
@@ -974,6 +979,71 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {224, 224, 255, 80}, .color3 = {225, 225, 225, 0},
     .elasticity = 0.2, .impact_damage_coeff = 5.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_99)
+  },
+  // Reddish heavy girder:
+  [100] = {
+    .style = AZ_WSTY_HEAVY_GIRDER, .bezel = 7.0,
+    .color1 = {128, 128, 128, 255}, .color2 = {80, 48, 48, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_girder_long)
+  },
+  // Blue-gray square block:
+  [101] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 1/3.0,
+    .color1 = {160, 160, 192, 255}, .color2 = {64, 64, 80, 255},
+    .color3 = {32, 32, 48, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_32)
+  },
+  // Blue-gray triangle block:
+  [102] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 1/3.0,
+    .color1 = {160, 160, 192, 255}, .color2 = {64, 64, 80, 255},
+    .color3 = {32, 32, 48, 255},
+    .elasticity = 0.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_34)
+  },
+  // Orange parallelagram block:
+  [103] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {128, 48, 0, 255}, .color2 = {48, 36, 0, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_101)
+  },
+  // Black parallelagram block:
+  [104] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {80, 80, 80, 255}, .color2 = {48, 48, 48, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_101)
+  },
+  // Yellow parallelagram block:
+  [105] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {128, 128, 0, 255}, .color2 = {48, 48, 0, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_101)
+  },
+  // Orange trapezoid block:
+  [106] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {128, 48, 0, 255}, .color2 = {48, 36, 0, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_105)
+  },
+  // Black trapezoid block:
+  [107] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {80, 80, 80, 255}, .color2 = {48, 48, 48, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_105)
+  },
+  // Yellow trapezoid block:
+  [108] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 8.0,
+    .color1 = {128, 128, 0, 255}, .color2 = {48, 48, 0, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_105)
   }
 };
 
