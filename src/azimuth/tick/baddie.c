@@ -28,6 +28,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
+#include "azimuth/tick/baddie_wyrm.h"
 #include "azimuth/tick/baddie_zipper.h"
 #include "azimuth/tick/object.h"
 #include "azimuth/tick/script.h"
@@ -225,36 +226,6 @@ static bool perch_on_ceiling(
   return perch_on_wall_ahead(state, baddie, time);
 }
 
-static void snake_along(
-    az_space_state_t *state, az_baddie_t *baddie, double time,
-    int first_component, double spacing, double speed, double wiggle,
-    az_vector_t destination) {
-  const double dest_theta = az_vtheta(az_vsub(destination, baddie->position));
-  const az_vector_t goal =
-    az_vadd(destination,
-            az_vpolar(wiggle * sin(baddie->param), dest_theta + AZ_HALF_PI));
-  const double new_angle = az_angle_towards(
-      baddie->angle, AZ_PI * time,
-      az_vtheta(az_vsub(goal, baddie->position)));
-  const double dtheta = az_mod2pi(new_angle - baddie->angle);
-  const az_vector_t reldelta = az_vpolar(speed * time, dtheta);
-  az_vector_t last_pos = AZ_VZERO;
-  for (int i = first_component; i < baddie->data->num_components; ++i) {
-    az_component_t *component = &baddie->components[i];
-    component->position = az_vrotate(component->position, -dtheta);
-    component->position = az_vsub(component->position, reldelta);
-    component->position =
-      az_vadd(last_pos, az_vwithlen(az_vsub(component->position, last_pos),
-                                    spacing));
-    component->angle = az_vtheta(az_vsub(last_pos, component->position));
-    last_pos = component->position;
-  }
-  baddie->position =
-    az_vadd(baddie->position, az_vpolar(speed * time, new_angle));
-  baddie->angle = new_angle;
-  baddie->param = az_mod2pi(baddie->param + AZ_TWO_PI * time);
-}
-
 /*===========================================================================*/
 
 static void tick_boss_door(az_space_state_t *state, az_baddie_t *baddie,
@@ -350,108 +321,6 @@ static void tick_boss_door(az_space_state_t *state, az_baddie_t *baddie,
       baddie->cooldown = 1.0;
     }
   }
-}
-
-static void tick_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
-                          double time) {
-  assert(baddie->kind == AZ_BAD_ROCKWYRM);
-  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
-  // Open/close jaws:
-  if (baddie->cooldown < 0.5 && baddie->state != 1) {
-    const double limit = AZ_DEG2RAD(45);
-    const double delta = AZ_DEG2RAD(180) * time;
-    baddie->components[0].angle =
-      fmin(limit, baddie->components[0].angle + delta);
-    baddie->components[1].angle =
-      fmax(-limit, baddie->components[1].angle - delta);
-  } else {
-    const double delta = AZ_DEG2RAD(45) * time;
-    baddie->components[0].angle =
-      fmax(0, baddie->components[0].angle - delta);
-    baddie->components[1].angle =
-      fmin(0, baddie->components[1].angle + delta);
-  }
-  // State 0: Shoot a spread of bullets:
-  if (baddie->state == 0) {
-    if (baddie->cooldown <= 0.0 &&
-        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20)) &&
-        az_can_see_ship(state, baddie)) {
-      // Fire bullets.  The lower our health, the more bullets we fire.
-      const int num_projectiles = 3 + 2 * (int)floor(4 * hurt);
-      double theta = 0.0;
-      for (int i = 0; i < num_projectiles; ++i) {
-        az_fire_baddie_projectile(
-            state, baddie, AZ_PROJ_STINGER,
-            baddie->data->main_body.bounding_radius, 0.0, theta);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
-        theta = -theta;
-        if (i % 2 == 0) theta += AZ_DEG2RAD(10);
-      }
-      // Below 35% health, we have a 20% chance to go to state 20 (firing a
-      // long spray of bullets).
-      if (hurt >= 0.65 && az_random(0, 1) < 0.2) {
-        baddie->state = 20;
-        baddie->cooldown = 3.0;
-      }
-      // Otherwise, we have a 50/50 chance to stay in state 0, or to go to
-      // state 1 (drop eggs).
-      else if (az_random(0, 1) < 0.5) {
-        baddie->state = 1;
-        baddie->cooldown = 1.0;
-      } else baddie->cooldown = az_random(2.0, 4.0);
-    }
-  }
-  // State 1: Drop eggs:
-  else if (baddie->state == 1) {
-    if (baddie->cooldown <= 0.0) {
-      // The lower our health, the more eggs we drop at once.
-      const int num_eggs = 1 + (int)floor(4 * hurt);
-      const double spread = AZ_DEG2RAD(num_eggs * 10);
-      const az_component_t *tail =
-        &baddie->components[baddie->data->num_components - 1];
-      for (int i = 0; i < num_eggs; ++i) {
-        az_baddie_t *egg = az_add_baddie(
-            state, AZ_BAD_WYRM_EGG,
-            az_vadd(baddie->position,
-                    az_vrotate(tail->position, baddie->angle)),
-            baddie->angle + tail->angle + AZ_PI + az_random(-spread, spread));
-        if (egg != NULL) {
-          egg->velocity = az_vpolar(az_random(50, 150), egg->angle);
-          // Set the egg to hatch (without waiting for the ship to get
-          // close first) after a random amount of time.
-          egg->state = 1;
-          egg->cooldown = az_random(2.0, 2.5);
-        } else break;
-      }
-      baddie->state = 0;
-      baddie->cooldown = az_random(1.0, 3.0);
-    }
-  }
-  // State 20: Wait until we have line of sight:
-  else if (baddie->state == 20) {
-    if (baddie->cooldown <= 0.0 &&
-        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
-        az_can_see_ship(state, baddie)) {
-      --baddie->state;
-    }
-  }
-  // States 2-19: Fire a steady spray of bullets:
-  else if (2 <= baddie->state && baddie->state <= 19) {
-    if (baddie->cooldown <= 0.0) {
-      for (int i = -1; i <= 1; ++i) {
-        az_fire_baddie_projectile(
-            state, baddie, AZ_PROJ_STINGER,
-            baddie->data->main_body.bounding_radius, 0.0,
-            AZ_DEG2RAD(i * az_random(0, 10)));
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
-      }
-      baddie->cooldown = 0.1;
-      --baddie->state;
-    }
-  } else baddie->state = 0;
-  // Chase ship; get slightly slower as we get hurt.
-  snake_along(state, baddie, time, 2, 40.0, 130.0 - 10.0 * hurt, 50.0,
-              state->ship.position);
 }
 
 static void tick_oth_gunship(az_space_state_t *state, az_baddie_t *baddie,
@@ -636,8 +505,8 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   }
   // State 0: Chase ship and fire homing torpedoes.
   if (baddie->state == 0) {
-    snake_along(state, baddie, time, 8, 30, 130 + 130 * hurt, 150,
-                state->ship.position);
+    az_snake_towards(baddie, time, 8, 130 + 130 * hurt, 150,
+                     state->ship.position);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
       if (az_random(0, 1) < 0.5) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
@@ -661,8 +530,8 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     const double dt = 150.0 / r;
     const az_vector_t dest = az_vpolar(r, bounds->min_theta +
         (baddie->state == 1 ? bounds->theta_span + dt : -dt));
-    snake_along(state, baddie, time, 8, 30, 200 + 150 * hurt,
-                150 + 150 * hurt, dest);
+    az_snake_towards(baddie, time, 8, 200 + 150 * hurt,
+                     150 + 150 * hurt, dest);
     if (az_ship_is_present(&state->ship) &&
         az_vwithin(baddie->position, dest, 100.0)) {
       baddie->state = 3;
@@ -987,38 +856,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       baddie->health = baddie->data->max_health;
       break;
     case AZ_BAD_ROCKWYRM:
-      tick_rockwyrm(state, baddie, time);
+      az_tick_bad_rockwyrm(state, baddie, time);
       break;
     case AZ_BAD_WYRM_EGG:
-      // Apply drag to the egg (if it's moving).
-      if (az_vnonzero(baddie->velocity)) {
-        const double drag_coeff = 1.0 / 400.0;
-        const az_vector_t drag_force =
-          az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
-        baddie->velocity =
-          az_vadd(baddie->velocity, az_vmul(drag_force, time));
-      }
-      // State 0: Wait for ship to draw near.
-      if (baddie->state == 0) {
-        if (az_ship_in_range(state, baddie, 200) &&
-            az_can_see_ship(state, baddie)) {
-          baddie->state = 1;
-          baddie->cooldown = 2.0;
-        }
-      }
-      // State 1: Hatch as soon as cooldown reaches zero.
-      else {
-        if (baddie->cooldown <= 0.0) {
-          const az_vector_t position = baddie->position;
-          const double angle = baddie->angle;
-          az_kill_baddie(state, baddie);
-          az_init_baddie(baddie, AZ_BAD_WYRMLING, position, angle);
-        }
-      }
+      az_tick_bad_wyrm_egg(state, baddie, time);
       break;
     case AZ_BAD_WYRMLING:
-      snake_along(state, baddie, time, 0, 5.0, 180.0, 120.0,
-                  state->ship.position);
+      az_tick_bad_wyrmling(state, baddie, time);
       break;
     case AZ_BAD_TRAPDOOR:
       if (!az_ship_in_range(state, baddie,

@@ -55,6 +55,12 @@ void az_crawl_around(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     bool rightwards, double turn_rate, double max_speed, double accel);
 
+// Move in a wiggling, snake-like motion towards the given destination.
+// Components from first_tail_component on up will trail behind.
+void az_snake_towards(
+    az_baddie_t *baddie, double time, int first_tail_component,
+    double speed, double wiggle, az_vector_t destination);
+
 /*===========================================================================*/
 // Weapons:
 
