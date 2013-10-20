@@ -528,14 +528,14 @@ static az_wall_data_t wall_datas[] = {
     .elasticity = 0.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_girder_short)
   },
-  // Small stalactite:
+  // Small brown stalactite:
   [36] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 1000.0,
     .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_18)
   },
-  // Large stalactite:
+  // Large brown stalactite:
   [37] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 20.0,
     .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
@@ -1044,6 +1044,34 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 128, 0, 255}, .color2 = {48, 48, 0, 255},
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_105)
+  },
+  // Small blue/gray boulder:
+  [109] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 30.0,
+    .color1 = {84, 68, 96, 255}, .color2 = {32, 16, 48, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+  },
+  // Large blue/gray boulder:
+  [110] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 50.0,
+    .color1 = {84, 68, 96, 255}, .color2 = {32, 16, 48, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+  },
+  // Small blue/gray stalactite:
+  [111] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 1000.0,
+    .color1 = {84, 68, 96, 255}, .color2 = {32, 16, 48, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_18)
+  },
+  // Large blue/gray stalactite:
+  [112] = {
+    .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 20.0,
+    .color1 = {84, 68, 96, 255}, .color2 = {32, 16, 48, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 6.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_37)
   }
 };
 

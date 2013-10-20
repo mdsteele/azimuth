@@ -94,8 +94,10 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
     az_select_gun(player, AZ_GUN_CHARGE + (upgrade - AZ_UPG_GUN_CHARGE));
   } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
     player->rockets = player->max_rockets;
+    az_select_ordnance(player, AZ_ORDN_ROCKETS);
   } else if (upgrade == AZ_UPG_MEGA_BOMBS) {
     player->bombs = player->max_bombs;
+    az_select_ordnance(player, AZ_ORDN_BOMBS);
   } else if (upgrade >= AZ_UPG_ROCKET_AMMO_00 &&
              upgrade <= AZ_UPG_ROCKET_AMMO_29) {
     assert(player->max_rockets >= 0);
