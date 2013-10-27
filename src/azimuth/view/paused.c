@@ -27,6 +27,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/gui/event.h"
 #include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
@@ -312,6 +313,10 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
 #define UPG_BOX_WIDTH 150
 #define UPG_BOX_HEIGHT 15
 
+#define TANK_BOX_LEFT 24
+#define SHIELD_BOX_TOP 26
+#define ENERGY_BOX_TOP 46
+
 #define ORDN_BOX_LEFT 466
 #define ROCKETS_BOX_TOP 26
 #define BOMBS_BOX_TOP 46
@@ -388,14 +393,16 @@ static void draw_upgrades(const az_paused_state_t *state) {
   } glEnd();
 
   glColor3f(1, 0, 1);
-  draw_bezel_box(2, 24, 26, 150, 15);
-  az_draw_printf(8, AZ_ALIGN_CENTER, 24 + UPG_BOX_WIDTH/2, 30,
-                 "SHIELD: %3d/%-3d",
+  draw_bezel_box(2, TANK_BOX_LEFT, SHIELD_BOX_TOP,
+                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  az_draw_printf(8, AZ_ALIGN_CENTER, TANK_BOX_LEFT + UPG_BOX_WIDTH/2,
+                 SHIELD_BOX_TOP + 4, "SHIELD: %3d/%-3d",
                  round_towards_middle(player->shields, player->max_shields),
                  (int)player->max_shields);
-  draw_bezel_box(2, 24, 46, 150, 15);
-  az_draw_printf(8, AZ_ALIGN_CENTER, 24 + UPG_BOX_WIDTH/2, 50,
-                 "ENERGY: %3d/%-3d",
+  draw_bezel_box(2, TANK_BOX_LEFT, ENERGY_BOX_TOP,
+                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  az_draw_printf(8, AZ_ALIGN_CENTER, TANK_BOX_LEFT + UPG_BOX_WIDTH/2,
+                 ENERGY_BOX_TOP + 4, "ENERGY: %3d/%-3d",
                  round_towards_middle(player->energy, player->max_energy),
                  (int)player->max_energy);
 
@@ -419,16 +426,18 @@ static void draw_upgrades(const az_paused_state_t *state) {
   draw_bezel_box(2, ORDN_BOX_LEFT, ROCKETS_BOX_TOP,
                  UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_rockets > 0) {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 30,
-                   "ROCKETS:%3d/%-3d", player->rockets, player->max_rockets);
+    az_draw_printf(8, AZ_ALIGN_CENTER, ORDN_BOX_LEFT + UPG_BOX_WIDTH/2,
+                   ROCKETS_BOX_TOP + 4, "ROCKETS:%3d/%-3d",
+                   player->rockets, player->max_rockets);
   }
   set_weapon_box_color(player->max_bombs > 0,
                        player->ordnance == AZ_ORDN_BOMBS);
   draw_bezel_box(2, ORDN_BOX_LEFT, BOMBS_BOX_TOP,
                  UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
   if (player->max_bombs > 0) {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 466 + UPG_BOX_WIDTH/2, 50,
-                   "  BOMBS:%3d/%-3d", player->bombs, player->max_bombs);
+    az_draw_printf(8, AZ_ALIGN_CENTER, ORDN_BOX_LEFT + UPG_BOX_WIDTH/2,
+                   BOMBS_BOX_TOP + 4, "  BOMBS:%3d/%-3d",
+                   player->bombs, player->max_bombs);
   }
 
   if (state->drawer_openness <= 0.0) return;
@@ -563,12 +572,48 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
 
 void az_paused_on_click(az_paused_state_t *state, int x, int y) {
   if (state->drawer_openness == (state->show_upgrades_drawer ? 1.0 : 0.0)) {
+#ifndef NDEBUG
+    const bool cheat = az_is_shift_key_held() && az_is_key_held(AZ_KEY_TAB);
+    if (cheat) {
+      for (int i = 0; i < 2; ++i) {
+        int top = (i == 0 ? SHIELD_BOX_TOP : ENERGY_BOX_TOP);
+        if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
+        if (x >= TANK_BOX_LEFT && x <= TANK_BOX_LEFT + UPG_BOX_WIDTH &&
+            y >= top && y <= top + UPG_BOX_HEIGHT) {
+          const az_upgrade_t first =
+            (i == 0 ? AZ_UPG_SHIELD_BATTERY_00 : AZ_UPG_CAPACITOR_00);
+          const az_upgrade_t last =
+            (i == 0 ? AZ_UPG_SHIELD_BATTERY_11 : AZ_UPG_CAPACITOR_05);
+          for (az_upgrade_t upgrade = first; upgrade <= last; ++upgrade) {
+            if (!az_has_upgrade(&state->ship->player, upgrade)) {
+              az_give_upgrade(&state->ship->player, upgrade);
+              break;
+            }
+          }
+        }
+      }
+      for (int i = 0; i < AZ_ARRAY_SIZE(upgrade_toplefts); ++i) {
+        const az_upgrade_t upgrade = (az_upgrade_t)i;
+        if (az_has_upgrade(&state->ship->player, upgrade)) continue;
+        az_vector_t topleft = upgrade_toplefts[i];
+        if (!state->show_upgrades_drawer) topleft.y += DRAWER_SLIDE_DISTANCE;
+        const double right = topleft.x +
+          (upgrade <= AZ_UPG_GUN_BEAM ? GUN_BOX_WIDTH : UPG_BOX_WIDTH);
+        const double bottom = topleft.y + UPG_BOX_HEIGHT;
+        if (x >= topleft.x && x <= right && y >= topleft.y && y <= bottom) {
+          az_give_upgrade(&state->ship->player, upgrade);
+          break;
+        }
+      }
+    }
+#endif
     for (int i = 0; i < 8; ++i) {
       az_vector_t topleft = upgrade_toplefts[AZ_UPG_GUN_CHARGE + i];
       if (!state->show_upgrades_drawer) topleft.y += DRAWER_SLIDE_DISTANCE;
       if (x >= topleft.x && x <= topleft.x + GUN_BOX_WIDTH &&
           y >= topleft.y && y <= topleft.y + UPG_BOX_HEIGHT) {
         az_select_gun(&state->ship->player, AZ_GUN_CHARGE + i);
+        break;
       }
     }
     for (int i = 0; i < 2; ++i) {
@@ -576,7 +621,22 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
       if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
       if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
           y >= top && y <= top + UPG_BOX_HEIGHT) {
+#ifndef NDEBUG
+        if (cheat) {
+          const az_upgrade_t first =
+            (i == 0 ? AZ_UPG_ROCKET_AMMO_00 : AZ_UPG_BOMB_AMMO_00);
+          const az_upgrade_t last =
+            (i == 0 ? AZ_UPG_ROCKET_AMMO_29 : AZ_UPG_BOMB_AMMO_19);
+          for (az_upgrade_t upgrade = first; upgrade <= last; ++upgrade) {
+            if (!az_has_upgrade(&state->ship->player, upgrade)) {
+              az_give_upgrade(&state->ship->player, upgrade);
+              break;
+            }
+          }
+        }
+#endif
         az_select_ordnance(&state->ship->player, AZ_ORDN_ROCKETS + i);
+        break;
       }
     }
   }
