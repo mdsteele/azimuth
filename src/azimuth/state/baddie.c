@@ -373,7 +373,7 @@ static az_component_data_t stalk_plant_components[] = {
   { .polygon = AZ_INIT_POLYGON(stalk_segment_vertices), \
     .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
                    AZ_DMGF_PIERCE | AZ_DMGF_ROCKET), \
-    .init_position = {x, 0}, .impact_damage = 4.0 }
+    .init_position = {(x), 0}, .impact_damage = 4.0 }
 
   STALK_SEGMENT(-10), STALK_SEGMENT(-30), STALK_SEGMENT(-50),
   STALK_SEGMENT(-70), STALK_SEGMENT(-90), STALK_SEGMENT(-110),
@@ -477,6 +477,46 @@ static az_component_data_t incorporeal_piston_ext_components[] = {
     .init_position = {-90, 0} }
 };
 
+// TODO: Update the various Kilofuge component polygons once we have real
+//   graphics for the Kilofuge.
+static const az_vector_t kilofuge_main_body_vertices[] = {
+  {150, 0}, {90, 120}, {30, 140}, {-80, 150},
+  {-150, 0}, {-80, -150}, {30, -140}, {90, -120}
+};
+static const az_vector_t kilofuge_left_pincer_vertices[] = {
+  {50, 10}, {100, 0}, {50, 20}, {0, 0}
+};
+static const az_vector_t kilofuge_right_pincer_vertices[] = {
+  {50, -10}, {100, 0}, {50, -20}, {0, 0}
+};
+static const az_vector_t kilofuge_leg_vertices[] = {
+  {0, 0}, {-100, 10}, {-100, -10}
+};
+static az_component_data_t kilofuge_components[] = {
+  // Eyes:
+  { .bounding_radius = 10, .init_position = {150, 0}, .impact_damage = 10,
+    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
+  { .bounding_radius = 10, .init_position = {140, 15}, .impact_damage = 10,
+    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
+  { .bounding_radius = 10, .init_position = {140, -15}, .impact_damage = 10,
+    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
+  // Pincers:
+  { .polygon = AZ_INIT_POLYGON(kilofuge_left_pincer_vertices),
+    .init_position = {110,  60}, .immunities = ~0, .impact_damage = 30 },
+  { .polygon = AZ_INIT_POLYGON(kilofuge_right_pincer_vertices),
+    .init_position = {110, -60}, .immunities = ~0, .impact_damage = 30 },
+  // Legs:
+#define KILOFUGE_LEG(x, y, theta) \
+  { .polygon = AZ_INIT_POLYGON(kilofuge_leg_vertices), \
+    .init_position = {(x), (y)}, .init_angle = (theta), \
+    .immunities = ~0, .impact_damage = 20 }
+
+  KILOFUGE_LEG( 70,  190,  1.5), KILOFUGE_LEG(110, -195, -1.0),
+  KILOFUGE_LEG( 20, -200, -1.5), KILOFUGE_LEG( 55,  190,  1.0),
+  KILOFUGE_LEG(-50,  190,  1.5), KILOFUGE_LEG(-10, -200, -1.0)
+#undef KILOFUGE_LEG
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -536,7 +576,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_CLAM] = {
-    .max_health = 6.0, .overall_bounding_radius = 30.0,
+    .max_health = 6.0, .overall_bounding_radius = 31.5,
     .potential_pickups = AZ_PUPF_ALL, .color = {128, 0, 255, 255},
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
@@ -879,7 +919,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 15.0, .impact_damage = 12.0 }
   },
   [AZ_BAD_PISTON] = {
-    .max_health = 14.0, .overall_bounding_radius = 106.0,
+    .max_health = 14.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                    AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
@@ -889,7 +929,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(piston_components)
   },
   [AZ_BAD_ARMORED_PISTON] = {
-    .max_health = 39.0, .overall_bounding_radius = 106.0,
+    .max_health = 39.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                    AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
@@ -900,7 +940,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(armored_piston_components)
   },
   [AZ_BAD_ARMORED_PISTON_EXT] = {
-    .max_health = 39.0, .overall_bounding_radius = 106.0,
+    .max_health = 39.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                    AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
@@ -911,7 +951,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(armored_piston_ext_components)
   },
   [AZ_BAD_INCORPOREAL_PISTON] = {
-    .max_health = 1000000.0, .overall_bounding_radius = 106.0,
+    .max_health = 1000000.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                    AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
@@ -920,7 +960,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(incorporeal_piston_components)
   },
   [AZ_BAD_INCORPOREAL_PISTON_EXT] = {
-    .max_health = 1000000.0, .overall_bounding_radius = 106.0,
+    .max_health = 1000000.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                    AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
@@ -974,6 +1014,13 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 12.0 }
+  },
+  [AZ_BAD_KILOFUGE] = {
+    .max_health = 500.0, .overall_bounding_radius = 350.0,
+    .properties = AZ_BADF_DRAW_BG, .color = {64, 192, 192, 255},
+    .main_body = { .polygon = AZ_INIT_POLYGON(kilofuge_main_body_vertices),
+                   .impact_damage = 25.0, .immunities = ~0 },
+    DECL_COMPONENTS(kilofuge_components)
   }
 };
 
@@ -1001,13 +1048,10 @@ static bool baddie_data_initialized = false;
 
 void az_init_baddie_datas(void) {
   assert(!baddie_data_initialized);
-  bool skipped = false;
   AZ_ARRAY_LOOP(data, baddie_datas) {
-    // Skip the first entry in the array (which is for AZ_BAD_NOTHING)
-    if (!skipped) {
-      skipped = true;
-      continue;
-    }
+    if (data == &baddie_datas[AZ_BAD_NOTHING]) continue;
+    // Check that the number of components is valid.
+    assert(data->num_components >= 0);
     assert(data->num_components <= AZ_MAX_BADDIE_COMPONENTS);
     // Set bounding radius for all components.
     for (int i = 0; i < data->num_components; ++i) {
@@ -1031,7 +1075,8 @@ void az_init_baddie_datas(void) {
     assert(data->overall_bounding_radius >= data->main_body.bounding_radius);
     for (int i = 0; i < data->num_components; ++i) {
       assert(data->overall_bounding_radius >=
-             data->components[i].bounding_radius);
+             data->components[i].bounding_radius +
+             az_vnorm(data->components[i].init_position));
     }
     // Sanity-check other fields.
     assert(data->max_health > 0.0);

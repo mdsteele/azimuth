@@ -26,6 +26,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/baddie_kilofuge.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_wyrm.h"
@@ -1623,6 +1624,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else if (baddie->state == 1) {
         if (!az_ship_in_range(state, baddie, 400)) baddie->state = 0;
       } else baddie->state = 0;
+      break;
+    case AZ_BAD_KILOFUGE:
+      az_tick_bad_kilofuge(state, baddie, time);
       break;
   }
 

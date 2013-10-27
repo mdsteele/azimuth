@@ -45,6 +45,39 @@ static void az_gl_color(az_color_t color) {
   glColor4ub(color.r, color.g, color.b, color.a);
 }
 
+static void draw_component_outline(const az_component_data_t *component) {
+  const az_polygon_t poly = component->polygon;
+  if (poly.num_vertices > 0) {
+    glBegin(GL_LINE_LOOP); {
+      for (int i = 0; i < poly.num_vertices; ++i) {
+        glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
+      }
+    } glEnd();
+  } else {
+    glBegin(GL_LINE_STRIP); {
+      const double radius = component->bounding_radius;
+      glVertex2f(0, 0);
+      for (int i = 0; i <= 360; i += 10) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  }
+}
+
+static void draw_baddie_outline(const az_baddie_t *baddie, float frozen) {
+  const float flare = baddie->armor_flare;
+  glColor3f(flare, 0.5 - 0.5 * flare + 0.5 * frozen, frozen);
+  draw_component_outline(&baddie->data->main_body);
+  for (int j = 0; j < baddie->data->num_components; ++j) {
+    glPushMatrix(); {
+      const az_component_t *component = &baddie->components[j];
+      glTranslated(component->position.x, component->position.y, 0);
+      glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+      draw_component_outline(&baddie->data->components[j]);
+    } glPopMatrix();
+  }
+}
+
 static void draw_atom_electron(double radius, az_vector_t position,
                                double angle) {
   const double cmult = 1.0 + 0.2 * sin(angle);
@@ -839,26 +872,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_FORCEFIEND:
       // TODO: Make real graphics for the Forcefiend.
-      glColor3f(0.5 + 0.5 * flare, 0, 1 - 0.5 * flare);
-      glBegin(GL_LINE_LOOP); {
-        const az_polygon_t poly = baddie->data->main_body.polygon;
-        for (int i = 0; i < poly.num_vertices; ++i) {
-          glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
-        }
-      } glEnd();
-      for (int j = 0; j < baddie->data->num_components; ++j) {
-        glPushMatrix(); {
-          const az_component_t *component = &baddie->components[j];
-          glTranslated(component->position.x, component->position.y, 0);
-          glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
-          glBegin(GL_LINE_LOOP); {
-            const az_polygon_t poly = baddie->data->components[j].polygon;
-            for (int i = 0; i < poly.num_vertices; ++i) {
-              glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
-            }
-          } glEnd();
-        } glPopMatrix();
-      }
+      draw_baddie_outline(baddie, frozen);
       break;
     case AZ_BAD_STALK_PLANT:
       // Stalk:
@@ -1338,6 +1352,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_SUPER_HORNET:
       az_draw_bad_super_hornet(baddie, frozen, clock);
+      break;
+    case AZ_BAD_KILOFUGE:
+      // TODO: Make real graphics for the Kilofuge.
+      draw_baddie_outline(baddie, frozen);
       break;
   }
 }

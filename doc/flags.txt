@@ -49,3 +49,4 @@
 48: Opened rocket door between Cnidam rooms 262 and 397
 49: Cnidam bomb started (Cnidam room 265)
 50: Cnidam bomb defused (Cnidam room 323)
+51: Killed Kilofuge (Cnidam boss, room 237)
