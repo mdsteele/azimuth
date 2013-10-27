@@ -32,7 +32,7 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_rockwyrm(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   assert(baddie->kind == AZ_BAD_ROCKWYRM);
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
@@ -134,7 +134,7 @@ void az_tick_bad_rockwyrm(az_space_state_t* state, az_baddie_t* baddie,
                    state->ship.position);
 }
 
-void az_tick_bad_wyrm_egg(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   // Apply drag to the egg (if it's moving).
   if (az_vnonzero(baddie->velocity)) {
@@ -163,7 +163,7 @@ void az_tick_bad_wyrm_egg(az_space_state_t* state, az_baddie_t* baddie,
   }
 }
 
-void az_tick_bad_wyrmling(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_wyrmling(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   az_snake_towards(baddie, time, 0, 180.0, 120.0, state->ship.position);
 }

@@ -27,9 +27,9 @@
 
 /*===========================================================================*/
 
-void az_draw_ship(az_space_state_t* state);
+void az_draw_ship(az_space_state_t *state);
 
-void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock);
+void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock);
 
 /*===========================================================================*/
 

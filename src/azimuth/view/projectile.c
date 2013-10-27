@@ -61,7 +61,7 @@ static void draw_rocket(az_clock_t clock, az_color_t color) {
   } glEnd();
 }
 
-static void draw_oth_projectile(const az_projectile_t* proj, double radius,
+static void draw_oth_projectile(const az_projectile_t *proj, double radius,
                                 az_clock_t clock) {
   const double turn_degrees = 1440.0 * proj->age;
   glBegin(GL_TRIANGLES); {
@@ -89,7 +89,7 @@ static void draw_spark(double age, double radius, az_color_t color) {
   } glEnd();
 }
 
-static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
+static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
   switch (proj->kind) {
     case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PROJ_GUN_NORMAL:
@@ -470,7 +470,7 @@ static void draw_projectile(const az_projectile_t* proj, az_clock_t clock) {
   }
 }
 
-void az_draw_projectiles(const az_space_state_t* state) {
+void az_draw_projectiles(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) continue;
     glPushMatrix(); {

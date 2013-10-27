@@ -25,7 +25,7 @@
 
 /*===========================================================================*/
 
-void az_editor_draw_screen(az_editor_state_t* state);
+void az_editor_draw_screen(az_editor_state_t *state);
 
 az_vector_t az_pixel_to_position(const az_editor_state_t *state, int x, int y);
 

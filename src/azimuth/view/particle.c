@@ -175,7 +175,7 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
   }
 }
 
-void az_draw_particles(const az_space_state_t* state) {
+void az_draw_particles(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(particle, state->particles) {
     if (particle->kind == AZ_PAR_NOTHING) continue;
     glPushMatrix(); {

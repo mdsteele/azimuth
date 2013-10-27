@@ -29,7 +29,7 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_zipper(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_zipper(az_space_state_t *state, az_baddie_t *baddie,
                         bool bounced) {
   assert(baddie->kind == AZ_BAD_ZIPPER ||
          baddie->kind == AZ_BAD_ARMORED_ZIPPER ||
@@ -40,7 +40,7 @@ void az_tick_bad_zipper(az_space_state_t* state, az_baddie_t* baddie,
               baddie->angle);
  }
 
-void az_tick_bad_fire_zipper(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
                              bool bounced) {
   assert(baddie->kind == AZ_BAD_FIRE_ZIPPER);
   // Bounce back and forth.

@@ -587,7 +587,7 @@ static void draw_camera_view(az_editor_state_t *state) {
   }
 }
 
-static void draw_hud(az_editor_state_t* state) {
+static void draw_hud(az_editor_state_t *state) {
   const az_editor_room_t *room =
     AZ_LIST_GET(state->planet.rooms, state->current_room);
   // Draw the room name:
@@ -749,7 +749,7 @@ static void draw_hud(az_editor_state_t* state) {
   }
 }
 
-void az_editor_draw_screen(az_editor_state_t* state) {
+void az_editor_draw_screen(az_editor_state_t *state) {
   glPushMatrix(); {
     // Make positive Y be up instead of down.
     glScaled(1, -1, 1);

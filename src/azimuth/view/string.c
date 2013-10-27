@@ -173,7 +173,7 @@ static void draw_char(int c) {
 
 static void draw_chars_internal(
     double height, az_alignment_t align, double x, double top, bool italic,
-    const char* chars, size_t len) {
+    const char *chars, size_t len) {
   double left = x;
   switch (align) {
     case AZ_ALIGN_LEFT: break;
@@ -201,12 +201,12 @@ static void draw_chars_internal(
 /*===========================================================================*/
 
 void az_draw_string(double height, az_alignment_t align, double x, double top,
-                    const char* string) {
+                    const char *string) {
   draw_chars_internal(height, align, x, top, false, string, strlen(string));
 }
 
 void az_draw_chars(double height, az_alignment_t align, double x, double top,
-                   const char* chars, size_t len) {
+                   const char *chars, size_t len) {
   draw_chars_internal(height, align, x, top, false, chars, len);
 }
 

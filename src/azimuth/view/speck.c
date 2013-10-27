@@ -30,7 +30,7 @@
 
 /*===========================================================================*/
 
-void az_draw_specks(const az_space_state_t* state) {
+void az_draw_specks(const az_space_state_t *state) {
   glBegin(GL_POINTS); {
     AZ_ARRAY_LOOP(speck, state->specks) {
       if (speck->kind == AZ_SPECK_NOTHING) continue;

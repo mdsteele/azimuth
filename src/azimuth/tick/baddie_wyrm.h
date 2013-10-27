@@ -26,13 +26,13 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_rockwyrm(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
 
-void az_tick_bad_wyrm_egg(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
 
-void az_tick_bad_wyrmling(az_space_state_t* state, az_baddie_t* baddie,
+void az_tick_bad_wyrmling(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
 
 /*===========================================================================*/

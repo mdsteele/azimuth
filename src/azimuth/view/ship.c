@@ -39,7 +39,7 @@ static inline void az_gl_vertex(az_vector_t v) {
   glVertex2d(v.x, v.y);
 }
 
-void az_draw_ship(az_space_state_t* state) {
+void az_draw_ship(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
   if (!az_ship_is_present(ship)) return;
 
@@ -104,7 +104,7 @@ void az_draw_ship(az_space_state_t* state) {
   az_draw_ship_body(ship, state->clock);
 }
 
-void az_draw_ship_body(const az_ship_t* ship, az_clock_t clock) {
+void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);

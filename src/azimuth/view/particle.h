@@ -25,7 +25,7 @@
 
 /*===========================================================================*/
 
-void az_draw_particles(const az_space_state_t* state);
+void az_draw_particles(const az_space_state_t *state);
 
 /*===========================================================================*/
 
