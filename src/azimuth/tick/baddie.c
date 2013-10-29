@@ -1628,6 +1628,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_KILOFUGE:
       az_tick_bad_kilofuge(state, baddie, time);
       break;
+    case AZ_BAD_ICE_CRYSTAL: break; // Do nothing.
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

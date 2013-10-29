@@ -415,6 +415,16 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         az_draw_gravfield_no_transform(&gravfield);
       }
       break;
+    case AZ_PROJ_ICE_TORPEDO:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0, 1, 1);
+        glVertex2f(5, 0);
+        for (int i = 0; i <= 360; i += 20) {
+          glColor4f(0, 0.5, 0.5, 0.5 + 0.5 * cos(AZ_DEG2RAD(i)));
+          glVertex2d(9.0 * cos(AZ_DEG2RAD(i)), 7.0 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_LASER_PULSE:
       glBegin(GL_QUADS); {
         glColor3f(1, 0.3, 0);

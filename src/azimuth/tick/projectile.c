@@ -154,6 +154,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_MISSILE_PHASE:
     case AZ_PROJ_MISSILE_PIERCE:
     case AZ_PROJ_MISSILE_BEAM:
+    case AZ_PROJ_ICE_TORPEDO:
     case AZ_PROJ_OTH_ROCKET:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
       break;
@@ -173,6 +174,21 @@ static void on_projectile_impact(az_space_state_t *state,
   if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO) {
     az_add_projectile(state, AZ_PROJ_GRAVITY_TORPEDO_WELL, proj->position,
                       proj->angle, proj->power, proj->fired_by);
+  }
+  // Ice torpedos are special: on impact, they create a number of ice crystals.
+  else if (proj->kind == AZ_PROJ_ICE_TORPEDO) {
+    const double crystal_radius =
+      az_get_baddie_data(AZ_BAD_ICE_CRYSTAL)->overall_bounding_radius;
+    for (int i = 0; i < 20; ++i) {
+      const az_vector_t position = az_vadd(proj->position, az_vpolar(
+          az_random(0, proj->data->splash_radius), az_random(-AZ_PI, AZ_PI)));
+      az_impact_t impact;
+      az_circle_impact(state, crystal_radius, position, AZ_VZERO,
+                       0, AZ_NULL_UID, &impact);
+      if (impact.type != AZ_IMP_NOTHING) continue;
+      const double angle = az_random(-AZ_PI, AZ_PI);
+      az_add_baddie(state, AZ_BAD_ICE_CRYSTAL, position, angle);
+    }
   }
 }
 
@@ -628,6 +644,12 @@ static void projectile_special_logic(az_space_state_t *state,
             az_vsub(proj->position, state->ship.position),
             time * 800.0 * (1.0 - proj->age / proj->data->lifetime)));
       }
+      break;
+    case AZ_PROJ_ICE_TORPEDO:
+      az_add_speck(state, (az_color_t){0, 255, 255, 255}, az_random(0.2, 1.0),
+                   az_vadd(proj->position,
+                           az_vpolar(az_random(-8.0, 8.0),
+                                     proj->angle + AZ_HALF_PI)), AZ_VZERO);
       break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,

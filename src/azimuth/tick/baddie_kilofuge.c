@@ -110,6 +110,15 @@ static void move_body_forward(
   if (stop_index >= 0) {
     baddie->state = (stop_index % 2 == 0 ? MOVE_EVEN_LEGS_STATE :
                      MOVE_ODD_LEGS_STATE);
+    az_vector_t rel_impact;
+    if (az_ship_is_present(&state->ship) &&
+        az_lead_target(az_vsub(state->ship.position,
+                               az_vadd(baddie->position,
+                                       az_vpolar(150.0, baddie->angle))),
+                       state->ship.velocity, 400.0, &rel_impact)) {
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_ICE_TORPEDO, 150.0, 0.0,
+                                az_vtheta(rel_impact) - baddie->angle);
+    }
   }
 }
 

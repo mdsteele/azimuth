@@ -517,6 +517,10 @@ static az_component_data_t kilofuge_components[] = {
 #undef KILOFUGE_LEG
 };
 
+static const az_vector_t ice_crystal_vertices[] = {
+  {20, 0}, {7, 12}, {-20, 0}, {0, -10}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -1021,6 +1025,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(kilofuge_main_body_vertices),
                    .impact_damage = 25.0, .immunities = ~0 },
     DECL_COMPONENTS(kilofuge_components)
+  },
+  [AZ_BAD_ICE_CRYSTAL] = {
+    .max_health = 6.0, .color = {64, 192, 192, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(ice_crystal_vertices),
+                   .impact_damage = 10.0,
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE) }
   }
 };
 
