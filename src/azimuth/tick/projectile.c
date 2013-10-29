@@ -182,6 +182,7 @@ static void on_projectile_impact(az_space_state_t *state,
     for (int i = 0; i < 20; ++i) {
       const az_vector_t position = az_vadd(proj->position, az_vpolar(
           az_random(0, proj->data->splash_radius), az_random(-AZ_PI, AZ_PI)));
+      // TODO: If position outside of camera bounds, continue
       az_impact_t impact;
       az_circle_impact(state, crystal_radius, position, AZ_VZERO,
                        0, AZ_NULL_UID, &impact);

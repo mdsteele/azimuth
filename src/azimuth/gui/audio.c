@@ -960,7 +960,8 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
           persisting->sound = sound;
           persisting->channel = channel;
         } else {
-          AZ_WARNING_ONCE("Could not play persistent sound (%d)", (int)sound);
+          AZ_WARNING_ONCE("Could not play persistent sound (%d)\n",
+                          (int)sound);
         }
         break;
       }
@@ -972,7 +973,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
     const az_sound_key_t sound = soundboard->oneshots[i];
     const int channel = Mix_PlayChannel(-1, sound_entries[sound].chunk, 0);
     if (channel < 0) {
-      AZ_WARNING_ONCE("Could not play sound effect (%d)", (int)sound);
+      AZ_WARNING_ONCE("Could not play sound effect (%d)\n", (int)sound);
     }
   }
 }
