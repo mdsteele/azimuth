@@ -192,4 +192,20 @@ void az_draw_bad_super_hornet(
   draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
 }
 
+void az_draw_bad_switcher(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  const float flare = baddie->armor_flare;
+  glPushMatrix(); {
+    glTranslatef(-2.5, 0, 0);
+    glScalef(0.75, 1, 1);
+    draw_zipper_antennae(color3(0.25, 0.75, 0.25));
+    draw_zipper_body(color3(flare, 0.5 + 0.25 * frozen, 0.75),
+                     color3(0.5 - 0.5 * frozen, 1, 0.5 + 0.25 * frozen),
+                     color3(0.2 + 0.4 * flare, 0.1 + 0.4 * frozen,
+                            0.4 + 0.4 * frozen), 8);
+  } glPopMatrix();
+  draw_zipper_wings(8, 1.8, 3.8, flare, frozen,
+                    (baddie->state == 0 ? 4 : clock));
+}
+
 /*===========================================================================*/

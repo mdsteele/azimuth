@@ -50,6 +50,9 @@ void az_draw_bad_hornet(
 void az_draw_bad_super_hornet(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_switcher(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_ZIPPER_H_

@@ -1373,6 +1373,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         } glEnd();
       }
     } break;
+    case AZ_BAD_SWITCHER:
+      az_draw_bad_switcher(baddie, frozen, clock);
+      break;
   }
 }
 

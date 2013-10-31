@@ -20,6 +20,7 @@
 #include "azimuth/tick/baddie_zipper.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
@@ -64,6 +65,39 @@ void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = 2.2;
       }
     }
+  }
+}
+
+void az_tick_bad_switcher(az_space_state_t *state, az_baddie_t *baddie,
+                          bool bounced) {
+  const double speed = 250.0;
+  if (baddie->state == 0) {
+    if (az_ship_is_present(&state->ship) &&
+        az_vnonzero(state->ship.velocity)) {
+      az_impact_t impact;
+      az_circle_impact(
+          state, baddie->data->overall_bounding_radius,
+          baddie->position, az_vpolar(5000.0, baddie->angle),
+          (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+      az_vector_t intersect_pos;
+      if (az_ray_hits_line_segment(
+              baddie->position, impact.position, state->ship.position,
+              az_vmul(state->ship.velocity, 10.0), &intersect_pos, NULL)) {
+        const double intersect_time =
+          az_vdist(state->ship.position, intersect_pos) /
+          az_vnorm(state->ship.velocity);
+        const double travel_time =
+          az_vdist(baddie->position, intersect_pos) / speed;
+        if (fabs(travel_time - intersect_time) <= 0.1) {
+          baddie->velocity = az_vpolar(speed, baddie->angle);
+          baddie->state = 1;
+        }
+      }
+    }
+  } else if (bounced) {
+    baddie->velocity = AZ_VZERO;
+    baddie->angle = az_mod2pi(baddie->angle + AZ_PI);
+    baddie->state = 0;
   }
 }
 

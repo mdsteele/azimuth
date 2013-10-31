@@ -90,7 +90,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
     .speed = 800.0,
     .lifetime = 3.0,
-    .impact_damage = 12.0,
+    .impact_damage = 15.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
   },

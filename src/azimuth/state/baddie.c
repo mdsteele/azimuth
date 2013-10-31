@@ -521,6 +521,11 @@ static const az_vector_t ice_crystal_vertices[] = {
   {20, 0}, {7, 12}, {-20, 0}, {0, -10}
 };
 
+static const az_vector_t switcher_vertices[] = {
+  {12.5, 4}, {8.5, 8.5}, {4.5, 9.5}, {-10, 5.5}, {-12.5, 2.5},
+  {-12.5, -2.5}, {-10, -5.5}, {4.5, -9.5}, {8.5, -8.5}, {12.5, -4}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -1032,6 +1037,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(ice_crystal_vertices),
                    .impact_damage = 10.0,
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE) }
+  },
+  [AZ_BAD_SWITCHER] = {
+    .max_health = 20.0, .color = {0, 192, 192, 255},
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = AZ_PUPF_ALL, .properties = AZ_BADF_BOUNCE_PERP,
+    .main_body = { .polygon = AZ_INIT_POLYGON(switcher_vertices),
+                   .impact_damage = 12.0 }
   }
 };
 
