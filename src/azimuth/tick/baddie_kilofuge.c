@@ -36,7 +36,8 @@
 #define MOVE_EVEN_LEGS_STATE 1
 #define MOVE_ODD_LEGS_STATE 2
 #define MELTBEAM_STATE 3
-#define WAITING_STATE 4
+#define CROSSBEAM_STATE 4
+#define WAITING_STATE 5
 
 #define NUM_EYES 3
 #define FIRST_EYE_COMPONENT_INDEX 0
@@ -116,6 +117,11 @@ static void choose_next_state(
   if (any_crystals_in_range) {
     baddie->state = MELTBEAM_STATE;
     baddie->cooldown = 3.0;
+  } else if (az_randint(1, 5) == 1) {
+    baddie->state = CROSSBEAM_STATE;
+    baddie->cooldown = 2.5;
+    baddie->components[FIRST_EYE_COMPONENT_INDEX + 1].angle = AZ_DEG2RAD(-45);
+    baddie->components[FIRST_EYE_COMPONENT_INDEX + 2].angle = AZ_DEG2RAD(45);
   } else {
     baddie->state = MOVE_BODY_STATE;
     az_vector_t rel_impact;
@@ -205,6 +211,42 @@ static void move_legs_forward(
   if (num_legs_okay >= NUM_LEGS / 2) choose_next_state(state, baddie);
 }
 
+static void fire_beam_from_eye(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    int eye_index, double power) {
+  // Fire a beam from the eye.
+  const az_component_t *eye =
+    &baddie->components[FIRST_EYE_COMPONENT_INDEX + eye_index];
+  const double beam_angle = baddie->angle + eye->angle;
+  const az_vector_t beam_start =
+    az_vadd(az_vadd(az_vrotate(eye->position, baddie->angle),
+                    baddie->position), az_vpolar(8, beam_angle));
+  az_impact_t impact;
+  az_ray_impact(state, beam_start, az_vpolar(5000, beam_angle),
+                AZ_IMPF_NOTHING, baddie->uid, &impact);
+
+  // The beam does far more damage to other baddies than to the ship.
+  if (impact.type == AZ_IMP_BADDIE) {
+    az_try_damage_baddie(
+        state, impact.target.baddie.baddie, impact.target.baddie.component,
+        AZ_DMGF_BEAM, 75.0 * power * time);
+  } else if (impact.type == AZ_IMP_SHIP) {
+    az_damage_ship(state, 15.0 * power * time, false);
+  }
+
+  // Add particles/sound for the beam.
+  const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+  const az_color_t beam_color = {255, 128, alt, 192};
+  az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+              power * (4.0 + 0.75 * az_clock_zigzag(8, 1, state->clock)));
+  az_add_speck(state, (impact.type == AZ_IMP_WALL ?
+                       impact.target.wall->data->color1 :
+                       AZ_WHITE), 1.0, impact.position,
+               az_vpolar(az_random(20.0, 70.0),
+                         az_vtheta(impact.normal) +
+                         az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+}
+
 static void fire_meltbeam(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
@@ -233,41 +275,31 @@ static void fire_meltbeam(
   } else if (az_ship_is_present(&state->ship)) {
     turn_eyes_towards(baddie, time, state->ship.position);
   }
-
-  // Fire a beam.  The beam does far more damage to baddies than to the ship.
-  const az_component_t *eye = &baddie->components[FIRST_EYE_COMPONENT_INDEX];
-  const double beam_angle = baddie->angle + eye->angle;
-  const az_vector_t beam_start =
-    az_vadd(az_vadd(az_vrotate(eye->position, baddie->angle),
-                    baddie->position), az_vpolar(8, beam_angle));
-  az_impact_t impact;
-  az_ray_impact(state, beam_start, az_vpolar(5000, beam_angle),
-                AZ_IMPF_NOTHING, baddie->uid, &impact);
-  if (impact.type == AZ_IMP_BADDIE) {
-    az_try_damage_baddie(
-        state, impact.target.baddie.baddie, impact.target.baddie.component,
-        AZ_DMGF_BEAM, 75.0 * time);
-  } else if (impact.type == AZ_IMP_SHIP) {
-    az_damage_ship(state, 15.0 * time, false);
-  }
-
-  // Add particles/sound for the beam.
-  const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
-  const az_color_t beam_color = {255, 128, alt, 192};
-  az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
-              4.0 + 0.75 * az_clock_zigzag(8, 1, state->clock));
-  az_add_speck(state, (impact.type == AZ_IMP_WALL ?
-                       impact.target.wall->data->color1 :
-                       AZ_WHITE), 1.0, impact.position,
-               az_vpolar(az_random(20.0, 70.0),
-                         az_vtheta(impact.normal) +
-                         az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+  fire_beam_from_eye(state, baddie, time, 0, 1.0);
   az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
 
   // When the cooldown timer reachers zero, stop firing the beam.
   if (baddie->cooldown <= 0.0) {
     baddie->state = WAITING_STATE;
     baddie->cooldown = 1.0;
+  }
+}
+
+static void fire_crossbeam(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_KILOFUGE);
+
+  if (az_ship_is_present(&state->ship)) {
+    turn_eyes_towards(baddie, time, state->ship.position);
+  }
+  fire_beam_from_eye(state, baddie, time, 1, 0.67);
+  fire_beam_from_eye(state, baddie, time, 2, 0.67);
+  az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
+
+  // When the cooldown timer reachers zero, stop firing the beams.
+  if (baddie->cooldown <= 0.0) {
+    baddie->state = WAITING_STATE;
+    baddie->cooldown = 0.5;
   }
 }
 
@@ -289,6 +321,9 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case MELTBEAM_STATE:
       fire_meltbeam(state, baddie, time);
+      break;
+    case CROSSBEAM_STATE:
+      fire_crossbeam(state, baddie, time);
       break;
     case WAITING_STATE:
       if (baddie->cooldown <= 0.0) choose_next_state(state, baddie);

@@ -496,9 +496,9 @@ static az_component_data_t kilofuge_components[] = {
   // Eyes:
   { .bounding_radius = 10, .init_position = {150, 0}, .impact_damage = 10,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
-  { .bounding_radius = 10, .init_position = {140, 15}, .impact_damage = 10,
+  { .bounding_radius = 10, .init_position = {140, 20}, .impact_damage = 10,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
-  { .bounding_radius = 10, .init_position = {140, -15}, .impact_damage = 10,
+  { .bounding_radius = 10, .init_position = {140, -20}, .impact_damage = 10,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_REACTIVE) },
   // Pincers:
   { .polygon = AZ_INIT_POLYGON(kilofuge_left_pincer_vertices),

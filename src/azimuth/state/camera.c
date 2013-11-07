@@ -21,6 +21,7 @@
 
 #include <math.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 
@@ -41,6 +42,26 @@ az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
     fmin(fmax(-half_span, az_mod2pi(az_vtheta(vec) - mid_theta)),
          half_span);
   return az_vpolar(r, theta);
+}
+
+bool az_position_visible(const az_camera_bounds_t *bounds, az_vector_t vec) {
+  const double min_rho = bounds->min_r - AZ_SCREEN_HEIGHT/2;
+  const double max_rho = bounds->min_r + bounds->r_span + AZ_SCREEN_HEIGHT/2;
+  // Right-hand edge of the room:
+  const az_vector_t vec1 = az_vrotate(vec, -bounds->min_theta);
+  if (vec1.x >= min_rho && vec1.x <= max_rho &&
+      vec1.y >= -AZ_SCREEN_WIDTH/2 && vec1.y <= 0.0) return true;
+  // Left-hand edge of the room:
+  const az_vector_t vec2 =
+    az_vrotate(vec, -(bounds->min_theta + bounds->theta_span));
+  if (vec2.x >= min_rho && vec2.x <= max_rho &&
+      vec2.y >= 0.0 && vec2.y <= AZ_SCREEN_WIDTH/2) return true;
+  // Middle of the room:
+  const double rho = az_vnorm(vec);
+  if (rho < min_rho || rho > max_rho) return false;
+  const double rel_theta =
+    az_mod2pi_nonneg(az_vtheta(vec) - bounds->min_theta);
+  return (rel_theta >= 0 && rel_theta <= bounds->theta_span);
 }
 
 /*===========================================================================*/

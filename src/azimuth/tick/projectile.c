@@ -177,12 +177,14 @@ static void on_projectile_impact(az_space_state_t *state,
   }
   // Ice torpedos are special: on impact, they create a number of ice crystals.
   else if (proj->kind == AZ_PROJ_ICE_TORPEDO) {
+    const az_camera_bounds_t *bounds =
+      &state->planet->rooms[state->ship.player.current_room].camera_bounds;
     const double crystal_radius =
       az_get_baddie_data(AZ_BAD_ICE_CRYSTAL)->overall_bounding_radius;
     for (int i = 0; i < 20; ++i) {
       const az_vector_t position = az_vadd(proj->position, az_vpolar(
           az_random(0, proj->data->splash_radius), az_random(-AZ_PI, AZ_PI)));
-      // TODO: If position outside of camera bounds, continue
+      if (!az_position_visible(bounds, position)) continue;
       az_impact_t impact;
       az_circle_impact(state, crystal_radius, position, AZ_VZERO,
                        0, AZ_NULL_UID, &impact);

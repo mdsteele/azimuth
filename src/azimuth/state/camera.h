@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_STATE_CAMERA_H_
 #define AZIMUTH_STATE_CAMERA_H_
 
+#include <stdbool.h>
+
 #include "azimuth/util/clock.h"
 #include "azimuth/util/vector.h"
 
@@ -39,6 +41,12 @@ az_vector_t az_bounds_center(const az_camera_bounds_t *bounds);
 // Clamp a vector to be within the given camera bounds.
 az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
                                az_vector_t vec);
+
+// Determine whether a position can be seen based on the given camera bounds.
+// This function is conservative in that it may return false for certain
+// positions that are actually possible to see in the periphery, but will never
+// return true for positions that are impossible to see.
+bool az_position_visible(const az_camera_bounds_t *bounds, az_vector_t vec);
 
 /*===========================================================================*/
 
