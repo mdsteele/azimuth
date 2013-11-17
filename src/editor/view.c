@@ -113,7 +113,7 @@ static void draw_zone_swatch(az_editor_state_t *state,
     az_gl_vertex(top_left);
     az_gl_vertex(bot_left);
   } glEnd();
-  // Draw a red X if the room is heated.
+  // Draw a red + if the room is heated.
   if (room->properties & AZ_ROOMF_HEATED) {
     glColor3f(1, 0, 0);
     glBegin(GL_LINES); {
@@ -123,7 +123,7 @@ static void draw_zone_swatch(az_editor_state_t *state,
       az_gl_vertex(az_vpolar(max_r, min_theta + 0.5 * bounds->theta_span));
     } glEnd();
   }
-  // Draw a black + if the room is dark.
+  // Draw a black X if the room is dark.
   if (room->properties & AZ_ROOMF_DARK) {
     glColor3f(0, 0, 0);
     glBegin(GL_LINES); {
