@@ -37,6 +37,167 @@
 
 #define SAVE_ALL_ROOMS false
 
+static const int wall_data_indices[] = {
+  // Colony walls:
+  0, 2, 1, 21,
+  // Green metal:
+  28, 29, 30,
+  // Girders:
+  35, 6, 20, 46, 51, // silver
+  8, 7, // red
+  50, 9, 10, // brown
+  47, // blue
+  100, 101, 102, // heavy red, and blue square blocks
+  // Pipes:
+  32, 34, 33, 48, 63, // yellow
+  38, 40, 39, 49, 64, // red
+  // Brown/gray rocks:
+  5, 11, 12, 13, 14, 41, // boulders
+  36, 37, // stalactites
+  // Shale rock:
+  80, 81, 82, 83, // blue
+  84, 85, 86, 87, // brown
+  // Crystals:
+  3, 4, // cyan crystals
+  53, 52, // glowing hex crystals
+  // Concrete:
+  26, 27, 54, 55, 56,
+  // Grass/dirt:
+  62, 42, 43, 44, // with grass
+  61, 45, 59, 60, // dirt only
+  // Tree parts:
+  67, 68, 69, 70, 71, 72,
+  // Seashells:
+  73, 74, 75, 76, 77, 78,
+  // Water-smoothed boulders:
+  88, 89,
+  // Sand:
+  90, 91, 92,
+  // Green rocks:
+  97, 98,
+  // Ice:
+  15, 16, 17, 57, 58, // boulders
+  18, 19, // icicles
+  99, // frozen layer of water
+  // Snow walls:
+  94, 93, 95, 96,
+  // Purple rocks:
+  109, 110, // boulders
+  111, 112, // stalactites
+  // Parallelagram blocks:
+  103, 104, 105, 106, 107, 108,
+  // Green/purple hex blocks:
+  24, 25, 65, 66,
+  // Cinderbricks:
+  22, 23, 31,
+  // Miscellaneous:
+  79
+};
+static int reverse_wall_data_indices[AZ_ARRAY_SIZE(wall_data_indices)];
+
+static az_baddie_kind_t baddie_kinds[] = {
+  AZ_BAD_MARKER,
+  // Turrets:
+  AZ_BAD_NORMAL_TURRET,
+  AZ_BAD_BROKEN_TURRET,
+  AZ_BAD_ARMORED_TURRET,
+  AZ_BAD_HEAVY_TURRET,
+  AZ_BAD_BEAM_TURRET,
+  AZ_BAD_ROCKET_TURRET,
+  AZ_BAD_CRAWLING_TURRET,
+  AZ_BAD_CRAWLING_MORTAR,
+  AZ_BAD_SECURITY_DRONE,
+  // Zippers:
+  AZ_BAD_ZIPPER,
+  AZ_BAD_ARMORED_ZIPPER,
+  AZ_BAD_MINI_ARMORED_ZIPPER,
+  AZ_BAD_FIRE_ZIPPER,
+  AZ_BAD_SWITCHER,
+  AZ_BAD_DRAGONFLY,
+  AZ_BAD_HORNET,
+  AZ_BAD_SUPER_HORNET,
+  AZ_BAD_MOSQUITO,
+  // Bats:
+  AZ_BAD_SWOOPER,
+  AZ_BAD_ECHO_SWOOPER,
+  // Crawlers:
+  AZ_BAD_CAVE_CRAWLER,
+  AZ_BAD_SPINED_CRAWLER,
+  AZ_BAD_ICE_CRAWLER,
+  // Machines:
+  AZ_BAD_GUN_SENSOR,
+  AZ_BAD_BEAM_SENSOR,
+  AZ_BAD_BOX,
+  AZ_BAD_ARMORED_BOX,
+  AZ_BAD_TRAPDOOR,
+  AZ_BAD_BEAM_WALL,
+  AZ_BAD_SPARK,
+  // Pistons:
+  AZ_BAD_PISTON,
+  AZ_BAD_ARMORED_PISTON,
+  AZ_BAD_ARMORED_PISTON_EXT,
+  AZ_BAD_INCORPOREAL_PISTON,
+  AZ_BAD_INCORPOREAL_PISTON_EXT,
+  // Vehicles:
+  AZ_BAD_COPTER_HORZ,
+  AZ_BAD_SMALL_TRUCK,
+  AZ_BAD_COPTER_VERT,
+  // Traps:
+  AZ_BAD_HEAT_RAY,
+  AZ_BAD_DEATH_RAY,
+  AZ_BAD_NUCLEAR_MINE,
+  // Bouncers:
+  AZ_BAD_BOUNCER,
+  AZ_BAD_BOUNCER_90,
+  // Spinies:
+  AZ_BAD_SPINER,
+  AZ_BAD_SPINE_MINE,
+  AZ_BAD_SUPER_SPINER,
+  AZ_BAD_URCHIN,
+  // Miscellaneous:
+  AZ_BAD_STALK_PLANT,
+  AZ_BAD_LEAPER,
+  AZ_BAD_CLAM,
+  AZ_BAD_FIREBALL_MINE,
+  AZ_BAD_NIGHTBUG,
+  AZ_BAD_ATOM,
+  // Oth:
+  AZ_BAD_OTH_RAZOR,
+  AZ_BAD_OTH_CRAB_1,
+  AZ_BAD_OTH_ORB_1,
+  AZ_BAD_OTH_CRAB_2,
+  AZ_BAD_OTH_ORB_2,
+  // Bosses and minions:
+  AZ_BAD_BOSS_DOOR,
+  AZ_BAD_OTH_SNAPDRAGON,
+  AZ_BAD_ROCKWYRM,
+  AZ_BAD_WYRM_EGG,
+  AZ_BAD_WYRMLING,
+  AZ_BAD_OTH_GUNSHIP,
+  AZ_BAD_FORCEFIEND,
+  AZ_BAD_KILOFUGE,
+  AZ_BAD_ICE_CRYSTAL,
+  AZ_BAD_ZENITH_CORE,
+};
+static int reverse_baddie_kinds[AZ_ARRAY_SIZE(baddie_kinds)];
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie_kinds) == AZ_NUM_BADDIE_KINDS);
+
+static bool reverse_indices_initialized = false;
+
+static void init_reverse_indices(void) {
+  if (reverse_indices_initialized) return;
+  assert(AZ_ARRAY_SIZE(wall_data_indices) == AZ_NUM_WALL_DATAS);
+  for (int i = 0; i < AZ_NUM_WALL_DATAS; ++i) {
+    reverse_wall_data_indices[wall_data_indices[i]] = i;
+  }
+  for (int i = 0; i < AZ_NUM_BADDIE_KINDS; ++i) {
+    reverse_baddie_kinds[baddie_kinds[i] - 1] = i;
+  }
+  reverse_indices_initialized = true;
+}
+
+/*===========================================================================*/
+
 void az_relabel_editor_room(az_editor_room_t *room) {
   room->label = AZ_ERL_NORMAL_ROOM;
   AZ_LIST_LOOP(node, room->nodes) {
@@ -61,6 +222,7 @@ void az_relabel_editor_room(az_editor_room_t *room) {
 }
 
 bool az_load_editor_state(az_editor_state_t *state) {
+  init_reverse_indices();
   state->spin_camera = true;
   state->zoom_level = 128.0;
   state->brush.baddie_kind = AZ_BAD_MARKER;
@@ -481,6 +643,23 @@ void az_destroy_editor_state(az_editor_state_t *state) {
     AZ_LIST_DESTROY(room->walls);
   }
   AZ_LIST_DESTROY(state->planet.rooms);
+}
+
+/*===========================================================================*/
+
+az_baddie_kind_t az_advance_baddie_kind(az_baddie_kind_t kind, int delta) {
+  assert(reverse_indices_initialized);
+  const int kind_index = (int)kind - 1;
+  assert(0 <= kind_index && kind_index < AZ_NUM_BADDIE_KINDS);
+  const int old = reverse_baddie_kinds[kind_index];
+  return baddie_kinds[az_modulo(old + delta, AZ_NUM_BADDIE_KINDS)];
+}
+
+int az_advance_wall_data_index(int wall_data_index, int delta) {
+  assert(reverse_indices_initialized);
+  assert(0 <= wall_data_index && wall_data_index < AZ_NUM_WALL_DATAS);
+  const int old = reverse_wall_data_indices[wall_data_index];
+  return wall_data_indices[az_modulo(old + delta, AZ_NUM_WALL_DATAS)];
 }
 
 /*===========================================================================*/

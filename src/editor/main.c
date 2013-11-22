@@ -738,7 +738,7 @@ static void do_change_data(int delta, bool secondary) {
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     const az_baddie_kind_t new_kind =
-      az_modulo((int)baddie->spec.kind - 1 + delta, AZ_NUM_BADDIE_KINDS) + 1;
+      az_advance_baddie_kind(baddie->spec.kind, delta);
     baddie->spec.kind = new_kind;
     state.brush.baddie_kind = new_kind;
     set_room_unsaved(room);
@@ -784,9 +784,9 @@ static void do_change_data(int delta, bool secondary) {
           break;
         case AZ_NODE_FAKE_WALL_FG:
         case AZ_NODE_FAKE_WALL_BG:
-          node->spec.subkind.fake_wall = az_get_wall_data(az_modulo(
-              az_wall_data_index(node->spec.subkind.fake_wall) + delta,
-              AZ_NUM_WALL_DATAS));
+          node->spec.subkind.fake_wall =
+            az_get_wall_data(az_advance_wall_data_index(az_wall_data_index(
+                node->spec.subkind.fake_wall), delta));
           break;
         case AZ_NODE_MARKER:
           node->spec.subkind.marker += delta;
@@ -810,7 +810,7 @@ static void do_change_data(int delta, bool secondary) {
       state.brush.wall_kind = new_kind;
     } else {
       const int old_index = az_wall_data_index(wall->spec.data);
-      const int new_index = az_modulo(old_index + delta, AZ_NUM_WALL_DATAS);
+      const int new_index = az_advance_wall_data_index(old_index, delta);
       wall->spec.data = az_get_wall_data(new_index);
       state.brush.wall_data_index = new_index;
     }
