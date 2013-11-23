@@ -1376,6 +1376,26 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_SWITCHER:
       az_draw_bad_switcher(baddie, frozen, clock);
       break;
+    case AZ_BAD_FAST_BOUNCER:
+      glBegin(GL_TRIANGLE_FAN); {
+        const unsigned int zig = az_clock_zigzag(15, 1, clock);
+        glColor3f(1.0f - 0.75f * frozen, 0.5f + 0.01f * zig + 0.3f * flare,
+                  0.25f + 0.75f * frozen);
+        glVertex2f(0, 0);
+        glColor3f(0.25f + 0.02f * zig - 0.25f * frozen, 0.1f + 0.5f * flare,
+                  0.25f * frozen);
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.25, 0.5, 1);
+        glVertex2f(0, 7);
+        glColor4f(0.25, 0.5, 1, 0);
+        glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
+        glVertex2f(-3, 2); glVertex2f(3, 2);
+      } glEnd();
+      break;
   }
 }
 

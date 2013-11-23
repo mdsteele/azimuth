@@ -1044,6 +1044,12 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL, .properties = AZ_BADF_BOUNCE_PERP,
     .main_body = { .polygon = AZ_INIT_POLYGON(switcher_vertices),
                    .impact_damage = 12.0 }
+  },
+  [AZ_BAD_FAST_BOUNCER] = {
+    .max_health = 6.0, .color = {255, 96, 0, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .bounding_radius = 15.0, .impact_damage = 20.0 }
   }
 };
 

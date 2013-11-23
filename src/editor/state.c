@@ -149,6 +149,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Bouncers:
   AZ_BAD_BOUNCER,
   AZ_BAD_BOUNCER_90,
+  AZ_BAD_FAST_BOUNCER,
   // Spinies:
   AZ_BAD_SPINER,
   AZ_BAD_SPINE_MINE,

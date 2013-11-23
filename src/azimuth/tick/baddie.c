@@ -1632,6 +1632,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SWITCHER:
       az_tick_bad_switcher(state, baddie, bounced);
       break;
+    case AZ_BAD_FAST_BOUNCER:
+      if (az_vnonzero(baddie->velocity)) {
+        baddie->angle = az_vtheta(baddie->velocity);
+      }
+      baddie->velocity = az_vpolar(385.0, baddie->angle);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
