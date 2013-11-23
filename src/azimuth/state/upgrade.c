@@ -20,7 +20,6 @@
 #include "azimuth/state/upgrade.h"
 
 #include <assert.h>
-#include <stddef.h> // for NULL
 
 #include "azimuth/constants.h"
 #include "azimuth/util/misc.h"
@@ -111,6 +110,12 @@ const char *az_upgrade_name(az_upgrade_t upgrade) {
     case AZ_UPG_CAPACITOR_03:
     case AZ_UPG_CAPACITOR_04:
     case AZ_UPG_CAPACITOR_05:
+    case AZ_UPG_CAPACITOR_06:
+    case AZ_UPG_CAPACITOR_07:
+    case AZ_UPG_CAPACITOR_08:
+    case AZ_UPG_CAPACITOR_09:
+    case AZ_UPG_CAPACITOR_10:
+    case AZ_UPG_CAPACITOR_11:
       return "CAPACITOR";
     case AZ_UPG_SHIELD_BATTERY_00:
     case AZ_UPG_SHIELD_BATTERY_01:
@@ -268,7 +273,14 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_CAPACITOR_03:
     case AZ_UPG_CAPACITOR_04:
     case AZ_UPG_CAPACITOR_05:
-      return "Maximum energy increased by 50.";
+    case AZ_UPG_CAPACITOR_06:
+    case AZ_UPG_CAPACITOR_07:
+    case AZ_UPG_CAPACITOR_08:
+    case AZ_UPG_CAPACITOR_09:
+    case AZ_UPG_CAPACITOR_10:
+    case AZ_UPG_CAPACITOR_11:
+      { AZ_STATIC_ASSERT(AZ_ENERGY_PER_CAPACITOR == 25); }
+      return "Maximum energy increased by 25.";
     case AZ_UPG_SHIELD_BATTERY_00:
     case AZ_UPG_SHIELD_BATTERY_01:
     case AZ_UPG_SHIELD_BATTERY_02:
@@ -281,6 +293,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_SHIELD_BATTERY_09:
     case AZ_UPG_SHIELD_BATTERY_10:
     case AZ_UPG_SHIELD_BATTERY_11:
+      { AZ_STATIC_ASSERT(AZ_SHIELDS_PER_BATTERY == 25); }
       return "Maximum shields increased by 25.";
   }
   AZ_ASSERT_UNREACHABLE();

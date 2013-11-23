@@ -115,7 +115,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
     player->bombs += AZ_BOMBS_PER_AMMO_UPGRADE;
     if (first_bombs) az_select_ordnance(player, AZ_ORDN_BOMBS);
   } else if (upgrade >= AZ_UPG_CAPACITOR_00 &&
-             upgrade <= AZ_UPG_CAPACITOR_05) {
+             upgrade <= AZ_UPG_CAPACITOR_11) {
     assert(player->energy <= player->max_energy);
     player->max_energy += AZ_ENERGY_PER_CAPACITOR;
   } else if (upgrade >= AZ_UPG_SHIELD_BATTERY_00 &&

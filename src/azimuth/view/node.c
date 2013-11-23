@@ -872,6 +872,12 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
     case AZ_UPG_CAPACITOR_03:
     case AZ_UPG_CAPACITOR_04:
     case AZ_UPG_CAPACITOR_05:
+    case AZ_UPG_CAPACITOR_06:
+    case AZ_UPG_CAPACITOR_07:
+    case AZ_UPG_CAPACITOR_08:
+    case AZ_UPG_CAPACITOR_09:
+    case AZ_UPG_CAPACITOR_10:
+    case AZ_UPG_CAPACITOR_11:
       draw_tank();
       if (frame % 2) glColor3f(0, 0, 0);
       else glColor3f(0.5, 0, 0.5);

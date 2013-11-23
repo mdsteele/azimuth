@@ -25,6 +25,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
@@ -37,6 +38,7 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
   const int seconds = total_seconds % 60;
   az_draw_printf(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 100,
                  "Clear time: %d:%02d:%02d", hours, minutes, seconds);
+  AZ_STATIC_ASSERT(AZ_NUM_UPGRADES == 98);
   const int percent = 100 * state->num_upgrades / AZ_NUM_UPGRADES;
   az_draw_printf(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 200,
                  "Items collected: %d%%", percent);

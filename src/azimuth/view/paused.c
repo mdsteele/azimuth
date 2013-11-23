@@ -583,7 +583,7 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
           const az_upgrade_t first =
             (i == 0 ? AZ_UPG_SHIELD_BATTERY_00 : AZ_UPG_CAPACITOR_00);
           const az_upgrade_t last =
-            (i == 0 ? AZ_UPG_SHIELD_BATTERY_11 : AZ_UPG_CAPACITOR_05);
+            (i == 0 ? AZ_UPG_SHIELD_BATTERY_11 : AZ_UPG_CAPACITOR_11);
           for (az_upgrade_t upgrade = first; upgrade <= last; ++upgrade) {
             if (!az_has_upgrade(&state->ship->player, upgrade)) {
               az_give_upgrade(&state->ship->player, upgrade);
