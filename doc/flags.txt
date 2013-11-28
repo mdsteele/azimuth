@@ -52,3 +52,5 @@
 51: Killed Kilofuge (Cnidam boss, room 237)
 52: Opened mega bomb door between Cnidam rooms 317 and 321
 53: Killed Oth Orb in Filimun room 113
+54: Opened rocket door between Nandiar rooms 213 and 214
+55: Turned off power in Nandiar room 214
