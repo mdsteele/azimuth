@@ -51,3 +51,4 @@
 50: Cnidam bomb defused (Cnidam room 323)
 51: Killed Kilofuge (Cnidam boss, room 237)
 52: Opened mega bomb door between Cnidam rooms 317 and 321
+53: Killed Oth Orb in Filimun room 113
