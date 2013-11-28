@@ -27,13 +27,11 @@ typedef unsigned long az_clock_t;
 
 // Return a number that cycles from zero up to (modulus - 1), with the number
 // advancing by one for every `slowdown` ticks of the clock.
-unsigned int az_clock_mod(unsigned int modulus, unsigned int slowdown,
-                          az_clock_t clock);
+int az_clock_mod(int modulus, int slowdown, az_clock_t clock);
 
 // Return a number that cycles from zero up to (modulus - 1) and back down
 // again, with the number advancing by one every `slowdown` ticks of the clock.
-unsigned int az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
-                             az_clock_t clock);
+int az_clock_zigzag(int modulus, int slowdown, az_clock_t clock);
 
 /*===========================================================================*/
 

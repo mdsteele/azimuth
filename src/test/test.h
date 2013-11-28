@@ -80,7 +80,6 @@ int final_test_summary(void);
 /*===========================================================================*/
 
 extern bool _current_test_failed;
-extern unsigned int _num_tests_failed;
 
 void _run_test(const char *name, void (*function)(void));
 

@@ -326,7 +326,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_BOUNCER:
       glBegin(GL_TRIANGLE_FAN); {
-        const unsigned int zig = az_clock_zigzag(15, 1, clock);
+        const int zig = az_clock_zigzag(15, 1, clock);
         glColor3f(1 - 0.75 * frozen, 0.25 + 0.01 * zig + 0.5 * flare,
                   0.25 + 0.75 * frozen); // red
         glVertex2f(0, 0);
@@ -1287,7 +1287,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     } break;
     case AZ_BAD_BOUNCER_90:
       glBegin(GL_TRIANGLE_FAN); {
-        const unsigned int zig = az_clock_zigzag(30, 1, clock);
+        const int zig = az_clock_zigzag(30, 1, clock);
         glColor3f(0.25f + 0.75f * flare, 1 - frozen, 1 - flare);
         glVertex2f(0, 0);
         glColor3f(0.5f * flare + 0.01f * zig, 0.25f + 0.25f * flare,
@@ -1378,7 +1378,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_FAST_BOUNCER:
       glBegin(GL_TRIANGLE_FAN); {
-        const unsigned int zig = az_clock_zigzag(15, 1, clock);
+        const int zig = az_clock_zigzag(15, 1, clock);
         glColor3f(1.0f - 0.75f * frozen, 0.5f + 0.01f * zig + 0.3f * flare,
                   0.25f + 0.75f * frozen);
         glVertex2f(0, 0);

@@ -29,15 +29,15 @@
 /*===========================================================================*/
 
 bool _current_test_failed = false;
-unsigned int _num_tests_failed = 0u;
+static int _num_tests_failed = 0;
 
 int final_test_summary(void) {
-  if (_num_tests_failed == 0u) {
+  if (_num_tests_failed == 0) {
     printf("\x1b[32;1mAll tests passed.\x1b[m\n");
     return EXIT_SUCCESS;
   } else {
-    printf("\x1b[31;1mSorry, %u test%s failed.\x1b[m\n",
-           _num_tests_failed, (_num_tests_failed == 1u ? "" : "s"));
+    printf("\x1b[31;1mSorry, %d test%s failed.\x1b[m\n",
+           _num_tests_failed, (_num_tests_failed == 1 ? "" : "s"));
     return EXIT_FAILURE;
   }
 }

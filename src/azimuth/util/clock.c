@@ -19,17 +19,21 @@
 
 #include "azimuth/util/clock.h"
 
+#include <assert.h>
+
 /*===========================================================================*/
 
-unsigned int az_clock_mod(unsigned int modulus, unsigned int slowdown,
-                          az_clock_t clock) {
+int az_clock_mod(int modulus, int slowdown, az_clock_t clock) {
+  assert(modulus >= 1);
+  assert(slowdown >= 1);
   return (clock % (modulus * slowdown)) / slowdown;
 }
 
-unsigned int az_clock_zigzag(unsigned int modulus, unsigned int slowdown,
-                             az_clock_t clock) {
-  const unsigned int m = modulus - 1;
-  const unsigned int d = az_clock_mod(2 * m, slowdown, clock);
+int az_clock_zigzag(int modulus, int slowdown, az_clock_t clock) {
+  assert(modulus >= 2);
+  assert(slowdown >= 1);
+  const int m = modulus - 1;
+  const int d = az_clock_mod(2 * m, slowdown, clock);
   return (d <= m ? d : 2 * m - d);
 }
 
