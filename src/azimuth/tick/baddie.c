@@ -66,6 +66,7 @@ static void apply_walls_to_force_field(
   const az_vector_t pos = baddie->position;
   AZ_ARRAY_LOOP(door, state->doors) {
     if (door->kind == AZ_DOOR_NOTHING) continue;
+    if (door->kind == AZ_DOOR_FORCEFIELD && door->openness >= 1.0) continue;
     const az_vector_t delta = az_vsub(pos, door->position);
     const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
       baddie->data->overall_bounding_radius;
@@ -117,8 +118,18 @@ static az_vector_t force_field_to_position(
 static void drift_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double max_speed, double ship_force, double wall_force) {
-  const az_vector_t drift = force_field_to_ship(
+  az_vector_t drift = force_field_to_ship(
       state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
+  AZ_ARRAY_LOOP(other, state->baddies) {
+    if (other->kind == AZ_BAD_NOTHING) continue;
+    if (other->data->properties & AZ_BADF_INCORPOREAL) continue;
+    if (other == baddie) continue;
+    if (az_circle_touches_baddie(other, baddie->data->overall_bounding_radius,
+                                 baddie->position, NULL)) {
+      const az_vector_t delta = az_vsub(baddie->position, other->position);
+      az_vpluseq(&drift, az_vwithlen(delta, 2.5 * wall_force));
+    }
+  }
   baddie->velocity =
     az_vcaplen(az_vadd(baddie->velocity, az_vmul(drift, time)), max_speed);
 }
