@@ -55,3 +55,4 @@
 54: Opened rocket door between Nandiar rooms 213 and 214
 55: Turned off power in Nandiar room 214
 56: Opened hyper rocket door between Nandiar rooms 211 and 212
+57: Opened rocket door between Colony room 99 and Filimun room 100

@@ -407,7 +407,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
   switch (minor) {
     case AZ_GUN_NONE: break;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
-    case AZ_GUN_FREEZE: energy_cost *= 1.5; break;
+    case AZ_GUN_FREEZE: break;
     case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.7; break;
     case AZ_GUN_HOMING: energy_cost *= 1.5; damage_mult *= 0.5; break;
     case AZ_GUN_PHASE: energy_cost *= 2.0; break;
@@ -758,7 +758,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_FREEZE:
       assert(minor_gun == AZ_GUN_NONE);
-      fire_gun_single(state, 1.5, AZ_PROJ_GUN_FREEZE, AZ_SND_FIRE_GUN_FREEZE);
+      fire_gun_single(state, 1.0, AZ_PROJ_GUN_FREEZE, AZ_SND_FIRE_GUN_FREEZE);
       return;
     case AZ_GUN_TRIPLE:
       switch (minor_gun) {
@@ -767,7 +767,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                          3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE, AZ_TRIPLE_DAMAGE_MULT,
+          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_FREEZE, AZ_TRIPLE_DAMAGE_MULT,
                          3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_FREEZE);
           return;
         default: AZ_ASSERT_UNREACHABLE();
@@ -779,7 +779,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                           AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 2.25, AZ_PROJ_GUN_FREEZE_HOMING,
+          fire_gun_single(state, 1.5, AZ_PROJ_GUN_FREEZE_HOMING,
                           AZ_SND_FIRE_GUN_FREEZE);
           return;
         case AZ_GUN_TRIPLE:
@@ -795,7 +795,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                          15, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_multi(state, 3.0, AZ_PROJ_GUN_FREEZE_PHASE, 1.0,
+          fire_gun_multi(state, 2.5, AZ_PROJ_GUN_FREEZE_PHASE, 1.0,
                          15, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_FREEZE);
           return;
         case AZ_GUN_TRIPLE:
@@ -815,7 +815,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                           AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 3.75, AZ_PROJ_GUN_FREEZE_BURST,
+          fire_gun_single(state, 3.0, AZ_PROJ_GUN_FREEZE_BURST,
                           AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_TRIPLE:
@@ -839,7 +839,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
                           AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_FREEZE:
-          fire_gun_single(state, 4.5, AZ_PROJ_GUN_FREEZE_PIERCE,
+          fire_gun_single(state, 4.0, AZ_PROJ_GUN_FREEZE_PIERCE,
                           AZ_SND_FIRE_GUN_PIERCE);
           return;
         case AZ_GUN_TRIPLE:
