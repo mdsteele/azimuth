@@ -63,8 +63,8 @@ static const int wall_data_indices[] = {
   // Concrete:
   26, 27, 54, 55, 56,
   // Grass/dirt:
-  62, 42, 43, 44, // with grass
   61, 45, 59, 60, // dirt only
+  62, 42, 43, 44, // with grass
   // Tree parts:
   67, 68, 69, 70, 71, 72,
   // Seashells:
