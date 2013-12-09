@@ -145,6 +145,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Traps:
   AZ_BAD_HEAT_RAY,
   AZ_BAD_DEATH_RAY,
+  AZ_BAD_PROXY_MINE,
   AZ_BAD_NUCLEAR_MINE,
   // Bouncers:
   AZ_BAD_BOUNCER,

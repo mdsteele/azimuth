@@ -19,14 +19,14 @@
   [Initializing systems].  Terminal online."
 !T5"
   \"Finally, an uplink!  Computer, what happened
-  here?  Where is everyone?\""
+  here?  Where is everyone?  And what the hell was
+  that thing?\""
 !T6"
   Query: Unknown.
   
-  Status: Automated emergency disaster-control
+  Status: Automated disaster-control security
   systems are active, although many of them have
-  been badly damaged.  Security IFF scanners
-  appear to be malfunctioning.
+  been badly damaged and may be malfunctioning.
   
   No colonists are currently in the outer
   habitation areas."

@@ -1649,6 +1649,26 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       baddie->velocity = az_vpolar(385.0, baddie->angle);
       break;
+    case AZ_BAD_PROXY_MINE:
+      baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(120) * time);
+      // State 0: Wait for ship.
+      if (baddie->state == 0) {
+        if (az_ship_in_range(state, baddie, 80) &&
+            az_can_see_ship(state, baddie)) {
+          baddie->state = 1;
+          baddie->cooldown = 0.3;
+          az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
+        }
+      }
+      // State 1: Explode when cooldown reaches zero.
+      else {
+        if (baddie->cooldown <= 0.0) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_MEDIUM_EXPLOSION,
+                                    0.0, 0.0, 0.0);
+          az_kill_baddie(state, baddie);
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

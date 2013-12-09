@@ -370,6 +370,13 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 2.0,
     .impact_damage = 3.0
   },
+  [AZ_PROJ_MEDIUM_EXPLOSION] = {
+    .splash_damage = 25.0,
+    .splash_radius = 100.0,
+    .impact_shake = 3.0,
+    .damage_kind = AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_NUCLEAR_EXPLOSION] = {
     .splash_damage = 75.0,
     .splash_radius = 200.0,
