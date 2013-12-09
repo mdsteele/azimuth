@@ -1231,10 +1231,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
         node->kind = AZ_NODE_NOTHING;
         state->mode = AZ_MODE_UPGRADE;
         state->upgrade_mode = (az_upgrade_mode_data_t){
-          .step = AZ_UGS_OPEN, .progress = 0.0, .upgrade = upgrade
+          .step = AZ_UGS_OPEN, .progress = 0.0,
+          .upgrade = upgrade, .script = script
         };
         az_give_upgrade(player, upgrade);
-        az_run_script(state, script);
         return;
       }
     }
