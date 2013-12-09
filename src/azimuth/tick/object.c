@@ -344,13 +344,16 @@ bool az_try_damage_baddie(
       baddie->frozen = 1.0;
     }
   }
-  // Otherwise, the baddie is dead.  Have it killed; after this point, we can
-  // no longer use the baddie object.
+  // Otherwise, the baddie is dead, so have it killed.
   else {
     assert(damage_was_dealt);
     // If this was the boss, go into boss-death mode.
     if (baddie->uid == state->boss_uid) {
       baddie->health = 0.000001;
+      // The boss can only die in normal mode (not in, say, game over mode).
+      if (!(state->mode == AZ_MODE_NORMAL ||
+            (state->mode == AZ_MODE_DOORWAY &&
+             state->doorway_mode.step == AZ_DWS_FADE_IN))) return true;
       state->mode = AZ_MODE_BOSS_DEATH;
       state->boss_death_mode = (az_boss_death_mode_data_t){
         .step = AZ_BDS_SHAKE, .progress = 0.0, .boss = *baddie

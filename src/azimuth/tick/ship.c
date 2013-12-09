@@ -75,6 +75,12 @@ static bool is_normal_mode(const az_space_state_t *state) {
            state->doorway_mode.step == AZ_DWS_FADE_IN));
 }
 
+static bool can_change_mode(const az_space_state_t *state) {
+  return (state->mode == AZ_MODE_NORMAL ||
+          (state->mode == AZ_MODE_DOORWAY &&
+           state->doorway_mode.step == AZ_DWS_FADE_IN));
+}
+
 static bool try_use_energy(az_ship_t *ship, double energy, bool exhaust) {
   if (ship->player.energy < energy) {
     if (exhaust) ship->player.energy = 0.0;
@@ -220,19 +226,22 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
       break;
     case AZ_IMP_DOOR_INSIDE:
       assert(impact->target.door->kind != AZ_DOOR_NOTHING);
-      ship->tractor_beam.active = false;
-      state->mode = AZ_MODE_DOORWAY;
-      state->doorway_mode = (az_doorway_mode_data_t){
-        .step = AZ_DWS_FADE_OUT, .progress = 0.0,
-        .destination = impact->target.door->destination,
-        .entrance = {
-          .kind = impact->target.door->kind,
-          .uid = impact->target.door->uid,
-          .position = impact->target.door->position,
-          .angle = impact->target.door->angle
-        }
-      };
-      return;
+      assert(impact->target.door->kind != AZ_DOOR_FORCEFIELD);
+      if (can_change_mode(state)) {
+        ship->tractor_beam.active = false;
+        state->mode = AZ_MODE_DOORWAY;
+        state->doorway_mode = (az_doorway_mode_data_t){
+          .step = AZ_DWS_FADE_OUT, .progress = 0.0,
+          .destination = impact->target.door->destination,
+          .entrance = {
+            .kind = impact->target.door->kind,
+            .uid = impact->target.door->uid,
+            .position = impact->target.door->position,
+            .angle = impact->target.door->angle
+          }
+        };
+        return;
+      } // else fallthrough
     case AZ_IMP_DOOR_OUTSIDE:
       elasticity = AZ_DOOR_ELASTICITY;
       break;
@@ -1176,7 +1185,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (!is_normal_mode(state)) return;
 
   // If we press the util key while near a console, use it.
-  if (controls->util_pressed) {
+  assert(az_ship_is_present(ship));
+  if (controls->util_pressed && can_change_mode(state)) {
     const az_node_t *console = NULL;
     double best_dist = AZ_CONSOLE_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {
@@ -1211,20 +1221,22 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Check if we hit an upgrade.
   assert(is_normal_mode(state));
   assert(az_ship_is_present(ship));
-  AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind != AZ_NODE_UPGRADE) continue;
-    if (az_vwithin(ship->position, node->position,
-                   AZ_UPGRADE_COLLECTION_RADIUS)) {
-      const az_upgrade_t upgrade = node->subkind.upgrade;
-      const az_script_t *script = node->on_use;
-      node->kind = AZ_NODE_NOTHING;
-      state->mode = AZ_MODE_UPGRADE;
-      state->upgrade_mode = (az_upgrade_mode_data_t){
-        .step = AZ_UGS_OPEN, .progress = 0.0, .upgrade = upgrade
-      };
-      az_give_upgrade(player, upgrade);
-      az_run_script(state, script);
-      return;
+  if (can_change_mode(state)) {
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind != AZ_NODE_UPGRADE) continue;
+      if (az_vwithin(ship->position, node->position,
+                     AZ_UPGRADE_COLLECTION_RADIUS)) {
+        const az_upgrade_t upgrade = node->subkind.upgrade;
+        const az_script_t *script = node->on_use;
+        node->kind = AZ_NODE_NOTHING;
+        state->mode = AZ_MODE_UPGRADE;
+        state->upgrade_mode = (az_upgrade_mode_data_t){
+          .step = AZ_UGS_OPEN, .progress = 0.0, .upgrade = upgrade
+        };
+        az_give_upgrade(player, upgrade);
+        az_run_script(state, script);
+        return;
+      }
     }
   }
 

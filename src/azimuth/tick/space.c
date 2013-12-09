@@ -180,16 +180,21 @@ static void tick_console_mode(az_space_state_t *state, double time) {
           break;
       }
       if (mode_data->progress >= 1.0) {
+        // We need to be in normal mode to run the script.
         state->mode = AZ_MODE_NORMAL;
         az_run_script(state, node->on_use);
-        if (node->subkind.console == AZ_CONS_SAVE) {
-          state->mode = AZ_MODE_CONSOLE;
-          mode_data->step = AZ_CSS_SAVE;
-          mode_data->progress = 0.0;
-        } else if (node->subkind.console == AZ_CONS_REFILL) {
-          if (player->max_rockets == 0 && player->max_bombs == 0) {
-            az_set_message(state, refilled_shields_only_paragraph);
-          } else az_set_message(state, refilled_shields_and_ammo_paragraph);
+        // Don't perform the console action if the script put us into some
+        // other mode (e.g. game over mode).
+        if (state->mode == AZ_MODE_NORMAL) {
+          if (node->subkind.console == AZ_CONS_SAVE) {
+            state->mode = AZ_MODE_CONSOLE;
+            mode_data->step = AZ_CSS_SAVE;
+            mode_data->progress = 0.0;
+          } else if (node->subkind.console == AZ_CONS_REFILL) {
+            if (player->max_rockets == 0 && player->max_bombs == 0) {
+              az_set_message(state, refilled_shields_only_paragraph);
+            } else az_set_message(state, refilled_shields_and_ammo_paragraph);
+          }
         }
       }
       break;
