@@ -41,7 +41,8 @@ void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
       [AZ_PREFS_LEFT_KEY_INDEX] = AZ_KEY_LEFT_ARROW,
       [AZ_PREFS_FIRE_KEY_INDEX] = AZ_KEY_C,
       [AZ_PREFS_ORDN_KEY_INDEX] = AZ_KEY_X,
-      [AZ_PREFS_UTIL_KEY_INDEX] = AZ_KEY_Z
+      [AZ_PREFS_UTIL_KEY_INDEX] = AZ_KEY_Z,
+      [AZ_PREFS_PAUSE_KEY_INDEX] = AZ_KEY_ESCAPE
     }
   };
 }
@@ -59,12 +60,12 @@ bool az_load_prefs_from_file(const char *filepath,
   int speedrun_timer, fullscreen, keys[AZ_PREFS_NUM_KEYS];
   const bool ok = (fscanf(
       file, "@F mv=%lf sv=%lf st=%d fs=%d\n"
-      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
+      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
       &music_volume, &sound_volume, &speedrun_timer, &fullscreen,
       &keys[AZ_PREFS_UP_KEY_INDEX], &keys[AZ_PREFS_DOWN_KEY_INDEX],
       &keys[AZ_PREFS_RIGHT_KEY_INDEX], &keys[AZ_PREFS_LEFT_KEY_INDEX],
       &keys[AZ_PREFS_FIRE_KEY_INDEX], &keys[AZ_PREFS_ORDN_KEY_INDEX],
-      &keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 11);
+      &keys[AZ_PREFS_UTIL_KEY_INDEX], &keys[AZ_PREFS_PAUSE_KEY_INDEX]) >= 12);
   fclose(file);
   if (!ok) return false;
 
@@ -95,7 +96,7 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
   if (file == NULL) return false;
   const bool ok = (fprintf(
       file, "@F mv=%.03f sv=%.03f st=%d fs=%d\n"
-      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d\n",
+      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
       (prefs->speedrun_timer ? 1 : 0), (prefs->fullscreen_on_startup ? 1 : 0),
       (int)prefs->keys[AZ_PREFS_UP_KEY_INDEX],
@@ -104,7 +105,8 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
       (int)prefs->keys[AZ_PREFS_LEFT_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_FIRE_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_ORDN_KEY_INDEX],
-      (int)prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) >= 0);
+      (int)prefs->keys[AZ_PREFS_UTIL_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) >= 0);
   fclose(file);
   return ok;
 }
@@ -112,7 +114,6 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
 bool az_is_valid_prefs_key(az_key_id_t key_id) {
   switch (key_id) {
     case AZ_KEY_UNKNOWN:
-    case AZ_KEY_ESCAPE:
     case AZ_KEY_RETURN:
     case AZ_KEY_1:
     case AZ_KEY_2:

@@ -54,7 +54,6 @@ az_paused_action_t az_paused_event_loop(
         case AZ_EVENT_KEY_DOWN:
           switch (event.key.id) {
             case AZ_KEY_RETURN:
-            case AZ_KEY_ESCAPE:
               return AZ_PA_RESUME;
             case AZ_KEY_1: az_select_gun(player, AZ_GUN_CHARGE); break;
             case AZ_KEY_2: az_select_gun(player, AZ_GUN_FREEZE); break;
@@ -67,7 +66,11 @@ az_paused_action_t az_paused_event_loop(
             case AZ_KEY_9: az_select_ordnance(player, AZ_ORDN_ROCKETS); break;
             case AZ_KEY_0: az_select_ordnance(player, AZ_ORDN_BOMBS);   break;
             default:
-              if (event.key.id == state.prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
+              if (event.key.id ==
+                  state.prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
+                return AZ_PA_RESUME;
+              } else if (event.key.id ==
+                         state.prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
                 state.show_upgrades_drawer = true;
               } else if (event.key.id ==
                          state.prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {

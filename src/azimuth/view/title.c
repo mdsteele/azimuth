@@ -286,6 +286,7 @@ static void draw_prefs_box(const az_title_state_t *state) {
   draw_key_picker(state, AZ_PREFS_FIRE_KEY_INDEX, "Fire");
   draw_key_picker(state, AZ_PREFS_ORDN_KEY_INDEX, "Ordnance");
   draw_key_picker(state, AZ_PREFS_UTIL_KEY_INDEX, "Utility");
+  draw_key_picker(state, AZ_PREFS_PAUSE_KEY_INDEX, "Pause");
 }
 
 /*===========================================================================*/

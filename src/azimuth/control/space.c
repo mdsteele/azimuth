@@ -191,15 +191,6 @@ az_space_action_t az_space_event_loop(
           } else if (state.mode == AZ_MODE_GAME_OVER) break;
           // Handle the keystroke:
           switch (event.key.id) {
-            case AZ_KEY_RETURN:
-              if (state.mode == AZ_MODE_NORMAL &&
-                  state.cutscene.scene == AZ_SCENE_NOTHING) {
-                state.mode = AZ_MODE_PAUSING;
-                state.pausing_mode = (az_pausing_mode_data_t){
-                  .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0
-                };
-              }
-              break;
             case AZ_KEY_1:
               az_select_gun(&state.ship.player, AZ_GUN_CHARGE);
               break;
@@ -231,7 +222,15 @@ az_space_action_t az_space_event_loop(
               az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
               break;
             default:
-              if (event.key.id == prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
+              if (event.key.id == prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
+                if (state.mode == AZ_MODE_NORMAL &&
+                    state.cutscene.scene == AZ_SCENE_NOTHING) {
+                  state.mode = AZ_MODE_PAUSING;
+                  state.pausing_mode = (az_pausing_mode_data_t){
+                    .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0
+                  };
+                }
+              } else if (event.key.id == prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
                 state.ship.controls.up_pressed = true;
               } else if (event.key.id ==
                          prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {

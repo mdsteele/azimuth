@@ -34,7 +34,8 @@
 #define AZ_PREFS_FIRE_KEY_INDEX 4
 #define AZ_PREFS_ORDN_KEY_INDEX 5
 #define AZ_PREFS_UTIL_KEY_INDEX 6
-#define AZ_PREFS_NUM_KEYS 7
+#define AZ_PREFS_PAUSE_KEY_INDEX 7
+#define AZ_PREFS_NUM_KEYS 8
 
 typedef struct {
   float music_volume, sound_volume;
