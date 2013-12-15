@@ -275,7 +275,8 @@ static void draw_baddie(const az_editor_state_t *state,
                  editor_baddie->spec.position, editor_baddie->spec.angle);
   const bool is_bg = (real_baddie.data->properties & AZ_BADF_DRAW_BG);
   if (is_bg != draw_bg) return;
-  if (real_baddie.kind == AZ_BAD_NIGHTBUG) real_baddie.param = 1.0;
+  if (real_baddie.kind == AZ_BAD_NIGHTBUG ||
+      real_baddie.kind == AZ_BAD_NIGHTSHADE) real_baddie.param = 1.0;
   az_draw_baddie(&real_baddie, state->clock);
   draw_script_and_uuid_slot(
       state, real_baddie.position, editor_baddie->spec.on_kill,

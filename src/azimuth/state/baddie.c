@@ -536,6 +536,22 @@ static const az_vector_t switcher_vertices[] = {
   {-12.5, -2.5}, {-10, -5.5}, {4.5, -9.5}, {8.5, -8.5}, {12.5, -4}
 };
 
+static const az_vector_t nightshade_body_vertices[] = {
+  {18.7, 0}, {9.9, 11}, {-12.1, 5.5}, {-12.1, -5.5}, {9.9, -11}
+};
+static const az_vector_t nightshade_left_mandible_vertices[] = {
+  {0, 0}, {26, -1}, {20, 4}, {10, 5}, {0, 4}, {-2, 2}
+};
+static const az_vector_t nightshade_right_mandible_vertices[] = {
+  {26, 1}, {0, 0}, {-2, -2}, {0, -4}, {10, -5}, {20, -4}
+};
+static az_component_data_t nightshade_components[] = {
+  { .init_position = {15, 2}, .impact_damage = 25.0,
+    .polygon = AZ_INIT_POLYGON(nightshade_left_mandible_vertices) },
+  { .init_position = {15, -2}, .impact_damage = 25.0,
+    .polygon = AZ_INIT_POLYGON(nightshade_right_mandible_vertices) }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -1065,6 +1081,14 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 6.0, .potential_pickups = AZ_PUPF_ALL,
     .color = {128, 128, 128, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(proxy_mine_vertices) }
+  },
+  [AZ_BAD_NIGHTSHADE] = {
+    .max_health = 12.0, .overall_bounding_radius = 50.0,
+    .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
+    .color = {192, 96, 0, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .main_body = { .polygon = AZ_INIT_POLYGON(nightshade_body_vertices),
+                   .impact_damage = 15.0 },
+    DECL_COMPONENTS(nightshade_components)
   }
 };
 

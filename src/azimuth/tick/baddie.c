@@ -1669,6 +1669,36 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_NIGHTSHADE: {
+      fly_towards_ship(state, baddie, time,
+                       4.0, 100.0, 100.0, 80.0, 30.0, 100.0);
+      double mandibles_turn_rate = AZ_DEG2RAD(30);
+      double goal_mandibles_angle = AZ_DEG2RAD(80);
+      if (baddie->state == 0) {
+        baddie->param = fmax(0.0, baddie->param - time / 2.5);
+        if (baddie->cooldown <= 1.0 && az_ship_in_range(state, baddie, 50) &&
+            az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6)) &&
+            az_can_see_ship(state, baddie)) {
+          baddie->state = 1;
+        }
+      } else if (baddie->state == 1) {
+        baddie->param = fmin(1.0, baddie->param + time / 0.75);
+        if (baddie->param > 0.5) {
+          goal_mandibles_angle = AZ_DEG2RAD(0);
+          mandibles_turn_rate = AZ_DEG2RAD(360);
+        }
+        if (baddie->cooldown <= 0.0 && baddie->param == 1.0) {
+          baddie->cooldown = 5.0;
+          baddie->state = 0;
+        }
+      } else baddie->state = 0;
+      for (int i = 0; i < 2; ++i) {
+        baddie->components[i].angle = az_angle_towards(
+            baddie->components[i].angle, time * mandibles_turn_rate,
+            goal_mandibles_angle);
+        goal_mandibles_angle = -goal_mandibles_angle;
+      }
+    } break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

@@ -162,6 +162,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_CLAM,
   AZ_BAD_FIREBALL_MINE,
   AZ_BAD_NIGHTBUG,
+  AZ_BAD_NIGHTSHADE,
   AZ_BAD_ATOM,
   // Oth:
   AZ_BAD_OTH_RAZOR,
