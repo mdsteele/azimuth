@@ -95,7 +95,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
     player->rockets = player->max_rockets;
     az_select_ordnance(player, AZ_ORDN_ROCKETS);
-  } else if (upgrade == AZ_UPG_MEGA_BOMBS) {
+  } else if (upgrade == AZ_UPG_MEGA_BOMBS || upgrade == AZ_UPG_ORION_BOOSTER) {
     player->bombs = player->max_bombs;
     az_select_ordnance(player, AZ_ORDN_BOMBS);
   } else if (upgrade >= AZ_UPG_ROCKET_AMMO_00 &&
