@@ -26,23 +26,26 @@
 
 /*===========================================================================*/
 
-#define NULL_POLYGON ((az_polygon_t){ .num_vertices = 0 })
+static const az_polygon_t null_polygon = { .num_vertices = 0 };
 
 static const az_vector_t triangle_vertices[3] = {{-3, -3}, {2, 0}, {1, 4}};
+static const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
+
+static const az_vector_t square_vertices[5] =
+  {{1, 1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+static const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
 static const az_vector_t concave_hexagon_vertices[6] = {
   {2, -3}, {2, 2}, {-2, 3}, {-2, -3}, {0, -1}, {1, -1}
 };
-
-static const az_vector_t square_vertices[5] =
-  {{1, 1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}};
+static const az_polygon_t concave_hexagon =
+  AZ_INIT_POLYGON(concave_hexagon_vertices);
 
 static const az_vector_t nix = {99999, 99999};
 
 /*===========================================================================*/
 
 void test_polygon_contains(void) {
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   // Simple case: a convex polygon.
   EXPECT_TRUE(az_polygon_contains(triangle, (az_vector_t){0, 1}));
   EXPECT_TRUE(az_polygon_contains(triangle, AZ_VZERO));
@@ -52,44 +55,22 @@ void test_polygon_contains(void) {
   EXPECT_FALSE(az_polygon_contains(triangle, (az_vector_t){-5, 10}));
 
   // Trickier: a concave polygon.
-  const az_polygon_t hexagon = AZ_INIT_POLYGON(concave_hexagon_vertices);
-  EXPECT_TRUE(az_polygon_contains(hexagon, AZ_VZERO));
-  EXPECT_TRUE(az_polygon_contains(hexagon, (az_vector_t){-1, 2.5}));
-  EXPECT_TRUE(az_polygon_contains(hexagon, (az_vector_t){-1.5, -2}));
-  EXPECT_FALSE(az_polygon_contains(hexagon, (az_vector_t){0, -2}));
-  EXPECT_FALSE(az_polygon_contains(hexagon, (az_vector_t){-3, -2}));
-  EXPECT_TRUE(az_polygon_contains(hexagon, (az_vector_t){-1, -1}));
-  EXPECT_FALSE(az_polygon_contains(hexagon, (az_vector_t){-5, -1}));
+  EXPECT_TRUE(az_polygon_contains(concave_hexagon, AZ_VZERO));
+  EXPECT_TRUE(az_polygon_contains(concave_hexagon, (az_vector_t){-1, 2.5}));
+  EXPECT_TRUE(az_polygon_contains(concave_hexagon, (az_vector_t){-1.5, -2}));
+  EXPECT_FALSE(az_polygon_contains(concave_hexagon, (az_vector_t){0, -2}));
+  EXPECT_FALSE(az_polygon_contains(concave_hexagon, (az_vector_t){-3, -2}));
+  EXPECT_TRUE(az_polygon_contains(concave_hexagon, (az_vector_t){-1, -1}));
+  EXPECT_FALSE(az_polygon_contains(concave_hexagon, (az_vector_t){-5, -1}));
 
   // Let do some tests with colinear edges:
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
   EXPECT_TRUE(az_polygon_contains(square, AZ_VZERO));
   EXPECT_TRUE(az_polygon_contains(square, (az_vector_t){0.5, 0.5}));
   EXPECT_FALSE(az_polygon_contains(square, (az_vector_t){-5, 1}));
   EXPECT_FALSE(az_polygon_contains(square, (az_vector_t){-5, -1}));
 
   // The null polygon shouldn't contain any point.
-  EXPECT_FALSE(az_polygon_contains(NULL_POLYGON, AZ_VZERO));
-}
-
-void test_convex_polygon_contains(void) {
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
-  EXPECT_TRUE(az_convex_polygon_contains(triangle, (az_vector_t){0, 1}));
-  EXPECT_TRUE(az_convex_polygon_contains(triangle, AZ_VZERO));
-  EXPECT_TRUE(az_convex_polygon_contains(triangle, (az_vector_t){1.5, 0.5}));
-  EXPECT_FALSE(az_convex_polygon_contains(triangle, (az_vector_t){-2, 3}));
-  EXPECT_FALSE(az_convex_polygon_contains(triangle, (az_vector_t){5, 1}));
-  EXPECT_FALSE(az_convex_polygon_contains(triangle, (az_vector_t){-5, 10}));
-
-  // Let do some tests with colinear edges:
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
-  EXPECT_TRUE(az_convex_polygon_contains(square, AZ_VZERO));
-  EXPECT_TRUE(az_convex_polygon_contains(square, (az_vector_t){0.5, 0.5}));
-  EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, 1}));
-  EXPECT_FALSE(az_convex_polygon_contains(square, (az_vector_t){-5, -1}));
-
-  // The null polygon shouldn't contain any point.
-  EXPECT_FALSE(az_convex_polygon_contains(NULL_POLYGON, AZ_VZERO));
+  EXPECT_FALSE(az_polygon_contains(null_polygon, AZ_VZERO));
 }
 
 /*===========================================================================*/
@@ -113,7 +94,6 @@ void test_circle_touches_line_segment(void) {
 }
 
 void test_circle_touches_polygon(void) {
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
   // Case where circle touches vertex:
   EXPECT_TRUE(az_circle_touches_polygon(
       triangle, 0.15, (az_vector_t){2.1, 0}));
@@ -129,7 +109,6 @@ void test_circle_touches_polygon(void) {
 }
 
 void test_circle_touches_polygon_trans(void) {
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
   EXPECT_TRUE(az_circle_touches_polygon_trans(
       square, (az_vector_t){-10, 1}, AZ_DEG2RAD(45),
       0.1, (az_vector_t){-10, 2.5}));
@@ -179,6 +158,14 @@ void test_ray_hits_circle(void) {
       &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){2, 0}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Ray starts inside circle:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_circle(
+      2.0, (az_vector_t){3, 3}, (az_vector_t){2, 2}, (az_vector_t){1, 0},
+      &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
 }
 
 void test_ray_hits_line_segment(void) {
@@ -216,7 +203,6 @@ void test_ray_hits_line_segment(void) {
 
 void test_ray_hits_polygon(void) {
   az_vector_t intersect = nix, normal = nix;
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
   // Check az_ray_hits_polygon works with NULLs for point_out and normal_out:
   EXPECT_TRUE(az_ray_hits_polygon(
@@ -266,7 +252,7 @@ void test_ray_hits_polygon(void) {
   // We should never hit the null polygon.
   intersect = normal = nix;
   EXPECT_FALSE(az_ray_hits_polygon(
-      NULL_POLYGON, (az_vector_t){-1, -1}, (az_vector_t){1, 1},
+      null_polygon, (az_vector_t){-1, -1}, (az_vector_t){1, 1},
       &intersect, &normal));
   EXPECT_VAPPROX(nix, intersect);
   EXPECT_VAPPROX(nix, normal);
@@ -274,7 +260,6 @@ void test_ray_hits_polygon(void) {
 
 void test_ray_hits_polygon_trans(void) {
   az_vector_t intersect = nix, normal = nix;
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
   intersect = normal = nix;
   EXPECT_TRUE(az_ray_hits_polygon_trans(
@@ -358,6 +343,22 @@ void test_circle_hits_circle(void) {
       (az_vector_t){10, 0}, &pos, &impact));
   EXPECT_VAPPROX(((az_vector_t){0, 1}), pos);
   EXPECT_VAPPROX(((az_vector_t){0, 1}), impact);
+
+  // Check case where moving circle starts inside stationary circle:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_circle(
+      5.0, (az_vector_t){1, 1}, 1.0, (az_vector_t){3, 1},
+      (az_vector_t){-10, 0}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){6, 1}), impact);
+
+  // Check case where stationary circle starts inside moving circle:
+  pos = impact = nix;
+  EXPECT_TRUE(az_circle_hits_circle(
+      1.0, (az_vector_t){1, 1}, 5.0, (az_vector_t){3, 1},
+      (az_vector_t){-10, 0}, &pos, &impact));
+  EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
+  EXPECT_VAPPROX(((az_vector_t){2, 1}), impact);
 }
 
 void test_circle_hits_line(void) {
@@ -446,8 +447,6 @@ void test_circle_hits_line_segment(void) {
 
 void test_circle_hits_polygon(void) {
   az_vector_t pos = nix, impact = nix;
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_circle_hits_polygon works with NULLs for pos_out and impact_out:
   EXPECT_TRUE(az_circle_hits_polygon(
@@ -504,7 +503,7 @@ void test_circle_hits_polygon(void) {
   // We should never hit the null polygon.
   pos = impact = nix;
   EXPECT_FALSE(az_circle_hits_polygon(
-      NULL_POLYGON, 0.5, (az_vector_t){-1, -1}, (az_vector_t){1, 1},
+      null_polygon, 0.5, (az_vector_t){-1, -1}, (az_vector_t){1, 1},
       &pos, &impact));
   EXPECT_VAPPROX(nix, pos);
   EXPECT_VAPPROX(nix, impact);
@@ -512,7 +511,6 @@ void test_circle_hits_polygon(void) {
 
 void test_circle_hits_polygon_trans(void) {
   az_vector_t pos = nix, impact = nix;
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
 
   EXPECT_TRUE(az_circle_hits_polygon_trans(
       triangle, (az_vector_t){3, 0.059714999709336247}, 1.3258176636680323,
@@ -655,7 +653,6 @@ void test_arc_ray_hits_line_segment(void) {
 void test_arc_ray_hits_polygon(void) {
   double angle = 99999;
   az_vector_t intersect = nix, normal = nix;
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_arc_ray_hits_polygon works with NULLs:
   EXPECT_TRUE(az_arc_ray_hits_polygon(
@@ -693,7 +690,6 @@ void test_arc_ray_hits_polygon(void) {
 void test_arc_ray_hits_polygon_trans(void) {
   double angle = 99999;
   az_vector_t intersect = nix, normal = nix;
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_arc_ray_hits_polygon_trans works with NULLs:
   EXPECT_TRUE(az_arc_ray_hits_polygon_trans(
@@ -831,7 +827,6 @@ void test_arc_circle_hits_line_segment(void) {
 void test_arc_circle_hits_polygon(void) {
   double angle = 99999;
   az_vector_t pos = nix, impact = nix;
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_arc_circle_hits_polygon works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_polygon(
@@ -887,7 +882,6 @@ void test_arc_circle_hits_polygon(void) {
 void test_arc_circle_hits_polygon_trans(void) {
   double angle = 99999;
   az_vector_t pos = nix, impact = nix;
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
 
   // Check az_arc_circle_hits_polygon_trans works with NULLs:
   EXPECT_TRUE(az_arc_circle_hits_polygon_trans(
@@ -906,67 +900,6 @@ void test_arc_circle_hits_polygon_trans(void) {
   EXPECT_APPROX(AZ_DEG2RAD(90), angle);
   EXPECT_VAPPROX(((az_vector_t){-1 + sqrt(2), 1}), pos);
   EXPECT_VAPPROX(((az_vector_t){-2 + sqrt(2), 1}), impact);
-}
-
-/*===========================================================================*/
-
-void test_polygons_collide(void) {
-  az_vector_t pos = nix, impact = nix, normal = nix;
-  const az_polygon_t triangle = AZ_INIT_POLYGON(triangle_vertices);
-  const az_polygon_t square = AZ_INIT_POLYGON(square_vertices);
-
-  // Check az_polygons_collide works with NULLs for out args:
-  pos = impact = normal = nix;
-  EXPECT_TRUE(az_polygons_collide(
-      square, AZ_VZERO, 0, triangle, (az_vector_t){0, -5}, AZ_HALF_PI,
-      (az_vector_t){0, 10}, NULL, NULL, NULL));
-
-  // Check case where corner of moving polygon hits edge of stationary polygon:
-  pos = impact = normal = nix;
-  EXPECT_TRUE(az_polygons_collide(
-      square, AZ_VZERO, 0, triangle, (az_vector_t){0, -5}, AZ_HALF_PI,
-      (az_vector_t){0, 10}, &pos, &impact, &normal));
-  EXPECT_VAPPROX(((az_vector_t){0, -3}), pos);
-  EXPECT_VAPPROX(((az_vector_t){0, -1}), impact);
-  EXPECT_VAPPROX(((az_vector_t){0, -1}), az_vunit(normal));
-
-  // Check case where corner of stationary polygon hits edge of moving polygon:
-  pos = impact = normal = nix;
-  EXPECT_TRUE(az_polygons_collide(
-      triangle, AZ_VZERO, 0, square, (az_vector_t){-5, -3}, AZ_PI,
-      (az_vector_t){10, 0}, &pos, &impact, &normal));
-  EXPECT_VAPPROX(((az_vector_t){-4, -3}), pos);
-  EXPECT_VAPPROX(((az_vector_t){-3, -3}), impact);
-  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
-
-  // Check another case where corner of stationary polygon hits edge of moving
-  // polygon:
-  pos = impact = normal = nix;
-  EXPECT_TRUE(az_polygons_collide(
-      triangle, AZ_VZERO, 0, square, (az_vector_t){-6, -6}, AZ_PI/4,
-      (az_vector_t){10, 10}, &pos, &impact, &normal));
-  EXPECT_VAPPROX(((az_vector_t){-3.707106781186548, -3.707106781186548}), pos);
-  EXPECT_VAPPROX(((az_vector_t){-3, -3}), impact);
-  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
-
-  // Check case where polygons don't collide:
-  pos = impact = normal = nix;
-  EXPECT_FALSE(az_polygons_collide(
-      square, AZ_VZERO, 0, triangle, (az_vector_t){5, -3}, 1.3258176636680323,
-      (az_vector_t){-10, 0}, &pos, &impact, &normal));
-  EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
-  EXPECT_VAPPROX(nix, normal);
-
-  // Check case where stationary polygon is not at origin:
-  pos = impact = normal = nix;
-  EXPECT_TRUE(az_polygons_collide(
-      triangle, (az_vector_t){5, -2}, -AZ_HALF_PI,
-      square, (az_vector_t){-1, 4}, AZ_PI / 4,
-      (az_vector_t){10, -10}, &pos, &impact, &normal));
-  EXPECT_VAPPROX(((az_vector_t){1.2928932188134525, 1.7071067811865475}), pos);
-  EXPECT_VAPPROX(((az_vector_t){2, 1}), impact);
-  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
 }
 
 /*===========================================================================*/

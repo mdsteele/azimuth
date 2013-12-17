@@ -77,7 +77,7 @@ void az_tick_bad_beam_turret(
       az_vadd(baddie->position, az_vpolar(30, beam_theta));
     az_impact_t impact;
     az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
-                  AZ_IMPF_NOTHING, baddie->uid, &impact);
+                  AZ_IMPF_NONE, baddie->uid, &impact);
     if (impact.type == AZ_IMP_BADDIE) {
       az_try_damage_baddie(state, impact.target.baddie.baddie,
                            impact.target.baddie.component, AZ_DMGF_BEAM,

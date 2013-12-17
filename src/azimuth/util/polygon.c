@@ -81,26 +81,6 @@ bool az_polygon_contains(az_polygon_t polygon, az_vector_t point) {
   return inside;
 }
 
-bool az_convex_polygon_contains(az_polygon_t polygon,
-                                az_vector_t point) {
-  if (polygon.num_vertices < 3) return false;
-  const az_vector_t *vertices = polygon.vertices;
-  // Iterate over all edges in the polygon.  On each iteration, i is the index
-  // of the "primary" vertex, and j is the index of the vertex that comes just
-  // after it in the list (wrapping around at the end).
-  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
-    // Use a cross-product to determine if the point is outside the given edge,
-    // using the assumption that vertices come in counter-clockwise order.
-    // Since this is a convex polygon, the point is outside the polygon iff it
-    // is outside at least once edge.
-    if (az_vcross(az_vsub(point, vertices[i]),
-                  az_vsub(vertices[j], vertices[i])) >= 0.0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /*===========================================================================*/
 
 bool az_circle_touches_line(
@@ -156,9 +136,9 @@ bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
   return az_circle_hits_point(center, radius, start, delta, NULL, NULL);
 }
 
-bool az_ray_hits_circle(double radius, az_vector_t center,
-                        az_vector_t start, az_vector_t delta,
-                        az_vector_t *point_out, az_vector_t *normal_out) {
+bool az_ray_hits_circle(
+    double radius, az_vector_t center, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
   az_vector_t point;
   if (!az_circle_hits_point(center, radius, start, delta,
                             &point, NULL)) return false;
@@ -254,9 +234,9 @@ static bool ray_hits_polygon_internal(
   return did_hit;
 }
 
-bool az_ray_hits_polygon(az_polygon_t polygon, az_vector_t start,
-                         az_vector_t delta, az_vector_t *point_out,
-                         az_vector_t *normal_out) {
+bool az_ray_hits_polygon(
+    az_polygon_t polygon, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
   double time = INFINITY;
   if (ray_hits_polygon_internal(polygon, start, delta, &time, normal_out)) {
     assert(isfinite(time));
@@ -268,11 +248,10 @@ bool az_ray_hits_polygon(az_polygon_t polygon, az_vector_t start,
   return false;
 }
 
-bool az_ray_hits_polygon_trans(az_polygon_t polygon,
-                               az_vector_t polygon_position,
-                               double polygon_angle, az_vector_t start,
-                               az_vector_t delta, az_vector_t *point_out,
-                               az_vector_t *normal_out) {
+bool az_ray_hits_polygon_trans(
+    az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
+    az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
   if (az_ray_hits_polygon(polygon,
           az_vrotate(az_vsub(start, polygon_position), -polygon_angle),
           az_vrotate(delta, -polygon_angle), point_out, normal_out)) {
@@ -827,103 +806,6 @@ bool az_arc_circle_hits_polygon_trans(
 }
 
 /*===========================================================================*/
-
-// This function works much the same as az_polygons_collide, but assumes that
-// s_polygon is at the origin, unrotated.  az_polygons_collide is then
-// implemented in terms of this function.
-static bool az_polygons_collide_internal(
-    az_polygon_t s_polygon, az_polygon_t m_polygon, az_vector_t position,
-    double angle, az_vector_t delta, az_vector_t *pos_out,
-    az_vector_t *impact_out, az_vector_t *normal_out) {
-  bool did_hit = false;
-  double best_time = INFINITY;
-  bool mvertex = false;
-  int best_vertex = -1;
-  az_vector_t best_normal = AZ_VZERO;
-  // Test if s_polygon's vertices hit m_polygon:
-  for (int i = 0; i < s_polygon.num_vertices; ++i) {
-    double time = INFINITY;
-    az_vector_t normal = AZ_VZERO;
-    if (ray_hits_polygon_internal(m_polygon,
-            az_vrotate(az_vsub(s_polygon.vertices[i], position), -angle),
-            az_vneg(az_vrotate(delta, -angle)), &time, &normal)) {
-      if (time < best_time) {
-        did_hit = true;
-        best_time = time;
-        best_vertex = i;
-        best_normal = normal;
-      }
-    }
-  }
-  // Test if m_polygon's vertices hit s_polygon:
-  for (int i = 0; i < m_polygon.num_vertices; ++i) {
-    double time = INFINITY;
-    az_vector_t normal = AZ_VZERO;
-    if (ray_hits_polygon_internal(s_polygon,
-            az_vadd(az_vrotate(m_polygon.vertices[i], angle), position),
-            delta, &time, &normal)) {
-      if (time < best_time) {
-        did_hit = true;
-        best_time = time;
-        mvertex = true;
-        best_vertex = i;
-        best_normal = normal;
-      }
-    }
-  }
-  // If we hit, populate out args:
-  if (did_hit) {
-    if (pos_out != NULL) {
-      *pos_out = az_vadd(position, az_vmul(delta, best_time));
-    }
-    if (impact_out != NULL) {
-      assert(best_vertex >= 0);
-      if (mvertex) {
-        assert(best_vertex < m_polygon.num_vertices);
-        *impact_out =
-          az_vadd(az_vadd(az_vrotate(m_polygon.vertices[best_vertex],
-                                     angle), position),
-                  az_vmul(delta, best_time));
-      } else {
-        assert(best_vertex < s_polygon.num_vertices);
-        *impact_out = s_polygon.vertices[best_vertex];
-      }
-    }
-    if (normal_out != NULL) {
-      if (mvertex) {
-        *normal_out = best_normal;
-      } else {
-        *normal_out = az_vrotate(az_vneg(best_normal), angle);
-      }
-    }
-  }
-  return did_hit;
-}
-
-bool az_polygons_collide(az_polygon_t s_polygon, az_vector_t s_position,
-                         double s_angle, az_polygon_t m_polygon,
-                         az_vector_t m_position, double m_angle,
-                         az_vector_t m_delta, az_vector_t *pos_out,
-                         az_vector_t *impact_out, az_vector_t *normal_out) {
-  if (az_polygons_collide_internal(
-          s_polygon, m_polygon,
-          az_vrotate(az_vsub(m_position, s_position), -s_angle),
-          m_angle - s_angle,
-          az_vrotate(m_delta, -s_angle),
-          pos_out, impact_out, normal_out)) {
-    if (pos_out != NULL) {
-      *pos_out = az_vadd(az_vrotate(*pos_out, s_angle), s_position);
-    }
-    if (impact_out != NULL) {
-      *impact_out = az_vadd(az_vrotate(*impact_out, s_angle), s_position);
-    }
-    if (normal_out != NULL) {
-      *normal_out = az_vrotate(*normal_out, s_angle);
-    }
-    return true;
-  }
-  return false;
-}
 
 bool az_lead_target(az_vector_t rel_position, az_vector_t rel_velocity,
                     double proj_speed, az_vector_t *rel_impact_out) {

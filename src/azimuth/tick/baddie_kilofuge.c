@@ -223,7 +223,7 @@ static void fire_beam_from_eye(
                     baddie->position), az_vpolar(8, beam_angle));
   az_impact_t impact;
   az_ray_impact(state, beam_start, az_vpolar(5000, beam_angle),
-                AZ_IMPF_NOTHING, baddie->uid, &impact);
+                AZ_IMPF_NONE, baddie->uid, &impact);
 
   // The beam does far more damage to other baddies than to the ship.
   if (impact.type == AZ_IMP_BADDIE) {

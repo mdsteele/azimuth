@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
   RUN_TEST(test_circle_touches_polygon_trans);
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
-  RUN_TEST(test_convex_polygon_contains);
   RUN_TEST(test_lead_target);
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
@@ -62,7 +61,6 @@ int main(int argc, char **argv) {
   RUN_TEST(test_player_set_room_visited);
   RUN_TEST(test_player_set_zone_mapped);
   RUN_TEST(test_polygon_contains);
-  RUN_TEST(test_polygons_collide);
   RUN_TEST(test_position_visible);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);

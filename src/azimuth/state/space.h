@@ -256,7 +256,7 @@ typedef enum {
 } az_impact_type_t;
 
 typedef uint_fast8_t az_impact_flags_t;
-#define AZ_IMPF_NOTHING      ((az_impact_flags_t)0)
+#define AZ_IMPF_NONE         ((az_impact_flags_t)0)
 #define AZ_IMPF_BADDIE       ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
 #define AZ_IMPF_DOOR_INSIDE  ((az_impact_flags_t)(1u << AZ_IMP_DOOR_INSIDE))
 #define AZ_IMPF_DOOR_OUTSIDE ((az_impact_flags_t)(1u << AZ_IMP_DOOR_OUTSIDE))
@@ -264,7 +264,9 @@ typedef uint_fast8_t az_impact_flags_t;
 #define AZ_IMPF_WALL         ((az_impact_flags_t)(1u << AZ_IMP_WALL))
 
 typedef struct {
+  // What type of object was hit:
   az_impact_type_t type;
+  // Pointer to the object that was hit (depending on the type field):
   union {
     struct {
       az_baddie_t *baddie;
@@ -274,9 +276,10 @@ typedef struct {
     az_wall_t *wall;
   } target;
   double angle; // only used for the az_arc_*_impact functions
+  // The position of the point/circle at the moment the impact occurs:
   az_vector_t position;
-  // Normal vector.  For ray impacts, the length is not guaranteed, but for
-  // circle impacts it will point from the point of contact to position.
+  // Normal vector pointing from the point of contact in the direction of
+  // position; no guarantees are made about the length (it may even be zero):
   az_vector_t normal;
 } az_impact_t;
 
