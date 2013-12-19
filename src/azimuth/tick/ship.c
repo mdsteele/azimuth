@@ -210,7 +210,9 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
           if (az_insert_particle(state, &particle)) {
             particle->kind = AZ_PAR_BOOM;
             particle->color = (az_color_t){255, 0, 0, 255};
-            particle->position = az_vsub(ship->position, impact->normal);
+            particle->position =
+              az_vsub(ship->position,
+                      az_vwithlen(impact->normal, AZ_SHIP_DEFLECTOR_RADIUS));
             particle->velocity = AZ_VZERO;
             particle->lifetime = 0.4;
             particle->param1 = 15.0;
@@ -305,7 +307,9 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   if (az_insert_particle(state, &particle)) {
     particle->kind = AZ_PAR_BOOM;
     particle->color = (az_color_t){255, 255, 255, 255};
-    particle->position = az_vsub(ship->position, impact->normal);
+    particle->position =
+      az_vsub(ship->position, az_vwithlen(impact->normal,
+                                          AZ_SHIP_DEFLECTOR_RADIUS));
     particle->velocity = AZ_VZERO;
     particle->lifetime = 0.3;
     particle->param1 = 10;

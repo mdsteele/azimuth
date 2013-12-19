@@ -406,17 +406,18 @@ void az_circle_impact(az_space_state_t *state, double radius,
                       az_impact_t *impact_out) {
   assert(impact_out != NULL);
   impact_out->type = AZ_IMP_NOTHING;
-  az_vector_t *position = &impact_out->position;
-  az_vector_t *normal = &impact_out->normal;
+  az_vector_t *position_out = &impact_out->position;
+  az_vector_t *normal_out = &impact_out->normal;
 
   // Walls:
   if (!(skip_types & AZ_IMPF_WALL)) {
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_circle_hits_wall(wall, radius, start, delta, position, normal)) {
+      if (az_circle_hits_wall(wall, radius, start, delta,
+                              position_out, normal_out)) {
         impact_out->type = AZ_IMP_WALL;
         impact_out->target.wall = wall;
-        delta = az_vsub(*position, start);
+        delta = az_vsub(*position_out, start);
       }
     }
   }
@@ -427,17 +428,17 @@ void az_circle_impact(az_space_state_t *state, double radius,
       if (door->kind == AZ_DOOR_NOTHING) continue;
       if (!(skip_types & AZ_IMPF_DOOR_INSIDE) &&
           az_circle_hits_door_inside(door, radius, start, delta,
-                                     position, normal)) {
+                                     position_out, normal_out)) {
         impact_out->type = AZ_IMP_DOOR_INSIDE;
         impact_out->target.door = door;
-        delta = az_vsub(*position, start);
+        delta = az_vsub(*position_out, start);
       }
       if (!(skip_types & AZ_IMPF_DOOR_OUTSIDE) &&
           az_circle_hits_door_outside(door, radius, start, delta,
-                                      position, normal)) {
+                                      position_out, normal_out)) {
         impact_out->type = AZ_IMP_DOOR_OUTSIDE;
         impact_out->target.door = door;
-        delta = az_vsub(*position, start);
+        delta = az_vsub(*position_out, start);
       }
     }
   }
@@ -445,9 +446,9 @@ void az_circle_impact(az_space_state_t *state, double radius,
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
       az_ship_is_present(&state->ship)) {
     if (az_circle_hits_ship(&state->ship, radius, start, delta,
-                            position, normal)) {
+                            position_out, normal_out)) {
       impact_out->type = AZ_IMP_SHIP;
-      delta = az_vsub(*position, start);
+      delta = az_vsub(*position_out, start);
     }
   }
   // Baddies:
@@ -458,20 +459,18 @@ void az_circle_impact(az_space_state_t *state, double radius,
       if (baddie->uid == skip_uid) continue;
       const az_component_data_t *component;
       if (az_circle_hits_baddie(baddie, radius, start, delta,
-                                position, normal, &component)) {
+                                position_out, normal_out, &component)) {
         impact_out->type = AZ_IMP_BADDIE;
         impact_out->target.baddie.baddie = baddie;
         impact_out->target.baddie.component = component;
-        delta = az_vsub(*position, start);
+        delta = az_vsub(*position_out, start);
       }
     }
   }
 
   if (impact_out->type == AZ_IMP_NOTHING) {
-    *position = az_vadd(start, delta);
-    *normal = AZ_VZERO;
-  } else {
-    *normal = az_vsub(*position, *normal);
+    *position_out = az_vadd(start, delta);
+    *normal_out = AZ_VZERO;
   }
 }
 

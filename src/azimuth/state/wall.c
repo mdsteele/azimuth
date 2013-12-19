@@ -1139,13 +1139,13 @@ bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
 
 bool az_circle_hits_wall(
     const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(wall->kind != AZ_WALL_NOTHING);
   return (az_ray_hits_bounding_circle(start, delta, wall->position,
                                       wall->data->bounding_radius + radius) &&
           az_circle_hits_polygon_trans(wall->data->polygon, wall->position,
                                        wall->angle, radius, start, delta,
-                                       pos_out, impact_out));
+                                       pos_out, normal_out));
 }
 
 bool az_arc_circle_hits_wall(

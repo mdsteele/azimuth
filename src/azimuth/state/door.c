@@ -147,7 +147,7 @@ bool az_ray_hits_door_outside(
 
 bool az_circle_hits_door_outside(
     const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (!az_ray_hits_bounding_circle(start, delta, door->position,
                                    AZ_DOOR_BOUNDING_RADIUS + radius)) {
@@ -159,11 +159,11 @@ bool az_circle_hits_door_outside(
     az_vector_t pos;
     bool hit = az_circle_hits_polygon_trans(
                    open_forcefield_polygon_1, door->position, door->angle,
-                   radius, start, delta, &pos, impact_out);
+                   radius, start, delta, &pos, normal_out);
     if (hit) delta = az_vsub(pos, start);
     hit |= az_circle_hits_polygon_trans(
                open_forcefield_polygon_2, door->position, door->angle,
-               radius, start, delta, &pos, impact_out);
+               radius, start, delta, &pos, normal_out);
     if (hit && pos_out != NULL) *pos_out = pos;
     return hit;
   } else {
@@ -172,7 +172,7 @@ bool az_circle_hits_door_outside(
          (door->kind == AZ_DOOR_FORCEFIELD ?
           closed_forcefield_polygon : closed_door_polygon)),
         door->position, door->angle, radius, start, delta,
-        pos_out, impact_out);
+        pos_out, normal_out);
   }
 }
 
@@ -231,7 +231,7 @@ bool az_ray_hits_door_inside(
 
 bool az_circle_hits_door_inside(
     const az_door_t *door, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind == AZ_DOOR_FORCEFIELD ||
       (door->kind != AZ_DOOR_PASSAGE && !door->is_open)) return false;
@@ -239,7 +239,7 @@ bool az_circle_hits_door_inside(
                                       AZ_DOOR_BOUNDING_RADIUS + radius) &&
           az_circle_hits_polygon_trans(entrance_polygon, door->position,
                                        door->angle, radius, start, delta,
-                                       pos_out, impact_out));
+                                       pos_out, normal_out));
 }
 
 bool az_arc_circle_hits_door_inside(

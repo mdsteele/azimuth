@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "azimuth/state/wall.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
@@ -53,9 +52,9 @@ bool az_point_touches_ship(const az_ship_t *ship, az_vector_t point) {
                                          -ship->angle)));
 }
 
-bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out,
-                      az_vector_t *normal_out) {
+bool az_ray_hits_ship(
+    const az_ship_t *ship, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
   assert(az_ship_is_present(ship));
   return (az_ray_hits_bounding_circle(start, delta, ship->position,
                                       SHIP_BOUNDING_RADIUS) &&
@@ -66,13 +65,13 @@ bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
 
 bool az_circle_hits_ship(
     const az_ship_t *ship, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(az_ship_is_present(ship));
   return (az_ray_hits_bounding_circle(start, delta, ship->position,
                                       SHIP_BOUNDING_RADIUS + radius) &&
           az_circle_hits_polygon_trans(AZ_SHIP_POLYGON, ship->position,
                                        ship->angle, radius, start, delta,
-                                       pos_out, impact_out));
+                                       pos_out, normal_out));
 }
 
 bool az_arc_circle_hits_ship(

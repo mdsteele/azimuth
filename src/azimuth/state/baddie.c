@@ -1352,22 +1352,22 @@ bool az_ray_hits_baddie(
 static bool circle_hits_component(
     const az_component_data_t *component, az_vector_t position, double angle,
     double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out) {
+    az_vector_t *pos_out, az_vector_t *normal_out) {
   if (component->polygon.num_vertices > 0) {
     return (az_ray_hits_bounding_circle(start, delta, position,
                                         component->bounding_radius + radius) &&
             az_circle_hits_polygon_trans(component->polygon, position, angle,
                                          radius, start, delta,
-                                         pos_out, impact_out));
+                                         pos_out, normal_out));
   } else {
     return az_circle_hits_circle(component->bounding_radius, position,
-                                 radius, start, delta, pos_out, impact_out);
+                                 radius, start, delta, pos_out, normal_out);
   }
 }
 
 bool az_circle_hits_baddie(
     const az_baddie_t *baddie, double radius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out,
     const az_component_data_t **component_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
@@ -1387,7 +1387,7 @@ bool az_circle_hits_baddie(
 
   // Check if we hit the main body of the baddie.
   if (circle_hits_component(&data->main_body, AZ_VZERO, 0.0, radius, rel_start,
-                            rel_delta, &pos, impact_out)) {
+                            rel_delta, &pos, normal_out)) {
     hit_component = &data->main_body;
     rel_delta = az_vsub(pos, rel_start);
   }
@@ -1398,20 +1398,19 @@ bool az_circle_hits_baddie(
     const az_component_data_t *component = &data->components[i];
     if (circle_hits_component(component, baddie->components[i].position,
                               baddie->components[i].angle, radius, rel_start,
-                              rel_delta, &pos, impact_out)) {
+                              rel_delta, &pos, normal_out)) {
       hit_component = component;
       rel_delta = az_vsub(pos, rel_start);
     }
   }
 
-  // Fix up *pos_out and *impact_out and return.
+  // Fix up *pos_out and *normal_out and return.
   if (hit_component != NULL) {
     if (pos_out != NULL) {
       *pos_out = az_vadd(az_vrotate(pos, baddie->angle), baddie->position);
     }
-    if (impact_out != NULL) {
-      *impact_out = az_vadd(az_vrotate(*impact_out, baddie->angle),
-                            baddie->position);
+    if (normal_out != NULL) {
+      *normal_out = az_vrotate(*normal_out, baddie->angle);
     }
     if (component_out != NULL) *component_out = hit_component;
     return true;

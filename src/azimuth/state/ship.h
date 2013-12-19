@@ -25,7 +25,7 @@
 
 #include "azimuth/state/player.h"
 #include "azimuth/state/uid.h"
-#include "azimuth/state/wall.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -81,18 +81,17 @@ bool az_point_touches_ship(const az_ship_t *ship, az_vector_t point);
 // Determine if a ray, travelling delta from start, will hit the ship.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
 // and the normal vector in *normal_out (if normal_out is non-NULL).
-bool az_ray_hits_ship(const az_ship_t *ship, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out,
-                      az_vector_t *normal_out);
+bool az_ray_hits_ship(
+    const az_ship_t *ship, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
 
 // Determine if a circle with the given radius, travelling delta from start,
-// will hit the ship.  If it does, the function stores in *pos_out
-// the earliest position of the circle at which it touches the wall (if pos_out
-// is non-NULL) and in *impact_out the point of intersection (if impact_out is
-// non-NULL).
-bool az_circle_hits_ship(const az_ship_t *ship, double radius,
-                         az_vector_t start, az_vector_t delta,
-                         az_vector_t *point_out, az_vector_t *impact_out);
+// will hit the ship.  If it does, the function stores in *pos_out the earliest
+// position of the circle at which it touches the ship (if pos_out is non-NULL)
+// and the normal vector in *normal_out (if normal_out is non-NULL).
+bool az_circle_hits_ship(
+    const az_ship_t *ship, double radius, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
 
 bool az_arc_circle_hits_ship(
     const az_ship_t *ship, double circle_radius,

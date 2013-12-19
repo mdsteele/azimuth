@@ -112,41 +112,41 @@ bool az_ray_hits_polygon_trans(
 // radius, travelling delta from start, will ever intersect a particular shape
 // (depending on the function).  If it does, the function stores in *pos_out
 // the first position of the circle at which it touches the shape (if pos_out
-// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// is non-NULL) and the normal vector in *normal_out (if normal_out is
 // non-NULL).
 
 // Determine if the circle will ever intersect the given point.
 bool az_circle_hits_point(
     az_vector_t point, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t *pos_out, az_vector_t *normal_out);
 
 // Determine if the circle will ever intersect the given circle.
 bool az_circle_hits_circle(
     double sradius, az_vector_t center, double mradius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out);
 
 // Determine if the circle will ever intersect the infinite line passing
 // through p1 and p2.
 bool az_circle_hits_line(
     az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out);
 
 // Determine if the circle will ever intersect the finite line segment between
 // p1 and p2.
 bool az_circle_hits_line_segment(
     az_vector_t p1, az_vector_t p2, double radius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out);
 
 // Determine if the circle will ever intersect the polygon.
 bool az_circle_hits_polygon(
     az_polygon_t polygon, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t *pos_out, az_vector_t *normal_out);
 
 // Determine if the circle will ever intersect the transformed polygon.
 bool az_circle_hits_polygon_trans(
     az_polygon_t polygon, az_vector_t polygon_position, double polygon_angle,
     double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t *pos_out, az_vector_t *normal_out);
 
 /*===========================================================================*/
 

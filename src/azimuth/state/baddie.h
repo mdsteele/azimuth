@@ -226,13 +226,13 @@ bool az_ray_hits_baddie(
     const az_component_data_t **component_out);
 
 // Determine if a circle with the given radius, travelling delta from start,
-// will hit the baddie.  If it does, the function stores in *pos_out
-// the earliest position of the circle at which it touches the wall (if pos_out
-// is non-NULL) and in *impact_out the point of intersection (if impact_out is
+// will hit the baddie.  If it does, the function stores in *pos_out the
+// earliest position of the circle at which it touches the baddie (if pos_out
+// is non-NULL) and the normal vector in *normal_out (if normal_out is
 // non-NULL).
 bool az_circle_hits_baddie(
     const az_baddie_t *baddie, double radius, az_vector_t start,
-    az_vector_t delta, az_vector_t *pos_out, az_vector_t *impact_out,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out,
     const az_component_data_t **component_out);
 
 bool az_arc_circle_hits_baddie(

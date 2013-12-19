@@ -119,18 +119,17 @@ bool az_circle_touches_wall(
 // Determine if a ray, travelling delta from start, will hit the wall.  If it
 // does, stores the intersection point in *point_out (if point_out is non-NULL)
 // and the normal vector in *normal_out (if normal_out is non-NULL).
-bool az_ray_hits_wall(const az_wall_t *wall, az_vector_t start,
-                      az_vector_t delta, az_vector_t *point_out,
-                      az_vector_t *normal_out);
+bool az_ray_hits_wall(
+    const az_wall_t *wall, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
 
 // Determine if a circle with the given radius, travelling delta from start,
-// will hit the wall.  If it does, the function stores in *pos_out
-// the earliest position of the circle at which it touches the wall (if pos_out
-// is non-NULL) and in *impact_out the point of intersection (if impact_out is
-// non-NULL).
+// will hit the wall.  If it does, the function stores in *pos_out the earliest
+// position of the circle at which it touches the wall (if pos_out is non-NULL)
+// and the normal vector in *normal_out (if normal_out is non-NULL).
 bool az_circle_hits_wall(
     const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
-    az_vector_t *pos_out, az_vector_t *impact_out);
+    az_vector_t *pos_out, az_vector_t *normal_out);
 
 bool az_arc_circle_hits_wall(
     const az_wall_t *wall, double circle_radius,

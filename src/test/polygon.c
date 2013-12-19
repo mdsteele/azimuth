@@ -272,97 +272,113 @@ void test_ray_hits_polygon_trans(void) {
 /*===========================================================================*/
 
 void test_circle_hits_point(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
-  // Check az_circle_hits_point works with NULLs for pos_out and impact_out:
+  // Check az_circle_hits_point works with NULLs for pos_out and normal_out:
   EXPECT_TRUE(az_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 0},
       NULL, NULL));
 
   // Check case where circle hits point dead-on.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 0},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-1, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Check case where circle hits point obliquely.
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_point(
+      (az_vector_t){1, 1}, sqrt(2), (az_vector_t){-6, 2}, (az_vector_t){10, 0},
+      &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){0, 2}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
 
   // Check case where point starts inside circle.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_point(
       (az_vector_t){-5, 7}, 2.0, (az_vector_t){-6, 6}, (az_vector_t){9, -15},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-6, 6}), pos);
-  EXPECT_VAPPROX(((az_vector_t){-5, 7}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
 
   // Check case where circle misses point.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){10, 10},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 
   // Check case where circle stops short of point.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_point(
       (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1}, (az_vector_t){3, 0},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_circle_hits_circle(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
   // Check az_circle_hits_point works with NULLs for pos_out and impact_out:
   EXPECT_TRUE(az_circle_hits_circle(
       1.0, (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1},
       (az_vector_t){10, 0}, NULL, NULL));
 
-  // Check simple case:
-  pos = impact = nix;
+  // Check case where moving circle hits the stationary circle head-on:
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_circle(
       1.0, (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1},
-      (az_vector_t){10, 0}, &pos, &impact));
+      (az_vector_t){10, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-2, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){0, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Check case where moving circle hits the stationary circle obliquely:
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_circle(
+      sqrt(2), (az_vector_t){1, 1}, sqrt(2), (az_vector_t){-6, 3},
+      (az_vector_t){10, 0}, &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){-1, 3}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
 
   // Check case where radius of stationary circle is zero:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_circle(
       0.0, (az_vector_t){1, 1}, 2.0, (az_vector_t){-6, 1},
-      (az_vector_t){10, 0}, &pos, &impact));
+      (az_vector_t){10, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-1, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){1, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
 
   // Check case where radius of moving circle is zero:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_circle(
       1.0, (az_vector_t){1, 1}, 0.0, (az_vector_t){-6, 1},
-      (az_vector_t){10, 0}, &pos, &impact));
+      (az_vector_t){10, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){0, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){0, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
 
   // Check case where moving circle starts inside stationary circle:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_circle(
       5.0, (az_vector_t){1, 1}, 1.0, (az_vector_t){3, 1},
-      (az_vector_t){-10, 0}, &pos, &impact));
+      (az_vector_t){-10, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){6, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){1, 0}), az_vunit(normal));
 
   // Check case where stationary circle starts inside moving circle:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_circle(
       1.0, (az_vector_t){1, 1}, 5.0, (az_vector_t){3, 1},
-      (az_vector_t){-10, 0}, &pos, &impact));
+      (az_vector_t){-10, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){3, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){2, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){1, 0}), az_vunit(normal));
 }
 
 void test_circle_hits_line(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
   // Check az_circle_hits_line works with NULLs for pos_out and impact_out:
   EXPECT_TRUE(az_circle_hits_line(
@@ -370,40 +386,40 @@ void test_circle_hits_line(void) {
       (az_vector_t){0, 10}, NULL, NULL));
 
   // Check case where circle hits line dead-on.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_line(
       (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){15, -1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){15, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0, -1}), az_vunit(normal));
 
   // Check case where circle is already intersecting line.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_line(
       (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){12, 2},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){12, 2}), pos);
-  EXPECT_VAPPROX(((az_vector_t){12, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0, 1}), az_vunit(normal));
 
   // Check case where circle goes wrong direction.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_line(
       (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
-      (az_vector_t){0, -10}, &pos, &impact));
+      (az_vector_t){0, -10}, &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 
   // Check case where circle stops short of line.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_line(
       (az_vector_t){1, 1}, (az_vector_t){2, 1}, 2.0, (az_vector_t){15, -5},
-      (az_vector_t){0, 3}, &pos, &impact));
+      (az_vector_t){0, 3}, &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_circle_hits_line_segment(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
   // Check az_circle_hits_line_segment works with NULLs:
   EXPECT_TRUE(az_circle_hits_line_segment(
@@ -411,42 +427,42 @@ void test_circle_hits_line_segment(void) {
       (az_vector_t){0, 10}, NULL, NULL));
 
   // Check case where circle hits line segment dead-on.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_line_segment(
       (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){6, -5},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){6, -1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){6, 1}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0, -1}), az_vunit(normal));
 
   // Check case where circle grazes endpoint of line segment.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_line_segment(
       (az_vector_t){-3, 2}, (az_vector_t){4, 2},
       sqrt(2), (az_vector_t){5, -4},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){5, 1}), pos);
-  EXPECT_VAPPROX(((az_vector_t){4, 2}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, -1}), az_vunit(normal));
 
   // Check case where circle would hit infinite line, but misses line segment.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_line_segment(
       (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){16, -5},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 
   // Check case where circle would hit infinite line, but misses line segment
   // on the other side.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_line_segment(
       (az_vector_t){5.5, 1}, (az_vector_t){6.5, 1}, 2.0, (az_vector_t){0, -5},
-      (az_vector_t){0, 10}, &pos, &impact));
+      (az_vector_t){0, 10}, &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_circle_hits_polygon(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
   // Check az_circle_hits_polygon works with NULLs for pos_out and impact_out:
   EXPECT_TRUE(az_circle_hits_polygon(
@@ -454,69 +470,88 @@ void test_circle_hits_polygon(void) {
       (az_vector_t){-4, -10}, NULL, NULL));
 
   // Check case where circle hits an edge of the triangle:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_polygon(
       triangle, 2.0, (az_vector_t){5.4402850002906638, 7.4850712500726662},
-      (az_vector_t){-4, -10}, &pos, &impact));
+      (az_vector_t){-4, -10}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){3.4402850002906638, 2.4850712500726662}), pos);
-  EXPECT_VAPPROX(((az_vector_t){1.5, 2}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){4, 1}), az_vunit(normal));
 
   // Check case where circle hits a corner of the triangle:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_polygon(
-      triangle, 2.0, (az_vector_t){4, 7}, (az_vector_t){-10, -10},
-      &pos, &impact));
-  EXPECT_VAPPROX(((az_vector_t){2.4142135623730949, 5.4142135623730949}), pos);
-  EXPECT_VAPPROX(((az_vector_t){1, 4}), impact);
+      triangle, sqrt(2), (az_vector_t){4, 7}, (az_vector_t){-10, -10},
+      &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){2, 5}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 1}), az_vunit(normal));
 
   // Check case where circle hits an edge of the square:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_polygon(
-      square, 0.3, (az_vector_t){-5, 0}, (az_vector_t){20, 0}, &pos, &impact));
+      square, 0.3, (az_vector_t){-5, 0}, (az_vector_t){20, 0}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-1.3, 0}), pos);
-  EXPECT_VAPPROX(((az_vector_t){-1, 0}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 0}), az_vunit(normal));
 
   // Check case where circle hits a corner of the square:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_polygon(
       square, sqrt(2), (az_vector_t){-5, 2}, (az_vector_t){20, 0},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){-2, 2}), pos);
-  EXPECT_VAPPROX(((az_vector_t){-1, 1}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 1}), az_vunit(normal));
 
   // Check case where circle misses the square:
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_polygon(
       square, 0.2, (az_vector_t){-5, 1.21}, (az_vector_t){20, 0},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 
-  // Check case where circle is completely inside the polygon:
-  pos = impact = nix;
+  // Check case where circle starts completely inside the square (the normal
+  // should point away from the origin):
+  pos = normal = nix;
   EXPECT_TRUE(az_circle_hits_polygon(
       square, 0.2, (az_vector_t){0.5, -0.5}, (az_vector_t){20, 0},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){0.5, -0.5}), pos);
-  EXPECT_VAPPROX(((az_vector_t){0.35857864376269, -0.35857864376269}), impact);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, -1}), az_vunit(normal));
+
+  // Check case where circle is initially overlapping one of the edges of the
+  // square (the normal should point away from that edge):
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      square, 1.1, (az_vector_t){-2, 0.5}, (az_vector_t){10, 0},
+      &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){-2, 0.5}), pos);
+  EXPECT_VAPPROX(((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Check case where circle is initially overlapping one of the corners of the
+  // square (the normal should point away from that corner):
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_polygon(
+      square, 1.2, (az_vector_t){-2, 1.5}, (az_vector_t){10, 0},
+      &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){-2, 1.5}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 0.5}), az_vunit(normal));
 
   // We should never hit the null polygon.
-  pos = impact = nix;
+  pos = normal = nix;
   EXPECT_FALSE(az_circle_hits_polygon(
       null_polygon, 0.5, (az_vector_t){-1, -1}, (az_vector_t){1, 1},
-      &pos, &impact));
+      &pos, &normal));
   EXPECT_VAPPROX(nix, pos);
-  EXPECT_VAPPROX(nix, impact);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_circle_hits_polygon_trans(void) {
-  az_vector_t pos = nix, impact = nix;
+  az_vector_t pos = nix, normal = nix;
 
   EXPECT_TRUE(az_circle_hits_polygon_trans(
       triangle, (az_vector_t){3, 0.059714999709336247}, 1.3258176636680323,
-      2.0, (az_vector_t){3, 5}, (az_vector_t){0, -5}, &pos, &impact));
+      2.0, (az_vector_t){3, 5}, (az_vector_t){0, -5}, &pos, &normal));
   EXPECT_VAPPROX(((az_vector_t){3, 4}), pos);
-  EXPECT_VAPPROX(((az_vector_t){3, 2}), impact);
+  EXPECT_VAPPROX(((az_vector_t){0, 1}), az_vunit(normal));
 }
 
 /*===========================================================================*/
