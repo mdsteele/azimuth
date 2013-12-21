@@ -480,15 +480,16 @@ void az_arc_circle_impact(
     az_impact_flags_t skip_types, az_uid_t skip_uid, az_impact_t *impact_out) {
   assert(impact_out != NULL);
   impact_out->type = AZ_IMP_NOTHING;
-  az_vector_t *position = &impact_out->position;
-  az_vector_t *normal = &impact_out->normal;
+  az_vector_t *position_out = &impact_out->position;
+  az_vector_t *normal_out = &impact_out->normal;
 
   // Walls:
   if (!(skip_types & AZ_IMPF_WALL)) {
     AZ_ARRAY_LOOP(wall, state->walls) {
       if (wall->kind == AZ_WALL_NOTHING) continue;
-      if (az_arc_circle_hits_wall(wall, circle_radius, start, spin_center,
-                                  spin_angle, &spin_angle, position, normal)) {
+      if (az_arc_circle_hits_wall(
+              wall, circle_radius, start, spin_center, spin_angle,
+              &spin_angle, position_out, normal_out)) {
         impact_out->type = AZ_IMP_WALL;
         impact_out->target.wall = wall;
       }
@@ -502,14 +503,14 @@ void az_arc_circle_impact(
       if (!(skip_types & AZ_IMPF_DOOR_INSIDE) &&
           az_arc_circle_hits_door_inside(
               door, circle_radius, start, spin_center, spin_angle,
-              &spin_angle, position, normal)) {
+              &spin_angle, position_out, normal_out)) {
         impact_out->type = AZ_IMP_DOOR_INSIDE;
         impact_out->target.door = door;
       }
       if (!(skip_types & AZ_IMPF_DOOR_OUTSIDE) &&
           az_arc_circle_hits_door_outside(
               door, circle_radius, start, spin_center, spin_angle,
-              &spin_angle, position, normal)) {
+              &spin_angle, position_out, normal_out)) {
         impact_out->type = AZ_IMP_DOOR_OUTSIDE;
         impact_out->target.door = door;
       }
@@ -520,7 +521,7 @@ void az_arc_circle_impact(
       az_ship_is_present(&state->ship)) {
     if (az_arc_circle_hits_ship(
             &state->ship, circle_radius, start, spin_center, spin_angle,
-            &spin_angle, position, normal)) {
+            &spin_angle, position_out, normal_out)) {
       impact_out->type = AZ_IMP_SHIP;
     }
   }
@@ -533,7 +534,7 @@ void az_arc_circle_impact(
       const az_component_data_t *component;
       if (az_arc_circle_hits_baddie(
               baddie, circle_radius, start, spin_center, spin_angle,
-              &spin_angle, position, normal, &component)) {
+              &spin_angle, position_out, normal_out, &component)) {
         impact_out->type = AZ_IMP_BADDIE;
         impact_out->target.baddie.baddie = baddie;
         impact_out->target.baddie.component = component;
@@ -543,11 +544,10 @@ void az_arc_circle_impact(
 
   impact_out->angle = spin_angle;
   if (impact_out->type == AZ_IMP_NOTHING) {
-    *position = az_vadd(spin_center,
-                        az_vrotate(az_vsub(start, spin_center), spin_angle));
-    *normal = AZ_VZERO;
-  } else {
-    *normal = az_vsub(*position, *normal);
+    *position_out = az_vadd(spin_center,
+                            az_vrotate(az_vsub(start, spin_center),
+                                       spin_angle));
+    *normal_out = AZ_VZERO;
   }
 }
 

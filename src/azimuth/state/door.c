@@ -179,7 +179,7 @@ bool az_circle_hits_door_outside(
 bool az_arc_circle_hits_door_outside(
     const az_door_t *door, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (!az_arc_ray_might_hit_bounding_circle(
           start, spin_center, spin_angle, door->position,
@@ -191,11 +191,11 @@ bool az_arc_circle_hits_door_outside(
       (az_arc_circle_hits_polygon_trans(
            open_forcefield_polygon_1, door->position, door->angle,
            circle_radius, start, spin_center, spin_angle,
-           &spin_angle, pos_out, impact_out) ||
+           &spin_angle, pos_out, normal_out) ||
        az_arc_circle_hits_polygon_trans(
            open_forcefield_polygon_2, door->position, door->angle,
            circle_radius, start, spin_center, spin_angle,
-           &spin_angle, pos_out, impact_out));
+           &spin_angle, pos_out, normal_out));
     if (hit && angle_out != NULL) *angle_out = spin_angle;
     return hit;
   } else {
@@ -204,7 +204,7 @@ bool az_arc_circle_hits_door_outside(
          (door->kind == AZ_DOOR_FORCEFIELD ?
           closed_forcefield_polygon : closed_door_polygon)),
         door->position, door->angle, circle_radius, start, spin_center,
-        spin_angle, angle_out, pos_out, impact_out);
+        spin_angle, angle_out, pos_out, normal_out);
   }
 }
 
@@ -245,7 +245,7 @@ bool az_circle_hits_door_inside(
 bool az_arc_circle_hits_door_inside(
     const az_door_t *door, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(door->kind != AZ_DOOR_NOTHING);
   if (door->kind == AZ_DOOR_FORCEFIELD ||
       (door->kind != AZ_DOOR_PASSAGE && !door->is_open)) return false;
@@ -255,7 +255,7 @@ bool az_arc_circle_hits_door_inside(
           az_arc_circle_hits_polygon_trans(
               entrance_polygon, door->position, door->angle,
               circle_radius, start, spin_center, spin_angle,
-              angle_out, pos_out, impact_out));
+              angle_out, pos_out, normal_out));
 }
 
 /*===========================================================================*/

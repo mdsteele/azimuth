@@ -86,8 +86,8 @@ double az_vnorm(az_vector_t v);
 // returns zero for both vectors).
 az_vector_t az_vunit(az_vector_t v);
 // Return a vector with the same direction as the given vector, but with the
-// given new length.  The input vector is permitted to be zero, but in that
-// case no guarantees are made about the direction of the output vector.
+// given new length (which may be negative).  If the vector is zero, returns a
+// vector along the x-axis (so that az_vtheta returns zero for both vectors).
 az_vector_t az_vwithlen(az_vector_t v, double length);
 // Return a vector with the same direction as the given input vector, but with
 // length equal to the min of `max_length` and the input vector's length.

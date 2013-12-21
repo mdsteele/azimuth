@@ -131,10 +131,17 @@ bool az_circle_hits_wall(
     const az_wall_t *wall, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *normal_out);
 
+// Determine if a circle with the given radius, travelling in a circular path
+// from start around spin_center by spin_angle radians, will hit the wall.  If
+// it does, the function stores in *angle_out the angle travelled by the circle
+// until impact (if angle_out is non-NULL), in *pos_out the first position of
+// the circle at which it touches the wall (if pos_out is non-NULL), and a
+// vector normal to the wall at the impact point in *normal_out (if normal_out
+// is non-NULL).
 bool az_arc_circle_hits_wall(
     const az_wall_t *wall, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out);
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out);
 
 /*===========================================================================*/
 

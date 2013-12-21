@@ -1424,7 +1424,7 @@ static bool arc_circle_hits_component(
     const az_component_data_t *component, az_vector_t component_position,
     double component_angle, double circle_radius, az_vector_t circle_start,
     az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out) {
   if (component->polygon.num_vertices > 0) {
     return (az_arc_ray_might_hit_bounding_circle(
                 circle_start, spin_center, spin_angle, component_position,
@@ -1432,18 +1432,18 @@ static bool arc_circle_hits_component(
             az_arc_circle_hits_polygon_trans(
                 component->polygon, component_position, component_angle,
                 circle_radius, circle_start, spin_center, spin_angle,
-                angle_out, pos_out, impact_out));
+                angle_out, pos_out, normal_out));
   } else {
     return az_arc_circle_hits_circle(
         component->bounding_radius, component_position, circle_radius,
-        circle_start, spin_center, spin_angle, angle_out, pos_out, impact_out);
+        circle_start, spin_center, spin_angle, angle_out, pos_out, normal_out);
   }
 }
 
 bool az_arc_circle_hits_baddie(
     const az_baddie_t *baddie, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out,
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out,
     const az_component_data_t **component_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
@@ -1465,7 +1465,7 @@ bool az_arc_circle_hits_baddie(
   // Check if we hit the main body of the baddie.
   if (arc_circle_hits_component(
           &data->main_body, AZ_VZERO, 0.0, circle_radius, rel_start,
-          rel_spin_center, spin_angle, &spin_angle, pos_out, impact_out)) {
+          rel_spin_center, spin_angle, &spin_angle, pos_out, normal_out)) {
     hit_component = &data->main_body;
   }
 
@@ -1476,21 +1476,20 @@ bool az_arc_circle_hits_baddie(
     if (arc_circle_hits_component(
             component, baddie->components[i].position,
             baddie->components[i].angle, circle_radius, rel_start,
-            rel_spin_center, spin_angle, &spin_angle, pos_out, impact_out)) {
+            rel_spin_center, spin_angle, &spin_angle, pos_out, normal_out)) {
       hit_component = component;
     }
   }
 
-  // Fix up *pos_out and *impact_out and return.
+  // Fix up *pos_out and *normal_out and return.
   if (hit_component != NULL) {
     if (angle_out != NULL) *angle_out = spin_angle;
     if (pos_out != NULL) {
       *pos_out = az_vadd(az_vrotate(*pos_out, baddie->angle),
                          baddie->position);
     }
-    if (impact_out != NULL) {
-      *impact_out = az_vadd(az_vrotate(*impact_out, baddie->angle),
-                            baddie->position);
+    if (normal_out != NULL) {
+      *normal_out = az_vrotate(*normal_out, baddie->angle);
     }
     if (component_out != NULL) *component_out = hit_component;
     return true;

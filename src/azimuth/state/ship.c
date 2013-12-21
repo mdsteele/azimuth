@@ -77,7 +77,7 @@ bool az_circle_hits_ship(
 bool az_arc_circle_hits_ship(
     const az_ship_t *ship, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
-    double *angle_out, az_vector_t *pos_out, az_vector_t *impact_out) {
+    double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(az_ship_is_present(ship));
   return (az_arc_ray_might_hit_bounding_circle(
               start, spin_center, spin_angle, ship->position,
@@ -85,7 +85,7 @@ bool az_arc_circle_hits_ship(
           az_arc_circle_hits_polygon_trans(
               AZ_SHIP_POLYGON, ship->position, ship->angle,
               circle_radius, start, spin_center, spin_angle,
-              angle_out, pos_out, impact_out));
+              angle_out, pos_out, normal_out));
 }
 
 /*===========================================================================*/
