@@ -163,6 +163,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   }
 
   // Move the ship:
+  const az_vector_t old_position = ship->position;
   ship->position = impact->position;
   if (tractor_node != NULL) {
     assert(az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM));
@@ -197,7 +198,11 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         if (baddie->frozen == 0.0) {
           ship->tractor_beam.active = false;
           damage = component->impact_damage;
-          if (damage > 0.0) induce_temp_invincibility = true;
+          if (damage > 0.0 ||
+              az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS - 0.75,
+                                       old_position, NULL)) {
+            induce_temp_invincibility = true;
+          }
         }
         // If we have Reactive Armor, and if the baddie is dealing damage to
         // us, deal damage back to the baddie.
