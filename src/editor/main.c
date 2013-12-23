@@ -1136,7 +1136,7 @@ static void begin_set_uuid_slot(void) {
     if (wall->selected) uuid_slot = wall->spec.uuid_slot;
   }
   if (uuid_slot < 0) return;
-  az_init_editor_text(&state, AZ_ETA_SET_UUID_SLOT, "%d", uuid_slot);
+  az_init_editor_text(&state, AZ_ETA_SET_UUID_SLOT, "%02d", uuid_slot);
 }
 
 static void try_set_uuid_slot(void) {
