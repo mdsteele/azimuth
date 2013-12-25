@@ -134,6 +134,8 @@ int az_imax(int a, int b);
 
 // Test if two (finite) doubles are approximately equal.
 bool az_dapprox(double a, double b);
+// Test if two vectors are approximately equal.
+bool az_vapprox(az_vector_t a, az_vector_t b);
 
 /*===========================================================================*/
 

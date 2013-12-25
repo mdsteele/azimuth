@@ -88,6 +88,8 @@ static const int wall_data_indices[] = {
   103, 104, 105, 106, 107, 108,
   // Green/purple hex blocks:
   24, 25, 65, 66,
+  // Jungle grass walls:
+  114, 115, 116, 117, 113,
   // Cinderbricks:
   22, 23, 31,
   // Miscellaneous:

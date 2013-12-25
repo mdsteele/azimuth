@@ -35,7 +35,7 @@
 // The UTF-8 sequence for the Apple command key symbol (U+2318):
 #define CMD_KEY_NAME "\xE2\x8C\x98"
 #else
-#define CMD_KEY_NAME "Ctrl"
+#define CMD_KEY_NAME "Ctrl-"
 #endif
 
 #define VIDEO_DEPTH 32
@@ -65,7 +65,7 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
   if (enable_audio) {
     az_init_audio_mixer();
   }
-  SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "-M to run full-screen)",
+  SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "M to run full-screen)",
                     "Azimuth");
   sdl_initialized = true;
   az_set_fullscreen(fullscreen);

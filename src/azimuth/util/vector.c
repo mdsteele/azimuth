@@ -208,4 +208,8 @@ bool az_dapprox(double a, double b) {
   return (d < EPSILON && d > -EPSILON);
 }
 
+bool az_vapprox(az_vector_t a, az_vector_t b) {
+  return az_vwithin(a, b, EPSILON);
+}
+
 /*===========================================================================*/

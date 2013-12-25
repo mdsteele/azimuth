@@ -286,6 +286,16 @@ static const az_vector_t wall_vertices_101[] = {
 static const az_vector_t wall_vertices_105[] = {
   {25, 25}, {-15, 25}, {-65, -25}, {25, -25}
 };
+static const az_vector_t wall_vertices_114[] = {
+  {50, 30}, {35, 28}, {25, 33}, {10, 25}, {-10, 32}, {-30, 24}, {-50, 30},
+  {-50, -30}, {-30, -25}, {-10, -32}, {10, -38}, {25, -30}, {35, -23},
+  {50, -30}
+};
+static const az_vector_t wall_vertices_115[] = {
+  {100, 30}, {70, 28}, {50, 33}, {20, 25}, {-20, 32}, {-60, 24}, {-100, 30},
+  {-100, -30}, {-60, -25}, {-20, -32}, {20, -38}, {50, -30}, {70, -23},
+  {100, -30}
+};
 
 /*===========================================================================*/
 
@@ -943,7 +953,7 @@ static az_wall_data_t wall_datas[] = {
     .elasticity = 0.15, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   },
-  // Snow/icw convex wall:
+  // Snow/ice convex wall:
   [95] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
     .color1 = {96, 32, 192, 255}, .color2 = {192, 176, 192, 255},
@@ -1072,6 +1082,45 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {84, 68, 96, 255}, .color2 = {32, 16, 48, 255},
     .elasticity = 0.25, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_37)
+  },
+  // Solid-colored dark green rectangle:
+  [113] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {0, 64, 24, 255}, .color2 = {0, 64, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Short jungle grass wall:
+  [114] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {40, 64, 16, 255}, .color1 = {64, 96, 16, 255},
+    .color3 = {0, 64, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_114)
+  },
+  // Long jungle grass wall:
+  [115] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {40, 64, 16, 255}, .color1 = {64, 96, 16, 255},
+    .color3 = {0, 64, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_115)
+  },
+  // Jungle grass convex wall:
+  [116] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {40, 64, 16, 255}, .color1 = {64, 96, 16, 255},
+    .color3 = {0, 64, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Jungle grass concave wall:
+  [117] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.75,
+    .color3 = {40, 64, 16, 255}, .color1 = {64, 96, 16, 255},
+    .color2 = {0, 64, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   }
 };
 
@@ -1084,10 +1133,12 @@ static bool wall_data_initialized = false;
 void az_init_wall_datas(void) {
   assert(!wall_data_initialized);
   AZ_ARRAY_LOOP(data, wall_datas) {
-    assert(data->polygon.num_vertices >= 3);
+    const az_polygon_t polygon = data->polygon;
+    assert(polygon.num_vertices >= 3);
     double radius = 0.0;
-    for (int i = 0; i < data->polygon.num_vertices; ++i) {
-      radius = fmax(radius, az_vnorm(data->polygon.vertices[i]));
+    for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+      assert(!az_vapprox(polygon.vertices[i], polygon.vertices[j]));
+      radius = fmax(radius, az_vnorm(polygon.vertices[i]));
     }
     data->bounding_radius = radius + 0.01; // small safety margin
   }
