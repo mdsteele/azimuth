@@ -89,6 +89,7 @@ typedef enum {
   AZ_OP_SANG, // pop top, set angle of obj i (of any type) to a
   AZ_OP_GSTAT, // push state of object i (meaning of "state" depends on type)
   AZ_OP_SSTAT, // pop top, set state of object i to a
+  AZ_OP_BOOM, // pop top two, create large explosion at position (a, b)
   // Ship:
   AZ_OP_GVEL, // push (x, y) velocity of ship
   AZ_OP_SVEL, // pop top two, set velocity of ship to (a, b)

@@ -479,6 +479,10 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
                 if (value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_SPIN;
               } else if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN) {
                 if (!value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_STILL;
+              } else if (node->subkind.doodad == AZ_DOOD_TUBE_WINDOW) {
+                if (value) node->subkind.doodad = AZ_DOOD_BROKEN_TUBE_WINDOW;
+              } else if (node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW) {
+                if (!value) node->subkind.doodad = AZ_DOOD_TUBE_WINDOW;
               }
             } else SCRIPT_ERROR("invalid node kind");
           } break;
@@ -487,6 +491,12 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             SCRIPT_ERROR("invalid object type");
             break;
         }
+      } break;
+      case AZ_OP_BOOM: {
+        az_vector_t position;
+        STACK_POP(&position.x, &position.y);
+        az_add_projectile(state, AZ_PROJ_NUCLEAR_EXPLOSION, position,
+                          0.0, 1.0, AZ_NULL_UID);
       } break;
       // Ship:
       case AZ_OP_GVEL:

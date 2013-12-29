@@ -59,3 +59,4 @@
 58: Killed boss door in Voquan room 356
 59: Killed Nocturne (Voquan boss, room 235)
 60: Opened rocket door between Nandiar rooms 174 and 177
+61: Exploded passage in Voquan room 190
