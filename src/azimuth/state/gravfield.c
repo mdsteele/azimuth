@@ -20,6 +20,7 @@
 #include "azimuth/state/gravfield.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
@@ -83,20 +84,25 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
 
 bool az_ray_hits_water_surface(
     const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
-    az_vector_t *point_out, double *angle_out) {
+    az_vector_t *point_out, az_vector_t *normal_out) {
   assert(gravfield->kind == AZ_GRAV_WATER);
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
-  const az_vector_t p1 = {semilength, front_offset - front_semiwidth};
-  const az_vector_t p2 = {semilength, front_offset + front_semiwidth};
-  if (az_ray_hits_line_segment(
-          az_vadd(az_vrotate(p1, gravfield->angle), gravfield->position),
-          az_vadd(az_vrotate(p2, gravfield->angle), gravfield->position),
-          start, delta, point_out, NULL)) {
-    if (angle_out != NULL) *angle_out = gravfield->angle;
-    return true;
-  } else return false;
+  const double position_norm = az_vnorm(gravfield->position);
+  const double arc_radius =
+    hypot(fmax(front_offset + front_semiwidth, front_offset - front_semiwidth),
+          position_norm + semilength);
+  const az_vector_t arc_center =
+    az_vsub(gravfield->position, az_vpolar(position_norm, gravfield->angle));
+  const double theta1 = atan2(front_offset - front_semiwidth,
+                              position_norm + semilength);
+  const double theta2 = atan2(front_offset + front_semiwidth,
+                              position_norm + semilength);
+  const double min_theta = az_mod2pi(theta1 + gravfield->angle);
+  const double theta_span = az_mod2pi_nonneg(theta2 - theta1);
+  return az_ray_hits_arc(arc_radius, arc_center, min_theta, theta_span,
+                         start, delta, point_out, normal_out);
 }
 
 /*===========================================================================*/

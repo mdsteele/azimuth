@@ -145,6 +145,7 @@ double az_vdist(az_vector_t v1, az_vector_t v2) {
 
 bool az_vwithin(az_vector_t v1, az_vector_t v2, double dist) {
   assert(isfinite(dist));
+  assert(dist >= 0.0);
   return ((v1.x - v2.x) * (v1.x - v2.x) +
           (v1.y - v2.y) * (v1.y - v2.y) <= dist * dist);
 }

@@ -120,7 +120,7 @@ void test_circle_touches_polygon_trans(void) {
 /*===========================================================================*/
 
 void test_ray_hits_bounding_circle(void) {
-  // Ray passes from ouside of circle to inside:
+  // Ray passes from outside of circle to inside:
   EXPECT_TRUE(az_ray_hits_bounding_circle(
       (az_vector_t){2, 2}, (az_vector_t){-2, -2}, (az_vector_t){0, 0}, 2));
   // Simple ray misses circle:
@@ -151,7 +151,7 @@ void test_ray_hits_circle(void) {
       2.0, (az_vector_t){0, 0}, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
       NULL, NULL));
 
-  // Ray passes from ouside of circle to inside:
+  // Ray passes from outside of circle to inside:
   intersect = normal = nix;
   EXPECT_TRUE(az_ray_hits_circle(
       2.0, (az_vector_t){0, 0}, (az_vector_t){3, 0}, (az_vector_t){-2, 0},
@@ -166,6 +166,47 @@ void test_ray_hits_circle(void) {
       &intersect, &normal));
   EXPECT_VAPPROX(((az_vector_t){2, 2}), intersect);
   EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
+}
+
+void test_ray_hits_arc(void) {
+  az_vector_t intersect = nix, normal = nix;
+
+  // Check az_ray_hits_arc works with NULLs for point_out and normal_out:
+  EXPECT_TRUE(az_ray_hits_arc(
+      sqrt(2), (az_vector_t){5, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(30),
+      (az_vector_t){8, -4}, (az_vector_t){-2, 2}, NULL, NULL));
+
+  // Ray passes from outside of circle to inside:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_arc(
+      sqrt(2), (az_vector_t){5, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(30),
+      (az_vector_t){8, -4}, (az_vector_t){-2, 2}, &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){6, -2}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, -1}), az_vunit(normal));
+
+  // Ray passes from outside of circle to inside but misses arc:
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_arc(
+      sqrt(2), (az_vector_t){5, -1}, AZ_DEG2RAD(-30), AZ_DEG2RAD(330),
+      (az_vector_t){8, -4}, (az_vector_t){-2, 2}, &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Ray passes from inside of circle to outside:
+  intersect = normal = nix;
+  EXPECT_TRUE(az_ray_hits_arc(
+      sqrt(2), (az_vector_t){5, -1}, AZ_DEG2RAD(10), AZ_DEG2RAD(70),
+      (az_vector_t){5, -0.5}, (az_vector_t){4, 2}, &intersect, &normal));
+  EXPECT_VAPPROX(((az_vector_t){6, 0}), intersect);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, -1}), az_vunit(normal));
+
+  // Ray passes from inside of circle to outside but misses arc:
+  intersect = normal = nix;
+  EXPECT_FALSE(az_ray_hits_arc(
+      sqrt(2), (az_vector_t){5, -1}, AZ_DEG2RAD(80), AZ_DEG2RAD(70),
+      (az_vector_t){5, -0.5}, (az_vector_t){4, 2}, &intersect, &normal));
+  EXPECT_VAPPROX(nix, intersect);
+  EXPECT_VAPPROX(nix, normal);
 }
 
 void test_ray_hits_line_segment(void) {

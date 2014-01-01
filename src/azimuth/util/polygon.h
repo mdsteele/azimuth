@@ -89,6 +89,12 @@ bool az_ray_hits_circle(
     double radius, az_vector_t center, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out);
 
+// Determine if the ray will hit the given circular arc.
+bool az_ray_hits_arc(
+    double radius, az_vector_t center, double min_theta, double theta_span,
+    az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out);
+
 // Determine if the ray will hit the finite line segment between p1 and p2.
 bool az_ray_hits_line_segment(
     az_vector_t p1, az_vector_t p2, az_vector_t start, az_vector_t delta,

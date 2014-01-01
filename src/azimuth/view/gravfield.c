@@ -133,16 +133,49 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
   const double rear_semiwidth = gravfield->size.trapezoid.rear_semiwidth;
+  const double position_norm = az_vnorm(gravfield->position);
+  const double outer_radius =
+    hypot(fmax(front_offset + front_semiwidth, front_offset - front_semiwidth),
+          position_norm + semilength);
+  const double inner_radius =
+    hypot(rear_semiwidth, position_norm - semilength);
+  const double outer_start_theta =
+    atan2(front_offset - front_semiwidth, position_norm + semilength);
+  const double outer_end_theta =
+    atan2(front_offset + front_semiwidth, position_norm + semilength);
+  const double inner_start_theta =
+    atan2(-rear_semiwidth, position_norm - semilength);
+  const double inner_end_theta =
+    atan2(rear_semiwidth, position_norm - semilength);
+  const int num_steps = 20;
+  const double outer_step =
+    az_mod2pi_nonneg(outer_end_theta - outer_start_theta) / num_steps;
+  const double inner_step =
+    az_mod2pi_nonneg(inner_end_theta - inner_start_theta) / num_steps;
+  // Draw the water itself:
   glBegin(GL_QUAD_STRIP); {
-    glColor4f(1, 1, 1, 0);
-    glVertex2d(semilength + 6, -front_semiwidth + front_offset);
-    glVertex2d(semilength + 6, front_semiwidth + front_offset);
-    glColor4f(0.3, 0.6, 1, 0.3);
-    glVertex2d(semilength, -front_semiwidth + front_offset);
-    glVertex2d(semilength, front_semiwidth + front_offset);
-    glColor4f(0, 0, 0.4, 0.75);
-    glVertex2d(-semilength, -rear_semiwidth);
-    glVertex2d(-semilength, rear_semiwidth);
+    for (int i = 0; i <= num_steps; ++i) {
+      const double inner_theta = inner_start_theta + i * inner_step;
+      const double outer_theta = outer_start_theta + i * outer_step;
+      glColor4f(0, 0, 0.4, 0.75);
+      glVertex2d(inner_radius * cos(inner_theta) - position_norm,
+                 inner_radius * sin(inner_theta));
+      glColor4f(0.3, 0.6, 1, 0.3);
+      glVertex2d(outer_radius * cos(outer_theta) - position_norm,
+                 outer_radius * sin(outer_theta));
+    }
+  } glEnd();
+  // Draw layer of mist above the water:
+  glBegin(GL_QUAD_STRIP); {
+    for (int i = 0; i <= num_steps; ++i) {
+      const double outer_theta = outer_start_theta + i * outer_step;
+      glColor4f(0.3, 0.6, 1, 0.3);
+      glVertex2d(outer_radius * cos(outer_theta) - position_norm,
+                 outer_radius * sin(outer_theta));
+      glColor4f(1, 1, 1, 0);
+      glVertex2d((outer_radius + 6) * cos(outer_theta) - position_norm,
+                 (outer_radius + 6) * sin(outer_theta));
+    }
   } glEnd();
 }
 

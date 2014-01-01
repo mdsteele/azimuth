@@ -33,8 +33,9 @@ static bool solve_quadratic(double a, double b, double c,
   const double discriminant = b * b - 4.0 * a * c;
   if (discriminant < 0.0) return false;
   const double root = sqrt(discriminant);
-  *t1 = (-b + root) / (2.0 * a);
-  *t2 = (-b - root) / (2.0 * a);
+  const double inv = 0.5 / a;
+  *t1 = (root - b) * inv;
+  *t2 = (-root - b) * inv;
   return true;
 }
 
@@ -131,16 +132,70 @@ bool az_circle_touches_polygon_trans(
 
 /*===========================================================================*/
 
+// Like az_ray_hits_circle, but if the ray starts inside the circle, it isn't
+// counted as an immediate impact.
+static bool ray_hits_hollow_circle(
+    double radius, az_vector_t center, az_vector_t start, az_vector_t delta,
+    az_vector_t *pos_out) {
+  assert(radius >= 0.0);
+  // Set up a quadratic equation modeling when the ray will hit the circle
+  // (assuming it travels t*delta from start at time t).  If there is no
+  // solution, the ray misses the circle; otherwise, we still need to check
+  // if the solution is in range.
+  const az_vector_t rel_start = az_vsub(start, center);
+  double t1, t2;
+  if (!solve_quadratic(az_vdot(delta, delta), 2.0 * az_vdot(rel_start, delta),
+                       az_vdot(rel_start, rel_start) - radius * radius,
+                       &t1, &t2)) return false;
+  const double t = (0.0 <= t1 && (t1 <= t2 || t2 < 0.0) ? t1 : t2);
+  if (0.0 <= t && t <= 1.0) {
+    if (pos_out != NULL) *pos_out = az_vadd(start, az_vmul(delta, t));
+    return true;
+  } else return false;
+}
+
 bool az_ray_hits_bounding_circle(az_vector_t start, az_vector_t delta,
                                  az_vector_t center, double radius) {
-  return az_circle_hits_point(center, radius, start, delta, NULL, NULL);
+  return (az_vwithin(start, center, radius) ||
+          ray_hits_hollow_circle(radius, center, start, delta, NULL));
 }
 
 bool az_ray_hits_circle(
     double radius, az_vector_t center, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
-  return az_circle_hits_point(center, radius, start, delta,
-                              point_out, normal_out);
+  // If the ray starts inside the circle, we're immediately done.
+  if (az_vwithin(start, center, radius)) {
+    if (point_out != NULL) *point_out = start;
+    if (normal_out != NULL) *normal_out = az_vsub(start, center);
+    return true;
+  }
+  // Otherwise, see if the ray will hit the circle from the outside.
+  az_vector_t point;
+  if (!ray_hits_hollow_circle(radius, center, start, delta, &point)) {
+    return false;
+  }
+  if (point_out != NULL) *point_out = point;
+  if (normal_out != NULL) *normal_out = az_vsub(point, center);
+  return true;
+}
+
+bool az_ray_hits_arc(
+    double radius, az_vector_t center, double min_theta, double theta_span,
+    az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  assert(theta_span >= 0.0);
+  az_vector_t point;
+  if (!ray_hits_hollow_circle(radius, center, start, delta, &point)) {
+    return false;
+  }
+  const double impact_theta = az_vtheta(az_vsub(point, center));
+  if (az_mod2pi_nonneg(impact_theta - min_theta) > theta_span) return false;
+  if (point_out != NULL) *point_out = point;
+  if (normal_out != NULL) {
+    *normal_out = (az_vwithin(start, center, radius) ?
+                   az_vsub(center, point) : az_vsub(point, center));
+  }
+  return true;
 }
 
 bool az_ray_hits_line_segment(
@@ -268,29 +323,7 @@ bool az_ray_hits_polygon_trans(
 bool az_circle_hits_point(
     az_vector_t point, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *normal_out) {
-  assert(radius >= 0.0);
-  // If the point is already inside the circle, we're immediately done.
-  if (az_vwithin(point, start, radius)) {
-    if (pos_out != NULL) *pos_out = start;
-    if (normal_out != NULL) *normal_out = az_vsub(start, point);
-    return true;
-  }
-  // Set up a quadratic equation modeling when the circle will hit the point
-  // (assuming it travels t*delta from start at time t).  If there is no
-  // solution, the circle misses the point; otherwise, we still need to check
-  // if the solution is in range.
-  const az_vector_t sdelta = az_vsub(start, point);
-  double t1, t2;
-  if (!solve_quadratic(az_vdot(delta, delta), 2.0 * az_vdot(sdelta, delta),
-                       az_vdot(sdelta, sdelta) - radius * radius,
-                       &t1, &t2)) return false;
-  const double t = (0.0 <= t1 && (t1 <= t2 || t2 < 0.0) ? t1 : t2);
-  if (0.0 <= t && t <= 1.0) {
-    const az_vector_t pos = az_vadd(start, az_vmul(delta, t));
-    if (pos_out != NULL) *pos_out = pos;
-    if (normal_out != NULL) *normal_out = az_vsub(pos, point);
-    return true;
-  } else return false;
+  return az_ray_hits_circle(radius, point, start, delta, pos_out, normal_out);
 }
 
 bool az_circle_hits_circle(
@@ -298,8 +331,8 @@ bool az_circle_hits_circle(
     az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out) {
   assert(sradius >= 0.0);
   assert(mradius >= 0.0);
-  return az_circle_hits_point(center, sradius + mradius, start, delta,
-                              pos_out, normal_out);
+  return az_ray_hits_circle(sradius + mradius, center, start, delta,
+                            pos_out, normal_out);
 }
 
 bool az_circle_hits_line(az_vector_t p1, az_vector_t p2, double radius,

@@ -79,7 +79,7 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
 
 bool az_ray_hits_water_surface(
     const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
-    az_vector_t *point_out, double *angle_out);
+    az_vector_t *point_out, az_vector_t *normal_out);
 
 /*===========================================================================*/
 
