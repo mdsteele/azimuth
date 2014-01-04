@@ -135,10 +135,10 @@
 !D1 x-6908.17 y24738.41 a0.261194 r365 u0
 !D1 x-6557.59 y25283.75 a-1.316870 r364 u0
 !B31 x-6015.94 y24836.89 a0.239959 u5
-$k:open1,open3,push1,sstat7;
+$k:open1,open3,activ7;
 !B31 x-6757.11 y24681.33 a-2.881906 u7
-$k:open1,open3,push1,sstat5;
+$k:open1,open3,activ5;
 !B31 x-6361.51 y24497.08 a-1.316642 u8
-$k:open2,open4,push1,sstat6;
+$k:open2,open4,activ6;
 !B31 x-6448.99 y25225.81 a1.821163 u6
-$k:open2,open4,push1,sstat8;
+$k:open2,open4,activ8;

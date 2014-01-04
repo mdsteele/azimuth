@@ -86,6 +86,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SANG:   return "sang";
     case AZ_OP_GSTAT:  return "gstat";
     case AZ_OP_SSTAT:  return "sstat";
+    case AZ_OP_ACTIV:  return "activ";
+    case AZ_OP_DEACT:  return "deact";
     case AZ_OP_BOOM:   return "boom";
     case AZ_OP_GVEL:   return "gvel";
     case AZ_OP_SVEL:   return "svel";
@@ -101,6 +103,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_GCAM:   return "gcam";
     case AZ_OP_DARK:   return "dark";
     case AZ_OP_NPS:    return "nps";
+    case AZ_OP_SHAKE:  return "shake";
     case AZ_OP_QUAKE:  return "quake";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_SCENE:  return "scene";
@@ -188,6 +191,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_SANG:
     case AZ_OP_GSTAT:
     case AZ_OP_SSTAT:
+    case AZ_OP_ACTIV:
+    case AZ_OP_DEACT:
     case AZ_OP_BAD:
       return (ins.immediate != 0.0);
     case AZ_OP_PUSH:
@@ -222,6 +227,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_SSTR:
     case AZ_OP_DARK:
     case AZ_OP_NPS:
+    case AZ_OP_SHAKE:
     case AZ_OP_QUAKE:
     case AZ_OP_MSG:
     case AZ_OP_SCENE:

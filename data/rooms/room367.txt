@@ -1,6 +1,6 @@
 @R z0 p4 b0 d8 g6 n20 w74
   c(47761.40,2007.76,1.970006,0.000000)
-$s:test23,heqz,push1,sstat1,push1,sstat2,push1,sstat3,push1,sstat4,push1,sstat5,push1,sstat6,lock7;
+$s:test23,heqz,activ1,activ2,activ3,activ4,activ5,activ6,lock7;
 !W1 d33 x-18621.90 y43747.61 a0.399229 u0
 !W1 d33 x-18340.25 y43866.43 a0.399229 u0
 !W1 d33 x-18543.13 y44163.05 a-1.171585 u0

@@ -1,6 +1,6 @@
 @R z7 p0 b10 d4 g0 n62 w75
   c(5675.37,966.21,0.850537,0.165413)
-$s:test22,heqz,push1,sstat1,push2,sstat2,push2,sstat3,push2,sstat4;
+$s:test22,heqz,activ1,push2,sstat2,push2,sstat3,push2,sstat4;
 !W1 d1 x3170.65 y5604.71 a0.230633 u0
 !W1 d21 x4404.24 y5059.53 a0.850793 u0
 !W1 d0 x3126.44 y4901.72 a2.586733 u0

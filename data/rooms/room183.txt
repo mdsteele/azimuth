@@ -96,7 +96,7 @@
 !D1 x-3546.40 y33428.59 a0.096934 r184 u0
 !D1 x-1805.34 y33567.02 a-3.079004 r182 u0
 !G1 x-2678.42 y33508.09 a-3.061829 s0.00 o0.00 f100.00 r100.00 l500.00 u12
-$e:gpos,gpos11,vsub,vnorm,push8,dup2,muli50,sub,subi300,abs,subi85,maxi0,divi5,isub8,maxi0,mini8,swap-3,subi1,dup,bnez-14,pop2,sstat1,sstat2,sstat3,sstat4,sstat5,sstat6,sstat7,sstat8,wait0.25,push0,sstat12;
+$e:gpos,gpos11,vsub,vnorm,push8,dup2,muli50,sub,subi300,abs,subi85,maxi0,divi5,isub8,maxi0,mini8,swap-3,subi1,dup,bnez-14,pop2,sstat1,sstat2,sstat3,sstat4,sstat5,sstat6,sstat7,sstat8,wait0.25,deact12;
 !N5/9 x-3173.48 y33298.91 a1.666627 u0
 !N5/1 x-3335.03 y33272.84 a-3.134287 u0
 !N5/1 x-3403.36 y33265.40 a-3.114331 u0

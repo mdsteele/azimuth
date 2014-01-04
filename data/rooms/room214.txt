@@ -1,6 +1,6 @@
 @R z3 p0 b22 d7 g0 n58 w118
   c(44990.99,0.00,1.817577,0.026172)
-$s:test54,beqz2,unlock1,test55,heqz,dark0.5,push1,sstat2,push1,sstat3,push1,sstat4,push1,sstat5,push1,sstat6,push1,sstat7,push1,sstat8,push1,sstat9,push1,sstat10;
+$s:test54,beqz2,unlock1,test55,heqz,dark0.5,activ2,activ3,activ4,activ5,activ6,activ7,activ8,activ9,activ10;
 !W1 d33 x-10785.03 y43763.28 a-2.894682 u0
 !W1 d33 x-10741.90 y43870.64 a1.817622 u0
 !W1 d33 x-10698.27 y43697.51 a1.817622 u0

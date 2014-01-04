@@ -89,6 +89,8 @@ typedef enum {
   AZ_OP_SANG, // pop top, set angle of obj i (of any type) to a
   AZ_OP_GSTAT, // push state of object i (meaning of "state" depends on type)
   AZ_OP_SSTAT, // pop top, set state of object i to a
+  AZ_OP_ACTIV, // set state of object i to 1
+  AZ_OP_DEACT, // set state of object i to 0
   AZ_OP_BOOM, // pop top two, create large explosion at position (a, b)
   // Ship:
   AZ_OP_GVEL, // push (x, y) velocity of ship
@@ -109,6 +111,7 @@ typedef enum {
   AZ_OP_GCAM, // push (x, y) position of camera center
   AZ_OP_DARK, // set room darkness goal to i
   AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
+  AZ_OP_SHAKE, // momentarily shake camera by amplitude i
   AZ_OP_QUAKE, // set camera quake amplitude to i
   // Messages/dialog:
   AZ_OP_MSG, // display text i at bottom of screen

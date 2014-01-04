@@ -86,12 +86,12 @@
 !N4/3 x-14842.04 y46065.81 a0.310974 u0
 !N4/2 x-14827.37 y46079.08 a1.881800 u0
 !B31 x-14804.55 y45672.36 a-2.822882 u3
-$k:open1,push1,sstat4;
+$k:open1,activ4;
 !B31 x-14719.51 y45700.75 a0.311551 u4
-$k:open1,push1,sstat3;
+$k:open1,activ3;
 !B31 x-14895.19 y45953.04 a-2.827974 u5
-$k:open2,push1,sstat6;
+$k:open2,activ6;
 !B31 x-14810.47 y45980.32 a0.311528 u6
-$k:open2,push1,sstat5;
+$k:open2,activ5;
 !B2 x-15292.60 y45850.71 a-0.684506 u0
 !B2 x-14519.71 y46103.30 a-1.789840 u0

@@ -1,6 +1,6 @@
 @R z3 p4 b2 d5 g2 n0 w99
   c(35080.07,1060.13,1.891951,0.000000)
-$s:gang,gang4,sub,mtau,abs,lti1,heqz,push1,sstat1,push1,sstat2,push1,sstat3;
+$s:gang,gang4,sub,mtau,abs,lti1,heqz,activ1,activ2,activ3;
 !W1 d45 x-11363.06 y34462.57 a1.886698 u0
 !W1 d61 x-11325.94 y34326.58 a1.679896 u0
 !W1 d45 x-11288.22 y34180.06 a1.874828 u0
@@ -107,6 +107,6 @@ $s:gang,gang4,sub,mtau,abs,lti1,heqz,push1,sstat1,push1,sstat2,push1,sstat3;
 !D8 x-11362.46 y34155.04 a1.891966 r220 u3
 !G1 x-11240.14 y33786.84 a1.891923 s300.00 o0.00 f80.00 r80.00 l670.00 u0
 !G1 x-11241.19 y33790.69 a1.892063 s0.00 o0.00 f270.00 r270.00 l780.00 u4
-$e:gang,gang4,sub,mtau,abs,lti1,beqz5,open1,open2,open3,jump4,close1,close2,close3,wait0.25,push0,sstat4;
+$e:gang,gang4,sub,mtau,abs,lti1,beqz5,open1,open2,open3,jump4,close1,close2,close3,wait0.25,deact4;
 !B3 x-11334.02 y33570.74 a0.321228 u0
 !B3 x-11204.41 y33980.18 a0.321228 u0

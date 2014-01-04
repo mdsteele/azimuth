@@ -127,23 +127,6 @@ static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
     vm->pc = new_pc - 1; \
   } while (0)
 
-#define GET_UUID(uuid_out) do { \
-    const int slot = (int)ins.immediate; \
-    if (slot < 0 || slot > AZ_NUM_UUID_SLOTS) { \
-      SCRIPT_ERROR("invalid uuid index"); \
-    } \
-    *(uuid_out) = (slot == 0 ? AZ_SHIP_UUID : state->uuids[slot - 1]); \
-  } while (0)
-
-#define GET_UID(uuid_type, uid_out) do { \
-    az_uuid_t uuid; \
-    GET_UUID(&uuid); \
-    if (uuid.type != (uuid_type)) { \
-      SCRIPT_ERROR("invalid uuid type"); \
-    } \
-    *(uid_out) = uuid.uid; \
-  } while (0)
-
 static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
                        az_script_vm_t *target_vm) {
   assert(script != NULL);
@@ -157,14 +140,6 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
 #define SUSPEND(script, target_vm) do { \
     do_suspend(vm, (script), (target_vm)); \
     return; \
-  } while (0)
-
-/*===========================================================================*/
-
-#define GET_OBJECT(object_out) do { \
-    az_uuid_t uuid; \
-    GET_UUID(&uuid); \
-    az_lookup_object(state, uuid, (object_out)); \
   } while (0)
 
 /*===========================================================================*/
@@ -186,6 +161,75 @@ static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
 static double modulo(double a, double b) {
   // If b is zero, return NaN (which will trigger an error).
   return (b == 0.0 ? NAN : az_signmod(a, b, b));
+}
+
+/*===========================================================================*/
+
+#define GET_UUID(uuid_out) do { \
+    const int slot = (int)ins.immediate; \
+    if (slot < 0 || slot > AZ_NUM_UUID_SLOTS) { \
+      SCRIPT_ERROR("invalid uuid index"); \
+    } \
+    *(uuid_out) = (slot == 0 ? AZ_SHIP_UUID : state->uuids[slot - 1]); \
+  } while (0)
+
+#define GET_UID(uuid_type, uid_out) do { \
+    az_uuid_t uuid; \
+    GET_UUID(&uuid); \
+    if (uuid.type != (uuid_type)) { \
+      SCRIPT_ERROR("invalid uuid type"); \
+    } \
+    *(uid_out) = uuid.uid; \
+  } while (0)
+
+#define GET_OBJECT(object_out) do { \
+    az_uuid_t uuid; \
+    GET_UUID(&uuid); \
+    az_lookup_object(state, uuid, (object_out)); \
+  } while (0)
+
+static void set_object_state(az_object_t *object, double value) {
+  switch (object->type) {
+    case AZ_OBJ_NOTHING: break;
+    case AZ_OBJ_BADDIE:
+      assert(object->obj.baddie->kind != AZ_BAD_NOTHING);
+      object->obj.baddie->state = (int)value;
+      break;
+    case AZ_OBJ_DOOR: {
+      az_door_t *door = object->obj.door;
+      assert(door->kind != AZ_DOOR_NOTHING);
+      if (door->kind != AZ_DOOR_PASSAGE &&
+          door->kind != AZ_DOOR_ALWAYS_OPEN &&
+          door->kind != AZ_DOOR_BOSS) {
+        door->is_open = (value != 0.0);
+        door->openness = (value != 0.0 ? 1.0 : 0.0);
+      }
+    } break;
+    case AZ_OBJ_GRAVFIELD:
+      assert(object->obj.gravfield->kind != AZ_GRAV_NOTHING);
+      object->obj.gravfield->script_fired = (value != 0.0);
+      break;
+    case AZ_OBJ_NODE: {
+      az_node_t *node = object->obj.node;
+      assert(node->kind != AZ_NODE_NOTHING);
+      if (node->kind == AZ_NODE_MARKER) {
+        node->subkind.marker = (int)value;
+      } else if (node->kind == AZ_NODE_DOODAD_FG ||
+                 node->kind == AZ_NODE_DOODAD_BG) {
+        if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_STILL) {
+          if (value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_SPIN;
+        } else if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN) {
+          if (!value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_STILL;
+        } else if (node->subkind.doodad == AZ_DOOD_TUBE_WINDOW) {
+          if (value) node->subkind.doodad = AZ_DOOD_BROKEN_TUBE_WINDOW;
+        } else if (node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW) {
+          if (!value) node->subkind.doodad = AZ_DOOD_TUBE_WINDOW;
+        }
+      }
+    } break;
+    case AZ_OBJ_SHIP: break;
+    case AZ_OBJ_WALL: break;
+  }
 }
 
 /*===========================================================================*/
@@ -418,29 +462,26 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
             break;
           case AZ_OBJ_DOOR:
             assert(object.obj.door->kind != AZ_DOOR_NOTHING);
-            if (object.obj.door->kind == AZ_DOOR_PASSAGE) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            value = (object.obj.door->is_open ? 1.0 : 0.0);
+            if (object.obj.door->is_open) value = 1.0;
             break;
           case AZ_OBJ_GRAVFIELD:
             assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
-            value = (object.obj.gravfield->script_fired ? 1.0 : 0.0);
+            if (object.obj.gravfield->script_fired) value = 1.0;
             break;
-          case AZ_OBJ_NODE:
-            assert(object.obj.node->kind != AZ_NODE_NOTHING);
-            if (object.obj.node->kind == AZ_NODE_MARKER) {
-              value = (double)object.obj.node->subkind.marker;
-            } else if (object.obj.node->kind == AZ_NODE_DOODAD_FG ||
-                       object.obj.node->kind == AZ_NODE_DOODAD_BG) {
-              value = (object.obj.node->subkind.doodad ==
-                       AZ_DOOD_DRILL_SHAFT_SPIN ? 1.0 : 0.0);
-            } else SCRIPT_ERROR("invalid node kind");
-            break;
-          case AZ_OBJ_SHIP:
-          case AZ_OBJ_WALL:
-            SCRIPT_ERROR("invalid object type");
-            break;
+          case AZ_OBJ_NODE: {
+            az_node_t *node = object.obj.node;
+            assert(node->kind != AZ_NODE_NOTHING);
+            if (node->kind == AZ_NODE_MARKER) {
+              value = (double)node->subkind.marker;
+            } else if ((node->kind == AZ_NODE_DOODAD_FG ||
+                        node->kind == AZ_NODE_DOODAD_BG) &&
+                       (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN ||
+                        node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW)) {
+              value = 1.0;
+            }
+          } break;
+          case AZ_OBJ_SHIP: break;
+          case AZ_OBJ_WALL: break;
         }
         STACK_PUSH(value);
       } break;
@@ -449,48 +490,17 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         GET_OBJECT(&object);
         double value;
         STACK_POP(&value);
-        switch (object.type) {
-          case AZ_OBJ_NOTHING: break;
-          case AZ_OBJ_BADDIE:
-            assert(object.obj.baddie->kind != AZ_BAD_NOTHING);
-            object.obj.baddie->state = (int)value;
-            break;
-          case AZ_OBJ_DOOR:
-            assert(object.obj.door->kind != AZ_DOOR_NOTHING);
-            if (object.obj.door->kind == AZ_DOOR_PASSAGE ||
-                object.obj.door->kind == AZ_DOOR_ALWAYS_OPEN) {
-              SCRIPT_ERROR("invalid door kind");
-            }
-            object.obj.door->is_open = (value != 0.0);
-            object.obj.door->openness = (value != 0.0 ? 1.0 : 0.0);
-            break;
-          case AZ_OBJ_GRAVFIELD:
-            assert(object.obj.gravfield->kind != AZ_GRAV_NOTHING);
-            object.obj.gravfield->script_fired = (value != 0.0);
-            break;
-          case AZ_OBJ_NODE: {
-            az_node_t *node = object.obj.node;
-            assert(node->kind != AZ_NODE_NOTHING);
-            if (node->kind == AZ_NODE_MARKER) {
-              node->subkind.marker = (int)value;
-            } else if (node->kind == AZ_NODE_DOODAD_FG ||
-                       node->kind == AZ_NODE_DOODAD_BG) {
-              if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_STILL) {
-                if (value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_SPIN;
-              } else if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN) {
-                if (!value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_STILL;
-              } else if (node->subkind.doodad == AZ_DOOD_TUBE_WINDOW) {
-                if (value) node->subkind.doodad = AZ_DOOD_BROKEN_TUBE_WINDOW;
-              } else if (node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW) {
-                if (!value) node->subkind.doodad = AZ_DOOD_TUBE_WINDOW;
-              }
-            } else SCRIPT_ERROR("invalid node kind");
-          } break;
-          case AZ_OBJ_SHIP:
-          case AZ_OBJ_WALL:
-            SCRIPT_ERROR("invalid object type");
-            break;
-        }
+        set_object_state(&object, value);
+      } break;
+      case AZ_OP_ACTIV: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        set_object_state(&object, 1);
+      } break;
+      case AZ_OP_DEACT: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        set_object_state(&object, 0);
       } break;
       case AZ_OP_BOOM: {
         az_vector_t position;
@@ -655,6 +665,9 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           particle->param1 = 50.0 * sqrt(ins.immediate);
         }
       } break;
+      case AZ_OP_SHAKE:
+        az_shake_camera(&state->camera, ins.immediate, ins.immediate * 0.75);
+        break;
       case AZ_OP_QUAKE:
         state->camera.quake_vert = fmax(0, ins.immediate);
         break;
