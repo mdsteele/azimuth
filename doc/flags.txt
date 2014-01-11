@@ -63,3 +63,4 @@
 62: Opened hyper rocket door between Nandiar rooms 176 and 191
 63: Opened lower-right forcefield in Nandiar room 176
 64: Killed Oth Crab/Orb in Nandiar room 176
+65: Killed Oth Orb in Nandiar room 179
