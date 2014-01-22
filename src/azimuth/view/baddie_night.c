@@ -17,7 +17,7 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/baddie_turret.h"
+#include "azimuth/view/baddie_night.h"
 
 #include <assert.h>
 #include <math.h>
@@ -99,6 +99,7 @@ static void draw_nightbug_body(GLfloat green, double invis, float flare,
 
 void az_draw_bad_nightbug(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_NIGHTBUG);
   const float flare = baddie->armor_flare;
   const double invis = fmax(fmax(baddie->param, flare), frozen);
   glPushMatrix(); {
@@ -109,6 +110,7 @@ void az_draw_bad_nightbug(
 
 void az_draw_bad_nightshade(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_NIGHTSHADE);
   const float flare = baddie->armor_flare;
   const double invis = fmax(fmax(baddie->param, flare), frozen);
   glPushMatrix(); {

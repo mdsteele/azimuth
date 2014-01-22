@@ -30,6 +30,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/baddie_chomper.h"
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
 #include "azimuth/view/baddie_turret.h"
@@ -836,90 +837,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       // TODO: Make real graphics for the Forcefiend.
       draw_baddie_outline(baddie, frozen);
       break;
-    case AZ_BAD_STALK_PLANT:
-      // Stalk:
-      for (int j = 3; j < baddie->data->num_components; ++j) {
-        glPushMatrix(); {
-          const az_component_t *component = &baddie->components[j];
-          glTranslated(component->position.x, component->position.y, 0);
-          glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
-          // Thorns:
-          glBegin(GL_TRIANGLE_FAN); {
-            glColor3f(0.75, 0.75, 0.75); glVertex2f(0, 0);
-            glColor3f(0.3, 0.3, 0.3); glVertex2f(0, 8);
-            glVertex2f(-4, 0); glVertex2f(0, -8); glVertex2f(4, 0);
-          } glEnd();
-          // Segment:
-          glBegin(GL_QUAD_STRIP); {
-            glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
-            glVertex2f(-12, 4); glVertex2f(12, 4);
-            glColor3f(0.5 - 0.5 * frozen, 1 - 0.5 * flare, frozen);
-            glVertex2f(-15, 0); glVertex2f(15, 0);
-            glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
-            glVertex2f(-12, -4); glVertex2f(12, -4);
-          } glEnd();
-        } glPopMatrix();
-      }
-      // Base of stalk:
-      glPushMatrix(); {
-        const az_component_t *base = &baddie->components[0];
-        glTranslated(base->position.x, base->position.y, 0);
-        glRotated(AZ_RAD2DEG(base->angle), 0, 0, 1);
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor3f(0.5 - 0.5 * frozen, 1 - 0.5 * flare, frozen);
-          glVertex2f(0, 0);
-          glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
-          glVertex2f(0, -14); glVertex2f(8, -11); glVertex2f(14, -4);
-          glColor3f(0.5 - 0.5 * frozen, 1 - 0.5 * flare, frozen);
-          glVertex2f(14, 0);
-          glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
-          glVertex2f(14, 4); glVertex2f(8, 11); glVertex2f(0, 14);
-        } glEnd();
-      } glPopMatrix();
-      // Inside mouth:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.75 - 0.75 * frozen, 0.25 + 0.5 * flare, 0.5); // reddish
-        glVertex2d(0.5 * baddie->data->main_body.bounding_radius, 0);
-        glColor3f(0.25 - 0.25 * frozen, 0.5 * flare,
-                  0.25 * frozen + 0.5 * flare); // dark red
-        const double radius = baddie->data->main_body.bounding_radius;
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      // Teeth:
-      for (int i = 1; i <= 2; ++i) {
-        glPushMatrix(); {
-          const az_component_t *pincer = &baddie->components[i];
-          glTranslated(pincer->position.x, pincer->position.y, 0);
-          glRotated(AZ_RAD2DEG(pincer->angle), 0, 0, 1);
-          glBegin(GL_TRIANGLES); {
-            glColor3f(0.5, 0.5, 0.5);
-            const GLfloat y = (i % 2 ? -4 : 4);
-            for (GLfloat x = 25 - 3 * i; x > 5; x -= 6) {
-              glVertex2d(x + 2, 0); glVertex2d(x, y); glVertex2d(x - 2, 0);
-            }
-          } glEnd();
-        } glPopMatrix();
-      }
-      // Pincers:
-      glColor3f(0.25 + 0.75 * flare, 1 - 0.5 * flare, frozen);
-      for (int i = 1; i <= 2; ++i) {
-        glPushMatrix(); {
-          const az_component_t *pincer = &baddie->components[i];
-          glTranslated(pincer->position.x, pincer->position.y, 0);
-          glRotated(AZ_RAD2DEG(pincer->angle), 0, 0, 1);
-          glBegin(GL_TRIANGLE_FAN); {
-            glColor3f(0.5 - 0.5 * frozen, 1 - 0.5 * flare, frozen);
-            glVertex2f(0, 0);
-            glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen);
-            const az_polygon_t poly = baddie->data->components[i].polygon;
-            for (int j = 0, k = poly.num_vertices; j >= 0; j = --k) {
-              glVertex2d(poly.vertices[j].x, poly.vertices[j].y);
-            }
-          } glEnd();
-        } glPopMatrix();
-      }
+    case AZ_BAD_CHOMPER_PLANT:
+      az_draw_bad_chomper_plant(baddie, frozen, clock);
       break;
     case AZ_BAD_COPTER_HORZ:
     case AZ_BAD_COPTER_VERT:
@@ -1385,6 +1304,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_NIGHTSHADE:
       az_draw_bad_nightshade(baddie, frozen, clock);
+      break;
+    case AZ_BAD_AQUATIC_CHOMPER:
+      az_draw_bad_aquatic_chomper(baddie, frozen, clock);
       break;
   }
 }

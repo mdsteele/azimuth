@@ -26,6 +26,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/baddie_chomper.h"
 #include "azimuth/tick/baddie_kilofuge.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
@@ -1209,95 +1210,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_FORCEFIEND:
       tick_forcefiend(state, baddie, time);
       break;
-    case AZ_BAD_STALK_PLANT:
-      {
-        az_component_t *base = &baddie->components[0];
-        // Get the absolute position of the base.
-        const az_vector_t base_pos =
-          az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
-        const double base_angle = az_mod2pi(baddie->angle + base->angle);
-        // Pick a new position for the head.
-        const bool line_of_sight = az_can_see_ship(state, baddie);
-        const az_vector_t ship_pos = state->ship.position;
-        const double head_angle = az_angle_towards(baddie->angle,
-            (line_of_sight ? AZ_DEG2RAD(120) : AZ_DEG2RAD(60)) * time,
-            (!line_of_sight ? base_angle :
-             az_vtheta(az_vsub(ship_pos, baddie->position))));
-        az_vector_t head_pos = baddie->position;
-        // State 0: Move head in a circle.
-        if (baddie->state == 0) {
-          baddie->param += time * 400 / az_vdist(head_pos, ship_pos);
-          const az_vector_t goal =
-            az_vadd(az_vadd(base_pos, az_vpolar(140, base_angle)),
-                    az_vpolar(40, baddie->param));
-          const double tracking_base = 0.1; // smaller = faster tracking
-          const az_vector_t delta =
-            az_vmul(az_vsub(goal, head_pos), 1.0 - pow(tracking_base, time));
-          az_vpluseq(&head_pos, delta);
-          if (baddie->cooldown <= 0.0 && line_of_sight &&
-              az_vwithin(ship_pos, head_pos, 150)) {
-            baddie->cooldown = az_random(0.35, 0.8);
-            baddie->state = 1;
-          }
-        }
-        // State 1: Rear back, then lunge at ship.
-        else {
-          if (!az_vwithin(head_pos, base_pos, 180) ||
-              (line_of_sight && az_vwithin(head_pos, ship_pos, 20))) {
-            baddie->cooldown = 1.5;
-            baddie->state = 0;
-          } else if (baddie->cooldown > 0) {
-            const az_vector_t goal =
-              az_vadd(base_pos, az_vpolar(50, base_angle));
-            const double tracking_base = 0.001; // smaller = faster tracking
-            const az_vector_t delta =
-              az_vmul(az_vsub(goal, head_pos), 1.0 - pow(tracking_base, time));
-            az_vpluseq(&head_pos, delta);
-          } else {
-            az_vpluseq(&head_pos, az_vpolar(600 * time, head_angle));
-          }
-        }
-        // The baddie is centered on the head, so move the baddie to where we
-        // want the head to be.
-        baddie->position = head_pos;
-        baddie->angle = head_angle;
-        // Now that the head has moved, move the base component so that it
-        // stays in the same absolute position as before.
-        base->position = az_vrotate(az_vsub(base_pos, baddie->position),
-                                    -baddie->angle);
-        base->angle = az_mod2pi(base_angle - baddie->angle);
-        // Arrange the stalk segments along a cubic bezier curve from the head
-        // to the base.
-        const az_vector_t ctrl1 = az_vsub(head_pos, az_vpolar(60, head_angle));
-        const az_vector_t ctrl2 = az_vadd(base_pos, az_vpolar(50, base_angle));
-        for (int i = 0; i < 9; ++i) {
-          az_component_t *segment = &baddie->components[i + 3];
-          const double t = (0.5 + i) / 10.0;
-          const double s = 1.0 - t;
-          segment->position = az_vrotate(az_vsub(
-              az_vadd(az_vadd(az_vmul(head_pos, s*s*s),
-                              az_vmul(ctrl1, 3*s*s*t)),
-                      az_vadd(az_vmul(ctrl2, 3*s*t*t),
-                              az_vmul(base_pos, t*t*t))),
-              baddie->position), -baddie->angle);
-          segment->angle = az_mod2pi(az_vtheta(az_vadd(
-              az_vadd(az_vmul(head_pos, -3*s*s),
-                      az_vmul(ctrl1, 3*s*s - 6*s*t)),
-              az_vadd(az_vmul(ctrl2, 6*s*t - 3*t*t),
-                      az_vmul(base_pos, 3*t*t)))) - baddie->angle);
-        }
-        // Open/close the jaws.
-        const double max_angle = AZ_DEG2RAD(40);
-        const double old_angle = baddie->components[1].angle;
-        const double new_angle =
-          (baddie->state == 0 ||
-           (baddie->state == 1 && line_of_sight &&
-            az_vwithin(head_pos, ship_pos, 50)) ?
-           fmax(0.0, old_angle - 4.0 * time) :
-           fmin(max_angle, old_angle + 2.0 * time));
-        baddie->components[1].angle = new_angle;
-        baddie->components[2].angle = -new_angle;
-      }
+    case AZ_BAD_CHOMPER_PLANT:
+      az_tick_bad_chomper_plant(state, baddie, time);
       break;
     case AZ_BAD_COPTER_HORZ:
     case AZ_BAD_COPTER_VERT:
@@ -1699,6 +1613,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         goal_mandibles_angle = -goal_mandibles_angle;
       }
     } break;
+    case AZ_BAD_AQUATIC_CHOMPER:
+      az_tick_bad_aquatic_chomper(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

@@ -158,8 +158,10 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_SPINE_MINE,
   AZ_BAD_SUPER_SPINER,
   AZ_BAD_URCHIN,
+  // Chompers:
+  AZ_BAD_CHOMPER_PLANT,
+  AZ_BAD_AQUATIC_CHOMPER,
   // Miscellaneous:
-  AZ_BAD_STALK_PLANT,
   AZ_BAD_LEAPER,
   AZ_BAD_CLAM,
   AZ_BAD_FIREBALL_MINE,
