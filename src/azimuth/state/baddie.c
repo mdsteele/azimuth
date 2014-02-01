@@ -104,9 +104,11 @@ static const az_vector_t clam_shell2_vertices[] = {
 };
 static az_component_data_t clam_components[] = {
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell1_vertices),
-    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE | AZ_DMGF_CPLUS) },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                   AZ_DMGF_ROCKET | AZ_DMGF_BEAM), .impact_damage = 10.0 },
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell2_vertices),
-    .immunities = ~(AZ_DMGF_FREEZE | AZ_DMGF_PIERCE | AZ_DMGF_CPLUS) }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                   AZ_DMGF_ROCKET | AZ_DMGF_BEAM), .impact_damage = 10.0 }
 };
 
 static const az_vector_t nightbug_vertices[] = {
@@ -579,6 +581,22 @@ static az_component_data_t nightshade_components[] = {
     .polygon = AZ_INIT_POLYGON(nightshade_right_mandible_vertices) }
 };
 
+static const az_vector_t small_fish_head_vertices[] = {
+  {-8, -6}, {6, -8}, {10, -5}, {12, 0}, {10, 5}, {6, 8}, {-8, 6}, {-10, 0}
+};
+static const az_vector_t small_fish_middle_vertices[] = {
+  {10, 0}, {8, 6}, {-8, 4}, {-10, 0}, {-8, -4}, {8, -6}
+};
+static const az_vector_t small_fish_tail_vertices[] = {
+  {8, 4}, {-10, 0}, {8, -4}
+};
+static az_component_data_t small_fish_components[] = {
+  { .polygon = AZ_INIT_POLYGON(small_fish_middle_vertices),
+    .init_position = {-15, 0}, .impact_damage = 12.0 },
+  { .polygon = AZ_INIT_POLYGON(small_fish_tail_vertices),
+    .init_position = {-30, 0}, .impact_damage = 12.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -683,8 +701,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_DRAGONFLY] = {
     .max_health = 8.0, .color = {255, 64, 0, 255},
-    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
-                          AZ_PUPF_MEDIUM_SHIELDS),
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 8.0 }
@@ -707,7 +724,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_HORNET] = {
     .max_health = 8.0, .color = {192, 192, 0, 255},
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_EMBERS,
-    .potential_pickups = AZ_PUPF_ALL,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 5.0 }
   },
@@ -784,7 +801,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_ORB_1] = {
-    .max_health = 30.0,
+    .max_health = 30.0, .potential_pickups = ~AZ_PUPF_NOTHING,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
@@ -811,7 +828,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_SECURITY_DRONE] = {
     .max_health = 15.0, .overall_bounding_radius = 31.7,
-    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
@@ -819,7 +836,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_SMALL_TRUCK] = {
     .max_health = 40.0,
-    .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_truck_vertices),
@@ -888,7 +905,8 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(chomper_plant_components)
   },
   [AZ_BAD_COPTER_HORZ] = {
-    .max_health = 40.0, .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .max_health = 40.0,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
@@ -897,7 +915,8 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_COPTER_VERT] = {
-    .max_health = 40.0, .potential_pickups = ~AZ_PUPF_SMALL_SHIELDS,
+    .max_health = 40.0,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
@@ -1040,6 +1059,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_OTH_ORB_2] = {
     .max_health = 50.0,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
@@ -1123,6 +1143,15 @@ static az_baddie_data_t baddie_datas[] = {
     .properties = AZ_BADF_DRAW_BG, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(aquatic_chomper_components)
+  },
+  [AZ_BAD_SMALL_FISH] = {
+    .max_health = 10.0, .overall_bounding_radius = 45.0,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {230, 0, 105, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .properties = AZ_BADF_DRAW_BG,
+    .main_body = { .polygon = AZ_INIT_POLYGON(small_fish_head_vertices),
+                   .impact_damage = 15.0 },
+    DECL_COMPONENTS(small_fish_components)
   }
 };
 

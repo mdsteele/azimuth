@@ -1616,6 +1616,41 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_AQUATIC_CHOMPER:
       az_tick_bad_aquatic_chomper(state, baddie, time);
       break;
+    case AZ_BAD_SMALL_FISH:
+      // TODO(mdsteele): Prevent fish from leaving water.
+      // If the ship is nearby and visible, chase it.
+      if (az_ship_in_range(state, baddie, 180) &&
+          az_can_see_ship(state, baddie)) {
+        az_snake_towards(baddie, time, 0, 100.0, 150.0, state->ship.position);
+      } else {
+        // Otherwise, we'll head in one of eight directions, determined by the
+        // baddie's current state.
+        const double abs_angle = az_vtheta(baddie->position) +
+          AZ_DEG2RAD(45) * az_modulo(baddie->state, 8);
+        const double rel_angle = az_mod2pi(abs_angle - baddie->angle);
+        const az_vector_t dest =
+          az_vadd(baddie->position, az_vpolar(300.0, abs_angle));
+        // Check if we're about to hit a wall.
+        const double dist =
+          dist_until_hit_wall(state, baddie, 100.0, rel_angle);
+        const az_camera_bounds_t *bounds =
+          &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+        // If we've somehow ended up within a wall (or nearly so) or outside
+        // the room, head back to the ship position to try to fix it.
+        if (dist < 1.0 || !az_position_visible(bounds, baddie->position)) {
+          az_snake_towards(baddie, time, 0, 70.0, 150.0, state->ship.position);
+          baddie->state = az_randint(0, 7);
+        } else {
+          // Otherwise head towards our current destination.
+          az_snake_towards(baddie, time, 0, 70.0, 150.0, dest);
+          // If we're getting near a wall ahead, turn back.
+          if (dist <= 90.0) {
+            const int shift = (az_randint(0, 1) ? 3 : -3);
+            baddie->state = az_modulo(baddie->state + shift, 8);
+          }
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

@@ -35,8 +35,10 @@
 
 /*===========================================================================*/
 
-// Below is a simple random number generator based on the MWC algorithm from:
-//   http://www.bobwheeler.com/statistics/Password/MarsagliaPost.txt
+// Below is a simple random number generator, based on the MWC and UNI
+// algorithms from George Marsaglia's post to sci.stat.math on 12 Jan 1999,
+// which can be found here:
+//   https://groups.google.com/forum/#!topic/sci.stat.math/5yb0jwf1stw
 // Using this rather than az_random() allows us to easily produce the same
 // "random" sequence over and over, which we use to generate a starfield that
 // looks random, but can be consistently regenerated on each frame.

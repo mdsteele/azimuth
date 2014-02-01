@@ -163,6 +163,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_AQUATIC_CHOMPER,
   // Miscellaneous:
   AZ_BAD_LEAPER,
+  AZ_BAD_SMALL_FISH,
   AZ_BAD_CLAM,
   AZ_BAD_FIREBALL_MINE,
   AZ_BAD_NIGHTBUG,
