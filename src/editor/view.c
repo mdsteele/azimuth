@@ -35,15 +35,12 @@
 #include "azimuth/view/gravfield.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
+#include "azimuth/view/util.h"
 #include "azimuth/view/wall.h"
 #include "editor/list.h"
 #include "editor/state.h"
 
 /*===========================================================================*/
-
-static inline void az_gl_vertex(az_vector_t v) {
-  glVertex2d(v.x, v.y);
-}
 
 static void arc_vertices(double r, double start_theta, double end_theta) {
   const double diff = end_theta - start_theta;

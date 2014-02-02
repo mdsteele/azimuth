@@ -31,6 +31,7 @@
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -158,16 +159,16 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     glBegin(GL_QUADS); {
       const GLfloat x1 = 30.0;
       const GLfloat x2 = 40.0 - 10.0 * door->openness;
-      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      az_gl_color(color1);
       glVertex2f(x1, 20);
       glVertex2f(x1, -20);
       glVertex2f(x2, -10);
       glVertex2f(x2, 10);
       for (int i = -1; i <= 1; i += 2) {
-        glColor4ub(color2.r, color2.g, color2.b, color2.a);
+        az_gl_color(color2);
         glVertex2f(x2, i * 35);
         glVertex2f(x1, i * 50);
-        glColor4ub(color1.r, color1.g, color1.b, color1.a);
+        az_gl_color(color1);
         glVertex2f(x1, i * (20 + 10.0 * door->openness));
         glVertex2f(x2, i * (10.0 + 25.0 * door->openness));
       }

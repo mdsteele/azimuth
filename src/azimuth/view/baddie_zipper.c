@@ -25,15 +25,12 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
 static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
-static void az_gl_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
 }
 
 /*===========================================================================*/

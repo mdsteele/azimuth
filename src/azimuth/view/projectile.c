@@ -28,6 +28,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/gravfield.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -80,7 +81,7 @@ static void draw_spark(double age, double radius, az_color_t color) {
   glBegin(GL_TRIANGLE_FAN); {
     glColor4f(1, 1, 1, 0.8);
     glVertex2f(0, 0);
-    glColor4ub(color.r, color.g, color.b, color.a);
+    az_gl_color(color);
     for (int i = 0; i <= 360; i += 45) {
       const double r = (i % 2 ? radius : 0.5 * radius);
       const double theta = AZ_DEG2RAD(i + 400 * age);

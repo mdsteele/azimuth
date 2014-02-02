@@ -36,19 +36,12 @@
 #include "azimuth/view/baddie_turret.h"
 #include "azimuth/view/baddie_wyrm.h"
 #include "azimuth/view/baddie_zipper.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
 static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
-static void az_gl_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
-
-static inline void az_gl_vertex(az_vector_t v) {
-  glVertex2d(v.x, v.y);
 }
 
 static void draw_component_outline(const az_component_data_t *component) {

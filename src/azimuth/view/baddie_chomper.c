@@ -27,15 +27,12 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
 static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
-static void az_gl_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
 }
 
 /*===========================================================================*/
@@ -108,7 +105,7 @@ void draw_pincers(const az_baddie_t *baddie, az_color_t center_color,
         glColor3f(0.5, 0.5, 0.5);
         const GLfloat y = (i % 2 ? -4 : 4);
         for (GLfloat x = 25 - 3 * i; x > 5; x -= 6) {
-          glVertex2d(x + 2, 0); glVertex2d(x, y); glVertex2d(x - 2, 0);
+          glVertex2f(x + 2, 0); glVertex2f(x, y); glVertex2f(x - 2, 0);
         }
       } glEnd();
     } glPopMatrix();
@@ -125,7 +122,7 @@ void draw_pincers(const az_baddie_t *baddie, az_color_t center_color,
         az_gl_color(side_color);
         const az_polygon_t poly = baddie->data->components[i].polygon;
         for (int j = 0, k = poly.num_vertices; j >= 0; j = --k) {
-          glVertex2d(poly.vertices[j].x, poly.vertices[j].y);
+          az_gl_vertex(poly.vertices[j]);
         }
       } glEnd();
     } glPopMatrix();

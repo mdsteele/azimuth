@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -58,9 +59,9 @@ static void draw_computer_circle(
     for (int i = 0; i <= 360; i += 30) {
       const double c = cos(AZ_DEG2RAD(i));
       const double s = sin(AZ_DEG2RAD(i));
-      glColor4ub(color1.r, color1.g, color1.b, color1.a);
+      az_gl_color(color1);
       glVertex2d(cx + r1 * c, cy + r1 * s);
-      glColor4ub(color2.r, color2.g, color2.b, color2.a);
+      az_gl_color(color2);
       glVertex2d(cx + r2 * c, cy + r2 * s);
     }
   } glEnd();
@@ -70,7 +71,7 @@ static void draw_computer_blinkenlight(
     double cx, double cy, az_color_t color1) {
   const double r = 2;
   glBegin(GL_TRIANGLE_FAN); {
-    glColor4ub(color1.r, color1.g, color1.b, color1.a);
+    az_gl_color(color1);
     glVertex2d(cx, cy);
     for (int i = 0; i <= 360; i += 30) {
       const double c = cos(AZ_DEG2RAD(i));
@@ -99,10 +100,10 @@ static void draw_portrait_polygon(
   // Draw the quad strip:
   glBegin(GL_QUAD_STRIP); {
     for (int i = n - 1, i2 = 0; i < n; i = i2++) {
-      glColor4ub(color1.r, color1.g, color1.b, color1.a);
-      glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
-      glColor4ub(color2.r, color2.g, color2.b, color2.a);
-      glVertex2d(bezel_vertices[i].x, bezel_vertices[i].y);
+      az_gl_color(color1);
+      az_gl_vertex(polygon.vertices[i]);
+      az_gl_color(color2);
+      az_gl_vertex(bezel_vertices[i]);
     }
   } glEnd();
 }

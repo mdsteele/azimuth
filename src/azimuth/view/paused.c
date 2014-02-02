@@ -38,12 +38,9 @@
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/hud.h"
 #include "azimuth/view/string.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
-
-static inline void az_gl_vertex(az_vector_t v) {
-  glVertex2d(v.x, v.y);
-}
 
 static void draw_bezel_box(double bezel, double x, double y,
                            double w, double h) {
@@ -79,7 +76,7 @@ static void begin_map_marker(az_color_t color, az_vector_t center) {
   glPushMatrix();
   glTranslated(center.x, center.y, 0);
   glScalef(MINIMAP_ZOOM, MINIMAP_ZOOM, 0);
-  glColor4ub(color.r, color.g, color.b, color.a);
+  az_gl_color(color);
   glBegin(GL_QUADS); {
     glVertex2f(4, 4); glVertex2f(-4, 4); glVertex2f(-4, -4); glVertex2f(4, -4);
   } glEnd();

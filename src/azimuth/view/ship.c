@@ -32,12 +32,9 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
-
-static inline void az_gl_vertex(az_vector_t v) {
-  glVertex2d(v.x, v.y);
-}
 
 void az_draw_ship(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
