@@ -64,3 +64,4 @@
 63: Opened lower-right forcefield in Nandiar room 176
 64: Killed Oth Crab/Orb in Nandiar room 176
 65: Killed Oth Orb in Nandiar room 179
+66: Opened locked door in Cnidam room 312
