@@ -835,14 +835,14 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(security_drone_components)
   },
   [AZ_BAD_SMALL_TRUCK] = {
-    .max_health = 40.0,
+    .max_health = 32.0, // Can be frozen by a charge/freeze shot.
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_truck_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
-                                  AZ_DMGF_REACTIVE), .impact_damage = 8.0 }
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                   .impact_damage = 8.0 }
   },
   [AZ_BAD_HEAT_RAY] = {
     .max_health = 40.0,
