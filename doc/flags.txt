@@ -65,3 +65,4 @@
 64: Killed Oth Crab/Orb in Nandiar room 176
 65: Killed Oth Orb in Nandiar room 179
 66: Opened locked door in Cnidam room 312
+67: Opened locked door in Cnidam room 308
