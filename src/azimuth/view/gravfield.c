@@ -157,7 +157,7 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
     for (int i = 0; i <= num_steps; ++i) {
       const double inner_theta = inner_start_theta + i * inner_step;
       const double outer_theta = outer_start_theta + i * outer_step;
-      glColor4f(0, 0, 0.4, 0.75);
+      glColor4f(0.1, 0.1, 0.4, 0.6);
       glVertex2d(inner_radius * cos(inner_theta) - position_norm,
                  inner_radius * sin(inner_theta));
       glColor4f(0.3, 0.6, 1, 0.3);

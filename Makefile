@@ -24,14 +24,14 @@ OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
 CFLAGS = -Wall -Wempty-body -Winline -Wmissing-field-initializers \
-         -Wold-style-definition -Woverride-init -Wshadow -Wsign-compare \
-         -Wstrict-prototypes -Wundef -Werror -O1 -I$(SRCDIR)
+         -Wold-style-definition -Winitializer-overrides -Wshadow \
+         -Wsign-compare -Wstrict-prototypes -Wundef -Werror -O1 -I$(SRCDIR)
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
 define compile-sys
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(CFLAGS)
+	@gcc -o $@ -c $< $(CFLAGS) -Wno-objc-protocol-method-implementation
 endef
 define compile-c99
 	@echo "Compiling $@"

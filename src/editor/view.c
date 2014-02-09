@@ -121,8 +121,15 @@ static void draw_zone_swatch(az_editor_state_t *state,
     } glEnd();
   }
   // Draw a black X if the room is dark.
+  double darkness = 0.0;
   if (room->properties & AZ_ROOMF_DARK) {
-    glColor3f(0, 0, 0);
+    darkness = 1.0;
+  } else if (room->on_start != NULL && room->on_start->num_instructions > 0 &&
+             room->on_start->instructions[0].opcode == AZ_OP_DARK) {
+    darkness = room->on_start->instructions[0].immediate;
+  }
+  if (darkness > 0.0) {
+    glColor4f(0, 0, 0, darkness);
     glBegin(GL_LINES); {
       az_gl_vertex(top_left); az_gl_vertex(bot_right);
       az_gl_vertex(bot_left); az_gl_vertex(top_right);
