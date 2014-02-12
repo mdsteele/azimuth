@@ -1121,6 +1121,45 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {0, 64, 24, 255},
     .elasticity = 0.1, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Solid-colored dark blue rectangle:
+  [118] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {80, 24, 144, 255}, .color2 = {80, 24, 144, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Dark blue straight-ish long wall:
+  [119] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_42)
+  },
+  // Dark blue straight-ish short wall:
+  [120] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_61)
+  },
+  // Dark blue curved wall:
+  [121] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
+    .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
+    .color3 = {0, 0, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Dark blue curved wall:
+  [122] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.6,
+    .color1 = {64, 16, 128, 255}, .color3 = {80, 24, 144, 255},
+    .color2 = {0, 0, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   }
 };
 
