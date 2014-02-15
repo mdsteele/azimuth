@@ -1,4 +1,4 @@
-@P z8 r450 t86 s6 x0.00 y50000.00 a-1.570796
+@P z8 r450 t87 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -364,3 +364,7 @@
   High-Energy Lab"
 !T85"
   Frozen Lake"
+!T86"
+  You should head west from here, to the Nandiar
+  region.  The location has been marked on your
+  map."

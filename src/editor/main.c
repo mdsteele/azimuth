@@ -1091,10 +1091,13 @@ static void try_set_door_dest(void) {
 
 static void begin_set_marker_flag(void) {
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  if (room->properties & AZ_ROOMF_MARKER) {
-    az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "%d",
+  if (room->properties & AZ_ROOMF_MARK_IF_CLR) {
+    az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "c%d",
                         (int)room->marker_flag);
-  } else az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, " ");
+  } else if (room->properties & AZ_ROOMF_MARK_IF_SET) {
+    az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "s%d",
+                        (int)room->marker_flag);
+  } else az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "c");
 }
 
 static void try_set_marker_flag(void) {
@@ -1103,14 +1106,21 @@ static void try_set_marker_flag(void) {
   assert(state.text.buffer[state.text.length] == '\0');
   az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
   if (state.text.length == 0) {
-    room->properties &= ~AZ_ROOMF_MARKER;
+    room->properties &= ~(AZ_ROOMF_MARK_IF_CLR | AZ_ROOMF_MARK_IF_SET);
     room->marker_flag = 0;
   } else {
+    char kind;
     int flag, count;
-    if (sscanf(state.text.buffer, "%d%n", &flag, &count) < 1) return;
+    if (sscanf(state.text.buffer, "%c%d%n", &kind, &flag, &count) < 2) return;
     if (count != state.text.length) return;
     if (flag < 0 || flag >= AZ_MAX_NUM_FLAGS) return;
-    room->properties |= AZ_ROOMF_MARKER;
+    if (kind == 'c') {
+      room->properties &= ~AZ_ROOMF_MARK_IF_SET;
+      room->properties |= AZ_ROOMF_MARK_IF_CLR;
+    } else if (kind == 's') {
+      room->properties &= ~AZ_ROOMF_MARK_IF_CLR;
+      room->properties |= AZ_ROOMF_MARK_IF_SET;
+    } else return;
     room->marker_flag = (az_flag_t)flag;
   }
   set_room_unsaved(room);

@@ -91,7 +91,8 @@ static void parse_room_header(az_load_room_t *loader) {
   if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
   loader->room->zone_key = (az_zone_key_t)zone_index;
   loader->room->properties = (az_room_flags_t)properties;
-  if (loader->room->properties & AZ_ROOMF_MARKER) {
+  if (loader->room->properties & (AZ_ROOMF_MARK_IF_CLR |
+                                  AZ_ROOMF_MARK_IF_SET)) {
     int marker_flag;
     READ("/%d", &marker_flag);
     if (marker_flag < 0 || marker_flag >= AZ_MAX_NUM_FLAGS) FAIL();
@@ -352,7 +353,7 @@ static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
 
 static bool write_room(const az_room_t *room, FILE *file) {
   WRITE("@R z%d p%u", (int)room->zone_key, (unsigned int)room->properties);
-  if (room->properties & AZ_ROOMF_MARKER) {
+  if (room->properties & (AZ_ROOMF_MARK_IF_CLR | AZ_ROOMF_MARK_IF_SET)) {
     WRITE("/%d", (int)room->marker_flag);
   }
   WRITE(" b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",

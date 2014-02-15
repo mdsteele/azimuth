@@ -57,7 +57,7 @@ static void draw_bezel_box(double bezel, double x, double y,
 
 #define MINIMAP_ZOOM 75.0
 
-static void draw_boss_marker(az_vector_t center, az_clock_t clock) {
+static void draw_map_marker(az_vector_t center, az_clock_t clock) {
   glPushMatrix(); {
     glTranslated(center.x, center.y, 0);
     glRotatef(3 * az_clock_mod(120, 1, clock), 0, 0, 1);
@@ -72,7 +72,7 @@ static void draw_boss_marker(az_vector_t center, az_clock_t clock) {
   } glPopMatrix();
 }
 
-static void begin_map_marker(az_color_t color, az_vector_t center) {
+static void begin_map_label(az_color_t color, az_vector_t center) {
   glPushMatrix();
   glTranslated(center.x, center.y, 0);
   glScalef(MINIMAP_ZOOM, MINIMAP_ZOOM, 0);
@@ -84,7 +84,7 @@ static void begin_map_marker(az_color_t color, az_vector_t center) {
   glBegin(GL_LINE_STRIP);
 }
 
-static void end_map_marker(void) {
+static void end_map_label(void) {
   glEnd();
   glPopMatrix();
 }
@@ -105,43 +105,54 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
   const az_player_t *player = &ship->player;
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
-    const bool visited = az_test_room_visited(player, i);
-    const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
-      az_test_zone_mapped(player, room->zone_key);
-    if (!visited && !mapped) continue;
-
-    az_draw_minimap_room(planet, room, visited, false);
-
     const az_camera_bounds_t *bounds = &room->camera_bounds;
     const az_vector_t center =
       (bounds->theta_span >= 6.28 && bounds->min_r < AZ_SCREEN_HEIGHT ?
        AZ_VZERO : az_bounds_center(bounds));
 
-    // Draw the boss marker if the room should have one.
-    if ((room->properties & AZ_ROOMF_MARKER) &&
-        !az_test_flag(player, room->marker_flag)) {
-      draw_boss_marker(center, state->clock);
+    const bool visited = az_test_room_visited(player, i);
+    const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
+      az_test_zone_mapped(player, room->zone_key);
+
+    if (!visited && !mapped) {
+      // The room isn't visible on the minimap.  Even in this case, however,
+      // we might need to draw a map marker.
+      if ((room->properties & AZ_ROOMF_MARK_IF_SET) &&
+          az_test_flag(player, room->marker_flag)) {
+        draw_map_marker(center, state->clock);
+      }
+      continue;
     }
 
-    // Draw a console marker (if any).  We mark all save rooms on the map, but
+    az_draw_minimap_room(planet, room, visited, false);
+
+    // Draw the map marker if the room should have one.
+    if (((room->properties & AZ_ROOMF_MARK_IF_CLR) &&
+         !az_test_flag(player, room->marker_flag)) ||
+        ((room->properties & AZ_ROOMF_MARK_IF_SET) &&
+         az_test_flag(player, room->marker_flag))) {
+      draw_map_marker(center, state->clock);
+    }
+
+    // Draw a console label (if any).  We mark all save rooms on the map, but
     // only mark refill/comm rooms if we've actually visited them.
     if (az_clock_mod(2, 30, state->clock) == 0) {
       if (room->properties & AZ_ROOMF_WITH_SAVE) {
-        begin_map_marker((az_color_t){128, 255, 128, 255}, center); {
+        begin_map_label((az_color_t){128, 255, 128, 255}, center); {
           glVertex2f(2, 2); glVertex2f(-2, 2); glVertex2f(-2, 0);
           glVertex2f(2, 0); glVertex2f(2, -2); glVertex2f(-2, -2);
-        } end_map_marker();
+        } end_map_label();
       } else if (visited) {
         if (room->properties & AZ_ROOMF_WITH_REFILL) {
-          begin_map_marker((az_color_t){255, 255, 128, 255}, center); {
+          begin_map_label((az_color_t){255, 255, 128, 255}, center); {
             glVertex2f(-2, -2); glVertex2f(-2, 2); glVertex2f(2, 2);
             glVertex2f(2, 0); glVertex2f(-2, 0); glVertex2f(2, -2);
-          } end_map_marker();
+          } end_map_label();
         } else if (room->properties & AZ_ROOMF_WITH_COMM) {
-          begin_map_marker((az_color_t){128, 128, 255, 255}, center); {
+          begin_map_label((az_color_t){128, 128, 255, 255}, center); {
             glVertex2f(2, 2); glVertex2f(-2, 2);
             glVertex2f(-2, -2); glVertex2f(2, -2);
-          } end_map_marker();
+          } end_map_label();
         }
       }
     }

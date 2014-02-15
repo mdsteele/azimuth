@@ -91,13 +91,17 @@ typedef struct {
 
 // Bitset of flags dictating special room behavior:
 typedef uint_fast8_t az_room_flags_t;
-// HEATED: the room is very hot, and deals damage unless you have Thermal Armor
+// HEATED: The room is hot, and deals damage unless you have Thermal Armor.
 #define AZ_ROOMF_HEATED      ((az_room_flags_t)(1u << 1))
-// UNMAPPED: the room is not included in the map data for the room's zone
+// UNMAPPED: The room is not included in the map data for the room's zone.
 #define AZ_ROOMF_UNMAPPED    ((az_room_flags_t)(1u << 2))
-// MARKER: the room should have a map marker until the marker_flag flag is set
-#define AZ_ROOMF_MARKER      ((az_room_flags_t)(1u << 3))
-// WITH_*: the room should be marked on the map as containing the given console
+// MARK_IF_CLR: The room should have a map marker if the marker_flag flag is
+// not set, and the room is visible on the minimap.
+#define AZ_ROOMF_MARK_IF_CLR ((az_room_flags_t)(1u << 3))
+// MARK_IF_SET: The room should have a map marker if the marker_flag flag is
+// set, even if the room isn't visible on the minimap.
+#define AZ_ROOMF_MARK_IF_SET ((az_room_flags_t)(1u << 0))
+// WITH_*: The room is labelled on the map as containing the given console.
 #define AZ_ROOMF_WITH_COMM   ((az_room_flags_t)(1u << 4))
 #define AZ_ROOMF_WITH_REFILL ((az_room_flags_t)(1u << 5))
 #define AZ_ROOMF_WITH_SAVE   ((az_room_flags_t)(1u << 6))
