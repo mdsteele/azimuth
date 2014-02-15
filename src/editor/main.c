@@ -1336,8 +1336,7 @@ static void event_loop(void) {
               if (event.key.command) {
                 if (event.key.shift) auto_set_door_dest();
                 else begin_set_door_dest();
-              } else if (event.key.shift) do_toggle_property(AZ_ROOMF_DARK);
-              else state.tool = AZ_TOOL_DOOR;
+              } else state.tool = AZ_TOOL_DOOR;
               break;
             case AZ_KEY_E:
               if (event.key.command) begin_edit_gravfield();

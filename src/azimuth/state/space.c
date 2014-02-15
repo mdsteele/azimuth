@@ -58,8 +58,7 @@ static void put_uuid(az_space_state_t *state, int slot,
 }
 
 void az_enter_room(az_space_state_t *state, const az_room_t *room) {
-  state->darkness = state->dark_goal =
-    ((room->properties & AZ_ROOMF_DARK) ? 1.0 : 0.0);
+  state->darkness = state->dark_goal = 0.0;
   // Make a map from UUID table indices to the baddie (if any) carrying that
   // object as cargo.
   az_baddie_t *cargo_carriers[AZ_NUM_UUID_SLOTS];

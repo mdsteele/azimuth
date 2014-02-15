@@ -91,8 +91,6 @@ typedef struct {
 
 // Bitset of flags dictating special room behavior:
 typedef uint_fast8_t az_room_flags_t;
-// DARK: the room is very dark, and requires the Infrascanner to see well
-#define AZ_ROOMF_DARK        ((az_room_flags_t)(1u << 0))
 // HEATED: the room is very hot, and deals damage unless you have Thermal Armor
 #define AZ_ROOMF_HEATED      ((az_room_flags_t)(1u << 1))
 // UNMAPPED: the room is not included in the map data for the room's zone

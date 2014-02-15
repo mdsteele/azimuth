@@ -509,7 +509,7 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     az_room_t *room = &planet.rooms[key];
     room->zone_key = eroom->zone_key;
     room->properties = eroom->properties &
-      (AZ_ROOMF_DARK | AZ_ROOMF_HEATED | AZ_ROOMF_MARKER | AZ_ROOMF_UNMAPPED);
+      (AZ_ROOMF_HEATED | AZ_ROOMF_MARKER | AZ_ROOMF_UNMAPPED);
     room->marker_flag = eroom->marker_flag;
     room->camera_bounds = eroom->camera_bounds;
     room->on_start = az_clone_script(eroom->on_start);
