@@ -68,3 +68,4 @@
 67: Opened locked door in Cnidam room 308
 68: Nandiar map room (room 303) marked on map
 69: Used Nandiar map room (room 303)
+70: Cnidam boss room (room 237) marked on map
