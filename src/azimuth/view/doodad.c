@@ -57,6 +57,45 @@ static void draw_drill_shaft(az_clock_t clock) {
   draw_drill_spikes(-AZ_HALF_PI, clock);
 }
 
+static void draw_chain_link_pair(void) {
+  // Facing link:
+  for (int r1 = 3; r1 <= 7; r1 += 4) {
+    const int r2 = 5;
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = 90; i <= 270; i += 30) {
+        glColor3f(0.25, 0.25, 0.25);
+        glVertex2d(3 + r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
+        glColor3f(0.60, 0.60, 0.60);
+        glVertex2d(3 + r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
+      }
+      for (int i = -90; i <= 90; i += 30) {
+        glColor3f(0.25, 0.25, 0.25);
+        glVertex2d(12 + r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
+        glColor3f(0.60, 0.60, 0.60);
+        glVertex2d(12 + r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
+      }
+      glColor3f(0.25, 0.25, 0.25); glVertex2d(3, r1);
+      glColor3f(0.60, 0.60, 0.60); glVertex2d(3, r2);
+    } glEnd();
+  }
+  // On-edge link:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-17,  2); glVertex2f(2,  2);
+    glColor3f(0.65, 0.65, 0.65); glVertex2f(-17,  0); glVertex2f(2,  0);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-17, -2); glVertex2f(2, -2);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.65, 0.65, 0.65); glVertex2f(-15, 0);
+    glColor3f(0.25, 0.25, 0.25);
+    glVertex2f(-17, 2); glVertex2f(-19, 0); glVertex2f(-17, -2);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.65, 0.65, 0.65); glVertex2f(0, 0);
+    glColor3f(0.25, 0.25, 0.25);
+    glVertex2f(2, -2); glVertex2f(4, 0); glVertex2f(2, 2);
+  } glEnd();
+}
+
 void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
   assert(0 <= (int)doodad_kind && (int)doodad_kind < AZ_NUM_DOODAD_KINDS);
   switch (doodad_kind) {
@@ -600,6 +639,18 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(-100, -78); glVertex2f(-85, -64);
         glVertex2f(30, -78); glVertex2f(18, -64);
       } glEnd();
+      break;
+    case AZ_DOOD_SHORT_CHAIN:
+      draw_chain_link_pair();
+      break;
+    case AZ_DOOD_LONG_CHAIN:
+      glPushMatrix(); {
+        glTranslatef(-45, 0, 0);
+        for (int i = 0; i < 3; ++i) {
+          draw_chain_link_pair();
+          glTranslatef(30, 0, 0);
+        }
+      } glPopMatrix();
       break;
   }
 }

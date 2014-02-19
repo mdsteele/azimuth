@@ -905,7 +905,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(chomper_plant_components)
   },
   [AZ_BAD_COPTER_HORZ] = {
-    .max_health = 40.0,
+    .max_health = 32.0, // Can be frozen by a charge/freeze shot.
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,
@@ -915,7 +915,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_COPTER_VERT] = {
-    .max_health = 40.0,
+    .max_health = 32.0, // Can be frozen by a charge/freeze shot.
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_BADF_CARRIES_CARGO,

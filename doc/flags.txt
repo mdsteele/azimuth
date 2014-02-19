@@ -69,3 +69,4 @@
 68: Nandiar map room (room 303) marked on map
 69: Used Nandiar map room (room 303)
 70: Cnidam boss room (room 237) marked on map
+71: Opened cyan door b/w Barrag room 291 and Cnidam room 310 (around room 342)
