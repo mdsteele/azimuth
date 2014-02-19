@@ -33,6 +33,20 @@
 
 /*===========================================================================*/
 
+// Remove the projectile and create specks in its place.
+static void expire_projectile(az_space_state_t *state, az_projectile_t *proj) {
+  assert(proj->kind != AZ_PROJ_NOTHING);
+  if (!(proj->data->properties & AZ_PROJF_FEW_SPECKS)) {
+    const double base_speed = 0.5 * az_vnorm(proj->velocity);
+    for (int i = 0; i < 3; ++i) {
+      az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+                   az_vpolar(base_speed + az_random(20, 70), proj->angle +
+                             AZ_DEG2RAD(15) * az_random(-1, 1)));
+    }
+  }
+  proj->kind = AZ_PROJ_NOTHING;
+}
+
 // Common projectile impact code, called by both on_projectile_hit_wall and
 // on_projectile_hit_target.
 static void on_projectile_impact(az_space_state_t *state,
@@ -111,33 +125,24 @@ static void on_projectile_impact(az_space_state_t *state,
   }
 
   // Add particles.
-  az_particle_t *particle;
-  switch (proj->kind) {
-    case AZ_PROJ_GUN_PHASE:
-    case AZ_PROJ_GUN_FREEZE_PHASE:
-    case AZ_PROJ_GUN_HOMING_PHASE:
-    case AZ_PROJ_GUN_PHASE_BURST:
-    case AZ_PROJ_GUN_PHASE_PIERCE:
-    case AZ_PROJ_SONIC_WAVE:
+  if (proj->data->properties & AZ_PROJF_FEW_SPECKS) {
+    az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+                 az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
+  } else {
+    az_particle_t *particle;
+    if (az_insert_particle(state, &particle)) {
+      const bool splash = radius > 0.0;
+      particle->kind = (splash ? AZ_PAR_EXPLOSION : AZ_PAR_BOOM);
+      particle->color = (splash ? (az_color_t){255, 240, 224, 192} : AZ_WHITE);
+      particle->position = proj->position;
+      particle->velocity = AZ_VZERO;
+      particle->lifetime = (splash ? 0.15 * cbrt(radius) : 0.3);
+      particle->param1 = (splash ? radius : 10.0);
+    }
+    for (int i = 0; i < 5; ++i) {
       az_add_speck(state, AZ_WHITE, 1.0, proj->position,
                    az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
-      break;
-    default:
-      if (az_insert_particle(state, &particle)) {
-        const bool splash = radius > 0.0;
-        particle->kind = (splash ? AZ_PAR_EXPLOSION : AZ_PAR_BOOM);
-        particle->color =
-          (splash ? (az_color_t){255, 240, 224, 192} : AZ_WHITE);
-        particle->position = proj->position;
-        particle->velocity = AZ_VZERO;
-        particle->lifetime = (splash ? 0.15 * cbrt(radius) : 0.3);
-        particle->param1 = (splash ? radius : 10.0);
-      }
-      for (int i = 0; i < 5; ++i) {
-        az_add_speck(state, AZ_WHITE, 1.0, proj->position,
-                     az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
-      }
-      break;
+    }
   }
 
   // Play sound.
@@ -431,9 +436,7 @@ static void projectile_special_logic(az_space_state_t *state,
           if (other_proj->fired_by != AZ_SHIP_UID &&
               !(other_proj->data->properties & AZ_PROJF_NO_HIT) &&
               az_vwithin(other_proj->position, proj->position, radius)) {
-            az_add_speck(state, AZ_WHITE, 1.0, other_proj->position,
-                         other_proj->velocity);
-            other_proj->kind = AZ_PROJ_NOTHING;
+            expire_projectile(state, other_proj);
           }
         }
         // Damage enemies within the blast (over the lifetime of the blast):
@@ -733,7 +736,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   projectile_special_logic(state, proj, time);
   if (proj->kind == AZ_PROJ_NOTHING) return;
   if (proj->age > proj->data->lifetime) {
-    proj->kind = AZ_PROJ_NOTHING;
+    expire_projectile(state, proj);
     return;
   }
 

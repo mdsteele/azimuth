@@ -85,7 +85,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.1,
-    .properties = AZ_PROJF_PHASED
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
     .speed = 800.0,
@@ -99,28 +99,28 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 0.5,
     .impact_damage = 0.1,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
-    .properties = AZ_PROJF_PHASED
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_HOMING_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.05,
     .homing_rate = AZ_DEG2RAD(200),
-    .properties = AZ_PROJF_PHASED
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_PHASE_BURST] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.1,
     .shrapnel_kind = AZ_PROJ_GUN_PHASE,
-    .properties = AZ_PROJF_PHASED
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.2,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
-    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_BURST] = {
     .speed = 900.0,
@@ -409,7 +409,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 600.0,
     .lifetime = 0.5,
     .impact_damage = 0.4,
-    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_SPARK] = {
     .speed = 100.0,
