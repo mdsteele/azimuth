@@ -1,4 +1,4 @@
-Next flag: 72
+Next flag: 73
 
 Bosses
 ======
@@ -75,6 +75,7 @@ Boss Doors
 28: Killed boss door in Nandiar room 178
 44: Killed boss door in Barrag room 233
 58: Killed boss door in Voquan room 356
+72: Killed boss door in Cnidam room 326
 
 Misc
 ====
