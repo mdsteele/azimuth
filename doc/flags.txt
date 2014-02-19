@@ -1,72 +1,94 @@
-0: Used one of the first two save points (Colony rooms 10 and 25)
+Next flag: 72
+
+Bosses
+======
 1: Killed Snapdragon (Colony boss, room 20)
-2: Met first AI (Colony room 19), upper armory door unlocked
-3: Opened rocket door between Colony room 21 and Filimun room 26
-4: Opened door to Core zone
+9: Killed Rockwyrm (Filimun boss, room 30)
+23: Killed Zenith Core (Core boss, room 0)
+29: Killed Oth Gunship (Nandiar boss, room 134)
+45: Killed Forcefiend (Barrag boss, room 231)
+51: Killed Kilofuge (Cnidam boss, room 237)
+59: Killed Nocturne (Voquan boss, room 235)
+
+Minibosses
+==========
 5: Killed security drone in Colony room 14
+43: Killed Oth Crab in Filimun room 115
+53: Killed Oth Orb in Filimun room 113
+64: Killed Oth Crab/Orb in Nandiar room 176
+65: Killed Oth Orb in Nandiar room 179
+
+Comm Consoles
+=============
+2: Met first AI (Colony room 19), upper armory door unlocked
+10: Met AI after Rockwyrm (Filimun room 31), lower armory door unlocked
+26: Used comm console in Filimun room 28
+27: Used comm console in Colony room 138
+69: Used comm console in Nandiar room 303
+
+Map Markers
+===========
+68: Nandiar map room (room 303) marked on map
+70: Cnidam boss room (room 237) marked on map
+
+Doors
+=====
+3: Opened red door between Colony room 21 and Filimun room 26
+4: Opened cyan door between Sarvari room 144 and Core room 145
+11: Opened blue door between Filimun rooms 108 and 109
+12: Opened blue door between Colony rooms 73 and 75 (around room 74)
+13: Opened red door between Colony rooms 125 and 128
+15: Opened pink door between Filimun room 47 and Nandiar room 48
+16: Opened pink door between Filimun room 43 and Nandiar room 44
+17: Opened blue door between Filimun rooms 110 and 117
+18: Opened pink door between Colony rooms 137 and 165
+20: Opened first door (Colony room 6)
+21: Opened blue door between Nandiar rooms 140 and 211
+24: Opened pink door bewteen Colony rooms 156 and 302
+31: Opened eastern pink door between Nandiar rooms 204 and 215
+32: Opened western pink door between Nandiar rooms 204 and 215
+33: Opened red door between Filimun rooms 26 and 29
+34: Opened pink door between Filimun rooms 26 and 40
+35: Opened pink door between Filimun rooms 122 and 124
+36: Opened red door between Filimun rooms 49 and 50
+37: Opened blue door between Filimun rooms 83 and 85
+38: Opened pink door between Filimun rooms 83 and 102
+40: Opened blue door between Filimun rooms 80 and 81
+41: Opened red door between Barrag rooms 241 and 244
+42: Opened pink door between Cnidam rooms 37 and 38
+46: Opened pink door between Nandiar rooms 178 and 179
+47: Opened red door between Nandiar rooms 176 and 403
+48: Opened red door between Cnidam rooms 262 and 397
+52: Opened cyan door between Cnidam rooms 317 and 321
+54: Opened red door between Nandiar rooms 213 and 214
+56: Opened pink door between Nandiar rooms 211 and 212
+57: Opened red door between Colony room 99 and Filimun room 100
+60: Opened red door between Nandiar rooms 174 and 177
+62: Opened pink door between Nandiar rooms 176 and 191
+66: Opened locked door in Cnidam room 312
+67: Opened locked door in Cnidam room 308
+71: Opened cyan door b/w Barrag room 291 and Cnidam room 310 (around room 342)
+
+Boss Doors
+==========
+14: Killed boss door in Filimun room 52
+28: Killed boss door in Nandiar room 178
+44: Killed boss door in Barrag room 233
+58: Killed boss door in Voquan room 356
+
+Misc
+====
+0: Used one of the first two save points (Colony rooms 10 and 25)
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 7: Entered upper armory (room 23)
 8: Reversed grav-corridor in Colony room 24
-9: Killed Rockwyrm (Filimun boss, room 30)
-10: Met AI after Rockwyrm (Filimun room 31), lower armory door unlocked
-11: Opened bomb door between Filimun rooms 108 and 109
-12: Opened bomb door between Colony rooms 73 and 75 (around room 74)
-13: Opened rocket door between Colony rooms 125 and 128
-14: Killed boss door in Filimun room 52
-15: Opened hyper rocket door between Filimun room 47 and Nandiar room 48
-16: Opened hyper rocket door between Filimun room 43 and Nandiar room 44
-17: Opened bomb door between Filimun rooms 110 and 117
-18: Opened hyper rocket door between Colony rooms 137 and 165
 19: Watched opening cutscene (Colony room 6)
-20: Opened first door (Colony room 6)
-21: Opened bomb door between Nandiar rooms 140 and 211
 22: Turned off death rays in Core room 146
-23: Killed Zenith Core (Core boss, room 0)
-24: Opened hyper rocket door bewteen Colony rooms 156 and 302
 25: Burst through rock face in Colony room 370
-26: Used comm console in Filimun room 28
-27: Used comm console in Colony room 138
-28: Killed boss door in Nandiar room 178
-29: Killed Oth Gunship (Nandiar boss, room 134)
 30: Turned off secondary reactor in Barrag room 274
-31: Opened eastern hyper rocket door between Nandiar rooms 204 and 215
-32: Opened western hyper rocket door between Nandiar rooms 204 and 215
-33: Opened rocket door between Filimun rooms 26 and 29
-34: Opened hyper rocket door between Filimun rooms 26 and 40
-35: Opened hyper rocket door between Filimun rooms 122 and 124
-36: Opened rocket door between Filimun rooms 49 and 50
-37: Opened bomb door between Filimun rooms 83 and 85
-38: Opened hyper rocket door between Filimun rooms 83 and 102
 39: Turned on drill in Filimun room 84
-40: Opened bomb door between Filimun rooms 80 and 81
-41: Opened rocket door between Barrag rooms 241 and 244
-42: Opened hyper rocket door between Cnidam rooms 37 and 38
-43: Killed Oth Crab in Filimun room 115
-44: Killed boss door in Barrag room 233
-45: Killed Forcefiend (Barrag boss, room 231)
-46: Opened hyper rocket door between Nandiar rooms 178 and 179
-47: Opened rocket door between Nandiar rooms 176 and 403
-48: Opened rocket door between Cnidam rooms 262 and 397
 49: Cnidam bomb started (Cnidam room 265)
 50: Cnidam bomb defused (Cnidam room 323)
-51: Killed Kilofuge (Cnidam boss, room 237)
-52: Opened mega bomb door between Cnidam rooms 317 and 321
-53: Killed Oth Orb in Filimun room 113
-54: Opened rocket door between Nandiar rooms 213 and 214
 55: Turned off power in Nandiar room 214
-56: Opened hyper rocket door between Nandiar rooms 211 and 212
-57: Opened rocket door between Colony room 99 and Filimun room 100
-58: Killed boss door in Voquan room 356
-59: Killed Nocturne (Voquan boss, room 235)
-60: Opened rocket door between Nandiar rooms 174 and 177
 61: Exploded passage in Voquan room 190
-62: Opened hyper rocket door between Nandiar rooms 176 and 191
 63: Opened lower-right forcefield in Nandiar room 176
-64: Killed Oth Crab/Orb in Nandiar room 176
-65: Killed Oth Orb in Nandiar room 179
-66: Opened locked door in Cnidam room 312
-67: Opened locked door in Cnidam room 308
-68: Nandiar map room (room 303) marked on map
-69: Used Nandiar map room (room 303)
-70: Cnidam boss room (room 237) marked on map
-71: Opened cyan door b/w Barrag room 291 and Cnidam room 310 (around room 342)
