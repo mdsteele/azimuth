@@ -314,10 +314,8 @@ bool az_try_damage_baddie(
   assert(baddie->health > 0.0);
   assert(damage_amount >= 0.0);
 
-  // If the damage is zero or the baddie is temporarily invincible, we can quit
-  // early.
+  // If the damage is zero, we can quit early.
   if (damage_amount <= 0.0) return false;
-  if (baddie->invincible) return false;
 
   // Determine if the baddie is susceptible to this kind of damage; if so,
   // damage the baddie.
@@ -333,10 +331,10 @@ bool az_try_damage_baddie(
 
   // If the baddie is still alive, it might still get frozen.
   if (baddie->health > 0.0) {
-    // The baddie will be frozen if (1) the damage kind includes
-    // AZ_DMGF_FREEZE, (2) the baddie is susceptible to being frozen, and (3)
-    // the baddie's health is low enough for it to be frozen, freeze the baddie
-    // (even if the baddie didn't actually take any damage from this hit).
+    // If (1) the damage kind includes AZ_DMGF_FREEZE, (2) the baddie is
+    // susceptible to being frozen, and (3) the baddie's health is low enough
+    // for it to be frozen, then freeze the baddie (even if the baddie didn't
+    // actually take any damage from this hit).
     const double freeze_threshold = 4.0;
     if ((damage_kind & AZ_DMGF_FREEZE) &&
         !(component->immunities & AZ_DMGF_FREEZE) &&
@@ -359,9 +357,11 @@ bool az_try_damage_baddie(
         .step = AZ_BDS_SHAKE, .progress = 0.0, .boss = *baddie
       };
       baddie->kind = AZ_BAD_NOTHING;
+      // When a boss dies, kill all other baddies in the room, except for
+      // baddies that are _permanently_ incorporeal.
       AZ_ARRAY_LOOP(other, state->baddies) {
         if (other->kind == AZ_BAD_NOTHING) continue;
-        if (other->data->properties & AZ_BADF_INCORPOREAL) continue;
+        if (other->data->static_properties & AZ_BADF_INCORPOREAL) continue;
         az_kill_baddie(state, other);
       }
       return true;

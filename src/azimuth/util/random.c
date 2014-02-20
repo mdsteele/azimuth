@@ -39,7 +39,8 @@ double az_random(double min, double max) {
   assert(random_initialized);
   assert(isfinite(min));
   assert(isfinite(max));
-  assert(min < max);
+  assert(min <= max);
+  if (min == max) return min;
   // This is a terrible, terrible implementation of random numbers.
   // TODO: Replace this with something better.
   return min + (max - min) * (double)rand() / (1.0 + (double)RAND_MAX);

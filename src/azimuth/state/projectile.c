@@ -207,7 +207,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 0.25,
     .splash_radius = 150.0,
     .splash_damage = 5.0,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_ROCKET] = {
     .speed = 1000.0,
@@ -238,7 +238,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_MISSILE_BARRAGE] = {
     .lifetime = 0.27,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_MISSILE_TRIPLE] = {
     .speed = 1000.0,
@@ -319,7 +319,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 0.8,
     .splash_damage = 15.0,
     .splash_radius = 300.0,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   // Baddie-only projectiles:
   [AZ_PROJ_FIREBALL_FAST] = {
@@ -335,7 +335,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_FORCE_WAVE] = {
     .speed = 200.0,
     .lifetime = 2.0,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GRAVITY_TORPEDO] = {
     .speed = 300.0,
@@ -345,7 +345,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_GRAVITY_TORPEDO_WELL] = {
     .lifetime = 3.0,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GRENADE] = {
     .speed = 500.0,
@@ -375,14 +375,22 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 100.0,
     .impact_shake = 3.0,
     .damage_kind = AZ_DMGF_BOMB,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
+  },
+  [AZ_PROJ_NIGHTSEED] = {
+    .speed = 500.0,
+    .lifetime = 5.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 40.0,
+    .impact_shake = 0.5
   },
   [AZ_PROJ_NUCLEAR_EXPLOSION] = {
     .splash_damage = 75.0,
     .splash_radius = 200.0,
     .impact_shake = 5.0,
     .damage_kind = AZ_DMGF_BOMB,
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,

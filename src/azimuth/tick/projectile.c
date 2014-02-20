@@ -72,8 +72,8 @@ static void on_projectile_impact(az_space_state_t *state,
     // damaged by its own projectiles).
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
       if (baddie->uid == proj->fired_by) continue;
+      if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       const az_component_data_t *component;
       if (az_circle_touches_baddie(baddie, radius, proj->position,
                                    &component)) {
@@ -125,13 +125,11 @@ static void on_projectile_impact(az_space_state_t *state,
   }
 
   // Add particles.
-  if (proj->data->properties & AZ_PROJF_FEW_SPECKS) {
-    az_add_speck(state, AZ_WHITE, 1.0, proj->position,
-                 az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
-  } else {
+  const bool splash = radius > 0.0;
+  const bool few_specks = (proj->data->properties & AZ_PROJF_FEW_SPECKS);
+  if (splash || !few_specks) {
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
-      const bool splash = radius > 0.0;
       particle->kind = (splash ? AZ_PAR_EXPLOSION : AZ_PAR_BOOM);
       particle->color = (splash ? (az_color_t){255, 240, 224, 192} : AZ_WHITE);
       particle->position = proj->position;
@@ -139,6 +137,11 @@ static void on_projectile_impact(az_space_state_t *state,
       particle->lifetime = (splash ? 0.15 * cbrt(radius) : 0.3);
       particle->param1 = (splash ? radius : 10.0);
     }
+  }
+  if (few_specks) {
+    az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+                 az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
+  } else {
     for (int i = 0; i < 5; ++i) {
       az_add_speck(state, AZ_WHITE, 1.0, proj->position,
                    az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
@@ -199,6 +202,22 @@ static void on_projectile_impact(az_space_state_t *state,
       az_add_baddie(state, AZ_BAD_ICE_CRYSTAL, position, angle);
     }
   }
+  // Nightseeds are special: on impact, they spawn a Nightbug.
+  else if (proj->kind == AZ_PROJ_NIGHTSEED) {
+    const az_baddie_kind_t baddie_kind = AZ_BAD_NIGHTBUG;
+    const double baddie_radius =
+      az_get_baddie_data(baddie_kind)->overall_bounding_radius;
+    const az_vector_t baddie_position =
+      az_vadd(proj->position, az_vwithlen(normal, baddie_radius + 5.0));
+    az_impact_t impact;
+    az_circle_impact(state, baddie_radius, baddie_position, AZ_VZERO,
+                     AZ_IMPF_BADDIE, AZ_NULL_UID, &impact);
+    if (impact.type == AZ_IMP_NOTHING) {
+      az_baddie_t *baddie =
+        az_add_baddie(state, baddie_kind, baddie_position, proj->angle);
+      if (baddie != NULL) baddie->param = 1.0;
+    }
+  }
 }
 
 // Called when a projectile hits a wall or a door.  This should never be called
@@ -241,8 +260,8 @@ static void on_projectile_hit_target(
       double best_dist = INFINITY;
       AZ_ARRAY_LOOP(baddie, state->baddies) {
         if (baddie->kind == AZ_BAD_NOTHING) continue;
-        if (baddie->data->properties & AZ_BADF_NO_HOMING_PROJ) continue;
         if (baddie->uid == proj->last_hit_uid) continue;
+        if (az_baddie_has_flag(baddie, AZ_BADF_NO_HOMING_PROJ)) continue;
         const double dist = az_vdist(baddie->position, proj->position) +
           fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
                          old_proj_angle)) * 100.0;
@@ -305,8 +324,8 @@ static void projectile_home_in(az_space_state_t *state,
     double best_dist = INFINITY;
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->data->properties & AZ_BADF_NO_HOMING_PROJ) continue;
       if (baddie->uid == proj->last_hit_uid) continue;
+      if (az_baddie_has_flag(baddie, AZ_BADF_NO_HOMING_PROJ)) continue;
       const double dist = az_vdist(baddie->position, proj->position) +
         fabs(az_mod2pi(az_vtheta(az_vsub(baddie->position, proj->position)) -
                        proj->angle)) * 100.0;
@@ -442,7 +461,7 @@ static void projectile_special_logic(az_space_state_t *state,
         // Damage enemies within the blast (over the lifetime of the blast):
         AZ_ARRAY_LOOP(baddie, state->baddies) {
           if (baddie->kind == AZ_BAD_NOTHING) continue;
-          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+          if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
           const az_component_data_t *component;
           if (az_circle_touches_baddie(baddie, radius, proj->position,
                                        &component)) {
@@ -589,7 +608,7 @@ static void projectile_special_logic(az_space_state_t *state,
         // Damage enemies within the blast (over the lifetime of the blast):
         AZ_ARRAY_LOOP(baddie, state->baddies) {
           if (baddie->kind == AZ_BAD_NOTHING) continue;
-          if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+          if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
           const az_component_data_t *component;
           if (az_circle_touches_baddie(baddie, 0.8 * radius, proj->position,
                                        &component)) {

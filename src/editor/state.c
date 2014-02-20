@@ -187,6 +187,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_FORCEFIEND,
   AZ_BAD_KILOFUGE,
   AZ_BAD_ICE_CRYSTAL,
+  AZ_BAD_NOCTURNE,
   AZ_BAD_ZENITH_CORE,
 };
 static int reverse_baddie_kinds[AZ_ARRAY_SIZE(baddie_kinds)];

@@ -40,7 +40,7 @@
 #define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 74
+#define AZ_NUM_BADDIE_KINDS 75
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -118,6 +118,7 @@ typedef enum {
   AZ_BAD_NIGHTSHADE,
   AZ_BAD_AQUATIC_CHOMPER,
   AZ_BAD_SMALL_FISH,
+  AZ_BAD_NOCTURNE,
 } az_baddie_kind_t;
 
 typedef enum {
@@ -159,7 +160,7 @@ typedef struct {
   az_sound_key_t death_sound;
   az_death_style_t death_style;
   az_pickup_flags_t potential_pickups;
-  az_baddie_flags_t properties;
+  az_baddie_flags_t static_properties;
   az_component_data_t main_body;
   int num_components;
   const az_component_data_t *components; // array of length num_components
@@ -186,7 +187,7 @@ typedef struct {
   double cooldown; // time until baddie can attack again, in seconds
   double param; // the meaning of this is baddie-kind-specific
   int state; // the meaning of this is baddie-kind-specific
-  bool invincible; // if true, baddie cannot be damaged (for one frame)
+  az_baddie_flags_t temp_properties;
   az_component_t components[AZ_MAX_BADDIE_COMPONENTS];
   az_uuid_t cargo_uuids[AZ_MAX_BADDIE_CARGO_UUIDS];
 } az_baddie_t;
@@ -208,6 +209,10 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle);
 
 /*===========================================================================*/
+
+// True if the baddie has the given flag set (either temporarily for this
+// particular baddie, or permanently for this baddie kind).
+bool az_baddie_has_flag(const az_baddie_t *baddie, az_baddie_flags_t flag);
 
 // Determine if the specified point overlaps the baddie.
 bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point);

@@ -228,7 +228,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         // If the baddie hasn't yet been killed, but it's a KAMIKAZE baddie,
         // kill it now.
         if (baddie->kind != AZ_BAD_NOTHING &&
-            (baddie->data->properties & AZ_BADF_KAMIKAZE)) {
+            az_baddie_has_flag(baddie, AZ_BADF_KAMIKAZE)) {
           az_kill_baddie(state, baddie);
         }
       }
@@ -466,7 +466,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       double best_dist = INFINITY;
       AZ_ARRAY_LOOP(baddie, state->baddies) {
         if (baddie->kind == AZ_BAD_NOTHING) continue;
-        if (baddie->data->properties & AZ_BADF_NO_HOMING_BEAM) continue;
+        if (az_baddie_has_flag(baddie, AZ_BADF_NO_HOMING_BEAM)) continue;
         const az_vector_t delta = az_vsub(baddie->position, beam_start);
         const double dist = az_vnorm(delta);
         if (dist >= best_dist) continue;
@@ -505,7 +505,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       const az_vector_t delta = az_vsub(impact.position, beam_start);
       AZ_ARRAY_LOOP(baddie, state->baddies) {
         if (baddie->kind == AZ_BAD_NOTHING) continue;
-        if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+        if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
         az_vector_t position, normal;
         const az_component_data_t *component;
         if (az_ray_hits_baddie(baddie, beam_start, delta,

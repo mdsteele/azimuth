@@ -63,9 +63,10 @@ static void draw_component_outline(const az_component_data_t *component) {
   }
 }
 
-static void draw_baddie_outline(const az_baddie_t *baddie, float frozen) {
+static void draw_baddie_outline(const az_baddie_t *baddie, float frozen,
+                                float alpha) {
   const float flare = baddie->armor_flare;
-  glColor3f(flare, 0.5 - 0.5 * flare + 0.5 * frozen, frozen);
+  glColor4f(flare, 0.5f - 0.5f * flare + 0.5f * frozen, frozen, alpha);
   draw_component_outline(&baddie->data->main_body);
   for (int j = 0; j < baddie->data->num_components; ++j) {
     glPushMatrix(); {
@@ -832,7 +833,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_FORCEFIEND:
       // TODO: Make real graphics for the Forcefiend.
-      draw_baddie_outline(baddie, frozen);
+      draw_baddie_outline(baddie, frozen, 1);
       break;
     case AZ_BAD_CHOMPER_PLANT:
       az_draw_bad_chomper_plant(baddie, frozen, clock);
@@ -1233,7 +1234,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_KILOFUGE:
       // TODO: Make real graphics for the Kilofuge.
-      draw_baddie_outline(baddie, frozen);
+      draw_baddie_outline(baddie, frozen, 1);
       break;
     case AZ_BAD_ICE_CRYSTAL: {
       const az_polygon_t polygon = baddie->data->main_body.polygon;
@@ -1390,6 +1391,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         az_gl_color(inner); glVertex2f(0, 0);
       } glEnd();
     } break;
+    case AZ_BAD_NOCTURNE:
+      // TODO: Make real graphics for the Nocturne.
+      draw_baddie_outline(baddie, frozen, baddie->param);
+      break;
   }
 }
 
@@ -1406,7 +1411,7 @@ void az_draw_background_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING ||
         baddie->kind == AZ_BAD_MARKER) continue;
-    if (!(baddie->data->properties & AZ_BADF_DRAW_BG)) continue;
+    if (!az_baddie_has_flag(baddie, AZ_BADF_DRAW_BG)) continue;
     az_draw_baddie(baddie, state->clock);
   }
 }
@@ -1415,7 +1420,7 @@ void az_draw_foreground_baddies(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING ||
         baddie->kind == AZ_BAD_MARKER) continue;
-    if (baddie->data->properties & AZ_BADF_DRAW_BG) continue;
+    if (az_baddie_has_flag(baddie, AZ_BADF_DRAW_BG)) continue;
     az_draw_baddie(baddie, state->clock);
   }
 }

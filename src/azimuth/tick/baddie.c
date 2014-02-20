@@ -28,6 +28,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/baddie_chomper.h"
 #include "azimuth/tick/baddie_kilofuge.h"
+#include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_wyrm.h"
@@ -123,8 +124,8 @@ static void drift_towards_ship(
       state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
   AZ_ARRAY_LOOP(other, state->baddies) {
     if (other->kind == AZ_BAD_NOTHING) continue;
-    if (other->data->properties & AZ_BADF_INCORPOREAL) continue;
     if (other == baddie) continue;
+    if (az_baddie_has_flag(other, AZ_BADF_INCORPOREAL)) continue;
     if (az_circle_touches_baddie(other, baddie->data->overall_bounding_radius,
                                  baddie->position, NULL)) {
       const az_vector_t delta = az_vsub(baddie->position, other->position);
@@ -605,8 +606,8 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
 
 static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                         double time) {
-  // End the baddie's invincibility frame.
-  baddie->invincible = false;
+  // Reset the baddie's temporary properties.
+  baddie->temp_properties = 0;
 
   // Allow the armor flare to die down a bit.
   assert(baddie->armor_flare >= 0.0);
@@ -644,7 +645,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       // Baddies with the BOUNCE_PERP flag always bounce perfectly backwards
       // (as if they hit the wall dead-on), even if they hit a wall at an
       // oblique angle.
-      if (baddie->data->properties & AZ_BADF_BOUNCE_PERP) {
+      if (az_baddie_has_flag(baddie, AZ_BADF_BOUNCE_PERP)) {
         impact.normal = az_vproj(impact.normal, baddie->velocity);
       }
       // Push the baddie slightly away from the impact point (so that we're
@@ -1651,11 +1652,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case AZ_BAD_NOCTURNE:
+      az_tick_bad_nocturne(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
   if (baddie->kind != AZ_BAD_NOTHING &&
-      (baddie->data->properties & AZ_BADF_CARRIES_CARGO)) {
+      az_baddie_has_flag(baddie, AZ_BADF_CARRIES_CARGO)) {
     az_move_baddie_cargo(
         state, baddie,
         az_vsub(baddie->position, old_baddie_position),

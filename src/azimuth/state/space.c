@@ -380,7 +380,7 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
   if (!(skip_types & AZ_IMPF_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+      if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
       const az_component_data_t *component;
       if (az_ray_hits_baddie(baddie, start, delta,
@@ -454,7 +454,7 @@ void az_circle_impact(az_space_state_t *state, double radius,
   if (!(skip_types & AZ_IMPF_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+      if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
       const az_component_data_t *component;
       if (az_circle_hits_baddie(baddie, radius, start, delta,
@@ -528,7 +528,7 @@ void az_arc_circle_impact(
   if (!(skip_types & AZ_IMPF_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
-      if (baddie->data->properties & AZ_BADF_INCORPOREAL) continue;
+      if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
       const az_component_data_t *component;
       if (az_arc_circle_hits_baddie(

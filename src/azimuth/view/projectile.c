@@ -435,12 +435,23 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_LASER_PULSE:
       glBegin(GL_QUADS); {
         glColor3f(1, 0.3, 0);
-        glVertex2d(0, -1.5); glVertex2d(0, 1.5);
+        glVertex2f(0, -1.5); glVertex2f(0, 1.5);
         glColor4f(1, 0.3, 0, 0);
-        glVertex2d(-20, 1.5); glVertex2d(-20, -1.5);
+        glVertex2f(-20, 1.5); glVertex2f(-20, -1.5);
       } glEnd();
       break;
     case AZ_PROJ_MEDIUM_EXPLOSION: break; // invisible
+    case AZ_PROJ_NIGHTSEED:
+      glBegin(GL_TRIANGLE_FAN); {
+        const double radius = 6.0;
+        glColor3f(0.6, 0.9, 0.75);
+        glVertex2d(0.25 * radius, 0);
+        glColor3f(0.1, 0.3, 0.15);
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_NUCLEAR_EXPLOSION: break; // invisible
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
