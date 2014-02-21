@@ -45,6 +45,10 @@
 
 static az_editor_state_t state;
 
+static az_editor_room_t *get_current_room(void) {
+  return AZ_LIST_GET(state.planet.rooms, state.current_room);
+}
+
 static void set_room_unsaved(az_editor_room_t *room) {
   room->unsaved = true;
   state.unsaved = true;
@@ -157,7 +161,7 @@ static void select_all(az_editor_room_t *room, bool selected) {
 }
 
 static void do_select(int x, int y, bool multi) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   double best_dist = INFINITY;
   az_editor_gravfield_t *best_gravfield = NULL;
@@ -280,7 +284,7 @@ static void do_select_from_sector(int x, int y, bool multi) {
     theta0 += sweep;
     sweep = fabs(sweep);
   }
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     const double obj_r = az_vnorm(*object.position);
     const double obj_theta = az_vtheta(*object.position);
@@ -294,32 +298,78 @@ static void do_select_from_sector(int x, int y, bool multi) {
   state.selection_sector.active = false;
 }
 
-static az_vector_t constrain_vector(az_vector_t vector, bool relative) {
-  bool any = false;
-  az_vector_t position = AZ_VZERO;
-  double angle = 0.0;
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+static bool get_top_object_pos_and_angle(az_vector_t *position_out,
+                                         double *angle_out) {
+  bool anything_selected = false;
+  az_editor_room_t *room = get_current_room();
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     if (!*object.selected) continue;
-    any = true;
-    position = *object.position;
-    angle = *object.angle;
+    anything_selected = true;
+    *position_out = *object.position;
+    *angle_out = *object.angle;
   }
-  if (!any) return vector;
-  if (relative) return az_vproj(vector, az_vpolar(1, angle));
-  return az_vadd(position, az_vproj(az_vsub(vector, position),
-                                    az_vpolar(1, angle)));
+  return anything_selected;
 }
 
-static void do_move(int x, int y, int dx, int dy, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_vector_t delta =
+static az_vector_t constrain_vector(
+    az_vector_t vector, az_vector_t selected_position, double selected_angle,
+    bool rotate_with_gravity) {
+  const az_vector_t projected =
+    az_vadd(selected_position,
+            az_vproj(az_vsub(vector, selected_position),
+                     az_vpolar(1, selected_angle)));
+  if (!rotate_with_gravity || !az_vnonzero(selected_position)) {
+    return projected;
+  }
+  const double selpos_r = az_vnorm(selected_position);
+  assert(selpos_r > 0.0);
+  const double selpos_theta = az_vtheta(selected_position);
+  const az_vector_t unit = az_vpolar(1, selected_angle - selpos_theta);
+  if (fabs(unit.x) >= fabs(unit.y)) {
+    // Vertical-ish.
+    assert(unit.x != 0.0);
+    const double proj_r = az_vnorm(projected);
+    if (proj_r <= 0.0) return AZ_VZERO;
+    return az_vpolar(proj_r, selpos_theta +
+                     log(proj_r / selpos_r) * (unit.y / unit.x));
+  } else {
+    // Horizontal-ish.
+    assert(unit.y != 0.0);
+    const double dtheta = az_mod2pi(az_vtheta(projected) - selpos_theta);
+    return az_vpolar(selpos_r * exp(dtheta * (unit.x / unit.y)),
+                     selpos_theta + dtheta);
+  }
+}
+
+static void do_move(int x, int y, int dx, int dy, bool constrained,
+                    bool rotate_with_gravity) {
+  az_vector_t selected_position;
+  double selected_angle;
+  if (!get_top_object_pos_and_angle(&selected_position,
+                                    &selected_angle)) return;
+  const az_vector_t mouse_delta =
     az_vsub(az_pixel_to_position(&state, x, y),
             az_pixel_to_position(&state, x - dx, y - dy));
-  if (constrained) delta = constrain_vector(delta, true);
+  az_vector_t new_position = az_vadd(selected_position, mouse_delta);
+  if (constrained) {
+    new_position = constrain_vector(new_position, selected_position,
+                                    selected_angle, rotate_with_gravity);
+  }
+  const az_vector_t position_delta = az_vsub(new_position, selected_position);
+  const double angle_delta = az_mod2pi(az_vtheta(new_position) -
+                                       az_vtheta(selected_position));
+  az_editor_room_t *room = get_current_room();
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     if (!*object.selected) continue;
-    *object.position = az_vadd(*object.position, delta);
+    if (rotate_with_gravity) {
+      *object.position =
+        az_vadd(new_position,
+                az_vrotate(az_vsub(*object.position, selected_position),
+                           angle_delta));
+      *object.angle = az_mod2pi(*object.angle + angle_delta);
+    } else {
+      az_vpluseq(object.position, position_delta);
+    }
     set_room_unsaved(room);
   }
 }
@@ -373,7 +423,7 @@ static void rotate_around(az_vector_t *vec, az_vector_t around, double theta) {
 }
 
 static void do_rotate(int x, int y, int dx, int dy) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   const az_vector_t pt0 = az_pixel_to_position(&state, x - dx, y - dy);
   const az_vector_t pt1 = az_pixel_to_position(&state, x, y);
   az_vector_t center = {0, 0};
@@ -415,7 +465,7 @@ static void do_rotate_align(bool to_camera) {
   const double cam_up =
     (state.spin_camera ? az_vtheta(state.camera) : AZ_HALF_PI);
   const double step = AZ_DEG2RAD(45);
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     if (!*object.selected) continue;
     const double up = (to_camera ? cam_up : az_vtheta(*object.position));
@@ -426,7 +476,7 @@ static void do_rotate_align(bool to_camera) {
 }
 
 static void do_set_camera_bounds(int x, int y) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   az_camera_bounds_t *bounds = &room->camera_bounds;
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   const double new_r = az_vnorm(pt);
@@ -473,83 +523,92 @@ static void do_set_camera_bounds(int x, int y) {
   set_room_unsaved(room);
 }
 
-static void do_add_baddie(int x, int y, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+// Helper function used for the do_add_*() functions.
+static void position_new_object(
+    int x, int y, bool constrained, bool rotate_with_gravity,
+    az_vector_t *position_out, double *angle_out) {
+  az_vector_t selected_position = AZ_VZERO;
+  double selected_angle = 0.0;
+  const bool anything_selected =
+    get_top_object_pos_and_angle(&selected_position, &selected_angle);
   az_vector_t pt = az_pixel_to_position(&state, x, y);
-  if (constrained) pt = constrain_vector(pt, false);
+  if (anything_selected && constrained) {
+    pt = constrain_vector(pt, selected_position, selected_angle,
+                          rotate_with_gravity);
+  }
+  if (anything_selected && rotate_with_gravity) {
+    state.brush.angle = az_mod2pi(selected_angle + az_vtheta(pt) -
+                                  az_vtheta(selected_position));
+  }
+  *position_out = pt;
+  *angle_out = state.brush.angle;
+  az_editor_room_t *room = get_current_room();
   select_all(room, false);
+  set_room_unsaved(room);
+}
+
+static void do_add_baddie(int x, int y, bool constrained,
+                          bool rotate_with_gravity) {
+  az_editor_room_t *room = get_current_room();
   if (AZ_LIST_SIZE(room->baddies) >= AZ_MAX_NUM_BADDIES) return;
   az_editor_baddie_t *baddie = AZ_LIST_ADD(room->baddies);
-  baddie->selected = true;
   baddie->spec.kind = state.brush.baddie_kind;
-  baddie->spec.position = pt;
-  baddie->spec.angle = state.brush.angle;
-  set_room_unsaved(room);
+  position_new_object(x, y, constrained, rotate_with_gravity,
+                      &baddie->spec.position, &baddie->spec.angle);
+  baddie->selected = true;
 }
 
-static void do_add_door(int x, int y, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_vector_t pt = az_pixel_to_position(&state, x, y);
-  if (constrained) pt = constrain_vector(pt, false);
-  select_all(room, false);
+static void do_add_door(int x, int y, bool constrained,
+                        bool rotate_with_gravity) {
+  az_editor_room_t *room = get_current_room();
   if (AZ_LIST_SIZE(room->doors) >= AZ_MAX_NUM_DOORS) return;
   az_editor_door_t *door = AZ_LIST_ADD(room->doors);
-  door->selected = true;
   door->spec.kind = state.brush.door_kind;
-  door->spec.position = pt;
-  door->spec.angle = state.brush.angle;
   door->spec.destination = state.current_room;
-  set_room_unsaved(room);
+  position_new_object(x, y, constrained, rotate_with_gravity,
+                      &door->spec.position, &door->spec.angle);
+  door->selected = true;
 }
 
-static void do_add_gravfield(int x, int y, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_vector_t pt = az_pixel_to_position(&state, x, y);
-  if (constrained) pt = constrain_vector(pt, false);
-  select_all(room, false);
+static void do_add_gravfield(int x, int y, bool constrained,
+                             bool rotate_with_gravity) {
+  az_editor_room_t *room = get_current_room();
   if (AZ_LIST_SIZE(room->gravfields) >= AZ_MAX_NUM_GRAVFIELDS) return;
   az_editor_gravfield_t *gravfield = AZ_LIST_ADD(room->gravfields);
-  gravfield->selected = true;
   gravfield->spec.kind = state.brush.gravfield_kind;
-  gravfield->spec.position = pt;
-  gravfield->spec.angle = state.brush.angle;
   gravfield->spec.strength = state.brush.gravfield_strength;
   gravfield->spec.size = state.brush.gravfield_size;
-  set_room_unsaved(room);
+  position_new_object(x, y, constrained, rotate_with_gravity,
+                      &gravfield->spec.position, &gravfield->spec.angle);
+  gravfield->selected = true;
 }
 
-static void do_add_node(int x, int y, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_vector_t pt = az_pixel_to_position(&state, x, y);
-  if (constrained) pt = constrain_vector(pt, false);
-  select_all(room, false);
+static void do_add_node(int x, int y, bool constrained,
+                        bool rotate_with_gravity) {
+  az_editor_room_t *room = get_current_room();
   if (AZ_LIST_SIZE(room->nodes) >= AZ_MAX_NUM_NODES) return;
   az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
-  node->selected = true;
   node->spec.kind = state.brush.node_kind;
   set_node_subkind_from_brush(node);
-  node->spec.position = pt;
-  node->spec.angle = state.brush.angle;
-  set_room_unsaved(room);
+  position_new_object(x, y, constrained, rotate_with_gravity,
+                      &node->spec.position, &node->spec.angle);
+  node->selected = true;
 }
 
-static void do_add_wall(int x, int y, bool constrained) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
-  az_vector_t pt = az_pixel_to_position(&state, x, y);
-  if (constrained) pt = constrain_vector(pt, false);
-  select_all(room, false);
+static void do_add_wall(int x, int y, bool constrained,
+                        bool rotate_with_gravity) {
+  az_editor_room_t *room = get_current_room();
   if (AZ_LIST_SIZE(room->walls) >= AZ_MAX_NUM_WALLS) return;
   az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
-  wall->selected = true;
   wall->spec.kind = state.brush.wall_kind;
   wall->spec.data = az_get_wall_data(state.brush.wall_data_index);
-  wall->spec.position = pt;
-  wall->spec.angle = state.brush.angle;
-  set_room_unsaved(room);
+  position_new_object(x, y, constrained, rotate_with_gravity,
+                      &wall->spec.position, &wall->spec.angle);
+  wall->selected = true;
 }
 
 static void do_remove(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   bool any = false;
 #define NUKE_SCRIPTS(obj, script) do { \
     AZ_LIST_LOOP(obj, room->obj##s) { \
@@ -585,7 +644,7 @@ static void do_remove(void) {
 }
 
 static void do_copy(bool cut) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   int num_objects = 0;
   az_vector_t center = AZ_VZERO;
   AZ_EDITOR_OBJECT_LOOP(object, room) {
@@ -648,7 +707,7 @@ static void do_copy(bool cut) {
 }
 
 static void do_paste(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   select_all(room, false);
   if (AZ_LIST_SIZE(state.clipboard) == 0) return;
   set_room_unsaved(room);
@@ -706,7 +765,7 @@ static void do_paste(void) {
 }
 
 static void do_partition(bool front) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
 #define PARTITION(obj) do { \
     AZ_LIST_DECLARE(az_editor_##obj##_t, back_##obj##s); \
     AZ_LIST_INIT(back_##obj##s, 2); \
@@ -734,7 +793,7 @@ static void do_move_to_back(void) { do_partition(false); }
 static void do_move_to_front(void) { do_partition(true); }
 
 static void do_change_data(int delta, bool secondary) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
     const az_baddie_kind_t new_kind =
@@ -819,7 +878,7 @@ static void do_change_data(int delta, bool secondary) {
 }
 
 static void do_change_zone(int delta) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   room->zone_key = az_modulo(room->zone_key + delta,
                              AZ_LIST_SIZE(state.planet.zones));
   state.brush.zone_key = room->zone_key;
@@ -844,7 +903,7 @@ static void do_toggle_property(az_room_flags_t flag) {
 }
 
 static void auto_set_door_dest(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     az_editor_door_t *closest_door = NULL;
@@ -873,7 +932,7 @@ static void auto_set_door_dest(void) {
 }
 
 static void begin_edit_gravfield(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   az_gravfield_spec_t *gravfield = NULL;
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
     if (editor_gravfield->selected) {
@@ -924,7 +983,7 @@ static void try_edit_gravfield(void) {
   state.text.action = AZ_ETA_NOTHING;
   state.brush.gravfield_strength = strength;
   state.brush.gravfield_size = size;
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
     if (az_trapezoidal(gravfield->spec.kind) != trapezoidal) continue;
@@ -936,7 +995,7 @@ static void try_edit_gravfield(void) {
 
 static void begin_edit_script(void) {
   assert(state.text.action == AZ_ETA_NOTHING);
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   const az_script_t *script = room->on_start;
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) script = baddie->spec.on_kill;
@@ -967,7 +1026,7 @@ static void try_edit_script(void) {
   assert(state.text.action == AZ_ETA_EDIT_SCRIPT);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
   assert(state.text.buffer[state.text.length] == '\0');
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   az_script_t *script = NULL;
   if (state.text.length > 0) {
     script = az_sscan_script(state.text.buffer, state.text.length);
@@ -993,7 +1052,7 @@ static void try_edit_script(void) {
 }
 
 static void begin_set_cargo_slots(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) {
       AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie->spec.cargo_slots) == 4);
@@ -1019,7 +1078,7 @@ static void try_set_cargo_slots(void) {
     if (slots[i] < 0 || slots[i] > AZ_NUM_UUID_SLOTS) return;
   }
   state.text.action = AZ_ETA_NOTHING;
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) {
       AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie->spec.cargo_slots) ==
@@ -1057,7 +1116,7 @@ static void try_set_current_room(void) {
 }
 
 static void begin_set_door_dest(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   bool any_doors = false;
   az_room_key_t key = 0;
   AZ_LIST_LOOP(door, room->doors) {
@@ -1081,7 +1140,7 @@ static void try_set_door_dest(void) {
   if (count != state.text.length) return;
   if (key < 0 || key >= AZ_LIST_SIZE(state.planet.rooms)) return;
   state.text.action = AZ_ETA_NOTHING;
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.destination = key;
@@ -1090,7 +1149,7 @@ static void try_set_door_dest(void) {
 }
 
 static void begin_set_marker_flag(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   if (room->properties & AZ_ROOMF_MARK_IF_CLR) {
     az_init_editor_text(&state, AZ_ETA_SET_MARKER_FLAG, "c%d",
                         (int)room->marker_flag);
@@ -1104,7 +1163,7 @@ static void try_set_marker_flag(void) {
   assert(state.text.action == AZ_ETA_SET_MARKER_FLAG);
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
   assert(state.text.buffer[state.text.length] == '\0');
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   if (state.text.length == 0) {
     room->properties &= ~(AZ_ROOMF_MARK_IF_CLR | AZ_ROOMF_MARK_IF_SET);
     room->marker_flag = 0;
@@ -1128,7 +1187,7 @@ static void try_set_marker_flag(void) {
 }
 
 static void begin_set_uuid_slot(void) {
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   int uuid_slot = -1;
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (baddie->selected) uuid_slot = baddie->spec.uuid_slot;
@@ -1160,7 +1219,7 @@ static void try_set_uuid_slot(void) {
     if (count != state.text.length) return;
   }
   if (uuid_slot < 0 || uuid_slot > AZ_NUM_UUID_SLOTS) return;
-  az_editor_room_t *room = AZ_LIST_GET(state.planet.rooms, state.current_room);
+  az_editor_room_t *room = get_current_room();
   // Make sure this UUID slot isn't in use.
   if (uuid_slot != 0) {
     AZ_LIST_LOOP(baddie, room->baddies) {
@@ -1409,6 +1468,7 @@ static void event_loop(void) {
             // TODO: Move cursor to where we clicked.
           } else {
             const bool shift = az_is_shift_key_held();
+            const bool tab = az_is_key_held(AZ_KEY_TAB);
             switch (state.tool) {
               case AZ_TOOL_MOVE:
               case AZ_TOOL_ROTATE:
@@ -1422,19 +1482,19 @@ static void event_loop(void) {
                 do_set_camera_bounds(event.mouse.x, event.mouse.y);
                 break;
               case AZ_TOOL_BADDIE:
-                do_add_baddie(event.mouse.x, event.mouse.y, shift);
+                do_add_baddie(event.mouse.x, event.mouse.y, shift, tab);
                 break;
               case AZ_TOOL_DOOR:
-                do_add_door(event.mouse.x, event.mouse.y, shift);
+                do_add_door(event.mouse.x, event.mouse.y, shift, tab);
                 break;
               case AZ_TOOL_GRAVFIELD:
-                do_add_gravfield(event.mouse.x, event.mouse.y, shift);
+                do_add_gravfield(event.mouse.x, event.mouse.y, shift, tab);
                 break;
               case AZ_TOOL_NODE:
-                do_add_node(event.mouse.x, event.mouse.y, shift);
+                do_add_node(event.mouse.x, event.mouse.y, shift, tab);
                 break;
               case AZ_TOOL_WALL:
-                do_add_wall(event.mouse.x, event.mouse.y, shift);
+                do_add_wall(event.mouse.x, event.mouse.y, shift, tab);
                 break;
             }
           }
@@ -1461,7 +1521,8 @@ static void event_loop(void) {
               case AZ_TOOL_NODE:
               case AZ_TOOL_WALL:
                 do_move(event.mouse.x, event.mouse.y, event.mouse.dx,
-                        event.mouse.dy, az_is_shift_key_held());
+                        event.mouse.dy, az_is_shift_key_held(),
+                        az_is_key_held(AZ_KEY_TAB));
                 break;
               case AZ_TOOL_MASS_MOVE:
                 do_mass_move(event.mouse.x, event.mouse.y,
