@@ -652,6 +652,73 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         }
       } glPopMatrix();
       break;
+    case AZ_DOOD_NUCLEAR_BOMB:
+      // Main cylinder:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-36,  30); glVertex2f(36,  30);
+        glColor3f(0.50, 0.50, 0.50); glVertex2f(-36,  18); glVertex2f(36,  18);
+        glColor3f(0.70, 0.70, 0.70); glVertex2f(-36,   0); glVertex2f(36,   0);
+        glColor3f(0.50, 0.50, 0.50); glVertex2f(-36, -18); glVertex2f(36, -18);
+        glColor3f(0.25, 0.25, 0.25); glVertex2f(-36, -30); glVertex2f(36, -30);
+      } glEnd();
+      // End caps:
+      for (int j = -1; j <= 1; j += 2) {
+        float x1 = j * 40;
+        float y1 = 30;
+        for (int i = 1; i <= 4; ++i) {
+          const float x2 = x1 + j * 2;
+          const float y2 = 8 * cos(AZ_DEG2RAD(i * 20)) + 22;
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor3f(0.25, 0.25, 0.25);
+            glVertex2f(x1, y1); glVertex2f(x2, y2);
+            glColor3f(0.50, 0.50, 0.50);
+            glVertex2f(x1, 0.6f * y1); glVertex2f(x2, 0.6f * y2);
+            glColor3f(0.70, 0.70, 0.70);
+            glVertex2f(x1, 0); glVertex2f(x2, 0);
+            glColor3f(0.50, 0.50, 0.50);
+            glVertex2f(x1, -0.6f * y1); glVertex2f(x2, -0.6f * y2);
+            glColor3f(0.25, 0.25, 0.25);
+            glVertex2f(x1, -y1); glVertex2f(x2, -y2);
+          } glEnd();
+          x1 = x2;
+          y1 = y2;
+        }
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor3f(0.20, 0.20, 0.20);
+          glVertex2f(j * 36,  31); glVertex2f(j * 40,  31);
+          glColor3f(0.45, 0.45, 0.45);
+          glVertex2f(j * 36,  19); glVertex2f(j * 40,  19);
+          glColor3f(0.65, 0.65, 0.65);
+          glVertex2f(j * 36,   0); glVertex2f(j * 40,   0);
+          glColor3f(0.45, 0.45, 0.45);
+          glVertex2f(j * 36, -19); glVertex2f(j * 40, -19);
+          glColor3f(0.20, 0.20, 0.20);
+          glVertex2f(j * 36, -31); glVertex2f(j * 40, -31);
+        } glEnd();
+      }
+      // Radiation symbol:
+      glColor4f(1, 1, 0, 0.3);
+      glBegin(GL_TRIANGLE_FAN); {
+        for (int i = 30; i < 360; i += 60) {
+          glVertex2d(16 * cos(AZ_DEG2RAD(i)), 15.5 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glColor4f(0, 0, 0, 0.65);
+      glBegin(GL_TRIANGLE_FAN); {
+        glVertex2d(0, 0);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(2.5 * cos(AZ_DEG2RAD(i)), 2.5 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      for (int j = 60; j < 420; j += 120) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          for (int i = j - 30; i <= j + 30; i += 10) {
+            glVertex2d(4.5 * cos(AZ_DEG2RAD(i)), 4.5 * sin(AZ_DEG2RAD(i)));
+            glVertex2d(11 * cos(AZ_DEG2RAD(i)), 10.5 * sin(AZ_DEG2RAD(i)));
+          }
+        } glEnd();
+      }
+      break;
   }
 }
 

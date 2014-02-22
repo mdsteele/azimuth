@@ -1,4 +1,4 @@
-@P z8 r450 t87 s6 x0.00 y50000.00 a-1.570796
+@P z8 r450 t104 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -368,3 +368,79 @@
   You should head west from here, to the Nandiar
   region.  The location has been marked on your
   map."
+!T87"
+  Terminal connected.  Accessing map data for this
+  region.
+  
+  ..."
+!T88"
+  Uh oh."
+!T89"
+  \"What's wrong?\""
+!T90"
+  The upper door just locked.  I can't override
+  it.  Someone or something is interfering with
+  the Cnidam mining subsystems.  I am detecting
+  significant Oth activity below -- they must be
+  responsible."
+!T91"
+  $Xff8800!DANGER DANGER!$W  This isn't good.  Hopper, we
+  have a serious problem."
+!T92"
+  The entire cache of nuclear deep-mining
+  explosives far below here has just been set to
+  go off.  They've cut me off from it.  I managed
+  to reengage the safeties just before they did,
+  but even that only buys us a few minutes.  If I
+  can't reestablish a connection, you'll have to
+  fly down there and shut it down manually."
+!T93"
+  \"The Oth did this!?\""
+!T94"
+  If the entire stockpile blows at once, the
+  explosion will probably rip all the way up this
+  shaft.  And they locked the door above us...
+  Hopper, they're trying very hard to stop you
+  from completing your mission."
+!T95"
+  I'll do what I can from here.  Meanwhile, get
+  down to the comm terminal in the stockpile room
+  immediately.  I've marked it on your map."
+!T96"
+  Mining Explosives
+  Stockpile"
+!T97"
+  \"C'mon, c'mon...   ...there we go!  E-stop
+  engaged.\""
+!T98"
+  \"Now let's see if I can get that uplink
+  reconnected...\""
+!T99"
+  Terminal online.  You did it.  That was close.
+  
+  I am permenantly disabling the explosives now.
+  Of course, that means the colonists will have to
+  get a technician in here for repairs before
+  they'll be able to resume any mining operations."
+!T100"
+  \"Somehow, I think that's the least of our
+  worries right now.  Just please tell me there
+  aren't any $/other$| giant piles of explosives
+  lying around waiting to go off?\""
+!T101"
+  No, there aren't.  Although...there is some
+  $Ctactical nuclear ordnance$W being stored in the
+  caves below.  Not any danger to you where it is,
+  but if you can find it, it would probably be a
+  big help to you for breaking through some of the
+  $Cheavier blast doors$W in your way."
+!T102"
+  \"Now you're talking.  That seems like it would
+  give me an edge on reaching the survivors before
+  the Oth do.\""
+!T103"
+  I've marked the location on your map.  Just be
+  wary of the wildlife and the automatic mining
+  systems between here and there.  Some of them
+  are quite dangerous, especially with the colony
+  security systems not functioning properly."

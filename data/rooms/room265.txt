@@ -1,6 +1,6 @@
 @R z2 p0 b0 d2 g0 n21 w47
   c(34278.82,0.00,1.137288,0.000000)
-$s:test50,hnez,lock1,test49,hnez,lock2;
+$s:test50,hnez,test49,bnez3,lock2,halt,lock1;
 !W1 d100 x14746.81 y31153.76 a-2.004442 u0
 !W1 d93 x14062.00 y31063.93 a-1.738208 u0
 !W1 d95 x14674.32 y30937.53 a0.172783 u0
@@ -57,7 +57,7 @@ $s:test50,hnez,lock1,test49,hnez,lock2;
 !N5/2 x14504.38 y31063.81 a1.133901 u0
 !N7/9 x14126.69 y31189.13 a-0.428151 u0
 !N1/0 x14379.61 y31070.67 a1.137142 u0
-$u:test50,hnez,test49,hnez,map2,set49,unlock2,doom300,kill;
+$u:test50,hnez,dlog,pt1,pb3,test49,bnez11,tb87,map2,lock1,tb88,tt89,tb90,tb91,tb92,tt93,tb94,tb95,test49,hnez,set49,dend,unlock2,doom300,kill;
 !N7/50 x14509.33 y31150.51 a1.153159 u0
 !N7/50 x14539.32 y31218.09 a1.153159 u0
 !N7/9 x14227.51 y31143.11 a-0.428151 u0
