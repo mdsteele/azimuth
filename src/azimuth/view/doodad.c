@@ -240,35 +240,43 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(10, -6); glVertex2f(16, -6);
       } glEnd();
       break;
-    case AZ_DOOD_MACHINE_FAN:
-      glBegin(GL_QUAD_STRIP); {
-        for (int i = 45; i <= 405; i += 90) {
-          const double c = cos(AZ_DEG2RAD(i));
-          const double s = sin(AZ_DEG2RAD(i));
-          glColor3f(0.25, 0.25, 0.25); glVertex2d(45.25 * c, 45.25 * s);
-          glColor3f(0.15, 0.15, 0.15); glVertex2d(55 * c, 55 * s);
-        }
-      } glEnd();
-      glColor3f(0.28, 0.28, 0.28);
-      glBegin(GL_QUADS); {
-        glVertex2f( 32,  32); glVertex2f(-32,  32);
-        glVertex2f(-32, -32); glVertex2f( 32, -32);
-      } glEnd();
-      glColor3f(0.15, 0.15, 0.15);
-      glBegin(GL_POLYGON); {
-        for (int i = 0; i < 360; i += 15) {
-          glVertex2d(28 * cos(AZ_DEG2RAD(i)), 28 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
+    case AZ_DOOD_PIPE_ELBOW:
+      for (int i = 180; i < 225; i += 15) {
+        glBegin(GL_QUAD_STRIP); {
+          const double c1 = cos(AZ_DEG2RAD(i));
+          const double s1 = sin(AZ_DEG2RAD(i));
+          const double c2 = cos(AZ_DEG2RAD(i + 15));
+          const double s2 = sin(AZ_DEG2RAD(i + 15));
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(3 * c1, 3 * s1); glVertex2d(3 * c2, 3 * s2);
+          glColor3f(0.65, 0.9, 0.65);
+          glVertex2d(8 * c1, 8 * s1); glVertex2d(8 * c2, 8 * s2);
+          glColor3f(0.1, 0.4, 0.1);
+          glVertex2d(13 * c1, 13 * s1); glVertex2d(13 * c2, 13 * s2);
+        } glEnd();
+      }
       glPushMatrix(); {
-        glRotatef(5.0f * az_clock_mod(72, 1, clock), 0, 0, 1);
-        for (int i = 0; i < 5; ++i) {
-          glRotatef(72, 0, 0, 1);
-          glBegin(GL_TRIANGLES); {
-            glColor3f(0.4, 0.4, 0.4);
-            glVertex2f(0, 0); glVertex2f(28, 0);
-            glColor3f(0.2, 0.2, 0.2);
-            glVertex2f(19, 19);
+        for (int i = 0; i < 2; ++i) {
+          if (i != 0) {
+            glScalef(1, -1, 1);
+            glRotatef(-45, 0, 0, 1);
+          }
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0.1, 0.4, 0.1);
+            glVertex2f(-3, 0); glVertex2f(-3, 5);
+            glColor3f(0.65, 0.9, 0.65);
+            glVertex2f(-8, 0); glVertex2f(-8, 5);
+            glColor3f(0.1, 0.4, 0.1);
+            glVertex2f(-13, 0); glVertex2f(-13, 5);
+          } glEnd();
+          // Coupling:
+          glBegin(GL_QUAD_STRIP); {
+            glColor3f(0.2, 0.35, 0.2);
+            glVertex2f(-2, 5); glVertex2f(-2, 11);
+            glColor3f(0.75, 0.85, 0.75);
+            glVertex2f(-8, 5); glVertex2f(-8, 11);
+            glColor3f(0.2, 0.35, 0.2);
+            glVertex2f(-14, 5); glVertex2f(-14, 11);
           } glEnd();
         }
       } glPopMatrix();
@@ -362,43 +370,35 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(47, 68); glVertex2f(37, 48);
       } glEnd();
       break;
-    case AZ_DOOD_PIPE_ELBOW:
-      for (int i = 180; i < 225; i += 15) {
-        glBegin(GL_QUAD_STRIP); {
-          const double c1 = cos(AZ_DEG2RAD(i));
-          const double s1 = sin(AZ_DEG2RAD(i));
-          const double c2 = cos(AZ_DEG2RAD(i + 15));
-          const double s2 = sin(AZ_DEG2RAD(i + 15));
-          glColor3f(0.1, 0.4, 0.1);
-          glVertex2d(3 * c1, 3 * s1); glVertex2d(3 * c2, 3 * s2);
-          glColor3f(0.65, 0.9, 0.65);
-          glVertex2d(8 * c1, 8 * s1); glVertex2d(8 * c2, 8 * s2);
-          glColor3f(0.1, 0.4, 0.1);
-          glVertex2d(13 * c1, 13 * s1); glVertex2d(13 * c2, 13 * s2);
-        } glEnd();
-      }
+    case AZ_DOOD_MACHINE_FAN:
+      glBegin(GL_QUAD_STRIP); {
+        for (int i = 45; i <= 405; i += 90) {
+          const double c = cos(AZ_DEG2RAD(i));
+          const double s = sin(AZ_DEG2RAD(i));
+          glColor3f(0.25, 0.25, 0.25); glVertex2d(45.25 * c, 45.25 * s);
+          glColor3f(0.15, 0.15, 0.15); glVertex2d(55 * c, 55 * s);
+        }
+      } glEnd();
+      glColor3f(0.28, 0.28, 0.28);
+      glBegin(GL_QUADS); {
+        glVertex2f( 32,  32); glVertex2f(-32,  32);
+        glVertex2f(-32, -32); glVertex2f( 32, -32);
+      } glEnd();
+      glColor3f(0.15, 0.15, 0.15);
+      glBegin(GL_POLYGON); {
+        for (int i = 0; i < 360; i += 15) {
+          glVertex2d(28 * cos(AZ_DEG2RAD(i)), 28 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
       glPushMatrix(); {
-        for (int i = 0; i < 2; ++i) {
-          if (i != 0) {
-            glScalef(1, -1, 1);
-            glRotatef(-45, 0, 0, 1);
-          }
-          glBegin(GL_QUAD_STRIP); {
-            glColor3f(0.1, 0.4, 0.1);
-            glVertex2f(-3, 0); glVertex2f(-3, 5);
-            glColor3f(0.65, 0.9, 0.65);
-            glVertex2f(-8, 0); glVertex2f(-8, 5);
-            glColor3f(0.1, 0.4, 0.1);
-            glVertex2f(-13, 0); glVertex2f(-13, 5);
-          } glEnd();
-          // Coupling:
-          glBegin(GL_QUAD_STRIP); {
-            glColor3f(0.2, 0.35, 0.2);
-            glVertex2f(-2, 5); glVertex2f(-2, 11);
-            glColor3f(0.75, 0.85, 0.75);
-            glVertex2f(-8, 5); glVertex2f(-8, 11);
-            glColor3f(0.2, 0.35, 0.2);
-            glVertex2f(-14, 5); glVertex2f(-14, 11);
+        glRotatef(5.0f * az_clock_mod(72, 1, clock), 0, 0, 1);
+        for (int i = 0; i < 5; ++i) {
+          glRotatef(72, 0, 0, 1);
+          glBegin(GL_TRIANGLES); {
+            glColor3f(0.4, 0.4, 0.4);
+            glVertex2f(0, 0); glVertex2f(28, 0);
+            glColor3f(0.2, 0.2, 0.2);
+            glVertex2f(19, 19);
           } glEnd();
         }
       } glPopMatrix();
