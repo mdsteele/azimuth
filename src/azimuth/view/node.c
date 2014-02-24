@@ -741,8 +741,8 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         const GLfloat r1 = 6.0f + 0.5f * (frame == 3 ? 1 : frame);
         const GLfloat r2 = r1 + 1.5f;
         for (int i = 0; i <= 360; i += 20) {
-          glVertex2f(r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
-          glVertex2f(r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
+          glVertex2d(r1 * cos(AZ_DEG2RAD(i)), r1 * sin(AZ_DEG2RAD(i)));
+          glVertex2d(r2 * cos(AZ_DEG2RAD(i)), r2 * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
       glBegin(GL_TRIANGLE_FAN); {
@@ -759,22 +759,30 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_UPG_MAGNET_SWEEP:
-      // TODO: some kind of animation
-      glBegin(GL_QUAD_STRIP); {
+      glBegin(GL_TRIANGLE_FAN); {
+        const double scale = 1 - (0.33 * (frame == 3 ? 1 : frame));
+        glColor4f(1, 1, 0.5, 0.5); glVertex2f(0, 8);
+        glColor4f(1, 1, 0.5, 0);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(8 * scale * cos(AZ_DEG2RAD(i)),
+                     5 * scale * sin(AZ_DEG2RAD(i)) + 8);
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
         for (int i = -200; i <= 20; i += 20) {
           const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
-          glColor3f(1, 0, 0); glVertex2d(9 * c, 9 * s - 1);
-          glColor3f(0.7, 0, 0); glVertex2d(5 * c, 5 * s - 1);
+          glColor3f(1, 0, 0); glVertex2d(8 * c, 8 * s - 3);
+          glColor3f(0.7, 0, 0); glVertex2d(4 * c, 4 * s - 3);
         }
       } glEnd();
       glBegin(GL_QUADS); {
         for (int i = -1; i <= 1; i += 2) {
           glColor3f(0.5, 0.6, 0.6);
-          glVertex2f(i * 2, 9); glVertex2f(i * 6, 9);
+          glVertex2f(i * 2, 6); glVertex2f(i * 6, 6);
           glColor3f(1, 0, 0);
-          glVertex2f(i * 8.5, 2);
+          glVertex2f(i * 7.7, -1);
           glColor3f(0.7, 0, 0);
-          glVertex2f(i * 4.7, 0.7);
+          glVertex2f(i * 3.9, -2.3);
         }
       }
       break;

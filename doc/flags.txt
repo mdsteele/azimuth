@@ -24,6 +24,8 @@ Comm Consoles
 10: Met AI after Rockwyrm (Filimun room 31), lower armory door unlocked
 26: Used comm console in Filimun room 28
 27: Used comm console in Colony room 138
+49: Cnidam bomb started (Cnidam room 265)
+50: Cnidam bomb defused (Cnidam room 323)
 69: Used comm console in Nandiar room 303
 
 Map Markers
@@ -89,8 +91,6 @@ Misc
 25: Burst through rock face in Colony room 370
 30: Turned off secondary reactor in Barrag room 274
 39: Turned on drill in Filimun room 84
-49: Cnidam bomb started (Cnidam room 265)
-50: Cnidam bomb defused (Cnidam room 323)
 55: Turned off power in Nandiar room 214
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176
