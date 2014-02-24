@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
+#include <SDL_mixer/SDL_mixer.h>
 
 #include "azimuth/system/resource.h"
 #include "azimuth/util/audio.h"
