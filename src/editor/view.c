@@ -42,6 +42,14 @@
 
 /*===========================================================================*/
 
+#define EDITOR_TEXT_BOX_TOP_MARGIN 20.5
+#define EDITOR_TEXT_BOX_SIDE_MARGIN 5.5
+#define EDITOR_TEXT_BOX_PADDING 3.5
+#define EDITOR_TEXT_BOX_FONT_SIZE 16
+#define EDITOR_TEXT_BOX_ROW_HEIGHT 22
+
+/*===========================================================================*/
+
 static void arc_vertices(double r, double start_theta, double end_theta) {
   const double diff = end_theta - start_theta;
   if (diff == 0.0) return;
@@ -702,14 +710,13 @@ static void draw_hud(az_editor_state_t *state) {
 
   // Draw the text box:
   if (state->text.action != AZ_ETA_NOTHING) {
-    const int chars_per_row = 39;
-    const int row_height = 22;
     const int num_rows =
-      az_imax(1, (state->text.length + chars_per_row - 1) / chars_per_row);
-    const GLfloat left = 5.5;
-    const GLfloat right = AZ_SCREEN_WIDTH - 5.5;
-    const GLfloat top = 20.5;
-    const GLfloat bottom = top + row_height * num_rows;
+      az_imax(1, (state->text.length + EDITOR_TEXT_BOX_CHARS_PER_ROW - 1) /
+              EDITOR_TEXT_BOX_CHARS_PER_ROW);
+    const GLfloat left = EDITOR_TEXT_BOX_SIDE_MARGIN;
+    const GLfloat right = AZ_SCREEN_WIDTH - EDITOR_TEXT_BOX_SIDE_MARGIN;
+    const GLfloat top = EDITOR_TEXT_BOX_TOP_MARGIN;
+    const GLfloat bottom = top + EDITOR_TEXT_BOX_ROW_HEIGHT * num_rows;
     // Draw box:
     glColor3f(0, 0, 0); // black
     glBegin(GL_QUADS); {
@@ -724,24 +731,30 @@ static void draw_hud(az_editor_state_t *state) {
     // Draw text:
     glColor3f(1, 1, 1); // white
     for (int row = 0; row < num_rows; ++row) {
-      const int start = row * chars_per_row;
-      az_draw_chars(16, AZ_ALIGN_LEFT, 9, top + 3.5 + row_height * row,
+      const int start = row * EDITOR_TEXT_BOX_CHARS_PER_ROW;
+      az_draw_chars(EDITOR_TEXT_BOX_FONT_SIZE, AZ_ALIGN_LEFT,
+                    left + EDITOR_TEXT_BOX_PADDING,
+                    top + EDITOR_TEXT_BOX_PADDING +
+                    EDITOR_TEXT_BOX_ROW_HEIGHT * row,
                     state->text.buffer + start,
-                    az_imin(chars_per_row, state->text.length - start));
+                    az_imin(EDITOR_TEXT_BOX_CHARS_PER_ROW,
+                            state->text.length - start));
     }
     // Draw cursor:
     if (az_clock_mod(2, 16, state->clock) != 0) {
-      int row = state->text.cursor / chars_per_row;
-      int col = state->text.cursor % chars_per_row;
+      int row = state->text.cursor / EDITOR_TEXT_BOX_CHARS_PER_ROW;
+      int col = state->text.cursor % EDITOR_TEXT_BOX_CHARS_PER_ROW;
       if (row == num_rows) {
         assert(col == 0);
         row = num_rows - 1;
-        col = chars_per_row;
+        col = EDITOR_TEXT_BOX_CHARS_PER_ROW;
       } else assert(row < num_rows);
       glColor3f(1, 0, 0); // red
       glBegin(GL_LINES); {
-        const GLfloat x = left + 4 + 16 * col;
-        const GLfloat y = top + 3 + row_height * row;
+        const GLfloat x = left + (EDITOR_TEXT_BOX_PADDING - 0.5) +
+          EDITOR_TEXT_BOX_FONT_SIZE * col;
+        const GLfloat y = top + (EDITOR_TEXT_BOX_PADDING - 0.5) +
+          EDITOR_TEXT_BOX_ROW_HEIGHT * row;
         glVertex2f(x, y);
         glVertex2f(x, y + 15);
       } glEnd();
@@ -782,6 +795,18 @@ az_vector_t az_pixel_to_position(const az_editor_state_t *state,
   } else {
     return az_vadd(pt, state->camera);
   }
+}
+
+int az_pixel_to_text_box_index(int x, int y) {
+  const int row = floor(((double)y - EDITOR_TEXT_BOX_TOP_MARGIN -
+                         EDITOR_TEXT_BOX_PADDING) /
+                        EDITOR_TEXT_BOX_ROW_HEIGHT);
+  const int col = floor(((double)x + 0.5 * EDITOR_TEXT_BOX_FONT_SIZE -
+                         EDITOR_TEXT_BOX_SIDE_MARGIN -
+                         EDITOR_TEXT_BOX_PADDING) /
+                        EDITOR_TEXT_BOX_FONT_SIZE);
+  return (EDITOR_TEXT_BOX_CHARS_PER_ROW * row +
+          az_imin(az_imax(0, col), EDITOR_TEXT_BOX_CHARS_PER_ROW));
 }
 
 /*===========================================================================*/

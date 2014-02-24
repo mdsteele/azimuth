@@ -25,9 +25,13 @@
 
 /*===========================================================================*/
 
+#define EDITOR_TEXT_BOX_CHARS_PER_ROW 39
+
 void az_editor_draw_screen(az_editor_state_t *state);
 
 az_vector_t az_pixel_to_position(const az_editor_state_t *state, int x, int y);
+
+int az_pixel_to_text_box_index(int x, int y);
 
 /*===========================================================================*/
 

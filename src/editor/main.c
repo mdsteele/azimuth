@@ -1339,10 +1339,12 @@ static void event_loop(void) {
                 }
                 break;
               case AZ_KEY_UP_ARROW:
-                state.text.cursor = az_imax(state.text.cursor - 39, 0);
+                state.text.cursor = az_imax(state.text.cursor -
+                                            EDITOR_TEXT_BOX_CHARS_PER_ROW, 0);
                 break;
               case AZ_KEY_DOWN_ARROW:
-                state.text.cursor = az_imin(state.text.cursor + 39,
+                state.text.cursor = az_imin(state.text.cursor +
+                                            EDITOR_TEXT_BOX_CHARS_PER_ROW,
                                             state.text.length);
                 break;
               case AZ_KEY_LEFT_ARROW:
@@ -1465,7 +1467,10 @@ static void event_loop(void) {
           break;
         case AZ_EVENT_MOUSE_DOWN:
           if (state.text.action != AZ_ETA_NOTHING) {
-            // TODO: Move cursor to where we clicked.
+            const int text_index =
+              az_pixel_to_text_box_index(event.mouse.x, event.mouse.y);
+            state.text.cursor =
+              az_imin(az_imax(0, text_index), state.text.length);
           } else {
             const bool shift = az_is_shift_key_held();
             const bool tab = az_is_key_held(AZ_KEY_TAB);
