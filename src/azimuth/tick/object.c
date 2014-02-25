@@ -187,33 +187,35 @@ static void kill_baddie_internal(
   assert(baddie->kind != AZ_BAD_NOTHING);
   az_play_sound(&state->soundboard, baddie->data->death_sound);
   // Add particles for baddie debris:
-  const double radius = baddie->data->overall_bounding_radius;
-  const double step = 2.5 + baddie->data->main_body.bounding_radius / 15.0;
-  for (double y = -radius; y <= radius; y += step) {
-    for (double x = -radius; x <= radius; x += step) {
+  const double overall_radius = baddie->data->overall_bounding_radius;
+  const double step = 6.0;
+  for (double y = -overall_radius; y <= overall_radius; y += step) {
+    for (double x = -overall_radius; x <= overall_radius; x += step) {
       const az_vector_t pos = {x + baddie->position.x + az_random(-3, 3),
                                y + baddie->position.y + az_random(-3, 3)};
       const az_death_style_t dstyle = baddie->data->death_style;
+      const az_component_data_t *component;
+      az_vector_t component_pos;
       az_particle_t *particle;
-      if (az_point_touches_baddie(baddie, pos) &&
+      if (az_point_touches_baddie(baddie, pos, &component, &component_pos) &&
           az_insert_particle(state, &particle)) {
         particle->kind = (dstyle == AZ_DEATH_EMBERS ? AZ_PAR_EMBER :
                           dstyle == AZ_DEATH_OTH ? AZ_PAR_OTH_FRAGMENT :
                           AZ_PAR_SHARD);
         particle->color = baddie->data->color;
         particle->position = pos;
-        if (dstyle == AZ_DEATH_EMBERS) {
-          particle->velocity = az_vsub(pos, baddie->position);
-        } else {
-          particle->velocity = az_vmul(az_vsub(pos, baddie->position), 5.0);
-        }
-        particle->velocity.x += az_random(-radius, radius);
-        particle->velocity.y += az_random(-radius, radius);
         particle->angle = az_random(0.0, AZ_TWO_PI);
         particle->lifetime = az_random(0.5, 1.0);
         particle->param1 = az_random(0.5, 1.5) * step *
           (particle->kind == AZ_PAR_SHARD ? 0.25 : 1.4);
         particle->param2 = az_random(-10.0, 10.0);
+        const double component_radius = component->bounding_radius;
+        particle->velocity = az_vsub(pos, component_pos);
+        if (dstyle != AZ_DEATH_EMBERS) {
+          particle->velocity = az_vmul(particle->velocity, 5.0);
+        }
+        particle->velocity.x += az_random(-component_radius, component_radius);
+        particle->velocity.y += az_random(-component_radius, component_radius);
       }
     }
   }
@@ -474,6 +476,7 @@ static void break_wall_internal(
   // Place particles for wall debris.
   const double radius = wall->data->bounding_radius;
   const double step = 3.0 + radius / 10.0;
+  const double size = 0.7 + radius / 60.0;
   az_particle_t *particle;
   for (double y = -radius; y <= radius; y += step) {
     for (double x = -radius; x <= radius; x += step) {
@@ -490,8 +493,8 @@ static void break_wall_internal(
         particle->velocity.x += az_random(-radius, radius);
         particle->velocity.y += az_random(-radius, radius);
         particle->angle = az_random(0.0, AZ_TWO_PI);
-        particle->lifetime = az_random(0.5, 1.0);
-        particle->param1 = az_random(1.0, 3.0) * (radius / 75.0);
+        particle->lifetime = az_random(0.3, 0.8);
+        particle->param1 = az_random(0.5, 1.5) * size;
         particle->param2 = az_random(-10.0, 10.0);
       }
     }

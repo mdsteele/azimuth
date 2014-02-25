@@ -214,8 +214,13 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
 // particular baddie, or permanently for this baddie kind).
 bool az_baddie_has_flag(const az_baddie_t *baddie, az_baddie_flags_t flag);
 
-// Determine if the specified point overlaps the baddie.
-bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point);
+// Determine if the specified point overlaps the baddie.  If so, stores one of
+// the overlapped components in *component_out (if component_out is non-NULL),
+// and the absolute position of that component in *component_pos_out (if
+// component_pos_out is non-NULL).
+bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point,
+                             const az_component_data_t **component_out,
+                             az_vector_t *component_pos_out);
 
 // Determine if the specified circle overlaps any part of the baddie.  If so,
 // stores one of the overlapped components in *component_out (if component_out

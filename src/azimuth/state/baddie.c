@@ -951,7 +951,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_CHOMPER_PLANT] = {
     .max_health = 14.0, .overall_bounding_radius = 250.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {32, 128, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(chomper_plant_components)
   },
@@ -1191,7 +1191,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_AQUATIC_CHOMPER] = {
     .max_health = 9.5, .overall_bounding_radius = 130.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {96, 32, 192, 255},
-    .static_properties = AZ_BADF_DRAW_BG, .death_sound = AZ_SND_KILL_TURRET,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(aquatic_chomper_components)
   },
@@ -1320,7 +1321,9 @@ static bool point_touches_component(
   }
 }
 
-bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point) {
+bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point,
+                             const az_component_data_t **component_out,
+                             az_vector_t *component_pos_out) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   const az_baddie_data_t *data = baddie->data;
 
@@ -1335,6 +1338,8 @@ bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point) {
 
   // Check if we hit the main body of the baddie.
   if (point_touches_component(&data->main_body, rel_point)) {
+    if (component_out != NULL) *component_out = &data->main_body;
+    if (component_pos_out != NULL) *component_pos_out = baddie->position;
     return true;
   }
 
@@ -1346,6 +1351,12 @@ bool az_point_touches_baddie(const az_baddie_t *baddie, az_vector_t point) {
       az_vrotate(az_vsub(rel_point, baddie->components[i].position),
                  -baddie->components[i].angle);
     if (point_touches_component(component, rel_rel_point)) {
+      if (component_out != NULL) *component_out = component;
+      if (component_pos_out != NULL) {
+        *component_pos_out = az_vadd(az_vrotate(baddie->components[i].position,
+                                                baddie->angle),
+                                     baddie->position);
+      }
       return true;
     }
   }
