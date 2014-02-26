@@ -29,9 +29,6 @@
 #define NOTHING_PROB 12
 #define ROCKETS_PROB 6
 #define BOMBS_PROB 4
-#define SSHIELDS_PROB 12
-#define MSHIELDS_PROB 6
-#define LSHIELDS_PROB 1
 
 az_pickup_kind_t az_choose_random_pickup_kind(
     const az_player_t *player, az_pickup_flags_t potential_pickups) {
@@ -48,14 +45,26 @@ az_pickup_kind_t az_choose_random_pickup_kind(
                            AZ_PUPF_LARGE_SHIELDS);
   }
 
+  // Tweak probability of shield pickups based on current ship shields:
+  const int sshields_prob =
+    (player->max_shields - player->shields < AZ_SHIELDS_PER_SMALL_PICKUP ? 6 :
+     player->shields <= AZ_SHIELDS_LOW_THRESHOLD ? 16 : 12);
+  const int mshields_prob =
+    (player->max_shields - player->shields < AZ_SHIELDS_PER_MEDIUM_PICKUP ? 3 :
+     player->shields <= AZ_SHIELDS_VERY_LOW_THRESHOLD ? 12 :
+     player->shields <= AZ_SHIELDS_LOW_THRESHOLD ? 9 : 6);
+  const int lshields_prob =
+    (player->shields <= AZ_SHIELDS_VERY_LOW_THRESHOLD ? 3 :
+     player->shields <= AZ_SHIELDS_LOW_THRESHOLD ? 2 : 1);
+
   // Determine the random range:
   int limit = 0;
   if (potential_pickups & AZ_PUPF_NOTHING) limit += NOTHING_PROB;
   if (potential_pickups & AZ_PUPF_ROCKETS) limit += ROCKETS_PROB;
   if (potential_pickups & AZ_PUPF_BOMBS) limit += BOMBS_PROB;
-  if (potential_pickups & AZ_PUPF_SMALL_SHIELDS) limit += SSHIELDS_PROB;
-  if (potential_pickups & AZ_PUPF_MEDIUM_SHIELDS) limit += MSHIELDS_PROB;
-  if (potential_pickups & AZ_PUPF_LARGE_SHIELDS) limit += LSHIELDS_PROB;
+  if (potential_pickups & AZ_PUPF_SMALL_SHIELDS) limit += sshields_prob;
+  if (potential_pickups & AZ_PUPF_MEDIUM_SHIELDS) limit += mshields_prob;
+  if (potential_pickups & AZ_PUPF_LARGE_SHIELDS) limit += lshields_prob;
   if (limit == 0) return AZ_PUP_NOTHING;
 
   // Select the pickup kind:
@@ -69,16 +78,16 @@ az_pickup_kind_t az_choose_random_pickup_kind(
     else choice -= BOMBS_PROB;
   }
   if (potential_pickups & AZ_PUPF_SMALL_SHIELDS) {
-    if (choice < SSHIELDS_PROB) return AZ_PUP_SMALL_SHIELDS;
-    else choice -= SSHIELDS_PROB;
+    if (choice < sshields_prob) return AZ_PUP_SMALL_SHIELDS;
+    else choice -= sshields_prob;
   }
   if (potential_pickups & AZ_PUPF_MEDIUM_SHIELDS) {
-    if (choice < MSHIELDS_PROB) return AZ_PUP_MEDIUM_SHIELDS;
-    else choice -= MSHIELDS_PROB;
+    if (choice < mshields_prob) return AZ_PUP_MEDIUM_SHIELDS;
+    else choice -= mshields_prob;
   }
   if (potential_pickups & AZ_PUPF_LARGE_SHIELDS) {
-    if (choice < LSHIELDS_PROB) return AZ_PUP_LARGE_SHIELDS;
-    else choice -= LSHIELDS_PROB;
+    if (choice < lshields_prob) return AZ_PUP_LARGE_SHIELDS;
+    else choice -= lshields_prob;
   }
   assert(potential_pickups & AZ_PUPF_NOTHING);
   assert(choice < NOTHING_PROB);

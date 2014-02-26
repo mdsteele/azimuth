@@ -43,14 +43,13 @@
 
 // A bitset of pickup flags, made from OR-ing together the below constants:
 typedef uint_fast8_t az_pickup_flags_t;
-#define AZ_PUPF_NOTHING       ((az_pickup_flags_t)(1u << AZ_PUP_NOTHING))
-#define AZ_PUPF_ROCKETS       ((az_pickup_flags_t)(1u << AZ_PUP_ROCKETS))
-#define AZ_PUPF_BOMBS         ((az_pickup_flags_t)(1u << AZ_PUP_BOMBS))
-#define AZ_PUPF_SMALL_SHIELDS ((az_pickup_flags_t)(1u << AZ_PUP_SMALL_SHIELDS))
-#define AZ_PUPF_MEDIUM_SHIELDS \
-  ((az_pickup_flags_t)(1u << AZ_PUP_MEDIUM_SHIELDS))
-#define AZ_PUPF_LARGE_SHIELDS ((az_pickup_flags_t)(1u << AZ_PUP_LARGE_SHIELDS))
-#define AZ_PUPF_ALL           ((az_pickup_flags_t)(~0u))
+#define AZ_PUPF_NOTHING        ((az_pickup_flags_t)(1u << 0))
+#define AZ_PUPF_ROCKETS        ((az_pickup_flags_t)(1u << 1))
+#define AZ_PUPF_BOMBS          ((az_pickup_flags_t)(1u << 2))
+#define AZ_PUPF_SMALL_SHIELDS  ((az_pickup_flags_t)(1u << 3))
+#define AZ_PUPF_MEDIUM_SHIELDS ((az_pickup_flags_t)(1u << 4))
+#define AZ_PUPF_LARGE_SHIELDS  ((az_pickup_flags_t)(1u << 5))
+#define AZ_PUPF_ALL            ((az_pickup_flags_t)(~0u))
 
 typedef enum {
   AZ_PUP_NOTHING = 0,

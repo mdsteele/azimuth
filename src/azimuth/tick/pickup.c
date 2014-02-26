@@ -71,7 +71,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
                           AZ_MAGNET_SWEEP_MAX_RANGE)) {
       const az_vector_t delta = az_vsub(ship->position, pickup->position);
       const double speed =
-        200.0 * (1.0 - az_vnorm(delta) / AZ_MAGNET_SWEEP_MAX_RANGE);
+        300.0 * (1.0 - az_vnorm(delta) / AZ_MAGNET_SWEEP_MAX_RANGE);
       pickup->position =
         az_vadd(pickup->position, az_vwithlen(delta, speed * time));
     }
