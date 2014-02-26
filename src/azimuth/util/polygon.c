@@ -223,80 +223,33 @@ bool az_ray_hits_line_segment(
   return true;
 }
 
-static bool ray_hits_polygon_internal(
-    az_polygon_t polygon, az_vector_t start, az_vector_t delta,
-    double *time_out, az_vector_t *normal_out) {
-  assert(time_out != NULL);
-  const az_vector_t *vertices = polygon.vertices;
-  // We're going to iterate through the edges of the polygon, testing each one
-  // for an intersection with the ray.  We keep track of the smallest "time"
-  // (from 0 to 1) for which the ray hits something.  We also keep track of how
-  // many edges we hit at all (at any nonnegative "time"), because if we hit an
-  // odd number of edges that means we started inside the polygon, and should
-  // actually hit at time zero.
-  double best_time = INFINITY;
-  az_vector_t best_edge = AZ_VZERO;
-  int hits = 0;
-  // Iterate over all edges in the polygon.  On each iteration, i is the index
-  // of the "primary" vertex, and j is the index of the vertex that comes just
-  // after it in the list (wrapping around at the end).
-  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
-    const az_vector_t edelta = az_vsub(vertices[j], vertices[i]);
-    const double denom = az_vcross(delta, edelta);
-    // Make sure the edge isn't parallel to the ray.
-    if (denom == 0.0) continue;
-    const az_vector_t rel = az_vsub(vertices[i], start);
-    // Make sure that the ray hits the edge line between the two vertices.
-    const double u = az_vcross(rel, delta) / denom;
-    assert(isfinite(u));
-    if (u < 0.0 || u >= 1.0) continue;
-    // Make sure that the ray hits the edge within the bounds of the ray.
-    const double t = az_vcross(rel, edelta) / denom;
-    assert(isfinite(t));
-    if (t < 0.0) continue;
-    ++hits;
-    if (t > 1.0) continue;
-    if (t < best_time) {
-      best_time = t;
-      best_edge = edelta;
-    }
-  }
-  // If we started inside the polygon, then we actually hit at time zero.
-  if (hits % 2 != 0) {
-    best_time = 0.0;
-    best_edge = AZ_VZERO;
-  }
-  // If the ray hits the polygon, store the collision point in point_out, and
-  // the normal vector in normal_out.
-  const bool did_hit = best_time != INFINITY;
-  if (did_hit) {
-    assert(hits > 0);
-    assert(isfinite(best_time));
-    assert(0.0 <= best_time && best_time <= 1.0);
-    *time_out = best_time;
-    if (normal_out != NULL) {
-      if (best_edge.x == 0.0 && best_edge.y == 0.0) {
-        *normal_out = az_vneg(delta);
-      } else {
-        *normal_out = az_vsub(az_vproj(delta, best_edge), delta);
-      }
-    }
-  }
-  return did_hit;
-}
-
 bool az_ray_hits_polygon(
     az_polygon_t polygon, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
-  double time = INFINITY;
-  if (ray_hits_polygon_internal(polygon, start, delta, &time, normal_out)) {
-    assert(isfinite(time));
-    if (point_out != NULL) {
-      *point_out = az_vadd(start, az_vmul(delta, time));
-    }
+  // If the ray starts within the polygon, count that as an immediate
+  // impact and use the position as the normal (so that the normal points away
+  // from the origin).
+  if (az_polygon_contains(polygon, start)) {
+    if (point_out != NULL) *point_out = start;
+    if (normal_out != NULL) *normal_out = start;
     return true;
   }
-  return false;
+  bool hit = false;
+  az_vector_t pos;
+  // Check if the ray hits any edges of the polygon.
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (az_ray_hits_line_segment(
+            polygon.vertices[i], polygon.vertices[j], start, delta,
+            &pos, normal_out)) {
+      hit = true;
+      delta = az_vsub(pos, start);
+    }
+  }
+  // Return the final answer.
+  if (hit && point_out != NULL) {
+    *point_out = pos;
+  }
+  return hit;
 }
 
 bool az_ray_hits_polygon_trans(
