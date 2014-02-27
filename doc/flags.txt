@@ -1,4 +1,5 @@
 Next flag: 74
+Unused: 55
 
 Bosses
 ======
@@ -91,6 +92,5 @@ Misc
 25: Burst through rock face in Colony room 370
 30: Turned off secondary reactor in Barrag room 274
 39: Turned on drill in Filimun room 84
-55: Turned off power in Nandiar room 214
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176

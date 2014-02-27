@@ -77,6 +77,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_TEST:   return "test";
     case AZ_OP_SET:    return "set";
     case AZ_OP_CLR:    return "clr";
+    case AZ_OP_HAS:    return "has";
     case AZ_OP_MAP:    return "map";
     case AZ_OP_NIX:    return "nix";
     case AZ_OP_KILL:   return "kill";
@@ -215,6 +216,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_TEST:
     case AZ_OP_SET:
     case AZ_OP_CLR:
+    case AZ_OP_HAS:
     case AZ_OP_MAP:
     case AZ_OP_NIX:
     case AZ_OP_SBADK:

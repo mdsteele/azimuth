@@ -378,6 +378,14 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         }
         az_clear_flag(&state->ship.player, (az_flag_t)flag_index);
       } break;
+      case AZ_OP_HAS: {
+        const int upgrade_index = (int)ins.immediate;
+        if (upgrade_index < 0 || upgrade_index >= AZ_NUM_UPGRADES) {
+          SCRIPT_ERROR("invalid upgrade index");
+        }
+        STACK_PUSH(az_has_upgrade(&state->ship.player,
+                                  (az_upgrade_t)upgrade_index) ? 1.0 : 0.0);
+      } break;
       case AZ_OP_MAP: {
         const int zone_index = (int)ins.immediate;
         if (zone_index < 0 || zone_index >= state->planet->num_zones) {
