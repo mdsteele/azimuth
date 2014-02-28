@@ -316,8 +316,9 @@ bool az_try_damage_baddie(
   assert(baddie->health > 0.0);
   assert(damage_amount >= 0.0);
 
-  // If the damage is zero, we can quit early.
+  // If the damage is zero or the baddie is invincible, we can quit early.
   if (damage_amount <= 0.0) return false;
+  if (az_baddie_has_flag(baddie, AZ_BADF_INVINCIBLE)) return false;
 
   // Determine if the baddie is susceptible to this kind of damage; if so,
   // damage the baddie.

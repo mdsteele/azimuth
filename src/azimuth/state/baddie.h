@@ -146,12 +146,14 @@ typedef uint_fast8_t az_baddie_flags_t;
 #define AZ_BADF_DRAW_BG        ((az_baddie_flags_t)(1u << 2))
 // INCORPOREAL: baddie cannot be hit by ship or by weapons
 #define AZ_BADF_INCORPOREAL    ((az_baddie_flags_t)(1u << 3))
+// INVINCIBLE: baddie cannot take damage
+#define AZ_BADF_INVINCIBLE     ((az_baddie_flags_t)(1u << 4))
 // KAMIKAZE: baddie dies when it hits the ship
-#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 4))
+#define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 5))
 // NO_HOMING_BEAM: homing beam ignores this baddie
-#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 5))
+#define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 6))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
-#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 6))
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 7))
 
 typedef struct {
   double overall_bounding_radius;

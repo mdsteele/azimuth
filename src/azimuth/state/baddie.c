@@ -1294,7 +1294,7 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
   baddie->position = position;
   baddie->angle = angle;
   baddie->health = baddie->data->max_health;
-  baddie->temp_properties = AZ_BADF_INCORPOREAL;
+  baddie->temp_properties = AZ_BADF_INVINCIBLE;
   for (int i = 0; i < baddie->data->num_components; ++i) {
     assert(i < AZ_ARRAY_SIZE(baddie->components));
     baddie->components[i].position = baddie->data->components[i].init_position;
