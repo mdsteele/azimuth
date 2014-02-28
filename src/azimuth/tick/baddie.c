@@ -708,16 +708,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_CLAM:
       {
+        const bool can_see = az_can_see_ship(state, baddie);
         const double ship_theta =
           az_vtheta(az_vsub(state->ship.position, baddie->position));
-        baddie->angle =
-          az_angle_towards(baddie->angle, 0.2 * time, ship_theta);
+        if (can_see) {
+          baddie->angle =
+            az_angle_towards(baddie->angle, 0.2 * time, ship_theta);
+        }
         const double max_angle = AZ_DEG2RAD(40);
         const double old_angle = baddie->components[0].angle;
         const double new_angle =
-          (baddie->cooldown <= 0.0 &&
-           fabs(az_mod2pi(baddie->angle - ship_theta)) < AZ_DEG2RAD(10) &&
-           az_can_see_ship(state, baddie) ?
+          (baddie->cooldown <= 0.0 && can_see &&
+           fabs(az_mod2pi(baddie->angle - ship_theta)) < AZ_DEG2RAD(10) ?
            fmin(max_angle, max_angle -
                 (max_angle - old_angle) * pow(0.00003, time)) :
            fmax(0.0, old_angle - 1.0 * time));

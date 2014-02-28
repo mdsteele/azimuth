@@ -1,5 +1,4 @@
 Next flag: 74
-Unused: 55
 
 Bosses
 ======
@@ -64,6 +63,7 @@ Doors
 48: Opened red door between Cnidam rooms 262 and 397
 52: Opened cyan door between Cnidam rooms 317 and 321
 54: Opened red door between Nandiar rooms 213 and 214
+55: Opened blue door between Barrag rooms 258 and 259
 56: Opened pink door between Nandiar rooms 211 and 212
 57: Opened red door between Colony room 99 and Filimun room 100
 60: Opened red door between Nandiar rooms 174 and 177
