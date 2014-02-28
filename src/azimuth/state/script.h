@@ -93,6 +93,7 @@ typedef enum {
   AZ_OP_ACTIV, // set state of object i to 1
   AZ_OP_DEACT, // set state of object i to 0
   AZ_OP_BOOM, // pop top two, create large explosion at position (a, b)
+  AZ_OP_NUKE, // create ginormous explosion that destroys everything
   // Ship:
   AZ_OP_GVEL, // push (x, y) velocity of ship
   AZ_OP_SVEL, // pop top two, set velocity of ship to (a, b)

@@ -462,6 +462,16 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_OTH_SPRAY:
       draw_oth_projectile(proj, 5.0, clock);
       break;
+    case AZ_PROJ_PLANETARY_EXPLOSION:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor4f(1, 0.9, 0.8, 0.5);
+        glVertex2f(0, -AZ_SCREEN_WIDTH);
+        glVertex2f(0,  AZ_SCREEN_WIDTH);
+        glColor4f(1, 0.75, 0.5, 0);
+        glVertex2f(-5 * AZ_SCREEN_HEIGHT, -AZ_SCREEN_WIDTH);
+        glVertex2f(-5 * AZ_SCREEN_HEIGHT,  AZ_SCREEN_WIDTH);
+      } glEnd();
+      break;
     case AZ_PROJ_SPARK:
       draw_spark(proj->age, 8.0, (az_color_t){0, 255, 0, 0});
       break;

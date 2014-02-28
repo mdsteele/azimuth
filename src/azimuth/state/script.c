@@ -90,6 +90,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_ACTIV:  return "activ";
     case AZ_OP_DEACT:  return "deact";
     case AZ_OP_BOOM:   return "boom";
+    case AZ_OP_NUKE:   return "nuke";
     case AZ_OP_GVEL:   return "gvel";
     case AZ_OP_SVEL:   return "svel";
     case AZ_OP_BAD:    return "bad";
@@ -170,6 +171,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_LE:
     case AZ_OP_GE:
     case AZ_OP_BOOM:
+    case AZ_OP_NUKE:
     case AZ_OP_GVEL:
     case AZ_OP_SVEL:
     case AZ_OP_GCAM:

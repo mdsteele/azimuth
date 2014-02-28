@@ -516,6 +516,14 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         az_add_projectile(state, AZ_PROJ_NUCLEAR_EXPLOSION, position,
                           0.0, 1.0, AZ_NULL_UID);
       } break;
+      case AZ_OP_NUKE: {
+        const az_vector_t position =
+          az_vwithlen(state->camera.center,
+                      fmax(az_vnorm(state->camera.center) -
+                           AZ_SCREEN_HEIGHT, 0.0));
+        az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION, position,
+                          az_vtheta(position), 1.0, AZ_NULL_UID);
+      } break;
       // Ship:
       case AZ_OP_GVEL:
         STACK_PUSH(state->ship.velocity.x, state->ship.velocity.y);
