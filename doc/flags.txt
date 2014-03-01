@@ -1,4 +1,4 @@
-Next flag: 74
+Next flag: 76
 
 Bosses
 ======
@@ -72,6 +72,8 @@ Doors
 67: Opened locked door in Cnidam room 308
 71: Opened cyan door b/w Barrag room 291 and Cnidam room 310 (around room 342)
 73: Opened red door between Barrag room 277 and Voquan room 343
+74: Opened cyan door between Barrag rooms 273 and 283
+75: Opened locked top door in Barrag room 273
 
 Boss Doors
 ==========
