@@ -1,4 +1,4 @@
-Next flag: 76
+Next flag: 77
 
 Bosses
 ======
@@ -27,6 +27,7 @@ Comm Consoles
 49: Cnidam bomb started (Cnidam room 265)
 50: Cnidam bomb defused (Cnidam room 323)
 69: Used comm console in Nandiar room 303
+76: Used comm console in Nandiar room 135
 
 Map Markers
 ===========

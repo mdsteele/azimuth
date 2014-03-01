@@ -1,4 +1,4 @@
-@P z8 r450 t104 s6 x0.00 y50000.00 a-1.570796
+@P z8 r450 t113 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -35,8 +35,8 @@
 !T8"
   Scanning records...
   
-  Of 284 registered colonists on Zenith, 47 human
-  and 16 trichord fatalities have been reported in
+  Of 284 registered colonists on Zenith, $Y47 human
+  and 16 trichord fatalities$W have been reported in
   the past 48 hours."
 !T9"
   \"Dammit!  ...But most of them are still alive?
@@ -44,7 +44,7 @@
 !T10"
   ERR@@@##...unknown.  Earlier sensor reports
   suggest that they retreated deeper within the
-  planetoid, into the Filimun region, following
+  planetoid, into the $MFilimun$W region, following
   the unknown disaster.  The Filimun entryway is
   now sealed off with $Rblast doors$W from the inside.
   However, due to subsequent systems damage, all
@@ -74,7 +74,7 @@
 !T15"
   \"Do it.\""
 !T16"
-  Armory $Asecurity doors$W have been $Yunlocked$W."
+  Armory security doors have been $Yunlocked$W."
 !T17"
   Lower Armory"
 !T18"
@@ -187,7 +187,7 @@
   find the surviving colonists immediately.  Isn't
   there anything $/useful$| you can do to help?\""
 !T44"
-  Survey map data is available for download.
+  $MSurvey map data$W is available for download.
   
   >>><"
 !T45"
@@ -204,8 +204,8 @@
 !T47"
   It seems that most of the colonists have
   relocated deeper down into the planetoid.  They
-  may be waiting there for the central colony
-  computer to restore emergency safety systems.
+  may be waiting there for the $Mcentral colony
+  computer$W to restore emergency safety systems.
   However, all communication with that area is
   completely cut off at this time."
 !T48"
@@ -213,8 +213,8 @@
   safety systems?\""
 !T49"
   Logs indicate there were unexpected effects from
-  the experiments into Nonlinear Paradimensional
-  Shear in the past several days.  Uncontrolled
+  the experiments into $GNonlinear Paradimensional
+  Shear$W in the past several days.  Uncontrolled
   NPS wormholes are likely responsible for the
   widespread systems damage."
 !T50"
@@ -299,7 +299,7 @@
   facility?  This place is bigger than I
   expected.\""
 !T67"
-  Accessing database.  Map data is available for
+  Accessing database.  $Xc06000Map data$W is available for
   download.
   
   >>><"
@@ -321,13 +321,13 @@
   There appear to be numerous damaged links
   throughout the data net.  Sensors available to
   this relay are limited to the upper portion of
-  the Nandiar region.  No Humans or Trichords are
+  the $YNandiar$W region.  No Humans or Trichords are
   currently present in that area."
 !T72"
   \"Figures.  Any idea where I can find them?\""
 !T73"
   It is possible that there may be researchers
-  down in the Lower Nandiar Laboratory, but
+  down in the $YLower Nandiar Laboratory$W, but
   sensors for that section are not currently
   available."
 !T74"
@@ -347,7 +347,7 @@
   if anyone's still in there.  Can you put it on
   my map?\""
 !T77"
-  Nandiar map data has been uploaded to your ship."
+  $YNandiar map data$W has been uploaded to your ship."
 !T78"
   Primary Reactor Core"
 !T79"
@@ -365,7 +365,7 @@
 !T85"
   Frozen Lake"
 !T86"
-  You should head west from here, to the Nandiar
+  You should head west from here, to the $YNandiar$W
   region.  The location has been marked on your
   map."
 !T87"
@@ -444,3 +444,56 @@
   systems between here and there.  Some of them
   are quite dangerous, especially with the colony
   security systems not functioning properly."
+!T104"
+  Bringing laboratory data banks and sensor net
+  back online.
+  
+  ...Unfortunately, there do not appear to be any
+  colonists remaining in the Nandiar lab areas
+  after all."
+!T105"
+  \"Yeah, I kinda noticed that.  I'll have to keep
+  going further down to look for them.\"
+  
+  \"Meanwhile, any chance you could tell me what
+  those rainbow things are that keep coming
+  through those weird portals and trying to kill
+  me?\""
+!T106"
+  Accessing laboratory research logs...
+  
+  The iridescent forms you are referring to are
+  known to the researchers here as...$YOth$W.
+  Evidently, they come from another universe with
+  different physics; what you are seeing are
+  merely their projections into this universe."
+!T107"
+  \"So how'd they get here?\""
+!T108"
+  $GNonlinear Paradimensional Shear$W.  The NPS
+  catalysis engines you've been seeing are able to
+  temporarily weaken the barrier between universes
+  in a controlled way; the Zenith researchers were
+  carefully investigating this effect.  But with
+  NPS engines now out of control, the Oth have
+  been coming through freely."
+!T109"
+  \"Can't we just turn these NPS engines $/off$|?\""
+!T110"
+  Inadvisable.  With the NPS engines running
+  undriven, and the data net so badly damaged,
+  there is $Rno safe way$W for you to shut them down.
+  Attempting to do so without the expertise of the
+  researchers here could have unpredictable
+  effects on the local spacial fabric, up to and
+  including the destruction of the entire colony."
+!T111"
+  \"Yikes.  I can't risk the safety of the
+  surviving colonists.  Sounds like the only way
+  to save them from the Oth is for me to find them
+  before the Oth do.\""
+!T112"
+  The current location of the survivors is still
+  uncertain, but your best option for proceeding
+  deeper into the planetoid is likely through the
+  underground oceans in $X4060e0Barrag$W, east of here."
