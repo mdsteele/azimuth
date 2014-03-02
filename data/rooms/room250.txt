@@ -111,6 +111,6 @@ $e:push8,sstat3,wait1,deact5;
 !B31 x10465.56 y32745.28 a2.837634 u0
 $k:push-100,sstr1;
 !B31 x10292.12 y32698.70 a1.266090 u2
-$k:gstat3,bnez3,push8,jump2,push0,sstat3,wait0.5,deact2;
+$k:gstat3,bnez/A,push8,jump/B,A#push0,B#sstat3,wait0.5,deact2;
 !B58 x10274.17 y32449.43 a-1.877701 u3:4
 !B74 x10143.24 y31951.00 a0.477999 u0

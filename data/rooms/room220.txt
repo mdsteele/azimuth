@@ -107,6 +107,6 @@ $s:gang,gang4,sub,mtau,abs,lti1,heqz,activ1,activ2,activ3;
 !D8 x-11362.46 y34155.04 a1.891966 r220 u3
 !G1 x-11240.14 y33786.84 a1.891923 s300.00 o0.00 f80.00 r80.00 l670.00 u0
 !G1 x-11241.19 y33790.69 a1.892063 s0.00 o0.00 f270.00 r270.00 l780.00 u4
-$e:gang,gang4,sub,mtau,abs,lti1,beqz5,open1,open2,open3,jump4,close1,close2,close3,wait0.25,deact4;
+$e:gang,gang4,sub,mtau,abs,lti1,beqz/A,open1,open2,open3,jump/B,A#close1,close2,close3,B#wait0.25,deact4;
 !B3 x-11334.02 y33570.74 a0.321228 u0
 !B3 x-11204.41 y33980.18 a0.321228 u0

@@ -25,13 +25,14 @@
 
 /*===========================================================================*/
 
-static const char script_string[] = "push-23.5,nop,beqz1,halt,push0;";
+static const char *script_string = "push-23.5,beqz/@,nop,bnez/A,halt,A#push0;";
 
 void test_script_print(void) {
   az_instruction_t instructions[] = {
     { .opcode = AZ_OP_PUSH, .immediate = -23.5 },
+    { .opcode = AZ_OP_BEQZ, .immediate = 5 },
     { .opcode = AZ_OP_NOP, .immediate = 1 },
-    { .opcode = AZ_OP_BEQZ, .immediate = 1 },
+    { .opcode = AZ_OP_BNEZ, .immediate = 2 },
     { .opcode = AZ_OP_HALT },
     { .opcode = AZ_OP_PUSH }
   };
@@ -43,45 +44,51 @@ void test_script_print(void) {
 }
 
 void test_script_scan(void) {
-  az_script_t *script = az_sscan_script(script_string, sizeof(script_string));
+  az_script_t *script = az_sscan_script(script_string, strlen(script_string));
   ASSERT_TRUE(script != NULL);
-  EXPECT_INT_EQ(5, script->num_instructions);
+  EXPECT_INT_EQ(6, script->num_instructions);
   if (script->num_instructions >= 1) {
     EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[0].opcode);
     EXPECT_APPROX(-23.5, script->instructions[0].immediate);
   }
   if (script->num_instructions >= 2) {
-    EXPECT_INT_EQ(AZ_OP_NOP, script->instructions[1].opcode);
-    EXPECT_APPROX(0, script->instructions[1].immediate);
+    EXPECT_INT_EQ(AZ_OP_BEQZ, script->instructions[1].opcode);
+    EXPECT_APPROX(5, script->instructions[1].immediate);
   }
   if (script->num_instructions >= 3) {
-    EXPECT_INT_EQ(AZ_OP_BEQZ, script->instructions[2].opcode);
-    EXPECT_APPROX(1, script->instructions[2].immediate);
+    EXPECT_INT_EQ(AZ_OP_NOP, script->instructions[2].opcode);
+    EXPECT_APPROX(0, script->instructions[2].immediate);
   }
   if (script->num_instructions >= 4) {
-    EXPECT_INT_EQ(AZ_OP_HALT, script->instructions[3].opcode);
-    EXPECT_APPROX(0, script->instructions[3].immediate);
+    EXPECT_INT_EQ(AZ_OP_BNEZ, script->instructions[3].opcode);
+    EXPECT_APPROX(2, script->instructions[3].immediate);
   }
   if (script->num_instructions >= 5) {
-    EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[4].opcode);
-    EXPECT_APPROX(0.0, script->instructions[4].immediate);
+    EXPECT_INT_EQ(AZ_OP_HALT, script->instructions[4].opcode);
+    EXPECT_APPROX(0, script->instructions[4].immediate);
+  }
+  if (script->num_instructions >= 6) {
+    EXPECT_INT_EQ(AZ_OP_PUSH, script->instructions[5].opcode);
+    EXPECT_APPROX(0.0, script->instructions[5].immediate);
   }
   az_free_script(script);
 }
 
 void test_script_clone(void) {
   EXPECT_TRUE(az_clone_script(NULL) == NULL);
-  az_script_t *script1 = az_sscan_script(script_string, sizeof(script_string));
-  EXPECT_INT_EQ(5, script1->num_instructions);
+  az_script_t *script1 = az_sscan_script(script_string, strlen(script_string));
+  ASSERT_TRUE(script1 != NULL);
+  EXPECT_INT_EQ(6, script1->num_instructions);
   if (script1->num_instructions >= 2) {
-    EXPECT_INT_EQ(AZ_OP_NOP, script1->instructions[1].opcode);
+    EXPECT_INT_EQ(AZ_OP_BEQZ, script1->instructions[1].opcode);
   }
   az_script_t *script2 = az_clone_script(script1);
   az_free_script(script1);
   script1 = NULL;
-  EXPECT_INT_EQ(5, script2->num_instructions);
+  ASSERT_TRUE(script2 != NULL);
+  EXPECT_INT_EQ(6, script2->num_instructions);
   if (script2->num_instructions >= 2) {
-    EXPECT_INT_EQ(AZ_OP_NOP, script2->instructions[1].opcode);
+    EXPECT_INT_EQ(AZ_OP_BEQZ, script2->instructions[1].opcode);
   }
   az_free_script(script2);
 }

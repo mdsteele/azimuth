@@ -125,7 +125,7 @@ $s:dark0.33;
 !D8 x-12270.11 y38111.17 a1.882358 r199 u2
 !D1 x-12787.28 y38371.95 a-1.249898 r401 u0
 !G1 x-12485.89 y38187.14 a1.886805 s0.00 o0.00 f300.00 r300.00 l290.00 u1
-$e:nix4,gang,gang1,sub,mtau,abs,lti1,beqz4,open2,open3,jump3,close2,close3,wait0.25,deact1;
+$e:nix4,gang,gang1,sub,mtau,abs,lti1,beqz/A,open2,open3,jump/B,A#close2,close3,B#wait0.25,deact1;
 !G1 x-12283.04 y38207.91 a1.881840 s300.00 o0.00 f90.00 r90.00 l170.00 u0
 !N7/56 x-11970.93 y38443.78 a-2.833975 u0
 !N7/26 x-12085.37 y38407.88 a-2.833977 u0

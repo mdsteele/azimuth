@@ -1,6 +1,6 @@
 @R z3 p0 b14 d7 g1 n92 w224
   c(33916.78,945.95,1.738192,0.028832)
-$s:activ4,activ5,test47,beqz2,unlock1,test62,beqz2,unlock2,test63,beqz3,activ3,activ9;
+$s:activ4,activ5,test47,beqz/A,unlock1,A#test62,beqz/B,unlock2,B#test63,beqz/@,activ3,activ9;
 !W2 d9 x-5614.13 y33296.36 a1.737244 u0
 !W1 d33 x-6846.16 y33830.70 a-2.945350 u0
 !W2 d9 x-6751.52 y33395.47 a0.196232 u0

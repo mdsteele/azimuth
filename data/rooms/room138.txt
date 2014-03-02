@@ -36,7 +36,7 @@ $s:msg59;
 !N5/1 x11172.33 y47187.39 a1.338410 u0
 !N5/1 x11561.14 y47093.98 a1.330009 u0
 !N1/0 x11337.72 y47043.73 a1.334344 u0
-$u:dlog,pt1,test27,beqz3,pb4,jump9,tt60,pb4,tb61,tt62,tb63,tt64,tb65,tt66,tb67,map0,dend,set27;
+$u:dlog,pt1,test27,beqz/A,pb4,jump/B,A#tt60,pb4,tb61,tt62,tb63,tt64,tb65,tt66,B#tb67,map0,dend,set27;
 !N5/1 x11296.88 y47092.16 a-0.235151 u0
 !N5/3 x11261.39 y47100.66 a-0.235151 u0
 !N5/1 x11397.31 y47068.12 a2.903860 u0

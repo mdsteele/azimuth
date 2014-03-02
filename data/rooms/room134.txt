@@ -1,6 +1,6 @@
 @R z3 p8/29 b1 d2 g0 n35 w98
   c(31353.74,801.99,1.687776,0.026483)
-$s:msg84,test29,beqz3,nix1,halt,lock2,lock3,push50,sbadk1,boss1;
+$s:msg84,test29,beqz/A,nix1,halt,A#lock2,lock3,push50,sbadk1,boss1;
 !W1 d33 x-3420.01 y31624.20 a1.687795 u0
 !W1 d33 x-4855.52 y32006.28 a0.143515 u0
 !W1 d33 x-4484.38 y32059.92 a0.143515 u0

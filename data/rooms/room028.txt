@@ -42,7 +42,7 @@
 !N5/5 x-921.20 y45298.77 a-1.549173 u0
 !N5/5 x-920.94 y45285.77 a-1.549173 u0
 !N1/0 x-853.35 y45261.40 a-3.122653 u0
-$u:dlog,pt1,pb4,test26,bnez9,tt36,tb37,tt38,tb39,tb40,tt41,tb42,tt43,tb44,map1,dend,set26;
+$u:dlog,pt1,pb4,test26,bnez/A,tt36,tb37,tt38,tb39,tb40,tt41,tb42,tt43,A#tb44,map1,dend,set26;
 !N5/3 x-920.29 y45260.09 a0.020489 u0
 !N5/2 x-929.47 y45312.61 a-3.120565 u0
 !N5/1 x-962.63 y45319.95 a0.021976 u0

@@ -1,6 +1,6 @@
 @R z3 p0 b12 d3 g1 n23 w85
   c(44092.16,729.79,1.910257,0.024732)
-$s:test21,beqz2,unlock1,test56,heqz,unlock2;
+$s:test21,beqz/A,unlock1,A#test56,heqz,unlock2;
 !W1 d5 x-15452.90 y41478.02 a-3.120733 u0
 !W1 d5 x-15501.75 y41453.31 a-2.103404 u0
 !W1 d59 x-14872.93 y42405.46 a-3.058934 u0

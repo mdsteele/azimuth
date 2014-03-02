@@ -1,6 +1,6 @@
 @R z2 p0 b0 d1 g1 n16 w122
   c(31203.49,1690.71,1.181661,0.000000)
-$s:push200,sstr1,wait2,push800,sstr1,wait2,push1000,sstr1,wait2,push1200,sstr1,wait2,jump-12;
+$s:A#push200,sstr1,wait2,push800,sstr1,wait2,push1000,sstr1,wait2,push1200,sstr1,wait2,jump/A;
 !W1 d18 x12449.11 y30603.53 a-0.388733 u0
 !W1 d93 x12680.31 y30527.60 a2.499333 u0
 !W1 d93 x12519.64 y30617.75 a2.753461 u0
