@@ -320,15 +320,16 @@ void az_draw_paragraph(
         case '/': italic = true; break;
         case '|': italic = false; break;
         // Handle color escapes:
-        case 'W': glColor3f(1, 1, 1); break;
-        case 'A': glColor3f(0.5, 0.5, 0.5); break;
-        case 'R': glColor3f(1, 0, 0); break;
-        case 'G': glColor3f(0, 1, 0); break;
-        case 'B': glColor3f(0, 0, 1); break;
-        case 'M': glColor3f(1, 0, 1); break;
-        case 'Y': glColor3f(1, 1, 0); break;
-        case 'C': glColor3f(0, 1, 1); break;
-        case 'X':
+        case 'A': glColor3f(0.5, 0.5, 0.5); break; // grAy
+        case 'B': glColor3f(0, 0, 1); break; // Blue
+        case 'C': glColor3f(0, 1, 1); break; // Cyan
+        case 'G': glColor3f(0, 1, 0); break; // Green
+        case 'M': glColor3f(1, 0, 1); break; // Magenta
+        case 'O': glColor3f(1, 0.5, 0); break; // Orange
+        case 'R': glColor3f(1, 0, 0); break; // Red
+        case 'W': glColor3f(1, 1, 1); break; // White
+        case 'Y': glColor3f(1, 1, 0); break; // Yellow
+        case 'X': // heX
           // First, make sure that we won't hit the end of the string trying to
           // read the next six characters after the "$X".  If we will, print a
           // warning and quit.

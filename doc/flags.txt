@@ -1,4 +1,4 @@
-Next flag: 77
+Next flag: 80
 
 Bosses
 ======
@@ -28,6 +28,7 @@ Comm Consoles
 50: Cnidam bomb defused (Cnidam room 323)
 69: Used comm console in Nandiar room 303
 76: Used comm console in Nandiar room 135
+77: Used comm console in Barrag room 295, unlocked doors to deep Barrag
 
 Map Markers
 ===========
@@ -75,6 +76,8 @@ Doors
 73: Opened red door between Barrag room 277 and Voquan room 343
 74: Opened cyan door between Barrag rooms 273 and 283
 75: Opened locked top door in Barrag room 273
+78: Opened locked door between Barrag rooms 244 and 254
+79: Opened locked door between Barrag rooms 246 and 253
 
 Boss Doors
 ==========
