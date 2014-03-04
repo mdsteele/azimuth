@@ -55,6 +55,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_MAXI:   return "maxi";
     case AZ_OP_ABS:    return "abs";
     case AZ_OP_MTAU:   return "mtau";
+    case AZ_OP_RAND:   return "rand";
     case AZ_OP_SQRT:   return "sqrt";
     case AZ_OP_VADD:   return "vadd";
     case AZ_OP_VSUB:   return "vsub";
@@ -158,6 +159,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_MAX:
     case AZ_OP_ABS:
     case AZ_OP_MTAU:
+    case AZ_OP_RAND:
     case AZ_OP_SQRT:
     case AZ_OP_VADD:
     case AZ_OP_VSUB:

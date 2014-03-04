@@ -53,6 +53,7 @@ typedef enum {
   // Math:
   AZ_OP_ABS, // pop top, push fabs(a)
   AZ_OP_MTAU, // pop top, push az_mod2pi(a)
+  AZ_OP_RAND, // push random number from [0, 1)
   AZ_OP_SQRT, // pop top, push sqrt(a)
   // Vectors:
   AZ_OP_VADD, // pop top four, push (a + c) and (b + d)

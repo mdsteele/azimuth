@@ -33,6 +33,7 @@
 #include "azimuth/tick/object.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -312,6 +313,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
       // Math:
       case AZ_OP_ABS: UNARY_OP(fabs(a)); break;
       case AZ_OP_MTAU: UNARY_OP(az_mod2pi(a)); break;
+      case AZ_OP_RAND: STACK_PUSH(az_random(0.0, 1.0)); break;
       case AZ_OP_SQRT: UNARY_OP(a < 0.0 ? NAN : sqrt(a)); break;
       // Vectors:
       case AZ_OP_VADD: {
