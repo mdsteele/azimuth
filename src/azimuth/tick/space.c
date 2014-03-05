@@ -213,15 +213,15 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
   switch (mode_data->step) {
     case AZ_DLS_BEGIN:
       assert(mode_data->paragraph == NULL);
-      assert(mode_data->vm.script != NULL);
+      assert(state->sync_vm.script != NULL);
       mode_data->progress += time / open_close_time;
       if (mode_data->progress >= 1.0) {
-        az_resume_script(state, &mode_data->vm);
+        az_resume_script(state, &state->sync_vm);
       }
       break;
     case AZ_DLS_TALK:
       assert(mode_data->paragraph != NULL);
-      assert(mode_data->vm.script != NULL);
+      assert(state->sync_vm.script != NULL);
       mode_data->progress += time / char_time;
       if (mode_data->progress >= 1.0) {
         mode_data->progress = 0.0;
@@ -234,7 +234,7 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
     case AZ_DLS_WAIT:
       assert(mode_data->paragraph != NULL);
       assert(mode_data->chars_to_print == mode_data->paragraph_length);
-      assert(mode_data->vm.script != NULL);
+      assert(state->sync_vm.script != NULL);
       break;
     case AZ_DLS_END:
       assert(mode_data->paragraph == NULL);
@@ -242,11 +242,10 @@ static void tick_dialog_mode(az_space_state_t *state, double time) {
       assert(mode_data->chars_to_print == 0);
       mode_data->progress += time / open_close_time;
       if (mode_data->progress >= 1.0) {
-        if (mode_data->vm.script != NULL) {
-          az_script_vm_t vm = mode_data->vm;
-          state->mode = AZ_MODE_NORMAL;
-          az_resume_script(state, &vm);
-        } else state->mode = AZ_MODE_NORMAL;
+        state->mode = AZ_MODE_NORMAL;
+        if (state->sync_vm.script != NULL) {
+          az_resume_script(state, &state->sync_vm);
+        }
       }
       break;
   }

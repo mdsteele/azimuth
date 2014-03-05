@@ -67,7 +67,6 @@ typedef struct {
   double fade_alpha; // 0.0 to 1.0
   double time;
   double param1, param2;
-  az_script_vm_t vm;
 } az_cutscene_state_t;
 
 typedef struct {
@@ -106,7 +105,6 @@ typedef struct {
   az_portrait_t top, bottom;
   const char *paragraph;
   int paragraph_length, chars_to_print;
-  az_script_vm_t vm;
 } az_dialog_mode_data_t;
 
 typedef struct {
@@ -172,6 +170,7 @@ typedef struct {
   az_game_over_mode_data_t game_over_mode;
   az_pausing_mode_data_t pausing_mode;
   az_upgrade_mode_data_t upgrade_mode;
+  az_script_vm_t sync_vm; // VM for storing synchronously-suspended scripts
   bool victory; // true if we just won the game
 
   // Space objects (these all get cleared out when we exit a room):

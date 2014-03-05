@@ -179,7 +179,8 @@ az_space_action_t az_space_event_loop(
                 state.dialog_mode.paragraph_length;
             } else if (state.dialog_mode.step == AZ_DLS_WAIT &&
                        event.key.id == AZ_KEY_RETURN) {
-              az_resume_script(&state, &state.dialog_mode.vm);
+              assert(state.sync_vm.script != NULL);
+              az_resume_script(&state, &state.sync_vm);
             }
             break;
           } else if (state.mode == AZ_MODE_UPGRADE) {

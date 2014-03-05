@@ -128,18 +128,19 @@ static void do_stack_pop(az_script_vm_t *vm, int num_args, ...) {
     vm->pc = new_pc - 1; \
   } while (0)
 
-static void do_suspend(az_script_vm_t *vm, const az_script_t *script,
-                       az_script_vm_t *target_vm) {
-  assert(script != NULL);
+static void do_suspend(az_script_vm_t *vm, az_script_vm_t *target_vm) {
+  assert(vm != NULL);
   assert(target_vm != NULL);
-  ++vm->pc;
+  assert(vm != target_vm);
+  assert(vm->script != NULL);
+  assert(target_vm->script == NULL);
+  *target_vm = *vm;
+  ++target_vm->pc;
   vm->script = NULL;
-  memmove(target_vm, vm, sizeof(az_script_vm_t));
-  target_vm->script = script;
 }
 
-#define SUSPEND(script, target_vm) do { \
-    do_suspend(vm, (script), (target_vm)); \
+#define SUSPEND(target_vm) do { \
+    do_suspend(vm, (target_vm)); \
     return; \
   } while (0)
 
@@ -235,17 +236,12 @@ static void set_object_state(az_object_t *object, double value) {
 
 /*===========================================================================*/
 
-void az_run_script(az_space_state_t *state, const az_script_t *script) {
-  if (script == NULL || script->num_instructions == 0) return;
-  az_script_vm_t vm = { .script = script };
-  az_resume_script(state, &vm);
-}
-
-void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
-  assert(state != NULL);
+static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
   assert(vm != NULL);
   assert(vm->script != NULL);
   assert(vm->script->instructions != NULL);
+  assert(state != NULL);
+  assert(state->sync_vm.script == NULL);
   int total_steps = 0;
   while (vm->pc < vm->script->num_instructions) {
     if (++total_steps > AZ_MAX_SCRIPT_STEPS) SCRIPT_ERROR("ran for too long");
@@ -707,13 +703,13 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         if (state->cutscene.scene == AZ_SCENE_NOTHING) {
           state->cutscene.scene = state->cutscene.next;
           state->cutscene.fade_alpha = 1.0;
-        } else SUSPEND(vm->script, &state->cutscene.vm);
+        } else SUSPEND(&state->sync_vm);
       } break;
       case AZ_OP_DLOG:
         if (state->mode == AZ_MODE_NORMAL) {
           state->mode = AZ_MODE_DIALOG;
           state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_BEGIN};
-          SUSPEND(vm->script, &state->dialog_mode.vm);
+          SUSPEND(&state->sync_vm);
         }
         SCRIPT_ERROR("can't start dialog now");
       case AZ_OP_PT:
@@ -751,7 +747,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           state->dialog_mode.paragraph_length =
             az_paragraph_total_length(state->prefs, paragraph);
           state->dialog_mode.chars_to_print = 0;
-          SUSPEND(vm->script, &state->dialog_mode.vm);
+          SUSPEND(&state->sync_vm);
         }
         SCRIPT_ERROR("not in dialog");
       case AZ_OP_TB:
@@ -769,7 +765,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           state->dialog_mode.paragraph_length =
             az_paragraph_total_length(state->prefs, paragraph);
           state->dialog_mode.chars_to_print = 0;
-          SUSPEND(vm->script, &state->dialog_mode.vm);
+          SUSPEND(&state->sync_vm);
         }
         SCRIPT_ERROR("not in dialog");
       case AZ_OP_DEND:
@@ -779,7 +775,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           state->dialog_mode.paragraph = NULL;
           state->dialog_mode.paragraph_length = 0;
           state->dialog_mode.chars_to_print = 0;
-          SUSPEND(vm->script, &state->dialog_mode.vm);
+          SUSPEND(&state->sync_vm);
         }
         SCRIPT_ERROR("not in dialog");
       // Music/sound:
@@ -803,12 +799,10 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
           SCRIPT_ERROR("can't WAIT during dialog");
         }
         if (ins.immediate > 0.0) {
-          const az_script_t *script = vm->script;
-          vm->script = NULL;
           AZ_ARRAY_LOOP(timer, state->timers) {
             if (timer->vm.script != NULL) continue;
             timer->time_remaining = ins.immediate;
-            SUSPEND(script, &timer->vm);
+            SUSPEND(&timer->vm);
           }
           SCRIPT_ERROR("too many timers");
         }
@@ -820,7 +814,7 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
         state->countdown.is_active = true;
         state->countdown.active_for = 0.0;
         state->countdown.time_remaining = fmax(0.0, ins.immediate);
-        SUSPEND(vm->script, &state->countdown.vm);
+        SUSPEND(&state->countdown.vm);
         break;
       case AZ_OP_SAFE:
         state->countdown.is_active = false;
@@ -866,9 +860,20 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
   if (state->mode == AZ_MODE_DIALOG) {
     state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_END};
   }
-  // Now that the script has completed, zero out the VM.  If the resumed script
-  // was a timer, this will have the effect of marking the timer as inactive.
-  memset(vm, 0, sizeof(*vm));
+}
+
+void az_run_script(az_space_state_t *state, const az_script_t *script) {
+  if (script == NULL || script->num_instructions == 0) return;
+  az_script_vm_t vm = { .script = script };
+  run_vm(state, &vm);
+}
+
+void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
+  assert(vm != NULL);
+  assert(vm->script != NULL);
+  az_script_vm_t local_vm = *vm;
+  vm->script = NULL;
+  run_vm(state, &local_vm);
 }
 
 /*===========================================================================*/

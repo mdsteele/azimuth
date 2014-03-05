@@ -38,7 +38,7 @@ static void next_scene(az_space_state_t *state, bool reset) {
     cutscene->time = cutscene->param1 = cutscene->param2 = 0.0;
   }
   cutscene->scene = cutscene->next;
-  if (cutscene->vm.script != NULL) az_resume_script(state, &cutscene->vm);
+  if (state->sync_vm.script != NULL) az_resume_script(state, &state->sync_vm);
 }
 
 static void fade_to_next_scene(az_space_state_t *state, double time) {
