@@ -685,7 +685,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_QUAKE:
         state->camera.quake_vert = fmax(0, ins.immediate);
         break;
-      // Messages/dialog:
+      // Messages/dialogue:
       case AZ_OP_MSG: {
         const int paragraph_index = (int)ins.immediate;
         if (paragraph_index < 0 ||
@@ -706,78 +706,64 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         } else SUSPEND(&state->sync_vm);
       } break;
       case AZ_OP_DLOG:
-        if (state->mode == AZ_MODE_NORMAL) {
-          state->mode = AZ_MODE_DIALOG;
-          state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_BEGIN};
+        if (state->mode == AZ_MODE_NORMAL &&
+            state->dialogue.step == AZ_DLS_INACTIVE) {
+          state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_BEGIN };
           SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("can't start dialog now");
+        SCRIPT_ERROR("can't start dialogue now");
       case AZ_OP_PT:
-        if (state->mode == AZ_MODE_DIALOG) {
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int portrait = (int)ins.immediate;
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
           } else {
-            state->dialog_mode.top = (az_portrait_t)portrait;
+            state->dialogue.top = (az_portrait_t)portrait;
           }
-        } else SCRIPT_ERROR("not in dialog");
+        } else SCRIPT_ERROR("not in dialogue");
         break;
       case AZ_OP_PB:
-        if (state->mode == AZ_MODE_DIALOG) {
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int portrait = (int)ins.immediate;
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
             SCRIPT_ERROR("invalid portrait");
           } else {
-            state->dialog_mode.bottom = (az_portrait_t)portrait;
+            state->dialogue.bottom = (az_portrait_t)portrait;
           }
-        } else SCRIPT_ERROR("not in dialog");
+        } else SCRIPT_ERROR("not in dialogue");
         break;
       case AZ_OP_TT:
-        if (state->mode == AZ_MODE_DIALOG) {
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int paragraph_index = (int)ins.immediate;
           if (paragraph_index < 0 ||
               paragraph_index >= state->planet->num_paragraphs) {
             SCRIPT_ERROR("invalid paragraph index");
           }
           const char *paragraph = state->planet->paragraphs[paragraph_index];
-          state->dialog_mode.step = AZ_DLS_TALK;
-          state->dialog_mode.progress = 0.0;
-          state->dialog_mode.bottom_next = false;
-          state->dialog_mode.paragraph = paragraph;
-          state->dialog_mode.paragraph_length =
-            az_paragraph_total_length(state->prefs, paragraph);
-          state->dialog_mode.chars_to_print = 0;
+          az_set_dialogue_text(&state->dialogue, state->prefs,
+                               paragraph, true);
           SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialog");
+        SCRIPT_ERROR("not in dialogue");
       case AZ_OP_TB:
-        if (state->mode == AZ_MODE_DIALOG) {
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int paragraph_index = (int)ins.immediate;
           if (paragraph_index < 0 ||
               paragraph_index >= state->planet->num_paragraphs) {
             SCRIPT_ERROR("invalid paragraph index");
           }
           const char *paragraph = state->planet->paragraphs[paragraph_index];
-          state->dialog_mode.step = AZ_DLS_TALK;
-          state->dialog_mode.progress = 0.0;
-          state->dialog_mode.bottom_next = true;
-          state->dialog_mode.paragraph = paragraph;
-          state->dialog_mode.paragraph_length =
-            az_paragraph_total_length(state->prefs, paragraph);
-          state->dialog_mode.chars_to_print = 0;
+          az_set_dialogue_text(&state->dialogue, state->prefs,
+                               paragraph, false);
           SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialog");
+        SCRIPT_ERROR("not in dialogue");
       case AZ_OP_DEND:
-        if (state->mode == AZ_MODE_DIALOG) {
-          state->dialog_mode.step = AZ_DLS_END;
-          state->dialog_mode.progress = 0.0;
-          state->dialog_mode.paragraph = NULL;
-          state->dialog_mode.paragraph_length = 0;
-          state->dialog_mode.chars_to_print = 0;
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+          state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
           SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialog");
+        SCRIPT_ERROR("not in dialogue");
       // Music/sound:
       case AZ_OP_MUS: {
         const int music_index = (int)ins.immediate;
@@ -795,8 +781,8 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       } break;
       // Timers:
       case AZ_OP_WAIT:
-        if (state->mode == AZ_MODE_DIALOG) {
-          SCRIPT_ERROR("can't WAIT during dialog");
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+          SCRIPT_ERROR("can't WAIT during dialogue");
         }
         if (ins.immediate > 0.0) {
           AZ_ARRAY_LOOP(timer, state->timers) {
@@ -808,8 +794,8 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         }
         break;
       case AZ_OP_DOOM:
-        if (state->mode == AZ_MODE_DIALOG) {
-          SCRIPT_ERROR("can't DOOM during dialog");
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+          SCRIPT_ERROR("can't DOOM during dialogue");
         }
         state->countdown.is_active = true;
         state->countdown.active_for = 0.0;
@@ -857,8 +843,8 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
 
  halt:
   state->cutscene.next = AZ_SCENE_NOTHING;
-  if (state->mode == AZ_MODE_DIALOG) {
-    state->dialog_mode = (az_dialog_mode_data_t){.step = AZ_DLS_END};
+  if (state->dialogue.step != AZ_DLS_INACTIVE) {
+    state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
   }
 }
 

@@ -474,7 +474,7 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
 #define DIALOG_HORZ_SPACING 20
 #define DIALOG_VERT_SPACING 50
 
-static void draw_dialog_frames(double openness) {
+static void draw_dialogue_frames(double openness) {
   assert(openness >= 0.0);
   assert(openness <= 1.0);
   { // Portraits:
@@ -493,16 +493,16 @@ static void draw_dialog_frames(double openness) {
       (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + PORTRAIT_BOX_HEIGHT) / 2;
     draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2, AZ_GREEN);
   }
-  { // Dialog boxes:
+  { // Dialogue boxes:
     const double sw = 0.5 * DIALOG_BOX_WIDTH * openness;
     const double sh = 0.5 * DIALOG_BOX_HEIGHT * openness;
-    // Top dialog box:
+    // Top dialogue box:
     const int tcx =
       (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + PORTRAIT_BOX_WIDTH) / 2;
     const int tcy =
       (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - DIALOG_BOX_HEIGHT) / 2;
     draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2, AZ_GREEN);
-    // Bottom dialog box:
+    // Bottom dialogue box:
     const int bcx =
       (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - PORTRAIT_BOX_WIDTH) / 2;
     const int bcy =
@@ -511,11 +511,11 @@ static void draw_dialog_frames(double openness) {
   }
 }
 
-static void draw_dialog_text(const az_space_state_t *state) {
-  assert(state->mode == AZ_MODE_DIALOG);
-  const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
+static void draw_dialogue_text(const az_space_state_t *state) {
+  const az_dialogue_state_t *dialogue = &state->dialogue;
+  assert(dialogue->step != AZ_DLS_INACTIVE);
   glPushMatrix(); {
-    if (!mode_data->bottom_next) {
+    if (dialogue->top_turn) {
       glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH +
                     PORTRAIT_BOX_WIDTH) / 2 + DIALOG_BOX_MARGIN,
                    (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING) / 2 -
@@ -527,7 +527,7 @@ static void draw_dialog_text(const az_space_state_t *state) {
                    DIALOG_BOX_MARGIN, 0);
     }
 
-    if (mode_data->step == AZ_DLS_WAIT) {
+    if (dialogue->step == AZ_DLS_WAIT) {
       if (az_clock_mod(2, 15, state->clock)) glColor4f(0.5, 0.5, 0.5, 0.5);
       else glColor4f(0.25, 0.75, 0.75, 0.5);
       az_draw_string(8, AZ_ALIGN_RIGHT,
@@ -536,13 +536,13 @@ static void draw_dialog_text(const az_space_state_t *state) {
     }
 
     az_draw_paragraph(8, AZ_ALIGN_LEFT, 0, 0, TEXT_LINE_SPACING,
-                      mode_data->chars_to_print, state->prefs,
-                      mode_data->paragraph);
+                      dialogue->chars_to_print, state->prefs,
+                      dialogue->paragraph);
   } glPopMatrix();
 }
 
-static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom,
-                                 bool talking, az_clock_t clock) {
+static void draw_dialogue_portrait(az_portrait_t portrait, bool is_bottom,
+                                   bool talking, az_clock_t clock) {
   if (portrait == AZ_POR_NOTHING) return;
   glPushMatrix(); {
     const GLfloat x_scale =
@@ -567,28 +567,27 @@ static void draw_dialog_portrait(az_portrait_t portrait, bool is_bottom,
   } glPopMatrix();
 }
 
-void az_draw_dialog(const az_space_state_t *state) {
-  assert(state->mode == AZ_MODE_DIALOG);
-  const az_dialog_mode_data_t *mode_data = &state->dialog_mode;
+void az_draw_dialogue(const az_space_state_t *state) {
+  const az_dialogue_state_t *dialogue = &state->dialogue;
   bool talking = false;
-  const bool bottom_next = mode_data->bottom_next;
-  switch (mode_data->step) {
+  switch (dialogue->step) {
+    case AZ_DLS_INACTIVE: break;
     case AZ_DLS_BEGIN:
-      draw_dialog_frames(mode_data->progress);
+      draw_dialogue_frames(dialogue->progress);
       break;
     case AZ_DLS_TALK:
       talking = true;
       // fallthrough
     case AZ_DLS_WAIT:
-      draw_dialog_frames(1.0);
-      draw_dialog_text(state);
-      draw_dialog_portrait(mode_data->top, false, talking && !bottom_next,
-                           state->clock);
-      draw_dialog_portrait(mode_data->bottom, true, talking && bottom_next,
-                           state->clock);
+      draw_dialogue_frames(1.0);
+      draw_dialogue_text(state);
+      draw_dialogue_portrait(dialogue->top, false,
+                             (talking && dialogue->top_turn), state->clock);
+      draw_dialogue_portrait(dialogue->bottom, true,
+                             (talking && !dialogue->top_turn), state->clock);
       break;
     case AZ_DLS_END:
-      draw_dialog_frames(1.0 - mode_data->progress);
+      draw_dialogue_frames(1.0 - dialogue->progress);
       break;
   }
 }
@@ -649,8 +648,8 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_boss_health(state);
   draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);
-  if (state->mode == AZ_MODE_DIALOG) az_draw_dialog(state);
-  else if (state->mode == AZ_MODE_UPGRADE) draw_upgrade_box(state);
+  az_draw_dialogue(state);
+  if (state->mode == AZ_MODE_UPGRADE) draw_upgrade_box(state);
 }
 
 /*===========================================================================*/

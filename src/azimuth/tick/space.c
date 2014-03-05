@@ -205,44 +205,46 @@ static void tick_console_mode(az_space_state_t *state, double time) {
   }
 }
 
-static void tick_dialog_mode(az_space_state_t *state, double time) {
-  assert(state->mode == AZ_MODE_DIALOG);
-  az_dialog_mode_data_t *mode_data = &state->dialog_mode;
+static void tick_dialogue(az_space_state_t *state, double time) {
+  az_dialogue_state_t *dialogue = &state->dialogue;
+  assert(dialogue->step != AZ_DLS_INACTIVE);
   const double open_close_time = 0.5; // seconds
   const double char_time = 0.03; // seconds
-  switch (mode_data->step) {
+  switch (dialogue->step) {
+    case AZ_DLS_INACTIVE: AZ_ASSERT_UNREACHABLE();
     case AZ_DLS_BEGIN:
-      assert(mode_data->paragraph == NULL);
+      assert(dialogue->paragraph == NULL);
       assert(state->sync_vm.script != NULL);
-      mode_data->progress += time / open_close_time;
-      if (mode_data->progress >= 1.0) {
+      dialogue->progress += time / open_close_time;
+      if (dialogue->progress >= 1.0) {
         az_resume_script(state, &state->sync_vm);
       }
       break;
     case AZ_DLS_TALK:
-      assert(mode_data->paragraph != NULL);
+      assert(dialogue->paragraph != NULL);
+      assert(dialogue->chars_to_print < dialogue->paragraph_length);
       assert(state->sync_vm.script != NULL);
-      mode_data->progress += time / char_time;
-      if (mode_data->progress >= 1.0) {
-        mode_data->progress = 0.0;
-        ++mode_data->chars_to_print;
-        if (mode_data->chars_to_print == mode_data->paragraph_length) {
-          mode_data->step = AZ_DLS_WAIT;
+      dialogue->progress += time / char_time;
+      if (dialogue->progress >= 1.0) {
+        dialogue->progress = 0.0;
+        ++dialogue->chars_to_print;
+        if (dialogue->chars_to_print == dialogue->paragraph_length) {
+          dialogue->step = AZ_DLS_WAIT;
         }
       }
       break;
     case AZ_DLS_WAIT:
-      assert(mode_data->paragraph != NULL);
-      assert(mode_data->chars_to_print == mode_data->paragraph_length);
+      assert(dialogue->paragraph != NULL);
+      assert(dialogue->chars_to_print == dialogue->paragraph_length);
       assert(state->sync_vm.script != NULL);
       break;
     case AZ_DLS_END:
-      assert(mode_data->paragraph == NULL);
-      assert(mode_data->paragraph_length == 0);
-      assert(mode_data->chars_to_print == 0);
-      mode_data->progress += time / open_close_time;
-      if (mode_data->progress >= 1.0) {
-        state->mode = AZ_MODE_NORMAL;
+      assert(dialogue->paragraph == NULL);
+      assert(dialogue->paragraph_length == 0);
+      assert(dialogue->chars_to_print == 0);
+      dialogue->progress += time / open_close_time;
+      if (dialogue->progress >= 1.0) {
+        *dialogue = (az_dialogue_state_t){ .step = AZ_DLS_INACTIVE };
         if (state->sync_vm.script != NULL) {
           az_resume_script(state, &state->sync_vm);
         }
@@ -531,12 +533,12 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   // Advance the animation clock.
   ++state->clock;
 
-  // If we're watching a cutscene, allow dialog and timer scripts to proceed,
+  // If we're watching a cutscene, allow dialogue and timer scripts to proceed,
   // but don't do anything else.
   if (state->cutscene.scene != AZ_SCENE_NOTHING) {
     az_tick_cutscene(state, time);
-    if (state->mode == AZ_MODE_DIALOG) {
-      tick_dialog_mode(state, time);
+    if (state->dialogue.step != AZ_DLS_INACTIVE) {
+      tick_dialogue(state, time);
     } else {
       az_tick_timers(state, time);
     }
@@ -549,14 +551,23 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     time *= 0.4;
   }
 
+  // These ticks happen even during dialogue.
+  az_tick_particles(state, time);
+  az_tick_specks(state, time);
+  tick_message(&state->message, time);
+  tick_countdown(&state->countdown, time);
+
+  // If we're in dialogue, advance the dialogue and then stop.
+  if (state->dialogue.step != AZ_DLS_INACTIVE) {
+    tick_dialogue(state, time);
+    return;
+  }
+
   // Advance the speedrun timer.
-  if (state->mode != AZ_MODE_DIALOG && state->mode != AZ_MODE_UPGRADE) {
+  if (state->mode != AZ_MODE_UPGRADE) {
     state->ship.player.total_time += time;
   }
 
-  // Tick game objects depending on what mode we're in:
-  az_tick_particles(state, time);
-  az_tick_specks(state, time);
   switch (state->mode) {
     case AZ_MODE_BOSS_DEATH:
       tick_all_objects(state, time);
@@ -566,9 +577,6 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       tick_console_mode(state, time);
       tick_most_objects(state, time);
       az_tick_nodes(state, time);
-      break;
-    case AZ_MODE_DIALOG:
-      tick_dialog_mode(state, time);
       break;
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
@@ -602,8 +610,6 @@ void az_tick_space_state(az_space_state_t *state, double time) {
        state->boss_death_mode.boss.position : state->ship.position);
     az_tick_camera(state, goal, time);
   }
-  tick_message(&state->message, time);
-  tick_countdown(&state->countdown, time);
 }
 
 /*===========================================================================*/

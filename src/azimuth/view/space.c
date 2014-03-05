@@ -69,7 +69,6 @@ static double mode_fade_alpha(az_space_state_t *state) {
     case AZ_MODE_NORMAL:
     case AZ_MODE_BOSS_DEATH:
     case AZ_MODE_CONSOLE:
-    case AZ_MODE_DIALOG:
     case AZ_MODE_UPGRADE:
       return 0.0;
   }
@@ -227,9 +226,7 @@ void az_space_draw_screen(az_space_state_t *state) {
   // If we're watching a cutscene, draw that instead of our normal camera view.
   if (state->cutscene.scene != AZ_SCENE_NOTHING) {
     az_draw_cutscene(state);
-    if (state->mode == AZ_MODE_DIALOG) {
-      az_draw_dialog(state);
-    }
+    az_draw_dialogue(state);
     return;
   }
 

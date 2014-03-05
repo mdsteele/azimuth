@@ -171,13 +171,12 @@ az_space_action_t az_space_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          if (state.mode == AZ_MODE_DIALOG) {
-            if (state.dialog_mode.step == AZ_DLS_TALK) {
-              state.dialog_mode.step = AZ_DLS_WAIT;
-              state.dialog_mode.progress = 0.0;
-              state.dialog_mode.chars_to_print =
-                state.dialog_mode.paragraph_length;
-            } else if (state.dialog_mode.step == AZ_DLS_WAIT &&
+          if (state.dialogue.step != AZ_DLS_INACTIVE) {
+            if (state.dialogue.step == AZ_DLS_TALK) {
+              state.dialogue.step = AZ_DLS_WAIT;
+              state.dialogue.progress = 0.0;
+              state.dialogue.chars_to_print = state.dialogue.paragraph_length;
+            } else if (state.dialogue.step == AZ_DLS_WAIT &&
                        event.key.id == AZ_KEY_RETURN) {
               assert(state.sync_vm.script != NULL);
               az_resume_script(&state, &state.sync_vm);

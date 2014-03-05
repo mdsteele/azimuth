@@ -41,6 +41,24 @@ typedef enum {
   AZ_POR_TRICHORD
 } az_portrait_t;
 
+typedef enum {
+  AZ_DLS_INACTIVE = 0,  // not in dialogue
+  AZ_DLS_BEGIN,  // dialogue box is opening
+  AZ_DLS_TALK,  // one character is talking
+  AZ_DLS_WAIT,  // waiting for player to press enter
+  AZ_DLS_END  // dialogue box is closing
+} az_dialogue_step_t;
+
+typedef struct {
+  az_dialogue_step_t step;
+  double progress; // progress on current step (0 to 1)
+  bool top_turn;  // true if top portrait talking, false if bottom portrait
+  az_portrait_t top, bottom;
+  const char *paragraph;
+  int paragraph_length;
+  int chars_to_print;
+} az_dialogue_state_t;
+
 /*===========================================================================*/
 
 // Serialize the paragraph to a file and return true, or return false on error
@@ -62,6 +80,11 @@ int az_paragraph_line_length(
 // Return the total length, in printed characters, of the paragraph.
 int az_paragraph_total_length(
     const az_preferences_t *prefs, const char *paragraph);
+
+// Set the dialogue state for starting to display the given paragraph.
+void az_set_dialogue_text(
+    az_dialogue_state_t *dialogue, const az_preferences_t *prefs,
+    const char *paragraph, bool top_turn);
 
 /*===========================================================================*/
 

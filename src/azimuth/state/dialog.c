@@ -167,4 +167,16 @@ int az_paragraph_total_length(
   return total_length;
 }
 
+void az_set_dialogue_text(
+    az_dialogue_state_t *dialogue, const az_preferences_t *prefs,
+    const char *paragraph, bool top_turn) {
+  const int paragraph_length = az_paragraph_total_length(prefs, paragraph);
+  dialogue->step = (paragraph_length == 0 ? AZ_DLS_WAIT : AZ_DLS_TALK);
+  dialogue->progress = 0.0;
+  dialogue->top_turn = top_turn;
+  dialogue->paragraph = paragraph;
+  dialogue->paragraph_length = paragraph_length;
+  dialogue->chars_to_print = 0;
+}
+
 /*===========================================================================*/

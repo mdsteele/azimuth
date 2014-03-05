@@ -99,15 +99,6 @@ typedef struct {
 } az_console_mode_data_t;
 
 typedef struct {
-  enum { AZ_DLS_BEGIN, AZ_DLS_TALK, AZ_DLS_WAIT, AZ_DLS_END } step;
-  double progress; // 0.0 to 1.0
-  bool bottom_next;
-  az_portrait_t top, bottom;
-  const char *paragraph;
-  int paragraph_length, chars_to_print;
-} az_dialog_mode_data_t;
-
-typedef struct {
   enum { AZ_DWS_FADE_OUT, AZ_DWS_SHIFT, AZ_DWS_FADE_IN } step;
   double progress; // 0.0 to 1.0
   az_room_key_t destination;
@@ -147,7 +138,6 @@ typedef struct {
   az_clock_t clock;
   az_camera_t camera;
   az_ship_t ship;
-  az_cutscene_state_t cutscene;
   az_message_t message;
   az_countdown_t countdown;
   az_soundboard_t soundboard;
@@ -157,7 +147,6 @@ typedef struct {
     AZ_MODE_NORMAL = 0, // flying around; the normal mode of gameplay
     AZ_MODE_BOSS_DEATH, // animating boss death
     AZ_MODE_CONSOLE, // using a save point, refill node, or comm node
-    AZ_MODE_DIALOG, // engaged in story dialog
     AZ_MODE_DOORWAY, // waiting while we pass through a door
     AZ_MODE_GAME_OVER, // showing the game over animation
     AZ_MODE_PAUSING, // entering/leaving the pause screen
@@ -165,7 +154,8 @@ typedef struct {
   } mode;
   az_boss_death_mode_data_t boss_death_mode;
   az_console_mode_data_t console_mode;
-  az_dialog_mode_data_t dialog_mode;
+  az_cutscene_state_t cutscene;
+  az_dialogue_state_t dialogue;
   az_doorway_mode_data_t doorway_mode;
   az_game_over_mode_data_t game_over_mode;
   az_pausing_mode_data_t pausing_mode;
