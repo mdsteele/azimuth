@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h> // for memset
 
 #include "azimuth/constants.h"
 #include "azimuth/util/misc.h"
@@ -48,7 +47,7 @@ const char *az_gun_name(az_gun_t gun) {
 /*===========================================================================*/
 
 void az_init_player(az_player_t *player) {
-  memset(player, 0, sizeof(*player));
+  AZ_ZERO_OBJECT(player);
   player->shields = player->max_shields = AZ_INITIAL_MAX_SHIELDS;
   player->energy = player->max_energy = AZ_INITIAL_MAX_ENERGY;
 }

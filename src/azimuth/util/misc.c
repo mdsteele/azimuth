@@ -26,8 +26,8 @@
 
 /*===========================================================================*/
 
-void _az_zero_array(void *ptr, size_t n, size_t size) {
-  memset(ptr, 0, n * size);
+void _az_zero_memory(void *ptr, size_t size) {
+  memset(ptr, 0, size);
 }
 
 void _az_fatal(const char *funcname, const char *format, ...) {

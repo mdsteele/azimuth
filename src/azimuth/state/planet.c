@@ -190,7 +190,7 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   assert(planet_out != NULL);
   const size_t dirlen = strlen(resource_dir);
   char path_buffer[dirlen + 20u];
-  memset(planet_out, 0, sizeof(*planet_out));
+  AZ_ZERO_OBJECT(planet_out);
 
   sprintf(path_buffer, "%s/rooms/planet.txt", resource_dir);
   if (!load_planet_basis(path_buffer, planet_out)) return false;
@@ -285,7 +285,7 @@ void az_destroy_planet(az_planet_t *planet) {
     az_destroy_room(&planet->rooms[i]);
   }
   free(planet->rooms);
-  memset(planet, 0, sizeof(*planet));
+  AZ_ZERO_OBJECT(planet);
 }
 
 /*===========================================================================*/

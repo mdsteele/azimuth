@@ -33,6 +33,21 @@ void test_array_size(void) {
   EXPECT_INT_EQ(11, AZ_ARRAY_SIZE(c));
 }
 
+void test_zero_object(void) {
+  struct { int foo; double bar; } objects[10];
+  for (int i = 0; i < AZ_ARRAY_SIZE(objects); ++i) {
+    objects[i].foo = 5 + i * i;
+    objects[i].bar = 3.7 * objects[i].foo;
+  }
+  AZ_ZERO_OBJECT(&objects[7]);
+  EXPECT_INT_EQ(41, objects[6].foo);
+  EXPECT_APPROX(151.7, objects[6].bar);
+  EXPECT_INT_EQ(0, objects[7].foo);
+  EXPECT_APPROX(0.0, objects[7].bar);
+  EXPECT_INT_EQ(69, objects[8].foo);
+  EXPECT_APPROX(255.3, objects[8].bar);
+}
+
 void test_zero_array(void) {
   int a = 0x5bababab;
   int b[13] = {0};

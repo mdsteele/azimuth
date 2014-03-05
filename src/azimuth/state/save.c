@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h> // for memset
+#include <string.h>
 
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"

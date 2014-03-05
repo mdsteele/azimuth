@@ -19,8 +19,6 @@
 
 #include "azimuth/control/gameover.h"
 
-#include <string.h>
-
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
@@ -34,7 +32,7 @@
 az_gameover_action_t az_gameover_event_loop(void) {
   az_init_gameover_view();
   static az_gameover_state_t state;
-  memset(&state, 0, sizeof(state));
+  AZ_ZERO_OBJECT(&state);
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   while (true) {

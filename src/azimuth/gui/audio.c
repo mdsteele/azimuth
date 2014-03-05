@@ -1027,7 +1027,7 @@ void az_tick_audio_mixer(az_soundboard_t *soundboard) {
   assert(!audio_mixer_paused);
   tick_music(soundboard);
   tick_sounds(soundboard);
-  memset(soundboard, 0, sizeof(*soundboard));
+  AZ_ZERO_OBJECT(soundboard);
 }
 
 void az_pause_all_audio(void) {

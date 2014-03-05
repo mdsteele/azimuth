@@ -23,7 +23,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h> // for NULL
-#include <string.h> // for memset
 
 #include "azimuth/state/pickup.h" // for AZ_PUPF_* macros
 #include "azimuth/util/misc.h"
@@ -1287,7 +1286,7 @@ void az_init_baddie(az_baddie_t *baddie, az_baddie_kind_t kind,
                     az_vector_t position, double angle) {
   assert(kind != AZ_BAD_NOTHING);
   const az_uid_t uid = baddie->uid;
-  memset(baddie, 0, sizeof(*baddie));
+  AZ_ZERO_OBJECT(baddie);
   baddie->kind = kind;
   baddie->data = az_get_baddie_data(kind);
   baddie->uid = uid;

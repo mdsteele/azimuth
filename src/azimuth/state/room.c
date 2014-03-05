@@ -24,7 +24,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/upgrade.h"
@@ -323,7 +322,7 @@ static void parse_room(az_load_room_t *loader) {
 
 bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
   assert(room_out != NULL);
-  memset(room_out, 0, sizeof(*room_out));
+  AZ_ZERO_OBJECT(room_out);
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
   az_load_room_t loader = {.file = file, .room = room_out, .success = false};
@@ -461,7 +460,7 @@ void az_destroy_room(az_room_t *room) {
   free(room->doors);
   free(room->nodes);
   free(room->walls);
-  memset(room, 0, sizeof(*room));
+  AZ_ZERO_OBJECT(room);
 }
 
 /*===========================================================================*/

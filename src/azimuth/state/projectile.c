@@ -21,7 +21,6 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <string.h> // for memset
 
 #include "azimuth/util/misc.h"
 
@@ -474,7 +473,7 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
                         az_uid_t fired_by) {
   assert(kind != AZ_PROJ_NOTHING);
   assert(power > 0.0);
-  memset(proj, 0, sizeof(*proj));
+  AZ_ZERO_OBJECT(proj);
   proj->kind = kind;
   const int data_index = (int)kind;
   assert(0 <= data_index && data_index < AZ_ARRAY_SIZE(proj_data));

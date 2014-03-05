@@ -19,8 +19,6 @@
 
 #include "azimuth/control/paused.h"
 
-#include <string.h> // for memset
-
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
@@ -34,7 +32,7 @@ az_paused_action_t az_paused_event_loop(
     const az_planet_t *planet, const az_preferences_t *prefs,
     az_ship_t *ship) {
   static az_paused_state_t state;
-  memset(&state, 0, sizeof(state));
+  AZ_ZERO_OBJECT(&state);
   state.planet = planet;
   state.prefs = prefs;
   state.ship = ship;

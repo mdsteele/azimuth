@@ -20,8 +20,8 @@
 #include "azimuth/control/title.h"
 
 #include <assert.h>
-#include <stdio.h> // for sprintf
-#include <string.h> // for memset
+#include <stdio.h>
+#include <string.h>
 
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
@@ -83,7 +83,7 @@ az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs) {
   static az_title_state_t state;
-  memset(&state, 0, sizeof(state));
+  AZ_ZERO_OBJECT(&state);
   state.planet = planet;
   state.saved_games = saved_games;
   state.music_slider.value = prefs->music_volume;

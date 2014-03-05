@@ -54,7 +54,7 @@ static void begin_saved_game(
   assert(saved_game_index < AZ_ARRAY_SIZE(saved_games->games));
   const az_saved_game_t *saved_game = &saved_games->games[saved_game_index];
 
-  memset(&state, 0, sizeof(state));
+  AZ_ZERO_OBJECT(&state);
   state.planet = planet;
   state.prefs = prefs;
   state.save_file_index = saved_game_index;
@@ -129,7 +129,7 @@ az_space_action_t az_space_event_loop(
     az_start_screen_redraw(); {
       az_space_draw_screen(&state);
     } az_finish_screen_redraw();
-    memset(&state.ship.controls, 0, sizeof(state.ship.controls));
+    AZ_ZERO_OBJECT(&state.ship.controls);
 
     // Check the current mode; we may need to do something before we move on to
     // handling events.

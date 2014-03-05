@@ -20,7 +20,6 @@
 #include "azimuth/control/victory.h"
 
 #include <assert.h>
-#include <string.h>
 
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
@@ -34,7 +33,7 @@
 
 void az_victory_event_loop(const az_player_t *player) {
   static az_victory_state_t state;
-  memset(&state, 0, sizeof(state));
+  AZ_ZERO_OBJECT(&state);
   state.clear_time = player->total_time;
   for (int i = 0; i < AZ_NUM_UPGRADES; ++i) {
     if (az_has_upgrade(player, (az_upgrade_t)i)) {

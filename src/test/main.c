@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_vunit);
   RUN_TEST(test_vwithlen);
   RUN_TEST(test_zero_array);
+  RUN_TEST(test_zero_object);
 
   return final_test_summary();
 }
