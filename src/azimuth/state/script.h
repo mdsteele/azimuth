@@ -161,7 +161,7 @@ typedef struct {
   const az_script_t *script;
   int pc;
   int stack_size;
-  double stack[12];
+  double stack[20];
 } az_script_vm_t;
 
 typedef struct {

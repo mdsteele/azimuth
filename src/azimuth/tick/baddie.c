@@ -864,7 +864,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->state == 0) {
         if (baddie->health < baddie->data->max_health) {
           baddie->state = 1;
-          az_run_script(state, baddie->on_kill);
+          az_schedule_script(state, baddie->on_kill);
         }
       }
       baddie->health = baddie->data->max_health;

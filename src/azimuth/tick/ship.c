@@ -1278,7 +1278,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
       ship->tractor_beam.active = true;
       ship->tractor_beam.node_uid = tractor_node->uid;
       ship->tractor_beam.distance = best_distance;
-      az_run_script(state, tractor_node->on_use);
+      az_schedule_script(state, tractor_node->on_use);
     }
   }
 

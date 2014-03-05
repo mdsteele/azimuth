@@ -573,8 +573,8 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     case AZ_MODE_DOORWAY:
       tick_doorway_mode(state, time);
       if (state->doorway_mode.step == AZ_DWS_FADE_IN) {
-        az_tick_timers(state, time);
         tick_all_objects(state, time);
+        az_tick_timers(state, time);
       } else hold_ship_sounds(state);
       break;
     case AZ_MODE_GAME_OVER:
@@ -583,9 +583,9 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       az_tick_nodes(state, time);
       break;
     case AZ_MODE_NORMAL:
+      tick_all_objects(state, time);
       az_tick_timers(state, time);
       check_countdown(state, time);
-      tick_all_objects(state, time);
       break;
     case AZ_MODE_PAUSING:
       AZ_ASSERT_UNREACHABLE(); // this mode is handled above

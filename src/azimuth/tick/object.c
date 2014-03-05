@@ -237,7 +237,7 @@ static void kill_baddie_internal(
   baddie->kind = AZ_BAD_NOTHING;
   if (pickups_and_scripts) {
     az_on_baddie_killed(state, kind, position, angle);
-    az_run_script(state, script);
+    az_schedule_script(state, script);
   }
 }
 

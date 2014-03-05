@@ -328,6 +328,17 @@ bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
   return false;
 }
 
+void az_schedule_script(az_space_state_t *state, const az_script_t *script) {
+  if (script == NULL) return;
+  AZ_ARRAY_LOOP(timer, state->timers) {
+    if (timer->vm.script != NULL) continue;
+    timer->time_remaining = 0.0;
+    timer->vm = (az_script_vm_t){ .script = script };
+    return;
+  }
+  AZ_WARNING_ONCE("Failed to schedule script; array is full.\n");
+}
+
 /*===========================================================================*/
 
 void az_ray_impact(az_space_state_t *state, az_vector_t start,

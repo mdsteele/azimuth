@@ -38,7 +38,7 @@ void az_try_open_door(az_space_state_t *state, az_door_t *door,
     assert(door->kind != AZ_DOOR_ALWAYS_OPEN);
     door->is_open = true;
     az_play_sound(&state->soundboard, AZ_SND_DOOR_OPEN);
-    az_run_script(state, door->on_open);
+    az_schedule_script(state, door->on_open);
   }
 }
 

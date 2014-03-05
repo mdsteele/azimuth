@@ -76,7 +76,7 @@ void az_tick_gravfields(az_space_state_t *state, double time) {
     if (!gravfield->script_fired && gravfield->on_enter != NULL &&
         az_point_within_gravfield(gravfield, state->ship.position)) {
       gravfield->script_fired = true;
-      az_run_script(state, gravfield->on_enter);
+      az_schedule_script(state, gravfield->on_enter);
     }
   }
 }

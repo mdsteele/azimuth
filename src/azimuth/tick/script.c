@@ -881,11 +881,13 @@ void az_resume_script(az_space_state_t *state, az_script_vm_t *vm) {
 void az_tick_timers(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(timer, state->timers) {
     if (timer->vm.script == NULL) continue;
-    assert(timer->time_remaining > 0.0);
+    assert(timer->time_remaining >= 0.0);
     timer->time_remaining -= time;
     if (timer->time_remaining <= 0.0) {
       timer->time_remaining = 0.0;
-      az_resume_script(state, &timer->vm);
+      if (state->sync_vm.script == NULL) {
+        az_resume_script(state, &timer->vm);
+      }
     }
   }
 }

@@ -184,7 +184,7 @@ typedef struct {
   az_pickup_t pickups[100];
   az_projectile_t projectiles[250];
   az_speck_t specks[750];
-  az_timer_t timers[5];
+  az_timer_t timers[20];
   az_wall_t walls[AZ_MAX_NUM_WALLS];
   az_uuid_t uuids[AZ_NUM_UUID_SLOTS];
 } az_space_state_t;
@@ -242,6 +242,10 @@ bool az_lookup_node(az_space_state_t *state, az_uid_t uid,
                     az_node_t **node_out);
 bool az_lookup_wall(az_space_state_t *state, az_uid_t uid,
                     az_wall_t **wall_out);
+
+// Schedule the script to run as soon as possible.  Does nothing if the script
+// is NULL.
+void az_schedule_script(az_space_state_t *state, const az_script_t *script);
 
 /*===========================================================================*/
 
