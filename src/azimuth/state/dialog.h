@@ -44,6 +44,7 @@ typedef enum {
 typedef enum {
   AZ_DLS_INACTIVE = 0,  // not in dialogue
   AZ_DLS_BEGIN,  // dialogue box is opening
+  AZ_DLS_BLANK, // dialogue box is open, but no text shown
   AZ_DLS_TALK,  // one character is talking
   AZ_DLS_WAIT,  // waiting for player to press enter
   AZ_DLS_END  // dialogue box is closing
@@ -52,12 +53,30 @@ typedef enum {
 typedef struct {
   az_dialogue_step_t step;
   double progress; // progress on current step (0 to 1)
+  bool hidden;
   bool top_turn;  // true if top portrait talking, false if bottom portrait
   az_portrait_t top, bottom;
   const char *paragraph;
   int paragraph_length;
   int chars_to_print;
 } az_dialogue_state_t;
+
+typedef enum {
+  AZ_MLS_INACTIVE = 0,  // not in monologue
+  AZ_MLS_BEGIN,  // monologue box is opening
+  AZ_MLS_BLANK, // monologue box is open, but no text shown
+  AZ_MLS_TALK,  // narrator is talking
+  AZ_MLS_WAIT,  // waiting for player to press enter
+  AZ_MLS_END  // monologue box is closing
+} az_monologue_step_t;
+
+typedef struct {
+  az_monologue_step_t step;
+  double progress; // 0.0 to 1.0
+  const char *paragraph;
+  int paragraph_length;
+  int chars_to_print;
+} az_monologue_state_t;
 
 /*===========================================================================*/
 

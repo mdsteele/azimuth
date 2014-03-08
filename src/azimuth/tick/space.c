@@ -208,10 +208,14 @@ static void tick_console_mode(az_space_state_t *state, double time) {
 static void tick_dialogue(az_space_state_t *state, double time) {
   az_dialogue_state_t *dialogue = &state->dialogue;
   assert(dialogue->step != AZ_DLS_INACTIVE);
+  assert(dialogue->step != AZ_DLS_BLANK);
+  assert(!dialogue->hidden);
   const double open_close_time = 0.5; // seconds
   const double char_time = 0.03; // seconds
   switch (dialogue->step) {
-    case AZ_DLS_INACTIVE: AZ_ASSERT_UNREACHABLE();
+    case AZ_DLS_INACTIVE:
+    case AZ_DLS_BLANK:
+      AZ_ASSERT_UNREACHABLE();
     case AZ_DLS_BEGIN:
       assert(dialogue->paragraph == NULL);
       assert(state->sync_vm.script != NULL);
@@ -392,6 +396,86 @@ static void tick_game_over_mode(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_global_fade(az_space_state_t *state, double time) {
+  const double fade_time = 1.0;
+  az_global_fade_state_t *global_fade = &state->global_fade;
+  switch (global_fade->step) {
+    case AZ_GFS_INACTIVE: break;
+    case AZ_GFS_FADE_OUT:
+      assert(state->sync_vm.script != NULL);
+      global_fade->fade_alpha += time / fade_time;
+      if (global_fade->fade_alpha >= 1.0) {
+        global_fade->step = AZ_GFS_INACTIVE;
+        global_fade->fade_alpha = 0.0;
+        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+          state->dialogue.hidden = true;
+        }
+        az_resume_script(state, &state->sync_vm);
+      }
+      break;
+    case AZ_GFS_FADE_IN:
+      assert(state->sync_vm.script != NULL);
+      global_fade->fade_alpha -= time / fade_time;
+      if (global_fade->fade_alpha <= 0.0) {
+        global_fade->step = AZ_GFS_INACTIVE;
+        global_fade->fade_alpha = 0.0;
+        az_resume_script(state, &state->sync_vm);
+      }
+      break;
+  }
+}
+
+static void tick_monologue(az_space_state_t *state, double time) {
+  az_monologue_state_t *monologue = &state->monologue;
+  assert(monologue->step != AZ_MLS_INACTIVE);
+  assert(monologue->step != AZ_MLS_BLANK);
+  const double open_close_time = 0.5; // seconds FIXME
+  const double char_time = 0.03; // seconds
+  switch (monologue->step) {
+    case AZ_MLS_INACTIVE:
+    case AZ_MLS_BLANK:
+      AZ_ASSERT_UNREACHABLE();
+    case AZ_MLS_BEGIN:
+      assert(monologue->paragraph == NULL);
+      assert(state->sync_vm.script != NULL);
+      monologue->progress += time / open_close_time;
+      if (monologue->progress >= 1.0) {
+        az_resume_script(state, &state->sync_vm);
+      }
+      break;
+    case AZ_MLS_TALK:
+      assert(monologue->paragraph != NULL);
+      assert(monologue->chars_to_print < monologue->paragraph_length);
+      assert(state->sync_vm.script != NULL);
+      monologue->progress += time / char_time;
+      if (monologue->progress >= 1.0) {
+        monologue->progress = 0.0;
+        ++monologue->chars_to_print;
+        if (monologue->chars_to_print == monologue->paragraph_length) {
+          monologue->step = AZ_MLS_WAIT;
+        }
+      }
+      break;
+    case AZ_MLS_WAIT:
+      assert(monologue->paragraph != NULL);
+      assert(monologue->chars_to_print == monologue->paragraph_length);
+      assert(state->sync_vm.script != NULL);
+      break;
+    case AZ_MLS_END:
+      assert(monologue->paragraph == NULL);
+      assert(monologue->paragraph_length == 0);
+      assert(monologue->chars_to_print == 0);
+      monologue->progress += time / open_close_time;
+      if (monologue->progress >= 1.0) {
+        *monologue = (az_monologue_state_t){ .step = AZ_MLS_INACTIVE };
+        if (state->sync_vm.script != NULL) {
+          az_resume_script(state, &state->sync_vm);
+        }
+      }
+      break;
+  }
+}
+
 static void tick_pausing_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_PAUSING);
   az_pausing_mode_data_t *mode_data = &state->pausing_mode;
@@ -406,6 +490,18 @@ static void tick_pausing_mode(az_space_state_t *state, double time) {
         fmax(0.0, mode_data->fade_alpha - time / fade_time);
       if (mode_data->fade_alpha == 0.0) state->mode = AZ_MODE_NORMAL;
       break;
+  }
+}
+
+static void tick_sync_timer(az_space_state_t *state, double time) {
+  assert(state->sync_timer.is_active);
+  assert(state->sync_timer.time_remaining > 0.0);
+  assert(state->sync_vm.script != NULL);
+  state->sync_timer.time_remaining -= time;
+  if (state->sync_timer.time_remaining <= 0.0) {
+    state->sync_timer.is_active = false;
+    state->sync_timer.time_remaining = 0.0;
+    az_resume_script(state, &state->sync_vm);
   }
 }
 
@@ -533,15 +629,25 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   // Advance the animation clock.
   ++state->clock;
 
+  // If we're fading the whole screen in or out, do that and then stop.
+  if (state->global_fade.step != AZ_GFS_INACTIVE) {
+    tick_global_fade(state, time);
+    return;
+  }
+
   // If we're watching a cutscene, allow dialogue and timer scripts to proceed,
   // but don't do anything else.
   if (state->cutscene.scene != AZ_SCENE_NOTHING) {
-    az_tick_cutscene(state, time);
-    if (state->dialogue.step != AZ_DLS_INACTIVE) {
-      tick_dialogue(state, time);
-    } else {
-      az_tick_timers(state, time);
+    if (state->cutscene.scene == state->cutscene.next) {
+      if (state->sync_timer.is_active) {
+        tick_sync_timer(state, time);
+      } else if (state->monologue.step != AZ_MLS_INACTIVE) {
+        tick_monologue(state, time);
+      } else if (state->dialogue.step != AZ_DLS_INACTIVE) {
+        tick_dialogue(state, time);
+      } else assert(false);
     }
+    az_tick_cutscene(state, time);
     return;
   }
 
@@ -551,17 +657,29 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     time *= 0.4;
   }
 
-  // These ticks happen even during dialogue.
+  // These ticks happen even during dialogue/monologue.
   az_tick_particles(state, time);
   az_tick_specks(state, time);
   tick_message(&state->message, time);
   tick_countdown(&state->countdown, time);
 
+  // If there's a synchronous timer, tick that.
+  if (state->sync_timer.is_active) {
+    tick_sync_timer(state, time);
+    return;
+  } else assert(state->sync_timer.time_remaining == 0.0);
+
+  // If we're in monologue, advance the monologue and then stop.
+  if (state->monologue.step != AZ_MLS_INACTIVE) {
+    tick_monologue(state, time);
+    return;
+  } else assert(state->monologue.paragraph == NULL);
+
   // If we're in dialogue, advance the dialogue and then stop.
   if (state->dialogue.step != AZ_DLS_INACTIVE) {
     tick_dialogue(state, time);
     return;
-  }
+  } else assert(state->dialogue.paragraph == NULL);
 
   // Advance the speedrun timer.
   if (state->mode != AZ_MODE_UPGRADE) {

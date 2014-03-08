@@ -685,15 +685,18 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_QUAKE:
         state->camera.quake_vert = fmax(0, ins.immediate);
         break;
-      // Messages/dialogue:
-      case AZ_OP_MSG: {
-        const int paragraph_index = (int)ins.immediate;
-        if (paragraph_index < 0 ||
-            paragraph_index >= state->planet->num_paragraphs) {
-          SCRIPT_ERROR("invalid paragraph index");
-        }
-        az_set_message(state, state->planet->paragraphs[paragraph_index]);
-      } break;
+      // Cutscenes:
+      case AZ_OP_FADO:
+        assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        state->global_fade.step = AZ_GFS_FADE_OUT;
+        state->global_fade.fade_alpha = 0.0;
+        SUSPEND(&state->sync_vm);
+      case AZ_OP_FADI:
+        assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        state->global_fade.step = AZ_GFS_FADE_IN;
+        state->global_fade.fade_alpha = 1.0;
+        state->dialogue.hidden = false;
+        SUSPEND(&state->sync_vm);
       case AZ_OP_SCENE: {
         const int scene_index = (int)ins.immediate;
         if (scene_index < 0 || scene_index > AZ_NUM_SCENES) {
@@ -705,9 +708,19 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           state->cutscene.fade_alpha = 1.0;
         } else SUSPEND(&state->sync_vm);
       } break;
+      // Messages/dialog:
+      case AZ_OP_MSG: {
+        const int paragraph_index = (int)ins.immediate;
+        if (paragraph_index < 0 ||
+            paragraph_index >= state->planet->num_paragraphs) {
+          SCRIPT_ERROR("invalid paragraph index");
+        }
+        az_set_message(state, state->planet->paragraphs[paragraph_index]);
+      } break;
       case AZ_OP_DLOG:
         if (state->mode == AZ_MODE_NORMAL &&
-            state->dialogue.step == AZ_DLS_INACTIVE) {
+            state->dialogue.step == AZ_DLS_INACTIVE &&
+            state->monologue.step == AZ_MLS_INACTIVE) {
           state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_BEGIN };
           SUSPEND(&state->sync_vm);
         }
@@ -720,7 +733,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           } else {
             state->dialogue.top = (az_portrait_t)portrait;
           }
-        } else SCRIPT_ERROR("not in dialogue");
+        } else SCRIPT_ERROR("can't PT when not in dialogue");
         break;
       case AZ_OP_PB:
         if (state->dialogue.step != AZ_DLS_INACTIVE) {
@@ -730,10 +743,14 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           } else {
             state->dialogue.bottom = (az_portrait_t)portrait;
           }
-        } else SCRIPT_ERROR("not in dialogue");
+        } else SCRIPT_ERROR("can't PB when not in dialogue");
         break;
       case AZ_OP_TT:
-        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+        if (state->dialogue.step == AZ_DLS_INACTIVE) {
+          SCRIPT_ERROR("can't TT when not in dialogue");
+        } else if (state->monologue.step != AZ_MLS_INACTIVE) {
+          SCRIPT_ERROR("can't TT during monologue");
+        } else {
           const int paragraph_index = (int)ins.immediate;
           if (paragraph_index < 0 ||
               paragraph_index >= state->planet->num_paragraphs) {
@@ -742,11 +759,14 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           const char *paragraph = state->planet->paragraphs[paragraph_index];
           az_set_dialogue_text(&state->dialogue, state->prefs,
                                paragraph, true);
-          SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialogue");
+        SUSPEND(&state->sync_vm);
       case AZ_OP_TB:
-        if (state->dialogue.step != AZ_DLS_INACTIVE) {
+        if (state->dialogue.step == AZ_DLS_INACTIVE) {
+          SCRIPT_ERROR("can't TB when not in dialogue");
+        } else if (state->monologue.step != AZ_MLS_INACTIVE) {
+          SCRIPT_ERROR("can't TB during monologue");
+        } else {
           const int paragraph_index = (int)ins.immediate;
           if (paragraph_index < 0 ||
               paragraph_index >= state->planet->num_paragraphs) {
@@ -755,15 +775,49 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           const char *paragraph = state->planet->paragraphs[paragraph_index];
           az_set_dialogue_text(&state->dialogue, state->prefs,
                                paragraph, false);
-          SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialogue");
+        SUSPEND(&state->sync_vm);
       case AZ_OP_DEND:
-        if (state->dialogue.step != AZ_DLS_INACTIVE) {
-          state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
+        if (state->dialogue.step == AZ_DLS_INACTIVE) {
+          SCRIPT_ERROR("can't DEND when not in dialogue");
+        } else if (state->monologue.step != AZ_MLS_INACTIVE) {
+          SCRIPT_ERROR("can't DEND during monologue");
+        }
+        state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
+        SUSPEND(&state->sync_vm);
+      case AZ_OP_MLOG:
+        if (state->monologue.step == AZ_MLS_INACTIVE) {
+          state->monologue = (az_monologue_state_t){ .step = AZ_MLS_BEGIN };
           SUSPEND(&state->sync_vm);
         }
-        SCRIPT_ERROR("not in dialogue");
+        SCRIPT_ERROR("can't MLOG while already in monologue");
+      case AZ_OP_TM:
+        if (state->monologue.step != AZ_MLS_INACTIVE) {
+          const int paragraph_index = (int)ins.immediate;
+          if (paragraph_index < 0 ||
+              paragraph_index >= state->planet->num_paragraphs) {
+            SCRIPT_ERROR("invalid paragraph index");
+          }
+          const char *paragraph = state->planet->paragraphs[paragraph_index];
+          state->monologue.step = AZ_MLS_TALK;
+          state->monologue.progress = 0.0;
+          state->monologue.paragraph = paragraph;
+          state->monologue.paragraph_length =
+            az_paragraph_total_length(state->prefs, paragraph);
+          state->monologue.chars_to_print = 0;
+          SUSPEND(&state->sync_vm);
+        }
+        SCRIPT_ERROR("can't TM when not in monologue");
+      case AZ_OP_MEND:
+        if (state->monologue.step != AZ_MLS_INACTIVE) {
+          state->monologue.step = AZ_MLS_END;
+          state->monologue.progress = 0.0;
+          state->monologue.paragraph = NULL;
+          state->monologue.paragraph_length = 0;
+          state->monologue.chars_to_print = 0;
+          SUSPEND(&state->sync_vm);
+        }
+        SCRIPT_ERROR("can't MEND when not in monologue");
       // Music/sound:
       case AZ_OP_MUS: {
         const int music_index = (int)ins.immediate;
@@ -781,10 +835,26 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       } break;
       // Timers:
       case AZ_OP_WAIT:
-        if (state->dialogue.step != AZ_DLS_INACTIVE) {
-          SCRIPT_ERROR("can't WAIT during dialogue");
-        }
         if (ins.immediate > 0.0) {
+          if (state->cutscene.scene != AZ_SCENE_NOTHING ||
+              state->dialogue.step != AZ_DLS_INACTIVE ||
+              state->monologue.step != AZ_MLS_INACTIVE) {
+            state->sync_timer.is_active = true;
+            state->sync_timer.time_remaining = ins.immediate;
+            if (state->dialogue.step != AZ_DLS_INACTIVE) {
+              state->dialogue.step = AZ_DLS_BLANK;
+              state->dialogue.paragraph = NULL;
+              state->dialogue.paragraph_length = 0;
+              state->dialogue.chars_to_print = 0;
+            }
+            if (state->monologue.step != AZ_MLS_INACTIVE) {
+              state->monologue.step = AZ_MLS_BLANK;
+              state->monologue.paragraph = NULL;
+              state->monologue.paragraph_length = 0;
+              state->monologue.chars_to_print = 0;
+            }
+            SUSPEND(&state->sync_vm);
+          }
           AZ_ARRAY_LOOP(timer, state->timers) {
             if (timer->vm.script != NULL) continue;
             timer->time_remaining = ins.immediate;
@@ -845,6 +915,9 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
   state->cutscene.next = AZ_SCENE_NOTHING;
   if (state->dialogue.step != AZ_DLS_INACTIVE) {
     state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
+  }
+  if (state->monologue.step != AZ_MLS_INACTIVE) {
+    state->monologue = (az_monologue_state_t){ .step = AZ_MLS_END };
   }
 }
 

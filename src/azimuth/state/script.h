@@ -116,15 +116,21 @@ typedef enum {
   AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
   AZ_OP_SHAKE, // momentarily shake camera by amplitude i
   AZ_OP_QUAKE, // set camera quake amplitude to i
+  // Cutscenes:
+  AZ_OP_FADO, // fade out whole screen (including HUD) and hide dialogue
+  AZ_OP_FADI, // fade in screen
+  AZ_OP_SCENE, // transition to cutscene i (suspend script until scene starts)
   // Messages/dialogue:
   AZ_OP_MSG, // display text i at bottom of screen
-  AZ_OP_SCENE, // display cutscene i next
   AZ_OP_DLOG, // begin dialogue
   AZ_OP_PT, // set top speaker to portrait i
   AZ_OP_PB, // set bottom speaker to portrait i
   AZ_OP_TT, // have top speaker say text i
   AZ_OP_TB, // have bottom speaker say text i
   AZ_OP_DEND, // end dialogue
+  AZ_OP_MLOG, // begin monologue
+  AZ_OP_TM, // have monologue say text i
+  AZ_OP_MEND, // end monologue
   // Music/sound:
   AZ_OP_MUS, // start music i
   AZ_OP_SND, // play sound i

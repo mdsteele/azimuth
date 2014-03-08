@@ -34,6 +34,8 @@ void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
 
 void az_draw_dialogue(const az_space_state_t *state);
 
+void az_draw_monologue(const az_space_state_t *state);
+
 void az_draw_hud(az_space_state_t *state);
 
 /*===========================================================================*/

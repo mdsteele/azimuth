@@ -1,4 +1,4 @@
-@P z8 r450 t121 s6 x0.00 y50000.00 a-1.570796
+@P z8 r450 t123 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -540,3 +540,29 @@
   navigation net for this region.  I will unlock
   the doors leading downwards and upload $X4060e0Barrag
   map data$W to your ship."
+!T121"
+  SapiAIs: the only truly sentient and
+  sapient artificial intelligences we
+  know of.  Planet-sized minds, and our
+  fellow citizens of the galaxy.  We've
+  only ever found three of them, each on
+  a different world -- presumably the
+  creation of some earlier civilization?
+  Even after decades of study, we still
+  don't know how they work, or how to
+  make more of them.  Still, the three
+  we've met so far -- Noumena, Halcyon,
+  and Epicedium -- have been invaluable
+  allies, even friends, in our unending
+  quest to explore and understand the
+  universe we all live in."
+!T122"
+  Apparently, all this time, there was a
+  fourth one of these irreplacable
+  beings right here on Zenith.
+  
+  But something already destroyed it.
+  
+  
+  
+  HQ is going to be pissed."

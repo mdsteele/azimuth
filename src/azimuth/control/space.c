@@ -171,7 +171,19 @@ az_space_action_t az_space_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          if (state.dialogue.step != AZ_DLS_INACTIVE) {
+          if (state.monologue.step != AZ_MLS_INACTIVE) {
+            if (state.monologue.step == AZ_MLS_TALK) {
+              state.monologue.step = AZ_MLS_WAIT;
+              state.monologue.progress = 0.0;
+              state.monologue.chars_to_print =
+                state.monologue.paragraph_length;
+            } else if (state.monologue.step == AZ_MLS_WAIT &&
+                       event.key.id == AZ_KEY_RETURN) {
+              assert(state.sync_vm.script != NULL);
+              az_resume_script(&state, &state.sync_vm);
+            }
+            break;
+          } else if (state.dialogue.step != AZ_DLS_INACTIVE) {
             if (state.dialogue.step == AZ_DLS_TALK) {
               state.dialogue.step = AZ_DLS_WAIT;
               state.dialogue.progress = 0.0;

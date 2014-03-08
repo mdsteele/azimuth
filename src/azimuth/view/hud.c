@@ -464,7 +464,7 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
 
 /*===========================================================================*/
 
-#define TEXT_LINE_SPACING 12
+#define DIALOG_TEXT_LINE_SPACING 12
 #define DIALOG_BOX_WIDTH 404
 #define DIALOG_BOX_HEIGHT 116
 #define DIALOG_BOX_MARGIN 10
@@ -514,6 +514,7 @@ static void draw_dialogue_frames(double openness) {
 static void draw_dialogue_text(const az_space_state_t *state) {
   const az_dialogue_state_t *dialogue = &state->dialogue;
   assert(dialogue->step != AZ_DLS_INACTIVE);
+  assert(dialogue->paragraph != NULL);
   glPushMatrix(); {
     if (dialogue->top_turn) {
       glTranslatef((AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH +
@@ -535,7 +536,7 @@ static void draw_dialogue_text(const az_space_state_t *state) {
                      DIALOG_BOX_HEIGHT - 2 * DIALOG_BOX_MARGIN - 8, "[ENTER]");
     }
 
-    az_draw_paragraph(8, AZ_ALIGN_LEFT, 0, 0, TEXT_LINE_SPACING,
+    az_draw_paragraph(8, AZ_ALIGN_LEFT, 0, 0, DIALOG_TEXT_LINE_SPACING,
                       dialogue->chars_to_print, state->prefs,
                       dialogue->paragraph);
   } glPopMatrix();
@@ -569,6 +570,7 @@ static void draw_dialogue_portrait(az_portrait_t portrait, bool is_bottom,
 
 void az_draw_dialogue(const az_space_state_t *state) {
   const az_dialogue_state_t *dialogue = &state->dialogue;
+  if (dialogue->hidden) return;
   bool talking = false;
   switch (dialogue->step) {
     case AZ_DLS_INACTIVE: break;
@@ -579,8 +581,9 @@ void az_draw_dialogue(const az_space_state_t *state) {
       talking = true;
       // fallthrough
     case AZ_DLS_WAIT:
+    case AZ_DLS_BLANK:
       draw_dialogue_frames(1.0);
-      draw_dialogue_text(state);
+      if (dialogue->paragraph != NULL) draw_dialogue_text(state);
       draw_dialogue_portrait(dialogue->top, false,
                              (talking && dialogue->top_turn), state->clock);
       draw_dialogue_portrait(dialogue->bottom, true,
@@ -589,6 +592,46 @@ void az_draw_dialogue(const az_space_state_t *state) {
     case AZ_DLS_END:
       draw_dialogue_frames(1.0 - dialogue->progress);
       break;
+  }
+}
+
+/*===========================================================================*/
+
+#define MONOLOGUE_TEXT_LINE_SPACING 24
+#define MONOLOGUE_BOX_WIDTH 628
+#define MONOLOGUE_BOX_HEIGHT 404
+#define MONOLOGUE_BOX_PADDING 10
+
+void az_draw_monologue(const az_space_state_t *state) {
+  if (state->monologue.step == AZ_MLS_INACTIVE) return;
+  const int left = (AZ_SCREEN_WIDTH - MONOLOGUE_BOX_WIDTH) / 2;
+  const int top = (AZ_SCREEN_HEIGHT - MONOLOGUE_BOX_HEIGHT) / 2;
+  double tint = 1.0;
+  if (state->monologue.step == AZ_MLS_BEGIN) {
+    tint = state->monologue.progress;
+  } else if (state->monologue.step == AZ_MLS_END) {
+    tint = 1.0 - state->monologue.progress;
+  }
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor4f(0, 0, 0, 0.5 * tint);
+    glVertex2i(left, top);
+    glVertex2i(left + MONOLOGUE_BOX_WIDTH, top);
+    glVertex2i(left, top + MONOLOGUE_BOX_HEIGHT);
+    glVertex2i(left + MONOLOGUE_BOX_WIDTH, top + MONOLOGUE_BOX_HEIGHT);
+  } glEnd();
+  if (state->monologue.paragraph != NULL) {
+    az_draw_paragraph(16, AZ_ALIGN_LEFT, left + MONOLOGUE_BOX_PADDING,
+                      top + MONOLOGUE_BOX_PADDING, MONOLOGUE_TEXT_LINE_SPACING,
+                      state->monologue.chars_to_print, state->prefs,
+                      state->monologue.paragraph);
+  }
+  if (state->monologue.step == AZ_MLS_WAIT) {
+    if (az_clock_mod(2, 15, state->clock)) glColor4f(0.5, 0.5, 0.5, 0.5);
+    else glColor4f(0.25, 0.75, 0.75, 0.5);
+    az_draw_string(16, AZ_ALIGN_RIGHT,
+                   left + MONOLOGUE_BOX_WIDTH - MONOLOGUE_BOX_PADDING,
+                   top + MONOLOGUE_BOX_HEIGHT - MONOLOGUE_BOX_PADDING - 16,
+                   "[ENTER]");
   }
 }
 
@@ -649,6 +692,7 @@ void az_draw_hud(az_space_state_t *state) {
   draw_hud_message(state->prefs, &state->message);
   draw_hud_countdown(&state->countdown, state->clock);
   az_draw_dialogue(state);
+  az_draw_monologue(state);
   if (state->mode == AZ_MODE_UPGRADE) draw_upgrade_box(state);
 }
 

@@ -118,6 +118,11 @@ typedef struct {
 } az_game_over_mode_data_t;
 
 typedef struct {
+  enum { AZ_GFS_INACTIVE = 0, AZ_GFS_FADE_OUT, AZ_GFS_FADE_IN } step;
+  double fade_alpha;  // 0 to 1
+} az_global_fade_state_t;
+
+typedef struct {
   enum { AZ_PSS_FADE_OUT, AZ_PSS_FADE_IN } step;
   double fade_alpha; // 0.0 to 1.0
 } az_pausing_mode_data_t;
@@ -158,7 +163,10 @@ typedef struct {
   az_dialogue_state_t dialogue;
   az_doorway_mode_data_t doorway_mode;
   az_game_over_mode_data_t game_over_mode;
+  az_global_fade_state_t global_fade;
+  az_monologue_state_t monologue;
   az_pausing_mode_data_t pausing_mode;
+  struct { bool is_active; double time_remaining; } sync_timer;
   az_upgrade_mode_data_t upgrade_mode;
   az_script_vm_t sync_vm; // VM for storing synchronously-suspended scripts
   bool victory; // true if we just won the game

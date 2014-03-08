@@ -173,6 +173,7 @@ void az_set_dialogue_text(
   const int paragraph_length = az_paragraph_total_length(prefs, paragraph);
   dialogue->step = (paragraph_length == 0 ? AZ_DLS_WAIT : AZ_DLS_TALK);
   dialogue->progress = 0.0;
+  dialogue->hidden = false;
   dialogue->top_turn = top_turn;
   dialogue->paragraph = paragraph;
   dialogue->paragraph_length = paragraph_length;

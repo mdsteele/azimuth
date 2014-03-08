@@ -109,14 +109,19 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_NPS:    return "nps";
     case AZ_OP_SHAKE:  return "shake";
     case AZ_OP_QUAKE:  return "quake";
-    case AZ_OP_MSG:    return "msg";
+    case AZ_OP_FADO:   return "fado";
+    case AZ_OP_FADI:   return "fadi";
     case AZ_OP_SCENE:  return "scene";
+    case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
     case AZ_OP_PB:     return "pb";
     case AZ_OP_TT:     return "tt";
     case AZ_OP_TB:     return "tb";
     case AZ_OP_DEND:   return "dend";
+    case AZ_OP_MLOG:   return "mlog";
+    case AZ_OP_TM:     return "tm";
+    case AZ_OP_MEND:   return "mend";
     case AZ_OP_MUS:    return "mus";
     case AZ_OP_SND:    return "snd";
     case AZ_OP_WAIT:   return "wait";
@@ -178,8 +183,12 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GVEL:
     case AZ_OP_SVEL:
     case AZ_OP_GCAM:
+    case AZ_OP_FADO:
+    case AZ_OP_FADI:
     case AZ_OP_DLOG:
     case AZ_OP_DEND:
+    case AZ_OP_MLOG:
+    case AZ_OP_MEND:
     case AZ_OP_SAFE:
     case AZ_OP_HALT:
     case AZ_OP_HEQZ:
@@ -236,12 +245,13 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_NPS:
     case AZ_OP_SHAKE:
     case AZ_OP_QUAKE:
-    case AZ_OP_MSG:
     case AZ_OP_SCENE:
+    case AZ_OP_MSG:
     case AZ_OP_PT:
     case AZ_OP_PB:
     case AZ_OP_TT:
     case AZ_OP_TB:
+    case AZ_OP_TM:
     case AZ_OP_MUS:
     case AZ_OP_SND:
     case AZ_OP_WAIT:

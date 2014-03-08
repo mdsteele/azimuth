@@ -205,7 +205,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_foreground_nodes(state);
 }
 
-void draw_doorway_transition(az_space_state_t *state) {
+static void draw_doorway_transition(az_space_state_t *state) {
   assert(state->mode == AZ_MODE_DOORWAY);
   const az_doorway_mode_data_t *mode_data = &state->doorway_mode;
   if (mode_data->step == AZ_DWS_SHIFT) {
@@ -222,11 +222,23 @@ void draw_doorway_transition(az_space_state_t *state) {
   }
 }
 
+static void draw_global_fade(const az_space_state_t *state) {
+  if (state->global_fade.step != AZ_GFS_INACTIVE) {
+    assert(state->global_fade.fade_alpha >= 0.0);
+    assert(state->global_fade.fade_alpha <= 1.0);
+    tint_screen(0, state->global_fade.fade_alpha);
+  } else {
+    assert(state->global_fade.fade_alpha == 0.0);
+  }
+}
+
 void az_space_draw_screen(az_space_state_t *state) {
   // If we're watching a cutscene, draw that instead of our normal camera view.
   if (state->cutscene.scene != AZ_SCENE_NOTHING) {
     az_draw_cutscene(state);
     az_draw_dialogue(state);
+    az_draw_monologue(state);
+    draw_global_fade(state);
     return;
   }
 
@@ -310,6 +322,7 @@ void az_space_draw_screen(az_space_state_t *state) {
   }
 
   az_draw_hud(state);
+  draw_global_fade(state);
 }
 
 /*===========================================================================*/
