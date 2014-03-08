@@ -39,7 +39,7 @@ bool az_fprint_paragraph(const char *paragraph, FILE *file) {
   WRITE("\n  ");
   for (const char *ch = paragraph; *ch != '\0'; ++ch) {
     switch (*ch) {
-      case '\n': WRITE("\n  "); break;
+      case '\n': WRITE(*(ch + 1) == '\n' ? "\n" : "\n  "); break;
       case '"': WRITE("\\\""); break;
       case '\\': WRITE("\\\\"); break;
       default: WRITE("%c", *ch); break;

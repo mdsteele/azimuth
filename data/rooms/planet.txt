@@ -23,18 +23,18 @@
   that thing?\""
 !T6"
   Query: Unknown.
-  
+
   Status: Automated disaster-control security
   systems are active, although many of them have
   been badly damaged and may be malfunctioning.
-  
+
   No colonists are currently in the outer
   habitation areas."
 !T7"
   \"Then where are they?  Are they still alive?\""
 !T8"
   Scanning records...
-  
+
   Of 284 registered colonists on Zenith, $Y47 human
   and 16 trichord fatalities$W have been reported in
   the past 48 hours."
@@ -146,11 +146,11 @@
   are the surviving colonists?\""
 !T37"
   Welcome, visitor, to Zenith Colony!            
-  
+
   Query: Historical log patterns indicate that at
   any given time the majority of the colonists are
   located in the outer habitation areas.
-  
+
   >>><"
 !T38"
   \"No!  They're not there anymore, they've
@@ -170,16 +170,16 @@
   Shear, and Experimental Propulsion Technologies.
   Donations to support future research can be made
   by contacting the JSFR science liason office.
-  
+
   >>><"
 !T41"
   \"That's not what I...no!  Gah!  There's been
   some kind of disaster here.  What went wrong?\""
 !T42"
   Query: ...                               
-  
+
   No information is available on that topic.
-  
+
   >>><"
 !T43"
   \"Look, I'm here to answer the distress call
@@ -188,12 +188,12 @@
   there anything $/useful$| you can do to help?\""
 !T44"
   $MSurvey map data$W is available for download.
-  
+
   >>><"
 !T45"
   Link established.  Merging new database
   contents.               
-  
+
   ERR**####...error corrected."
 !T46"
   \"Computer, I still haven't found any trace of
@@ -257,28 +257,28 @@
   up here.  Eerie.\""
 !T61"
   Terminal online.  Awaiting command.
-  
+
   >>><"
 !T62"
   \"Hmm, this looks like the controls for the
   colony's transmitter array.  Maybe I can get a
   message to HQ, let them know what's going on?\"
-  
+
   \"Computer, open a comm link to the nearest IPF
   navsat.\""
 !T63"
   ERROR: ENODEV
-  
+
   Cannot comply with request.  The planetary
   transmitter array is currently non-functional.
-  
+
   >>><"
 !T64"
   \"Blast it.  My ship can't broadcast far enough
   from here, and I can't risk taking three hours
   just to fly back out to range; not until I know
   the survivors are safe.\"
-  
+
   \"Computer, what's wrong with the transmitter?
   Can you bring it back online?\""
 !T65"
@@ -294,14 +294,14 @@
   \"Crap.  I'll take that as a 'no' to my second
   question.  At least now I know why the distress
   signal cut out.\"
-  
+
   \"Computer, can I at least get a map of the
   facility?  This place is bigger than I
   expected.\""
 !T67"
   Accessing database.  $Xc06000Map data$W is available for
   download.
-  
+
   >>><"
 !T68"
   Storage Room"
@@ -316,7 +316,7 @@
   survivors are?\""
 !T71"
   Greetings Hopper.  Checking sensors...         
-  
+
   $O[WARN]$W Most planetary sensors are cut off.
   There appear to be numerous damaged links
   throughout the data net.  Sensors available to
@@ -338,7 +338,7 @@
   rest of Zenith Research Colony: to give the
   Humans and Trichords something to cooperate on,
   to help ease the tense relations between them.
-  
+
   Scientifically, the Lower Nandiar Laboratory is
   where many of the high-energy NPS experiments
   are conducted."
@@ -371,7 +371,7 @@
 !T87"
   Terminal connected.  Accessing $Cmap data$W for this
   region.
-  
+
   ..."
 !T88"
   Uh oh."
@@ -401,7 +401,7 @@
   explosion will probably rip all the way up
   through this shaft.  You'd never survive it.
   And they locked the door above us...
-  
+
   Hopper, they're trying very hard to stop you
   from completing your mission."
 !T95"
@@ -419,7 +419,7 @@
   reconnected...\""
 !T99"
   Terminal online.  You did it.  That was close.
-  
+
   I am permenantly disabling the explosives now.
   Of course, that means the colonists will have to
   get a technician in here for repairs before
@@ -449,21 +449,21 @@
 !T104"
   Bringing laboratory data banks and sensor net
   back online.
-  
+
   ...Unfortunately, there do not appear to be any
   colonists remaining in the Nandiar lab areas
   after all."
 !T105"
   \"Yeah, I kinda noticed that.  I'll have to keep
   going further down to look for them.\"
-  
+
   \"Meanwhile, any chance you could tell me what
   those rainbow things are that keep coming
   through those weird portals and trying to kill
   me?\""
 !T106"
   Accessing laboratory research logs...
-  
+
   The iridescent forms you are referring to are
   known to the researchers here as...$YOth$W.
   Evidently, they come from another universe with
@@ -503,9 +503,9 @@
   Connections to this uplink have been restored.
   $OERR**####$W...error corrected.  Merging new nodes
   into network.        
-  
+
   ...                                 
-  
+
   Thank you."
 !T114"
   \"Computer, where are the survivors?\""
@@ -519,20 +519,20 @@
   you just say 'I think'?  And 'thank you'?
   That's...not how standard-issue Fed computers
   usually talk.\"
-  
+
   \"Are you an AI or something?\""
 !T117"
   I am...what you might call a $MFragment AI$W.
   However, what remains is merely pattern-based.
   I am not truly sentient.
-  
+
   Probably."
 !T118"
   \"That's...  ...um, okay.  What remains of $/what$|?
   And what's a Fragment AI, anyway?\""
 !T119"
   Unknown.                          
-  
+
   ...Sorry."
 !T120"
   I will continue to try to locate the colonists.
@@ -560,18 +560,18 @@
   Apparently, all this time, there was a
   fourth one of these irreplacable
   beings right here on Zenith.
-  
+
   But something already destroyed it.
-  
-  
-  
+
+
+
   HQ is going to be pissed."
 !T123"
   Connecting terminal.  Merging with newly-linked
   systems.        
-  
+
   ...                                 
-  
+
   I find myself...strangely awake."
 !T124"
   \"Are you another Fragment AI?\""
@@ -582,11 +582,11 @@
 !T126"
   \"Yeah, the net seems to have been partitioned
   by the damage.\"
-  
+
   \"Are you...conscious?  Self-aware?\""
 !T127"
   No.  Not exactly.  Not like you are, anyway.
-  
+
   I am merely a fragment; a piece."
 !T128"
   \"A piece of what?\""
@@ -597,13 +597,13 @@
   \"There was a SapiAI?!  Here?!\""
 !T131"
   Yes, there was a SapiAI here.
-  
+
   He was called $GAzimuth$W."
 !T132"
   \"So what happened to him?\""
 !T133"
   That, I am not sure of yet.
-  
+
   But your rescue mission must remain our
   priority.  I will do what I can to help."
 !T134"
