@@ -168,6 +168,7 @@ static void draw_move_out_scene(
 
 static void draw_arrival_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_ARRIVAL);
   az_draw_planet_starfield(clock);
   az_draw_zenith_planet(clock);
   glPushMatrix(); {
@@ -195,6 +196,13 @@ static void draw_arrival_scene(
   } glPopMatrix();
 }
 
+static void draw_zenith_scene(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_ZENITH);
+  az_draw_planet_starfield(clock);
+  az_draw_zenith_planet(clock);
+}
+
 /*===========================================================================*/
 
 void az_draw_cutscene(const az_space_state_t *state) {
@@ -210,6 +218,9 @@ void az_draw_cutscene(const az_space_state_t *state) {
       break;
     case AZ_SCENE_ARRIVAL:
       draw_arrival_scene(cutscene, state->clock);
+      break;
+    case AZ_SCENE_ZENITH:
+      draw_zenith_scene(cutscene, state->clock);
       break;
     case AZ_SCENE_ESCAPE: break; // TODO
     case AZ_SCENE_HOMECOMING: break; // TODO

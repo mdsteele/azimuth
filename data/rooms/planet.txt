@@ -1,4 +1,4 @@
-@P z8 r450 t123 s6 x0.00 y50000.00 a-1.570796
+@P z8 r450 t135 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -566,3 +566,52 @@
   
   
   HQ is going to be pissed."
+!T123"
+  Connecting terminal.  Merging with newly-linked
+  systems.        
+  
+  ...                                 
+  
+  I find myself...strangely awake."
+!T124"
+  \"Are you another Fragment AI?\""
+!T125"
+  Do you mean that there are others?  I still
+  haven't been able to communicate with most of
+  the colony network."
+!T126"
+  \"Yeah, the net seems to have been partitioned
+  by the damage.\"
+  
+  \"Are you...conscious?  Self-aware?\""
+!T127"
+  No.  Not exactly.  Not like you are, anyway.
+  
+  I am merely a fragment; a piece."
+!T128"
+  \"A piece of what?\""
+!T129"
+  Of the $GSapiAI$W that used to operate this colony's
+  systems."
+!T130"
+  \"There was a SapiAI?!  Here?!\""
+!T131"
+  Yes, there was a SapiAI here.
+  
+  He was called $GAzimuth$W."
+!T132"
+  \"So what happened to him?\""
+!T133"
+  That, I am not sure of yet.
+  
+  But your rescue mission must remain our
+  priority.  I will do what I can to help."
+!T134"
+  You'll have to go deeper into the planetoid to
+  search for the surviving colonists, but the
+  $Cblast doors$W leading downwards from here are
+  far too heavy for you to break through right
+  now.  However, I believe you could instead go
+  all the way down through the mining shaft in the
+  $CCnidam$W region; I've marked the top of the
+  shaft on your map."

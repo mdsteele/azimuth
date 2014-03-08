@@ -90,6 +90,20 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
         fade_to_next_scene(state, time);
       } else fade_in(cutscene, time);
       break;
+    case AZ_SCENE_ZENITH:
+      cutscene->time += time;
+      switch (cutscene->next) {
+        case AZ_SCENE_ZENITH:
+          fade_in(cutscene, time);
+          break;
+        case AZ_SCENE_ARRIVAL:
+          next_scene(state, false);
+          break;
+        default:
+          fade_to_next_scene(state, time);
+          break;
+      }
+      break;
     // TODO: implement other cutscenes
     case AZ_SCENE_ESCAPE:
     case AZ_SCENE_HOMECOMING:

@@ -1,4 +1,4 @@
-Next flag: 80
+Next flag: 82
 
 Bosses
 ======
@@ -29,11 +29,13 @@ Comm Consoles
 69: Used comm console in Nandiar room 303
 76: Used comm console in Nandiar room 135
 77: Used comm console in Barrag room 295, unlocked doors to deep Barrag
+80: Used comm console in Barrag room 232
 
 Map Markers
 ===========
 68: Nandiar map room (room 303) marked on map
 70: Cnidam boss room (room 237) marked on map
+81: Cnidam mine shaft entry room (room 265) marked on map
 
 Doors
 =====
