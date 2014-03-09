@@ -1,4 +1,4 @@
-Next flag: 82
+Next flag: 83
 
 Bosses
 ======
@@ -80,6 +80,7 @@ Doors
 75: Opened locked top door in Barrag room 273
 78: Opened locked door between Barrag rooms 244 and 254
 79: Opened locked door between Barrag rooms 246 and 253
+82: Opened pink door between Barrag rooms 272 and 273
 
 Boss Doors
 ==========
