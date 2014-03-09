@@ -1,4 +1,4 @@
-Next flag: 83
+Next flag: 86
 
 Bosses
 ======
@@ -81,6 +81,9 @@ Doors
 78: Opened locked door between Barrag rooms 244 and 254
 79: Opened locked door between Barrag rooms 246 and 253
 82: Opened pink door between Barrag rooms 272 and 273
+83: Opened cyan door between Barrag room 234 and Cnidam room 450
+84: Opened pink door between Barrag rooms 234 and 269
+85: Opened cyan door between Cnidam rooms 332 and 333
 
 Boss Doors
 ==========
