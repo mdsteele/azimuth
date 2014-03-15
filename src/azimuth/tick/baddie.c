@@ -28,6 +28,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/baddie_chomper.h"
 #include "azimuth/tick/baddie_kilofuge.h"
+#include "azimuth/tick/baddie_myco.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
@@ -1654,6 +1655,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_NOCTURNE:
       az_tick_bad_nocturne(state, baddie, time);
+      break;
+    case AZ_BAD_MYCOFLAKKER:
+      az_tick_bad_mycoflakker(state, baddie, time);
       break;
   }
 

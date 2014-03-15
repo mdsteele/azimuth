@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_chomper.h"
+#include "azimuth/view/baddie_myco.h"
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
 #include "azimuth/view/baddie_turret.h"
@@ -1394,6 +1395,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_NOCTURNE:
       // TODO: Make real graphics for the Nocturne.
       draw_baddie_outline(baddie, frozen, baddie->param);
+      break;
+    case AZ_BAD_MYCOFLAKKER:
+      az_draw_bad_mycoflakker(baddie, frozen, clock);
       break;
   }
 }

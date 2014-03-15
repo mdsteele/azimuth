@@ -376,6 +376,11 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_MYCOSPORE] = {
+    .speed = 100.0,
+    .lifetime = 3.2,
+    .impact_damage = 6.0
+  },
   [AZ_PROJ_NIGHTSEED] = {
     .speed = 500.0,
     .lifetime = 5.0,

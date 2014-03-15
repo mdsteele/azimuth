@@ -678,6 +678,10 @@ static void projectile_special_logic(az_space_state_t *state,
                            az_vpolar(az_random(-8.0, 8.0),
                                      proj->angle + AZ_HALF_PI)), AZ_VZERO);
       break;
+    case AZ_PROJ_MYCOSPORE:
+      proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+            proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+      break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));

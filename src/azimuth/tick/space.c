@@ -429,7 +429,7 @@ static void tick_monologue(az_space_state_t *state, double time) {
   az_monologue_state_t *monologue = &state->monologue;
   assert(monologue->step != AZ_MLS_INACTIVE);
   assert(monologue->step != AZ_MLS_BLANK);
-  const double open_close_time = 0.5; // seconds FIXME
+  const double open_close_time = 0.5; // seconds
   const double char_time = 0.03; // seconds
   switch (monologue->step) {
     case AZ_MLS_INACTIVE:

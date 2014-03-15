@@ -649,6 +649,11 @@ static az_component_data_t nocturne_components[] = {
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
 };
 
+static const az_vector_t mycoflakker_vertices[] = {
+  {-12, 8}, {-14, -1}, {-12, -10}, {5, -7}, {6, -14}, {9, -18}, {18, -10},
+  {22, 0}, {18, 10}, {9, 18}, {6, 14}, {5, 7}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -1211,6 +1216,13 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 20.0 },
     DECL_COMPONENTS(nocturne_components)
+  },
+  [AZ_BAD_MYCOFLAKKER] = {
+    .max_health = 8.0,
+    .color = {160, 80, 255, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mycoflakker_vertices),
+                   .impact_damage = 10.0 }
   }
 };
 
