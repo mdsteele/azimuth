@@ -29,6 +29,9 @@
 void az_draw_bad_mycoflakker(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_mycostalker(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_MYCO_H_

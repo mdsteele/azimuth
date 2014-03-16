@@ -19,6 +19,7 @@
 
 #include "azimuth/view/baddie_myco.h"
 
+#include <assert.h>
 #include <math.h>
 
 #include <GL/gl.h>
@@ -46,44 +47,17 @@ static void draw_shroom_spot(double cx, double cy, double w, double h) {
   } glEnd();
 }
 
-/*===========================================================================*/
-
-void az_draw_bad_mycoflakker(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
-  const float flare = baddie->armor_flare;
-  // Stem:
-  {
-    const az_color_t inner =
-      color3(0.7f + 0.3f * flare - 0.6f * frozen,
-             0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
-    const az_color_t outer =
-      color3(0.3f + 0.3f * flare - 0.2f * frozen,
-             0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
-    glBegin(GL_TRIANGLE_STRIP); {
-      az_gl_color(outer); glVertex2f(-12,   9); glVertex2f(12,  7);
-      az_gl_color(inner); glVertex2f(-12,  -1); glVertex2f(12,  0);
-      az_gl_color(outer); glVertex2f(-12, -11); glVertex2f(12, -6);
-    } glEnd();
-    az_color_t lower = inner; lower.a = 0;
-    glBegin(GL_TRIANGLE_STRIP); {
-      az_gl_color(outer); glVertex2f(-12,   9);
-      az_gl_color(inner); glVertex2f(-12,  -1);
-      az_gl_color(lower); glVertex2f(-14,  -1);
-      az_gl_color(outer); glVertex2f(-12, -11);
-    } glEnd();
-  }
-  // Cap:
+static void draw_shroom_cap(az_color_t inner, az_color_t outer,
+                            GLfloat trans_x, bool wiggle, az_clock_t clock) {
   glPushMatrix(); {
-    glTranslatef(10, 0, 0);
-    if (baddie->state != 0) {
+    glTranslatef(trans_x, 0, 0);
+    if (wiggle) {
       glRotatef(az_clock_zigzag(9, 2, clock) - 4, 0, 0, 1);
     }
     glBegin(GL_TRIANGLE_FAN); {
-      glColor3f(0.6f + 0.5f * flare - 0.6f * frozen, 0.4f + 0.3f * frozen,
-                1.0f - 0.5f * flare);
+      az_gl_color(inner);
       glVertex2f(0, 0);
-      glColor3f(0.2f + 0.3f * flare - 0.2f * frozen, 0.15f + 0.1f * frozen,
-                0.5f - 0.25f * flare);
+      az_gl_color(outer);
       for (int i = 0; i <= 360; i += 15) {
         const double rho = 10.0 * (1.0 + cos(sin(1.5 * AZ_DEG2RAD(i))));
         glVertex2d(2 + 0.5 * rho * cos(AZ_DEG2RAD(i)),
@@ -94,6 +68,79 @@ void az_draw_bad_mycoflakker(
     draw_shroom_spot(1, -11, 3.5, 4);
     draw_shroom_spot(9, -3, 2, 4);
   } glPopMatrix();
+}
+
+/*===========================================================================*/
+
+void az_draw_bad_mycoflakker(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_MYCOFLAKKER);
+  const float flare = baddie->armor_flare;
+  // Stem:
+  {
+    const az_color_t inner =
+      color3(0.7f + 0.3f * flare - 0.6f * frozen,
+             0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
+    const az_color_t outer =
+      color3(0.3f + 0.3f * flare - 0.2f * frozen,
+             0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(outer); glVertex2f(-16,   9); glVertex2f(8,  7);
+      az_gl_color(inner); glVertex2f(-16,  -1); glVertex2f(8,  0);
+      az_gl_color(outer); glVertex2f(-16, -11); glVertex2f(8, -6);
+    } glEnd();
+    az_color_t lower = inner; lower.a = 0;
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(outer); glVertex2f(-16,   9);
+      az_gl_color(inner); glVertex2f(-16,  -1);
+      az_gl_color(lower); glVertex2f(-18,  -1);
+      az_gl_color(outer); glVertex2f(-16, -11);
+    } glEnd();
+  }
+  // Cap:
+  draw_shroom_cap(color3(0.6f + 0.4f * flare - 0.6f * frozen,
+                         0.4f + 0.3f * frozen, 1.0f - 0.5f * flare),
+                  color3(0.2f + 0.3f * flare - 0.2f * frozen,
+                         0.15f + 0.1f * frozen, 0.5f - 0.25f * flare),
+                  6, (baddie->state != 0), clock);
+}
+
+void az_draw_bad_mycostalker(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_MYCOSTALKER);
+  const float flare = baddie->armor_flare;
+  {
+    const az_color_t inner =
+      color3(0.7f + 0.3f * flare - 0.6f * frozen,
+             0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
+    const az_color_t outer =
+      color3(0.3f + 0.3f * flare - 0.2f * frozen,
+             0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
+    // Stem:
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(outer); glVertex2f(0,  8); glVertex2f(10,  7);
+      az_gl_color(inner); glVertex2f(0, -1); glVertex2f(10,  0);
+      az_gl_color(outer); glVertex2f(0, -7); glVertex2f(10, -6);
+    } glEnd();
+    // Feet:
+    const GLfloat offset = 0.8f * (az_clock_zigzag(5, 5, clock) - 2.0f);
+    for (int j = 0; j < 4; ++j) {
+      const int i = (2 + j) % 4;
+      glBegin(GL_TRIANGLE_STRIP); {
+        const GLfloat x = (i == 0 || i == 3 ? -20.0f : -22.0f);
+        const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
+        az_gl_color(outer); glVertex2f(0,  8); glVertex2f(x, y + 2);
+        az_gl_color(inner); glVertex2f(0, -1); glVertex2f(x - 1, y);
+        az_gl_color(outer); glVertex2f(0, -7); glVertex2f(x, y - 2);
+      } glEnd();
+    }
+  }
+  // Cap:
+  draw_shroom_cap(color3(0.7f + 0.3f * flare - 0.6f * frozen,
+                         0.4f + 0.3f * frozen, 0.9f - 0.5f * flare),
+                  color3(0.3f + 0.3f * flare - 0.2f * frozen,
+                         0.15f + 0.1f * frozen, 0.4f - 0.25f * flare),
+                  8, (baddie->state != 0), clock);
 }
 
 /*===========================================================================*/

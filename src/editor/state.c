@@ -163,15 +163,18 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Chompers:
   AZ_BAD_CHOMPER_PLANT,
   AZ_BAD_AQUATIC_CHOMPER,
+  // Mushrooms:
+  AZ_BAD_MYCOFLAKKER,
+  AZ_BAD_MYCOSTALKER,
+  // Nightbugs:
+  AZ_BAD_NIGHTBUG,
+  AZ_BAD_NIGHTSHADE,
   // Miscellaneous:
   AZ_BAD_LEAPER,
   AZ_BAD_SMALL_FISH,
   AZ_BAD_CLAM,
   AZ_BAD_FIREBALL_MINE,
-  AZ_BAD_NIGHTBUG,
-  AZ_BAD_NIGHTSHADE,
   AZ_BAD_ATOM,
-  AZ_BAD_MYCOFLAKKER,
   // Oth:
   AZ_BAD_OTH_RAZOR,
   AZ_BAD_OTH_CRAB_1,

@@ -29,6 +29,9 @@
 void az_tick_bad_mycoflakker(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_mycostalker(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_BADDIE_MYCO_H_

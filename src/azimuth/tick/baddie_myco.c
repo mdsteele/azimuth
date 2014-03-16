@@ -30,14 +30,11 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_mycoflakker(
-    az_space_state_t *state, az_baddie_t *baddie, double time) {
-  assert(baddie->kind == AZ_BAD_MYCOFLAKKER);
+static void fire_spores(az_space_state_t *state, az_baddie_t *baddie,
+                        double time, double limit, double spread) {
   if (az_ship_in_range(state, baddie, 350) &&
       az_can_see_ship(state, baddie)) {
     if (baddie->cooldown <= 0.0) {
-      const double limit = AZ_DEG2RAD(20);
-      const double spread = AZ_DEG2RAD(60);
       const double angle =
         fmin(fmax(az_mod2pi(az_vtheta(az_vsub(state->ship.position,
                                               baddie->position)) -
@@ -48,6 +45,24 @@ void az_tick_bad_mycoflakker(
     }
     baddie->state = 1;
   } else baddie->state = 0;
+}
+
+/*===========================================================================*/
+
+void az_tick_bad_mycoflakker(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_MYCOFLAKKER);
+  fire_spores(state, baddie, time, AZ_DEG2RAD(20), AZ_DEG2RAD(60));
+}
+
+void az_tick_bad_mycostalker(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_MYCOSTALKER);
+  az_crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+                  az_vcross(az_vsub(state->ship.position, baddie->position),
+                            az_vpolar(1.0, baddie->angle)) > 0.0,
+                  1.0, 30.0, 100.0);
+  fire_spores(state, baddie, time, AZ_DEG2RAD(60), AZ_DEG2RAD(30));
 }
 
 /*===========================================================================*/

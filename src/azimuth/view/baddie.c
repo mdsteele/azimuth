@@ -1399,6 +1399,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_MYCOFLAKKER:
       az_draw_bad_mycoflakker(baddie, frozen, clock);
       break;
+    case AZ_BAD_MYCOSTALKER:
+      az_draw_bad_mycostalker(baddie, frozen, clock);
+      break;
   }
 }
 

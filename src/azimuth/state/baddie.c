@@ -650,8 +650,13 @@ static az_component_data_t nocturne_components[] = {
 };
 
 static const az_vector_t mycoflakker_vertices[] = {
-  {-12, 8}, {-14, -1}, {-12, -10}, {5, -7}, {6, -14}, {9, -18}, {18, -10},
-  {22, 0}, {18, 10}, {9, 18}, {6, 14}, {5, 7}
+  {-16, 9}, {-18, -1}, {-16, -11}, {1, -7.4}, {2, -14}, {5, -18},
+  {14, -10}, {18, 0}, {14, 10}, {5, 18}, {2, 14}, {1, 7.5}
+};
+
+static const az_vector_t mycostalker_vertices[] = {
+  {-16, 11.5}, {-20, -1}, {-16, -11.5}, {3, -6.3}, {4, -14}, {7, -18},
+  {16, -10}, {20, 0}, {16, 10}, {7, 18}, {4, 14}, {3, 7.4}
 };
 
 static az_baddie_data_t baddie_datas[] = {
@@ -1223,6 +1228,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycoflakker_vertices),
                    .impact_damage = 10.0 }
+  },
+  [AZ_BAD_MYCOSTALKER] = {
+    .max_health = 10.0,
+    .color = {192, 80, 224, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
+                   .impact_damage = 12.0 }
   }
 };
 
