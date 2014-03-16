@@ -652,15 +652,15 @@ static az_wall_data_t wall_datas[] = {
   [52] = {
     .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
     .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
-    .underglow = true, .elasticity = 0.3, .impact_damage_coeff = 7.0,
-    .polygon = AZ_INIT_POLYGON(wall_vertices_52)
+    .underglow = {50, 50, 50, 255}, .impact_damage_coeff = 7.0,
+    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_52)
   },
   // Medium glowing hex crystal:
   [53] = {
     .style = AZ_WSTY_CELL_QUAD, .color1 = {128, 96, 80, 255},
     .color2 = {48, 16, 32, 128}, .color3 = {84, 68, 96, 255},
-    .underglow = true, .elasticity = 0.3, .impact_damage_coeff = 7.0,
-    .polygon = AZ_INIT_POLYGON(wall_vertices_53)
+    .underglow = {50, 50, 50, 255}, .impact_damage_coeff = 7.0,
+    .elasticity = 0.3, .polygon = AZ_INIT_POLYGON(wall_vertices_53)
   },
   // Small blue/gray square block with rounded corners:
   [54] = {
@@ -1160,6 +1160,20 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {0, 0, 0, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Small red-glowing ash boulder:
+  [123] = {
+    .style = AZ_WSTY_TRIFAN, .bezel = 30.0,
+    .color1 = {84, 84, 84, 128}, .color2 = {40, 40, 40, 128},
+    .underglow = {40, 0, 0, 255}, .impact_damage_coeff = 7.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+  },
+  // Large red-glowing ash boulder:
+  [124] = {
+    .style = AZ_WSTY_TRIFAN, .bezel = 50.0,
+    .color1 = {128, 128, 128, 128}, .color2 = {50, 50, 50, 128},
+    .underglow = {64, 0, 0, 255}, .impact_damage_coeff = 7.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_74)
   }
 };
 

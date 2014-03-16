@@ -420,10 +420,13 @@ void az_draw_wall_data(const az_wall_data_t *data, az_clock_t clock) {
   const GLuint display_list =
     wall_display_lists_start + az_wall_data_index(data);
   assert(glIsList(display_list));
-  if (data->underglow) {
+  if (data->underglow.a != 0) {
     glBegin(GL_TRIANGLE_FAN); {
-      const GLfloat gray = 0.002f * az_clock_zigzag(100, 1, clock);
-      glColor3f(gray, gray, gray);
+      const float mult = 0.01f * az_clock_zigzag(100, 1, clock);
+      glColor4f(((float)data->underglow.r / 255.0f) * mult,
+                ((float)data->underglow.g / 255.0f) * mult,
+                ((float)data->underglow.b / 255.0f) * mult,
+                ((float)data->underglow.a / 255.0f));
       for (int i = 0; i < data->polygon.num_vertices; ++i) {
         az_gl_vertex(data->polygon.vertices[i]);
       }

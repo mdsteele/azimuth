@@ -92,6 +92,8 @@ static const int wall_data_indices[] = {
   24, 25, 65, 66,
   // Jungle grass walls:
   114, 115, 116, 117, 113,
+  // Red-glowing ash boulders:
+  123, 124,
   // Cinderbricks:
   22, 23, 31,
   // Miscellaneous:

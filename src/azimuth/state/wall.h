@@ -74,7 +74,7 @@ typedef struct {
   az_wall_style_t style;
   float bezel;
   az_color_t color1, color2, color3;
-  bool underglow;
+  az_color_t underglow;
   double elasticity; // the coefficiant of restitution when ship hits the wall
   double impact_damage_coeff;
   double bounding_radius;
