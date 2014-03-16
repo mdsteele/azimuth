@@ -38,7 +38,7 @@ az_gameover_action_t az_gameover_event_loop(void) {
   while (true) {
     // Tick the state and redraw the screen.
     az_tick_gameover_state(&state, 1.0/60.0);
-    az_tick_audio_mixer(&state.soundboard);
+    az_tick_audio(&state.soundboard);
     az_start_screen_redraw(); {
       az_gameover_draw_screen(&state);
     } az_finish_screen_redraw();

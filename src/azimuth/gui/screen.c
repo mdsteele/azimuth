@@ -63,7 +63,7 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
   }
   atexit(SDL_Quit);
   if (enable_audio) {
-    az_init_audio_mixer();
+    az_init_audio();
   }
   SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "M to run full-screen)",
                     "Azimuth");

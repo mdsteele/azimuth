@@ -27,13 +27,13 @@
 
 // Call this once per frame to update our audio system.  The audio system must
 // be initialized first (by calling az_init_gui, which will in turn call
-// az_init_audio_mixer above).
-void az_tick_audio_mixer(az_soundboard_t *soundboard);
+// az_init_audio below).
+void az_tick_audio(az_soundboard_t *soundboard);
 
 // Set the global volume for music or sound effects, respectively.  The
 // argument should be between 0.0 (silent) and 1.0 (full volume), inclusive.
 // The audio system must be initialized first (by calling az_init_gui, which
-// will in turn call az_init_audio_mixer above).
+// will in turn call az_init_audio below).
 void az_set_global_music_volume(float volume);
 void az_set_global_sound_volume(float volume);
 
@@ -41,7 +41,7 @@ void az_set_global_sound_volume(float volume);
 
 // Initialize our audio system (once the GUI has been initialized).  This is
 // called by az_init_gui, and should not be called from elsewhere.
-void az_init_audio_mixer(void);
+void az_init_audio(void);
 
 // Pause and unpause all audio (sounds and music).  These are automatically
 // called from event.c and screen.c when the app goes out/in of focus, and

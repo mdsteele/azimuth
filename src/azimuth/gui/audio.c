@@ -981,28 +981,28 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 /*===========================================================================*/
 // Audio system:
 
-static bool audio_mixer_initialized = false;
-static bool audio_mixer_paused = false;
+static bool audio_system_initialized = false;
+static bool audio_system_paused = false;
 
-static void shut_down_audio_mixer(void) {
+static void shut_down_audio_system(void) {
   free_all_sounds();
   free_all_music();
   Mix_CloseAudio();
 }
 
-void az_init_audio_mixer(void) {
-  assert(!audio_mixer_initialized);
+void az_init_audio(void) {
+  assert(!audio_system_initialized);
   // Initialize the SDL mixer.
   if (Mix_OpenAudio(AUDIO_RATE, AUDIO_FORMAT, AUDIO_CHANNELS,
                     AUDIO_BUFFERSIZE) != 0) {
     AZ_FATAL("Mix_OpenAudio failed.\n");
   }
-  atexit(shut_down_audio_mixer);
+  atexit(shut_down_audio_system);
   Mix_AllocateChannels(NUM_MIXER_CHANNELS);
   // Load our music and sound data.
   load_all_music();
   generate_all_sounds();
-  audio_mixer_initialized = true;
+  audio_system_initialized = true;
 }
 
 static int to_sdl_volume(float volume) {
@@ -1011,39 +1011,39 @@ static int to_sdl_volume(float volume) {
 }
 
 void az_set_global_music_volume(float volume) {
-  assert(audio_mixer_initialized);
-  assert(!audio_mixer_paused);
+  assert(audio_system_initialized);
+  assert(!audio_system_paused);
   Mix_VolumeMusic(to_sdl_volume(volume));
 }
 
 void az_set_global_sound_volume(float volume) {
-  assert(audio_mixer_initialized);
-  assert(!audio_mixer_paused);
+  assert(audio_system_initialized);
+  assert(!audio_system_paused);
   Mix_Volume(-1, to_sdl_volume(volume));
 }
 
-void az_tick_audio_mixer(az_soundboard_t *soundboard) {
-  assert(audio_mixer_initialized);
-  assert(!audio_mixer_paused);
+void az_tick_audio(az_soundboard_t *soundboard) {
+  assert(audio_system_initialized);
+  assert(!audio_system_paused);
   tick_music(soundboard);
   tick_sounds(soundboard);
   AZ_ZERO_OBJECT(soundboard);
 }
 
 void az_pause_all_audio(void) {
-  if (!audio_mixer_initialized) return;
-  assert(!audio_mixer_paused);
+  if (!audio_system_initialized) return;
+  assert(!audio_system_paused);
   Mix_Pause(-1); // pause all (non-music) channels
   Mix_PauseMusic();
-  audio_mixer_paused = true;
+  audio_system_paused = true;
 }
 
 void az_unpause_all_audio(void) {
-  if (!audio_mixer_initialized) return;
-  assert(audio_mixer_paused);
+  if (!audio_system_initialized) return;
+  assert(audio_system_paused);
   Mix_Resume(-1); // unpause all (non-music) channels
   Mix_ResumeMusic();
-  audio_mixer_paused = false;
+  audio_system_paused = false;
 }
 
 /*===========================================================================*/
