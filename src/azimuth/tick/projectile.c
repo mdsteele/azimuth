@@ -153,6 +153,7 @@ static void on_projectile_impact(az_space_state_t *state,
     case AZ_PROJ_ROCKET:
     case AZ_PROJ_MISSILE_TRIPLE:
     case AZ_PROJ_MISSILE_HOMING:
+    case AZ_PROJ_OTH_MINIROCKET:
     case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
     case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
       az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
@@ -685,6 +686,10 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));
+      break;
+    case AZ_PROJ_OTH_MINIROCKET:
+      leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                           0.3, 6.0, AZ_DEG2RAD(720));
       break;
     case AZ_PROJ_OTH_ROCKET:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,

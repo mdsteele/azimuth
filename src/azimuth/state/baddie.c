@@ -1235,6 +1235,12 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
                    .impact_damage = 12.0 }
+  },
+  [AZ_BAD_OTH_CRAWLER] = {
+    .max_health = 20.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .main_body = { .bounding_radius = 16.0, .impact_damage = 20.0 }
   }
 };
 

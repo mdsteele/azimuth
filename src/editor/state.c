@@ -183,6 +183,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_OTH_ORB_1,
   AZ_BAD_OTH_CRAB_2,
   AZ_BAD_OTH_ORB_2,
+  AZ_BAD_OTH_CRAWLER,
   // Bosses and minions:
   AZ_BAD_BOSS_DOOR,
   AZ_BAD_OTH_SNAPDRAGON,

@@ -1662,6 +1662,20 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_MYCOSTALKER:
       az_tick_bad_mycostalker(state, baddie, time);
       break;
+    case AZ_BAD_OTH_CRAWLER:
+      az_crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
+      if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
+        az_vector_t rel_impact;
+        if (az_lead_target(az_vsub(state->ship.position, baddie->position),
+                           state->ship.velocity, 1000.0, &rel_impact)) {
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_OTH_MINIROCKET,
+              0.0, az_vtheta(rel_impact) - baddie->angle, 0.0);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+          baddie->cooldown = az_random(1.0, 2.0);
+        }
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

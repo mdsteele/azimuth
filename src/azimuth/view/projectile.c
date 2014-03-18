@@ -460,6 +460,9 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
       break;
+    case AZ_PROJ_OTH_MINIROCKET:
+      draw_oth_projectile(proj, 6.0, clock);
+      break;
     case AZ_PROJ_OTH_ROCKET:
       draw_oth_projectile(proj, 9.0, clock);
       break;

@@ -57,6 +57,29 @@ static const az_vector_t oth_crab_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_crab_triangles) % 3 == 0);
 
+static const az_vector_t oth_crawler_triangles[] = {
+  // Body:
+  {0, 0}, {0, 20}, {12, 10},
+  {12, 10}, {12, -10}, {0, 0},
+  {0, -20}, {0, 0}, {12, -10},
+  {0, 0}, {0, -20}, {-12, -10},
+  {-12, -10}, {-12, 10}, {0, 0},
+  {0, 20}, {0, 0}, {-12, 10},
+  // Spines:
+  {0, 20}, {6, 15}, {9, 23},
+  {6, 15}, {12, 10}, {15, 18},
+  {12, 10}, {12, 0}, {20, 5},
+  {12, -10}, {12, 0}, {20, -5},
+  {6, -15}, {12, -10}, {15, -18},
+  {0, -20}, {6, -15}, {9, -23},
+  // Feet:
+  {-12, 10}, {-12, 5}, {-20, 12},
+  {-12, 5}, {-12, 0}, {-22, 3},
+  {-12, -5}, {-12, 0}, {-22, -3},
+  {-12, -10}, {-12, -5}, {-20, -12}
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_crawler_triangles) % 3 == 0);
+
 static const az_vector_t oth_orb_triangles[] = {
   {0, 0}, {20, 0}, {14.1, 14.1},
   {0, 0}, {14.1, 14.1}, {0, 20},
@@ -173,6 +196,12 @@ void az_draw_bad_oth_crab(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   draw_oth(baddie, frozen, clock, oth_crab_triangles,
            AZ_ARRAY_SIZE(oth_crab_triangles));
+}
+
+void az_draw_bad_oth_crawler(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  draw_oth(baddie, frozen, clock, oth_crawler_triangles,
+           AZ_ARRAY_SIZE(oth_crawler_triangles));
 }
 
 void az_draw_bad_oth_gunship(
