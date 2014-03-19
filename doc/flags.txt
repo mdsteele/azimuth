@@ -1,4 +1,4 @@
-Next flag: 88
+Next flag: 89
 
 Bosses
 ======
@@ -17,6 +17,7 @@ Minibosses
 53: Killed Oth Orb in Filimun room 113
 64: Killed Oth Crab/Orb in Nandiar room 176
 65: Killed Oth Orb in Nandiar room 179
+88: Killed Oth Crawlers in Cnidam room 325
 
 Comm Consoles
 =============
