@@ -268,7 +268,7 @@ static const az_vector_t armor_line_vertices[] = {
 static const az_vector_t reactor_line_vertices[] = {
   {176, 203}, {230, 203}, {230, 260}, {290, 260}
 };
-static const az_vector_t misc_line_vertices[] = {
+static const az_vector_t util_line_vertices[] = {
   {176, 273}, {205, 273}, {205, 338}, {330, 338}, {330, 290}
 };
 static const az_vector_t ordnance_line_vertices[] = {
@@ -276,6 +276,9 @@ static const az_vector_t ordnance_line_vertices[] = {
 };
 static const az_vector_t engines_line_vertices[] = {
   {464, 213}, {430, 213}, {430, 245}, {380, 245}
+};
+static const az_vector_t scan_line_vertices[] = {
+  {464, 283}, {357, 283}, {357, 255}
 };
 
 static void vertex_between(az_vector_t v0, az_vector_t v1, double amount) {
@@ -363,8 +366,10 @@ static const az_vector_t upgrade_toplefts[] = {
   [AZ_UPG_FUSION_REACTOR] = {24, 186},
   [AZ_UPG_QUANTUM_REACTOR] = {24, 206},
   [AZ_UPG_TRACTOR_BEAM] = {24, 246},
-  [AZ_UPG_INFRASCANNER] = {24, 266},
-  [AZ_UPG_MAGNET_SWEEP] = {24, 286}
+  [AZ_UPG_TRACTOR_CLOAK] = {24, 266},
+  [AZ_UPG_MAGNET_SWEEP] = {24, 286},
+  [AZ_UPG_INFRASCANNER] = {466, 266},
+  [AZ_UPG_MILLIWAVE_RADAR] = {466, 286}
 };
 
 static void set_weapon_box_color(bool has, bool selected) {
@@ -491,13 +496,13 @@ static void draw_upgrades(const az_paused_state_t *state) {
                         AZ_ARRAY_SIZE(reactor_line_vertices));
   }
 
-  bool has_misc = false;
-  draw_upg_box(player, AZ_UPG_TRACTOR_BEAM, &has_misc);
-  draw_upg_box(player, AZ_UPG_INFRASCANNER, &has_misc);
-  draw_upg_box(player, AZ_UPG_MAGNET_SWEEP, &has_misc);
-  if (has_misc) {
-    draw_schematic_line(state->clock, misc_line_vertices,
-                        AZ_ARRAY_SIZE(misc_line_vertices));
+  bool has_util = false;
+  draw_upg_box(player, AZ_UPG_TRACTOR_BEAM, &has_util);
+  draw_upg_box(player, AZ_UPG_TRACTOR_CLOAK, &has_util);
+  draw_upg_box(player, AZ_UPG_MAGNET_SWEEP, &has_util);
+  if (has_util) {
+    draw_schematic_line(state->clock, util_line_vertices,
+                        AZ_ARRAY_SIZE(util_line_vertices));
   }
 
   bool has_ordnance = false;
@@ -517,6 +522,14 @@ static void draw_upgrades(const az_paused_state_t *state) {
   if (has_engines) {
     draw_schematic_line(state->clock, engines_line_vertices,
                         AZ_ARRAY_SIZE(engines_line_vertices));
+  }
+
+  bool has_scan = false;
+  draw_upg_box(player, AZ_UPG_INFRASCANNER, &has_scan);
+  draw_upg_box(player, AZ_UPG_MILLIWAVE_RADAR, &has_scan);
+  if (has_scan) {
+    draw_schematic_line(state->clock, scan_line_vertices,
+                        AZ_ARRAY_SIZE(scan_line_vertices));
   }
 
   glColor3f(1, 1, 0.5);

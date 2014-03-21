@@ -50,8 +50,10 @@ const char *az_upgrade_name(az_upgrade_t upgrade) {
     case AZ_UPG_FUSION_REACTOR: return "FUSION REACTOR";
     case AZ_UPG_QUANTUM_REACTOR: return "QUANTUM REACTOR";
     case AZ_UPG_TRACTOR_BEAM: return "TRACTOR BEAM";
-    case AZ_UPG_INFRASCANNER: return "INFRASCANNER";
+    case AZ_UPG_TRACTOR_CLOAK: return "TRACTOR CLOAK";
     case AZ_UPG_MAGNET_SWEEP: return "MAGNET SWEEP";
+    case AZ_UPG_INFRASCANNER: return "INFRASCANNER";
+    case AZ_UPG_MILLIWAVE_RADAR: return "MILLIWAVE RADAR";
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
     case AZ_UPG_ROCKET_AMMO_02:
@@ -206,11 +208,16 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
       return "Energy recharge rate is greatly increased.";
     case AZ_UPG_TRACTOR_BEAM:
       return "Hold [$t] to lock onto flashing tractor nodes.";
-    case AZ_UPG_INFRASCANNER:
-      return "Improves your ship's sensors in low-visibility areas.";
+    case AZ_UPG_TRACTOR_CLOAK:
+      return ("Your ship will cloak after locking onto a tractor\n"
+              "node for a few seconds.");
     case AZ_UPG_MAGNET_SWEEP:
       return ("Nearby shield and ammo pickups will be\n"
               "pulled toward your ship.");
+    case AZ_UPG_INFRASCANNER:
+      return "Improves your ship's sensors in low-visibility areas.";
+    case AZ_UPG_MILLIWAVE_RADAR:
+      return "Hold [$t] for a few seconds to scan for nearby items.";
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
     case AZ_UPG_ROCKET_AMMO_02:

@@ -786,6 +786,12 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         }
       }
       break;
+    case AZ_UPG_TRACTOR_CLOAK:
+      // TODO: upgrade icon for Tractor Cloak
+      break;
+    case AZ_UPG_MILLIWAVE_RADAR:
+      // TODO: upgrade icon for Milliwave Radar
+      break;
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
     case AZ_UPG_ROCKET_AMMO_02:
