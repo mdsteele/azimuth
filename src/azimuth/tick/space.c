@@ -138,7 +138,7 @@ static void tick_console_mode(az_space_state_t *state, double time) {
   assert(node != NULL);
   assert(node->kind == AZ_NODE_CONSOLE);
   az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   assert(ship->thrusters == AZ_THRUST_NONE);
   az_player_t *player = &ship->player;
   const double align_time = 0.3; // seconds
@@ -612,7 +612,7 @@ static void hold_ship_sounds(az_space_state_t *state) {
 
 void az_tick_space_state(az_space_state_t *state, double time) {
   // Loop a klaxon sound if the ship's shields are low.
-  if (az_ship_is_present(&state->ship) &&
+  if (az_ship_is_alive(&state->ship) &&
       state->ship.player.shields <= AZ_SHIELDS_LOW_THRESHOLD) {
     az_loop_sound(&state->soundboard,
                   (state->ship.player.shields > AZ_SHIELDS_VERY_LOW_THRESHOLD ?

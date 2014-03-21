@@ -207,7 +207,7 @@ void az_tick_bad_rocket_turret(
 void az_tick_bad_crawling_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_CRAWLING_TURRET);
-  az_crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
                   az_vcross(az_vsub(state->ship.position, baddie->position),
                             az_vpolar(1.0, baddie->angle)) > 0.0,
                   1.0, 20.0, 100.0);
@@ -232,7 +232,7 @@ void az_tick_bad_crawling_turret(
 void az_tick_bad_crawling_mortar(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_CRAWLING_MORTAR);
-  az_crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
                   az_vcross(az_vsub(state->ship.position, baddie->position),
                             az_vpolar(1.0, baddie->angle)) > 0.0,
                   1.0, 20.0, 100.0);

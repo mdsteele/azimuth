@@ -62,6 +62,10 @@
 #define AZ_CPLUS_DECAY_TIME 3.5
 // Energy consumed by the C-plus drive per second while active:
 #define AZ_CPLUS_POWER_COST 70.0
+// The time needed to charge up the Tractor Cloak, in seconds:
+#define AZ_CLOAK_CHARGE_TIME 3.0
+// How long the Tractor Cloak lasts, in seconds:
+#define AZ_CLOAK_DECAY_TIME 4.0
 // Damage per second taken in superheated rooms without Thermal Armor:
 #define AZ_HEAT_DAMAGE_PER_SECOND 5.0
 
@@ -130,6 +134,15 @@ static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
   const az_vector_t drag_force =
     az_vmul(ship->velocity, -drag_coeff * az_vnorm(ship->velocity));
   az_vpluseq(&ship->velocity, az_vmul(drag_force, time));
+}
+
+static void disable_ship_tractor_cloak(az_space_state_t *state) {
+  if (state->ship.tractor_cloak.active) {
+    // TODO decloak particles
+    az_play_sound(&state->soundboard, AZ_SND_CLOAK_END);
+  }
+  state->ship.tractor_cloak.active = false;
+  state->ship.tractor_cloak.charge = 0.0;
 }
 
 /*===========================================================================*/
@@ -276,9 +289,11 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   }
 
   // Update C-plus drive status.
-  if (state->ship.cplus.state == AZ_CPLUS_ACTIVE) {
+  if (ship->cplus.state == AZ_CPLUS_ACTIVE) {
+    assert(!ship->tractor_cloak.active);
+    assert(ship->tractor_cloak.charge == 0.0);
     induce_temp_invincibility = true;
-    state->ship.cplus.state = AZ_CPLUS_INACTIVE;
+    ship->cplus.state = AZ_CPLUS_INACTIVE;
     rel_velocity = az_vsub(rel_velocity, ship->velocity);
     ship->velocity = az_vmul(ship->velocity, 0.3);
     az_vpluseq(&rel_velocity, ship->velocity);
@@ -324,6 +339,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   az_play_sound(&state->soundboard, AZ_SND_HIT_WALL);
 
   // Damage the ship.
+  if (induce_temp_invincibility) disable_ship_tractor_cloak(state);
   az_damage_ship(state, damage, induce_temp_invincibility);
 }
 
@@ -351,6 +367,7 @@ static void fire_projectiles(
     az_space_state_t *state, az_proj_kind_t kind, double power, bool forward,
     int num_shots, double dtheta, double theta_offset, bool alt_params,
     az_sound_key_t sound) {
+  disable_ship_tractor_cloak(state);
   const az_ship_t *ship = &state->ship;
   const az_vector_t gun_position =
     az_vadd(ship->position, az_vpolar((forward ? 18 : -12), ship->angle));
@@ -436,6 +453,8 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
   if (!try_use_energy(ship, energy_cost, true)) return;
+
+  disable_ship_tractor_cloak(state);
 
   az_damage_flags_t damage_kind = AZ_DMGF_BEAM;
   if (minor == AZ_GUN_FREEZE) damage_kind |= AZ_DMGF_FREEZE;
@@ -582,6 +601,7 @@ static void charge_weapons(az_space_state_t *state, double time) {
   assert(player->gun2 != AZ_GUN_CHARGE);
   if (player->gun1 == AZ_GUN_CHARGE) {
     if (controls->fire_held) {
+      disable_ship_tractor_cloak(state);
       if (ship->gun_charge < 1.0) {
         ship->gun_charge = fmin(1.0, ship->gun_charge +
                                 AZ_CHARGE_GUN_CHARGING_TIME * time);
@@ -601,6 +621,7 @@ static void charge_weapons(az_space_state_t *state, double time) {
        (az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) ||
         az_has_upgrade(player, AZ_UPG_ORION_BOOSTER)))) {
     if (controls->ordn_held) {
+      disable_ship_tractor_cloak(state);
       if (ship->ordn_charge < 1.0) {
         ship->ordn_charge = fmin(1.0, ship->ordn_charge +
                                  AZ_ORDN_CHARGING_TIME * time);
@@ -980,6 +1001,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
         ship->cplus.tap_time = fmax(0.0, ship->cplus.tap_time - time);
         if (controls->up_pressed) {
           if (ship->cplus.tap_time > 0.0) {
+            disable_ship_tractor_cloak(state);
             ship->cplus.state = AZ_CPLUS_ACTIVE;
             ship->cplus.charge = 0.0;
             ship->cplus.tap_time = 0.0;
@@ -994,6 +1016,8 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       assert(ship->cplus.tap_time == 0.0);
       assert(ship->temp_invincibility == 0.0);
       assert(ship->thrusters == AZ_THRUST_NONE);
+      assert(!ship->tractor_cloak.active);
+      assert(ship->tractor_cloak.charge == 0.0);
       // Drain energy while the C-plus drive is active.  If we stop thrusting
       // or if we run out of energy, deactivate the C-plus drive.
       const double energy_cost = AZ_CPLUS_POWER_COST * time;
@@ -1096,7 +1120,7 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
 void az_tick_ship(az_space_state_t *state, double time) {
   assert(is_normal_mode(state));
   az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
 
@@ -1150,6 +1174,35 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // Update the tractor cloak.
+  if (az_has_upgrade(&ship->player, AZ_UPG_TRACTOR_CLOAK)) {
+    assert(ship->tractor_cloak.charge >= 0.0);
+    assert(ship->tractor_cloak.charge <= 1.0);
+    if (ship->tractor_beam.active) {
+      if (ship->tractor_cloak.active) {
+        ship->tractor_cloak.charge = 1.0;
+      } else {
+        ship->tractor_cloak.charge += time / AZ_CLOAK_CHARGE_TIME;
+        if (ship->tractor_cloak.charge >= 1.0) {
+          ship->tractor_cloak.charge = 1.0;
+          ship->tractor_cloak.active = true;
+          // TODO cloak particles?
+          az_play_sound(&state->soundboard, AZ_SND_CLOAK_BEGIN);
+        }
+      }
+    } else if (ship->tractor_cloak.active) {
+      ship->tractor_cloak.charge -= time / AZ_CLOAK_DECAY_TIME;
+      if (ship->tractor_cloak.charge <= 0.0) {
+        disable_ship_tractor_cloak(state);
+      }
+    } else {
+      ship->tractor_cloak.charge = 0.0;
+    }
+  } else {
+    assert(!ship->tractor_cloak.active);
+    assert(ship->tractor_cloak.charge == 0.0);
+  }
+
   // Apply tractor beam's velocity changes:
   if (ship->tractor_beam.active) {
     assert(tractor_node != NULL);
@@ -1162,7 +1215,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Apply velocity.  If the tractor beam is active, that implies angular
   // motion (around the locked-onto node); otherwise, linear motion.
   assert(is_normal_mode(state));
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   az_impact_flags_t impact_flags = AZ_IMPF_SHIP;
   if (ship->temp_invincibility > 0.0) impact_flags |= AZ_IMPF_BADDIE;
   if (ship->tractor_beam.active) {
@@ -1196,7 +1249,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (!is_normal_mode(state)) return;
 
   // If we press the util key while near a console, use it.
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   if (controls->util_pressed && can_change_mode(state)) {
     const az_node_t *console = NULL;
     double best_dist = AZ_CONSOLE_RANGE;
@@ -1231,7 +1284,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Check if we hit an upgrade.
   assert(is_normal_mode(state));
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   if (can_change_mode(state)) {
     AZ_ARRAY_LOOP(node, state->nodes) {
       if (node->kind != AZ_NODE_UPGRADE) continue;

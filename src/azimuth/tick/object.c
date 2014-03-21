@@ -127,7 +127,7 @@ static void move_object_internal(
       break;
     case AZ_OBJ_SHIP:
       assert(object->obj.ship == &state->ship);
-      assert(az_ship_is_present(object->obj.ship));
+      assert(az_ship_is_alive(object->obj.ship));
       if (az_vnonzero(delta_position)) {
         // If the ship is forced to move while the tractor beam is active,
         // break the tractor beam.
@@ -282,7 +282,7 @@ static void kill_object_internal(
         break;
       case AZ_OBJ_SHIP:
         assert(object->obj.ship == &state->ship);
-        assert(az_ship_is_present(object->obj.ship));
+        assert(az_ship_is_alive(object->obj.ship));
         az_kill_ship(state);
         break;
       case AZ_OBJ_WALL:
@@ -389,7 +389,7 @@ void az_kill_baddie(az_space_state_t *state, az_baddie_t *baddie) {
 void az_damage_ship(az_space_state_t *state, double damage,
                     bool induce_temp_invincibility) {
   az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   assert(damage >= 0.0);
   if (ship->temp_invincibility > 0.0 ||
       ship->cplus.state == AZ_CPLUS_ACTIVE) return;
@@ -422,7 +422,7 @@ void az_damage_ship(az_space_state_t *state, double damage,
 
 void az_kill_ship(az_space_state_t *state) {
   az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   // Add particles for ship debris:
   az_particle_t *particle;
   if (az_insert_particle(state, &particle)) {

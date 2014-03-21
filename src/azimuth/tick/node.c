@@ -33,7 +33,7 @@
 /*===========================================================================*/
 
 void az_tick_nodes(az_space_state_t *state, double time) {
-  const bool has_tractor_beam = az_ship_is_present(&state->ship) &&
+  const bool has_tractor_beam = az_ship_is_alive(&state->ship) &&
     az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM);
   double best_tractor_dist = AZ_TRACTOR_BEAM_MAX_RANGE;
   az_node_t *closest_tractor_node = NULL;

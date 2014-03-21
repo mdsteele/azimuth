@@ -66,12 +66,19 @@ typedef struct {
     az_uid_t node_uid;
     double distance;
   } tractor_beam;
+  struct {
+    bool active;
+    double charge; // from 0.0 (uncharged) to 1.0 (fully charged)
+  } tractor_cloak;
 } az_ship_t;
 
 extern const az_polygon_t AZ_SHIP_POLYGON;
 
-// Return true if the ship is present (i.e. not destroyed), false otherwise.
-bool az_ship_is_present(const az_ship_t *ship);
+// Return true if the ship is alive (i.e. not destroyed), false otherwise.
+bool az_ship_is_alive(const az_ship_t *ship);
+
+// Return true if the ship is alive and not cloaked, false otherwise.
+bool az_ship_is_decloaked(const az_ship_t *ship);
 
 /*===========================================================================*/
 

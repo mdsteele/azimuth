@@ -131,7 +131,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
       // Phase in:
       baddie->param = fmin(1.0, baddie->param + time / PHASE_IN_TIME);
       // Fly around:
-      if (az_ship_is_present(&state->ship)) {
+      if (az_ship_is_decloaked(&state->ship)) {
         // TODO: Actually fly around; don't just turn towards ship.
         baddie->angle = az_angle_towards(
             baddie->angle, AZ_DEG2RAD(60) * time,

@@ -125,7 +125,7 @@ static void choose_next_state(
   } else {
     baddie->state = MOVE_BODY_STATE;
     az_vector_t rel_impact;
-    if (az_ship_is_present(&state->ship) &&
+    if (az_ship_is_decloaked(&state->ship) &&
         az_lead_target(az_vsub(state->ship.position,
                                az_vadd(baddie->position,
                                        az_vpolar(150.0, baddie->angle))),
@@ -140,7 +140,7 @@ static void move_body_forward(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   // Look at the ship.
-  if (az_ship_is_present(&state->ship)) {
+  if (az_ship_is_decloaked(&state->ship)) {
     turn_eyes_towards(baddie, time, state->ship.position);
   }
   // Determine our new position, moving along the center of the room.
@@ -186,7 +186,7 @@ static void move_legs_forward(
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   assert(parity == 0 || parity == 1);
   // Look at the ship.
-  if (az_ship_is_present(&state->ship)) {
+  if (az_ship_is_decloaked(&state->ship)) {
     turn_eyes_towards(baddie, time, state->ship.position);
   }
   // Move half of the legs forward; either the even or the odd numbered ones.
@@ -272,7 +272,7 @@ static void fire_meltbeam(
   // are no ice crystals in range.
   if (lowest_crystal != NULL) {
     turn_eyes_towards(baddie, time, lowest_crystal->position);
-  } else if (az_ship_is_present(&state->ship)) {
+  } else if (az_ship_is_decloaked(&state->ship)) {
     turn_eyes_towards(baddie, time, state->ship.position);
   }
   fire_beam_from_eye(state, baddie, time, 0, 1.0);
@@ -289,7 +289,7 @@ static void fire_crossbeam(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
 
-  if (az_ship_is_present(&state->ship)) {
+  if (az_ship_is_decloaked(&state->ship)) {
     turn_eyes_towards(baddie, time, state->ship.position);
   }
   fire_beam_from_eye(state, baddie, time, 1, 0.67);

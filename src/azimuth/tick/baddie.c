@@ -259,7 +259,7 @@ static void tick_boss_door(az_space_state_t *state, az_baddie_t *baddie,
   }
   // States 0 and 1: Wait for an opportunity to fire at ship.
   if (baddie->state == 0 || baddie->state == 1) {
-    const bool can_see_ship = az_ship_is_present(&state->ship) &&
+    const bool can_see_ship = az_ship_is_decloaked(&state->ship) &&
       (fabs(az_mod2pi(az_vtheta(az_vsub(
            state->ship.position, baddie->position)) -
                       baddie->angle)) <= max_angle) &&
@@ -511,7 +511,7 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   baddie->components[1].angle = az_angle_towards(
       baddie->components[1].angle, AZ_DEG2RAD(90) * time, -jaw_angle);
   // If the ship is destroyed or we run it over, move away from it.
-  if (!az_ship_is_present(&state->ship) ||
+  if (!az_ship_is_decloaked(&state->ship) ||
       az_vwithin(baddie->position, state->ship.position, 30.0)) {
     if (az_mod2pi(az_vtheta(state->ship.position) -
                   (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
@@ -547,7 +547,7 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         (baddie->state == 1 ? bounds->theta_span + dt : -dt));
     az_snake_towards(baddie, time, 8, 200 + 150 * hurt,
                      150 + 150 * hurt, dest);
-    if (az_ship_is_present(&state->ship) &&
+    if (az_ship_is_alive(&state->ship) &&
         az_vwithin(baddie->position, dest, 100.0)) {
       baddie->state = 3;
       if (hurt > 0.5) {
@@ -567,7 +567,7 @@ static void tick_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       baddie->cooldown = 0.3;
       if (az_random(0, 1) < 0.05) baddie->state = 0;
     }
-    if (!az_ship_is_present(&state->ship) ||
+    if (!az_ship_is_decloaked(&state->ship) ||
         az_vwithin(state->ship.position, baddie->position, 150.0)) {
       baddie->state = 0;
     }
@@ -794,7 +794,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
         const double beam_damage = 300.0 * time;
         // Damage the ship and any baddies within the beam.
-        if (az_ship_is_present(&state->ship) &&
+        if (az_ship_is_alive(&state->ship) &&
             az_ray_hits_ship(&state->ship, beam_start, beam_delta,
                              NULL, NULL)) {
           az_damage_ship(state, beam_damage, false);
@@ -828,7 +828,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_DRAGONFLY:
       fly_towards_ship(state, baddie, time,
                        5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
-      if (az_ship_is_present(&state->ship) &&
+      if (az_ship_is_alive(&state->ship) &&
           state->ship.temp_invincibility > 0.0) {
         baddie->cooldown = 2.0;
       }
@@ -907,7 +907,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 2: Chase the ship for up to a few seconds, then go to state 0.
       else if (baddie->state == 2) {
-        if (az_ship_is_present(&state->ship)) {
+        if (az_ship_is_decloaked(&state->ship)) {
           fly_towards_ship(state, baddie, time,
                            5.0, 500.0, 300.0, 250.0, 0.0, 100.0);
           baddie->param = fmax(0.0, baddie->param - time);
@@ -1375,7 +1375,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
             baddie->state = 1;
           } else {
             az_crawl_around(
-                state, baddie, time, az_ship_is_present(&state->ship) &&
+                state, baddie, time, az_ship_is_decloaked(&state->ship) &&
                 az_vcross(az_vsub(state->ship.position, baddie->position),
                           az_vpolar(1.0, baddie->angle)) > 0.0,
                 1.0, 20.0, 100.0);
@@ -1509,7 +1509,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       // State 2: Chase the ship for up to a few seconds, then go to state 0.
       else if (baddie->state == 2) {
-        if (az_ship_is_present(&state->ship)) {
+        if (az_ship_is_decloaked(&state->ship)) {
           if (baddie->cooldown <= 0.0 &&
               az_ship_in_range(state, baddie, 200) &&
               az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(10))) {

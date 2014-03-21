@@ -31,21 +31,21 @@
 
 bool az_ship_in_range(
     const az_space_state_t *state, const az_baddie_t *baddie, double range) {
-  return (az_ship_is_present(&state->ship) &&
+  return (az_ship_is_decloaked(&state->ship) &&
           az_vwithin(baddie->position, state->ship.position, range));
 }
 
 bool az_ship_within_angle(
     const az_space_state_t *state, const az_baddie_t *baddie,
     double offset, double angle) {
-  return (az_ship_is_present(&state->ship) &&
+  return (az_ship_is_decloaked(&state->ship) &&
           fabs(az_mod2pi(baddie->angle + offset -
                          az_vtheta(az_vsub(state->ship.position,
                                            baddie->position)))) <= angle);
 }
 
 bool az_can_see_ship(az_space_state_t *state, const az_baddie_t *baddie) {
-  if (!az_ship_is_present(&state->ship)) return false;
+  if (!az_ship_is_decloaked(&state->ship)) return false;
   az_impact_t impact;
   az_ray_impact(state, baddie->position,
                 az_vsub(state->ship.position, baddie->position),

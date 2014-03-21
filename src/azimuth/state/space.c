@@ -381,7 +381,7 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
   }
   // Ship:
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
-      az_ship_is_present(&state->ship)) {
+      az_ship_is_alive(&state->ship)) {
     if (az_ray_hits_ship(&state->ship, start, delta, position, normal)) {
       impact_out->type = AZ_IMP_SHIP;
       delta = az_vsub(*position, start);
@@ -454,7 +454,7 @@ void az_circle_impact(az_space_state_t *state, double radius,
   }
   // Ship:
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
-      az_ship_is_present(&state->ship)) {
+      az_ship_is_alive(&state->ship)) {
     if (az_circle_hits_ship(&state->ship, radius, start, delta,
                             position_out, normal_out)) {
       impact_out->type = AZ_IMP_SHIP;
@@ -528,7 +528,7 @@ void az_arc_circle_impact(
   }
   // Ship:
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
-      az_ship_is_present(&state->ship)) {
+      az_ship_is_alive(&state->ship)) {
     if (az_arc_circle_hits_ship(
             &state->ship, circle_radius, start, spin_center, spin_angle,
             &spin_angle, position_out, normal_out)) {

@@ -682,7 +682,7 @@ static void draw_upgrade_box(const az_space_state_t *state) {
 
 void az_draw_hud(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
-  if (!az_ship_is_present(ship)) return;
+  if (!az_ship_is_alive(ship)) return;
   draw_minimap(state);
   const az_player_t *player = &ship->player;
   draw_hud_shields_energy(player, state->clock);

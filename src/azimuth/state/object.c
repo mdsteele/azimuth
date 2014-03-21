@@ -67,7 +67,7 @@ bool az_lookup_object(az_space_state_t *state, az_uuid_t uuid,
       break;
     case AZ_UUID_SHIP:
       assert(uuid.uid == AZ_SHIP_UID);
-      if (az_ship_is_present(&state->ship)) {
+      if (az_ship_is_alive(&state->ship)) {
         object_out->type = AZ_OBJ_SHIP;
         object_out->obj.ship = &state->ship;
         return true;
@@ -100,7 +100,7 @@ az_vector_t az_get_object_position(const az_object_t *object) {
       assert(object->obj.node->kind != AZ_NODE_NOTHING);
       return object->obj.node->position;
     case AZ_OBJ_SHIP:
-      assert(az_ship_is_present(object->obj.ship));
+      assert(az_ship_is_alive(object->obj.ship));
       return object->obj.ship->position;
     case AZ_OBJ_WALL:
       assert(object->obj.wall->kind != AZ_WALL_NOTHING);
@@ -126,7 +126,7 @@ double az_get_object_angle(const az_object_t *object) {
       assert(object->obj.node->kind != AZ_NODE_NOTHING);
       return object->obj.node->angle;
     case AZ_OBJ_SHIP:
-      assert(az_ship_is_present(object->obj.ship));
+      assert(az_ship_is_alive(object->obj.ship));
       return object->obj.ship->angle;
     case AZ_OBJ_WALL:
       assert(object->obj.wall->kind != AZ_WALL_NOTHING);

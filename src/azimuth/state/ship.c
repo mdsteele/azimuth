@@ -40,12 +40,16 @@ const az_polygon_t AZ_SHIP_POLYGON = {
   .vertices = ship_vertices
 };
 
-bool az_ship_is_present(const az_ship_t *ship) {
+bool az_ship_is_alive(const az_ship_t *ship) {
   return ship->player.shields > 0.0;
 }
 
+bool az_ship_is_decloaked(const az_ship_t *ship) {
+  return az_ship_is_alive(ship) && !ship->tractor_cloak.active;
+}
+
 bool az_point_touches_ship(const az_ship_t *ship, az_vector_t point) {
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   return (az_vwithin(point, ship->position, SHIP_BOUNDING_RADIUS) &&
           az_polygon_contains(AZ_SHIP_POLYGON,
                               az_vrotate(az_vsub(point, ship->position),
@@ -55,7 +59,7 @@ bool az_point_touches_ship(const az_ship_t *ship, az_vector_t point) {
 bool az_ray_hits_ship(
     const az_ship_t *ship, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   return (az_ray_hits_bounding_circle(start, delta, ship->position,
                                       SHIP_BOUNDING_RADIUS) &&
           az_ray_hits_polygon_trans(AZ_SHIP_POLYGON, ship->position,
@@ -66,7 +70,7 @@ bool az_ray_hits_ship(
 bool az_circle_hits_ship(
     const az_ship_t *ship, double radius, az_vector_t start, az_vector_t delta,
     az_vector_t *pos_out, az_vector_t *normal_out) {
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   return (az_ray_hits_bounding_circle(start, delta, ship->position,
                                       SHIP_BOUNDING_RADIUS + radius) &&
           az_circle_hits_polygon_trans(AZ_SHIP_POLYGON, ship->position,
@@ -78,7 +82,7 @@ bool az_arc_circle_hits_ship(
     const az_ship_t *ship, double circle_radius,
     az_vector_t start, az_vector_t spin_center, double spin_angle,
     double *angle_out, az_vector_t *pos_out, az_vector_t *normal_out) {
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   return (az_arc_ray_might_hit_bounding_circle(
               start, spin_center, spin_angle, ship->position,
               SHIP_BOUNDING_RADIUS + circle_radius) &&

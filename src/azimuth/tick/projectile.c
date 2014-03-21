@@ -57,7 +57,7 @@ static void on_projectile_impact(az_space_state_t *state,
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
     // Damage the ship if it's within the blast (even if this projectile was
     // fired by the ship).
-    if (az_ship_is_present(&state->ship) &&
+    if (az_ship_is_alive(&state->ship) &&
         az_vwithin(state->ship.position, proj->position, radius)) {
       double damage = proj->data->splash_damage * proj->power;
       // The Attuned Explosives upgrade reduces the splash damage the ship
@@ -297,7 +297,7 @@ static void on_projectile_hit_ship(
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(proj->fired_by != AZ_SHIP_UID);
   az_ship_t *ship = &state->ship;
-  assert(az_ship_is_present(ship));
+  assert(az_ship_is_alive(ship));
   proj->last_hit_uid = AZ_SHIP_UID;
   // Knock the ship around:
   az_vpluseq(&ship->velocity, az_vwithlen(
@@ -317,7 +317,7 @@ static void projectile_home_in(az_space_state_t *state,
   bool found_target = false;
   az_vector_t goal = AZ_VZERO;
   if (proj->fired_by != AZ_SHIP_UID) {
-    if (az_ship_is_present(&state->ship)) {
+    if (az_ship_is_decloaked(&state->ship)) {
       found_target = true;
       goal = state->ship.position;
     }
@@ -600,7 +600,7 @@ static void projectile_special_logic(az_space_state_t *state,
         const double factor = proj->age / proj->data->lifetime;
         const double radius = proj->data->splash_radius * factor * factor;
         // Propel the ship away from the blast:
-        if (az_ship_is_present(&state->ship) &&
+        if (az_ship_is_alive(&state->ship) &&
             az_vwithin(state->ship.position, proj->position, radius)) {
           az_vpluseq(&state->ship.velocity, az_vwithlen(
               az_vsub(state->ship.position, proj->position),
@@ -635,7 +635,7 @@ static void projectile_special_logic(az_space_state_t *state,
           proj->angle = az_vtheta(proj->velocity);
         } else proj->velocity = az_vwithlen(proj->velocity, new_speed);
       }
-      if (az_ship_is_present(&state->ship)) {
+      if (az_ship_is_alive(&state->ship)) {
         const double factor = fmin(1.0, 2.0 * proj->age);
         const az_vector_t vertices[] = {
           {0, -50 * factor}, {0, 50 * factor},
@@ -666,7 +666,7 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_GRAVITY_TORPEDO_WELL:
       assert(proj->fired_by != AZ_SHIP_UID);
-      if (az_ship_is_present(&state->ship) &&
+      if (az_ship_is_alive(&state->ship) &&
           az_vwithin(proj->position, state->ship.position, 100.0)) {
         az_vpluseq(&state->ship.velocity, az_vwithlen(
             az_vsub(proj->position, state->ship.position),
@@ -711,7 +711,7 @@ static void projectile_special_logic(az_space_state_t *state,
           az_kill_baddie(state, baddie);
         }
       }
-      if (az_ship_is_present(&state->ship) &&
+      if (az_ship_is_alive(&state->ship) &&
           az_vwithin(state->ship.position, AZ_VZERO, rho)) {
         az_kill_ship(state);
       }
@@ -741,7 +741,7 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_TRINE_TORPEDO:
       assert(proj->fired_by != AZ_SHIP_UID);
-      if (az_ship_is_present(&state->ship) &&
+      if (az_ship_is_decloaked(&state->ship) &&
           az_vwithin(proj->position, state->ship.position, 100.0)) {
         const az_vector_t position = proj->position;
         const double power = proj->power;
@@ -768,7 +768,7 @@ static void projectile_special_logic(az_space_state_t *state,
         const az_uid_t fired_by = proj->fired_by;
         double goal_angle = proj->angle + AZ_PI;
         proj->kind = AZ_PROJ_NOTHING; // We cannot use proj after this point.
-        if (az_ship_is_present(&state->ship)) {
+        if (az_ship_is_decloaked(&state->ship)) {
           goal_angle = az_vtheta(az_vsub(state->ship.position, position));
         }
         az_add_projectile(state, AZ_PROJ_TRINE_TORPEDO_FIREBALL, position,

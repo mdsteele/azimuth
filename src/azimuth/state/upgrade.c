@@ -209,8 +209,8 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_TRACTOR_BEAM:
       return "Hold [$t] to lock onto flashing tractor nodes.";
     case AZ_UPG_TRACTOR_CLOAK:
-      return ("Your ship will cloak after locking onto a tractor\n"
-              "node for a few seconds.");
+      return ("Cloaks your ship after locking onto a tractor node for\n"
+              "a few seconds.  Firing weapons disables the cloak.");
     case AZ_UPG_MAGNET_SWEEP:
       return ("Nearby shield and ammo pickups will be\n"
               "pulled toward your ship.");

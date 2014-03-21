@@ -280,6 +280,20 @@ static az_sound_entry_t sound_entries[] = {
     .square_duty = 0.40368, .duty_sweep = 0.0140844583511,
     .volume_adjust = -0.4
   },
+  [AZ_SND_CLOAK_BEGIN] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.352112680674, .env_decay = 0.27622,
+    .start_freq = 0.146478870511, .freq_slide = 0.12,
+    .vibrato_depth = 0.2, .vibrato_speed = 0.2,
+    .square_duty = 0.53694, .volume_adjust = -0.7
+  },
+  [AZ_SND_CLOAK_END] = {
+    .wave_kind = SQUARE,
+    .env_sustain = 0.352112680674, .env_decay = 0.27622,
+    .start_freq = 0.201408463717, .freq_slide = -0.18,
+    .vibrato_depth = 0.2, .vibrato_speed = 0.2,
+    .square_duty = 0.53694, .volume_adjust = -0.7
+  },
   [AZ_SND_CPLUS_ACTIVE] = {
     .wave_kind = NOISE,
     .env_sustain = 0.2827, .env_punch = 0.61646, .env_decay = 1.0,
@@ -564,7 +578,7 @@ static az_sound_entry_t sound_entries[] = {
   },
   [AZ_SND_TRACTOR_BEAM] = {
     .wave_kind = WOBBLE, .env_sustain = 1.0, .start_freq = 0.18,
-    .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.5
+    .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.4
   }
 };
 

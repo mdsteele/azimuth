@@ -72,7 +72,7 @@ void az_tick_bad_switcher(az_space_state_t *state, az_baddie_t *baddie,
                           bool bounced) {
   const double speed = 250.0;
   if (baddie->state == 0) {
-    if (az_ship_is_present(&state->ship) &&
+    if (az_ship_is_decloaked(&state->ship) &&
         az_vnonzero(state->ship.velocity)) {
       az_impact_t impact;
       az_circle_impact(

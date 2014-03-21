@@ -58,7 +58,7 @@ void az_tick_bad_mycoflakker(
 void az_tick_bad_mycostalker(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_MYCOSTALKER);
-  az_crawl_around(state, baddie, time, az_ship_is_present(&state->ship) &&
+  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
                   az_vcross(az_vsub(state->ship.position, baddie->position),
                             az_vpolar(1.0, baddie->angle)) > 0.0,
                   1.0, 30.0, 100.0);

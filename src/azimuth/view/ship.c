@@ -38,7 +38,7 @@
 
 void az_draw_ship(az_space_state_t *state) {
   const az_ship_t *ship = &state->ship;
-  if (!az_ship_is_present(ship)) return;
+  if (!az_ship_is_alive(ship)) return;
 
   // Draw the magnet sweep:
   if (az_has_upgrade(&ship->player, AZ_UPG_MAGNET_SWEEP)) {
@@ -101,13 +101,27 @@ void az_draw_ship(az_space_state_t *state) {
   az_draw_ship_body(ship, state->clock);
 }
 
+static void draw_cloak_glow(float alpha) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4f(0.5, 0, 1, 0.75f * alpha);
+    glVertex2f(0, 0);
+    glColor4f(0.5, 0, 1, 0);
+    for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
+      az_gl_vertex(AZ_SHIP_POLYGON.vertices[i]);
+    }
+    az_gl_vertex(AZ_SHIP_POLYGON.vertices[0]);
+  } glEnd();
+}
+
 void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
 
-    if (ship->temp_invincibility <= 0.0 ||
-        az_clock_mod(4, 1, clock) != 0) {
+    if (ship->tractor_cloak.active && az_clock_mod(2, 1, clock) != 0) {
+      draw_cloak_glow(1.0);
+    } else if (ship->temp_invincibility <= 0.0 ||
+               az_clock_mod(4, 1, clock) != 0) {
       // Exhaust:
       if (ship->thrusters != AZ_THRUST_NONE) {
         const double zig = az_clock_zigzag(10, 1, clock);
@@ -238,6 +252,13 @@ void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
         glColor3f(0, 0.5, 0.5); // dim cyan
         glVertex2f(15, -2);
       } glEnd();
+    }
+
+    // Tractor cloak charging glow:
+    if (!ship->tractor_cloak.active &&
+        ship->tractor_cloak.charge > 0.0) {
+      assert(ship->tractor_cloak.charge < 1.0);
+      draw_cloak_glow(ship->tractor_cloak.charge);
     }
 
     // Reactive Armor flare:

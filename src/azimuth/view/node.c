@@ -735,6 +735,28 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glVertex2f(-9, 5); glVertex2f(8, -12);
       } glEnd();
       break;
+    case AZ_UPG_TRACTOR_CLOAK: {
+      glPushMatrix(); {
+        glRotatef(15, 0, 0, 1);
+        glScalef(0.5, 0.5, 1);
+        draw_tractor_node(AZ_NS_ACTIVE, 0);
+      } glPopMatrix();
+      const double r = 9 + frame;
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(0.5, 0, 1, 0.75);
+        glVertex2f(0, 0);
+        glColor4f(0.5, 0, 1, 0.1);
+        for (int i = 0; i <= 360; i += 60) {
+          glVertex2d(r * cos(AZ_DEG2RAD(i)), r * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor4f(0.5, 0, 1, 0.9);
+        for (int i = 0; i < 360; i += 60) {
+          glVertex2d(r * cos(AZ_DEG2RAD(i)), r * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+    } break;
     case AZ_UPG_INFRASCANNER:
       glBegin(GL_QUAD_STRIP); {
         glColor4f(1, 1, 0.5, 0.25);
@@ -785,9 +807,6 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           glVertex2f(i * 3.9, -2.3);
         }
       }
-      break;
-    case AZ_UPG_TRACTOR_CLOAK:
-      // TODO: upgrade icon for Tractor Cloak
       break;
     case AZ_UPG_MILLIWAVE_RADAR:
       // TODO: upgrade icon for Milliwave Radar
