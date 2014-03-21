@@ -37,6 +37,7 @@
 #include "azimuth/util/vector.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/hud.h"
+#include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
 
@@ -533,13 +534,23 @@ static void draw_upgrades(const az_paused_state_t *state) {
   }
 
   glColor3f(1, 1, 0.5);
-  draw_bezel_box(8, 50, 370, AZ_SCREEN_WIDTH - 100, 82);
+  draw_bezel_box(8, 40, 370, AZ_SCREEN_WIDTH - 80, 82);
   if (state->hovering_over_upgrade) {
+    glPushMatrix(); {
+      glTranslatef(73.5, 410.5, 0);
+      glScalef(1, -1, 1);
+      az_draw_upgrade_icon(state->hovered_upgrade, state->clock);
+      glBegin(GL_LINE_LOOP); {
+        glColor4f(1, 1, 1, 0.75);
+        glVertex2f(14, 14); glVertex2f(-14, 14);
+        glVertex2f(-14, -14); glVertex2f(14, -14);
+      } glEnd();
+    } glPopMatrix();
     glColor3f(1, 0.5, 0.5);
-    az_draw_printf(8, AZ_ALIGN_LEFT, 88, 387, "%s:",
+    az_draw_printf(8, AZ_ALIGN_LEFT, 106, 387, "%s:",
                    az_upgrade_name(state->hovered_upgrade));
     az_draw_paragraph(
-        8, AZ_ALIGN_LEFT, 94, 409, 16, -1, state->prefs,
+        8, AZ_ALIGN_LEFT, 106, 409, 16, -1, state->prefs,
         (state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
          "Press [9] to select, hold [$o] and press [$f] to fire." :
          state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?

@@ -27,6 +27,8 @@
 
 /*===========================================================================*/
 
+void az_draw_upgrade_icon(const az_upgrade_t upgrade, az_clock_t clock);
+
 // Draw a single node.  The GL matrix should be at the camera position.
 void az_draw_node(const az_node_t *node, az_clock_t clock);
 

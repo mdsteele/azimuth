@@ -359,7 +359,7 @@ static void draw_tank(void) {
   }
 }
 
-static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
+void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
   const int frame = az_clock_mod(4, 10, clock);
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
@@ -806,7 +806,7 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
           glColor3f(0.7, 0, 0);
           glVertex2f(i * 3.9, -2.3);
         }
-      }
+      } glEnd();
       break;
     case AZ_UPG_MILLIWAVE_RADAR:
       // TODO: upgrade icon for Milliwave Radar
@@ -947,6 +947,10 @@ static void draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
   }
+}
+
+static void draw_upgrade(az_upgrade_t upgrade, az_clock_t clock) {
+  az_draw_upgrade_icon(upgrade, clock);
   glBegin(GL_QUADS); {
     glColor4f(1, 1, 1, 0.25); glVertex2f(-12, 12);
     glColor4f(1, 1, 1, 0.15); glVertex2f(-12, -12);
@@ -971,7 +975,7 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
       draw_tractor_node(node->status, clock);
       break;
     case AZ_NODE_UPGRADE:
-      draw_upgrade_icon(node->subkind.upgrade, clock);
+      draw_upgrade(node->subkind.upgrade, clock);
       break;
     case AZ_NODE_DOODAD_FG:
     case AZ_NODE_DOODAD_BG:
