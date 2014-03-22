@@ -1021,8 +1021,7 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       // Drain energy while the C-plus drive is active.  If we stop thrusting
       // or if we run out of energy, deactivate the C-plus drive.
       const double energy_cost = AZ_CPLUS_POWER_COST * time;
-      if (controls->down_held || !controls->up_held ||
-          !try_use_energy(ship, energy_cost, true)) {
+      if (controls->down_held || !try_use_energy(ship, energy_cost, true)) {
         ship->cplus.state = AZ_CPLUS_INACTIVE;
         az_reset_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
       } else {

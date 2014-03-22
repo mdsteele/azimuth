@@ -183,7 +183,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
       return "Press [$d] to accelerate your ship backwards.";
     case AZ_UPG_CPLUS_DRIVE:
       return ("Fly straight without stopping to charge, then\n"
-              "double-tap-and-hold [$u].  Destroys certain walls on impact.");
+              "double-tap [$u].  Destroys certain walls on impact.");
     case AZ_UPG_ORION_BOOSTER:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_ORION_BOOST == 2); }
       return ("Press [0] to select bombs, hold [$o] to charge,\n"
