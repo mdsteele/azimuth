@@ -65,8 +65,7 @@ static az_component_data_t rocket_turret_components[] = {
     .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 }
 };
 static az_component_data_t crawling_mortar_components[] = {
-  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 }
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 15.0 }
 };
 static az_component_data_t heavy_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(double_turret_cannon_vertices),
@@ -1110,11 +1109,11 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(incorporeal_piston_ext_components)
   },
   [AZ_BAD_CRAWLING_MORTAR] = {
-    .max_health = 30.0, .overall_bounding_radius = 30.5,
+    .max_health = 20.0, .overall_bounding_radius = 30.5,
     .potential_pickups = AZ_PUPF_ALL,
     .color = {96, 96, 96, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 },
+                   .impact_damage = 15.0 },
     DECL_COMPONENTS(crawling_mortar_components)
   },
   [AZ_BAD_OTH_ORB_2] = {
