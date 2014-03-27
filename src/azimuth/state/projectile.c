@@ -390,7 +390,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 0.5
   },
   [AZ_PROJ_NUCLEAR_EXPLOSION] = {
-    .splash_damage = 75.0,
+    .splash_damage = 50.0,
     .splash_radius = 200.0,
     .impact_shake = 5.0,
     .damage_kind = AZ_DMGF_BOMB,
