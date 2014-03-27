@@ -99,6 +99,10 @@
 // The additional energy produced by the Quantum Reactor upgrade, in
 // energy/second:
 #define AZ_QUANTUM_REACTOR_RECHARGE_RATE 125.0
+// How long you have to hold down the button before the radar is visible:
+#define AZ_MILLIWAVE_RADAR_WARMUP_TIME 2.0
+// How long you have to hold down the button before the radar finds items:
+#define AZ_MILLIWAVE_RADAR_SCAN_TIME 4.0
 
 /*===========================================================================*/
 // Weapons:

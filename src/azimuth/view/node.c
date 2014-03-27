@@ -809,7 +809,28 @@ void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_UPG_MILLIWAVE_RADAR:
-      // TODO: upgrade icon for Milliwave Radar
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0, 1, 0); glVertex2f(0, 0);
+        glColor4f(1, (frame < 2 ? 0.5f : 0.0f), 0, 0);
+        const double radius = (frame < 2 ? 5 : 4);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glPushMatrix(); {
+        for (int i = 0; i < 8; ++i) {
+          const bool bright = (i % 4 == frame);
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor4f(1, (bright ? 1.0f : 0.0f), 0, (bright ? 1.0f : 0.75f));
+            glVertex2f(8, 0);
+            glColor4f(1, (bright ? 0.75f : 0.0f), (bright ? 0.5f : 0.0f), 0);
+            const GLfloat y = (bright ? -3 : -2);
+            glVertex2f(12, 0); glVertex2f(7, y);
+            glVertex2f(5, 0); glVertex2f(7, -y); glVertex2f(12, 0);
+          } glEnd();
+          glRotated(45, 0, 0, 1);
+        }
+      } glPopMatrix();
       break;
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:

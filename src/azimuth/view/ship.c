@@ -25,6 +25,7 @@
 
 #include <GL/gl.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/state/node.h"
 #include "azimuth/state/pickup.h"
 #include "azimuth/state/player.h"
@@ -95,6 +96,32 @@ void az_draw_ship(az_space_state_t *state) {
         } glEnd();
       } glPopMatrix();
     }
+  }
+
+  // Draw the milliwave radar:
+  if (ship->radar.active_time >= AZ_MILLIWAVE_RADAR_WARMUP_TIME) {
+    const double up_angle = az_vtheta(ship->position);
+    const int segment =
+      az_mod2pi_nonneg(ship->radar.angle + 0.125 * AZ_PI - up_angle) *
+      (8.0 / AZ_TWO_PI);
+    assert(segment >= 0 && segment < 8);
+    glPushMatrix(); {
+      glTranslated(ship->position.x, ship->position.y, 0);
+      glRotated(AZ_RAD2DEG(up_angle), 0, 0, 1);
+      for (int i = 0; i < 8; ++i) {
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(1, (i == segment ? 1.0f : 0.0f), 0,
+                    (i == segment ? 0.4f : 0.2f));
+          glVertex2f(35, 0);
+          glColor4f(1, (i == segment ? 0.75f : 0.0f),
+                    (i == segment ? 0.5f : 0.0f), 0);
+          const GLfloat y = (i == segment ? -5 : -3);
+          glVertex2f(45, 0); glVertex2f(30, y);
+          glVertex2f(25, 0); glVertex2f(30, -y); glVertex2f(45, 0);
+        } glEnd();
+        glRotated(45, 0, 0, 1);
+      }
+    } glPopMatrix();
   }
 
   // Draw the ship itself:

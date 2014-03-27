@@ -1173,6 +1173,37 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // Update the milliwave radar.
+  if (controls->util_held && !ship->tractor_beam.active &&
+      az_has_upgrade(&state->ship.player, AZ_UPG_MILLIWAVE_RADAR)) {
+    ship->radar.active_time += time;
+    az_node_t *nearest_upgrade = NULL;
+    if (ship->radar.active_time >= AZ_MILLIWAVE_RADAR_SCAN_TIME) {
+      double best_distance = INFINITY;
+      AZ_ARRAY_LOOP(node, state->nodes) {
+        if (node->kind != AZ_NODE_UPGRADE) continue;
+        const double distance = az_vdist(node->position, ship->position);
+        if (distance < best_distance) {
+          nearest_upgrade = node;
+          best_distance = distance;
+        }
+      }
+      if (nearest_upgrade != NULL) {
+        ship->radar.angle = az_angle_towards(
+            ship->radar.angle, AZ_DEG2RAD(90) * time,
+            az_vtheta(az_vsub(nearest_upgrade->position, ship->position)));
+      }
+    }
+    if (nearest_upgrade == NULL &&
+        ship->radar.active_time >= AZ_MILLIWAVE_RADAR_WARMUP_TIME) {
+      ship->radar.angle =
+        az_mod2pi(ship->radar.angle + AZ_DEG2RAD(720) * time);
+    }
+  } else {
+    ship->radar.active_time = 0.0;
+    ship->radar.angle = az_vtheta(ship->position);
+  }
+
   // Update the tractor cloak.
   if (az_has_upgrade(&ship->player, AZ_UPG_TRACTOR_CLOAK)) {
     assert(ship->tractor_cloak.charge >= 0.0);
