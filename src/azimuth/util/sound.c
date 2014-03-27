@@ -21,11 +21,11 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "azimuth/util/misc.h"
-#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -89,9 +89,18 @@ static struct {
   int16_t samples[128 * 1024];
 } synth;
 
+// Fill each entry in synth.noise_buffer with a random float from -1 to 1.
 static void refill_noise_buffer(void) {
+  // Xorshift RNG (see http://en.wikipedia.org/wiki/Xorshift)
+  static uint32_t x = 123456789;
+  static uint32_t y = 362436069;
+  static uint32_t z = 521288629;
+  static uint32_t w = 88675123;
   for (int i = 0; i < 32; ++i) {
-    synth.noise_buffer[i] = az_random(-1.0, 1.0);
+    const uint32_t t = x ^ (x << 11);
+    x = y; y = z; z = w;
+    w = w ^ (w >> 19) ^ t ^ (t >> 8);
+    synth.noise_buffer[i] = (w * 4.656612874161595e-10) - 1.0;
   }
 }
 
