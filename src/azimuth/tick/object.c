@@ -207,7 +207,8 @@ static void kill_baddie_internal(
         particle->angle = az_random(0.0, AZ_TWO_PI);
         particle->lifetime = az_random(0.5, 1.0);
         particle->param1 = az_random(0.5, 1.5) * step *
-          (particle->kind == AZ_PAR_SHARD ? 0.25 : 1.4);
+          (particle->kind == AZ_PAR_SHARD ? 0.25 :
+           particle->kind == AZ_PAR_EMBER ? 1.4 : 1.0);
         particle->param2 = az_random(-10.0, 10.0);
         const double component_radius = component->bounding_radius;
         particle->velocity = az_vsub(pos, component_pos);

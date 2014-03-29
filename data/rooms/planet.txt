@@ -1,4 +1,4 @@
-@P z8 r453 t135 s6 x0.00 y50000.00 a-1.570796
+@P z8 r453 t136 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0) m1
 !Z"Filimun" c(224,0,224) m2
 !Z"Cnidam" c(0,224,224) m3
@@ -14,13 +14,13 @@
 !T2"
   Auxiliary Power Station"
 !T3"
-  Security Hall"
+  Security Hallway"
 !T4"
   [Initializing systems].  Terminal online."
 !T5"
   \"Finally, an uplink!  Computer, what happened
   here?  Where is everyone?  And what the hell was
-  that thing?\""
+  that...thing?\""
 !T6"
   Query: Unknown.
 
@@ -35,8 +35,8 @@
 !T8"
   Scanning records...
 
-  Of 284 registered colonists on Zenith, $Y47 human
-  and 16 trichord fatalities$W have been reported in
+  Of 976 registered colonists on Zenith, $Y178 human
+  and 51 trichord fatalities$W have been reported in
   the past 48 hours."
 !T9"
   \"Dammit!  ...But most of them are still alive?
@@ -58,23 +58,19 @@
   sensors.  $RBlast doors$W are in place and cannot be
   unlocked from outside.  However, in an emergency
   situation, they could likely be breached with
-  the $Rdefensive ordnance$W that is located in the
-  upper armory."
+  the $Rdefensive ordnance$W that is locked up in the
+  armory just beyond this room."
 !T13"
-  \"Okay, sounds good.  How do I get to the upper
-  armory from here?\""
+  \"This is $/definitely$| an emergency situation.
+  There are people trapped down there, and I need
+  to evacuate them immediately.\""
 !T14"
-  Routing...ERR%###SIGSEG.  Error.  Unable to
-  access the colony's interior map data storage at
-  this time, apparently due to the severe systems
-  damage.  The armory is located nearby the outer
-  habitation areas, beyond $Asecurity doors$W whose
-  location data I cannot currently access.  But I
-  can unlock them remotely nonetheless."
+  Surface Airlock"
 !T15"
-  \"Do it.\""
+  [[UNUSED]]"
 !T16"
-  Armory security doors have been $Yunlocked$W."
+  Acknowledged.  Armory security doors have been
+  $Yunlocked$W."
 !T17"
   Lower Armory"
 !T18"
@@ -615,3 +611,5 @@
   all the way down through the mining shaft in the
   $CCnidam$W region; I've marked the top of the
   shaft on your map."
+!T135"
+  Press [$t] to use the console."

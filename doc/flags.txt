@@ -1,4 +1,5 @@
 Next flag: 89
+Unused: 5
 
 Bosses
 ======
@@ -12,7 +13,6 @@ Bosses
 
 Minibosses
 ==========
-5: Killed security drone in Colony room 14
 43: Killed Oth Crab in Filimun room 115
 53: Killed Oth Orb in Filimun room 113
 64: Killed Oth Crab/Orb in Nandiar room 176
@@ -42,6 +42,7 @@ Doors
 =====
 3: Opened red door between Colony room 21 and Filimun room 26
 4: Opened cyan door between Sarvari room 144 and Core room 145
+7: Opened red door between Colony rooms 15 and 16
 11: Opened blue door between Filimun rooms 108 and 109
 12: Opened blue door between Colony rooms 73 and 75 (around room 74)
 13: Opened red door between Colony rooms 125 and 128
@@ -100,7 +101,6 @@ Misc
 ====
 0: Used one of the first two save points (Colony rooms 10 and 25)
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
-7: Entered upper armory (room 23)
 8: Reversed grav-corridor in Colony room 24
 19: Watched opening cutscene (Colony room 6)
 22: Turned off death rays in Core room 146

@@ -874,7 +874,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_OTH_RAZOR] = {
     .max_health = 0.1, .color = {255, 255, 255, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
-    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .potential_pickups = AZ_PUPF_SMALL_SHIELDS,
     .static_properties = AZ_BADF_KAMIKAZE,
     .main_body = { .bounding_radius = 10.0, .impact_damage = 3.0 }
   },
@@ -1059,7 +1059,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 15.0, .impact_damage = 12.0 }
   },
   [AZ_BAD_PISTON] = {
-    .max_health = 14.0, .overall_bounding_radius = 110.0,
+    .max_health = 7.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),

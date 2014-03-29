@@ -587,10 +587,11 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
 
 void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
   if (!state->show_upgrades_drawer || state->drawer_openness < 1.0) return;
+  const az_player_t *player = &state->ship->player;
   state->hovering_over_upgrade = false;
   for (int i = 0; i < AZ_ARRAY_SIZE(upgrade_toplefts); ++i) {
     const az_upgrade_t upgrade = (az_upgrade_t)i;
-    if (!az_has_upgrade(&state->ship->player, upgrade)) continue;
+    if (!az_has_upgrade(player, upgrade)) continue;
     const az_vector_t topleft = upgrade_toplefts[i];
     const double right =
       topleft.x + (upgrade <= AZ_UPG_GUN_BEAM ? GUN_BOX_WIDTH : UPG_BOX_WIDTH);
@@ -602,6 +603,7 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
     }
   }
   for (int i = 0; i < 2; ++i) {
+    if ((i == 0 ? player->max_rockets : player->max_bombs) == 0) continue;
     int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
     if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
         y >= top && y <= top + UPG_BOX_HEIGHT) {
