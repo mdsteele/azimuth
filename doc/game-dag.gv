@@ -35,12 +35,12 @@ node [shape=box, height=0.4, fixedsize=false];
 "Reactive Armor" [color=gray];
 // Shield batteries:
 node [shape=Mcircle, height=0.5, fixedsize=true];
-"S1"  [color=magenta];
-"S2"  [color=magenta];
-"S3"  [color=yellow];
-"S4"  [color=cyan];
-"S5"  [color=brown];
-"S6"  [color=blue];
+"S1"  [color=magenta]; // in Filimun entry hall (room 26)
+"S2"  [color=magenta]; // in Filimun shale quarry (room 85)
+"S3"  [color=yellow]; // in Nandiar wind tunnel (room 215)
+"S4"  [color=cyan]; // in Cnidam frozen lake (room 307)
+"S5"  [color=brown]; // past Colony primary reactor (room 160)
+"S6"  [color=blue]; // in center upper Barrag tunnel (room 258)
 "S7"  [color=blue];
 "S8"  [color=cyan];
 "S9"  [color=green];
