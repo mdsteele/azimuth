@@ -1,4 +1,4 @@
-Next flag: 89
+Next flag: 90
 Unused: 5
 
 Bosses
@@ -104,8 +104,9 @@ Misc
 8: Reversed grav-corridor in Colony room 24
 19: Watched opening cutscene (Colony room 6)
 22: Turned off death rays in Core room 146
-25: Burst through rock face in Colony room 370
+25: Burst through rock floor in Filimun room 93
 30: Turned off secondary reactor in Barrag room 274
 39: Turned on drill in Filimun room 84
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176
+89: Traversed room 367

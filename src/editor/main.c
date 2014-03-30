@@ -877,6 +877,58 @@ static void do_change_data(int delta, bool secondary) {
   }
 }
 
+static void do_nodify_walls(void) {
+  az_editor_room_t *room = get_current_room();
+  bool any = false;
+  AZ_LIST_DECLARE(az_editor_wall_t, temp_walls);
+  AZ_LIST_INIT(temp_walls, 2);
+  AZ_LIST_LOOP(wall, room->walls) {
+    if (!wall->selected || AZ_LIST_SIZE(room->nodes) >= AZ_MAX_NUM_NODES) {
+      *AZ_LIST_ADD(temp_walls) = *wall;
+      continue;
+    }
+    any = true;
+    az_editor_node_t *node = AZ_LIST_ADD(room->nodes);
+    node->selected = true;
+    node->spec.kind = AZ_NODE_FAKE_WALL_FG;
+    node->spec.subkind.fake_wall = wall->spec.data;
+    node->spec.position = wall->spec.position;
+    node->spec.angle = wall->spec.angle;
+    node->spec.uuid_slot = wall->spec.uuid_slot;
+  }
+  AZ_LIST_SWAP(temp_walls, room->walls);
+  AZ_LIST_DESTROY(temp_walls);
+  if (any) set_room_unsaved(room);
+}
+
+static void do_wallify_nodes(void) {
+  az_editor_room_t *room = get_current_room();
+  bool any = false;
+  AZ_LIST_DECLARE(az_editor_node_t, temp_nodes);
+  AZ_LIST_INIT(temp_nodes, 2);
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected || (node->spec.kind != AZ_NODE_FAKE_WALL_FG &&
+                            node->spec.kind != AZ_NODE_FAKE_WALL_BG) ||
+        AZ_LIST_SIZE(room->walls) >= AZ_MAX_NUM_WALLS) {
+      *AZ_LIST_ADD(temp_nodes) = *node;
+      continue;
+    }
+    any = true;
+    az_editor_wall_t *wall = AZ_LIST_ADD(room->walls);
+    wall->selected = true;
+    wall->spec.kind = AZ_WALL_INDESTRUCTIBLE;
+    wall->spec.data = node->spec.subkind.fake_wall;
+    wall->spec.position = node->spec.position;
+    wall->spec.angle = node->spec.angle;
+    wall->spec.uuid_slot = node->spec.uuid_slot;
+    az_free_script(node->spec.on_use);
+    node->spec.on_use = NULL;
+  }
+  AZ_LIST_SWAP(temp_nodes, room->nodes);
+  AZ_LIST_DESTROY(temp_nodes);
+  if (any) set_room_unsaved(room);
+}
+
 static void do_change_zone(int delta) {
   az_editor_room_t *room = get_current_room();
   room->zone_key = az_modulo(room->zone_key + delta,
@@ -1429,8 +1481,10 @@ static void event_loop(void) {
               } else state.tool = AZ_TOOL_MOVE;
               break;
             case AZ_KEY_N:
-              if (event.key.command) add_new_room();
-              else state.tool = AZ_TOOL_NODE;
+              if (event.key.command) {
+                if (event.key.shift) do_nodify_walls();
+                else add_new_room();
+              } else state.tool = AZ_TOOL_NODE;
               break;
             case AZ_KEY_O: do_change_data(1, event.key.shift); break;
             case AZ_KEY_P: do_change_data(-1, event.key.shift); break;
@@ -1454,7 +1508,11 @@ static void event_loop(void) {
             case AZ_KEY_V:
               if (event.key.command && !event.key.shift) do_paste();
               break;
-            case AZ_KEY_W: state.tool = AZ_TOOL_WALL; break;
+            case AZ_KEY_W:
+              if (event.key.command) {
+                if (event.key.shift) do_wallify_nodes();
+              } else state.tool = AZ_TOOL_WALL;
+              break;
             case AZ_KEY_X:
               if (event.key.command && !event.key.shift) do_copy(true);
               break;

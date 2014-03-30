@@ -1,6 +1,6 @@
-@R z0 p0 b0 d3 g2 n14 w49
+@R z0 p0 b0 d3 g3 n14 w49
   c(49278.36,568.86,1.570993,0.000000)
-$s:test19,beqz/A,msg14,halt,A#activ1,activ2,set19,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene3,scene0,msg14,gpos3,spos,gang3,sang,push400,gang,vpolar,svel,wait0.5,close1,wait0.25,close2;
+$s:test19,beqz/A,msg14,test23,heqz,activ1,activ2,halt,A#activ1,activ2,set19,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene3,scene0,msg14,gpos3,spos,gang3,sang,push400,gang,vpolar,svel,wait0.5,close1,wait0.25,close2;
 !W1 d5 x-286.00 y49830.01 a-1.569412 u0
 !W1 d13 x-335.93 y49737.33 a1.051880 u0
 !W1 d12 x283.44 y49794.68 a1.562568 u0
@@ -58,6 +58,8 @@ $o:set20;
 $e:test20,hnez,msg34,wait10,deact4;
 !G1 x-9.82 y49157.60 a1.570996 s0.00 o0.00 f300.00 r300.00 l100.00 u5
 $e:test20,hnez,msg35,wait10,deact5;
+!G1 x-2.84 y50020.79 a1.570853 s0.00 o0.00 f100.00 r100.00 l60.00 u6
+$e:test23,heqz,push200,gang6,vpolar,gvel,vadd,svel,close2,wait0.25,close1,wait1,fado,scene1,wait2,vict;
 !N8/0 x-4.85 y50110.52 a-1.570640 u3
 !N7/9 x175.01 y49487.57 a-0.788233 u0
 !N7/9 x253.79 y49408.35 a-0.788233 u0
