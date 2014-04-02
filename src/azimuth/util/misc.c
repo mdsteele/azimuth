@@ -26,11 +26,11 @@
 
 /*===========================================================================*/
 
-void _az_zero_memory(void *ptr, size_t size) {
+void az_zero_memory_(void *ptr, size_t size) {
   memset(ptr, 0, size);
 }
 
-void _az_fatal(const char *funcname, const char *format, ...) {
+void az_fatal_(const char *funcname, const char *format, ...) {
   va_list args;
   fprintf(stderr, "Fatal error in %s: ", funcname);
   va_start(args, format);
@@ -39,11 +39,11 @@ void _az_fatal(const char *funcname, const char *format, ...) {
   exit(EXIT_FAILURE);
 }
 
-void *_az_alloc(const char *funcname, size_t n, size_t size) {
+void *az_alloc_(const char *funcname, size_t n, size_t size) {
   if (n == 0) return NULL;
   void *ptr = calloc(n, size);
   if (ptr == NULL) {
-    _az_fatal(funcname, "Out of memory.\n");
+    az_fatal_(funcname, "Out of memory.\n");
   }
   return ptr;
 }

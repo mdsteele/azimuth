@@ -36,23 +36,23 @@
 
 // Zero the memory of a single object.
 #define AZ_ZERO_OBJECT(ptr) \
-  _az_zero_memory((ptr), sizeof(*(ptr)))
+  az_zero_memory_((ptr), sizeof(*(ptr)))
 // Zero the memory of a statically-sized array.
 #define AZ_ZERO_ARRAY(array) \
-  _az_zero_memory((array), AZ_ARRAY_SIZE(array) * sizeof((array)[0]))
-void _az_zero_memory(void *ptr, size_t size);
+  az_zero_memory_((array), AZ_ARRAY_SIZE(array) * sizeof((array)[0]))
+void az_zero_memory_(void *ptr, size_t size);
 
 // Signal a fatal error and exit the program.
-#define AZ_FATAL(...) _az_fatal(__func__, __VA_ARGS__)
-void _az_fatal(const char *funcname, const char *format, ...)
+#define AZ_FATAL(...) az_fatal_(__func__, __VA_ARGS__)
+void az_fatal_(const char *funcname, const char *format, ...)
   __attribute__((__format__(__printf__,2,3),__noreturn__));
 
 // Allocate a block of memory large enough to fit a type[n] array.  If you only
 // want to allocate a single object rather than an array, simply use n=1.  If
 // memory allocation fails, this will signal a fatal error and exit the
 // program.  Returns NULL for n=0.
-#define AZ_ALLOC(n, type) ((type *)_az_alloc(__func__, (n), sizeof(type)))
-void *_az_alloc(const char *funcname, size_t n, size_t size)
+#define AZ_ALLOC(n, type) ((type *)az_alloc_(__func__, (n), sizeof(type)))
+void *az_alloc_(const char *funcname, size_t n, size_t size)
   __attribute__((__malloc__));
 
 // Use this macro to indicate that this point in the code should never be
@@ -69,8 +69,8 @@ void *_az_alloc(const char *funcname, size_t n, size_t size)
 // Join two tokens.  This is handy when one of the two tokens is __LINE__;
 // using AZ_JOIN(foo_, __LINE__) will produce e.g. foo_123, whereas
 // foo_##__LINE__ would result in foo___LINE__.
-#define AZ_JOIN(a, b) AZ_JOIN2(a, b)
-#define AZ_JOIN2(a, b) a##b
+#define AZ_JOIN(a, b) AZ_JOIN2_(a, b)
+#define AZ_JOIN2_(a, b) a##b
 
 // AZ_COUNT_ARGS(...) expands to the number of arguments passed to it (as long
 // as that number is between 1 and 15, inclusive).  Beware: it may silently

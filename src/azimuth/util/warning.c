@@ -24,7 +24,7 @@
 
 /*===========================================================================*/
 
-void _az_print_warning(const char *funcname, const char *filename,
+void az_print_warning_(const char *funcname, const char *filename,
                        int line, const char *format, ...) {
   va_list args;
   fprintf(stderr, "WARNING: function %s, file %s, line %d: ",

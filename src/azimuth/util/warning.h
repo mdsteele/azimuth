@@ -30,7 +30,7 @@
 #define AZ_WARNING_ALWAYS(...)
 #else
 #define AZ_WARNING_ALWAYS(...) \
-  _az_print_warning(__func__, __FILE__, __LINE__, __VA_ARGS__)
+  az_print_warning_(__func__, __FILE__, __LINE__, __VA_ARGS__)
 #endif
 
 // In debug mode, print a warning message, but only the first time that this
@@ -39,15 +39,15 @@
 #define AZ_WARNING_ONCE(...)
 #else
 #define AZ_WARNING_ONCE(...) do { \
-    static bool AZ_JOIN(_az_warn_, __LINE__) = false; \
-    if (!AZ_JOIN(_az_warn_, __LINE__)) { \
-      _az_print_warning(__func__, __FILE__, __LINE__, __VA_ARGS__); \
-      AZ_JOIN(_az_warn_, __LINE__) = true; \
+    static bool AZ_JOIN(az_warn_, __LINE__) = false; \
+    if (!AZ_JOIN(az_warn_, __LINE__)) { \
+      az_print_warning_(__func__, __FILE__, __LINE__, __VA_ARGS__); \
+      AZ_JOIN(az_warn_, __LINE__) = true; \
     } \
   } while (false)
 #endif
 
-void _az_print_warning(const char *funcname, const char *filename,
+void az_print_warning_(const char *funcname, const char *filename,
                        int line, const char *format, ...)
   __attribute__((__format__(__printf__,4,5)));
 

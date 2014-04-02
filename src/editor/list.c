@@ -27,7 +27,7 @@
 
 /*===========================================================================*/
 
-void _az_list_init(int *num, int *max, void **items, size_t item_size,
+void az_list_init_(int *num, int *max, void **items, size_t item_size,
                    int init_max) {
   *items = calloc(init_max, item_size);
   if (*items == NULL) AZ_FATAL("Out of memory.\n");
@@ -35,7 +35,7 @@ void _az_list_init(int *num, int *max, void **items, size_t item_size,
   *num = 0;
 }
 
-void _az_list_destroy(int *num, int *max, void **items) {
+void az_list_destroy_(int *num, int *max, void **items) {
   free(*items);
   // Clobber list fields to be safe:
   *num = 0;
@@ -43,13 +43,13 @@ void _az_list_destroy(int *num, int *max, void **items) {
   *items = NULL;
 }
 
-void *_az_list_get(int num, void *items, size_t item_size, int idx) {
+void *az_list_get_(int num, void *items, size_t item_size, int idx) {
   assert(idx >= 0);
   assert(idx < num);
   return (char *)items + idx * item_size;
 }
 
-void *_az_list_add(int *num, int *max, void **items, size_t item_size) {
+void *az_list_add_(int *num, int *max, void **items, size_t item_size) {
   // Sanity check that the list isn't bigger than its maximum size.
   const int old_num = *num, old_max = *max;
   assert(old_num <= old_max);
@@ -70,7 +70,7 @@ void *_az_list_add(int *num, int *max, void **items, size_t item_size) {
   return item;
 }
 
-void _az_list_remove(int *num, int *max, void **items, size_t item_size,
+void az_list_remove_(int *num, int *max, void **items, size_t item_size,
                      void *item) {
   // Calculate offsets.
   const int old_num = *num;
@@ -96,7 +96,7 @@ void _az_list_remove(int *num, int *max, void **items, size_t item_size,
   }
 }
 
-void _az_list_swap(int *num1, int *max1, void **items1,
+void az_list_swap_(int *num1, int *max1, void **items1,
                    int *num2, int *max2, void **items2) {
   const int temp_num = *num1;
   const int temp_max = *max1;
@@ -109,7 +109,7 @@ void _az_list_swap(int *num1, int *max1, void **items1,
   *items2 = temp_items;
 }
 
-void _az_list_concat(int *num1, int *max1, void **items1,
+void az_list_concat_(int *num1, int *max1, void **items1,
                      int num2, const void *items2, size_t item_size) {
   assert(*items1 != items2);
   const int old_num1 = *num1;
