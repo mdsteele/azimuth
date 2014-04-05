@@ -280,8 +280,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 4.0,
     .splash_radius = 30.0,
     .impact_shake = 1.5,
-    .damage_kind = AZ_DMGF_PIERCE | AZ_DMGF_ROCKET,
-    .properties = AZ_PROJF_PIERCING
+    .damage_kind = AZ_DMGF_PIERCE | AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_BEAM] = {
     .lifetime = 0.5,

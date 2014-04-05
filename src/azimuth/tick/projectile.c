@@ -248,11 +248,6 @@ static void on_projectile_hit_target(
   if (shake > 0.0) {
     az_shake_camera(&state->camera, shake * 0.75, shake * 0.25);
   }
-  // Remove the projectile (unless it's piercing, in which case it should
-  // continue on beyond this target).
-  if (!(proj->data->properties & AZ_PROJF_PIERCING)) {
-    proj->kind = AZ_PROJ_NOTHING;
-  }
   // Pierce Missiles are special: when they hit a target, they ricochet towards
   // another target.
   if (proj->kind == AZ_PROJ_MISSILE_PIERCE) {
@@ -274,6 +269,12 @@ static void on_projectile_hit_target(
       proj->velocity = az_vpolar(az_vnorm(proj->velocity) - 50.0, proj->angle);
       ++proj->param;
     } else proj->kind = AZ_PROJ_NOTHING;
+    return;
+  }
+  // Remove the projectile (unless it's piercing, in which case it should
+  // continue on beyond this target).
+  if (!(proj->data->properties & AZ_PROJF_PIERCING)) {
+    proj->kind = AZ_PROJ_NOTHING;
   }
 }
 
@@ -810,20 +811,63 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     if (proj->data->properties & AZ_PROJF_PHASED) {
       skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE | AZ_IMPF_DOOR_OUTSIDE;
     }
-    const az_vector_t delta = az_vmul(proj->velocity, time);
-    az_ray_impact(state, proj->position, delta, skip_types, proj->last_hit_uid,
-                  &impact);
+    if (proj->data->properties & AZ_PROJF_PIERCING) {
+      skip_types |= AZ_IMPF_SHIP | AZ_IMPF_BADDIE;
+    }
+    az_ray_impact(state, proj->position, az_vmul(proj->velocity, time),
+                  skip_types, proj->last_hit_uid, &impact);
+    const az_vector_t delta = az_vsub(impact.position, proj->position);
 
-    // If this is a phased projectile fired by the ship, also hit all doors
-    // along the way.
-    if (proj->fired_by == AZ_SHIP_UID &&
-        (proj->data->properties & AZ_PROJF_PHASED)) {
-      assert(impact.type != AZ_IMP_DOOR_OUTSIDE);
-      AZ_ARRAY_LOOP(door, state->doors) {
-        if (door->kind == AZ_DOOR_NOTHING) continue;
-        if (az_ray_hits_door_outside(door, proj->position, delta,
-                                     NULL, NULL)) {
-          az_try_open_door(state, door, proj->data->damage_kind);
+    if (proj->data->properties & AZ_PROJF_PHASED) {
+      // If this phased projectile was fired by the ship, also hit all doors
+      // along the way.
+      if (proj->fired_by == AZ_SHIP_UID) {
+        AZ_ARRAY_LOOP(door, state->doors) {
+          if (door->kind == AZ_DOOR_NOTHING) continue;
+          if (az_ray_hits_door_outside(door, proj->position, delta,
+                                       NULL, NULL)) {
+            az_try_open_door(state, door, proj->data->damage_kind);
+          }
+        }
+      }
+      // For charged phased projectiles, also hit breakable walls on the way.
+      // We only do this for _charged_ phased projectiles because we don't want
+      // to apply this behavior to, say, phased rockets.
+      if (proj->data->damage_kind & AZ_DMGF_CHARGED) {
+        AZ_ARRAY_LOOP(wall, state->walls) {
+          if (wall->kind == AZ_WALL_NOTHING ||
+              wall->kind == AZ_WALL_INDESTRUCTIBLE) continue;
+          az_vector_t point;
+          if (az_ray_hits_wall(wall, proj->position, delta, &point, NULL)) {
+            az_try_break_wall(state, wall, proj->data->damage_kind, point);
+          }
+        }
+      }
+    }
+
+    // For piercing projectiles, hit all targets along the way.
+    if (proj->data->properties & AZ_PROJF_PIERCING) {
+      const az_vector_t start = proj->position;
+      if (proj->fired_by != AZ_SHIP_UID && proj->last_hit_uid != AZ_SHIP_UID) {
+        az_vector_t normal;
+        if (az_ray_hits_ship(&state->ship, start, delta,
+                             &proj->position, &normal)) {
+          on_projectile_hit_ship(state, proj, normal);
+          assert(proj->kind != AZ_PROJ_NOTHING);
+        }
+      }
+      if (proj->fired_by == AZ_SHIP_UID || proj->fired_by == AZ_NULL_UID) {
+        AZ_ARRAY_LOOP(baddie, state->baddies) {
+          if (baddie->kind == AZ_BAD_NOTHING) continue;
+          if (baddie->uid == proj->last_hit_uid) continue;
+          if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
+          az_vector_t normal;
+          const az_component_data_t *component;
+          if (az_ray_hits_baddie(baddie, start, delta,
+                                 &proj->position, &normal, &component)) {
+            on_projectile_hit_baddie(state, proj, baddie, component, normal);
+            assert(proj->kind != AZ_PROJ_NOTHING);
+          }
         }
       }
     }
