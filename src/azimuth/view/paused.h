@@ -36,11 +36,16 @@ typedef struct {
   const az_preferences_t *prefs;
   az_ship_t *ship;
   az_clock_t clock;
+  double scroll_y, scroll_y_min;
   bool show_upgrades_drawer;
   double drawer_openness; // 0.0 to 1.0
   bool hovering_over_upgrade;
   az_upgrade_t hovered_upgrade;
 } az_paused_state_t;
+
+void az_init_paused_state(
+    az_paused_state_t *state, const az_planet_t *planet,
+    const az_preferences_t *prefs, az_ship_t *ship);
 
 void az_paused_draw_screen(const az_paused_state_t *state);
 

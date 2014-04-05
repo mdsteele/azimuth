@@ -34,6 +34,7 @@
 #include "azimuth/state/ship.h"
 #include "azimuth/state/upgrade.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/hud.h"
@@ -55,8 +56,12 @@ static void draw_bezel_box(double bezel, double x, double y,
 }
 
 /*===========================================================================*/
+// Minimap geometry:
 
+#define DRAWER_SLIDE_DISTANCE 410
 #define MINIMAP_ZOOM 75.0
+#define SCROLL_Y_MAX (AZ_PLANETOID_RADIUS - 180 * MINIMAP_ZOOM)
+#define SCROLL_SPEED (AZ_PLANETOID_RADIUS)
 
 static bool test_room_mapped(const az_player_t *player,
                              const az_room_t *room) {
@@ -69,6 +74,9 @@ static az_vector_t get_room_center(const az_room_t *room) {
   return (bounds->theta_span >= 6.28 && bounds->min_r < AZ_SCREEN_HEIGHT ?
           AZ_VZERO : az_bounds_center(bounds));
 }
+
+/*===========================================================================*/
+// Drawing minimap:
 
 static void draw_map_marker(const az_room_t *room, az_clock_t clock) {
   const az_vector_t center = get_room_center(room);
@@ -187,14 +195,6 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
 }
 
 static void draw_minimap(const az_paused_state_t *state) {
-  const az_room_key_t current_room = state->ship->player.current_room;
-  assert(current_room < state->planet->num_rooms);
-  const az_camera_bounds_t *bounds =
-    &state->planet->rooms[current_room].camera_bounds;
-  const double rho = fmin(bounds->min_r + 0.5 * bounds->r_span,
-                          AZ_PLANETOID_RADIUS - 180 * MINIMAP_ZOOM);
-  const az_vector_t center = az_vpolar(rho, AZ_HALF_PI);
-
   glEnable(GL_SCISSOR_TEST); {
     glScissor(30, 50, 580, 400);
     glPushMatrix(); {
@@ -205,8 +205,7 @@ static void draw_minimap(const az_paused_state_t *state) {
       // Zoom out.
       glScaled(1.0 / MINIMAP_ZOOM, 1.0 / MINIMAP_ZOOM, 1);
       // Move the screen to the camera pose.
-      glTranslated(0, -az_vnorm(center), 0);
-      glRotated(90.0 - AZ_RAD2DEG(az_vtheta(center)), 0, 0, 1);
+      glTranslated(0, -state->scroll_y, 0);
       // Draw what the camera sees.
       draw_minimap_rooms(state);
     } glPopMatrix();
@@ -215,8 +214,12 @@ static void draw_minimap(const az_paused_state_t *state) {
   glColor3f(0.75, 0.75, 0.75);
   draw_bezel_box(2, 30, 30, 580, 400);
 
-  const az_zone_t *current_zone =
-    &state->planet->zones[state->planet->rooms[current_room].zone_key];
+  const az_planet_t *planet = state->planet;
+  const az_room_key_t current_room_key = state->ship->player.current_room;
+  assert(current_room_key < planet->num_rooms);
+  const az_room_t *current_room = &planet->rooms[current_room_key];
+  assert(current_room->zone_key < planet->num_zones);
+  const az_zone_t *current_zone = &planet->zones[current_room->zone_key];
   glColor3f(1, 1, 1);
   az_draw_string(8, AZ_ALIGN_LEFT, 38, 18, "Zenith Planetoid");
   az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 46 -
@@ -228,6 +231,7 @@ static void draw_minimap(const az_paused_state_t *state) {
 }
 
 /*===========================================================================*/
+// Drawing schematic:
 
 static void draw_ship_schematic(void) {
   glColor3f(0, 1, 0);
@@ -331,6 +335,7 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
 }
 
 /*===========================================================================*/
+// Drawing upgrades:
 
 #define GUN_BOX_WIDTH 60
 #define UPG_BOX_WIDTH 150
@@ -561,7 +566,32 @@ static void draw_upgrades(const az_paused_state_t *state) {
 
 /*===========================================================================*/
 
-#define DRAWER_SLIDE_DISTANCE 410
+void az_init_paused_state(
+    az_paused_state_t *state, const az_planet_t *planet,
+    const az_preferences_t *prefs, az_ship_t *ship) {
+  assert(state != NULL);
+  assert(planet != NULL);
+  assert(prefs != NULL);
+  assert(ship != NULL);
+  AZ_ZERO_OBJECT(state);
+  state->planet = planet;
+  state->prefs = prefs;
+  state->ship = ship;
+  const az_player_t *player = &ship->player;
+  double y_min = SCROLL_Y_MAX;
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    const az_room_t *room = &planet->rooms[i];
+    if (test_room_mapped(player, room) || az_test_room_visited(player, i)) {
+      y_min = fmin(y_min, get_room_center(room).y + 120 * MINIMAP_ZOOM);
+    }
+  }
+  const az_room_key_t current_room_key = player->current_room;
+  assert(current_room_key < planet->num_rooms);
+  const az_room_t *current_room = &planet->rooms[current_room_key];
+  const double current_y = get_room_center(current_room).y;
+  state->scroll_y = fmin(fmax(y_min, current_y), SCROLL_Y_MAX);
+  state->scroll_y_min = y_min;
+}
 
 void az_paused_draw_screen(const az_paused_state_t *state) {
   draw_minimap(state);
@@ -582,6 +612,18 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
     state->drawer_openness =
       fmax(0.0, state->drawer_openness - time / drawer_time);
     state->hovering_over_upgrade = false;
+  }
+  if (!state->show_upgrades_drawer) {
+    const az_preferences_t *prefs = state->prefs;
+    const bool up = az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
+    const bool down = az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
+    if (up && !down) {
+      state->scroll_y += time * SCROLL_SPEED;
+    } else if (down && !up) {
+      state->scroll_y -= time * SCROLL_SPEED;
+    }
+    state->scroll_y =
+      fmin(fmax(state->scroll_y_min, state->scroll_y), SCROLL_Y_MAX);
   }
 }
 

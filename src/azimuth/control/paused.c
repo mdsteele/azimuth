@@ -32,10 +32,7 @@ az_paused_action_t az_paused_event_loop(
     const az_planet_t *planet, const az_preferences_t *prefs,
     az_ship_t *ship) {
   static az_paused_state_t state;
-  AZ_ZERO_OBJECT(&state);
-  state.planet = planet;
-  state.prefs = prefs;
-  state.ship = ship;
+  az_init_paused_state(&state, planet, prefs, ship);
   az_player_t *player = &ship->player;
 
   while (true) {
@@ -51,8 +48,7 @@ az_paused_action_t az_paused_event_loop(
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
           switch (event.key.id) {
-            case AZ_KEY_RETURN:
-              return AZ_PA_RESUME;
+            case AZ_KEY_RETURN: return AZ_PA_RESUME;
             case AZ_KEY_1: az_select_gun(player, AZ_GUN_CHARGE); break;
             case AZ_KEY_2: az_select_gun(player, AZ_GUN_FREEZE); break;
             case AZ_KEY_3: az_select_gun(player, AZ_GUN_TRIPLE); break;
@@ -68,10 +64,10 @@ az_paused_action_t az_paused_event_loop(
                   state.prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
                 return AZ_PA_RESUME;
               } else if (event.key.id ==
-                         state.prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
+                         state.prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]) {
                 state.show_upgrades_drawer = true;
               } else if (event.key.id ==
-                         state.prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {
+                         state.prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]) {
                 state.show_upgrades_drawer = false;
               }
               break;

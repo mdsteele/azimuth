@@ -810,7 +810,7 @@ void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       break;
     case AZ_UPG_MILLIWAVE_RADAR:
       glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0, 1, 0); glVertex2f(0, 0);
+        glColor3f(1, 1, 1); glVertex2f(0, 0);
         glColor4f(1, (frame < 2 ? 0.5f : 0.0f), 0, 0);
         const double radius = (frame < 2 ? 5 : 4);
         for (int i = 0; i <= 360; i += 30) {
