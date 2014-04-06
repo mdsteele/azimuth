@@ -130,6 +130,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_CAVE_CRAWLER,
   AZ_BAD_SPINED_CRAWLER,
   AZ_BAD_ICE_CRAWLER,
+  AZ_BAD_FIRE_CRAWLER,
   // Machines:
   AZ_BAD_GUN_SENSOR,
   AZ_BAD_BEAM_SENSOR,

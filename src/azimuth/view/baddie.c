@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_chomper.h"
+#include "azimuth/view/baddie_crawler.h"
 #include "azimuth/view/baddie_myco.h"
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
@@ -480,39 +481,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_dragonfly(baddie, frozen, clock);
       break;
     case AZ_BAD_CAVE_CRAWLER:
-      // Feet:
-      glBegin(GL_QUADS); {
-        const GLfloat offset = 0.8f * (az_clock_zigzag(5, 5, clock) - 2.0f);
-        for (int i = 0; i < 4; ++i) {
-          glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
-          glVertex2f(0, 5); glVertex2f(0, -5);
-          const GLfloat x = (i == 0 || i == 3 ? -18.0f : -20.0f);
-          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
-          glVertex2f(x, y - 2);
-          glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
-          glVertex2f(x, y + 2);
-        }
-      } glEnd();
-      // Body:
-      glPushMatrix(); {
-        glTranslatef(-0.5f * az_clock_zigzag(5, 5, clock), 0, 0);
-        glColor3f(0.3f + 0.7f * flare, 0.2, 0.4 + 0.6f * frozen);
-        glBegin(GL_TRIANGLE_FAN); {
-          glVertex2f(-15.0f, az_clock_zigzag(9, 3, clock) - 4.0f);
-          for (int i = -120; i <= 120; i += 5) {
-            if (i % 3 == 0) {
-              glColor3f(0.2f + 0.6f * flare, 0, 0.3f + 0.6f * frozen);
-            } else glColor3f(0.4, 0, 0.2 + 0.6f * frozen);
-            const double rr = 1.0 +
-              0.1 * (sin(AZ_DEG2RAD(i) * 2500) +
-                     cos(AZ_DEG2RAD(i) * 777 *
-                         (1 + az_clock_zigzag(7, 12, clock)))) +
-              0.01 * az_clock_zigzag(10, 3, clock);
-            glVertex2d(15 * rr * cos(AZ_DEG2RAD(i)) - 3,
-                       17 * rr * sin(AZ_DEG2RAD(i)));
-          }
-        } glEnd();
-      } glPopMatrix();
+      az_draw_bad_cave_crawler(baddie, frozen, clock);
       break;
     case AZ_BAD_CRAWLING_TURRET:
       az_draw_bad_crawling_turret(baddie, frozen, clock);
@@ -591,43 +560,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           color3(0, 0.2, 0.1));
       break;
     case AZ_BAD_ICE_CRAWLER:
-      // Feet:
-      glBegin(GL_QUADS); {
-        const GLfloat offset = 0.8f * (az_clock_zigzag(5, 6, clock) - 2.0f);
-        for (int i = 0; i < 4; ++i) {
-          glColor3f(0.5f + 0.5f * flare, 0.15f, 0.5f);
-          glVertex2f(0, 5); glVertex2f(0, -5);
-          const GLfloat x = (i == 0 || i == 3 ? -19.0f : -20.0f);
-          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
-          glVertex2f(x, y - 2);
-          glColor3f(0.2f + 0.2f * flare, 0.1f, 0.4f);
-          glVertex2f(x, y + 2);
-        }
-      } glEnd();
-      // Body:
-      glPushMatrix(); {
-        glTranslatef(-0.2f * az_clock_zigzag(5, 5, clock), 0, 0);
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor3f(0.5f + 0.5f * flare, 0.2, 0.4);
-          glVertex2f(-15, 0);
-          glColor3f(0.4f + 0.6f * flare, 0, 0.2);
-          for (int i = -135; i <= 135; i += 5) {
-            glVertex2d(13 * cos(AZ_DEG2RAD(i)) - 4, 14 * sin(AZ_DEG2RAD(i)));
-          }
-        } glEnd();
-        // Shell:
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor4f(0.35, 1, 1, 0.6);
-          glVertex2f(-4, 0);
-          glColor4f(0.06, 0.125, 0.2, 0.8);
-          const az_component_data_t *component = &baddie->data->components[0];
-          for (int i = 0, j = component->polygon.num_vertices;
-               i >= 0; i = --j) {
-            const az_vector_t vertex = component->polygon.vertices[i];
-            glVertex2d(vertex.x, vertex.y);
-          }
-        } glEnd();
-      } glPopMatrix();
+      az_draw_bad_ice_crawler(baddie, frozen, clock);
       break;
     case AZ_BAD_BEAM_TURRET:
       az_draw_bad_beam_turret(baddie, frozen, clock);
@@ -973,47 +906,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_mini_armored_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_SPINED_CRAWLER:
-      // Feet:
-      glBegin(GL_QUADS); {
-        const GLfloat offset = 0.8f * (baddie->state == 3 ? 0.0f :
-                                       (az_clock_zigzag(5, 5, clock) - 2.0f));
-        for (int i = 0; i < 4; ++i) {
-          glColor3f(0.5f, 0.15f, 0.1f + 0.6f * frozen);
-          glVertex2f(0, 5); glVertex2f(0, -5);
-          const GLfloat x = (i == 0 || i == 3 ? -18.0f : -20.0f);
-          const GLfloat y = -12.0f + 8.0f * i + (2 * (i % 2) - 1) * offset;
-          glVertex2f(x, y - 2);
-          glColor3f(0.2f, 0.1f, 0.4f + 0.6f * frozen);
-          glVertex2f(x, y + 2);
-        }
-      } glEnd();
-      // Body:
-      glPushMatrix(); {
-        glTranslatef((baddie->state == 3 ? -2.5f :
-                      -0.5f * az_clock_zigzag(5, 5, clock)), 0, 0);
-        for (int i = -82; i <= 82; i += 41) {
-          glPushMatrix(); {
-            glTranslatef(-12, 0, 0);
-            glScalef(1, 0.85, 1);
-            glRotatef(i, 0, 0, 1);
-            glTranslatef((baddie->state == 3 ? 21 : 18), 0, 0);
-            glScalef(0.7, 1, 1);
-            draw_spiner_spine(flare, frozen);
-          } glPopMatrix();
-        }
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor3f(0.2f + 0.8f * flare, 0.6f - 0.3f * flare,
-                    0.4f + 0.6f * frozen);
-          glVertex2f(-13, 0);
-          glColor3f(0.06 + 0.5f * flare, 0.24f - 0.1f * flare,
-                    0.12f + 0.5f * frozen);
-          glVertex2f(-15, 0);
-          for (int i = -120; i <= 120; i += 30) {
-            glVertex2d(13 * cos(AZ_DEG2RAD(i)) - 7, 16 * sin(AZ_DEG2RAD(i)));
-          }
-          glVertex2f(-15, 0);
-        } glEnd();
-      } glPopMatrix();
+      az_draw_bad_spined_crawler(baddie, frozen, clock);
       break;
     case AZ_BAD_DEATH_RAY:
       assert(frozen == 0.0f);
@@ -1404,6 +1297,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_OTH_CRAWLER:
       az_draw_bad_oth_crawler(baddie, frozen, clock);
+      break;
+    case AZ_BAD_FIRE_CRAWLER:
+      az_draw_bad_fire_crawler(baddie, frozen, clock);
       break;
   }
 }

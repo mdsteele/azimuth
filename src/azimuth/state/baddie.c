@@ -658,6 +658,10 @@ static const az_vector_t mycostalker_vertices[] = {
   {16, -10}, {20, 0}, {16, 10}, {7, 18}, {4, 14}, {3, 7.4}
 };
 
+static const az_vector_t fire_crawler_vertices[] = {
+  {5, -8}, {5, 8}, {-4, 14}, {-15, 10}, {-15, -10}, {-4, -14}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
@@ -1240,6 +1244,13 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 16.0, .impact_damage = 20.0 }
+  },
+  [AZ_BAD_FIRE_CRAWLER] = {
+    .max_health = 14.0,
+    .potential_pickups = AZ_PUPF_ALL,
+    .color = {255, 0, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(fire_crawler_vertices),
+                   .impact_damage = 20.0, .immunities = AZ_DMGF_FREEZE }
   }
 };
 

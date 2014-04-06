@@ -27,6 +27,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/baddie_chomper.h"
+#include "azimuth/tick/baddie_crawler.h"
 #include "azimuth/tick/baddie_kilofuge.h"
 #include "azimuth/tick/baddie_myco.h"
 #include "azimuth/tick/baddie_nocturne.h"
@@ -834,7 +835,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_CAVE_CRAWLER:
-      az_crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
+      az_tick_bad_cave_crawler(state, baddie, time);
       break;
     case AZ_BAD_CRAWLING_TURRET:
       az_tick_bad_crawling_turret(state, baddie, time);
@@ -916,7 +917,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else baddie->state = 0;
       break;
     case AZ_BAD_ICE_CRAWLER:
-      az_crawl_around(state, baddie, time, false, 3.0, 30.0, 100.0);
+      az_tick_bad_ice_crawler(state, baddie, time);
       break;
     case AZ_BAD_BEAM_TURRET:
       az_tick_bad_beam_turret(state, baddie, time);
@@ -1274,38 +1275,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_SPINED_CRAWLER:
-      if (baddie->state == 0) {
-        baddie->param = baddie->angle;
-        baddie->state = az_randint(1, 2);
-      }
-      if (baddie->state == 1 || baddie->state == 2) {
-        const double angle = fabs(az_mod2pi(baddie->angle - baddie->param));
-        az_crawl_around(state, baddie, time, (baddie->state == 1), 3.0,
-                        50.0 - 40.0 * fmin(1.0, angle / AZ_HALF_PI), 100.0);
-        if (angle > AZ_DEG2RAD(80) && baddie->cooldown <= 0.0) {
-          baddie->state = (baddie->state == 1 ? 2 : 1);
-          baddie->cooldown = 1.0;
-        }
-        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 90) &&
-            az_can_see_ship(state, baddie)) {
-          const az_vector_t center =
-            az_vadd(baddie->position, az_vpolar(-13, baddie->angle));
-          for (int i = -2; i <= 2; ++i) {
-            const double theta = baddie->angle + i * AZ_DEG2RAD(41);
-            az_add_projectile(
-                state, AZ_PROJ_STINGER,
-                az_vadd(center, az_vpolar(10.0, theta)),
-                theta + az_random(-1, 1) * AZ_DEG2RAD(20), 1.0, baddie->uid);
-          }
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
-          baddie->velocity = AZ_VZERO;
-          baddie->state = 3;
-          baddie->cooldown = 2.5;
-        }
-      } else if (baddie->state == 3) {
-        baddie->velocity = AZ_VZERO;
-        if (baddie->cooldown <= 0.0) baddie->state = az_randint(1, 2);
-      } else baddie->state = 0;
+      az_tick_bad_spined_crawler(state, baddie, time);
       break;
     case AZ_BAD_DEATH_RAY:
       if (baddie->state == 0 || baddie->state == 1) {
@@ -1675,6 +1645,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
           baddie->cooldown = az_random(1.0, 2.0);
         }
       }
+      break;
+    case AZ_BAD_FIRE_CRAWLER:
+      az_tick_bad_fire_crawler(state, baddie, time);
       break;
   }
 
