@@ -1185,7 +1185,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 6.0, .color = {255, 96, 0, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL,
-    .main_body = { .bounding_radius = 15.0, .impact_damage = 20.0 }
+    .main_body = { .bounding_radius = 15.0, .impact_damage = 15.0 }
   },
   [AZ_BAD_PROXY_MINE] = {
     .max_health = 6.0, .potential_pickups = AZ_PUPF_ALL,
@@ -1247,8 +1247,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_FIRE_CRAWLER] = {
     .max_health = 14.0,
-    .potential_pickups = AZ_PUPF_ALL,
-    .color = {255, 0, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .potential_pickups = AZ_PUPF_ALL, .color = {255, 96, 0, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(fire_crawler_vertices),
                    .impact_damage = 20.0, .immunities = AZ_DMGF_FREEZE }
   }

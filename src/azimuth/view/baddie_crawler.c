@@ -186,10 +186,10 @@ void az_draw_bad_fire_crawler(
     } glEnd();
     // Flames:
     glBegin(GL_TRIANGLE_FAN); {
-      glColor3f(1.0f, 0.3f, 0.0f);
+      glColor3f(1.0f, 0.3f + 0.5f * flare, 0.0f);
       glVertex2f(-14, 0);
       for (int i = -120; i <= 120; i += 5) {
-        glColor4f(0.4, 0.1, 0, 0.75);
+        glColor4f(0.4f, 0.1f + 0.2f * flare, 0, 0.75f);
         const double rr = 1.0 +
           0.25 * (sin(AZ_DEG2RAD(i) * 2500) +
                   cos(AZ_DEG2RAD(i) * 777 *
@@ -201,9 +201,9 @@ void az_draw_bad_fire_crawler(
     } glEnd();
     // Yellow glow:
     glBegin(GL_TRIANGLE_FAN); {
-      glColor4f(1.0f, 0.9f - 0.7f * flare, 0, 0.75f);
+      glColor4f(1.0f, 0.9f, 0, 0.75f);
       glVertex2f(-9, 0);
-      glColor4f(1.0f, 0.9f - 0.7f * flare, 0, 0);
+      glColor4f(1.0f, 0.9f, 0, 0);
       const double rr = 0.9 + 0.06 * az_clock_zigzag(6, 8, clock);
       for (int i = 0; i <= 360; i += 15) {
         glVertex2d(11.0 * rr * cos(AZ_DEG2RAD(i)) - 3,
