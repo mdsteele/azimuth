@@ -1208,7 +1208,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
   if (az_has_upgrade(&ship->player, AZ_UPG_TRACTOR_CLOAK)) {
     assert(ship->tractor_cloak.charge >= 0.0);
     assert(ship->tractor_cloak.charge <= 1.0);
-    if (ship->tractor_beam.active) {
+    if (ship->cplus.state == AZ_CPLUS_ACTIVE) {
+      assert(!ship->tractor_cloak.active);
+      assert(ship->tractor_cloak.charge == 0.0);
+    } else if (ship->tractor_beam.active) {
       if (ship->tractor_cloak.active) {
         ship->tractor_cloak.charge = 1.0;
       } else {
