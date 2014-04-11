@@ -1,4 +1,4 @@
-Next flag: 91
+Next flag: 92
 Unused: 5
 
 Bosses
@@ -89,6 +89,7 @@ Doors
 86: Opened pink door between Cnidam rooms 324 and 451
 87: Opened pink door between Cnidam rooms 328 and 330
 90: Opened blue door between Cnidam rooms 336 and 339
+91: Opened blue door between Barrag rooms 287 and 288
 
 Boss Doors
 ==========
