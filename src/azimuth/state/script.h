@@ -93,8 +93,6 @@ typedef enum {
   AZ_OP_SSTAT, // pop top, set state of object i to a
   AZ_OP_ACTIV, // set state of object i to 1
   AZ_OP_DEACT, // set state of object i to 0
-  AZ_OP_BOOM, // pop top two, create large explosion at position (a, b)
-  AZ_OP_NUKE, // create ginormous explosion that destroys everything
   // Ship:
   AZ_OP_GVEL, // push (x, y) velocity of ship
   AZ_OP_SVEL, // pop top two, set velocity of ship to (a, b)
@@ -113,9 +111,13 @@ typedef enum {
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
   AZ_OP_DARK, // set room darkness goal to i
-  AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
   AZ_OP_SHAKE, // momentarily shake camera by amplitude i
   AZ_OP_QUAKE, // set camera quake amplitude to i
+  // Pyrotechnics:
+  AZ_OP_BOOM, // pop top two, create large explosion at position (a, b)
+  AZ_OP_NUKE, // create ginormous explosion that destroys everything
+  AZ_OP_BOLT, // pop top four, add bolt from (a, b) to (c, d) for i seconds
+  AZ_OP_NPS, // pop top 2, create intensity-i NPS portal at (a, b)
   // Cutscenes:
   AZ_OP_FADO, // fade out whole screen (including HUD) and hide dialogue
   AZ_OP_FADI, // fade in screen

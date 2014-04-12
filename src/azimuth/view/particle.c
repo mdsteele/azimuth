@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <GL/gl.h>
 
@@ -30,12 +31,36 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
 static void with_color_alpha(az_color_t color, double alpha_factor) {
   glColor4ub(color.r, color.g, color.b, color.a * alpha_factor);
 }
+
+// Generate a random-ish double from -1 to 1 based on the seed value, and
+// update the seed.
+static double bolt_random(uint32_t *seed) {
+  // This is a simple linear congruential generator, using the parameters
+  // suggested by http://stackoverflow.com/a/3062783
+  *seed = 1103515245u * (*seed) + 12345u;
+  return 4.656612873077393e-10 * (*seed) - 1.0;
+}
+
+static void draw_bolt_glowball(az_color_t color, double cx, az_clock_t clock) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4f(1, 1, 1, 0.75);
+    glVertex2d(cx, 0);
+    with_color_alpha(color, 0);
+    const double rad = 8 + az_clock_zigzag(5, 8, clock);
+    for (int i = 0; i <= 360; i += 30) {
+      glVertex2d(rad * cos(AZ_DEG2RAD(i)) + cx, rad * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
+/*===========================================================================*/
 
 static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
   assert(particle->kind != AZ_PAR_NOTHING);
@@ -97,6 +122,36 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
           glVertex2d(outer_radius * c, outer_radius * s);
         }
       } glEnd();
+      break;
+    case AZ_PAR_LIGHTNING_BOLT:
+      if (particle->age >= particle->param2) {
+        const int num_steps = az_imax(2, round(particle->param1 / 15.0));
+        const double step = particle->param1 / num_steps;
+        uint32_t seed = 123456789u ^ (uint32_t)(clock / 5) ^
+          (uint32_t)(194821.0 * particle->angle);
+        az_vector_t prev = {0, 0};
+        for (int i = 1; i <= num_steps; ++i) {
+          const az_vector_t next =
+            (i == num_steps ? (az_vector_t){particle->param1, 0} :
+             (az_vector_t){10.0 * bolt_random(&seed) + i * step,
+                           16.0 * bolt_random(&seed)});
+          const az_vector_t side =
+            az_vwithlen(az_vrot90ccw(az_vsub(next, prev)), 4);
+          glBegin(GL_TRIANGLE_STRIP); {
+            with_color_alpha(particle->color, 0);
+            az_gl_vertex(az_vadd(prev, side));
+            az_gl_vertex(az_vadd(next, side));
+            with_color_alpha(particle->color, 0.5);
+            az_gl_vertex(prev); az_gl_vertex(next);
+            with_color_alpha(particle->color, 0);
+            az_gl_vertex(az_vsub(prev, side));
+            az_gl_vertex(az_vsub(next, side));
+          } glEnd();
+          prev = next;
+        }
+        draw_bolt_glowball(particle->color, particle->param1, clock);
+      }
+      draw_bolt_glowball(particle->color, 0, clock);
       break;
     case AZ_PAR_OTH_FRAGMENT:
       glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);

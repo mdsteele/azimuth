@@ -1,6 +1,6 @@
-@R z0 p8/1 b1 d2 g0 n46 w35
+@R z0 p8/1 b1 d2 g0 n50 w35
   c(48469.79,320.93,1.629536,0.008697)
-$s:test1,beqz/A,nix1,halt,A#mus10,lock2,lock3,wait3,gpos1,nps4,wait2,gpos1,gpos,vsub,vtheta,sang1,push29,sbadk1,wait2,boss1;
+$s:test1,beqz/A,nix1,halt,A#mus10,lock2,lock3,wait3,gpos1,dup2,dup4,gpos4,bolt3,gpos5,bolt3,gpos6,bolt3,gpos7,bolt3,wait1,gpos1,nps4,wait2,gpos1,gpos,vsub,vtheta,sang1,push29,sbadk1,wait2,boss1;
 !W3 d33 x-3054.40 y48335.14 a1.633985 u0
 !W3 d33 x-3075.97 y48723.23 a1.632803 u0
 !W3 d33 x-2849.39 y48547.12 a0.059051 u0
@@ -84,5 +84,9 @@ $s:test1,beqz/A,nix1,halt,A#mus10,lock2,lock3,wait3,gpos1,nps4,wait2,gpos1,gpos,
 !N5/1 x-2717.79 y48312.12 a0.056386 u0
 !N5/1 x-2661.65 y48315.28 a-3.084240 u0
 !N5/1 x-2614.22 y48317.97 a0.056386 u0
+!N8/0 x-3060.46 y48415.05 a0.063134 u4
+!N8/0 x-3214.88 y48525.93 a0.063134 u5
+!N8/0 x-3071.54 y48643.32 a0.063134 u6
+!N8/0 x-2925.87 y48541.87 a0.063134 u7
 !B1 x-3065.97 y48533.48 a-3.063915 u1
 $k:set1,unlock3,mus1;

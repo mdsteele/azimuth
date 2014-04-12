@@ -508,20 +508,6 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         GET_OBJECT(&object);
         set_object_state(&object, 0);
       } break;
-      case AZ_OP_BOOM: {
-        az_vector_t position;
-        STACK_POP(&position.x, &position.y);
-        az_add_projectile(state, AZ_PROJ_NUCLEAR_EXPLOSION, position,
-                          0.0, 1.0, AZ_NULL_UID);
-      } break;
-      case AZ_OP_NUKE: {
-        const az_vector_t position =
-          az_vwithlen(state->camera.center,
-                      fmax(az_vnorm(state->camera.center) -
-                           AZ_SCREEN_HEIGHT, 0.0));
-        az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION, position,
-                          az_vtheta(position), 1.0, AZ_NULL_UID);
-      } break;
       // Ship:
       case AZ_OP_GVEL:
         STACK_PUSH(state->ship.velocity.x, state->ship.velocity.y);
@@ -663,28 +649,57 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
-      case AZ_OP_NPS: {
-        double x, y;
-        STACK_POP(&x, &y);
-        state->camera.wobble_goal = 0.5 * ins.immediate;
-        az_particle_t *particle;
-        if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_NPS_PORTAL;
-          particle->color = (az_color_t){128, 64, 255, 255};
-          particle->position.x = x;
-          particle->position.y = y;
-          particle->velocity = AZ_VZERO;
-          particle->angle = 0.0;
-          particle->lifetime = ins.immediate;
-          particle->param1 = 50.0 * sqrt(ins.immediate);
-        }
-      } break;
       case AZ_OP_SHAKE:
         az_shake_camera(&state->camera, ins.immediate, ins.immediate * 0.75);
         break;
       case AZ_OP_QUAKE:
         state->camera.quake_vert = fmax(0, ins.immediate);
         break;
+      // Pyrotechnics:
+      case AZ_OP_BOOM: {
+        az_vector_t position;
+        STACK_POP(&position.x, &position.y);
+        az_add_projectile(state, AZ_PROJ_NUCLEAR_EXPLOSION, position,
+                          0.0, 1.0, AZ_NULL_UID);
+      } break;
+      case AZ_OP_NUKE: {
+        const az_vector_t position =
+          az_vwithlen(state->camera.center,
+                      fmax(az_vnorm(state->camera.center) -
+                           AZ_SCREEN_HEIGHT, 0.0));
+        az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION, position,
+                          az_vtheta(position), 1.0, AZ_NULL_UID);
+      } break;
+      case AZ_OP_BOLT: {
+        az_vector_t p1, p2;
+        STACK_POP(&p1.x, &p1.y, &p2.x, &p2.y);
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_LIGHTNING_BOLT;
+          particle->color = (az_color_t){128, 64, 255, 255};
+          particle->position = p2;
+          particle->velocity = AZ_VZERO;
+          particle->angle = az_vtheta(az_vsub(p1, p2));
+          particle->lifetime = ins.immediate;
+          particle->param1 = az_vdist(p1, p2);
+          particle->param2 = 0.66;
+        }
+      } break;
+      case AZ_OP_NPS: {
+        az_vector_t position;
+        STACK_POP(&position.x, &position.y);
+        state->camera.wobble_goal = 0.5 * ins.immediate;
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_NPS_PORTAL;
+          particle->color = (az_color_t){128, 64, 255, 255};
+          particle->position = position;
+          particle->velocity = AZ_VZERO;
+          particle->angle = 0.0;
+          particle->lifetime = ins.immediate;
+          particle->param1 = 50.0 * sqrt(ins.immediate);
+        }
+      } break;
       // Cutscenes:
       case AZ_OP_FADO:
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
