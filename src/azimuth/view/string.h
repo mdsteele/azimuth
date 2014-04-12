@@ -66,13 +66,14 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 //   $Y - set color to yellow
 //   $C - set color to cyan
 //   $Xrrggbb - set color to {rr, gg, bb}, where rrggbb are hex digits
-//   $u - insert name of prefs->up_key
-//   $d - insert name of prefs->down_key
-//   $r - insert name of prefs->right_key
-//   $l - insert name of prefs->left_key
-//   $f - insert name of prefs->fire_key
-//   $o - insert name of prefs->ordn_key
-//   $t - insert name of prefs->util_key
+//   $u - insert name of prefs UP key
+//   $d - insert name of prefs DOWN key
+//   $r - insert name of prefs RIGHT key
+//   $l - insert name of prefs LEFT key
+//   $f - insert name of prefs FIRE key
+//   $o - insert name of prefs ORDN key
+//   $t - insert name of prefs UTIL key
+//   $p - insert name of prefs PAUSE key
 void az_draw_paragraph(
     double height, az_alignment_t align, double x, double top, double spacing,
     int max_chars, const az_preferences_t *prefs, const char *paragraph);

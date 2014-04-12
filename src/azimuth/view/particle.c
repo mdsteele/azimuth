@@ -125,7 +125,7 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
       break;
     case AZ_PAR_LIGHTNING_BOLT:
       if (particle->age >= particle->param2) {
-        const int num_steps = az_imax(2, round(particle->param1 / 15.0));
+        const int num_steps = az_imax(2, round(particle->param1 / 10.0));
         const double step = particle->param1 / num_steps;
         uint32_t seed = 123456789u ^ (uint32_t)(clock / 5) ^
           (uint32_t)(194821.0 * particle->angle);
@@ -133,15 +133,15 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         for (int i = 1; i <= num_steps; ++i) {
           const az_vector_t next =
             (i == num_steps ? (az_vector_t){particle->param1, 0} :
-             (az_vector_t){10.0 * bolt_random(&seed) + i * step,
-                           16.0 * bolt_random(&seed)});
+             (az_vector_t){3.0 * bolt_random(&seed) + i * step,
+                           10.0 * bolt_random(&seed)});
           const az_vector_t side =
             az_vwithlen(az_vrot90ccw(az_vsub(next, prev)), 4);
           glBegin(GL_TRIANGLE_STRIP); {
             with_color_alpha(particle->color, 0);
             az_gl_vertex(az_vadd(prev, side));
             az_gl_vertex(az_vadd(next, side));
-            with_color_alpha(particle->color, 0.5);
+            glColor4f(1, 1, 1, 0.5);
             az_gl_vertex(prev); az_gl_vertex(next);
             with_color_alpha(particle->color, 0);
             az_gl_vertex(az_vsub(prev, side));

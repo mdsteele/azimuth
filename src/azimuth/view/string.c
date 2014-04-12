@@ -371,6 +371,7 @@ void az_draw_paragraph(
         case 'f': key_id = prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]; break;
         case 'o': key_id = prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]; break;
         case 't': key_id = prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]; break;
+        case 'p': key_id = prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]; break;
         // If we see an unknown escape (e.g. "$Q"), skip over both characters,
         // print a warning, and keep going.
         default:

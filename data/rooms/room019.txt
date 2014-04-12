@@ -34,7 +34,7 @@ $s:test2,hnez,lock1,lock2;
 !D1 x-2510.95 y48728.29 a0.048932 r20 u1
 !D1 x-1925.92 y48755.79 a-3.101798 r23 u2
 !G2 x-2114.10 y48754.64 a-1.526143 s0.00 w0.00 i0.00 t40.00 u3
-$e:wait1,test2,hnez,msg135,wait9,deact3;
+$e:test2,hnez,msg135,wait9,deact3;
 !N5/5 x-2065.54 y48652.18 a0.039148 u0
 !N1/0 x-2114.10 y48754.64 a0.043562 u0
 $u:dlog,pt1,pb3,test2,bnez/A,tb4,tt5,tb6,tt7,tb8,tt9,tb10,tt11,tb12,tt13,unlock2,A#tb16,dend,set2;

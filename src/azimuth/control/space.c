@@ -42,8 +42,10 @@
 
 /*===========================================================================*/
 
-static const char save_failed_paragraph[] = "Save $Rfailed$W.";
-static const char save_success_paragraph[] = "Game has been $Gsaved$W.";
+static const char save_failed_paragraph[] =
+  "$RERROR:$W Unable to save game.";
+static const char save_success_paragraph[] =
+  "Shields refilled and $Ggame saved$W.";
 
 static az_space_state_t state;
 

@@ -67,7 +67,8 @@
 !T14"
   Surface Airlock"
 !T15"
-  [[UNUSED]]"
+  Press [$p] to pause game
+  and view the map."
 !T16"
   Acknowledged.  Armory security doors have been
   $Yunlocked$W."
