@@ -48,13 +48,160 @@ static void do_polygon(GLenum mode, az_polygon_t polygon) {
 
 /*===========================================================================*/
 
+static void draw_title_letter(char ch, float hilight) {
+  glColor4f(0.25f + hilight, 0.35f + 0.5f * hilight, 0.35f, 0.5f);
+  switch (ch) {
+    case 'A':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-28, 25); glVertex2f(-15, 25);
+        glVertex2f(-5, -25); glVertex2f(0, -10); glVertex2f(5, -25);
+        glVertex2f(15, 25); glVertex2f(28, 25);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-5, 0); glVertex2f(5, 0);
+        glVertex2f(-9, 10); glVertex2f(9, 10);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(28, 25); glVertex2f(5, -25); glVertex2f(-5, -25);
+        glVertex2f(-28, 25); glVertex2f(-15, 25); glVertex2f(-9, 10);
+        glVertex2f(9, 10); glVertex2f(15, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(-5, 0); glVertex2f(5, 0); glVertex2f(0, -10);
+      } glEnd();
+      break;
+    case 'Z':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-25, -25); glVertex2f(-25, -15); glVertex2f(25, -25);
+        glVertex2f(10, -15); glVertex2f(25, -15); glVertex2f(-25, 15);
+        glVertex2f(-10, 15); glVertex2f(-25, 25); glVertex2f(25, 15);
+        glVertex2f(25, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(25, -25); glVertex2f(-25, -25); glVertex2f(-25, -15);
+        glVertex2f(10, -15); glVertex2f(-25, 15); glVertex2f(-25, 25);
+        glVertex2f(25, 25); glVertex2f(25, 15); glVertex2f(-10, 15);
+        glVertex2f(25, -15);
+      } glEnd();
+      break;
+    case 'I':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-18, -25); glVertex2f(18, -25);
+        glVertex2f(-18, -15); glVertex2f(18, -15);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-5, -15); glVertex2f(5, -15);
+        glVertex2f(-5, 15); glVertex2f(5, 15);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-18, 15); glVertex2f(18, 15);
+        glVertex2f(-18, 25); glVertex2f(18, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(18, -25); glVertex2f(-18, -25); glVertex2f(-18, -15);
+        glVertex2f(-5, -15); glVertex2f(-5, 15); glVertex2f(-18, 15);
+        glVertex2f(-18, 25); glVertex2f(18, 25); glVertex2f(18, 15);
+        glVertex2f(5, 15); glVertex2f(5, -15); glVertex2f(18, -15);
+      } glEnd();
+      break;
+    case 'M':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-25, 25); glVertex2f(-15, 25); glVertex2f(-25, -25);
+        glVertex2f(-15, -10); glVertex2f(-15, -25); glVertex2f(0, 5);
+        glVertex2f(0, -10); glVertex2f(15, -10); glVertex2f(15, -25);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(15, -25); glVertex2f(25, -25);
+        glVertex2f(15, 25); glVertex2f(25, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(25, -25); glVertex2f(15, -25); glVertex2f(0, -10);
+        glVertex2f(-15, -25); glVertex2f(-25, -25); glVertex2f(-25, 25);
+        glVertex2f(-15, 25); glVertex2f(-15, -10); glVertex2f(0, 5);
+        glVertex2f(15, -10); glVertex2f(15, 25); glVertex2f(25, 25);
+      } glEnd();
+      break;
+    case 'U':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-25, -25); glVertex2f(-15, -25); glVertex2f(-25, 25);
+        glVertex2f(-15, 15); glVertex2f(25, 25); glVertex2f(15, 15);
+        glVertex2f(25, -25); glVertex2f(15, -25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(-25, -25); glVertex2f(-25, 25); glVertex2f(25, 25);
+        glVertex2f(25, -25); glVertex2f(15, -25); glVertex2f(15, 15);
+        glVertex2f(-15, 15); glVertex2f(-15, -25);
+      } glEnd();
+      break;
+    case 'T':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-25, -25); glVertex2f(25, -25);
+        glVertex2f(-25, -15); glVertex2f(25, -15);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-5, -15); glVertex2f(5, -15);
+        glVertex2f(-5, 25); glVertex2f(5, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(25, -25); glVertex2f(-25, -25); glVertex2f(-25, -15);
+        glVertex2f(-5, -15); glVertex2f(-5, 25); glVertex2f(5, 25);
+        glVertex2f(5, -15); glVertex2f(25, -15);
+      } glEnd();
+      break;
+    case 'H':
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-25, -25); glVertex2f(-15, -25);
+        glVertex2f(-25, 25); glVertex2f(-15, 25);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(-15, -5); glVertex2f(15, -5);
+        glVertex2f(-15, 5); glVertex2f(15, 5);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(15, -25); glVertex2f(25, -25);
+        glVertex2f(15, 25); glVertex2f(25, 25);
+      } glEnd();
+      glBegin(GL_LINE_LOOP); {
+        glColor3f(1, 1, 1);
+        glVertex2f(25, -25); glVertex2f(15, -25); glVertex2f(15, -5);
+        glVertex2f(-15, -5); glVertex2f(-15, -25); glVertex2f(-25, -25);
+        glVertex2f(-25, 25); glVertex2f(-15, 25); glVertex2f(-15, 5);
+        glVertex2f(15, 5); glVertex2f(15, 25); glVertex2f(25, 25);
+      } glEnd();
+      break;
+    default: break;
+  }
+}
+
 static void draw_background(const az_title_state_t *state) {
   az_draw_planet_starfield(state->clock);
   az_draw_zenith_planet(state->clock);
 
   // Draw game title:
-  glColor3f(1, 1, 1); // white
-  az_draw_string(80, AZ_ALIGN_CENTER, 320, 100, "Azimuth");
+  glPushMatrix(); {
+    glTranslatef(AZ_SCREEN_WIDTH / 2, 150, 0);
+    glTranslatef(-3 * 80 + 0.5, 0.5, 0);
+    for (int i = 0; i < 7; ++i) {
+      glPushMatrix(); {
+        if (state->mode == AZ_TMODE_INTRO) {
+          const GLfloat angle = (i % 2 ? -45 : 45);
+          glRotatef(angle, 0, 0, 1);
+          glScalef(state->mode_data.intro.progress, 1, 1);
+          glRotatef(-angle, 0, 0, 1);
+        }
+        draw_title_letter("AZIMUTH"[i], fmax(0.0, 0.005 * (az_clock_zigzag(
+            200, 1, state->clock + 10 * (7 - i)) - 140)));
+      } glPopMatrix();
+      glTranslatef(80, 0, 0);
+    }
+  } glPopMatrix();
 }
 
 /*===========================================================================*/
@@ -588,6 +735,15 @@ static void fade_screen_black(GLfloat alpha) {
 void az_title_draw_screen(const az_title_state_t *state) {
   // Draw background:
   draw_background(state);
+  if (state->mode == AZ_TMODE_INTRO) return;
+  else if (state->mode == AZ_TMODE_READY) {
+    glColor4f(0, 0.75, 0.5,
+              0.01 * az_clock_zigzag(100, 2, state->clock -
+                                     state->mode_data.ready.start));
+    az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 430,
+                   "Press any key");
+    return;
+  }
 
   // Draw save slots:
   if (state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) {
@@ -619,10 +775,18 @@ void az_title_draw_screen(const az_title_state_t *state) {
 
 /*===========================================================================*/
 
+#define INTRO_TIME 3.0
 #define STARTING_TIME 0.9
 
 static void tick_mode(az_title_state_t *state, double time) {
   switch (state->mode) {
+    case AZ_TMODE_INTRO:
+      state->mode_data.intro.progress =
+        fmin(1.0, state->mode_data.intro.progress + time / INTRO_TIME);
+      if (state->mode_data.intro.progress >= 1.0) {
+        az_title_skip_intro(state);
+      }
+      break;
     case AZ_TMODE_STARTING:
       state->mode_data.starting.progress =
         fmin(1.0, state->mode_data.starting.progress + time / STARTING_TIME);
@@ -729,6 +893,12 @@ void az_tick_title_state(az_title_state_t *state, double time) {
 }
 
 /*===========================================================================*/
+
+void az_title_skip_intro(az_title_state_t *state) {
+  assert(state->mode == AZ_TMODE_INTRO);
+  state->mode = AZ_TMODE_READY;
+  state->mode_data.ready.start = state->clock;
+}
 
 void az_title_start_game(az_title_state_t *state, int slot_index) {
   assert(state->mode == AZ_TMODE_NORMAL);
@@ -877,6 +1047,14 @@ static void picker_on_click(
 }
 
 void az_title_on_click(az_title_state_t *state, int x, int y) {
+  if (state->mode == AZ_TMODE_INTRO) {
+    az_title_skip_intro(state);
+    return;
+  }
+  if (state->mode == AZ_TMODE_READY) {
+    state->mode = AZ_TMODE_NORMAL;
+    return;
+  }
   if (state->mode == AZ_TMODE_NORMAL) {
     for (int i = 0; i < AZ_NUM_SAVED_GAME_SLOTS; ++i) {
       if (state->saved_games->games[i].present &&

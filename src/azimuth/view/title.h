@@ -63,8 +63,9 @@ typedef struct {
   az_soundboard_t soundboard;
 
   enum {
-    // TODO intro sequence
-    AZ_TMODE_NORMAL = 0,
+    AZ_TMODE_INTRO = 0,
+    AZ_TMODE_READY,
+    AZ_TMODE_NORMAL,
     AZ_TMODE_PREFS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_ERASING,
@@ -73,6 +74,8 @@ typedef struct {
     AZ_TMODE_QUITTING
   } mode;
   union {
+    struct { double progress; } intro;
+    struct { az_clock_t start; } ready;
     struct { int slot_index; bool do_erase; } erasing;
     struct { int picker_index; } pick_key;
     struct { double progress; int slot_index; } starting;
@@ -89,6 +92,9 @@ typedef struct {
 void az_title_draw_screen(const az_title_state_t *state);
 
 void az_tick_title_state(az_title_state_t *state, double time);
+
+// Skip to READY mode.  The UI must currently be in INTRO mode.
+void az_title_skip_intro(az_title_state_t *state);
 
 // Put the UI into STARTING mode, to start the game for the given slot index.
 // The UI must currently be in NORMAL mode.

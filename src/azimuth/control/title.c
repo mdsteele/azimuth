@@ -51,12 +51,6 @@ static void save_preferences(const az_preferences_t *prefs) {
   (void)az_save_prefs_to_file(prefs, path_buffer);
 }
 
-static void try_start_game(az_title_state_t *state, int slot_index) {
-  if (state->mode == AZ_TMODE_NORMAL) {
-    az_title_start_game(state, slot_index);
-  }
-}
-
 static bool try_pick_key(az_title_state_t *state, az_preferences_t *prefs,
                          az_key_id_t key_id) {
   assert(state->mode == AZ_TMODE_PICK_KEY);
@@ -124,16 +118,23 @@ az_title_action_t az_title_event_loop(
             if (try_pick_key(&state, prefs, event.key.id)) {
               prefs_changed = true;
             }
-            break;
-          }
-          switch (event.key.id) {
-            case AZ_KEY_1: try_start_game(&state, 0); break;
-            case AZ_KEY_2: try_start_game(&state, 1); break;
-            case AZ_KEY_3: try_start_game(&state, 2); break;
-            case AZ_KEY_4: try_start_game(&state, 3); break;
-            case AZ_KEY_5: try_start_game(&state, 4); break;
-            case AZ_KEY_6: try_start_game(&state, 5); break;
-            default: break;
+          } else if (state.mode == AZ_TMODE_INTRO) {
+            if (event.key.id == AZ_KEY_ESCAPE ||
+                event.key.id == AZ_KEY_RETURN) {
+              az_title_skip_intro(&state);
+            }
+          } else if (state.mode == AZ_TMODE_READY) {
+            state.mode = AZ_TMODE_NORMAL;
+          } else if (state.mode == AZ_TMODE_NORMAL) {
+            switch (event.key.id) {
+              case AZ_KEY_1: az_title_start_game(&state, 0); break;
+              case AZ_KEY_2: az_title_start_game(&state, 1); break;
+              case AZ_KEY_3: az_title_start_game(&state, 2); break;
+              case AZ_KEY_4: az_title_start_game(&state, 3); break;
+              case AZ_KEY_5: az_title_start_game(&state, 4); break;
+              case AZ_KEY_6: az_title_start_game(&state, 5); break;
+              default: break;
+            }
           }
           break;
         case AZ_EVENT_MOUSE_DOWN:
