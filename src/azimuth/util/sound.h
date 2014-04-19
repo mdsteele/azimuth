@@ -55,7 +55,7 @@ typedef struct {
 typedef struct {
   size_t num_samples;
   int16_t *samples;
-}  az_sound_data_t;
+} az_sound_data_t;
 
 void az_create_sound_data(const az_sound_spec_t *spec, az_sound_data_t *data);
 
