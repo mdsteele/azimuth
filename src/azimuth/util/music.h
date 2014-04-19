@@ -1,0 +1,124 @@
+/*=============================================================================
+| Copyright 2012 Matthew D. Steele <mdsteele@alum.mit.edu>                    |
+|                                                                             |
+| This file is part of Azimuth.                                               |
+|                                                                             |
+| Azimuth is free software: you can redistribute it and/or modify it under    |
+| the terms of the GNU General Public License as published by the Free        |
+| Software Foundation, either version 3 of the License, or (at your option)   |
+| any later version.                                                          |
+|                                                                             |
+| Azimuth is distributed in the hope that it will be useful, but WITHOUT      |
+| ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       |
+| FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   |
+| more details.                                                               |
+|                                                                             |
+| You should have received a copy of the GNU General Public License along     |
+| with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
+=============================================================================*/
+
+#pragma once
+#ifndef AZIMUTH_UTIL_MUSIC_H_
+#define AZIMUTH_UTIL_MUSIC_H_
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "azimuth/util/sound.h"
+
+/*===========================================================================*/
+
+#define AZ_MUSIC_NUM_TRACKS 4
+
+typedef enum {
+  AZ_NOTE_REST,
+  AZ_NOTE_TONE,
+  AZ_NOTE_DUTYMOD,
+  AZ_NOTE_ENVELOPE,
+  AZ_NOTE_LOUDNESS,
+  AZ_NOTE_VIBRATO,
+  AZ_NOTE_WAVEFORM,
+} az_note_type_t;
+
+typedef struct {
+  az_note_type_t type;
+  union {
+    struct {
+      double duration; // seconds
+    } rest;
+    struct {
+      double duration; // seconds
+      double frequency; // Hz
+    } tone;
+    struct {
+      double depth;
+      double speed;
+    } dutymod;
+    struct {
+      double attack_time; // seconds
+      double decay_fraction; // fraction of tone duration
+    } envelope;
+    struct {
+      double volume; // multiplier; 1.0 is neutral
+    } loudness;
+    struct {
+      double depth;
+      double speed;
+    } vibrato;
+    struct {
+      az_sound_wave_kind_t kind;
+      double duty; // 0.0 to 1.0
+    } waveform;
+  } attributes;
+} az_music_note_t;
+
+typedef struct {
+  int num_notes;
+  az_music_note_t *notes;
+} az_music_track_t;
+
+typedef struct {
+  az_music_track_t tracks[AZ_MUSIC_NUM_TRACKS];
+} az_music_part_t;
+
+typedef struct {
+  int spec_length;
+  int *spec;
+  int loop_point;
+  int num_parts;
+  az_music_part_t *parts;
+} az_music_t;
+
+bool az_parse_music_from_file(const char *filepath, az_music_t *music_out);
+
+void az_destroy_music(az_music_t *music);
+
+/*===========================================================================*/
+
+typedef struct {
+  const az_music_t *music;
+  int spec_index;
+  double time_index;
+  struct {
+    const az_music_track_t *track;
+    int note_index;
+    double time_from_note_start;
+    az_sound_wave_kind_t waveform;
+    double duty;
+    double loudness;
+    double attack_time, decay_fraction;
+    double dutymod_depth, dutymod_speed;
+    double vibrato_depth, vibrato_speed;
+    int iphase;
+    uint64_t noise_bits;
+  } voices[AZ_MUSIC_NUM_TRACKS];
+} az_music_synth_t;
+
+void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music);
+
+void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
+                         int num_samples);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_UTIL_MUSIC_H_

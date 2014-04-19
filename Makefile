@@ -47,7 +47,8 @@ endef
 #=============================================================================#
 # Determine what OS we're on and what targets we're building.
 
-ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests
+ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
+               $(BINDIR)/muse
 
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
@@ -55,12 +56,14 @@ ifeq "$(OS_NAME)" "Darwin"
   MAIN_LIBFLAGS = -framework Cocoa -framework OpenGL \
                   -framework SDL -framework SDL_mixer
   TEST_LIBFLAGS =
+  MUSE_LIBFLAGS = -framework Cocoa -framework SDL
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
   MAIN_LIBFLAGS = -lGL -lSDL -lSDL_mixer
   TEST_LIBFLAGS = -lm
+  MUSE_LIBFLAGS = -lSDL
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
   ALL_TARGETS += linux_app
 endif
@@ -78,6 +81,7 @@ AZ_UTIL_HEADERS := $(shell find $(SRCDIR)/azimuth/util -name '*.h') \
 AZ_VIEW_HEADERS := $(shell find $(SRCDIR)/azimuth/view -name '*.h')
 AZ_EDITOR_HEADERS := $(shell find $(SRCDIR)/editor -name '*.h')
 AZ_TEST_HEADERS := $(shell find $(SRCDIR)/test -name '*.h')
+AZ_MUSE_HEADERS := $(shell find $(SRCDIR)/muse -name '*.h')
 
 AZ_CONTROL_C99FILES := $(shell find $(SRCDIR)/azimuth/control -name '*.c')
 AZ_GUI_C99FILES := $(shell find $(SRCDIR)/azimuth/gui -name '*.c')
@@ -94,12 +98,15 @@ EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
                  $(AZ_VIEW_C99FILES)
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
                  $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
+MUSE_C99FILES := $(shell find $(SRCDIR)/muse -name '*.c') $(AZ_UTIL_C99FILES)
 
 MAIN_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MAIN_C99FILES)) \
                  $(SYSTEM_OBJFILES)
 EDIT_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(EDIT_C99FILES)) \
                  $(SYSTEM_OBJFILES)
 TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
+MUSE_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MUSE_C99FILES)) \
+                 $(SYSTEM_OBJFILES)
 
 RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.mp3') \
                   $(shell find $(DATADIR)/music -name '*.ogg') \
@@ -128,6 +135,11 @@ $(BINDIR)/unit_tests: $(TEST_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
 	@gcc -o $@ $^ $(CFLAGS) $(TEST_LIBFLAGS)
+
+$(BINDIR)/muse: $(MUSE_OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(@D)
+	@gcc -o $@ $^ $(CFLAGS) $(MUSE_LIBFLAGS)
 
 #=============================================================================#
 # Build rules for compiling system-specific code:
@@ -185,6 +197,9 @@ $(OBJDIR)/editor/%.o: $(SRCDIR)/editor/%.c \
 
 $(OBJDIR)/test/%.o: $(SRCDIR)/test/%.c \
     $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_TEST_HEADERS)
+	$(compile-c99)
+
+$(OBJDIR)/muse/%.o: $(SRCDIR)/muse/%.c $(AZ_UTIL_HEADERS) $(AZ_MUSE_HEADERS)
 	$(compile-c99)
 
 #=============================================================================#

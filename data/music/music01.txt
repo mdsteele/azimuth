@@ -1,0 +1,93 @@
+@M "SA|BBCDD"
+% Title: "I Came Home to a Coffin"
+
+=tempo 120
+=key 3b
+
+
+!Part S
+
+1      L30
+2 Wp25 L25  E0,25  D+10,10
+3 Wt50             D-20,20
+4 Wn   L25  E0,100
+
+!Part A
+
+1 Wp50 E0,25  D-20,20
+3 L150 E300,5
+
+1| rw | rw |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| rw | rw |
+4| rw | rw |
+
+1| c6s re.  c6s re. c6s rs c6s rs rq |
+1| rs c6s rs c6s rs re. c6s re c6s rq |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| rw | rw |
+4| rw | rw |
+
+1| rw | rw |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c2w+w+w+w |
+4| c1e rq ce c5q r | c1e rq ce c5q r |
+
+1| c6s re.  c6s re. c6s rs c6s rs rq |
+1| rs c6s rs c6s rs re. c6s re c6s rq |
+2| c3e g g c a a c g | g c f g e f e b2 |
+4| c1e rq ce c5q c2e r | c1e r c2 r c1 c2 c5s c2e rs |
+
+!Part B
+
+1 Wp50 E300,15 D-20,20
+3 L275 E300,15
+
+1| c4w | gw |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| g3w | dw |
+4| c1e r c5q c2e c c5q | c1e c c5q c2e r c5q |
+
+1| a4w | cw |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| e3w | fw |
+4| c1e r c5q c2e c c5q | c1e c c5q c2e c3s c2 c5s c6e. |
+
+1| g4w+w |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c3w+w |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e r c5q |
+
+1 E0,25
+1| c6s re.  c6s re. c6s rs c6s rs rq |
+1| rs c6s rs c6s rs re. c6s re c6s rq |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| rw | rw |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e c3s c2 c5s c6e. |
+
+!Part C
+
+1 Wp75 E0,25 D-20,30
+3 L200 E0,25
+
+1| c4e de gq fq ge a | eq g d ee f |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c2q ce. b1s+s be bs c2e g1 | c2q ce. b1s+s be bs c2e g1 |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e r c5q |
+
+1| c4q g fe ge aq | eq g dh |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c2q ce. b1s+s be bs c2e g1 | c2q ce. b1s+s be bs c2e g1 |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e r c5q |
+
+!Part D
+
+1| c5s g4 c5e b4 g a f ge. at b | c5s g4 c5e b4 g d5s b4 d5e c5q |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c2q ce. b1s+s be bs c2e g1 | c2q ce. b1s+s be bs c2e g1 |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e r c5q |
+
+1| c5s g4 c5e b4 g a f ge ft g as | bs c5 g4 c5s+s ge fs d5e b4 c5q |
+2| c3e g g c a a c g | g c f g e f e b2 |
+3| c2q ce. b1s+s be bs c2e g1 | c2q ce. b1s+s be bs c2e g1 |
+4| c1e re c5q c2e r c5q | c1e re c5q c2e r c5q |
