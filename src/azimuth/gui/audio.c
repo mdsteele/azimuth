@@ -101,7 +101,7 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
     int sample = (global_music_volume * (int)samples[i]) >> VOLUME_SHIFT;
     sample = (music_fade_volume * sample) >> VOLUME_SHIFT;
     sample += (global_sound_volume * sound_sample) >> VOLUME_SHIFT;
-    samples[i] = sample;
+    samples[i] = az_imin(az_imax(INT16_MIN, sample), INT16_MAX);
 
     // Fade out music, if applicable:
     if (music_fade_slowdown > 0 && music_fade_volume > 0) {
