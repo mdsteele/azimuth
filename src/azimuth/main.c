@@ -28,8 +28,10 @@
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
+#include "azimuth/state/music.h" // for az_init_music_datas
 #include "azimuth/state/planet.h"
 #include "azimuth/state/save.h"
+#include "azimuth/state/sound.h" // for az_init_sound_datas
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/system/resource.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
@@ -47,6 +49,7 @@ static az_preferences_t preferences;
 static bool load_scenario(void) {
   const char *resource_dir = az_get_resource_directory();
   if (resource_dir == NULL) return false;
+  if (!az_init_music_datas(resource_dir)) return false;
   if (!az_load_planet(resource_dir, &planet)) return false;
   return true;
 }
@@ -79,6 +82,7 @@ typedef enum {
 
 int main(int argc, char **argv) {
   az_init_random();
+  az_init_sound_datas();
   az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_portrait_drawing);

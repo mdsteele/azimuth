@@ -26,8 +26,8 @@
 #include "azimuth/state/pickup.h" // for az_pickup_flags_t
 #include "azimuth/state/player.h" // for az_damage_kinds_t
 #include "azimuth/state/script.h"
+#include "azimuth/state/sound.h"
 #include "azimuth/state/uid.h"
-#include "azimuth/util/audio.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"

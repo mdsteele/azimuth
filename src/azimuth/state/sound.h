@@ -18,74 +18,106 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_UTIL_AUDIO_H_
-#define AZIMUTH_UTIL_AUDIO_H_
+#ifndef AZIMUTH_STATE_SOUND_H_
+#define AZIMUTH_STATE_SOUND_H_
 
-#include <stdbool.h>
-
-#include "azimuth/util/music.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/sound.h"
 
 /*===========================================================================*/
 
-// A soundboard keeps track of what sounds/music we want to play next.  It will
-// be periodically read and flushed by our audio system.  To initialize it,
-// simply zero it with a memset.  One should not manipulate the fields of this
-// struct directly; instead, use the various functions below.
-typedef struct {
-  bool change_music;
-  const az_music_t *next_music;
-  double music_fade_out_seconds;
-  int num_oneshots;
-  const az_sound_data_t *oneshots[10];
-  int num_persists;
-  struct {
-    const az_sound_data_t *sound_data;
-    bool play;
-    bool loop;
-    bool reset;
-  } persists[10];
-} az_soundboard_t;
+// The number of different sound keys there are, not counting AZ_SND_NOTHING:
+#define AZ_NUM_SOUND_KEYS 51
+
+typedef enum {
+  AZ_SND_NOTHING = 0,
+  // Sounds used in scripts:
+  AZ_SND_DRILLING,
+  // Sounds not used in scripts:
+  AZ_SND_BEAM_FREEZE,
+  AZ_SND_BEAM_NORMAL,
+  AZ_SND_BEAM_PHASE,
+  AZ_SND_BEAM_PIERCE,
+  AZ_SND_BLINK_MEGA_BOMB,
+  AZ_SND_CHARGED_GUN,
+  AZ_SND_CHARGED_MISSILE_BEAM,
+  AZ_SND_CHARGED_ORDNANCE,
+  AZ_SND_CHARGING_GUN,
+  AZ_SND_CHARGING_ORDNANCE,
+  AZ_SND_CLOAK_BEGIN,
+  AZ_SND_CLOAK_END,
+  AZ_SND_CPLUS_ACTIVE,
+  AZ_SND_CPLUS_CHARGED,
+  AZ_SND_CPLUS_IMPACT,
+  AZ_SND_CPLUS_READY,
+  AZ_SND_DOOR_CLOSE,
+  AZ_SND_DOOR_OPEN,
+  AZ_SND_DROP_BOMB,
+  AZ_SND_EXPLODE_BOMB,
+  AZ_SND_EXPLODE_HYPER_ROCKET,
+  AZ_SND_EXPLODE_MEGA_BOMB,
+  AZ_SND_EXPLODE_ROCKET,
+  AZ_SND_EXPLODE_SHIP,
+  AZ_SND_FIRE_GUN_CHARGED_BEAM,
+  AZ_SND_FIRE_GUN_FREEZE,
+  AZ_SND_FIRE_GUN_NORMAL,
+  AZ_SND_FIRE_GUN_PIERCE,
+  AZ_SND_FIRE_HYPER_ROCKET,
+  AZ_SND_FIRE_LASER_PULSE,
+  AZ_SND_FIRE_MISSILE_BEAM,
+  AZ_SND_FIRE_OTH_ROCKET,
+  AZ_SND_FIRE_OTH_SPRAY,
+  AZ_SND_FIRE_ROCKET,
+  AZ_SND_FIRE_STINGER,
+  AZ_SND_HEAT_DAMAGE,
+  AZ_SND_HIT_WALL,
+  AZ_SND_KILL_ATOM,
+  AZ_SND_KILL_DRAGONFLY,
+  AZ_SND_KILL_TURRET,
+  AZ_SND_KLAXON,
+  AZ_SND_KLAXON_DIRE,
+  AZ_SND_LAUNCH_OTH_RAZORS,
+  AZ_SND_METAL_CLINK,
+  AZ_SND_ORION_BOOSTER,
+  AZ_SND_PICKUP_ORDNANCE,
+  AZ_SND_PICKUP_SHIELDS,
+  AZ_SND_SONIC_SCREECH,
+  AZ_SND_SPLASH,
+  AZ_SND_TRACTOR_BEAM
+} az_sound_key_t;
 
 /*===========================================================================*/
 
-// Indicate that we would like to change which music is playing.
-void az_change_music_data(az_soundboard_t *soundboard, const az_music_t *music,
-                          double fade_out_seconds);
+void az_init_sound_datas(void);
 
 // Indicate that we should play the given sound (once).  The sound will not
 // loop, and cannot be cancelled or paused once started.
-void az_play_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data);
+void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
 // same sound, otherwise the sound will stop.  As long as we keep calling this
 // function, the sound will continue to loop.
-void az_loop_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data);
+void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
 // same sound, otherwise the sound will stop.  The sound will play only once,
 // and won't restart until we either stop calling this function for at least
 // one frame before calling it again, or we call az_reset_sound.
-void az_persist_sound_data(az_soundboard_t *soundboard,
-                           const az_sound_data_t *sound_data);
+void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 // Indicate that, if the given persisted or looped sound is currently playing,
 // we should pause it for this frame.  To keep the sound from resetting, we
 // must call this function every frame with the same sound; the sound will
 // resume once we start calling az_persist_sound or az_loop_sound again.
-void az_hold_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data);
+void az_hold_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 // Indicate that the given persisted or looped sound should restart from the
 // beginning, even if we also call az_persist_sound or az_loop_sound this frame
 // to keep the sound going.
-void az_reset_sound_data(az_soundboard_t *soundboard,
-                         const az_sound_data_t *sound_data);
+void az_reset_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_UTIL_AUDIO_H_
+#endif // AZIMUTH_STATE_SOUND_H_

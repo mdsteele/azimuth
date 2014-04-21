@@ -17,53 +17,45 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/control/victory.h"
+#pragma once
+#ifndef AZIMUTH_STATE_MUSIC_H_
+#define AZIMUTH_STATE_MUSIC_H_
 
-#include <assert.h>
-
-#include "azimuth/gui/audio.h"
-#include "azimuth/gui/event.h"
-#include "azimuth/gui/screen.h"
-#include "azimuth/state/music.h"
-#include "azimuth/state/player.h"
-#include "azimuth/state/upgrade.h"
-#include "azimuth/util/misc.h"
-#include "azimuth/view/victory.h"
+#include "azimuth/util/audio.h"
+#include "azimuth/util/music.h"
 
 /*===========================================================================*/
 
-void az_victory_event_loop(const az_player_t *player) {
-  static az_victory_state_t state;
-  AZ_ZERO_OBJECT(&state);
-  state.clear_time = player->total_time;
-  for (int i = 0; i < AZ_NUM_UPGRADES; ++i) {
-    if (az_has_upgrade(player, (az_upgrade_t)i)) {
-      ++state.num_upgrades;
-    }
-  }
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
+// The number of different music keys there are, not counting AZ_MUS_NOTHING:
+#define AZ_NUM_MUSIC_KEYS 12
 
-  while (true) {
-    // Tick the state and redraw the screen.
-    az_tick_victory_state(&state, 1.0/60.0);
-    az_tick_audio(&state.soundboard);
-    az_start_screen_redraw(); {
-      az_victory_draw_screen(&state);
-    } az_finish_screen_redraw();
-
-    // Get and process GUI events.
-    az_event_t event;
-    while (az_poll_event(&event)) {
-      switch (event.kind) {
-        case AZ_EVENT_KEY_DOWN:
-        case AZ_EVENT_MOUSE_DOWN:
-          if (state.step == AZ_VS_DONE) return;
-          break;
-        default: break;
-      }
-    }
-  }
-  AZ_ASSERT_UNREACHABLE();
-}
+typedef enum {
+  AZ_MUS_NOTHING = 0,
+  AZ_MUS_COLONY_ZONE,
+  AZ_MUS_FILIMUN_ZONE,
+  AZ_MUS_CNIDAM_ZONE,
+  AZ_MUS_NANDIAR_ZONE,
+  AZ_MUS_VOQUAN_ZONE,
+  AZ_MUS_BARRAG_ZONE,
+  AZ_MUS_SARVARI_ZONE,
+  AZ_MUS_CORE_ZONE,
+  AZ_MUS_ZENITH_CORE,
+  AZ_MUS_BOSS1,
+  AZ_MUS_BOSS2,
+  AZ_MUS_TITLE
+} az_music_key_t;
 
 /*===========================================================================*/
+
+bool az_init_music_datas(const char *resource_dir);
+
+// Indicate that we would like to change which music is playing.
+void az_change_music(az_soundboard_t *soundboard, az_music_key_t music_key);
+
+// Indicate that we would like to stop the current music (without playing
+// something else next), by fading out for the given amount of time.
+void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_STATE_MUSIC_H_

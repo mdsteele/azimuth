@@ -27,64 +27,67 @@
 
 /*===========================================================================*/
 
-void az_change_music(az_soundboard_t *soundboard, az_music_key_t music) {
-  soundboard->music_action = AZ_MUSA_CHANGE;
+void az_change_music_data(az_soundboard_t *soundboard, const az_music_t *music,
+                          double fade_out_seconds) {
+  soundboard->change_music = true;
   soundboard->next_music = music;
+  soundboard->music_fade_out_seconds = fade_out_seconds;
 }
 
-void az_stop_music(az_soundboard_t *soundboard, double fade_out_seconds) {
-  assert(fade_out_seconds >= 0.0);
-  soundboard->music_action = AZ_MUSA_STOP;
-  soundboard->music_fade_out_millis = (int)(1000.0 * fade_out_seconds);
-}
-
-void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
+void az_play_sound_data(az_soundboard_t *soundboard,
+                        const az_sound_data_t *sound_data) {
+  if (sound_data == NULL) return;
   if (soundboard->num_oneshots < AZ_ARRAY_SIZE(soundboard->oneshots)) {
     // Don't start the same sound more than once in the same frame.
     for (int i = 0; i < soundboard->num_oneshots; ++i) {
-      if (soundboard->oneshots[i] == sound) return;
+      if (soundboard->oneshots[i] == sound_data) return;
     }
-    soundboard->oneshots[soundboard->num_oneshots] = sound;
+    soundboard->oneshots[soundboard->num_oneshots] = sound_data;
     ++soundboard->num_oneshots;
   }
 }
 
 static void persist_sound_internal(
-    az_soundboard_t *soundboard, az_sound_key_t sound,
+    az_soundboard_t *soundboard, const az_sound_data_t *sound_data,
     bool play, bool loop, bool reset) {
+  if (sound_data == NULL) return;
   int index;
   for (index = 0; index < soundboard->num_persists; ++index) {
-    if (soundboard->persists[index].sound == sound) goto merge;
+    if (soundboard->persists[index].sound_data == sound_data) goto merge;
   }
   if (soundboard->num_persists == AZ_ARRAY_SIZE(soundboard->persists)) {
-    AZ_WARNING_ONCE("No room to persist sound %d\n", (int)sound);
+    AZ_WARNING_ONCE("No room to persist sound\n");
     return;
   }
   assert(index == soundboard->num_persists);
   assert(soundboard->num_persists < AZ_ARRAY_SIZE(soundboard->persists));
   ++soundboard->num_persists;
-  soundboard->persists[index].sound = sound;
+  soundboard->persists[index].sound_data = sound_data;
  merge:
-  assert(soundboard->persists[index].sound == sound);
+  assert(soundboard->persists[index].sound_data == sound_data);
   soundboard->persists[index].play |= play;
   soundboard->persists[index].loop |= loop;
   soundboard->persists[index].reset |= reset;
 }
 
-void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, true, true, false);
+void az_loop_sound_data(az_soundboard_t *soundboard,
+                        const az_sound_data_t *sound_data) {
+  persist_sound_internal(soundboard, sound_data, true, true, false);
 }
 
-void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, true, false, false);
+void az_persist_sound_data(az_soundboard_t *soundboard,
+                           const az_sound_data_t *sound_data) {
+  persist_sound_internal(soundboard, sound_data, true, false, false);
 }
 
-void az_hold_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, false, false, false);
+void az_hold_sound_data(az_soundboard_t *soundboard,
+                        const az_sound_data_t *sound_data) {
+  persist_sound_internal(soundboard, sound_data, false, false, false);
 }
 
-void az_reset_sound(az_soundboard_t *soundboard, az_sound_key_t sound) {
-  persist_sound_internal(soundboard, sound, false, false, true);
+void az_reset_sound_data(az_soundboard_t *soundboard,
+                         const az_sound_data_t *sound_data) {
+  persist_sound_internal(soundboard, sound_data, false, false, true);
 }
 
 /*===========================================================================*/

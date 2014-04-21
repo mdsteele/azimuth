@@ -23,7 +23,7 @@
 4| rw | rw |
 
 1| c6s re.  c6s re. c6s rs c6s rs rq |
-1| rs c6s rs c6s rs re. c6s re c6s rq |
+1| re c6s rs c6s re. c6s re c6s rq |
 2| c3e g g c a a c g | g c f g e f e b2 |
 3| rw | rw |
 4| rw | rw |
@@ -34,7 +34,7 @@
 4| c1e rq ce c5q r | c1e rq ce c5q r |
 
 1| c6s re.  c6s re. c6s rs c6s rs rq |
-1| rs c6s rs c6s rs re. c6s re c6s rq |
+1| re c6s rs c6s re. c6s re c6s rq |
 2| c3e g g c a a c g | g c f g e f e b2 |
 4| c1e rq ce c5q c2e r | c1e r c2 r c1 c2 c5s c2e rs |
 
@@ -60,7 +60,7 @@
 
 1 E0,25
 1| c6s re.  c6s re. c6s rs c6s rs rq |
-1| rs c6s rs c6s rs re. c6s re c6s rq |
+1| re c6s rs c6s re. c6s re c6s rq |
 2| c3e g g c a a c g | g c f g e f e b2 |
 3| rw | rw |
 4| c1e re c5q c2e r c5q | c1e re c5q c2e c3s c2 c5s c6e. |

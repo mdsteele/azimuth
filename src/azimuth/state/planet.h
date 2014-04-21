@@ -26,7 +26,7 @@
 #include "azimuth/state/dialog.h"
 #include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/room.h"
-#include "azimuth/util/audio.h" // for az_music_key_t
+#include "azimuth/state/music.h" // for az_music_key_t
 
 /*===========================================================================*/
 

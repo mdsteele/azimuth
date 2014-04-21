@@ -53,15 +53,14 @@ ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
-  MAIN_LIBFLAGS = -framework Cocoa -framework OpenGL \
-                  -framework SDL -framework SDL_mixer
+  MAIN_LIBFLAGS = -framework Cocoa -framework SDL -framework OpenGL
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa -framework SDL
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
-  MAIN_LIBFLAGS = -lGL -lSDL -lSDL_mixer
+  MAIN_LIBFLAGS = -lGL -lSDL
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lSDL
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
@@ -108,8 +107,7 @@ TEST_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(TEST_C99FILES))
 MUSE_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MUSE_C99FILES)) \
                  $(SYSTEM_OBJFILES)
 
-RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.mp3') \
-                  $(shell find $(DATADIR)/music -name '*.ogg') \
+RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.txt') \
                   $(shell find $(DATADIR)/rooms -name '*.txt')
 
 #=============================================================================#
