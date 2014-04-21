@@ -37,12 +37,13 @@ static const char *music_filenames[] = {
   [AZ_MUS_CNIDAM_ZONE] = NULL,
   [AZ_MUS_NANDIAR_ZONE] = NULL,
   [AZ_MUS_VOQUAN_ZONE] = NULL,
-  [AZ_MUS_BARRAG_ZONE] = NULL,
+  [AZ_MUS_BARRAG_ZONE] = "music06.txt",
   [AZ_MUS_SARVARI_ZONE] = NULL,
   [AZ_MUS_CORE_ZONE] = NULL,
   [AZ_MUS_ZENITH_CORE] = NULL,
-  [AZ_MUS_BOSS1] = NULL,
+  [AZ_MUS_BOSS1] = "music10.txt",
   [AZ_MUS_BOSS2] = NULL,
+  [AZ_MUS_SUSPENSE] = "music12.txt",
   [AZ_MUS_TITLE] = NULL
 };
 

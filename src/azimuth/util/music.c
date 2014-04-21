@@ -425,6 +425,7 @@ static void parse_music_data(az_music_parser_t *parser) {
           case 'w': case 'h': case 'q': case 'e':
           case 's': case 't': case 'x':
             goto begin_duration;
+          case '+': break;
           case ' ': case '|': case '\'': break;
           default:
             PARSE_ERROR("invalid duration continuation char: '%c'\n", ch);

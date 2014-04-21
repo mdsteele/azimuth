@@ -1,0 +1,27 @@
+@M "SA|B"
+
+=tempo 70
+=key 1b
+
+
+!Part S
+
+1 Wp60 L20  E40,40  D-10,20
+2 Wt25 L45  E10,25  V+1,50
+3 Wt50 L150 E25,100 D+20,30
+4 Wn   L15  E0,100
+
+!Part A
+
+1|        d3q a      d a | ebq b eb     b   |
+2| rw                    | rh    re g3e a b |
+4| c2s rs+e cs r c cb cs rs+e    cs r  c cb |
+ | c2s rs+e cs r c cb cs rs c cb c  cb c cb |
+
+!Part B
+
+1|        d3q a      d a | ebq b eb     b   |
+2| E10,75 a3h E10,25 rh  | rh    re g3e a b |
+3| a2w                   | g2w              |
+4| c2s rs+e cs r c cb cs rs+e    cs r  c cb |
+ | c2s rs+e cs r c cb cs rs c cb c  cb c cb |

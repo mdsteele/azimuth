@@ -1,0 +1,59 @@
+@M "S|ABB"
+
+=tempo 150
+=key 2#
+
+!Part S
+
+1 Wp50 L30  E0,15 D+40,2
+2 Wp25 L20  E0,15 D+10,15
+3 Wt50 L100 E0,0  D+25,20
+4 Wn   L30  E0,100
+
+!Part A
+
+1 T-4
+2 T-4
+
+1| b3q. f4q. b3e c4 | d4q. ae+h |
+2| rw | rw |
+4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b6s re. |
+
+1| g4e d f c e c g c | f4e c e c d b3 c4 a#3 |
+2| rw | rw |
+4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b5s b b6e |
+
+1| b3q. f4q. b3e c4 | d4q. ae+h |
+2| rq f3e d4e+e ee d e | a3q fe ee+q de c |
+4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b6s re. |
+
+1| g4e d f c e c g c | f4w |
+2| d3q e f g | f3w |
+4| b6s re. b6s re. b6s re. b6s re. |
+ | b6s re. b6s re. L15 b3s b L20 b b L25 b b L30 b b |
+
+!Part B
+
+1 T+8
+2 T-4
+3 T-4
+
+1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +e f3e ' d4e a3 ' c4 b3 ' aq |
+2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
+3| b3q. f4q. b3e a | b3q. f4q. b3e a |
+4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+
+1| b3q ' d4e b3 ' c4 b3 ' a E0,50 b3e+ | +e a3e+e g3e+e E0,15 d4e ' d c |
+2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
+3| g3q. d4q. g3e a | f3q. c4q. f3e a |
+4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+
+1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +e f3e ' d4e a3 ' c4 b3 ' aq |
+2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
+3| b3q. f4q. b3e a | b3q. f4q. b3e a |
+4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+
+1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +h rh |
+2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
+3| g3q. d4q. g3e a | f3q. c4q. fe a3 |
+4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
