@@ -2,7 +2,8 @@
 % Title: "Blind Fury"
 
 =tempo 150
-=key 1#
+=key 1#        % E minor
+=loudness 1.2
 
 
 !Part S
@@ -10,7 +11,7 @@
 1 Wp75 L40  E0,20 D-20,50
 2                 V+2,100
 3 Wt75 L300 E0,25 D+10,75
-4 Wn   L35  E0,50 V-25,5
+4 Wn   L40  E0,50 V-25,5
 
 !Part A
 

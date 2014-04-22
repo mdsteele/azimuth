@@ -37,6 +37,7 @@
 #define MAX_NUM_PARTS 26
 #define MAX_NOTES_PER_TRACK 2048
 #define MAX_SPEC_LENGTH 256
+#define HALF_STEPS_PER_OCTAVE 12
 
 // Frequencies in Hz of each note in octave zero:
 static const double pitch_frequencies[] = {
@@ -53,6 +54,8 @@ static const double pitch_frequencies[] = {
   29.1352350949, // a#0
   30.8677063285  // b0
 };
+
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(pitch_frequencies) == HALF_STEPS_PER_OCTAVE);
 
 /*===========================================================================*/
 
@@ -85,6 +88,7 @@ typedef struct {
     LINE_COMMENT
   } state;
 
+  double loudness_multiplier;
   double seconds_per_whole_note;
   int current_part;
   int current_track;
@@ -93,7 +97,8 @@ typedef struct {
   int base_pitch; // named_pitch with current_key applied
   int pitch_adjust; // 1 = sharp, -1 = flat
   int octave;
-  int transpose[AZ_MUSIC_NUM_TRACKS]; // num half steps to transpose all tones
+  int global_transpose; // num half steps
+  int local_transpose[AZ_MUSIC_NUM_TRACKS]; // num half steps
   double base_duration; // 1 = whole note
   double extra_duration; // 1 = whole note
 } az_music_parser_t;
@@ -104,6 +109,7 @@ az_music_parser_t *new_music_parser(az_music_t *music, FILE *file) {
   parser->file = file;
   parser->line = 1;
   AZ_ARRAY_LOOP(part_index, parser->part_indices) *part_index = -1;
+  parser->loudness_multiplier = 1.0;
   parser->seconds_per_whole_note = 2.0;
   parser->current_part = -1;
   parser->current_track = -1;
@@ -121,16 +127,13 @@ void free_music_parser(az_music_parser_t *parser) {
 
 /*===========================================================================*/
 
+#define TRY_READ(...) \
+  (fscanf(parser->file, __VA_ARGS__) == AZ_COUNT_ARGS(__VA_ARGS__) - 1)
+
 #define PARSE_ERROR(...) do { \
     fprintf(stderr, "line %d: parse error: ", parser->line); \
     fprintf(stderr, __VA_ARGS__); \
     longjmp(parser->jump, 1); \
-  } while (false)
-
-#define READ(...) do { \
-    if (fscanf(parser->file, __VA_ARGS__) < AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
-      PARSE_ERROR("failed\n"); \
-    } \
   } while (false)
 
 static int next_char(az_music_parser_t *parser) {
@@ -141,7 +144,7 @@ static int next_char(az_music_parser_t *parser) {
 }
 
 static void parse_music_header(az_music_parser_t *parser) {
-  READ("@M \"");
+  if (!TRY_READ("@M \"")) PARSE_ERROR("invalid file header\n");
   assert(parser->spec_string_length == 0);
   while (true) {
     const int ch = fgetc(parser->file);
@@ -172,7 +175,7 @@ static void parse_directive(az_music_parser_t *parser) {
   switch (next_char(parser)) {
     case 'k': {
       char num_char, accidental;
-      READ("ey %c%c", &num_char, &accidental);
+      if (!TRY_READ("ey %c%c", &num_char, &accidental)) goto invalid;
       if (num_char < '0' || num_char > '7') {
         PARSE_ERROR("invalid key number: '%c'\n", num_char);
       }
@@ -184,15 +187,35 @@ static void parse_directive(az_music_parser_t *parser) {
         default: PARSE_ERROR("invalid key accidental: '%c'\n", accidental);
       }
     } break;
-    case 't': {
-      double quarter_notes_per_minute;
-      READ("empo %lf", &quarter_notes_per_minute);
-      if (quarter_notes_per_minute <= 0.0) {
-        PARSE_ERROR("tempo must be positive\n");
+    case 'l': {
+      double loudness;
+      if (!TRY_READ("oudness %lf", &loudness)) goto invalid;
+      if (loudness <= 0.0) {
+        PARSE_ERROR("loudness must be positive\n");
       }
-      parser->seconds_per_whole_note = 240.0 / quarter_notes_per_minute;
+      parser->loudness_multiplier = loudness;
     } break;
-    default: PARSE_ERROR("invalid directive\n");
+    case 't':
+      switch (next_char(parser)) {
+        case 'e': {
+          double quarter_notes_per_minute;
+          if (!TRY_READ("mpo %lf", &quarter_notes_per_minute)) goto invalid;
+          if (quarter_notes_per_minute <= 0.0) {
+            PARSE_ERROR("tempo must be positive\n");
+          }
+          parser->seconds_per_whole_note = 240.0 / quarter_notes_per_minute;
+        } break;
+        case 'r': {
+          int half_steps;
+          if (!TRY_READ("anspose %d", &half_steps)) goto invalid;
+          parser->global_transpose = half_steps;
+        } break;
+        default: goto invalid;
+      }
+      break;
+    default:
+    invalid:
+      PARSE_ERROR("invalid directive\n");
   }
   parser->current_track = -1;
   parser->state = AFTER_DIRECTIVE;
@@ -210,21 +233,21 @@ static void finish_part(az_music_parser_t *parser) {
            track->num_notes * sizeof(az_music_note_t));
   }
   AZ_ZERO_ARRAY(parser->tracks);
-  AZ_ZERO_ARRAY(parser->transpose);
+  AZ_ZERO_ARRAY(parser->local_transpose);
 }
 
 static void parse_part_heading(az_music_parser_t *parser) {
-  finish_part(parser);
-  ++parser->current_part;
-  if (parser->current_part >= MAX_NUM_PARTS) PARSE_ERROR("too many parts\n");
   char letter;
-  READ("Part %c", &letter);
+  if (!TRY_READ("Part %c", &letter)) PARSE_ERROR("invalid part header\n");
   if (letter < 'A' || letter > 'Z') {
     PARSE_ERROR("invalid part name: '%c'\n", letter);
   }
   if (parser->part_indices[letter - 'A'] >= 0) {
     PARSE_ERROR("reused part name: '%c'\n", letter);
   }
+  finish_part(parser);
+  ++parser->current_part;
+  if (parser->current_part >= MAX_NUM_PARTS) PARSE_ERROR("too many parts\n");
   parser->part_indices[letter - 'A'] = parser->current_part;
   parser->current_track = -1;
   parser->state = AFTER_DIRECTIVE;
@@ -248,7 +271,9 @@ static void parse_dutymod(az_music_parser_t *parser) {
   az_music_note_t *note = next_note(parser);
   note->type = AZ_NOTE_DUTYMOD;
   double depth, speed;
-  READ("%lf,%lf", &depth, &speed);
+  if (!TRY_READ("%lf,%lf", &depth, &speed)) {
+    PARSE_ERROR("invalid Dutymod params\n");
+  }
   note->attributes.dutymod.depth = depth * 0.01;
   note->attributes.dutymod.speed = fmax(0.0, speed);
 }
@@ -257,7 +282,9 @@ static void parse_envelope(az_music_parser_t *parser) {
   az_music_note_t *note = next_note(parser);
   note->type = AZ_NOTE_ENVELOPE;
   double attack, decay;
-  READ("%lf,%lf", &attack, &decay);
+  if (!TRY_READ("%lf,%lf", &attack, &decay)) {
+    PARSE_ERROR("invalid Envelope params\n");
+  }
   note->attributes.envelope.attack_time =
     fmax(0.0, 0.0025 * parser->seconds_per_whole_note * attack);
   note->attributes.envelope.decay_fraction =
@@ -268,23 +295,26 @@ static void parse_loudness(az_music_parser_t *parser) {
   az_music_note_t *note = next_note(parser);
   note->type = AZ_NOTE_LOUDNESS;
   double volume;
-  READ("%lf", &volume);
-  note->attributes.loudness.volume = fmax(0.0, volume / 100.0);
+  if (!TRY_READ("%lf", &volume)) PARSE_ERROR("invalid Loudness param\n");
+  note->attributes.loudness.volume =
+    parser->loudness_multiplier * fmax(0.0, volume / 100.0);
 }
 
 static void parse_transpose(az_music_parser_t *parser) {
   assert(parser->current_track >= 0);
   assert(parser->current_track < AZ_MUSIC_NUM_TRACKS);
-  int transpose;
-  READ("%d", &transpose);
-  parser->transpose[parser->current_track] = transpose;
+  int half_steps;
+  if (!TRY_READ("%d", &half_steps)) PARSE_ERROR("invalid Transpose param\n");
+  parser->local_transpose[parser->current_track] = half_steps;
 }
 
 static void parse_vibrato(az_music_parser_t *parser) {
   az_music_note_t *note = next_note(parser);
   note->type = AZ_NOTE_VIBRATO;
   double depth, speed;
-  READ("%lf,%lf", &depth, &speed);
+  if (!TRY_READ("%lf,%lf", &depth, &speed)) {
+    PARSE_ERROR("invalid Vibrato params\n");
+  }
   note->attributes.vibrato.depth = depth * 0.01;
   note->attributes.vibrato.speed = fmax(0.0, speed);
 }
@@ -297,7 +327,7 @@ static void parse_waveform(az_music_parser_t *parser) {
     note->attributes.waveform.kind =
       (ch == 'p' ? AZ_SQUARE_WAVE : AZ_TRIANGLE_WAVE);
     double duty;
-    READ("%lf", &duty);
+    if (!TRY_READ("%lf", &duty)) PARSE_ERROR("invalid waveform duty\n");
     note->attributes.waveform.duty = fmin(fmax(0.0, duty / 100.0), 1.0);
   } else if (ch == 'n') {
     note->attributes.waveform.kind = AZ_NOISE_WAVE;
@@ -309,10 +339,10 @@ static void parse_waveform(az_music_parser_t *parser) {
 static void start_pitch(az_music_parser_t *parser, int named_pitch,
                         int flat_key, int sharp_key) {
   if (parser->current_part < 0) {
-    PARSE_ERROR("can't start pitch outside of any part");
+    PARSE_ERROR("can't start pitch outside of any part\n");
   }
   if (parser->current_track < 0) {
-    PARSE_ERROR("can't start pitch before setting the current track");
+    PARSE_ERROR("can't start pitch before setting the current track\n");
   }
   parser->named_pitch = named_pitch;
   parser->base_pitch = named_pitch;
@@ -333,12 +363,13 @@ static void emit_note(az_music_parser_t *parser) {
     note->attributes.rest.duration = duration_seconds;
   } else {
     note->type = AZ_NOTE_TONE;
-    int absolute_pitch =
-      parser->base_pitch + parser->pitch_adjust + 12 * parser->octave +
-      parser->transpose[parser->current_track];
-    if (absolute_pitch < 0) absolute_pitch = 0;
-    const int octave = absolute_pitch / 12;
-    const int pitch = absolute_pitch % 12;
+    const int absolute_pitch =
+      az_imax(0, parser->base_pitch + parser->pitch_adjust +
+              HALF_STEPS_PER_OCTAVE * parser->octave +
+              parser->global_transpose +
+              parser->local_transpose[parser->current_track]);
+    const int octave = absolute_pitch / HALF_STEPS_PER_OCTAVE;
+    const int pitch = absolute_pitch % HALF_STEPS_PER_OCTAVE;
     note->attributes.tone.frequency = pitch_frequencies[pitch] * (1 << octave);
     note->attributes.tone.duration = duration_seconds;
   }

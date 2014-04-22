@@ -1,14 +1,14 @@
 @M "SA|B"
 
 =tempo 70
-=key 1b
+=key 1b    % D minor
 
 
 !Part S
 
 1 Wp60 L20  E40,40  D-10,20
-2 Wt25 L45  E10,25  V+1,50
-3 Wt50 L150 E25,100 D+20,30
+2 Wt25 L60  E10,25  V+1,50
+3 Wt50 L175 E25,100 D+20,30
 4 Wn   L15  E0,100
 
 !Part A

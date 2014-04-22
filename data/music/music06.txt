@@ -1,7 +1,8 @@
 @M "S|ABB"
 
 =tempo 150
-=key 2#
+=key 2#        % Music below is in B minor
+=transpose -4  % Transpose down to G minor
 
 !Part S
 
@@ -11,9 +12,6 @@
 4 Wn   L30  E0,100
 
 !Part A
-
-1 T-4
-2 T-4
 
 1| b3q. f4q. b3e c4 | d4q. ae+h |
 2| rw | rw |
@@ -34,9 +32,7 @@
 
 !Part B
 
-1 T+8
-2 T-4
-3 T-4
+1 T+12
 
 1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +e f3e ' d4e a3 ' c4 b3 ' aq |
 2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
