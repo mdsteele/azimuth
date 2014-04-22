@@ -490,6 +490,16 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.84507, .freq_slide = 0.422535, .freq_delta_slide = -0.0986,
     .phaser_sweep = 1.0, .hpf_cutoff = 0.5
   },
+  [AZ_SND_SWITCH_ACTIVATE] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.03, .env_punch = 0.4, .env_decay = 0.47,
+    .start_freq = 0.305, .arp_mod = 0.68, .arp_speed = 0.56
+  },
+  [AZ_SND_SWITCH_CONFIRM] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.03, .env_punch = 0.4, .env_decay = 0.7,
+    .start_freq = 0.4, .arp_mod = 0.5, .arp_speed = 0.56, .repeat_speed = 0.3
+  },
   [AZ_SND_TRACTOR_BEAM] = {
     .wave_kind = AZ_WOBBLE_WAVE, .env_sustain = 1.0, .start_freq = 0.18,
     .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.4

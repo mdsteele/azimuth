@@ -215,9 +215,9 @@ $o:set82;
 !N4/5 x6920.60 y23516.50 a1.284582 u0
 !N4/1 x6832.44 y23680.11 a-1.851698 u0
 !B31 x7717.62 y23332.13 a1.251353 u5
-$k:gstat3,subi1,dup,sstat3,hnez,unlock2;
+$k:gstat3,subi1,dup,sstat3,beqz/A,snd2,halt,A#snd3,unlock2;
 !B31 x5361.84 y24337.83 a-1.795553 u4
-$k:gstat3,subi1,dup,sstat3,hnez,unlock2;
+$k:gstat3,subi1,dup,sstat3,beqz/A,snd2,halt,A#snd3,unlock2;
 !B5 x5328.78 y24199.65 a0.000000 u0
 !B5 x7371.86 y23607.18 a2.051015 u0
 !B5 x7230.88 y23815.28 a-1.865574 u0

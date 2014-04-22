@@ -180,7 +180,7 @@ $s:test39,heqz,activ1,activ2,activ3,nix4,nix5,nix6,nix7,activ8;
 !N7/61 x-2755.34 y37767.10 a-0.142904 u0
 !N7/61 x-2635.73 y37761.18 a-0.031278 u0
 !B31 x-2488.03 y37806.95 a-3.076111 u8
-$k:set39,push1,dup,dup,sstat1,sstat2,sstat3,snd1,quake1,wait0.5,quake2,wait0.5,snd1,quake3,wait0.5,quake4,wait0.5,snd1,quake5,wait1,snd1,kill4,wait1,snd1,kill5,wait1,snd1,kill6,wait1,snd1,wait0.5,kill7,wait0.5,quake0;
+$k:snd2,set39,push1,dup,dup,sstat1,sstat2,sstat3,snd1,quake1,wait0.5,quake2,wait0.5,snd1,quake3,wait0.5,quake4,wait0.5,snd1,quake5,wait1,snd1,kill4,wait1,snd1,kill5,wait1,snd1,kill6,wait1,snd1,wait0.5,kill7,wait0.5,quake0;
 !B24 x-2751.01 y38704.29 a1.641663 u0
 !B24 x-2555.68 y38154.44 a1.641663 u0
 !B3 x-2563.57 y38540.18 a-3.075044 u0

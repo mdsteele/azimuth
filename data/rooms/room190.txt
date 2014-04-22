@@ -160,7 +160,7 @@ $s:test61,heqz,nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,nix10,nix13,activ12,
 !N7/50 x-10387.92 y33960.96 a0.291705 u0
 !N5/21 x-9665.03 y33080.92 a0.284254 u10
 !B31 x-9241.03 y33025.60 a-1.297609 u20
-$k:test61,hnez,gpos10,boom,shake10,kill1,kill2,nix3,kill4,nix5,kill6,nix7,kill8,kill9,kill10,kill13,activ12,activ11,gang11,addi3.14159,sang11,set61;
+$k:test61,hnez,snd2,wait1,gpos10,boom,shake10,kill1,kill2,nix3,kill4,nix5,kill6,nix7,kill8,kill9,kill10,kill13,activ12,activ11,gang11,addi3.14159,sang11,set61;
 !B66 x-9499.82 y33584.42 a-0.502621 u0
 !B66 x-10106.82 y33571.74 a-1.278375 u0
 !B62 x-9313.77 y32951.58 a0.276633 u0
