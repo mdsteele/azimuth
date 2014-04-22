@@ -33,7 +33,8 @@ void az_tick_pickups(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) continue;
     pickup->age += time;
-    if (az_vwithin(pickup->position, ship->position,
+    if (az_ship_is_alive(ship) &&
+        az_vwithin(pickup->position, ship->position,
                    AZ_PICKUP_COLLECTION_RANGE)) {
       switch (pickup->kind) {
         case AZ_PUP_NOTHING: AZ_ASSERT_UNREACHABLE();

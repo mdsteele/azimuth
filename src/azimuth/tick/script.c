@@ -684,6 +684,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           particle->param1 = az_vdist(p1, p2);
           particle->param2 = 0.66;
         }
+        az_play_sound(&state->soundboard, AZ_SND_ELECTRICITY);
       } break;
       case AZ_OP_NPS: {
         az_vector_t position;
@@ -699,6 +700,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           particle->lifetime = ins.immediate;
           particle->param1 = 50.0 * sqrt(ins.immediate);
         }
+        az_play_sound(&state->soundboard, AZ_SND_NPS_PORTAL);
       } break;
       // Cutscenes:
       case AZ_OP_FADO:
@@ -836,14 +838,14 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       // Music/sound:
       case AZ_OP_MUS: {
         const int music_index = (int)ins.immediate;
-        if (music_index < 0 || music_index >= AZ_NUM_MUSIC_KEYS) {
+        if (music_index < 0 || music_index > AZ_NUM_MUSIC_KEYS) {
           SCRIPT_ERROR("invalid music index");
         }
         az_change_music(&state->soundboard, (az_music_key_t)music_index);
       } break;
       case AZ_OP_SND: {
         const int sound_index = (int)ins.immediate;
-        if (sound_index < 0 || sound_index >= AZ_NUM_SOUND_KEYS) {
+        if (sound_index < 0 || sound_index > AZ_NUM_SOUND_KEYS) {
           SCRIPT_ERROR("invalid sound index");
         }
         az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);

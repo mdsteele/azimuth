@@ -664,14 +664,15 @@ static const az_vector_t fire_crawler_vertices[] = {
 
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
-    .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
+    .max_health = 1000000.0,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_INCORPOREAL |
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_NORMAL_TURRET] = {
     .max_health = 5.0, .overall_bounding_radius = 30.5,
-    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .color = {160, 160, 160, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
@@ -705,19 +706,20 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 18.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BOX] = {
-    .max_health = 8.0,
+    .max_health = 8.0, .color = {160, 160, 160, 255},
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
-    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = AZ_DMGF_FREEZE, .impact_damage = 0.0 }
   },
   [AZ_BAD_ARMORED_BOX] = {
-    .max_health = 10.0,
+    .max_health = 10.0, .color = {80, 80, 160, 255},
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .color = {80, 80, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
+    .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_FREEZE | AZ_DMGF_BEAM),
+                                  AZ_DMGF_FREEZE),
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_CLAM] = {
@@ -741,9 +743,10 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_BROKEN_TURRET] = {
     .max_health = 3.0, .overall_bounding_radius = 30.5,
+    .color = {160, 160, 160, 255},
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
                           AZ_PUPF_ROCKETS),
-    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 5.0 },
     DECL_COMPONENTS(broken_turret_components)
@@ -759,6 +762,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ARMORED_TURRET] = {
     .max_health = 8.0, .overall_bounding_radius = 30.5,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {80, 80, 160, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
@@ -780,8 +784,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_CRAWLING_TURRET] = {
     .max_health = 10.0, .overall_bounding_radius = 30.5,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {160, 160, 160, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(crawling_turret_components)
@@ -852,7 +856,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_TURRET] = {
     .max_health = 20.0, .overall_bounding_radius = 30.5,
     .potential_pickups = AZ_PUPF_ALL, .color = {80, 160, 120, 255},
-    .death_sound = AZ_SND_KILL_TURRET,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM),
                    .impact_damage = 10.0 },
@@ -860,18 +864,20 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_OTH_CRAB_1] = {
     .max_health = 50.0, .potential_pickups = ~AZ_PUPF_NOTHING,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
+    .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_ORB_1] = {
     .max_health = 30.0, .potential_pickups = ~AZ_PUPF_NOTHING,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
+    .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_SNAPDRAGON] = {
-    .max_health = 60.0,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .max_health = 60.0, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
   },
@@ -1003,7 +1009,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ROCKET_TURRET] = {
     .max_health = 20.0, .overall_bounding_radius = 30.5,
     .potential_pickups = AZ_PUPF_ALL, .color = {160, 80, 120, 255},
-    .death_sound = AZ_SND_KILL_TURRET,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(rocket_turret_components)
@@ -1018,7 +1024,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_OTH_CRAB_2] = {
     .max_health = 60.0, .potential_pickups = AZ_PUPF_LARGE_SHIELDS,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
+    .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
   },
@@ -1064,7 +1071,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_PISTON] = {
     .max_health = 7.0, .overall_bounding_radius = 110.0,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
+    .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {96, 96, 128, 255},
@@ -1074,7 +1082,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_ARMORED_PISTON] = {
     .max_health = 39.0, .overall_bounding_radius = 110.0,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {128, 96, 96, 255},
@@ -1085,7 +1093,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_ARMORED_PISTON_EXT] = {
     .max_health = 39.0, .overall_bounding_radius = 110.0,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {128, 96, 96, 255},
@@ -1114,8 +1122,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_CRAWLING_MORTAR] = {
     .max_health = 20.0, .overall_bounding_radius = 30.5,
-    .potential_pickups = AZ_PUPF_ALL,
-    .color = {96, 96, 96, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .potential_pickups = AZ_PUPF_ALL, .color = {96, 96, 96, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 15.0 },
     DECL_COMPONENTS(crawling_mortar_components)
@@ -1123,7 +1131,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_OTH_ORB_2] = {
     .max_health = 50.0,
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
+    .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_FIRE_ZIPPER] = {
@@ -1141,6 +1150,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_HEAVY_TURRET] = {
     .max_health = 16.0, .overall_bounding_radius = 31.7,
     .potential_pickups = AZ_PUPF_ALL, .color = {80, 80, 160, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
@@ -1242,7 +1252,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_OTH_CRAWLER] = {
     .max_health = 20.0, .color = {255, 255, 255, 255},
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_OTH,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_TURRET,
+    .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 16.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_FIRE_CRAWLER] = {

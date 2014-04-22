@@ -163,7 +163,7 @@ typedef struct {
   double overall_bounding_radius;
   double max_health;
   az_color_t color;
-  az_sound_key_t death_sound;
+  az_sound_key_t hurt_sound, armor_sound, death_sound;
   az_death_style_t death_style;
   az_pickup_flags_t potential_pickups;
   az_baddie_flags_t static_properties;

@@ -285,8 +285,12 @@ static void on_projectile_hit_baddie(
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(proj->fired_by == AZ_SHIP_UID || proj->fired_by == AZ_NULL_UID);
   proj->last_hit_uid = baddie->uid;
-  az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
-                       proj->data->impact_damage * proj->power);
+  if (!az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
+                            proj->data->impact_damage * proj->power)) {
+    az_play_sound(&state->soundboard, baddie->data->armor_sound);
+  } else if (baddie->kind != AZ_BAD_NOTHING) {
+    az_play_sound(&state->soundboard, baddie->data->hurt_sound);
+  }
   // Note that at this point, the baddie may now be dead and removed.  So we
   // can no longer use the `baddie` or `component` pointers.
   on_projectile_hit_target(state, proj, normal);

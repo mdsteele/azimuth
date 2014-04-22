@@ -62,6 +62,7 @@ void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_FIREBALL_SLOW,
                                     0.0, center_angle, i * AZ_DEG2RAD(10));
         }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
         baddie->cooldown = 2.2;
       }
     }

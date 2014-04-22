@@ -228,18 +228,12 @@ static void kill_baddie_internal(
   if (pickups_and_scripts) {
     az_add_random_pickup(state, baddie->data->potential_pickups,
                          baddie->position);
+    az_schedule_script(state, baddie->on_kill);
+    az_on_baddie_killed(state, baddie->kind, baddie->position, baddie->angle);
   }
-  const az_baddie_kind_t kind = baddie->kind;
-  const az_vector_t position = baddie->position;
-  const double angle = baddie->angle;
-  const az_script_t *script = baddie->on_kill;
   // Remove the baddie.  After this point, we can no longer use the baddie
   // object.
   baddie->kind = AZ_BAD_NOTHING;
-  if (pickups_and_scripts) {
-    az_on_baddie_killed(state, kind, position, angle);
-    az_schedule_script(state, script);
-  }
 }
 
 static void kill_object_internal(
@@ -344,6 +338,7 @@ bool az_try_damage_baddie(
         !(component->immunities & AZ_DMGF_FREEZE) &&
         baddie->health <= fmax(damage_amount, 1.0) * freeze_threshold) {
       baddie->frozen = 1.0;
+      // TODO: play sound
     }
   }
   // Otherwise, the baddie is dead, so have it killed.
@@ -357,6 +352,7 @@ bool az_try_damage_baddie(
             (state->mode == AZ_MODE_DOORWAY &&
              state->doorway_mode.step == AZ_DWS_FADE_IN))) return true;
       state->mode = AZ_MODE_BOSS_DEATH;
+      az_play_sound(&state->soundboard, AZ_SND_BOSS_SHAKE);
       state->boss_death_mode = (az_boss_death_mode_data_t){
         .step = AZ_BDS_SHAKE, .progress = 0.0, .boss = *baddie
       };
@@ -415,6 +411,8 @@ void az_damage_ship(az_space_state_t *state, double damage,
   // If the ship can survive the damage, reduce shields and we're done.
   if (ship->player.shields > damage) {
     ship->player.shields -= damage;
+    az_play_sound(&state->soundboard, (damage >= 3.0 ? AZ_SND_HURT_SHIP :
+                                       AZ_SND_HURT_SHIP_SLIGHTLY));
     return;
   }
   // Otherwise, the ship will be destroyed.

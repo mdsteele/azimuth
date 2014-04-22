@@ -82,9 +82,9 @@ void az_after_entering_room(az_space_state_t *state) {
 static void tick_boss_death_mode(az_space_state_t *state, double time) {
   assert(state->mode == AZ_MODE_BOSS_DEATH);
   az_boss_death_mode_data_t *mode_data = &state->boss_death_mode;
-  const double shake_time = 1.0; // seconds
-  const double boom_time = 1.5; // seconds
-  const double fade_time = 1.2; // seconds
+  const double shake_time = 1.5; // seconds
+  const double boom_time = 1.0; // seconds
+  const double fade_time = 2.5; // seconds
   switch (mode_data->step) {
     case AZ_BDS_SHAKE:
       assert(mode_data->boss.kind != AZ_BAD_NOTHING);
@@ -93,6 +93,7 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
       if (mode_data->progress >= 1.0) {
         mode_data->step = AZ_BDS_BOOM;
         mode_data->progress = 0.0;
+        az_play_sound(&state->soundboard, AZ_SND_BOSS_EXPLODE);
       }
       break;
     case AZ_BDS_BOOM:

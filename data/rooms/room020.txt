@@ -1,6 +1,6 @@
-@R z0 p8/1 b1 d2 g0 n50 w35
+@R z0 p8/1 b1 d2 g1 n50 w35
   c(48469.79,320.93,1.629536,0.008697)
-$s:test1,beqz/A,nix1,halt,A#mus12,lock2,lock3,wait3,gpos1,dup2,dup4,gpos4,bolt3,gpos5,bolt3,gpos6,bolt3,gpos7,bolt3,wait1,gpos1,nps4,wait2,mus10,gpos1,gpos,vsub,vtheta,sang1,push29,sbadk1,wait2,boss1;
+$s:test1,hnez,mus12,lock2,lock3;
 !W3 d33 x-3054.40 y48335.14 a1.633985 u0
 !W3 d33 x-3075.97 y48723.23 a1.632803 u0
 !W3 d33 x-2849.39 y48547.12 a0.059051 u0
@@ -38,6 +38,8 @@ $s:test1,beqz/A,nix1,halt,A#mus12,lock2,lock3,wait3,gpos1,dup2,dup4,gpos4,bolt3,
 !W3 d34 x-2886.63 y48544.30 a2.416936 u0
 !D1 x-2568.88 y48723.43 a-3.080912 r19 u3
 !D1 x-3248.08 y48146.59 a1.634469 r22 u2
+!G1 x-2735.43 y48727.68 a1.629477 s0.00 o100.00 f250.00 r150.00 l180.00 u0
+$e:test1,hnez,wait2,gpos1,dup2,dup4,gpos4,bolt3,gpos5,bolt3,gpos6,bolt3,gpos7,bolt3,wait1,gpos1,nps4,wait2,mus10,gpos1,gpos,vsub,vtheta,sang1,push29,sbadk1,wait2,boss1;
 !N7/51 x-2738.00 y48352.77 a0.056507 u0
 !N5/1 x-3285.58 y48466.26 a1.640218 u0
 !N7/20 x-3389.68 y48213.12 a-1.503619 u0

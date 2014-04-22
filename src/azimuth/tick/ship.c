@@ -739,29 +739,30 @@ static void fire_weapons(az_space_state_t *state, double time) {
         switch (player->gun2) {
           case AZ_GUN_NONE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,
-                            AZ_SND_FIRE_GUN_NORMAL);
+                            AZ_SND_FIRE_GUN_CHARGED_NORMAL);
             break;
           case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
           case AZ_GUN_FREEZE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_FREEZE,
-                            AZ_SND_FIRE_GUN_FREEZE);
+                            AZ_SND_FIRE_GUN_CHARGED_FREEZE);
             break;
           case AZ_GUN_TRIPLE:
-            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE, 1.0,
-                           3, AZ_DEG2RAD(10), 0, AZ_SND_FIRE_GUN_NORMAL);
+            fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_TRIPLE,
+                           1.0, 3, AZ_DEG2RAD(10), 0,
+                           AZ_SND_FIRE_GUN_CHARGED_NORMAL);
             break;
           case AZ_GUN_HOMING:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_CHARGED_HOMING, 1.0,
                            4, AZ_DEG2RAD(90), AZ_DEG2RAD(45),
-                           AZ_SND_FIRE_GUN_NORMAL);
+                           AZ_SND_FIRE_GUN_CHARGED_NORMAL);
             break;
           case AZ_GUN_PHASE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE,
-                            AZ_SND_FIRE_GUN_NORMAL);
+                            AZ_SND_FIRE_GUN_CHARGED_NORMAL);
             break;
           case AZ_GUN_BURST:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 1.0, 9,
-                           AZ_DEG2RAD(5), 0, AZ_SND_FIRE_GUN_NORMAL);
+                           AZ_DEG2RAD(5), 0, AZ_SND_FIRE_GUN_CHARGED_NORMAL);
           break;
           case AZ_GUN_PIERCE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE,

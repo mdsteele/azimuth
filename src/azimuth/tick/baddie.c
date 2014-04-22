@@ -732,6 +732,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                 0.5 * baddie->data->main_body.bounding_radius,
                 AZ_DEG2RAD(i * 5), 0.0);
           }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
           baddie->cooldown = 3.0;
         }
       }
@@ -964,7 +965,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               az_projectile_t *proj = az_fire_baddie_projectile(
                   state, baddie, AZ_PROJ_OTH_ROCKET, 30.0, 0.0, 0.0);
               if (proj != NULL) {
-                proj->power = (crazy ? 0.5 : 0.7);
+                proj->power = (crazy ? 0.3 : 0.5);
                 az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
                 baddie->cooldown = (crazy ? 0.75 : 2.0);
                 ++baddie->state;

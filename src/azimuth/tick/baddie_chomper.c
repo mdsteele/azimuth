@@ -170,6 +170,7 @@ void az_tick_bad_aquatic_chomper(
             AZ_PROJ_FIREBALL_SLOW, baddie->data->main_body.bounding_radius,
             AZ_DEG2RAD(i * 5), 0.0);
       }
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
       baddie->cooldown = az_random(2.0, 4.0);
     }
   } else {

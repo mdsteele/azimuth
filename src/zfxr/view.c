@@ -79,8 +79,10 @@ static void do_print_sound(az_zfxr_state_t *state) {
   PRINT_FIELD(vibrato_speed);
   PRINT_FIELD(arp_mod);
   PRINT_FIELD(arp_speed);
-  PRINT_FIELD(square_duty);
-  PRINT_FIELD(duty_sweep);
+  if (spec->wave_kind == AZ_SQUARE_WAVE) {
+    PRINT_FIELD(square_duty);
+    PRINT_FIELD(duty_sweep);
+  }
   PRINT_FIELD(repeat_speed);
   PRINT_FIELD(phaser_offset);
   PRINT_FIELD(phaser_sweep);
