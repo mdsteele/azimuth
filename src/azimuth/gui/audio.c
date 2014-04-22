@@ -66,7 +66,7 @@ static const az_music_t *next_music = NULL;
 static struct {
   const az_sound_data_t *data;
   size_t sample_index;
-  bool loop, persisted, paused;
+  bool loop, persisted, paused, finished;
 } active_sounds[MAX_SIMULTANEOUS_SOUNDS];
 
 static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
@@ -87,7 +87,11 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
     int sound_sample = 0;
     AZ_ARRAY_LOOP(sound, active_sounds) {
       if (sound->data == NULL) continue;
-      if (sound->paused) continue;
+      if (sound->paused || sound->finished) {
+        assert(sound->persisted);
+        continue;
+      }
+      assert(sound->data->num_samples > 0);
       assert(sound->sample_index < sound->data->num_samples);
       sound_sample += sound->data->samples[sound->sample_index];
       ++sound->sample_index;
@@ -95,6 +99,8 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
         if (sound->loop) {
           assert(sound->persisted);
           sound->sample_index = 0;
+        } else if (sound->persisted) {
+          sound->finished = true;
         } else AZ_ZERO_OBJECT(sound);
       }
     }
@@ -170,6 +176,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
   // sounds that need to be started.
   for (int i = 0; i < soundboard->num_persists; ++i) {
     if (already_active[i] || !soundboard->persists[i].play) continue;
+    if (soundboard->persists[i].sound_data->num_samples == 0) continue;
     bool success = false;
     AZ_ARRAY_LOOP(sound, active_sounds) {
       if (sound->data != NULL) continue;
@@ -186,6 +193,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 
   // Third, start playing any new one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
+    if (soundboard->oneshots[i]->num_samples == 0) continue;
     bool success = false;
     AZ_ARRAY_LOOP(sound, active_sounds) {
       if (sound->data != NULL) continue;
