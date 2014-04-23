@@ -32,12 +32,23 @@
 
 /*===========================================================================*/
 
+#define ROCKWYRM_STATE_NORMAL 0
+#define ROCKWYRM_STATE_SCREAM 1
+#define ROCKWYRM_STATE_EGGS 2
+#define ROCKWYRM_STATE_AIM_SPRAY 21
+
+#define EGG_STATE_WAIT_FOR_SHIP 0
+#define EGG_STATE_HATCH_AFTER_COOLDOWN 1
+
+/*===========================================================================*/
+
 void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   assert(baddie->kind == AZ_BAD_ROCKWYRM);
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   // Open/close jaws:
-  if (baddie->cooldown < 0.5 && baddie->state != 1) {
+  if (baddie->state == ROCKWYRM_STATE_SCREAM ||
+      (baddie->cooldown < 0.5 && baddie->state != ROCKWYRM_STATE_EGGS)) {
     const double limit = AZ_DEG2RAD(45);
     const double delta = AZ_DEG2RAD(180) * time;
     baddie->components[0].angle =
@@ -51,38 +62,65 @@ void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
     baddie->components[1].angle =
       fmin(0, baddie->components[1].angle + delta);
   }
-  // State 0: Shoot a spread of bullets:
-  if (baddie->state == 0) {
+  // State NORMAL: Shoot a spread of bullets:
+  if (baddie->state == ROCKWYRM_STATE_NORMAL) {
     if (baddie->cooldown <= 0.0 &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20)) &&
         az_can_see_ship(state, baddie)) {
-      // Fire bullets.  The lower our health, the more bullets we fire.
-      const int num_projectiles = 3 + 2 * (int)floor(4 * hurt);
-      double theta = 0.0;
-      for (int i = 0; i < num_projectiles; ++i) {
-        az_fire_baddie_projectile(
-            state, baddie, AZ_PROJ_STINGER,
-            baddie->data->main_body.bounding_radius, 0.0, theta);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
-        theta = -theta;
-        if (i % 2 == 0) theta += AZ_DEG2RAD(10);
+      if (hurt >= 0.35 && az_random(0, 1) < 0.25) {
+        int num_wyrmlings = 0;
+        AZ_ARRAY_LOOP(other, state->baddies) {
+          if (other->kind == AZ_BAD_WYRMLING) ++num_wyrmlings;
+        }
+        if (num_wyrmlings <= 6) {
+          az_play_sound(&state->soundboard, AZ_SND_ROCKWYRM_SCREAM);
+          baddie->state = ROCKWYRM_STATE_SCREAM;
+          baddie->cooldown = 1.0;
+        }
       }
-      // Below 35% health, we have a 20% chance to go to state 20 (firing a
-      // long spray of bullets).
-      if (hurt >= 0.65 && az_random(0, 1) < 0.2) {
-        baddie->state = 20;
-        baddie->cooldown = 3.0;
+      if (baddie->state != ROCKWYRM_STATE_SCREAM) {
+        // Fire bullets.  The lower our health, the more bullets we fire.
+        const int num_projectiles = 3 + 2 * (int)floor(4 * hurt);
+        double theta = 0.0;
+        for (int i = 0; i < num_projectiles; ++i) {
+          az_fire_baddie_projectile(
+              state, baddie, AZ_PROJ_STINGER,
+              baddie->data->main_body.bounding_radius, 0.0, theta);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
+          theta = -theta;
+          if (i % 2 == 0) theta += AZ_DEG2RAD(10);
+        }
+        // Below 35% health, we have a 20% chance to go to state 20 (firing a
+        // long spray of bullets).
+        if (hurt >= 0.65 && az_random(0, 1) < 0.2) {
+          baddie->state = ROCKWYRM_STATE_AIM_SPRAY;
+          baddie->cooldown = 3.0;
+        }
+        // Otherwise, we have a 50/50 chance to stay in state 0, or to go to
+        // state 2 (drop eggs).
+        else if (az_random(0, 1) < 0.5) {
+          baddie->state = ROCKWYRM_STATE_EGGS;
+          baddie->cooldown = 1.0;
+        } else baddie->cooldown = az_random(2.0, 4.0);
       }
-      // Otherwise, we have a 50/50 chance to stay in state 0, or to go to
-      // state 1 (drop eggs).
-      else if (az_random(0, 1) < 0.5) {
-        baddie->state = 1;
-        baddie->cooldown = 1.0;
-      } else baddie->cooldown = az_random(2.0, 4.0);
     }
   }
-  // State 1: Drop eggs:
-  else if (baddie->state == 1) {
+  // State SCREAM: Scream and summon more wyrmlings:
+  else if (baddie->state == ROCKWYRM_STATE_SCREAM) {
+    az_shake_camera(&state->camera, 3.5, 7.0);
+    if (baddie->cooldown <= 0.0) {
+      AZ_ARRAY_LOOP(node, state->nodes) {
+        if (node->kind != AZ_NODE_MARKER) continue;
+        if (az_random(0, 1) > hurt) continue;
+        az_add_baddie(state, AZ_BAD_WYRMLING, node->position,
+                      az_vtheta(az_vsub(baddie->position, node->position)));
+      }
+      baddie->state = ROCKWYRM_STATE_NORMAL;
+      baddie->cooldown = az_random(3.0, 5.0);
+    }
+  }
+  // State EGGS: Drop eggs:
+  else if (baddie->state == ROCKWYRM_STATE_EGGS) {
     if (baddie->cooldown <= 0.0) {
       // The lower our health, the more eggs we drop at once.
       const int num_eggs = 1 + (int)floor(4 * hurt);
@@ -99,24 +137,25 @@ void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
           egg->velocity = az_vpolar(az_random(50, 150), egg->angle);
           // Set the egg to hatch (without waiting for the ship to get
           // close first) after a random amount of time.
-          egg->state = 1;
+          egg->state = EGG_STATE_HATCH_AFTER_COOLDOWN;
           egg->cooldown = az_random(2.0, 2.5);
         } else break;
       }
-      baddie->state = 0;
+      baddie->state = ROCKWYRM_STATE_NORMAL;
       baddie->cooldown = az_random(1.0, 3.0);
     }
   }
-  // State 20: Wait until we have line of sight:
-  else if (baddie->state == 20) {
+  // State AIM_SPRAY: Wait until we have line of sight:
+  else if (baddie->state == ROCKWYRM_STATE_AIM_SPRAY) {
     if (baddie->cooldown <= 0.0 &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
         az_can_see_ship(state, baddie)) {
       --baddie->state;
     }
   }
-  // States 2-19: Fire a steady spray of bullets:
-  else if (2 <= baddie->state && baddie->state <= 19) {
+  // Between states EGGS and AIM_SPRAY: Fire a steady spray of bullets:
+  else if (ROCKWYRM_STATE_EGGS < baddie->state &&
+           baddie->state < ROCKWYRM_STATE_AIM_SPRAY) {
     if (baddie->cooldown <= 0.0) {
       for (int i = -1; i <= 1; ++i) {
         az_fire_baddie_projectile(
@@ -128,11 +167,13 @@ void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
       baddie->cooldown = 0.1;
       --baddie->state;
     }
-  } else baddie->state = 0;
+  } else baddie->state = ROCKWYRM_STATE_NORMAL;
   // Chase ship; get slightly slower as we get hurt.
   az_snake_towards(baddie, time, 2, 130.0 - 10.0 * hurt, 50.0,
                    state->ship.position);
 }
+
+/*===========================================================================*/
 
 void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
@@ -144,16 +185,13 @@ void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
     baddie->velocity =
       az_vadd(baddie->velocity, az_vmul(drag_force, time));
   }
-  // State 0: Wait for ship to draw near.
-  if (baddie->state == 0) {
+  if (baddie->state == EGG_STATE_WAIT_FOR_SHIP) {
     if (az_ship_in_range(state, baddie, 200) &&
         az_can_see_ship(state, baddie)) {
-      baddie->state = 1;
+      baddie->state = EGG_STATE_HATCH_AFTER_COOLDOWN;
       baddie->cooldown = 2.0;
     }
-  }
-  // State 1: Hatch as soon as cooldown reaches zero.
-  else {
+  } else {
     if (baddie->cooldown <= 0.0) {
       const az_vector_t position = baddie->position;
       const double angle = baddie->angle;

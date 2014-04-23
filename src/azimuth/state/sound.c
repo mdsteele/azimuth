@@ -410,12 +410,22 @@ static az_sound_spec_t sound_specs[] = {
     .hpf_cutoff = 0.285813, .hpf_ramp = 0.760594, .volume_adjust = 0.5
   },
   [AZ_SND_HURT_OTH] = {
-    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.355, .env_punch = 0.000476076, .env_decay = 0.35,
     .start_freq = 0.455, .freq_slide = 0.25, .freq_delta_slide = -0.28,
     .vibrato_depth = 0.78, .vibrato_speed = 0.625,
     .arp_mod = 0.54, .arp_speed = 0.595,
     .phaser_offset = -0.43, .hpf_cutoff = 0.485, .volume_adjust = 0.5
+  },
+  [AZ_SND_HURT_ROCKWYRM] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_attack = 0.00378904, .env_sustain = 0.04,
+    .env_punch = 0.14, .env_decay = 0.555,
+    .start_freq = 0.5, .freq_slide = 0.16, .freq_delta_slide = 0.24,
+    .vibrato_depth = 0.227081, .vibrato_speed = 0.776884,
+    .repeat_speed = 0.555, .phaser_offset = -0.31, .phaser_sweep = -0.2,
+    .lpf_cutoff = 0.472522, .lpf_ramp = 0.12, .lpf_resonance = -0.77,
+    .hpf_ramp = 0.00133439
   },
   [AZ_SND_HURT_SHIP] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
@@ -591,6 +601,16 @@ static az_sound_spec_t sound_specs[] = {
     .env_sustain = 0.1376, .env_decay = 0.288732379675,
     .start_freq = 0.225352108479, .freq_slide = 0.2832,
     .repeat_speed = 0.542253494263
+  },
+  [AZ_SND_ROCKWYRM_SCREAM] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_attack = 0.00378904, .env_sustain = 0.26,
+    .env_punch = 0.14, .env_decay = 0.97,
+    .start_freq = 0.96, .freq_slide = -0.24, .freq_delta_slide = -0.48,
+    .vibrato_depth = 0.545, .vibrato_speed = 0.665, .repeat_speed = 0.675,
+    .phaser_offset = -0.31, .phaser_sweep = -0.2,
+    .lpf_cutoff = 0.472522, .lpf_ramp = 0.12, .lpf_resonance = -0.77,
+    .hpf_ramp = 0.00133439
   },
   [AZ_SND_SONIC_SCREECH] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,

@@ -1,0 +1,72 @@
+@M "SAB|CCADDX"
+% Title: "Facing Goliath"
+
+=tempo 130
+=key 3#        % F# minor
+=loudness 1.2
+
+
+!Part S
+
+1 Wp75 L35  E0,25 D-15,20 V+3,80
+2 Wp12 L50  E0,15 D+5,50 V+1,50
+3 Wt25 L250 E0,25 D+10,20
+4 Wn   L30  E0,100
+5 Wn   L60  E0,100
+
+!Part A
+
+1| c5e c ' ds de ds ' ce c ' ds de ds |
+2| c4e c ' ds de ds ' ce c ' ds de ds |
+3| f1q ' c ' f ' c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 x5q x3s x3 x3 x3 x5q |
+
+1| c5e c ' ds de ds ' ce c ' ds de ds |
+2| c4e c ' ds de ds ' ce c ' ds de ds |
+3| f1q ' c ' f ' c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 x5q x3s x3 x3 x3 x5q |
+
+!Part B
+
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+1 L0
+
+!Part C
+
+1| rq    ' c4q ' f      ' c    |
+2| re f3 ' g a ' b as g ' ae f |
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+2| a3e fs e ' fe c ' g e ' fq |
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+!Part D
+
+1| rq    ' rq  ' f5e gs a ' ge e |
+2| re f4 ' g a ' b as g ' ae f |
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+1| g5s g ee ' fq   ' rh       |
+2| a4e gs f ' ge e ' g e# ' fq |
+3| f2e c ' f c ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x0e c7 x0 c7 x0 c7 x0 c7 |
+
+!Part X
+
+1 L35

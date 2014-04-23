@@ -27,7 +27,7 @@
 /*===========================================================================*/
 
 // The number of different sound keys there are, not counting AZ_SND_NOTHING:
-#define AZ_NUM_SOUND_KEYS 79
+#define AZ_NUM_SOUND_KEYS 81
 
 typedef enum {
   AZ_SND_NOTHING = 0,
@@ -86,6 +86,7 @@ typedef enum {
   AZ_SND_HURT_CRAWLER,
   AZ_SND_HURT_FISH,
   AZ_SND_HURT_OTH,
+  AZ_SND_HURT_ROCKWYRM,
   AZ_SND_HURT_SHIP,
   AZ_SND_HURT_SHIP_SLIGHTLY,
   AZ_SND_HURT_SWOOPER,
@@ -106,6 +107,7 @@ typedef enum {
   AZ_SND_ORION_BOOSTER,
   AZ_SND_PICKUP_ORDNANCE,
   AZ_SND_PICKUP_SHIELDS,
+  AZ_SND_ROCKWYRM_SCREAM,
   AZ_SND_SONIC_SCREECH,
   AZ_SND_SPLASH,
   AZ_SND_TRACTOR_BEAM,

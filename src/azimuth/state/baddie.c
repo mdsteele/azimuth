@@ -810,8 +810,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_ROCKWYRM] = {
     .max_health = 150.0, .overall_bounding_radius = 500.0,
-    .color = {192, 255, 128, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .color = {192, 255, 128, 255}, .hurt_sound = AZ_SND_HURT_ROCKWYRM,
     .main_body = { .bounding_radius = 24.0, .impact_damage = 5.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
     DECL_COMPONENTS(rockwyrm_components)
@@ -826,7 +825,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_WYRMLING] = {
     .max_health = 0.1, .overall_bounding_radius = 30.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {192, 255, 128, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .death_sound = AZ_SND_KILL_SWOOPER, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 5.0, .impact_damage = 3.0,
                    .immunities = AZ_DMGF_FREEZE },
     DECL_COMPONENTS(wyrmling_components)
