@@ -21,6 +21,9 @@
 #ifndef ZFXR_VIEW_H_
 #define ZFXR_VIEW_H_
 
+#include <stdbool.h>
+
+#include "azimuth/util/key.h"
 #include "zfxr/state.h"
 
 /*===========================================================================*/
@@ -28,6 +31,9 @@
 void az_zfxr_draw_screen(const az_zfxr_state_t *state);
 
 void az_zfxr_on_click(az_zfxr_state_t *state, int x, int y);
+
+void az_zfxr_on_keypress(az_zfxr_state_t *state, az_key_id_t key_id,
+                         bool shift);
 
 /*===========================================================================*/
 

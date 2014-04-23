@@ -20,6 +20,7 @@
 #include "zfxr/view.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -136,16 +137,18 @@ static const struct {
   { .left = 550, .top = 10, .name = "Wobble", .kind = AZ_WOBBLE_WAVE },
 };
 
-#define MAKE_SLIDER(y, name_string, fieldname, negative) \
-  { .y_index = (y), .name = (name_string), .allow_negative = (negative), \
-    .field_offset = offsetof(az_sound_spec_t, fieldname) }
-
-static const struct {
+typedef struct {
   int y_index;
   const char *name;
   size_t field_offset;
   bool allow_negative;
-} sliders[] = {
+} az_zfxr_slider_t;
+
+#define MAKE_SLIDER(y, name_string, fieldname, negative) \
+  { .y_index = (y), .name = (name_string), .allow_negative = (negative), \
+    .field_offset = offsetof(az_sound_spec_t, fieldname) }
+
+static const az_zfxr_slider_t sliders[] = {
   MAKE_SLIDER(0, "Square duty", square_duty, false),
   MAKE_SLIDER(1, "Duty sweep", duty_sweep, true),
   MAKE_SLIDER(3, "Volume adjust", volume_adjust, true),
@@ -170,6 +173,18 @@ static const struct {
   MAKE_SLIDER(24, "HPF cutoff", hpf_cutoff, false),
   MAKE_SLIDER(25, "HPF sweep", hpf_ramp, true)
 };
+
+static int current_slider = -1;
+
+static float get_slider_value(const az_zfxr_state_t *state,
+                          const az_zfxr_slider_t *slider) {
+  return *(float*)((char*)(&state->sound_spec) + slider->field_offset);
+}
+
+static float *mutable_slider_value(az_zfxr_state_t *state,
+                                   const az_zfxr_slider_t *slider) {
+  return (float*)((char*)(&state->sound_spec) + slider->field_offset);
+}
 
 /*===========================================================================*/
 
@@ -203,9 +218,9 @@ void az_zfxr_draw_screen(const az_zfxr_state_t *state) {
                    button->top + 6, button->name);
   }
 
+  int slider_index = 0;
   AZ_ARRAY_LOOP(slider, sliders) {
-    const float value =
-      *(float*)((char*)(&state->sound_spec) + slider->field_offset);
+    const float value = get_slider_value(state, slider);
     const int top = 40 + 16 * slider->y_index;
     const GLfloat x_0 = (slider->allow_negative ? 400.0f : 300.0f);
     const GLfloat value_x =
@@ -225,8 +240,10 @@ void az_zfxr_draw_screen(const az_zfxr_state_t *state) {
       glVertex2f(SLIDER_RIGHT + 0.5, top + SLIDER_HEIGHT + 0.5);
       glVertex2f(SLIDER_RIGHT + 0.5, top +  0.5);
     } glEnd();
+    if (current_slider == slider_index) glColor3f(0, 1, 1);
     az_draw_string(8, AZ_ALIGN_RIGHT, 290, top + 2, slider->name);
     az_draw_printf(8, AZ_ALIGN_LEFT, 510, top + 2, "%.03f", (double)value);
+    ++slider_index;
   }
 
   glColor3f(1, 1, 1);
@@ -240,11 +257,13 @@ void az_zfxr_draw_screen(const az_zfxr_state_t *state) {
 /*===========================================================================*/
 
 void az_zfxr_on_click(az_zfxr_state_t *state, int x, int y) {
+  current_slider = -1;
+
   AZ_ARRAY_LOOP(button, buttons) {
     if (x >= button->left && x <= button->left + BUTTON_WIDTH &&
         y >= button->top && y <= button->top + BUTTON_HEIGHT) {
       button->action(state);
-      break;
+      return;
     }
   }
 
@@ -253,16 +272,16 @@ void az_zfxr_on_click(az_zfxr_state_t *state, int x, int y) {
         y >= button->top && y <= button->top + BUTTON_HEIGHT) {
       state->sound_spec.wave_kind = button->kind;
       state->request_play = true;
-      break;
+      return;
     }
   }
 
+  int slider_index = 0;
   AZ_ARRAY_LOOP(slider, sliders) {
     const int top = 40 + 16 * slider->y_index;
     if (x >= SLIDER_LEFT && x <= SLIDER_RIGHT &&
         y >= top && y <= top + SLIDER_HEIGHT) {
-      float *value =
-        (float*)((char*)(&state->sound_spec) + slider->field_offset);
+      float *value = mutable_slider_value(state, slider);
       if (slider->allow_negative) {
         *value = (float)(x - SLIDER_CENTER) / (float)(SLIDER_WIDTH/2);
         assert(*value >= -1.0f);
@@ -273,7 +292,37 @@ void az_zfxr_on_click(az_zfxr_state_t *state, int x, int y) {
         assert(*value <= 1.0f);
       }
       state->request_play = true;
+      current_slider = slider_index;
+      return;
     }
+    ++slider_index;
+  }
+}
+
+void az_zfxr_on_keypress(az_zfxr_state_t *state, az_key_id_t key_id,
+                         bool shift) {
+  switch (key_id) {
+    case AZ_KEY_SPACE:
+      state->request_play = true;
+      break;
+    case AZ_KEY_LEFT_ARROW:
+      if (current_slider >= 0) {
+        assert(current_slider < AZ_ARRAY_SIZE(sliders));
+        const az_zfxr_slider_t *slider = &sliders[current_slider];
+        float *value = mutable_slider_value(state, slider);
+        *value = fmax((slider->allow_negative ? -1.0 : 0.0),
+                      *value - (shift ? 0.001 : 0.01));
+      }
+      break;
+    case AZ_KEY_RIGHT_ARROW:
+      if (current_slider >= 0) {
+        assert(current_slider < AZ_ARRAY_SIZE(sliders));
+        const az_zfxr_slider_t *slider = &sliders[current_slider];
+        float *value = mutable_slider_value(state, slider);
+        *value = fmin(1.0, *value + (shift ? 0.001 : 0.01));
+      }
+      break;
+    default: break;
   }
 }
 

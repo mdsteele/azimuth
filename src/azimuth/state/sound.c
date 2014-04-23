@@ -621,6 +621,20 @@ static az_sound_spec_t sound_specs[] = {
     .wave_kind = AZ_WOBBLE_WAVE, .env_sustain = 1.0, .start_freq = 0.18,
     .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.4
   },
+  [AZ_SND_USE_COMM_CONSOLE] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_attack = 0.4, .env_sustain = 0.75, .env_decay = 0.4,
+    .start_freq = 0.42, .freq_slide = -0.11, .freq_delta_slide = 0.16,
+    .arp_mod = -0.43, .arp_speed = 0.665, .repeat_speed = 0.46,
+    .volume_adjust = -0.8
+  },
+  [AZ_SND_USE_REFILL_CONSOLE] = {
+    .wave_kind = AZ_TRIANGLE_WAVE,
+    .env_attack = 0.4, .env_sustain = 0.6, .env_decay = 0.3,
+    .start_freq = 0.23, .freq_slide = 0.09,
+    .vibrato_depth = 0.305, .vibrato_speed = 0.615,
+    .arp_mod = 0.59, .arp_speed = 0.55
+  },
   [AZ_SND_USE_SAVE_CONSOLE] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_attack = 0.255, .env_sustain = 0.685,

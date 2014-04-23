@@ -44,9 +44,7 @@ static void event_loop(void) {
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
-          if (event.key.id == AZ_KEY_SPACE) {
-            state.request_play = true;
-          }
+          az_zfxr_on_keypress(&state, event.key.id, event.key.shift);
           break;
         case AZ_EVENT_MOUSE_DOWN:
           az_zfxr_on_click(&state, event.mouse.x, event.mouse.y);
