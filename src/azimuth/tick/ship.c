@@ -758,7 +758,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
             break;
           case AZ_GUN_PHASE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PHASE,
-                            AZ_SND_FIRE_GUN_CHARGED_NORMAL);
+                            AZ_SND_FIRE_GUN_CHARGED_PHASE);
             break;
           case AZ_GUN_BURST:
             fire_gun_multi(state, 0.0, AZ_PROJ_GUN_BURST, 1.0, 9,
@@ -766,7 +766,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           break;
           case AZ_GUN_PIERCE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_PIERCE,
-                            AZ_SND_FIRE_GUN_PIERCE);
+                            AZ_SND_FIRE_GUN_CHARGED_PIERCE);
             break;
           case AZ_GUN_BEAM:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_BEAM,

@@ -27,7 +27,7 @@
 /*===========================================================================*/
 
 // The number of different sound keys there are, not counting AZ_SND_NOTHING:
-#define AZ_NUM_SOUND_KEYS 65
+#define AZ_NUM_SOUND_KEYS 77
 
 typedef enum {
   AZ_SND_NOTHING = 0,
@@ -67,6 +67,8 @@ typedef enum {
   AZ_SND_FIRE_GUN_CHARGED_BEAM,
   AZ_SND_FIRE_GUN_CHARGED_FREEZE,
   AZ_SND_FIRE_GUN_CHARGED_NORMAL,
+  AZ_SND_FIRE_GUN_CHARGED_PHASE,
+  AZ_SND_FIRE_GUN_CHARGED_PIERCE,
   AZ_SND_FIRE_GUN_FREEZE,
   AZ_SND_FIRE_GUN_NORMAL,
   AZ_SND_FIRE_GUN_PIERCE,
@@ -77,15 +79,24 @@ typedef enum {
   AZ_SND_FIRE_OTH_SPRAY,
   AZ_SND_FIRE_ROCKET,
   AZ_SND_FIRE_STINGER,
+  AZ_SND_FREEZE_BADDIE,
   AZ_SND_HEAT_DAMAGE,
   AZ_SND_HIT_ARMOR,
   AZ_SND_HIT_WALL,
+  AZ_SND_HURT_CRAWLER,
+  AZ_SND_HURT_FISH,
   AZ_SND_HURT_OTH,
   AZ_SND_HURT_SHIP,
   AZ_SND_HURT_SHIP_SLIGHTLY,
+  AZ_SND_HURT_SWOOPER,
   AZ_SND_HURT_TURRET,
+  AZ_SND_HURT_ZIPPER,
   AZ_SND_KILL_ATOM,
   AZ_SND_KILL_DRAGONFLY,
+  AZ_SND_KILL_FIRE_CRAWLER,
+  AZ_SND_KILL_FISH,
+  AZ_SND_KILL_OTH,
+  AZ_SND_KILL_SWOOPER,
   AZ_SND_KILL_TURRET,
   AZ_SND_KLAXON,
   AZ_SND_KLAXON_DIRE,
@@ -97,7 +108,8 @@ typedef enum {
   AZ_SND_PICKUP_SHIELDS,
   AZ_SND_SONIC_SCREECH,
   AZ_SND_SPLASH,
-  AZ_SND_TRACTOR_BEAM
+  AZ_SND_TRACTOR_BEAM,
+  AZ_SND_USE_SAVE_CONSOLE,
 } az_sound_key_t;
 
 /*===========================================================================*/

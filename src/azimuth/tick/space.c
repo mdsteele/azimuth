@@ -159,6 +159,9 @@ static void tick_console_mode(az_space_state_t *state, double time) {
       if (mode_data->progress >= 1.0) {
         mode_data->step = AZ_CSS_USE;
         mode_data->progress = 0.0;
+        if (node->subkind.console == AZ_CONS_SAVE) {
+          az_play_sound(&state->soundboard, AZ_SND_USE_SAVE_CONSOLE);
+        }
       }
       break;
     case AZ_CSS_USE:

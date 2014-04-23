@@ -94,6 +94,7 @@ void az_tick_bad_fire_crawler(
         state, baddie, AZ_PROJ_FIREBALL_SLOW, 0.0, 0.0,
         az_vtheta(az_vsub(state->ship.position, baddie->position)) +
         AZ_DEG2RAD(5) * az_random(-1, 1) - baddie->angle);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
     baddie->cooldown = 0.1;
     --baddie->state;
   }

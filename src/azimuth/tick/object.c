@@ -337,8 +337,10 @@ bool az_try_damage_baddie(
     if ((damage_kind & AZ_DMGF_FREEZE) &&
         !(component->immunities & AZ_DMGF_FREEZE) &&
         baddie->health <= fmax(damage_amount, 1.0) * freeze_threshold) {
+      if (baddie->frozen <= 0.0) {
+        az_play_sound(&state->soundboard, AZ_SND_FREEZE_BADDIE);
+      }
       baddie->frozen = 1.0;
-      // TODO: play sound
     }
   }
   // Otherwise, the baddie is dead, so have it killed.
