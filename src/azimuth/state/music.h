@@ -48,6 +48,8 @@ typedef enum {
 
 /*===========================================================================*/
 
+void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out);
+
 bool az_init_music_datas(const char *resource_dir);
 
 // Indicate that we would like to change which music is playing.

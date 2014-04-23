@@ -65,6 +65,8 @@ typedef struct {
   int current_char; // the most recent character read from the file
   int line, col;
   jmp_buf jump;
+  int num_drums;
+  const az_sound_data_t *drums;
 
   int spec_string_length;
   char spec_string[MAX_SPEC_LENGTH];
@@ -99,15 +101,22 @@ typedef struct {
   int octave;
   int global_transpose; // num half steps
   int local_transpose[AZ_MUSIC_NUM_TRACKS]; // num half steps
+  const az_sound_data_t *current_drum;
   double base_duration; // 1 = whole note
   double extra_duration; // 1 = whole note
 } az_music_parser_t;
 
-az_music_parser_t *new_music_parser(az_music_t *music, FILE *file) {
+az_music_parser_t *new_music_parser(
+    az_music_t *music, FILE *file, int num_drums,
+    const az_sound_data_t *drums) {
+  assert(num_drums >= 0);
+  assert(drums != NULL || num_drums == 0);
   az_music_parser_t *parser = AZ_ALLOC(1, az_music_parser_t);
   parser->music = music;
   parser->file = file;
   parser->line = 1;
+  parser->num_drums = num_drums;
+  parser->drums = drums;
   AZ_ARRAY_LOOP(part_index, parser->part_indices) *part_index = -1;
   parser->loudness_multiplier = 1.0;
   parser->seconds_per_whole_note = 2.0;
@@ -352,13 +361,34 @@ static void start_pitch(az_music_parser_t *parser, int named_pitch,
   parser->state = ADJUST_PITCH;
 }
 
+static void start_drum(az_music_parser_t *parser) {
+  if (parser->current_part < 0) {
+    PARSE_ERROR("can't start drum outside of any part\n");
+  }
+  if (parser->current_track < 0) {
+    PARSE_ERROR("can't start drum before setting the current track\n");
+  }
+  int drum_number;
+  if (!TRY_READ("%d", &drum_number) ||
+      drum_number < 0 || drum_number >= parser->num_drums) {
+    PARSE_ERROR("invalid drum number\n");
+  }
+  parser->current_drum = &parser->drums[drum_number];
+  parser->state = BEGIN_DURATION;
+}
+
 static void emit_note(az_music_parser_t *parser) {
   az_music_note_t *note = next_note(parser);
   parser->base_duration += parser->extra_duration;
   parser->extra_duration = 0.0;
   const double duration_seconds =
     parser->seconds_per_whole_note * parser->base_duration;
-  if (parser->named_pitch < 0) {
+  if (parser->current_drum != NULL) {
+    note->type = AZ_NOTE_DRUM;
+    note->attributes.drum.duration = duration_seconds;
+    note->attributes.drum.data = parser->current_drum;
+    parser->current_drum = NULL;
+  } else if (parser->named_pitch < 0) {
     note->type = AZ_NOTE_REST;
     note->attributes.rest.duration = duration_seconds;
   } else {
@@ -386,7 +416,7 @@ static void parse_music_data(az_music_parser_t *parser) {
           case '\n': begin_line(parser); break;
           case '!': parse_part_heading(parser); break;
           case '=': parse_directive(parser); break;
-          case '1': case '2': case '3': case '4':
+          case '1': case '2': case '3': case '4': case '5':
             if (parser->current_part < 0) {
               PARSE_ERROR("can't set track outside of any part\n");
             }
@@ -413,6 +443,7 @@ static void parse_music_data(az_music_parser_t *parser) {
           case 'f': start_pitch(parser,  5, -7, 1); break;
           case 'g': start_pitch(parser,  7, -5, 3); break;
           case 'r': start_pitch(parser, -1, -9, 9); break;
+          case 'x': start_drum(parser); break;
           case ' ': case '|': case '\'': break;
           case '\n': begin_line(parser); break;
           default: PARSE_ERROR("invalid char at start-of-note: '%c'\n", ch);
@@ -580,12 +611,15 @@ static bool parse_music(az_music_parser_t *parser) {
 
 /*===========================================================================*/
 
-bool az_parse_music_from_file(const char *filepath, az_music_t *music_out) {
+bool az_parse_music_from_file(
+    const char *filepath, int num_drums, const az_sound_data_t *drums,
+    az_music_t *music_out) {
   assert(music_out != NULL);
   AZ_ZERO_OBJECT(music_out);
   FILE *file = fopen(filepath, "r");
   if (file == NULL) return false;
-  az_music_parser_t *parser = new_music_parser(music_out, file);
+  az_music_parser_t *parser =
+    new_music_parser(music_out, file, num_drums, drums);
   const bool success = parse_music(parser);
   free_music_parser(parser);
   fclose(file);
@@ -662,6 +696,13 @@ static void synth_advance(az_music_synth_t *synth) {
             }
             voice->time_from_note_start -= note->attributes.tone.duration;
             break;
+          case AZ_NOTE_DRUM:
+            if (voice->time_from_note_start <
+                note->attributes.drum.duration) {
+              goto sustain;
+            }
+            voice->time_from_note_start -= note->attributes.drum.duration;
+            break;
           case AZ_NOTE_DUTYMOD:
             voice->dutymod_depth = note->attributes.dutymod.depth;
             voice->dutymod_speed = note->attributes.dutymod.speed;
@@ -684,6 +725,7 @@ static void synth_advance(az_music_synth_t *synth) {
             break;
         }
         ++voice->note_index;
+        voice->drum_index = 0;
       }
     sustain:;
     }
@@ -716,7 +758,7 @@ void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
     return;
   }
   for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
-    int16_t sample = 0;
+    int sample = 0;
     AZ_ARRAY_LOOP(voice, synth->voices) {
       if (voice->loudness <= 0.0) continue;
       const az_music_track_t *track = voice->track;
@@ -773,9 +815,16 @@ void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
            voice->time_from_note_start / voice->attack_time : 1.0) *
           (time_remaining < decay_time ? time_remaining / decay_time : 1.0);
         sample += (amplitude / SYNTH_SUPERSAMPLE) * envelope * voice->loudness;
+      } else if (note->type == AZ_NOTE_DRUM) {
+        const az_sound_data_t *data = note->attributes.drum.data;
+        if (voice->drum_index < data->num_samples) {
+          sample += ((1.0 / BASE_LOUDNESS) * voice->loudness *
+                     data->samples[voice->drum_index]);
+          ++voice->drum_index;
+        }
       } else assert(note->type == AZ_NOTE_REST);
     }
-    samples[sample_index] = sample;
+    samples[sample_index] = az_imin(az_imax(INT16_MIN, sample), INT16_MAX);
 
     AZ_ARRAY_LOOP(voice, synth->voices) {
       if (voice->note_index < voice->track->num_notes) {

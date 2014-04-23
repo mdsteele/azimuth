@@ -28,11 +28,12 @@
 
 /*===========================================================================*/
 
-#define AZ_MUSIC_NUM_TRACKS 4
+#define AZ_MUSIC_NUM_TRACKS 5
 
 typedef enum {
   AZ_NOTE_REST,
   AZ_NOTE_TONE,
+  AZ_NOTE_DRUM,
   AZ_NOTE_DUTYMOD,
   AZ_NOTE_ENVELOPE,
   AZ_NOTE_LOUDNESS,
@@ -50,6 +51,10 @@ typedef struct {
       double duration; // seconds
       double frequency; // Hz
     } tone;
+    struct {
+      double duration; // seconds
+      const az_sound_data_t *data;
+    } drum;
     struct {
       double depth;
       double speed;
@@ -89,7 +94,9 @@ typedef struct {
   az_music_part_t *parts;
 } az_music_t;
 
-bool az_parse_music_from_file(const char *filepath, az_music_t *music_out);
+bool az_parse_music_from_file(
+    const char *filepath, int num_drums, const az_sound_data_t *drums,
+    az_music_t *music_out);
 
 void az_destroy_music(az_music_t *music);
 
@@ -102,6 +109,7 @@ typedef struct {
   struct {
     const az_music_track_t *track;
     int note_index;
+    size_t drum_index;
     double time_from_note_start;
     az_sound_wave_kind_t waveform;
     double duty;

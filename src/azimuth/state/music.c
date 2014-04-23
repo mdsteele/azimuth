@@ -31,6 +31,81 @@
 
 /*===========================================================================*/
 
+static bool drums_initialized = false;
+
+static const az_sound_spec_t drum_specs[] = {
+  // Base drum:
+  [0] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.163306, .env_punch = 0.315, .env_decay = 0.295,
+    .start_freq = 0.175, .freq_delta_slide = -0.713252,
+    .arp_mod = -0.548859, .arp_speed = 0.160983,
+    .repeat_speed = 0.555, .phaser_sweep = -0.35, .volume_adjust = 0.76
+  },
+  // Alternate base drum:
+  [1] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.163306, .env_punch = 0.9, .env_decay = 0.295,
+    .start_freq = 0.18, .freq_delta_slide = -0.713252,
+    .arp_mod = -0.548859, .arp_speed = 0.160983,
+    .repeat_speed = 0.65, .phaser_sweep = -0.05, .volume_adjust = 0.76
+  },
+  // Clap:
+  [2] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_decay = 0.31, .start_freq = 0.24, .freq_slide = 0.25,
+    .phaser_offset = 0.17, .volume_adjust = -0.25
+  },
+  // Tom-tom 1:
+  [3] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_sustain = 0.06, .env_punch = 1.0, .env_decay = 0.375,
+    .start_freq = 0.175, .freq_slide = -0.17, .freq_delta_slide = 0.05,
+    .volume_adjust = 0.5
+  },
+  // Tom-tom 2:
+  [4] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_sustain = 0.06, .env_punch = 1.0, .env_decay = 0.375,
+    .start_freq = 0.2, .freq_slide = -0.17, .freq_delta_slide = 0.05,
+    .volume_adjust = 0.5
+  },
+  // Tom-tom 3:
+  [5] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_sustain = 0.06, .env_punch = 1.0, .env_decay = 0.375,
+    .start_freq = 0.230, .freq_slide = -0.17, .freq_delta_slide = 0.05,
+    .volume_adjust = 0.5
+  },
+  // Tom-tom 4:
+  [6] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_sustain = 0.06, .env_punch = 1.0, .env_decay = 0.375,
+    .start_freq = 0.255, .freq_slide = -0.17, .freq_delta_slide = 0.05,
+    .volume_adjust = 0.5
+  }
+};
+
+static az_sound_data_t drum_datas[AZ_ARRAY_SIZE(drum_specs)];
+
+static void destroy_drums(void) {
+  AZ_ARRAY_LOOP(data, drum_datas) az_destroy_sound_data(data);
+}
+
+void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out) {
+  if (!drums_initialized) {
+    for (int i = 0; i < AZ_ARRAY_SIZE(drum_specs); ++i) {
+      az_create_sound_data(&drum_specs[i], &drum_datas[i]);
+    }
+    atexit(destroy_drums);
+    drums_initialized = true;
+  }
+  *num_drums_out = AZ_ARRAY_SIZE(drum_datas);
+  *drums_out = drum_datas;
+}
+
+/*===========================================================================*/
+
 static const char *music_filenames[] = {
   [AZ_MUS_COLONY_ZONE] = "music01.txt",
   [AZ_MUS_FILIMUN_ZONE] = NULL,
@@ -60,8 +135,11 @@ static void destroy_music_datas(void) {
 bool az_init_music_datas(const char *resource_dir) {
   assert(!music_data_initialized);
   assert(resource_dir != NULL);
-  music_data_initialized = true;
-  atexit(destroy_music_datas);
+  // Initialize drum kit:
+  int num_drums = 0;
+  const az_sound_data_t *drums = NULL;
+  az_get_drum_kit(&num_drums, &drums);
+  // Initialize music:
   const size_t dirlen = strlen(resource_dir);
   char path_buffer[dirlen + 30u];
   for (int i = 0; i < AZ_ARRAY_SIZE(music_filenames); ++i) {
@@ -69,11 +147,15 @@ bool az_init_music_datas(const char *resource_dir) {
     if (filename == NULL) continue;
     assert(strlen(filename) <= 20u);
     sprintf(path_buffer, "%s/music/%s", resource_dir, filename);
-    if (!az_parse_music_from_file(path_buffer, &music_datas[i])) {
+    if (!az_parse_music_from_file(path_buffer, num_drums, drums,
+                                  &music_datas[i])) {
       AZ_WARNING_ALWAYS("Failed to load music from %s\n", path_buffer);
+      destroy_music_datas();
       return false;
     }
   }
+  atexit(destroy_music_datas);
+  music_data_initialized = true;
   return true;
 }
 

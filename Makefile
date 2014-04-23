@@ -98,7 +98,8 @@ EDIT_C99FILES := $(shell find $(SRCDIR)/editor -name '*.c') \
                  $(AZ_VIEW_C99FILES)
 TEST_C99FILES := $(shell find $(SRCDIR)/test -name '*.c') \
                  $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
-MUSE_C99FILES := $(shell find $(SRCDIR)/muse -name '*.c') $(AZ_UTIL_C99FILES)
+MUSE_C99FILES := $(shell find $(SRCDIR)/muse -name '*.c') \
+                 $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES)
 ZFXR_C99FILES := $(shell find $(SRCDIR)/zfxr -name '*.c') \
                  $(AZ_UTIL_C99FILES) $(AZ_STATE_C99FILES) $(AZ_GUI_C99FILES) \
                  $(AZ_VIEW_C99FILES)
@@ -208,7 +209,8 @@ $(OBJDIR)/test/%.o: $(SRCDIR)/test/%.c \
     $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_TEST_HEADERS)
 	$(compile-c99)
 
-$(OBJDIR)/muse/%.o: $(SRCDIR)/muse/%.c $(AZ_UTIL_HEADERS) $(AZ_MUSE_HEADERS)
+$(OBJDIR)/muse/%.o: $(SRCDIR)/muse/%.c \
+    $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_MUSE_HEADERS)
 	$(compile-c99)
 
 $(OBJDIR)/zfxr/%.o: $(SRCDIR)/zfxr/%.c \

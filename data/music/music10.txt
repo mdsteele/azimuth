@@ -1,9 +1,10 @@
-@M "SA|FIFICFIFOC"
+@M "SABAC|ZOZOGIGJZOZUGIGJ"
 % Title: "Blind Fury"
 
 =tempo 150
 =key 1#        % E minor
 =loudness 1.2
+
 
 
 !Part S
@@ -12,52 +13,44 @@
 2                 V+2,100
 3 Wt75 L300 E0,25 D+10,75
 4 Wn   L40  E0,50 V-25,5
+5 Wn   L60  E0,100
+
+
 
 !Part A
 
-2 Wn L30 E0,100
-
 1| g4e e b4q  ge   b  fs f be |
-2| e0q e e e |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0q x3 x0 x3 |
 
 1| e4e b3e b4q  gs g be fq      |
-2| e0q e e e |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0q x3 x0 x3 |
 
 1| g4e e b4q  ge   b  fs f be |
-2| e0q e e e |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0q x3 x0 x3 |
+
+!Part B
 
 1| e5s e ee ds d de cs c ce b4s b be |
-2| e0q e e e |
 3| e2q f g a |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| g4e e b4q  ge   b  fs f be |
-2| e0q e e e |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| e4e b3e b4q  gs g be fq      |
-2| e0q e e e |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| g4e e b4q  ge   b  fs f be |
-2| e0q e e e |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| e5s e ee ds d de fs f fe gs g ge |
-2| e0q e e e |
-3| e2q f g a |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0q x3 x0 x3 |
 
 !Part C
+
+1| e5s e ee ds d de fs f fe gs g ge |
+3| e2q f g a |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0q x0 x0 x0 |
+
+
+
+!Part G
 
 2 Wp25 L30
 
@@ -65,43 +58,39 @@
 2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
 1| e4e b3e b4q  gs g be fq      |
 2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
 1| g4e e b4q  ge   b  fs f be |
 2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
 3| e2q ee b1s e2s+s b1s e2e de d |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
+
+!Part I
 
 1| e5s e ee ds d de cs c ce b4s b be |
 2| E75,0 f6q g a b |
 3| e2q f g a |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
-1| g4e e b4q  ge   b  fs f be |
-2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| e4e b3e b4q  gs g be fq      |
-2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
-
-1| g4e e b4q  ge   b  fs f be |
-2| E175,0 e6h Wt12 L100 E0,100 e4h Wp25 L30 |
-3| e2q ee b1s e2s+s b1s e2e de d |
-4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+!Part J
 
 1| e5s e ee ds d de fs f fe gs g ge |
 2| E75,0 f6q g a b |
 3| e2q f g a |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
-!Part F
+
+
+!Part Z
 
 2 Wp12 L30  E0,20
 
@@ -109,27 +98,32 @@
 2| b4h d5h |
 3| e2q ge es gs+s es ge be g |
 4| c1e c2s g ' c5e. rs ' c1e c2s g ' c5e. rs |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
 1| c5e  cs c ' ce gs g ' f f ge    ' dq     |
 2| g4h a4h |
 3| e2q ge es gs+s es ge be g |
 4| c1e c2s g ' c5e. rs ' c1e c2s g ' c5e. rs |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
 1| e5e es e  ' ee  g  ' fs f de   ' d ds d |
 2| b4h d5 |
 3| e2q ge es gs+s es ge be g |
 4| c1e c2s g ' c5e. rs ' c1e c2s g ' c5e. rs |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
-!Part I
+!Part O
 
 1| b5s b be  ' as a ae   ' gs g ge   ' fs f fe   |
 2| f5q e d c# |
 3| b2e d ' a c# ' g b1 ' f2 a1 |
 4| c2e c2s c ' c3e c2s c ' c1e c2s c ' c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
-!Part O
+!Part U
 
 1| b5s b be  ' c6s c ce  ' ds d de   ' d#s d# d#e |
 2| f5q g a b |
 3| b2e d ' a c# ' g b1 ' f2 a1 |
 4| c2e c2s c ' c3e c2s c ' c1e c2s c ' c3e c2s c |
+5| x0e c7 x0 c7 x0e c7 x0 c7 |
