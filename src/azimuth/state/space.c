@@ -251,6 +251,10 @@ az_projectile_t *az_add_projectile(
 void az_add_random_pickup(az_space_state_t *state,
                           az_pickup_flags_t potential_pickups,
                           az_vector_t position) {
+  az_impact_t impact;
+  az_circle_impact(state, 3.0, position, AZ_VZERO,
+                   (AZ_IMPF_SHIP | AZ_IMPF_BADDIE), AZ_NULL_UID, &impact);
+  if (impact.type != AZ_IMP_NOTHING) return;
   const az_pickup_kind_t kind =
     az_choose_random_pickup_kind(&state->ship.player, potential_pickups);
   if (kind == AZ_PUP_NOTHING) return;
