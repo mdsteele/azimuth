@@ -1,0 +1,121 @@
+@M "SN|ABC"
+% Title: "Don't Make Me Come Over There"
+
+=tempo 140
+=key 2#     % B minor
+
+
+!Part S
+
+1 Wt75 L100 E0,15 D-15,30 V-1,50
+2 Wp25 L25  E0,25
+3 Wt50 L120 E0,25 D-40,10
+4 Wn   L25  E0,100
+5 Wn   L25  E0,100
+
+
+!Part N
+
+1| rw | rw |
+2| rw | rw |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs ' ce c |
+5| rw | rw |
+
+1| rw | b3s b be ' e4s e ee ' gs f e d ' f e d c |
+2| rw | b2s b be ' e3s e ee ' gs f e d ' f e d c |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce d3s c ' d c d c |
+5| rq x2 r x2 | x0q x2 x0 x2 |
+
+
+!Part A
+
+1| b3q. c4s d cq. ds e | dq. es f eq. fs g |
+2| b2q
+3| b2q b ae be+e fe+ | +e fe+e fe a f a f |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| f4e. e de ee. d ce | de. c b3e c4e. b3 a#e |
+3| b2q b ae be+e fe+ | +e fe+e fe a f a f |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| b3q. c4s d cq. ds e | dq. es f eq. fs g |
+3| b2q b ae be+e fe+ | +e fe+e fe a f a f |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| f4e. e de ee. f ge | fh. re es fs |
+3| b2q b ae be+e fe+ | +e fe+e fe a f a f |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce d3s c ' d c d c |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+
+!Part B
+
+2 E0,25
+
+1| g4e e ' g e ' fq+'e de | ee c ' e b3s c4s ' de c ' b3 bs c4 |
+2| c3s e g e ' c e g e ' b2 d3 f d ' b2 d3 f d |
+ | a#2s c3 e c ' a#2s c3 e c ' b2 d3 f d ' b2 d3 f d |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| d4e b3 ' d4 b3 ' e4q+'e ds es | fe g ' f e ' fq+'e fe |
+2| b2s d3 f d ' b2 d3 f d ' b2 e3 g e ' b2 e3 g e |
+ | c3s f a f ' c f a f ' c4 f a f ' c a3 f a |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| g4e e ' g e ' fq ' fe g | fe fs g ' fe e ' d b3 ' d4q |
+2| e3s g b g ' e g b g ' d f b f ' d f b f |
+ | c3s f a f ' c f a f ' d b2 d3 f ' d b2 d3 f |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| b3q. c4s d cq. ds e | f4e. e ge ' fq+'e re |
+2| b2s d3 f d ' b2 d3 f d ' a#2 c3 e c ' a#2 c3 e c |
+ | c3s f a f ' c f a f ' c a2 f a ' c3 a2 f a |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+
+!Part C
+
+1| g4q+'e ee ' fq+'e de | ce cs ds ' ee c ' b3q+'e be |
+2| E75,0 b2q E0,100 b4q E75,0 b3q E0,100 b4q |
+ | E75,0 b2q E0,100 b4q E75,0 b3q E0,100 b4q |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| a#3e f ' a# f ' b f ' b f | c4e a#3 ' c4 a#3 ' bq+'e d4s es |
+2| E75,0 a#2q E0,100 a#4q E75,0 a#3q E0,100 a#4q |
+ | E75,0 a#2q E0,100 a#4q E75,0 b3q  E0,100 b4q  |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| fq ' ge e ' fq ' dq | ce cs ds ' ee c ' b3q+'e bs c4s |
+2| E75,0 b2q E0,100 b4q E75,0 b3q E0,100 b4q |
+ | E75,0 b2q E0,100 b4q E75,0 b3q E0,100 b4q |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| de. e fe ' ee. f ge | ae. f de ' b3q ' a#q |
+2| E75,0 d3q E0,100 d5q E75,0 e4q E0,100 e5q |
+ | E75,0 f3q E0,100 f5q E75,0 b3q E0,100 b4q |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
