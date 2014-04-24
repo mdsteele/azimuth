@@ -54,7 +54,7 @@ typedef enum {
 } az_console_kind_t;
 
 // The number of different doodad kinds there are:
-#define AZ_NUM_DOODAD_KINDS 22
+#define AZ_NUM_DOODAD_KINDS 23
 
 typedef enum {
   AZ_DOOD_WARNING_LIGHT,
@@ -79,6 +79,7 @@ typedef enum {
   AZ_DOOD_SHORT_CHAIN,
   AZ_DOOD_LONG_CHAIN,
   AZ_DOOD_NUCLEAR_BOMB,
+  AZ_DOOD_HANGING_VINE,
 } az_doodad_kind_t;
 
 typedef union {

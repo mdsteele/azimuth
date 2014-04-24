@@ -719,6 +719,44 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         } glEnd();
       }
       break;
+    case AZ_DOOD_HANGING_VINE:
+      glBegin(GL_TRIANGLE_STRIP); {
+        for (int i = 0; i <= 60; i += 3) {
+          const GLfloat deviation = 0.1 * ((29 * i) % 12);
+          glColor3f(0.3, 0.5, 0); glVertex2f(30 - i, deviation);
+          glColor3f(0.1, 0.25, 0); glVertex2f(30 - i, -3.0f + deviation);
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        for (int i = 0; i <= 60; i += 3) {
+          const GLfloat deviation = 0.1 * ((29 * i) % 12);
+          glColor3f(0.3, 0.5, 0); glVertex2f(30 - i, deviation);
+          glColor3f(0.1, 0.25, 0); glVertex2f(30 - i, 3.0f + deviation);
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.3, 0.5, 0); glVertex2f(30, 0); glColor3f(0.1, 0.25, 0);
+        for (int i = -90; i <= 90; i += 30) {
+          glVertex2d(30 + 5 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glPushMatrix(); {
+        glTranslatef(-26, 0, 0);
+        for (int i = 0; i < 8; ++i) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.4, 0.6, 0); glVertex2f(0, 5); glColor3f(0.2, 0.4, 0);
+            glVertex2f(0, 0); glVertex2f(3, 2); glVertex2f(5, 7);
+            glVertex2f(5 + (i % 3) +
+                       0.1 * az_clock_zigzag(15, 2, clock + 4 * i),
+                       15 + ((i + 1) % 3));
+            glVertex2f(-2, 11); glVertex2f(-3, 7);
+            glVertex2f(-1, 2); glVertex2f(0, 0);
+          } glEnd();
+          glTranslatef(6.6 + (i % 2), (i % 3) - 1, 0);
+          glScalef(1, -1, 1);
+        }
+      } glPopMatrix();
+      break;
   }
 }
 
