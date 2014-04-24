@@ -18,35 +18,17 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_ZIPPER_H_
-#define AZIMUTH_TICK_BADDIE_ZIPPER_H_
+#ifndef AZIMUTH_TICK_BADDIE_FORCEFIEND_H_
+#define AZIMUTH_TICK_BADDIE_FORCEFIEND_H_
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_bad_zipper(az_space_state_t *state, az_baddie_t *baddie,
-                        bool bounced);
-
-void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
-                             bool bounced);
-
-void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
-                          double time);
-
-void az_tick_bad_dragonfly(az_space_state_t *state, az_baddie_t *baddie,
-                           double time);
-
-void az_tick_bad_hornet(az_space_state_t *state, az_baddie_t *baddie,
-                        double time);
-
-void az_tick_bad_super_hornet(az_space_state_t *state, az_baddie_t *baddie,
-                              double time);
-
-void az_tick_bad_switcher(az_space_state_t *state, az_baddie_t *baddie,
-                          bool bounced);
+void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
+                            double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_ZIPPER_H_
+#endif // AZIMUTH_TICK_BADDIE_FORCEFIEND_H_

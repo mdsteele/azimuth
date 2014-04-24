@@ -23,10 +23,10 @@
 #include <math.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/object.h"
-#include "azimuth/util/audio.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 

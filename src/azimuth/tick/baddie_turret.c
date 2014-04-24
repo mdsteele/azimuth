@@ -254,4 +254,38 @@ void az_tick_bad_crawling_mortar(
   }
 }
 
+void az_tick_bad_security_drone(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_SECURITY_DRONE);
+  // Chase ship:
+  az_drift_towards_ship(
+      state, baddie, time, 300,
+      (az_ship_in_range(state, baddie, 200) ? -300 : 300), 100);
+  // Orient body:
+  baddie->angle = az_vtheta(baddie->position);
+  // Aim gun:
+  baddie->components[0].angle = az_mod2pi(az_angle_towards(
+      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
+      az_vtheta(az_vsub(state->ship.position,
+                        baddie->position))) - baddie->angle);
+  // State 0: cooling off for next salvo:
+  if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
+      az_ship_within_angle(state, baddie, baddie->components[0].angle,
+                           AZ_DEG2RAD(6)) &&
+      az_can_see_ship(state, baddie)) {
+    baddie->state = 10;
+  }
+  // State N: firing salvo, N shots left until next cooldown.
+  if (baddie->state > 0 && baddie->cooldown <= 0.0) {
+    const double offset =
+      (baddie->state % 2 ? AZ_DEG2RAD(-12) : AZ_DEG2RAD(12));
+    az_fire_baddie_projectile(
+        state, baddie, AZ_PROJ_LASER_PULSE, 28.6,
+        baddie->components[0].angle - offset, offset);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
+    --baddie->state;
+    baddie->cooldown = (baddie->state > 0 ? 0.1 : 1.5);
+  }
+}
+
 /*===========================================================================*/

@@ -26,6 +26,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie_util.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -69,8 +70,109 @@ void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
+void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
+                          double time) {
+  assert(baddie->kind == AZ_BAD_MOSQUITO);
+  baddie->angle = az_vtheta(baddie->velocity);
+  const double speed = 200.0;
+  const double turn = AZ_DEG2RAD(120) * time;
+  bool chasing_ship = false;
+  if (az_ship_in_range(state, baddie, 200)) {
+    const double goal_theta =
+      az_vtheta(az_vsub(state->ship.position, baddie->position));
+    if (fabs(az_mod2pi(goal_theta - baddie->angle)) <= AZ_DEG2RAD(45) &&
+        az_can_see_ship(state, baddie)) {
+      baddie->angle = az_angle_towards(baddie->angle, turn, goal_theta);
+      chasing_ship = true;
+    }
+  }
+  if (!chasing_ship) {
+    bool avoiding = false;
+    AZ_ARRAY_LOOP(other, state->baddies) {
+      if (other->kind != AZ_BAD_MOSQUITO || other == baddie) continue;
+      if (az_vwithin(baddie->position, other->position,
+                     2.0 * baddie->data->overall_bounding_radius)) {
+        const double rel =
+          az_mod2pi(az_vtheta(az_vsub(other->position, baddie->position)) -
+                    baddie->angle);
+        baddie->angle = az_mod2pi(baddie->angle + (rel < 0 ? turn : -turn));
+        avoiding = true;
+        break;
+      }
+    }
+    if (!avoiding) {
+      const double left =
+        az_baddie_dist_to_wall(state, baddie, 2000, AZ_DEG2RAD(40));
+      const double right =
+        az_baddie_dist_to_wall(state, baddie, 2000, AZ_DEG2RAD(-40));
+      baddie->angle = az_mod2pi(baddie->angle + (left > right ? turn : -turn));
+    }
+  }
+  baddie->velocity = az_vpolar(speed, baddie->angle);
+}
+
+void az_tick_bad_dragonfly(az_space_state_t *state, az_baddie_t *baddie,
+                           double time) {
+  assert(baddie->kind == AZ_BAD_DRAGONFLY);
+  az_fly_towards_ship(state, baddie, time,
+                      5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
+  if (az_ship_is_alive(&state->ship) &&
+      state->ship.temp_invincibility > 0.0) {
+    baddie->cooldown = 2.0;
+  }
+}
+
+void az_tick_bad_hornet(az_space_state_t *state, az_baddie_t *baddie,
+                        double time) {
+  assert(baddie->kind == AZ_BAD_HORNET);
+  // Fire (when the ship is behind us):
+  if (baddie->cooldown <= 0.0 &&
+      az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+      az_can_see_ship(state, baddie)) {
+    az_fire_baddie_projectile(state, baddie, AZ_PROJ_STINGER,
+                              15.0, AZ_PI, 0.0);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
+    baddie->cooldown = 0.5;
+  }
+  // Chase ship if state 0, flee in state 1:
+  az_fly_towards_ship(state, baddie, time, 8.0, 200.0, 300.0, 200.0,
+                      0.0, (baddie->state == 0 ? 100.0 : -100.0));
+  // Switch from state 0 to state 1 if we're close to the ship; switch from
+  // state 1 to state 0 if we're far from the ship.
+  if (baddie->state == 0) {
+    if (az_ship_in_range(state, baddie, 200)) baddie->state = 1;
+  } else if (baddie->state == 1) {
+    if (!az_ship_in_range(state, baddie, 400)) baddie->state = 0;
+  } else baddie->state = 0;
+}
+
+void az_tick_bad_super_hornet(az_space_state_t *state, az_baddie_t *baddie,
+                              double time) {
+  assert(baddie->kind == AZ_BAD_SUPER_HORNET);
+  // Fire (when the ship is behind us):
+  if (baddie->cooldown <= 0.0 &&
+      az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(6)) &&
+      az_can_see_ship(state, baddie)) {
+    az_fire_baddie_projectile(state, baddie, AZ_PROJ_STINGER, 15.0, AZ_PI,
+                              az_random(-AZ_DEG2RAD(5), AZ_DEG2RAD(5)));
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
+    baddie->cooldown = 0.1;
+  }
+  // Chase ship if state 0, flee in state 1:
+  az_fly_towards_ship(state, baddie, time, 8.0, 200.0, 300.0, 200.0,
+                      0.0, (baddie->state == 0 ? 100.0 : -100.0));
+  // Switch from state 0 to state 1 if we're close to the ship; switch from
+  // state 1 to state 0 if we're far from the ship.
+  if (baddie->state == 0) {
+    if (az_ship_in_range(state, baddie, 200)) baddie->state = 1;
+  } else if (baddie->state == 1) {
+    if (!az_ship_in_range(state, baddie, 400)) baddie->state = 0;
+  } else baddie->state = 0;
+}
+
 void az_tick_bad_switcher(az_space_state_t *state, az_baddie_t *baddie,
                           bool bounced) {
+  assert(baddie->kind == AZ_BAD_SWITCHER);
   const double speed = 250.0;
   if (baddie->state == 0) {
     if (az_ship_is_decloaked(&state->ship) &&

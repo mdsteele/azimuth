@@ -55,6 +55,29 @@ bool az_can_see_ship(az_space_state_t *state, const az_baddie_t *baddie) {
 
 /*===========================================================================*/
 
+double az_baddie_dist_to_wall(
+    az_space_state_t *state, const az_baddie_t *baddie,
+    double max_dist, double relative_angle) {
+  az_impact_t impact;
+  az_circle_impact(
+      state, baddie->data->overall_bounding_radius, baddie->position,
+      az_vpolar(max_dist, baddie->angle + relative_angle),
+      (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+  return az_vdist(baddie->position, impact.position);
+}
+
+
+bool az_baddie_has_clear_path_to_position(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t position) {
+  az_impact_t impact;
+  az_circle_impact(state, baddie->data->main_body.bounding_radius,
+                   baddie->position, az_vsub(position, baddie->position),
+                   (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+  return (impact.type == AZ_IMP_NOTHING);
+}
+
+/*===========================================================================*/
+
 void az_crawl_around(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     bool rightwards, double turn_rate, double max_speed, double accel) {
@@ -107,6 +130,123 @@ void az_snake_towards(
     az_vadd(baddie->position, az_vpolar(speed * time, new_angle));
   baddie->angle = new_angle;
   baddie->param = az_mod2pi(baddie->param + AZ_TWO_PI * time);
+}
+
+static void apply_walls_to_force_field(
+    az_space_state_t *state, az_baddie_t *baddie,
+    double wall_far_coeff, double wall_near_coeff, az_vector_t *drift) {
+  const az_vector_t pos = baddie->position;
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
+    if (door->kind == AZ_DOOR_FORCEFIELD && door->openness >= 1.0) continue;
+    const az_vector_t delta = az_vsub(pos, door->position);
+    const double dist = az_vnorm(delta) - AZ_DOOR_BOUNDING_RADIUS -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) {
+      az_vpluseq(drift, az_vwithlen(delta, wall_near_coeff));
+    } else {
+      az_vpluseq(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+    }
+  }
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    const az_vector_t delta = az_vsub(pos, wall->position);
+    const double dist = az_vnorm(delta) - wall->data->bounding_radius -
+      baddie->data->overall_bounding_radius;
+    if (dist <= 0.0) {
+      az_vpluseq(drift, az_vwithlen(delta, wall_near_coeff));
+    } else {
+      az_vpluseq(drift, az_vwithlen(delta, wall_far_coeff * exp(-dist)));
+    }
+  }
+}
+
+static az_vector_t force_field_to_ship(
+    az_space_state_t *state, az_baddie_t *baddie,
+    double ship_coeff, double ship_min_range, double ship_max_range,
+    double wall_far_coeff, double wall_near_coeff) {
+  az_vector_t drift = AZ_VZERO;
+  if (az_ship_in_range(state, baddie, ship_max_range)) {
+    drift = az_vwithlen(az_vsub(state->ship.position, baddie->position),
+                        (az_ship_in_range(state, baddie, ship_min_range) ?
+                         -ship_coeff : ship_coeff));
+  }
+  apply_walls_to_force_field(state, baddie, wall_far_coeff,
+                             wall_near_coeff, &drift);
+  return drift;
+}
+
+static az_vector_t force_field_to_position(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t goal,
+    double goal_coeff, double wall_far_coeff, double wall_near_coeff) {
+  az_vector_t drift = az_vwithlen(az_vsub(goal, baddie->position), goal_coeff);
+  apply_walls_to_force_field(state, baddie, wall_far_coeff,
+                             wall_near_coeff, &drift);
+  return drift;
+}
+
+void az_drift_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double max_speed, double ship_force, double wall_force) {
+  az_vector_t drift = force_field_to_ship(
+      state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
+  AZ_ARRAY_LOOP(other, state->baddies) {
+    if (other->kind == AZ_BAD_NOTHING) continue;
+    if (other == baddie) continue;
+    if (az_baddie_has_flag(other, AZ_BADF_INCORPOREAL)) continue;
+    if (az_circle_touches_baddie(other, baddie->data->overall_bounding_radius,
+                                 baddie->position, NULL)) {
+      const az_vector_t delta = az_vsub(baddie->position, other->position);
+      az_vpluseq(&drift, az_vwithlen(delta, 2.5 * wall_force));
+    }
+  }
+  baddie->velocity =
+    az_vcaplen(az_vadd(baddie->velocity, az_vmul(drift, time)), max_speed);
+}
+
+static void fly_common(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double turn_rate, double max_speed, double forward_accel,
+    double lateral_decel_rate, az_vector_t drift, double goal_theta) {
+  const double backward_accel = 80.0;
+  baddie->angle =
+    az_angle_towards(baddie->angle, turn_rate * time, goal_theta);
+  const az_vector_t unit = az_vpolar(1, baddie->angle);
+  const az_vector_t lateral = az_vflatten(baddie->velocity, unit);
+  const az_vector_t dvel =
+    az_vadd(az_vcaplen(az_vneg(lateral), lateral_decel_rate * time),
+            (az_vdot(unit, drift) >= 0.0 ?
+             az_vmul(unit, forward_accel * time) :
+             az_vmul(unit, -backward_accel * time)));
+  baddie->velocity = az_vcaplen(az_vadd(baddie->velocity, dvel), max_speed);
+}
+
+
+void az_fly_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double turn_rate, double max_speed, double forward_accel,
+    double lateral_decel_rate, double attack_range, double ship_coeff) {
+  const az_vector_t drift =
+    (baddie->cooldown > 1.0 ?
+     force_field_to_ship(state, baddie, -100.0, 0.0, 500.0, 100.0, 200.0) :
+     force_field_to_ship(state, baddie, ship_coeff, attack_range, 1000.0,
+                         100.0, 200.0));
+  const double goal_theta =
+    az_vtheta(baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 120) ?
+              az_vsub(state->ship.position, baddie->position) : drift);
+  fly_common(state, baddie, time, turn_rate, max_speed, forward_accel,
+             lateral_decel_rate, drift, goal_theta);
+}
+
+void az_fly_towards_position(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    az_vector_t goal, double turn_rate, double max_speed,
+    double forward_accel, double lateral_decel_rate, double goal_coeff) {
+  const az_vector_t drift =
+    force_field_to_position(state, baddie, goal, goal_coeff, 100.0, 200.0);
+  const double goal_theta = az_vtheta(drift);
+  fly_common(state, baddie, time, turn_rate, max_speed, forward_accel,
+             lateral_decel_rate, drift, goal_theta);
 }
 
 /*===========================================================================*/

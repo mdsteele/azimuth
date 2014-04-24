@@ -47,6 +47,21 @@ bool az_ship_within_angle(
 bool az_can_see_ship(az_space_state_t *state, const az_baddie_t *baddie);
 
 /*===========================================================================*/
+// Detecting walls:
+
+// Return the distance a baddie could go before hitting a wall or door if it
+// moved in a straight line (up to max_dist) at relative_angle from its current
+// position/angle.
+double az_baddie_dist_to_wall(
+    az_space_state_t *state, const az_baddie_t *baddie,
+    double max_dist, double relative_angle);
+
+// Return true if the baddie could move in a straight line from its current
+// location to the given position without hitting any walls or doors.
+bool az_baddie_has_clear_path_to_position(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t position);
+
+/*===========================================================================*/
 // Navigation:
 
 // Crawl along the wall.  The `rightwards` argument controls the direction of
@@ -60,6 +75,20 @@ void az_crawl_around(
 void az_snake_towards(
     az_baddie_t *baddie, double time, int first_tail_component,
     double speed, double wiggle, az_vector_t destination);
+
+void az_drift_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double max_speed, double ship_force, double wall_force);
+
+void az_fly_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double turn_rate, double max_speed, double forward_accel,
+    double lateral_decel_rate, double attack_range, double ship_coeff);
+
+void az_fly_towards_position(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    az_vector_t goal, double turn_rate, double max_speed,
+    double forward_accel, double lateral_decel_rate, double goal_coeff);
 
 /*===========================================================================*/
 // Weapons:
