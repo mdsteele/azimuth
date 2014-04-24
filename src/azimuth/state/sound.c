@@ -388,6 +388,14 @@ static az_sound_spec_t sound_specs[] = {
     .env_sustain = 0.03245, .env_decay = 0.10518,
     .start_freq = 0.43334, .freq_slide = -0.57352
   },
+  [AZ_SND_HURT_BOUNCER] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_attack = 0.08, .env_sustain = 0.130676,
+    .env_punch = 0.211366, .env_decay = 0.215,
+    .start_freq = 0.1, .freq_slide = 0.41, .freq_delta_slide = -0.35,
+    .arp_mod = 0.23, .arp_speed = 0.787091, .repeat_speed = 0.637637,
+    .lpf_cutoff = 0.81, .lpf_resonance = 0.65, .hpf_cutoff = 0.31
+  },
   [AZ_SND_HURT_CRAWLER] = {
     .wave_kind = AZ_WOBBLE_WAVE,
     .env_attack = 0.00138677, .env_sustain = 0.065, .env_decay = 0.2,
@@ -478,6 +486,13 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.6059253, .phaser_sweep = -0.3536932,
     .lpf_cutoff = 0.982626, .lpf_ramp = 0.2353423, .lpf_resonance = 0.8618,
     .volume_adjust = 0.8
+  },
+  [AZ_SND_KILL_BOUNCER] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.18, .env_punch = 0.797245, .env_decay = 0.419678,
+    .start_freq = 0.065, .freq_slide = -0.08,
+    .arp_mod = 0.544511, .arp_speed = 0.673332,
+    .lpf_cutoff = 0.55, .lpf_ramp = -0.25
   },
   [AZ_SND_KILL_DRAGONFLY] = {
     .wave_kind = AZ_SQUARE_WAVE,

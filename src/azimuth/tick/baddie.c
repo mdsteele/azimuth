@@ -770,6 +770,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               baddie->data->main_body.bounding_radius,
               AZ_DEG2RAD(i) + az_random(AZ_DEG2RAD(-10), AZ_DEG2RAD(10)), 0.0);
         }
+        az_play_sound(&state->soundboard, AZ_SND_KILL_BOUNCER);
         baddie->kind = AZ_BAD_NOTHING;
       }
       break;

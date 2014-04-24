@@ -689,7 +689,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_BOUNCER] = {
     .max_health = 5.0, .color = {255, 0, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_BOUNCER, .death_sound = AZ_SND_KILL_BOUNCER,
+    .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 10.0 }
   },
@@ -702,8 +703,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_SPINER] = {
     .max_health = 10.0, .color = {128, 255, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
-    .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_BOUNCER, .death_sound = AZ_SND_KILL_BOUNCER,
+    .death_style = AZ_DEATH_EMBERS, .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 18.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BOX] = {
@@ -740,7 +741,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_SPINE_MINE] = {
     .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_BOUNCER,
     .main_body = { .bounding_radius = 9.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_BROKEN_TURRET] = {
@@ -1004,7 +1005,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_URCHIN] = {
     .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .color = {128, 255, 0, 255}, .death_sound = AZ_SND_KILL_BOUNCER,
     .main_body = { .bounding_radius = 9.0, .impact_damage = 12.0 }
   },
   [AZ_BAD_BOSS_DOOR] = {
@@ -1078,8 +1079,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_BOUNCER_90] = {
     .max_health = 8.0, .color = {0, 255, 255, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
-    .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_BOUNCER, .death_sound = AZ_SND_KILL_BOUNCER,
+    .death_style = AZ_DEATH_EMBERS, .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 12.0 }
   },
   [AZ_BAD_PISTON] = {
@@ -1158,7 +1159,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_SUPER_SPINER] = {
     .max_health = 25.0, .color = {0, 192, 64, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_BOUNCER, .death_sound = AZ_SND_KILL_BOUNCER,
+    .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 18.0, .impact_damage = 25.0 }
   },
   [AZ_BAD_HEAVY_TURRET] = {
@@ -1210,8 +1212,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_FAST_BOUNCER] = {
     .max_health = 6.0, .color = {255, 96, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
-    .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_BOUNCER, .death_sound = AZ_SND_KILL_BOUNCER,
+    .death_style = AZ_DEATH_EMBERS, .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 15.0 }
   },
   [AZ_BAD_PROXY_MINE] = {
