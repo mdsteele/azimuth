@@ -1017,6 +1017,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_FIRE_CRAWLER:
       az_tick_bad_fire_crawler(state, baddie, time);
       break;
+    case AZ_BAD_JUNGLE_CRAWLER:
+      az_tick_bad_jungle_crawler(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
@@ -1048,6 +1051,9 @@ void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
         az_add_baddie(state, AZ_BAD_URCHIN,
                       az_vadd(position, az_vpolar(10, theta)), theta);
       }
+      break;
+    case AZ_BAD_JUNGLE_CRAWLER:
+      az_on_jungle_crawler_killed(state, position, angle);
       break;
     default: break;
   }

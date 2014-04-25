@@ -23,6 +23,7 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
@@ -34,6 +35,11 @@ void az_tick_bad_spined_crawler(
 
 void az_tick_bad_ice_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+
+void az_tick_bad_jungle_crawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_jungle_crawler_killed(
+    az_space_state_t *state, az_vector_t position, double angle);
 
 void az_tick_bad_fire_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time);

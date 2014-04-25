@@ -35,6 +35,9 @@ void az_draw_bad_spined_crawler(
 void az_draw_bad_ice_crawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_jungle_crawler(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 void az_draw_bad_fire_crawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 

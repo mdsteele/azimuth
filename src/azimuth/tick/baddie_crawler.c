@@ -100,4 +100,21 @@ void az_tick_bad_fire_crawler(
   }
 }
 
+void az_tick_bad_jungle_crawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_JUNGLE_CRAWLER);
+  az_crawl_around(state, baddie, time, false, 3.0, 40.0, 100.0);
+}
+
+void az_on_jungle_crawler_killed(
+    az_space_state_t *state, az_vector_t position, double angle) {
+  for (int i = -100; i <= 100; i += 20) {
+    const double theta = az_mod2pi(angle + AZ_DEG2RAD(i));
+    az_add_projectile(state, AZ_PROJ_SPINE,
+                      az_vadd(az_vadd(position, az_vpolar(-6, angle)),
+                              az_vpolar(18, theta)),
+                      theta, 1.0, AZ_NULL_UID);
+  }
+}
+
 /*===========================================================================*/

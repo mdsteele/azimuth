@@ -213,4 +213,39 @@ void az_draw_bad_fire_crawler(
   } glPopMatrix();
 }
 
+void az_draw_bad_jungle_crawler(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_JUNGLE_CRAWLER);
+  const float flare = baddie->armor_flare;
+  draw_normal_feet(frozen, clock, false);
+  // Body:
+  glPushMatrix(); {
+    glTranslatef(-0.5f * az_clock_zigzag(5, 5, clock), 0, 0);
+    for (int i = -100; i <= 100; i += 20) {
+      glPushMatrix(); {
+        glTranslatef(-6, 0, 0);
+        glRotatef(i, 0, 0, 1);
+        glTranslatef(17, 0, 0);
+        draw_spine(flare, frozen);
+      } glPopMatrix();
+    }
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.4f + 0.6f * flare, 0.2f, 0.2f + 0.6f * frozen);
+      glVertex2f(-15.0f, az_clock_zigzag(9, 3, clock) - 4.0f);
+      for (int i = -120; i <= 120; i += 5) {
+        if (i % 3 == 0) {
+          glColor3f(0.3f + 0.6f * flare, 0.2f, 0.6f * frozen);
+        } else glColor3f(0.2f, 0.4f, 0.6f * frozen);
+        const double rr = 1.0 +
+          0.05 * (sin(AZ_DEG2RAD(i) * 2500) +
+                  cos(AZ_DEG2RAD(i) * 777 *
+                      (1 + az_clock_zigzag(7, 12, clock)))) +
+          0.01 * az_clock_zigzag(10, 3, clock);
+        glVertex2d(13 * rr * cos(AZ_DEG2RAD(i)) - 3,
+                   16 * rr * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 /*===========================================================================*/

@@ -1286,6 +1286,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(fire_crawler_vertices),
                    .impact_damage = 20.0, .immunities = AZ_DMGF_FREEZE }
+  },
+  [AZ_BAD_JUNGLE_CRAWLER] = {
+    .max_health = 7.0, .color = {0, 128, 0, 255},
+    .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_CRAWLER, .death_sound = AZ_SND_KILL_TURRET,
+    .main_body = { .polygon = AZ_INIT_POLYGON(cave_crawler_vertices),
+                   .impact_damage = 15.0 }
   }
 };
 

@@ -1301,6 +1301,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_FIRE_CRAWLER:
       az_draw_bad_fire_crawler(baddie, frozen, clock);
       break;
+    case AZ_BAD_JUNGLE_CRAWLER:
+      az_draw_bad_jungle_crawler(baddie, frozen, clock);
+      break;
   }
 }
 
