@@ -68,8 +68,26 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
           } else baddie->state = 2;
         }
       } else {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
-                                  20, 0, 0);
+        bool any_gravity_torps = false;
+        AZ_ARRAY_LOOP(proj, state->projectiles) {
+          if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO ||
+              proj->kind == AZ_PROJ_GRAVITY_TORPEDO_WELL) {
+            any_gravity_torps = true;
+            break;
+          }
+        }
+        if (!any_gravity_torps) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
+                                    20, 0, 0);
+        }
+      }
+      int num_eggs = 0;
+      AZ_ARRAY_LOOP(other, state->baddies) {
+        if (other->kind == AZ_BAD_FORCE_EGG) ++num_eggs;
+      }
+      if (num_eggs < 8) {
+        az_add_baddie(state, AZ_BAD_FORCE_EGG,
+                      baddie->position, baddie->angle);
       }
       baddie->cooldown = 2.0 - 0.8 * hurt;
     }
@@ -131,6 +149,70 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     baddie->components[i+1].position = elbow;
     baddie->components[i+1].angle = az_vtheta(az_vsub(wrist, elbow));
   }
+}
+
+/*===========================================================================*/
+
+void az_tick_bad_force_egg(az_space_state_t *state, az_baddie_t *baddie,
+                           bool bounced, double time) {
+  assert(baddie->kind == AZ_BAD_FORCE_EGG);
+  baddie->angle = az_mod2pi(baddie->angle +
+                            time * 0.006 * az_vnorm(baddie->velocity));
+  // If the egg hits a wall, hatch it.
+  if (bounced) {
+    const az_vector_t position = baddie->position;
+    az_kill_baddie(state, baddie);
+    for (int i = -1; i <= 1; i += 2) {
+      az_baddie_t *forceling = az_add_baddie(
+          state, AZ_BAD_FORCELING, position,
+          az_mod2pi(baddie->angle + i * AZ_DEG2RAD(90)));
+      if (forceling != NULL) forceling->state = i;
+    }
+    return;
+  }
+  // Apply drag.
+  const double drag_coeff = 1.0 / 200.0;
+  const az_vector_t drag_force =
+    az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
+  baddie->velocity = az_vadd(baddie->velocity, az_vmul(drag_force, time));
+  // Accelerate away from walls/doors and from other Force Eggs.
+  az_vector_t closest_pos = AZ_VZERO;
+  double closest_dist = INFINITY;
+  AZ_ARRAY_LOOP(other, state->baddies) {
+    if (other->kind != AZ_BAD_FORCE_EGG) continue;
+    if (other == baddie) continue;
+    const double dist = az_vdist(other->position, baddie->position);
+    if (dist < closest_dist) {
+      closest_pos = other->position;
+      closest_dist = dist;
+    }
+  }
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_NOTHING) continue;
+    const double dist = az_vdist(door->position, baddie->position);
+    if (dist < closest_dist) {
+      closest_pos = door->position;
+      closest_dist = dist;
+    }
+  }
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    const double dist = az_vdist(wall->position, baddie->position);
+    if (dist < closest_dist) {
+      closest_pos = wall->position;
+      closest_dist = dist;
+    }
+  }
+  az_vpluseq(&baddie->velocity,
+             az_vwithlen(az_vsub(baddie->position, closest_pos), 50.0 * time));
+}
+
+void az_tick_bad_forceling(az_space_state_t *state, az_baddie_t *baddie,
+                           double time) {
+  az_snake_towards(baddie, time, 0, 100.0, 150.0,
+                   az_vadd(az_vpolar(150, state->ship.angle +
+                                     baddie->state * AZ_DEG2RAD(90)),
+                           state->ship.position));
 }
 
 /*===========================================================================*/

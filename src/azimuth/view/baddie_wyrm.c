@@ -25,6 +25,7 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -34,8 +35,8 @@ static void draw_rockwyrm_segment(const az_baddie_t *baddie, int i) {
   const az_component_data_t *data = &baddie->data->components[i];
   const az_component_t *component = &baddie->components[i];
   glPushMatrix(); {
-    glTranslated(component->position.x, component->position.y, 0);
-    glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+    az_gl_translated(component->position);
+    az_gl_rotated(component->angle);
     // Spikes:
     const int limit = (last ? 7 : 5);
     for (int j = -limit; j <= limit; j += 2) {
@@ -90,8 +91,8 @@ void az_draw_bad_rockwyrm(const az_baddie_t *baddie) {
   for (int i = 0; i < 2; ++i) {
     const az_component_t *component = &baddie->components[i];
     glPushMatrix(); {
-      glTranslated(component->position.x, component->position.y, 0);
-      glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+      az_gl_translated(component->position);
+      az_gl_rotated(component->angle);
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(1, 0, 1);
         glVertex2f(0, 0);
@@ -99,7 +100,7 @@ void az_draw_bad_rockwyrm(const az_baddie_t *baddie) {
         const az_polygon_t polygon = baddie->data->components[i].polygon;
         for (int j = polygon.num_vertices - 1, k = 0;
              j < polygon.num_vertices; j = k++) {
-          glVertex2d(polygon.vertices[j].x, polygon.vertices[j].y);
+          az_gl_vertex(polygon.vertices[j]);
         }
       } glEnd();
     } glPopMatrix();
@@ -145,8 +146,8 @@ void az_draw_bad_wyrmling(const az_baddie_t *baddie, float frozen) {
     const az_component_data_t *data = &baddie->data->components[i];
     const az_component_t *component = &baddie->components[i];
     glPushMatrix(); {
-      glTranslated(component->position.x, component->position.y, 0);
-      glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+      az_gl_translated(component->position);
+      az_gl_rotated(component->angle);
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(0.75, 1, 0.25);
         glVertex2f(0, 0);

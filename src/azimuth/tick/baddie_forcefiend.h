@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_TICK_BADDIE_FORCEFIEND_H_
 #define AZIMUTH_TICK_BADDIE_FORCEFIEND_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
 
@@ -28,6 +30,12 @@
 
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time);
+
+void az_tick_bad_force_egg(az_space_state_t *state, az_baddie_t *baddie,
+                           bool bounced, double time);
+
+void az_tick_bad_forceling(az_space_state_t *state, az_baddie_t *baddie,
+                           double time);
 
 /*===========================================================================*/
 

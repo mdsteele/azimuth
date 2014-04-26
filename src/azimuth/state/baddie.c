@@ -278,37 +278,40 @@ static const az_vector_t flyer_vertices[] = {
   {-7.5, -1.33}, {-5, -2.66}, {5, -4.66}, {7.5, -4}, {10, -2}
 };
 
-// TODO: Update the various Forcefiend component polygons once we have real
-//   graphics for the Forcefiend.
 static const az_vector_t forcefiend_left_pincer_vertices[] = {
-  {0, 0}, {30, 0}, {15, 15}
+  {30, -4}, {15, -3}, {0, -5}, {-6, -5}, {-11, -2},
+  {-7,  7}, {0,  9}, {14,  8}, {22,  4}
 };
 static const az_vector_t forcefiend_right_pincer_vertices[] = {
-  {0, 0}, {15, -15}, {30, 0}
+  {30,  4}, {15,  3}, {0,  5}, {-6,  5}, {-11,  2},
+  {-7, -7}, {0, -9}, {14, -8}, {22, -4}
 };
 static const az_vector_t forcefiend_upper_arm_vertices[] = {
-  {0, 0}, {20, -5}, {40, 0}, {20, 5}
+  {0, 9}, {0, -9}, {40, -4}, {42, 0}, {40, 4}
 };
 static const az_vector_t forcefiend_lower_arm_vertices[] = {
-  {0, 0}, {17, -5}, {34, 0}, {17, 5}
+  {0, 4}, {-4, 0}, {0, -4}, {34, -3}, {36, 0}, {34, 3}
 };
 static const az_vector_t forcefiend_left_claw_vertices[] = {
-  {0, 0}, {20, 5}, {40, 0}, {20, 15}
+  {40, -1.5}, {20, -2}, {5, -3}, {-4, -4}, {-7, -2},
+  {-5,  3}, {0,  4}, {18,  4}, {30,  2}
 };
 static const az_vector_t forcefiend_right_claw_vertices[] = {
-  {0, 0}, {20, -15}, {40, 0}, {20, -5}
+  {40,  1.5}, {20,  2}, {5,  3}, {-4,  4}, {-7,  2},
+  {-5, -3}, {0, -4}, {18, -4}, {30, -2}
 };
 static const az_vector_t forcefiend_segment0_vertices[] = {
-  {20, 0}, {5, 15}, {-5, 15}, {-20, 0}, {-5, -15}, {5, -15}
+  {23, 0}, {15, 12}, {7, 15}, {-14, 14},
+  {-20, 0}, {-14, -14}, {7, -15}, {15, -12}
 };
 static const az_vector_t forcefiend_segment1_vertices[] = {
-  {20, 0}, {6, 14}, {-6, 14}, {-20, 0}, {-6, -14}, {6, -14}
+  {20, 0}, {12, 14}, {-12, 12}, {-20, 0}, {-12, -12}, {12, -14}
 };
 static const az_vector_t forcefiend_segment2_vertices[] = {
-  {20, 0}, {7, 13}, {-8, 12}, {-20, 0}, {-8, -12}, {7, -13}
+  {20, 0}, {12, 12}, {-18, 8}, {-20, 0}, {-18, -8}, {12, -12}
 };
 static const az_vector_t forcefiend_segment3_vertices[] = {
-  {20, 0}, {12, 8}, {-15, 5}, {-20, 0}, {-15, -5}, {12, -8}
+  {17, 0}, {12, 8}, {-16, 5}, {-18, 0}, {-16, -5}, {12, -8}
 };
 static const az_vector_t forcefiend_stinger_vertices[] = {
   {14, 5}, {-20, 0}, {14, -5}
@@ -316,9 +319,9 @@ static const az_vector_t forcefiend_stinger_vertices[] = {
 static az_component_data_t forcefiend_components[] = {
   // Pincers:
   { .polygon = AZ_INIT_POLYGON(forcefiend_left_pincer_vertices),
-    .init_position = {15, 0}, .immunities = ~0, .impact_damage = 10.0 },
+    .init_position = {15,  4}, .immunities = ~0, .impact_damage = 15.0 },
   { .polygon = AZ_INIT_POLYGON(forcefiend_right_pincer_vertices),
-    .init_position = {15, 0}, .immunities = ~0, .impact_damage = 10.0 },
+    .init_position = {15, -4}, .immunities = ~0, .impact_damage = 15.0 },
   // Left arm:
   { .polygon = AZ_INIT_POLYGON(forcefiend_upper_arm_vertices),
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
@@ -329,7 +332,7 @@ static az_component_data_t forcefiend_components[] = {
     .impact_damage = 4.0 },
   { .polygon = AZ_INIT_POLYGON(forcefiend_left_claw_vertices),
     .init_position = {-54, 34.64}, .init_angle = AZ_DEG2RAD(180),
-    .immunities = ~0, .impact_damage = 10.0 },
+    .immunities = ~0, .impact_damage = 12.0 },
   // Right arm:
   { .polygon = AZ_INIT_POLYGON(forcefiend_upper_arm_vertices),
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
@@ -340,7 +343,7 @@ static az_component_data_t forcefiend_components[] = {
     .impact_damage = 4.0 },
   { .polygon = AZ_INIT_POLYGON(forcefiend_right_claw_vertices),
     .init_position = {-54, -34.64}, .init_angle = AZ_DEG2RAD(180),
-    .immunities = ~0, .impact_damage = 10.0 },
+    .immunities = ~0, .impact_damage = 12.0 },
   // Tail:
   { .polygon = AZ_INIT_POLYGON(forcefiend_segment1_vertices),
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
@@ -352,7 +355,8 @@ static az_component_data_t forcefiend_components[] = {
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
     .init_position = {-90, 0}, .impact_damage = 4.0 },
   { .polygon = AZ_INIT_POLYGON(forcefiend_stinger_vertices),
-    .init_position = {-120, 0}, .immunities = ~0, .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
+    .init_position = {-120, 0}, .impact_damage = 10.0 }
 };
 
 static az_vector_t chomper_plant_base_vertices[] = {
@@ -662,6 +666,22 @@ static const az_vector_t fire_crawler_vertices[] = {
   {5, -8}, {5, 8}, {-4, 14}, {-15, 10}, {-15, -10}, {-4, -14}
 };
 
+static const az_vector_t forceling_head_vertices[] = {
+  {-4, -3}, {3, -4}, {5, -3.5}, {9, 0}, {5, 3.5}, {3, 4}, {-4, 3}, {-5, 0}
+};
+static const az_vector_t forceling_middle_vertices[] = {
+  {5, 0}, {4, 3}, {-4, 2}, {-5, 0}, {-4, -2}, {4, -3}
+};
+static const az_vector_t forceling_tail_vertices[] = {
+  {4, 2}, {-7, 0}, {4, -2}
+};
+static az_component_data_t forceling_components[] = {
+  { .polygon = AZ_INIT_POLYGON(forceling_middle_vertices),
+    .init_position = {-7.5, 0}, .impact_damage = 6.0 },
+  { .polygon = AZ_INIT_POLYGON(forceling_tail_vertices),
+    .init_position = {-15, 0}, .impact_damage = 6.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -966,9 +986,9 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_FORCEFIEND] = {
-    .max_health = 450.0, .color = {192, 128, 255, 255},
-    .overall_bounding_radius = 150.0,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .max_health = 450.0, .overall_bounding_radius = 150.0,
+    .color = {192, 128, 255, 255}, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_ROCKWYRM, .armor_sound = AZ_SND_HIT_ARMOR,
     .main_body = { .polygon = AZ_INIT_POLYGON(forcefiend_segment0_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 4.0 },
@@ -1244,8 +1264,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 10.0, .overall_bounding_radius = 45.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {230, 0, 105, 255},
     .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
-    .death_style = AZ_DEATH_EMBERS,
-    .static_properties = AZ_BADF_DRAW_BG,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_fish_head_vertices),
                    .impact_damage = 15.0 },
     DECL_COMPONENTS(small_fish_components)
@@ -1293,6 +1312,22 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_CRAWLER, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(cave_crawler_vertices),
                    .impact_damage = 15.0 }
+  },
+  [AZ_BAD_FORCE_EGG] = {
+    .max_health = 5.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .static_properties = AZ_BADF_DRAW_BG, .color = {168, 142, 102, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_BOUNCER,
+    .main_body = { .bounding_radius = 12.0, .impact_damage = 5.0,
+                   .immunities = AZ_DMGF_FREEZE }
+  },
+  [AZ_BAD_FORCELING] = {
+    .max_health = 0.75, .overall_bounding_radius = 22.5,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {230, 105, 50, 255},
+    .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
+    .main_body = { .polygon = AZ_INIT_POLYGON(forceling_head_vertices),
+                   .impact_damage = 6.0 },
+    DECL_COMPONENTS(forceling_components)
   }
 };
 

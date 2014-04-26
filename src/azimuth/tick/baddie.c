@@ -1020,6 +1020,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_JUNGLE_CRAWLER:
       az_tick_bad_jungle_crawler(state, baddie, time);
       break;
+    case AZ_BAD_FORCE_EGG:
+      az_tick_bad_force_egg(state, baddie, bounced, time);
+      break;
+    case AZ_BAD_FORCELING:
+      az_tick_bad_forceling(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

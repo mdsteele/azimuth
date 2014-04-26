@@ -631,29 +631,37 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
                            (az_color_t){255, 128, 0, 128}, 0.1, 5.0, 0.0);
       break;
-    case AZ_PROJ_FORCE_WAVE:
-      {
-        const double new_speed = az_vnorm(proj->velocity) + 700 * time;
-        if (proj->age >= 0.5) {
-          proj->velocity = az_vwithlen(
-              az_vflatten(proj->velocity, proj->position), new_speed);
-          proj->angle = az_vtheta(proj->velocity);
-        } else proj->velocity = az_vwithlen(proj->velocity, new_speed);
+    case AZ_PROJ_FORCE_WAVE: {
+      const double new_speed = az_vnorm(proj->velocity) + 700 * time;
+      if (proj->age >= 0.5) {
+        proj->velocity = az_vwithlen(
+            az_vflatten(proj->velocity, proj->position), new_speed);
+        proj->angle = az_vtheta(proj->velocity);
+      } else {
+        proj->velocity = az_vwithlen(proj->velocity, new_speed);
+      }
+      const double factor = fmin(1.0, 2.0 * proj->age);
+      const az_vector_t vertices[] = {
+        {0, -50 * factor}, {0, 50 * factor},
+        {-100 * factor, 50 * factor}, {-100 * factor, -50 * factor}
+      };
+      const az_polygon_t polygon = AZ_INIT_POLYGON(vertices);
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind != AZ_BAD_FORCE_EGG) continue;
+        if (az_circle_touches_polygon_trans(
+                polygon, proj->position, proj->angle, 1,
+                baddie->position)) {
+          az_vpluseq(&baddie->velocity, az_vmul(proj->velocity, 5 * time));
+        }
       }
       if (az_ship_is_alive(&state->ship)) {
-        const double factor = fmin(1.0, 2.0 * proj->age);
-        const az_vector_t vertices[] = {
-          {0, -50 * factor}, {0, 50 * factor},
-          {-100 * factor, 50 * factor}, {-100 * factor, -50 * factor}
-        };
-        const az_polygon_t polygon = AZ_INIT_POLYGON(vertices);
         if (az_circle_touches_polygon_trans(
                 polygon, proj->position, proj->angle, 1,
                 state->ship.position)) {
           az_vpluseq(&state->ship.velocity, az_vmul(proj->velocity, 5 * time));
         }
       }
-      break;
+    } break;
     case AZ_PROJ_GRENADE: {
       const double per_second = 15.0;
       if (ceil(per_second * proj->age) >

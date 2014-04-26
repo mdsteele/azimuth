@@ -26,8 +26,16 @@
 
 /*===========================================================================*/
 
+// Set the current GL color.
 void az_gl_color(az_color_t color);
 
+// Rotate the GL camera by the given angle in radians.
+void az_gl_rotated(double radians);
+
+// Translate the GL camera by the given vector.
+void az_gl_translated(az_vector_t v);
+
+// Place a GL vertex at the given position.
 void az_gl_vertex(az_vector_t v);
 
 /*===========================================================================*/

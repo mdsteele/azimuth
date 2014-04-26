@@ -32,6 +32,7 @@
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_chomper.h"
 #include "azimuth/view/baddie_crawler.h"
+#include "azimuth/view/baddie_forcefiend.h"
 #include "azimuth/view/baddie_myco.h"
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
@@ -766,8 +767,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_armored_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_FORCEFIEND:
-      // TODO: Make real graphics for the Forcefiend.
-      draw_baddie_outline(baddie, frozen, 1);
+      az_draw_bad_forcefiend(baddie);
       break;
     case AZ_BAD_CHOMPER_PLANT:
       az_draw_bad_chomper_plant(baddie, frozen, clock);
@@ -1200,91 +1200,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_AQUATIC_CHOMPER:
       az_draw_bad_aquatic_chomper(baddie, frozen, clock);
       break;
-    case AZ_BAD_SMALL_FISH: {
-      const az_color_t inner =
-        color3(0.9f + 0.1f * flare, 0.5f * flare + 0.5f * frozen,
-               0.4f - 0.4f * flare + 0.6f * frozen);
-      const az_color_t outer =
-        color3(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
-               0.3f - 0.2f * flare + 0.3f * frozen);
-      const az_component_t *middle = &baddie->components[0];
-      const az_component_t *tail = &baddie->components[1];
-      const az_vector_t *hvertices = baddie->data->main_body.polygon.vertices;
-      const az_vector_t *mvertices =
-        baddie->data->components[0].polygon.vertices;
-      const az_vector_t *tvertices =
-        baddie->data->components[1].polygon.vertices;
-      // Fins:
-      for (int i = -1; i <= 1; i += 2) {
-        glBegin(GL_TRIANGLE_FAN); {
-          az_gl_color(inner); glVertex2f(1, 5*i);
-          az_gl_color(outer); glVertex2f(8, 5*i);
-          glVertex2f(-4 - az_clock_zigzag(4, 7, clock), 12*i);
-          glVertex2f(-2, 5*i);
-        } glEnd();
-      }
-      glPushMatrix(); {
-        glTranslated(middle->position.x, middle->position.y, 0);
-        glRotated(AZ_RAD2DEG(middle->angle), 0, 0, 1);
-        for (int i = -1; i <= 1; i += 2) {
-          glBegin(GL_TRIANGLE_FAN); {
-            az_gl_color(inner); glVertex2f(1, 3*i);
-            az_gl_color(outer); glVertex2f(8, 3*i);
-            glVertex2f(-4 - az_clock_zigzag(4, 7, clock), 9*i);
-            glVertex2f(-2, 3*i);
-          } glEnd();
-        }
-      } glPopMatrix();
-      // Head:
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(inner);
-        glVertex2f(0, 0);
-        az_gl_color(outer);
-        for (int i = 0; i < 7; ++i) az_gl_vertex(hvertices[i]);
-      } glEnd();
-      // Body:
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(outer); az_gl_vertex(hvertices[6]);
-        az_gl_color(inner); glVertex2f(0, 0);
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[1], middle->angle),
-                             middle->position));
-        az_gl_color(inner);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[0], middle->angle),
-                             middle->position));
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[2], middle->angle),
-                             middle->position));
-        az_gl_color(inner); az_gl_vertex(middle->position);
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(tvertices[0], tail->angle),
-                             tail->position));
-        az_gl_color(inner);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[3], middle->angle),
-                             middle->position));
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(tvertices[1], tail->angle),
-                             tail->position));
-        az_gl_vertex(az_vadd(az_vrotate(tvertices[2], tail->angle),
-                             tail->position));
-        az_gl_color(inner);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[3], middle->angle),
-                             middle->position));
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[4], middle->angle),
-                             middle->position));
-        az_gl_color(inner);
-        az_gl_vertex(middle->position);
-        az_gl_color(outer);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[5], middle->angle),
-                             middle->position));
-        az_gl_color(inner);
-        az_gl_vertex(az_vadd(az_vrotate(mvertices[0], middle->angle),
-                             middle->position));
-        az_gl_color(outer); az_gl_vertex(hvertices[0]);
-        az_gl_color(inner); glVertex2f(0, 0);
-      } glEnd();
-    } break;
+    case AZ_BAD_SMALL_FISH:
+      az_draw_bad_small_fish(baddie, frozen, clock);
+      break;
     case AZ_BAD_NOCTURNE:
       // TODO: Make real graphics for the Nocturne.
       draw_baddie_outline(baddie, frozen, baddie->param);
@@ -1303,6 +1221,12 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_JUNGLE_CRAWLER:
       az_draw_bad_jungle_crawler(baddie, frozen, clock);
+      break;
+    case AZ_BAD_FORCE_EGG:
+      az_draw_bad_force_egg(baddie);
+      break;
+    case AZ_BAD_FORCELING:
+      az_draw_bad_forceling(baddie, frozen, clock);
       break;
   }
 }

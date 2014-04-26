@@ -17,29 +17,25 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/view/util.h"
+#pragma once
+#ifndef AZIMUTH_VIEW_BADDIE_FORCEFIEND_H_
+#define AZIMUTH_VIEW_BADDIE_FORCEFIEND_H_
 
-#include <GL/gl.h>
+#include "azimuth/state/baddie.h"
+#include "azimuth/util/clock.h"
 
-#include "azimuth/util/color.h"
-#include "azimuth/util/vector.h"
+/*===========================================================================*/
+
+void az_draw_bad_forcefiend(const az_baddie_t *baddie);
+
+void az_draw_bad_force_egg(const az_baddie_t *baddie);
+
+void az_draw_bad_forceling(const az_baddie_t *baddie, float frozen,
+                           az_clock_t clock);
+
+void az_draw_bad_small_fish(const az_baddie_t *baddie, float frozen,
+                            az_clock_t clock);
 
 /*===========================================================================*/
 
-void az_gl_color(az_color_t color) {
-  glColor4ub(color.r, color.g, color.b, color.a);
-}
-
-void az_gl_rotated(double radians) {
-  glRotated(AZ_RAD2DEG(radians), 0, 0, 1);
-}
-
-void az_gl_translated(az_vector_t v) {
-  glTranslated(v.x, v.y, 0);
-}
-
-void az_gl_vertex(az_vector_t v) {
-  glVertex2d(v.x, v.y);
-}
-
-/*===========================================================================*/
+#endif // AZIMUTH_VIEW_BADDIE_FORCEFIEND_H_
