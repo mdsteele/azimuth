@@ -301,17 +301,20 @@ static const az_vector_t forcefiend_right_claw_vertices[] = {
   {-5, -3}, {0, -4}, {18, -4}, {30, -2}
 };
 static const az_vector_t forcefiend_segment0_vertices[] = {
-  {23, 0}, {15, 12}, {7, 15}, {-14, 14},
-  {-20, 0}, {-14, -14}, {7, -15}, {15, -12}
+  {7, -15}, {15, -12}, {23, 0}, {15, 12}, {7, 15},
+  {-14, 14}, {-20, 0}, {-14, -14}
 };
 static const az_vector_t forcefiend_segment1_vertices[] = {
-  {20, 0}, {12, 14}, {-12, 12}, {-20, 0}, {-12, -12}, {12, -14}
+  {20, 0}, {12, 14}, {0, 15}, {-12, 12},
+  {-20, 0}, {-12, -12}, {0, -15}, {12, -14}
 };
 static const az_vector_t forcefiend_segment2_vertices[] = {
-  {20, 0}, {12, 12}, {-18, 8}, {-20, 0}, {-18, -8}, {12, -12}
+  {20, 0}, {12, 12}, {-2, 11}, {-18, 8},
+  {-20, 0}, {-18, -8}, {-2, -11}, {12, -12}
 };
 static const az_vector_t forcefiend_segment3_vertices[] = {
-  {17, 0}, {12, 8}, {-16, 5}, {-18, 0}, {-16, -5}, {12, -8}
+  {17, 0}, {12, 8}, {-1, 7}, {-16, 5},
+  {-18, 0}, {-16, -5}, {-1, -7}, {12, -8}
 };
 static const az_vector_t forcefiend_stinger_vertices[] = {
   {14, 5}, {-20, 0}, {14, -5}
@@ -1322,7 +1325,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_FORCELING] = {
     .max_health = 0.75, .overall_bounding_radius = 22.5,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {230, 105, 50, 255},
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {204, 25, 76, 255},
     .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
     .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(forceling_head_vertices),

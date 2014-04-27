@@ -35,6 +35,14 @@ static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
 }
 
+static az_vector_t transform(const az_component_t *component, az_vector_t v) {
+  return az_vadd(az_vrotate(v, component->angle), component->position);
+}
+
+static void avg_vertex(az_vector_t v1, az_vector_t v2) {
+  az_gl_vertex(az_vmul(az_vadd(v1, v2), 0.5));
+}
+
 static void draw_fish(const az_baddie_t *baddie, az_color_t inner,
                       az_color_t outer, GLfloat fin_scale, az_clock_t clock) {
   const az_component_t *middle = &baddie->components[0];
@@ -118,11 +126,30 @@ static void draw_fish(const az_baddie_t *baddie, az_color_t inner,
   } glEnd();
 }
 
-static void draw_forcefiend_segment(az_polygon_t polygon, float flare) {
+static void draw_forcefiend_bone(const az_baddie_t *baddie, int idx,
+                                  GLfloat cx) {
+  const az_component_t *component = &baddie->components[idx];
+  glPushMatrix(); {
+    az_gl_translated(component->position);
+    az_gl_rotated(component->angle);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.6, 0.5, 0.5); glVertex2f(cx, 0);
+      glColor3f(0.3, 0.25, 0.25);
+      const az_polygon_t polygon = baddie->data->components[idx].polygon;
+      for (int j = polygon.num_vertices - 1, k = 0;
+           j < polygon.num_vertices; j = k++) {
+        az_gl_vertex(polygon.vertices[j]);
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
+static void draw_forcefiend_arm(az_polygon_t polygon, az_color_t inner,
+                                az_color_t outer) {
   glBegin(GL_TRIANGLE_FAN); {
-    glColor3f(0.8f + 0.2f * flare, 0.1f - 0.1f * flare, 0.3f - 0.3f * flare);
+    az_gl_color(inner);
     glVertex2f(0, 0);
-    glColor3f(0.4f + 0.4f * flare, 0.1f - 0.1f * flare, 0.15f - 0.1f * flare);
+    az_gl_color(outer);
     for (int j = polygon.num_vertices - 1, k = 0;
          j < polygon.num_vertices; j = k++) {
       az_gl_vertex(polygon.vertices[j]);
@@ -135,61 +162,31 @@ static void draw_forcefiend_segment(az_polygon_t polygon, float flare) {
 void az_draw_bad_forcefiend(const az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
   const float flare = baddie->armor_flare;
+  const float hurt = 1.0 - baddie->health / baddie->data->max_health;
+  const az_color_t inner = color3(0.8f + 0.2f * flare - 0.3f * hurt,
+                                  0.1f - 0.1f * flare + 0.6f * hurt,
+                                  0.3f - 0.3f * flare);
+  const az_color_t midst = color3(0.6f + 0.1f * flare - 0.1f * hurt,
+                                  0.1f - 0.1f * flare + 0.3f * hurt,
+                                  0.3f - 0.3f * flare);
+  const az_color_t outer = color3(0.35f + 0.2f * flare - 0.1f * hurt,
+                                  0.1f - 0.1f * flare + 0.1f * hurt,
+                                  0.15f - 0.1f * flare);
   // Stinger:
-  glPushMatrix(); {
-    const az_component_t *component = &baddie->components[11];
-    az_gl_translated(component->position);
-    az_gl_rotated(component->angle);
-    glBegin(GL_TRIANGLE_FAN); {
-      glColor3f(0.6, 0.5, 0.5); glVertex2f(16, 0);
-      glColor3f(0.3, 0.25, 0.25);
-      const az_polygon_t polygon = baddie->data->components[11].polygon;
-      for (int i = 0; i < polygon.num_vertices; ++i) {
-        az_gl_vertex(polygon.vertices[i]);
-      }
-    } glEnd();
-  } glPopMatrix();
+  draw_forcefiend_bone(baddie, 11, 13);
   // Pincers:
-  for (int i = 0; i < 2; ++i) {
-    const az_component_t *component = &baddie->components[i];
-    glPushMatrix(); {
-      az_gl_translated(component->position);
-      az_gl_rotated(component->angle);
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.6, 0.5, 0.5); glVertex2f(0, 0);
-        glColor3f(0.3, 0.25, 0.25);
-        const az_polygon_t polygon = baddie->data->components[i].polygon;
-        for (int j = polygon.num_vertices - 1, k = 0;
-             j < polygon.num_vertices; j = k++) {
-          az_gl_vertex(polygon.vertices[j]);
-        }
-      } glEnd();
-    } glPopMatrix();
-  }
+  draw_forcefiend_bone(baddie, 0, 0);
+  draw_forcefiend_bone(baddie, 1, 0);
   // Claws:
-  for (int i = 4; i <= 7; i += 3) {
-    const az_component_t *component = &baddie->components[i];
-    glPushMatrix(); {
-      az_gl_translated(component->position);
-      az_gl_rotated(component->angle);
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.6, 0.5, 0.5); glVertex2f(0, 0);
-        glColor3f(0.3, 0.25, 0.25);
-        const az_polygon_t polygon = baddie->data->components[i].polygon;
-        for (int j = polygon.num_vertices - 1, k = 0;
-             j < polygon.num_vertices; j = k++) {
-          az_gl_vertex(polygon.vertices[j]);
-        }
-      } glEnd();
-    } glPopMatrix();
-  }
+  draw_forcefiend_bone(baddie, 4, 0);
+  draw_forcefiend_bone(baddie, 7, 0);
   // Lower arms:
   for (int i = 3; i <= 6; i += 3) {
     const az_component_t *component = &baddie->components[i];
     glPushMatrix(); {
       az_gl_translated(component->position);
       az_gl_rotated(component->angle);
-      draw_forcefiend_segment(baddie->data->components[i].polygon, flare);
+      draw_forcefiend_arm(baddie->data->components[i].polygon, inner, outer);
     } glPopMatrix();
   }
   // Upper arms:
@@ -198,19 +195,69 @@ void az_draw_bad_forcefiend(const az_baddie_t *baddie) {
     glPushMatrix(); {
       az_gl_translated(component->position);
       az_gl_rotated(component->angle);
-      draw_forcefiend_segment(baddie->data->components[i].polygon, flare);
+      draw_forcefiend_arm(baddie->data->components[i].polygon, inner, outer);
     } glPopMatrix();
   }
   // Body:
-  for (int i = 10; i >= 8; --i) {
-    const az_component_t *component = &baddie->components[i];
-    glPushMatrix(); {
-      az_gl_translated(component->position);
-      az_gl_rotated(component->angle);
-      draw_forcefiend_segment(baddie->data->components[i].polygon, flare);
-    } glPopMatrix();
-  }
-  draw_forcefiend_segment(baddie->data->main_body.polygon, flare);
+  const az_component_t *segment1 = &baddie->components[8];
+  const az_component_t *segment2 = &baddie->components[9];
+  const az_component_t *segment3 = &baddie->components[10];
+  const az_polygon_t poly0 = baddie->data->main_body.polygon;
+  const az_polygon_t poly1 = baddie->data->components[8].polygon;
+  const az_polygon_t poly2 = baddie->data->components[9].polygon;
+  const az_polygon_t poly3 = baddie->data->components[10].polygon;
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
+    for (int i = 0; i < 5; ++i) az_gl_vertex(poly0.vertices[i]);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(outer); az_gl_vertex(poly0.vertices[4]);
+    az_gl_color(inner); glVertex2f(0, 0);
+    az_gl_color(outer); avg_vertex(poly0.vertices[5],
+                                   transform(segment1, poly1.vertices[1]));
+    az_gl_color(midst); avg_vertex(poly0.vertices[6],
+                                   transform(segment1, poly1.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment1, poly1.vertices[2]));
+    az_gl_color(inner); az_gl_vertex(segment1->position);
+    az_gl_color(outer); avg_vertex(transform(segment1, poly1.vertices[3]),
+                                   transform(segment2, poly2.vertices[1]));
+    az_gl_color(midst); avg_vertex(transform(segment1, poly1.vertices[4]),
+                                   transform(segment2, poly2.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment2, poly2.vertices[2]));
+    az_gl_color(inner); az_gl_vertex(segment2->position);
+    az_gl_color(outer); avg_vertex(transform(segment2, poly2.vertices[3]),
+                                   transform(segment3, poly3.vertices[1]));
+    az_gl_color(midst); avg_vertex(transform(segment2, poly2.vertices[4]),
+                                   transform(segment3, poly3.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment3, poly3.vertices[2]));
+    az_gl_color(inner); az_gl_vertex(segment3->position);
+    az_gl_color(outer); az_gl_vertex(transform(segment3, poly3.vertices[3]));
+    az_gl_color(midst); az_gl_vertex(transform(segment3, poly3.vertices[4]));
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(outer); az_gl_vertex(poly0.vertices[0]);
+    az_gl_color(inner); glVertex2f(0, 0);
+    az_gl_color(outer); avg_vertex(poly0.vertices[7],
+                                   transform(segment1, poly1.vertices[7]));
+    az_gl_color(midst); avg_vertex(poly0.vertices[6],
+                                   transform(segment1, poly1.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment1, poly1.vertices[6]));
+    az_gl_color(inner); az_gl_vertex(segment1->position);
+    az_gl_color(outer); avg_vertex(transform(segment1, poly1.vertices[5]),
+                                   transform(segment2, poly2.vertices[7]));
+    az_gl_color(midst); avg_vertex(transform(segment1, poly1.vertices[4]),
+                                   transform(segment2, poly2.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment2, poly2.vertices[6]));
+    az_gl_color(inner); az_gl_vertex(segment2->position);
+    az_gl_color(outer); avg_vertex(transform(segment2, poly2.vertices[5]),
+                                   transform(segment3, poly3.vertices[7]));
+    az_gl_color(midst); avg_vertex(transform(segment2, poly2.vertices[4]),
+                                   transform(segment3, poly3.vertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(segment3, poly3.vertices[6]));
+    az_gl_color(inner); az_gl_vertex(segment3->position);
+    az_gl_color(outer); az_gl_vertex(transform(segment3, poly3.vertices[5]));
+    az_gl_color(midst); az_gl_vertex(transform(segment3, poly3.vertices[4]));
+  } glEnd();
 }
 
 void az_draw_bad_force_egg(const az_baddie_t *baddie) {
