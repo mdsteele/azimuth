@@ -154,6 +154,11 @@ typedef enum {
 // The number of different upgrade kinds:
 #define AZ_NUM_UPGRADES ((int)AZ_UPG_SHIELD_BATTERY_11 + 1)
 
+#define AZ_UPG_ROCKET_AMMO_MAX AZ_UPG_ROCKET_AMMO_29
+#define AZ_UPG_BOMB_AMMO_MAX AZ_UPG_BOMB_AMMO_19
+#define AZ_UPG_CAPACITOR_MAX AZ_UPG_CAPACITOR_11
+#define AZ_UPG_SHIELD_BATTERY_MAX AZ_UPG_SHIELD_BATTERY_11
+
 /*===========================================================================*/
 
 // Return the name of the upgrade as a NUL-terminted string.

@@ -451,26 +451,43 @@ static void summarize_scenario(const az_planet_t *planet) {
   // Print number of rooms in each zone (both total rooms in that zone, and
   // "populated" rooms in that zone, so we can tell how many more rooms need to
   // be fleshed out):
-  printf("\x1b[33;1m        Zone  Pop  TTL  Frac\x1b[m\n");
+  printf("\x1b[33;1m        Zone  Rem  Pop  TTL  Frac"
+         "   \x1b[31mRk \x1b[34mBm \x1b[36mSh \x1b[35mCp\x1b[m\n");
   int total_pop_rooms = 0;
   for (int zone_index = 0; zone_index < planet->num_zones; ++zone_index) {
     const az_zone_t *zone = &planet->zones[zone_index];
     int num_rooms = 0, num_pop_rooms = 0;
+    int num_rockets = 0, num_bombs = 0, num_shields = 0, num_capacitors = 0;
     for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
       const az_room_t *room = &planet->rooms[room_index];
-      if (room->zone_key == (az_zone_key_t)zone_index) {
-        ++num_rooms;
-        if (room->num_walls >= 8) {
-          ++num_pop_rooms;
-          ++total_pop_rooms;
-        }
+      if (room->zone_key != (az_zone_key_t)zone_index) continue;
+      ++num_rooms;
+      if (room->num_walls >= 8) {
+        ++num_pop_rooms;
+        ++total_pop_rooms;
+      }
+      for (int node_index = 0; node_index < room->num_nodes; ++node_index) {
+        const az_node_spec_t *node = &room->nodes[node_index];
+        if (node->kind != AZ_NODE_UPGRADE) continue;
+        const az_upgrade_t upgrade = node->subkind.upgrade;
+        if (upgrade >= AZ_UPG_ROCKET_AMMO_00 &&
+            upgrade <= AZ_UPG_ROCKET_AMMO_MAX) ++num_rockets;
+        if (upgrade >= AZ_UPG_BOMB_AMMO_00 &&
+            upgrade <= AZ_UPG_BOMB_AMMO_MAX) ++num_bombs;
+        if (upgrade >= AZ_UPG_SHIELD_BATTERY_00 &&
+            upgrade <= AZ_UPG_SHIELD_BATTERY_MAX) ++num_shields;
+        if (upgrade >= AZ_UPG_CAPACITOR_00 &&
+            upgrade <= AZ_UPG_CAPACITOR_MAX) ++num_capacitors;
       }
     }
-    printf("%12s  %3d  %3d  %3d%%\n", zone->name, num_pop_rooms, num_rooms,
-           (int)(100.0 * (double)num_pop_rooms / (double)num_rooms));
+    printf("%12s  %3d  %3d  %3d  %3d%%   %2d %2d %2d %2d\n", zone->name,
+           (num_rooms - num_pop_rooms), num_pop_rooms, num_rooms,
+           (int)(100.0 * (double)num_pop_rooms / (double)num_rooms),
+           num_rockets, num_bombs, num_shields, num_capacitors);
   }
-  printf("\x1b[1m       TOTAL  %3d  %3d  %3d%%\x1b[m\n",
-         total_pop_rooms, planet->num_rooms,
+  printf("\x1b[1m       TOTAL  %3d  %3d  %3d  %3d%%\x1b[m\n",
+         (planet->num_rooms - total_pop_rooms), total_pop_rooms,
+         planet->num_rooms,
          (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms));
 }
 
