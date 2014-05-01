@@ -42,13 +42,13 @@ void draw_stalk(const az_baddie_t *baddie, bool thorns, float length_scale,
   for (int j = 3; j < baddie->data->num_components; ++j) {
     glPushMatrix(); {
       const az_component_t *component = &baddie->components[j];
-      glTranslated(component->position.x, component->position.y, 0);
-      glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+      az_gl_translated(component->position);
+      az_gl_rotated(component->angle);
       if (thorns) {
         glBegin(GL_TRIANGLE_FAN); {
           glColor3f(0.75, 0.75, 0.75); glVertex2f(0, 0);
-          glColor3f(0.3, 0.3, 0.3); glVertex2f(0, 8);
-          glVertex2f(-4, 0); glVertex2f(0, -8); glVertex2f(4, 0);
+          glColor3f(0.3, 0.3, 0.3); glVertex2f(0, 8); glVertex2f(-4, 0);
+          glVertex2f(0, -8); glVertex2f(4, 0); glVertex2f(0, 8);
         } glEnd();
       }
       glScalef(length_scale, 1, 1);
@@ -65,8 +65,8 @@ void draw_base(const az_baddie_t *baddie, az_color_t center_color,
                az_color_t side_color) {
   glPushMatrix(); {
     const az_component_t *base = &baddie->components[0];
-    glTranslated(base->position.x, base->position.y, 0);
-    glRotated(AZ_RAD2DEG(base->angle), 0, 0, 1);
+    az_gl_translated(base->position);
+    az_gl_rotated(base->angle);
     glBegin(GL_TRIANGLE_FAN); {
       az_gl_color(center_color);
       glVertex2f(0, 0);
@@ -93,14 +93,14 @@ void draw_core(const az_baddie_t *baddie, float flare, float frozen) {
   } glEnd();
 }
 
-void draw_pincers(const az_baddie_t *baddie, az_color_t center_color,
-                  az_color_t side_color) {
+void draw_pincers(const az_baddie_t *baddie, bool thorns,
+                  az_color_t center_color, az_color_t side_color) {
   // Teeth:
   for (int i = 1; i <= 2; ++i) {
     glPushMatrix(); {
       const az_component_t *pincer = &baddie->components[i];
-      glTranslated(pincer->position.x, pincer->position.y, 0);
-      glRotated(AZ_RAD2DEG(pincer->angle), 0, 0, 1);
+      az_gl_translated(pincer->position);
+      az_gl_rotated(pincer->angle);
       glBegin(GL_TRIANGLES); {
         glColor3f(0.5, 0.5, 0.5);
         const GLfloat y = (i % 2 ? -4 : 4);
@@ -108,14 +108,32 @@ void draw_pincers(const az_baddie_t *baddie, az_color_t center_color,
           glVertex2f(x + 2, 0); glVertex2f(x, y); glVertex2f(x - 2, 0);
         }
       } glEnd();
+      // Thorns:
+      if (thorns) {
+        for (int j = 10; j <= 150; j += 20) {
+          glBegin(GL_TRIANGLE_FAN); {
+            const double sign = 3 - i * 2;
+            glColor3f(0.75, 0.75, 0.75);
+            glVertex2d(9 + 14 * cos(AZ_DEG2RAD(j)),
+                       sign * (3 + 7 * sin(AZ_DEG2RAD(j))));
+            glColor3f(0.3, 0.3, 0.3);
+            glVertex2d(9 + 14 * cos(AZ_DEG2RAD(j - 10)),
+                       sign * (3 + 7 * sin(AZ_DEG2RAD(j - 10))));
+            glVertex2d(9 + 20 * cos(AZ_DEG2RAD(j)),
+                       sign * (3 + 14 * sin(AZ_DEG2RAD(j))));
+            glVertex2d(9 + 14 * cos(AZ_DEG2RAD(j + 10)),
+                       sign * (3 + 7 * sin(AZ_DEG2RAD(j + 10))));
+          } glEnd();
+        }
+      }
     } glPopMatrix();
   }
   // Pincers:
   for (int i = 1; i <= 2; ++i) {
     glPushMatrix(); {
       const az_component_t *pincer = &baddie->components[i];
-      glTranslated(pincer->position.x, pincer->position.y, 0);
-      glRotated(AZ_RAD2DEG(pincer->angle), 0, 0, 1);
+      az_gl_translated(pincer->position);
+      az_gl_rotated(pincer->angle);
       glBegin(GL_TRIANGLE_FAN); {
         az_gl_color(center_color);
         glVertex2f(0, 0);
@@ -142,7 +160,7 @@ void az_draw_bad_chomper_plant(
   draw_stalk(baddie, true, 1.0, center_color, side_color);
   draw_base(baddie, center_color, side_color);
   draw_core(baddie, flare, frozen);
-  draw_pincers(baddie, center_color, side_color);
+  draw_pincers(baddie, false, center_color, side_color);
 }
 
 void az_draw_bad_aquatic_chomper(
@@ -157,7 +175,21 @@ void az_draw_bad_aquatic_chomper(
   draw_stalk(baddie, false, 0.5, center_color, side_color);
   draw_base(baddie, center_color, side_color);
   draw_core(baddie, flare, frozen);
-  draw_pincers(baddie, center_color, side_color);
+  draw_pincers(baddie, false, center_color, side_color);
+}
+
+void az_draw_bad_jungle_chomper(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_JUNGLE_CHOMPER);
+  const float flare = baddie->armor_flare;
+  const az_color_t center_color =
+    color3(0.75f - 0.75f * frozen, 1.0f - 0.5f * flare, frozen);
+  const az_color_t side_color =
+    color3(0.15f + 0.4f * flare, 0.3f - 0.3f * flare, 0.4f * frozen);
+  draw_stalk(baddie, true, 1.0, center_color, side_color);
+  draw_base(baddie, center_color, side_color);
+  draw_core(baddie, flare, frozen);
+  draw_pincers(baddie, true, center_color, side_color);
 }
 
 /*===========================================================================*/

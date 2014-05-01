@@ -425,6 +425,30 @@ static az_component_data_t aquatic_chomper_components[] = {
 #undef STALK_SEGMENT
 };
 
+static az_component_data_t jungle_chomper_components[] = {
+  // Base:
+  { .polygon = AZ_INIT_POLYGON(chomper_plant_base_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
+                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET),
+    .init_position = {-190, 0}, .impact_damage = 6.0 },
+  // Pincers:
+  { .polygon = AZ_INIT_POLYGON(chomper_plant_left_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 },
+  { .polygon = AZ_INIT_POLYGON(chomper_plant_right_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 },
+  // Stalk:
+#define STALK_SEGMENT(x) \
+  { .polygon = AZ_INIT_POLYGON(stalk_segment_vertices), \
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
+                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET), \
+    .init_position = {(x), 0}, .impact_damage = 4.0 }
+
+  STALK_SEGMENT(-10), STALK_SEGMENT(-30), STALK_SEGMENT(-50),
+  STALK_SEGMENT(-70), STALK_SEGMENT(-90), STALK_SEGMENT(-110),
+  STALK_SEGMENT(-130), STALK_SEGMENT(-150), STALK_SEGMENT(-170)
+#undef STALK_SEGMENT
+};
+
 static az_vector_t copter_vertices[] = {
   {14, 21}, {-14, 21}, {-14, -21}, {14, -21}
 };
@@ -1331,6 +1355,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(forceling_head_vertices),
                    .impact_damage = 6.0 },
     DECL_COMPONENTS(forceling_components)
+  },
+  [AZ_BAD_JUNGLE_CHOMPER] = {
+    .max_health = 14.0, .overall_bounding_radius = 250.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {128, 192, 0, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
+    DECL_COMPONENTS(jungle_chomper_components)
   }
 };
 

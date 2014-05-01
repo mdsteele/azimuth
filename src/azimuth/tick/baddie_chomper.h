@@ -32,6 +32,9 @@ void az_tick_bad_chomper_plant(
 void az_tick_bad_aquatic_chomper(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_jungle_chomper(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_BADDIE_CHOMPER_H_

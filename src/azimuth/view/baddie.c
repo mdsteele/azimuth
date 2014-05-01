@@ -1228,6 +1228,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_FORCELING:
       az_draw_bad_forceling(baddie, frozen, clock);
       break;
+    case AZ_BAD_JUNGLE_CHOMPER:
+      az_draw_bad_jungle_chomper(baddie, frozen, clock);
+      break;
   }
 }
 

@@ -91,6 +91,7 @@ static void move_head(
 
 void az_tick_bad_chomper_plant(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_CHOMPER_PLANT);
   az_component_t *base = &baddie->components[0];
   // Get the absolute position of the base.
   const az_vector_t base_pos =
@@ -106,7 +107,7 @@ void az_tick_bad_chomper_plant(
   az_vector_t head_pos = baddie->position;
   // State 0: Move head in a circle.
   if (baddie->state == 0) {
-    baddie->param += time * 400 / az_vdist(head_pos, ship_pos);
+    baddie->param += time * 400 / fmax(10, az_vdist(head_pos, ship_pos));
     const az_vector_t goal =
       az_vadd(az_vadd(base_pos, az_vpolar(140, base_angle)),
               az_vpolar(40, baddie->param));
@@ -146,6 +147,7 @@ void az_tick_bad_chomper_plant(
 
 void az_tick_bad_aquatic_chomper(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_AQUATIC_CHOMPER);
   az_component_t *base = &baddie->components[0];
   // Get the absolute position of the base.
   const az_vector_t base_pos =
@@ -191,6 +193,64 @@ void az_tick_bad_aquatic_chomper(
       head_angle_goal);
   move_head(baddie, time, 0.5, head_pos, head_angle, base_pos, base_angle,
             (line_of_sight && baddie->cooldown < 0.75));
+}
+
+void az_tick_bad_jungle_chomper(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_JUNGLE_CHOMPER);
+  az_component_t *base = &baddie->components[0];
+  // Get the absolute position of the base.
+  const az_vector_t base_pos =
+    az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
+  const double base_angle = az_mod2pi(baddie->angle + base->angle);
+  // Pick a new position for the head.
+  const bool line_of_sight = az_can_see_ship(state, baddie);
+  const az_vector_t ship_pos = state->ship.position;
+  const double head_angle = az_angle_towards(baddie->angle,
+      (line_of_sight ? AZ_DEG2RAD(120) : AZ_DEG2RAD(60)) * time,
+      (!line_of_sight ? base_angle :
+       az_vtheta(az_vsub(ship_pos, baddie->position))));
+  az_vector_t head_pos = baddie->position;
+  // State 0: Move head in a circle.
+  if (baddie->state <= 0) {
+    baddie->param += time * 400 / fmax(10, az_vdist(head_pos, ship_pos));
+    const az_vector_t goal =
+      az_vadd(az_vadd(base_pos, az_vpolar(140, base_angle)),
+              az_vpolar(40, baddie->param));
+    const double tracking_base = 0.1; // smaller = faster tracking
+    const az_vector_t delta =
+      az_vmul(az_vsub(goal, head_pos), 1.0 - pow(tracking_base, time));
+    az_vpluseq(&head_pos, delta);
+    if (baddie->cooldown <= 0.0 && line_of_sight &&
+        az_ship_in_range(state, baddie, 300)) {
+      baddie->cooldown = 1.0;
+      baddie->state = 12;
+    }
+  }
+  // State 1-12: Fire a burst of fireballs.
+  else {
+    baddie->param += time * 600 / fmax(10, az_vdist(head_pos, ship_pos));
+    const az_vector_t goal =
+      az_vadd(az_vadd(base_pos, az_vpolar(130, base_angle)),
+              az_vpolar(15, baddie->param));
+    const double tracking_base = 0.001; // smaller = faster tracking
+    const az_vector_t delta =
+      az_vmul(az_vsub(goal, head_pos), 1.0 - pow(tracking_base, time));
+    az_vpluseq(&head_pos, delta);
+    if (baddie->cooldown <= 0.0) {
+      az_fire_baddie_projectile(state, baddie,
+          AZ_PROJ_FIREBALL_FAST, baddie->data->main_body.bounding_radius,
+          0.0, az_random(-1, 1) * AZ_DEG2RAD(10));
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
+      az_vpluseq(&head_pos, az_vpolar(-10, head_angle));
+      if (line_of_sight) --baddie->state;
+      else baddie->state = 0;
+      baddie->cooldown = (baddie->state == 0 ? 2.0 : az_random(0.1, 0.15));
+    }
+  }
+  // Update the baddie's position and components.
+  move_head(baddie, time, 1.0, head_pos, head_angle, base_pos, base_angle,
+            (baddie->state > 0));
 }
 
 /*===========================================================================*/
