@@ -427,9 +427,11 @@ void az_draw_wall_data(const az_wall_data_t *data, az_clock_t clock) {
                 ((float)data->underglow.g / 255.0f) * mult,
                 ((float)data->underglow.b / 255.0f) * mult,
                 ((float)data->underglow.a / 255.0f));
+      glVertex2f(0, 0);
       for (int i = 0; i < data->polygon.num_vertices; ++i) {
         az_gl_vertex(data->polygon.vertices[i]);
       }
+      az_gl_vertex(data->polygon.vertices[0]);
     } glEnd();
   }
   glCallList(display_list);
@@ -468,10 +470,12 @@ void az_draw_wall(const az_wall_t *wall, az_clock_t clock) {
           break;
       }
       glBegin(GL_TRIANGLE_FAN); {
+        glVertex2f(0, 0);
         const az_polygon_t polygon = wall->data->polygon;
         for (int i = 0; i < polygon.num_vertices; ++i) {
           az_gl_vertex(polygon.vertices[i]);
         }
+        az_gl_vertex(polygon.vertices[0]);
       } glEnd();
     }
   } glPopMatrix();
