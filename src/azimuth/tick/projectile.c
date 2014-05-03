@@ -578,8 +578,18 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_NUCLEAR_EXPLOSION:
       if (proj->age >= proj->data->lifetime) {
         on_projectile_hit_wall(state, proj, AZ_VZERO);
-      } else {
-        proj->angle = az_mod2pi(proj->angle + 1.5 * time);
+        return;
+      }
+      if (proj->kind == AZ_PROJ_BOMB &&
+          !az_vwithin(proj->position, state->ship.position,
+                      proj->data->splash_radius + 5.0)) {
+        az_impact_t impact;
+        az_circle_impact(state, 25.0, proj->position, AZ_VZERO,
+                         ~AZ_IMPF_BADDIE, AZ_NULL_UID, &impact);
+        if (impact.type == AZ_IMP_BADDIE) {
+          on_projectile_hit_wall(state, proj, AZ_VZERO);
+          return;
+        }
       }
       if (proj->kind == AZ_PROJ_MEGA_BOMB && proj->age >= 0.25 &&
           (proj->age < 2.0 ?
@@ -587,6 +597,7 @@ static void projectile_special_logic(az_space_state_t *state,
            (ceil(6.0 * proj->age) > ceil(6.0 * (proj->age - time))))) {
         az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
       }
+      proj->angle = az_mod2pi(proj->angle + 1.5 * time);
       break;
     case AZ_PROJ_ORION_BOMB:
       if (proj->age >= proj->data->lifetime) {

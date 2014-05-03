@@ -296,7 +296,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 25.0,
     .splash_radius = 60.0,
     .impact_shake = 1.5,
-    .damage_kind = AZ_DMGF_BOMB
+    .damage_kind = AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_MEGA_BOMB] = {
     .lifetime = 3.0,
