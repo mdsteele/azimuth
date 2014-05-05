@@ -44,7 +44,7 @@ node [shape=Mcircle, height=0.5, fixedsize=true];
 "S7"  [color=blue];
 "S8"  [color=cyan];
 "S9"  [color=green];
-"S10" [color=green];
+"S10" [color=green]; // in big Voquan hex nest (room 358)
 "S11" [color=red];
 "S12" [color=gray];
 // Capacitors:
@@ -163,6 +163,7 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 "Pierce Gun" -> "Quantum Reactor" [style=dashed];
 "Orion Booster" -> "Enter Deep Sarvari";
 "Orion Booster" -> "S10";
+"Enter Deep Voquan" -> "S10" [style=dotted];
 "Enter Deep Sarvari" -> "C10";
 "Enter Deep Sarvari" -> "S11";
 "Enter Deep Sarvari" -> "Magbeest";
