@@ -85,7 +85,7 @@ typedef struct {
 bool az_fprint_paragraph(const char *paragraph, FILE *file);
 
 // Parse and allocate the paragraph.
-char *az_sscan_paragraph(const char *string, int length);
+char *az_sscan_paragraph(const char *string);
 
 // Return the number of lines in the paragraph.  This will be at least 1,
 // even for an empty string.

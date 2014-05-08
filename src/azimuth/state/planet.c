@@ -24,12 +24,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/dialog.h"
 #include "azimuth/state/room.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/string.h"
 
 /*===========================================================================*/
 
@@ -124,7 +124,7 @@ static void parse_paragraph_directive(az_load_planet_t *loader) {
   READ("%d", &paragraph_index);
   if (paragraph_index != loader->planet->num_paragraphs) FAIL();
   char *string = scan_string(loader);
-  char *paragraph = az_sscan_paragraph(string, strlen(string));
+  char *paragraph = az_sscan_paragraph(string);
   free(string);
   if (paragraph == NULL) FAIL();
   loader->planet->paragraphs[loader->planet->num_paragraphs] = paragraph;
@@ -188,17 +188,21 @@ static bool load_planet_basis(const char *filepath, az_planet_t *planet_out) {
 bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   assert(resource_dir != NULL);
   assert(planet_out != NULL);
-  const size_t dirlen = strlen(resource_dir);
-  char path_buffer[dirlen + 20u];
-  AZ_ZERO_OBJECT(planet_out);
 
-  sprintf(path_buffer, "%s/rooms/planet.txt", resource_dir);
-  if (!load_planet_basis(path_buffer, planet_out)) return false;
+  {
+    char *planet_path = az_strprintf("%s/rooms/planet.txt", resource_dir);
+    const bool success = load_planet_basis(planet_path, planet_out);
+    free(planet_path);
+    if (!success) return false;
+  }
 
   for (int i = 0; i < planet_out->num_rooms; ++i) {
-    sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, i);
-    if (!az_load_room_from_file(path_buffer, &planet_out->rooms[i]) ||
-        planet_out->rooms[i].zone_key >= planet_out->num_zones) {
+    char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, i);
+    const bool success =
+      az_load_room_from_file(room_path, &planet_out->rooms[i]) &&
+      planet_out->rooms[i].zone_key < planet_out->num_zones;
+    free(room_path);
+    if (!success) {
       az_destroy_planet(planet_out);
       return false;
     }
@@ -256,17 +260,19 @@ bool az_save_planet(
     const az_room_key_t *rooms_to_save, int num_rooms_to_save) {
   assert(planet != NULL);
   assert(resource_dir != NULL);
-  const size_t dirlen = strlen(resource_dir);
-  char path_buffer[dirlen + 20u];
 
   for (int i = 0; i < num_rooms_to_save; ++i) {
     const int key = rooms_to_save[i];
-    sprintf(path_buffer, "%s/rooms/room%03d.txt", resource_dir, key);
-    if (!az_save_room_to_file(&planet->rooms[key], path_buffer)) return false;
+    char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, key);
+    const bool success = az_save_room_to_file(&planet->rooms[key], room_path);
+    free(room_path);
+    if (!success) return false;
   }
 
-  sprintf(path_buffer, "%s/rooms/planet.txt", resource_dir);
-  return save_planet_header(planet, path_buffer);
+  char *planet_path = az_strprintf("%s/rooms/planet.txt", resource_dir);
+  const bool success = save_planet_header(planet, planet_path);
+  free(planet_path);
+  return success;
 }
 
 /*===========================================================================*/

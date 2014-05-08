@@ -52,7 +52,8 @@ bool az_fprint_paragraph(const char *paragraph, FILE *file) {
 
 /*===========================================================================*/
 
-char *az_sscan_paragraph(const char *string, int length) {
+char *az_sscan_paragraph(const char *string) {
+  const int length = strlen(string);
   int paragraph_length = 0;
   int start = 0;
   for (; start < length; ++start) {

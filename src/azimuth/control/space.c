@@ -21,8 +21,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h> // for sprintf
-#include <string.h>
+#include <stdlib.h>
 
 #include "azimuth/control/paused.h"
 #include "azimuth/control/victory.h"
@@ -38,6 +37,7 @@
 #include "azimuth/tick/script.h"
 #include "azimuth/tick/space.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/string.h"
 #include "azimuth/view/space.h"
 
 /*===========================================================================*/
@@ -96,9 +96,10 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   saved_game->player = state.ship.player;
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return false;
-  char path_buffer[strlen(data_dir) + 10u];
-  sprintf(path_buffer, "%s/save.txt", data_dir);
-  return az_save_games_to_file(saved_games, path_buffer);
+  char *save_path = az_strprintf("%s/save.txt", data_dir);
+  const bool success = az_save_games_to_file(saved_games, save_path);
+  free(save_path);
+  return success;
 }
 
 static void update_controls(const az_preferences_t *prefs) {

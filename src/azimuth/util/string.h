@@ -17,43 +17,24 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include <stdlib.h>
-
-#include "azimuth/state/dialog.h"
-#include "azimuth/util/key.h"
-#include "azimuth/util/prefs.h"
-#include "test/test.h"
+#pragma once
+#ifndef AZIMUTH_UTIL_STRING_H_
+#define AZIMUTH_UTIL_STRING_H_
 
 /*===========================================================================*/
 
-static const char input_string[] = "\n"
-  "  This is a $Gtest$W.  However, $Xface42it is\n"
-  "  $Ronly$W a test.  Press [$u].";
-static const char paragraph[] =
-  "This is a $Gtest$W.  However, $Xface42it is\n"
-  "$Ronly$W a test.  Press [$u].";
+// Allocates and returns a copy of the given NUL-terminated string.  If memory
+// allocation fails, this will signal a fatal error and exit the program.
+// Returns NULL if the argument is NULL.
+char *az_strdup(const char *str)
+  __attribute__((__malloc__));
 
-void test_paragraph_scan(void) {
-  char *actual_paragraph = az_sscan_paragraph(input_string);
-  ASSERT_TRUE(actual_paragraph != NULL);
-  EXPECT_STRING_EQ(paragraph, actual_paragraph);
-  free(actual_paragraph);
-}
-
-void test_paragraph_length(void) {
-  az_preferences_t prefs;
-  az_reset_prefs_to_defaults(&prefs);
-
-  EXPECT_INT_EQ(1, az_paragraph_num_lines(""));
-  EXPECT_INT_EQ(0, az_paragraph_line_length(&prefs, "", 0));
-  EXPECT_INT_EQ(0, az_paragraph_total_length(&prefs, ""));
-
-  EXPECT_INT_EQ(2, az_paragraph_num_lines(paragraph));
-  EXPECT_INT_EQ(31, az_paragraph_line_length(&prefs, paragraph, 0));
-  EXPECT_INT_EQ(55, az_paragraph_total_length(&prefs, paragraph));
-
-  prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
-  EXPECT_INT_EQ(57, az_paragraph_total_length(&prefs, paragraph));
-}
+// Allocates a new string with the same text that would be produced by a call
+// to printf with the same format and arguments.  If memory allocation fails,
+// this will signal a fatal error and exit the program.
+char *az_strprintf(const char *format, ...)
+  __attribute__((__malloc__,__format__(__printf__,1,2)));
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_UTIL_STRING_H_

@@ -37,6 +37,7 @@
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/prefs.h"
 #include "azimuth/util/random.h" // for az_init_random
+#include "azimuth/util/string.h"
 #include "azimuth/view/dialog.h" // for az_init_portrait_drawing
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
@@ -57,21 +58,21 @@ static bool load_scenario(void) {
 static void load_saved_games(void) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
-  char path_buffer[strlen(data_dir) + 10u];
-  sprintf(path_buffer, "%s/save.txt", data_dir);
-  if (!az_load_games_from_file(&planet, path_buffer, &saved_games)) {
+  char *save_path = az_strprintf("%s/save.txt", data_dir);
+  if (!az_load_games_from_file(&planet, save_path, &saved_games)) {
     az_reset_saved_games(&saved_games);
   }
+  free(save_path);
 }
 
 static void load_preferences(void) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
-  char path_buffer[strlen(data_dir) + 11u];
-  sprintf(path_buffer, "%s/prefs.txt", data_dir);
-  if (!az_load_prefs_from_file(path_buffer, &preferences)) {
+  char *prefs_path = az_strprintf("%s/prefs.txt", data_dir);
+  if (!az_load_prefs_from_file(prefs_path, &preferences)) {
     az_reset_prefs_to_defaults(&preferences);
   }
+  free(prefs_path);
 }
 
 typedef enum {

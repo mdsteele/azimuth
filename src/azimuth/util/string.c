@@ -17,43 +17,34 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include <stdlib.h>
+#include "azimuth/util/string.h"
 
-#include "azimuth/state/dialog.h"
-#include "azimuth/util/key.h"
-#include "azimuth/util/prefs.h"
-#include "test/test.h"
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-static const char input_string[] = "\n"
-  "  This is a $Gtest$W.  However, $Xface42it is\n"
-  "  $Ronly$W a test.  Press [$u].";
-static const char paragraph[] =
-  "This is a $Gtest$W.  However, $Xface42it is\n"
-  "$Ronly$W a test.  Press [$u].";
-
-void test_paragraph_scan(void) {
-  char *actual_paragraph = az_sscan_paragraph(input_string);
-  ASSERT_TRUE(actual_paragraph != NULL);
-  EXPECT_STRING_EQ(paragraph, actual_paragraph);
-  free(actual_paragraph);
+char *az_strdup(const char *str) {
+  if (str == NULL) return NULL;
+  char *copy = AZ_ALLOC(strlen(str) + 1, char); // add 1 for trailing '\0'
+  strcpy(copy, str);
+  return copy;
 }
 
-void test_paragraph_length(void) {
-  az_preferences_t prefs;
-  az_reset_prefs_to_defaults(&prefs);
-
-  EXPECT_INT_EQ(1, az_paragraph_num_lines(""));
-  EXPECT_INT_EQ(0, az_paragraph_line_length(&prefs, "", 0));
-  EXPECT_INT_EQ(0, az_paragraph_total_length(&prefs, ""));
-
-  EXPECT_INT_EQ(2, az_paragraph_num_lines(paragraph));
-  EXPECT_INT_EQ(31, az_paragraph_line_length(&prefs, paragraph, 0));
-  EXPECT_INT_EQ(55, az_paragraph_total_length(&prefs, paragraph));
-
-  prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
-  EXPECT_INT_EQ(57, az_paragraph_total_length(&prefs, paragraph));
+char *az_strprintf(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  const size_t size = vsnprintf(NULL, 0, format, args);
+  va_end(args);
+  char *out = AZ_ALLOC(size + 1, char); // add 1 for trailing '\0'
+  va_start(args, format);
+  vsprintf(out, format, args);
+  va_end(args);
+  return out;
 }
 
 /*===========================================================================*/

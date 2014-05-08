@@ -20,13 +20,12 @@
 #include "azimuth/state/music.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/music.h"
+#include "azimuth/util/string.h"
 #include "azimuth/util/warning.h"
 
 /*===========================================================================*/
@@ -140,19 +139,17 @@ bool az_init_music_datas(const char *resource_dir) {
   const az_sound_data_t *drums = NULL;
   az_get_drum_kit(&num_drums, &drums);
   // Initialize music:
-  const size_t dirlen = strlen(resource_dir);
-  char path_buffer[dirlen + 30u];
   for (int i = 0; i < AZ_ARRAY_SIZE(music_filenames); ++i) {
     const char *filename = music_filenames[i];
     if (filename == NULL) continue;
-    assert(strlen(filename) <= 20u);
-    sprintf(path_buffer, "%s/music/%s", resource_dir, filename);
-    if (!az_parse_music_from_file(path_buffer, num_drums, drums,
+    char *music_path = az_strprintf("%s/music/%s", resource_dir, filename);
+    if (!az_parse_music_from_file(music_path, num_drums, drums,
                                   &music_datas[i])) {
-      AZ_WARNING_ALWAYS("Failed to load music from %s\n", path_buffer);
+      AZ_WARNING_ALWAYS("Failed to load music from %s\n", music_path);
+      free(music_path);
       destroy_music_datas();
       return false;
-    }
+    } else free(music_path);
   }
   atexit(destroy_music_datas);
   music_data_initialized = true;

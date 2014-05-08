@@ -24,12 +24,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/script.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/string.h"
 #include "azimuth/util/vector.h"
 #include "editor/list.h"
 
@@ -272,15 +272,14 @@ bool az_load_editor_state(az_editor_state_t *state) {
   // Convert paragraphs:
   AZ_LIST_INIT(state->planet.paragraphs, planet.num_paragraphs);
   for (int i = 0; i < planet.num_paragraphs; ++i) {
-    *AZ_LIST_ADD(state->planet.paragraphs) = strdup(planet.paragraphs[i]);
+    *AZ_LIST_ADD(state->planet.paragraphs) = az_strdup(planet.paragraphs[i]);
   }
   // Convert zones:
   AZ_LIST_INIT(state->planet.zones, planet.num_zones);
   for (int i = 0; i < planet.num_zones; ++i) {
     az_zone_t *zone = AZ_LIST_ADD(state->planet.zones);
     *zone = planet.zones[i];
-    zone->name = AZ_ALLOC(strlen(planet.zones[i].name + 1), char);
-    strcpy(zone->name, planet.zones[i].name);
+    zone->name = az_strdup(planet.zones[i].name);
   }
   // Convert rooms:
   AZ_LIST_INIT(state->planet.rooms, planet.num_rooms);
@@ -517,14 +516,14 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   };
   // Convert paragraphs:
   for (int i = 0; i < num_paragraphs; ++i) {
-    planet.paragraphs[i] = strdup(*AZ_LIST_GET(state->planet.paragraphs, i));
+    planet.paragraphs[i] =
+      az_strdup(*AZ_LIST_GET(state->planet.paragraphs, i));
   }
   // Convert zones:
   for (int i = 0; i < num_zones; ++i) {
     az_zone_t *zone = AZ_LIST_GET(state->planet.zones, i);
     planet.zones[i] = *zone;
-    planet.zones[i].name = AZ_ALLOC(strlen(zone->name) + 1, char);
-    strcpy(planet.zones[i].name, zone->name);
+    planet.zones[i].name = az_strdup(zone->name);
   }
   // Convert rooms:
   az_room_key_t *rooms_to_save = AZ_ALLOC(num_rooms_to_save, az_room_key_t);

@@ -19,41 +19,25 @@
 
 #include <stdlib.h>
 
-#include "azimuth/state/dialog.h"
-#include "azimuth/util/key.h"
-#include "azimuth/util/prefs.h"
+#include "azimuth/util/string.h"
+#include "azimuth/util/vector.h"
 #include "test/test.h"
 
 /*===========================================================================*/
 
-static const char input_string[] = "\n"
-  "  This is a $Gtest$W.  However, $Xface42it is\n"
-  "  $Ronly$W a test.  Press [$u].";
-static const char paragraph[] =
-  "This is a $Gtest$W.  However, $Xface42it is\n"
-  "$Ronly$W a test.  Press [$u].";
+void test_strdup(void) {
+  EXPECT_TRUE(az_strdup(NULL) == NULL);
 
-void test_paragraph_scan(void) {
-  char *actual_paragraph = az_sscan_paragraph(input_string);
-  ASSERT_TRUE(actual_paragraph != NULL);
-  EXPECT_STRING_EQ(paragraph, actual_paragraph);
-  free(actual_paragraph);
+  const char *str = "Hello, world!";
+  char *copy = az_strdup(str);
+  EXPECT_STRING_EQ(str, copy);
+  free(copy);
 }
 
-void test_paragraph_length(void) {
-  az_preferences_t prefs;
-  az_reset_prefs_to_defaults(&prefs);
-
-  EXPECT_INT_EQ(1, az_paragraph_num_lines(""));
-  EXPECT_INT_EQ(0, az_paragraph_line_length(&prefs, "", 0));
-  EXPECT_INT_EQ(0, az_paragraph_total_length(&prefs, ""));
-
-  EXPECT_INT_EQ(2, az_paragraph_num_lines(paragraph));
-  EXPECT_INT_EQ(31, az_paragraph_line_length(&prefs, paragraph, 0));
-  EXPECT_INT_EQ(55, az_paragraph_total_length(&prefs, paragraph));
-
-  prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
-  EXPECT_INT_EQ(57, az_paragraph_total_length(&prefs, paragraph));
+void test_strprintf(void) {
+  char *str = az_strprintf("Hello, %s number %.2f!", "purple world", AZ_PI);
+  EXPECT_STRING_EQ("Hello, purple world number 3.14!", str);
+  free(str);
 }
 
 /*===========================================================================*/
