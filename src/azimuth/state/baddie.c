@@ -709,6 +709,11 @@ static az_component_data_t forceling_components[] = {
     .init_position = {-15, 0}, .impact_damage = 6.0 }
 };
 
+static const az_vector_t small_auv_vertices[] = {
+  {30, 10}, {10, 16}, {10, 14}, {-24, 14}, {-30, 8},
+  {-30, -8}, {-24, -14}, {10, -14}, {10, -16}, {30, -10}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1362,6 +1367,16 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(jungle_chomper_components)
+  },
+  [AZ_BAD_SMALL_AUV] = {
+    .max_health = 30.0, .color = {160, 160, 160, 255},
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
+    .static_properties = AZ_BADF_CARRIES_CARGO,
+    .main_body = { .polygon = AZ_INIT_POLYGON(small_auv_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                   .impact_damage = 8.0 }
   }
 };
 

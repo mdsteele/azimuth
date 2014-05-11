@@ -35,6 +35,7 @@
 #include "azimuth/tick/baddie_oth.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
+#include "azimuth/tick/baddie_vehicle.h"
 #include "azimuth/tick/baddie_wyrm.h"
 #include "azimuth/tick/baddie_zipper.h"
 #include "azimuth/tick/object.h"
@@ -519,33 +520,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_security_drone(state, baddie, time);
       break;
     case AZ_BAD_SMALL_TRUCK:
-      // States 0 and 1: fly forward.
-      if (baddie->state == 0 || baddie->state == 1) {
-        const double max_speed = 100.0, accel = 50.0;
-        const double min_dist = 100.0, max_dist = 200.0;
-        const double dist =
-          az_baddie_dist_to_wall(state, baddie, max_dist + 1.0, 0.0);
-        const double fraction =
-          fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
-        const double speed_limit = max_speed * sqrt(fraction);
-        const double speed =
-          fmin(speed_limit, az_vnorm(baddie->velocity) + accel * time);
-        baddie->state = (speed >= max_speed || speed < speed_limit ? 1 : 0);
-        baddie->velocity = az_vpolar(speed, baddie->angle);
-        if (fraction <= 0.0) {
-          baddie->param = az_mod2pi(baddie->angle + AZ_HALF_PI);
-          baddie->state = 2;
-        }
-      }
-      // State 2: Turn.
-      else if (baddie->state == 2) {
-        baddie->velocity = AZ_VZERO;
-        const double turn_rate = AZ_DEG2RAD(50);
-        const double goal_angle = baddie->param;
-        baddie->angle =
-          az_angle_towards(baddie->angle, turn_rate * time, goal_angle);
-        if (baddie->angle == goal_angle) baddie->state = 0;
-      } else baddie->state = 0;
+      az_tick_bad_small_truck(state, baddie, time);
       break;
     case AZ_BAD_HEAT_RAY:
       // State 0: Fire beam until cooldown expires.
@@ -642,29 +617,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_chomper_plant(state, baddie, time);
       break;
     case AZ_BAD_COPTER_HORZ:
+      az_tick_bad_copter_horz(state, baddie, time);
+      break;
     case AZ_BAD_COPTER_VERT:
-      if (baddie->cooldown <= 0.0) {
-        const double max_speed = 150.0, accel = 50.0, max_dist = 200.0;
-        const double min_dist =
-          (baddie->kind == AZ_BAD_COPTER_VERT ? 50.0 : 100.0);
-        const double rel_angle =
-          (baddie->kind == AZ_BAD_COPTER_VERT ?
-           (baddie->state == 0 ? 0 : AZ_PI) :
-           (baddie->state == 0 ? AZ_HALF_PI : -AZ_HALF_PI));
-        const double dist =
-          az_baddie_dist_to_wall(state, baddie, max_dist + 1.0, rel_angle);
-        const double fraction =
-          fmin(1.0, fmax(0.0, dist - min_dist) / (max_dist - min_dist));
-        const double speed_limit = max_speed * sqrt(fraction);
-        const double speed =
-          fmin(speed_limit, az_vnorm(baddie->velocity) + accel * time);
-        baddie->velocity = az_vpolar(speed, baddie->angle + rel_angle);
-        if (fraction <= 0.0) {
-          baddie->velocity = AZ_VZERO;
-          baddie->state = (baddie->state == 0 ? 1 : 0);
-          baddie->cooldown = 1.0;
-        }
-      }
+      az_tick_bad_copter_vert(state, baddie, time);
       break;
     case AZ_BAD_URCHIN:
       az_drift_towards_ship(state, baddie, time, 250, 300, 500);
@@ -1028,6 +984,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_JUNGLE_CHOMPER:
       az_tick_bad_jungle_chomper(state, baddie, time);
+      break;
+    case AZ_BAD_SMALL_AUV:
+      az_tick_bad_small_auv(state, baddie, time);
       break;
   }
 

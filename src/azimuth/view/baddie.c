@@ -37,6 +37,7 @@
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
 #include "azimuth/view/baddie_turret.h"
+#include "azimuth/view/baddie_vehicle.h"
 #include "azimuth/view/baddie_wyrm.h"
 #include "azimuth/view/baddie_zipper.h"
 #include "azimuth/view/util.h"
@@ -611,69 +612,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_security_drone(baddie, frozen, clock);
       break;
     case AZ_BAD_SMALL_TRUCK:
-      // Thruster exhaust:
-      if (baddie->state == 1 && frozen == 0.0f) {
-        const GLfloat zig = (GLfloat)az_clock_zigzag(10, 1, clock);
-        for (int i = -1; i <= 1; i += 2) {
-          glBegin(GL_TRIANGLE_FAN); {
-            glColor4f(0, 1, 1, 0.9);
-            glVertex2f(-30, i * 9);
-            glColor4f(0, 0.75, 1, 0);
-            glVertex2f(-30, i * 12);
-            glVertex2f(-40.0f - zig, i * 9);
-            glVertex2f(-30, i * 7);
-          } glEnd();
-          glBegin(GL_TRIANGLE_FAN); {
-            glColor4f(0, 1, 1, 0.9);
-            glVertex2f(10, i * 17);
-            glColor4f(0, 0.75, 1, 0);
-            glVertex2f(10, i * 19);
-            glVertex2f(-0.5f * zig, i * 17);
-            glVertex2f(10, i * 15);
-          } glEnd();
-        }
-      }
-      // Panels:
-      glBegin(GL_QUADS); {
-        // Front:
-        glColor3f(0.2f + 0.8f * flare, 0.25f, 0.25f + 0.75f * frozen);
-        glVertex2f(32, -12); glVertex2f(32, 12);
-        glColor3f(0.5f + 0.5f * flare, 0.55f, 0.55f + 0.45f * frozen);
-        glVertex2f(10, 20); glVertex2f(10, -20);
-        // Rear:
-        glVertex2f(-30, -14); glVertex2f(-30, 14); glVertex2f(-10, 14);
-        glColor3f(0.35f + 0.5f * flare, 0.4f, 0.4f + 0.45f * frozen);
-        glVertex2f(-10, -14);
-      } glEnd();
-      // Body siding:
-      glBegin(GL_QUAD_STRIP); {
-        const az_color_t outer =
-          color3(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
-        const az_color_t inner =
-          color3(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
-        az_gl_color(outer); glVertex2f(10, 14);
-        az_gl_color(inner); glVertex2f(10, 9);
-        az_gl_color(outer); glVertex2f(-30, 14);
-        az_gl_color(inner); glVertex2f(-25, 9);
-        az_gl_color(outer); glVertex2f(-30, -14);
-        az_gl_color(inner); glVertex2f(-25, -9);
-        az_gl_color(outer); glVertex2f(10, -14);
-        az_gl_color(inner); glVertex2f(10, -9);
-      } glEnd();
-      // Cab siding:
-      glBegin(GL_TRIANGLES); {
-        // Left side:
-        glColor3f(0.15f + 0.85f * flare, 0.2f, 0.2f + 0.8f * frozen);
-        glVertex2f(32, 12);
-        glVertex2f(10, 20);
-        glColor3f(0.55f + 0.45f * flare, 0.55f, 0.55f + 0.45f * frozen);
-        glVertex2f(10, 8);
-        // Right side:
-        glVertex2f(10, -8);
-        glColor3f(0.15f + 0.85f * flare, 0.2f, 0.2f + 0.8f * frozen);
-        glVertex2f(32, -12);
-        glVertex2f(10, -20);
-      } glEnd();
+      az_draw_bad_small_truck(baddie, frozen, clock);
       break;
     case AZ_BAD_HEAT_RAY:
       assert(frozen == 0.0);
@@ -774,53 +713,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_COPTER_HORZ:
     case AZ_BAD_COPTER_VERT:
-      // Rotor blades:
-      glBegin(GL_QUADS); {
-        GLfloat y = 6 * az_clock_zigzag(5, 1, clock);
-        glColor4f(0.5, 0.5, 0.5, 0.6);
-        glVertex2f(-16, y); glVertex2f(-18, y);
-        glVertex2f(-18, -y); glVertex2f(-16, -y);
-        y = 6 * az_clock_zigzag(5, 1, clock + 2);
-        glVertex2f(-19, y); glVertex2f(-21, y);
-        glVertex2f(-21, -y); glVertex2f(-19, -y);
-      } glEnd();
-      // Panels:
-      glBegin(GL_QUADS); {
-        // Top:
-        glColor3f(0.2f + 0.8f * flare, 0.25f, 0.25f + 0.75f * frozen);
-        glVertex2f(10, 6);
-        glColor3f(0.5f + 0.5f * flare, 0.55f, 0.55f + 0.45f * frozen);
-        glVertex2f(10, 17); glVertex2f(-10, 17); glVertex2f(-10, 6);
-        // Bottom:
-        glVertex2f(-10, -17); glVertex2f(10, -17); glVertex2f(10, -6);
-        glColor3f(0.35f + 0.5f * flare, 0.4f, 0.4f + 0.45f * frozen);
-        glVertex2f(-10, -6);
-      } glEnd();
-      {
-        const az_color_t outer =
-          color3(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
-        const az_color_t inner =
-          color3(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
-        // Rotor hub:
-        glBegin(GL_QUAD_STRIP); {
-          az_gl_color(outer); glVertex2f(-21, 2); glVertex2f(-14, 2);
-          az_gl_color(inner); glVertex2f(-22, 0); glVertex2f(-14, 0);
-          az_gl_color(outer); glVertex2f(-21, -2); glVertex2f(-14, -2);
-        } glEnd();
-        // Body siding:
-        glBegin(GL_QUAD_STRIP); {
-          az_gl_color(outer); glVertex2f(14, 21);
-          az_gl_color(inner); glVertex2f(10, 17);
-          az_gl_color(outer); glVertex2f(-14, 21);
-          az_gl_color(inner); glVertex2f(-10, 17);
-          az_gl_color(outer); glVertex2f(-14, -21);
-          az_gl_color(inner); glVertex2f(-10, -17);
-          az_gl_color(outer); glVertex2f(14, -21);
-          az_gl_color(inner); glVertex2f(10, -17);
-          az_gl_color(outer); glVertex2f(14, 21);
-          az_gl_color(inner); glVertex2f(10, 17);
-        } glEnd();
-      }
+      az_draw_bad_copter(baddie, frozen, clock);
       break;
     case AZ_BAD_BOSS_DOOR:
       // Eye:
@@ -1230,6 +1123,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_JUNGLE_CHOMPER:
       az_draw_bad_jungle_chomper(baddie, frozen, clock);
+      break;
+    case AZ_BAD_SMALL_AUV:
+      az_draw_bad_small_auv(baddie, frozen, clock);
       break;
   }
 }

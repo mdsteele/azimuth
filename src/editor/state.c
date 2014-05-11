@@ -150,6 +150,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_COPTER_HORZ,
   AZ_BAD_SMALL_TRUCK,
   AZ_BAD_COPTER_VERT,
+  AZ_BAD_SMALL_AUV,
   // Traps:
   AZ_BAD_HEAT_RAY,
   AZ_BAD_DEATH_RAY,
