@@ -1,0 +1,217 @@
+@M "SNA|ABBCCTUCCTVHIGJZ"
+% Title: "Less QQ More Pew Pew"
+
+=tempo 140
+=key 3b     % C minor
+
+
+
+!Part S
+
+1 Wp75 L40  E0,5   D+20,50
+2 Wp75 L30  E0,50  D-50,50
+3 Wt34 L200 E0,25  D+20,20
+4 Wn   L30  E0,100
+5 Wp75 L30  E0,50  D-50,50
+
+
+
+!Part N
+
+1| Wp50 c3q d e f Wp75 |
+2| c5q d e f |
+3| c2q d e f |
+
+
+
+!Part Z
+
+2| c4q |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+!Part A
+
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+!Part B
+
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re c5 r c r c r c |
+
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re f5 r f r g r g |
+
+!Part C
+
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re c4 r c r c r c |
+
+2| c5s a4 c5e | es c ee | ds b4 d5e | fs d fe |
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re f4 r f r g r g |
+
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re c4 r c r c r c |
+
+2| c5s a4 c5e es c ee fs b4 f5e ds f4 d5e |
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+5| re f4 r f r g r g |
+
+
+
+!Part T
+
+1| e4e. de ce. ge. ce de. |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| eq+s fs ee dq b3q |
+2| c5s a4 c5e es c ee ds b4 d5e fs d fe |
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4e. de ce. ge. ce de. |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| eq+s fs ee dh |
+2| c5s a4 c5e es c ee fs b4 f5e ds f4 d5e |
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| g4e. c5e b4e. gq. bs a |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| f4e. ae g4e. eq. gs f |
+2| fs b4 f5e ds f4 d5e c5s a4 c5e es c ee |
+3| d2s f b f d f b f c2s e a e c e a e |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4e. ge fe. de. fe ee. |
+2| c5s a4 c5e es c ee fs b4 f5e ds f4 d5e |
+3| c2s e a e c e a e d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+!Part U
+
+1| c4h |
+2| c5h |
+3| c2h |
+4| c1h L50 c2s c3 c c c1 c2 c c L30 |
+
+!Part V
+
+1| c4h rq+s g3s c4 d |
+2| e5s c ee es c ee c5s g4 c5e c6s g5 c6e |
+3| c2h |
+4| c1h L50 c2s c3 c c c1 c2 c c L30 |
+
+
+
+!Part H
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 d g b g d g b g |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4e. d b3e c4q. cs d |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| d2s g b g d g b g e2s g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| g4e. a ge fe. c de |
+2| g5s c ge gs e ge fs b fe ds g de |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| g3e. e4 de c4q. cs d |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| d2s g b g d g b g c f a f e2s g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+!Part I
+
+1| c4h rq+s g3s c4 d |
+2| c5q d e f |
+3| c2h |
+4| c1h L50 c2s c3 c c c1 c2 c c L30 |
+
+!Part G
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 b g d3 g2 b g d3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| g3e. e4 de c4q. cs d |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g b g e g b g e2s g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 b g d3 g2 b g d3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| E0,50 c4e b3s c4e c b3s c4e c b3s c4e. E0,5 |
+2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
+3| e2s g c3 g2 e g c3 g2 e g c3 g2 e g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e5s c ee es c ee c5s g4 c5e es c ee |
+3| e2s g c3 g2 e g c3 g2 d g b g d g b g |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| g4q. as g fe gs f ee cs d |
+2| g5s c6 g5e c6s g5 c6e fs b fe es a5 c6e |
+3| d2s g b g d g b g c f a f e2s g c3 g2 |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+1| e4q. fs e dq b3 |
+2| e6s c ee es c ee cs g5 ce es c ee |
+3| e2s g c3 g2 e g c3 g2 d f b f d f b f |
+4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
+
+!Part J
+
+1| c4h |
+2| c5h a4s g f e g f e d |
+3| c2h |
+4| c1h L50 c2s c3 c c c1 c2 c c L30 |

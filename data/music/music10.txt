@@ -11,7 +11,7 @@
 
 1 Wp75 L40  E0,20 D-20,50
 2                 V+2,100
-3 Wt75 L300 E0,25 D+10,75
+3 Wt75 L250 E0,25
 4 Wn   L40  E0,50 V-25,5
 5 Wn   L60  E0,100
 
@@ -37,14 +37,14 @@
 !Part B
 
 1| e5s e ee ds d de cs c ce b4s b be |
-3| e2q f g a |
+3| f2q g a b |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 5| x0q x3 x0 x3 |
 
 !Part C
 
 1| e5s e ee ds d de fs f fe gs g ge |
-3| e2q f g a |
+3| f2q g a b |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 5| x0q x0 x0 x0 |
 
@@ -76,7 +76,7 @@
 
 1| e5s e ee ds d de cs c ce b4s b be |
 2| E75,0 f6q g a b |
-3| e2q f g a |
+3| f2q g a b |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
@@ -84,7 +84,7 @@
 
 1| e5s e ee ds d de fs f fe gs g ge |
 2| E75,0 f6q g a b |
-3| e2q f g a |
+3| f2q g a b |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 5| x0e c7 x0 c7 x0e c7 x0 c7 |
 
