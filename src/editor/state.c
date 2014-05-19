@@ -68,7 +68,7 @@ static const int wall_data_indices[] = {
   // Tree parts:
   67, 68, 69, 70, 71, 72,
   // Seashells:
-  73, 74, 75, 76, 77, 78,
+  73, 76, 75, 77, 74, 78,
   // Water-smoothed boulders:
   88, 89,
   // Sand:
@@ -721,6 +721,32 @@ int az_advance_wall_data_index(int wall_data_index, int delta) {
   assert(0 <= wall_data_index && wall_data_index < AZ_NUM_WALL_DATAS);
   const int old = reverse_wall_data_indices[wall_data_index];
   return wall_data_indices[az_modulo(old + delta, AZ_NUM_WALL_DATAS)];
+}
+
+/*===========================================================================*/
+
+bool az_circle_hits_editor_walls(
+    const az_editor_state_t *state, double circle_radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *pos_out, az_vector_t *normal_out) {
+  az_editor_room_t *room =
+    AZ_LIST_GET(state->planet.rooms, state->current_room);
+  bool hit_anything = false;
+  AZ_LIST_LOOP(editor_wall, room->walls) {
+    const az_wall_t real_wall = {
+      .kind = editor_wall->spec.kind,
+      .data = editor_wall->spec.data,
+      .position = editor_wall->spec.position,
+      .angle = editor_wall->spec.angle
+    };
+    az_vector_t pos;
+    if (az_circle_hits_wall(&real_wall, circle_radius, start, delta,
+                            &pos, normal_out)) {
+      if (pos_out != NULL) *pos_out = pos;
+      delta = az_vsub(pos, start);
+      hit_anything = true;
+    }
+  }
+  return hit_anything;
 }
 
 /*===========================================================================*/

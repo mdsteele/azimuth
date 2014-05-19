@@ -66,6 +66,26 @@ static void circle_vertices(double r) {
   arc_vertices(r, 0, AZ_TWO_PI);
 }
 
+static void draw_dashed_line(az_vector_t start, az_vector_t end) {
+  const int num_steps =
+    1 + 2 * (int)ceil(0.5 * (az_vdist(start, end) / 10.0 - 1.0));
+  const az_vector_t step = az_vdiv(az_vsub(end, start), num_steps);
+  glBegin(GL_LINES); {
+    for (int i = 0; i <= num_steps; ++i) {
+      az_gl_vertex(az_vadd(start, az_vmul(step, i)));
+    }
+  } glEnd();
+}
+
+static void draw_dashed_circle(az_vector_t center, double r) {
+  glPushMatrix(); {
+    az_gl_translated(center);
+    glBegin(GL_LINES); {
+      circle_vertices(r);
+    } glEnd();
+  } glPopMatrix();
+}
+
 // Draw the bounds of where the camera center is allowed to be within the given
 // room.
 static void draw_camera_center_bounds(const az_editor_room_t *room) {
@@ -275,6 +295,26 @@ static void draw_gravfield_border(const az_gravfield_spec_t *gravfield) {
   } glPopMatrix();
 }
 
+static void draw_truck_route(
+    const az_editor_state_t *state, const az_baddie_t *baddie,
+    double dist, double turn, int count) {
+  az_vector_t start = baddie->position;
+  double angle = baddie->angle;
+  for (int i = 0; i < count; ++i) {
+    az_vector_t end;
+    if (!az_circle_hits_editor_walls(
+            state, baddie->data->overall_bounding_radius, start,
+            az_vpolar(10000, angle), &end, NULL)) break;
+    if (az_vdist(start, end) > dist) {
+      az_vpluseq(&end, az_vwithlen(az_vsub(start, end), dist));
+      glColor4f(1, 0, 0, 0.5);
+      draw_dashed_line(start, end);
+      start = end;
+    }
+    angle += turn;
+  }
+}
+
 static void draw_baddie(const az_editor_state_t *state,
                         az_editor_baddie_t *editor_baddie, bool draw_bg) {
   az_baddie_t real_baddie;
@@ -285,6 +325,17 @@ static void draw_baddie(const az_editor_state_t *state,
   if (real_baddie.kind == AZ_BAD_NIGHTBUG ||
       real_baddie.kind == AZ_BAD_NIGHTSHADE ||
       real_baddie.kind == AZ_BAD_NOCTURNE) real_baddie.param = 1.0;
+  if (real_baddie.kind == AZ_BAD_NUCLEAR_MINE) {
+    glColor4f(1, 0, 0, 0.5);
+    draw_dashed_circle(real_baddie.position, 150);
+  } else if (real_baddie.kind == AZ_BAD_PROXY_MINE) {
+    glColor4f(1, 0, 0, 0.5);
+    draw_dashed_circle(real_baddie.position, 80);
+  } else if (real_baddie.kind == AZ_BAD_SMALL_TRUCK) {
+    draw_truck_route(state, &real_baddie, 100.0, AZ_DEG2RAD(90), 5);
+  } else if (real_baddie.kind == AZ_BAD_SMALL_AUV) {
+    draw_truck_route(state, &real_baddie, 50.0, AZ_DEG2RAD(-60), 7);
+  }
   az_draw_baddie(&real_baddie, state->clock);
   draw_script_and_uuid_slot(
       state, real_baddie.position, editor_baddie->spec.on_kill,

@@ -1,4 +1,4 @@
-Next flag: 94
+Next flag: 95
 Unused: 5
 
 Bosses
@@ -114,3 +114,4 @@ Misc
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176
 89: Traversed room 367
+94: Opened forcefield in Barrag room 286

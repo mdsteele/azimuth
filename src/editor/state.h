@@ -209,6 +209,12 @@ int az_advance_wall_data_index(int wall_data_index, int delta);
 
 /*===========================================================================*/
 
+bool az_circle_hits_editor_walls(
+    const az_editor_state_t *state, double circle_radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *point_out, az_vector_t *normal_out);
+
+/*===========================================================================*/
+
 #define AZ_EDITOR_OBJECT_LOOP(var_name, editor_room) \
   for (az_editor_object_t var_name = {.room = editor_room}; \
        az_editor_object_next(&(var_name));)
