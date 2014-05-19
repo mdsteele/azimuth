@@ -135,9 +135,9 @@
 3| e2s g c3 g2 e g c3 g2 d g b g d g b g |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 
-1| e4e. d b3e c4q. cs d |
+1| g3e. e4 de c4q. cs d |
 2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
-3| d2s g b g d g b g e2s g c3 g2 e g c3 g2 |
+3| d2s g b g d g b g c f a f e2s g c3 g2 |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 
 1| e4q. fs e dq b3 |
@@ -155,9 +155,9 @@
 3| e2s g c3 g2 e g c3 g2 d f b f d f b f |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 
-1| g3e. e4 de c4q. cs d |
+1| e4e. d b3e c4q. cs d |
 2| c5s g4 c5e es c ee gs e ge c6s g5 c6e |
-3| d2s g b g d g b g c f a f e2s g c3 g2 |
+3| d2s g b g d g b g e2s g c3 g2 e g c3 g2 |
 4| c1e c2s c c3e c2s c c1e c2s c c3e c2s c |
 
 1| e4q. fs e dq b3 |
