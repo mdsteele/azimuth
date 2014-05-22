@@ -135,6 +135,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Machines:
   AZ_BAD_GUN_SENSOR,
   AZ_BAD_BEAM_SENSOR,
+  AZ_BAD_SENSOR_LASER,
   AZ_BAD_BOX,
   AZ_BAD_ARMORED_BOX,
   AZ_BAD_TRAPDOOR,

@@ -714,6 +714,11 @@ static const az_vector_t small_auv_vertices[] = {
   {-30, -8}, {-24, -14}, {10, -14}, {10, -16}, {30, -10}
 };
 
+static const az_vector_t sensor_laser_vertices[] = {
+  {4, -3}, {6, 0}, {4, 3}, {10, 12}, {10, 20}, {-15, 20},
+  {-15, -20}, {10, -20}, {10, -12}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1377,6 +1382,14 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
                                   AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
                    .impact_damage = 8.0 }
+  },
+  [AZ_BAD_SENSOR_LASER] = {
+    .max_health = 1000000.0, .color = {160, 160, 160, 255},
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
+                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+    .main_body = { .polygon = AZ_INIT_POLYGON(sensor_laser_vertices),
+                   .immunities = ~0 }
   }
 };
 

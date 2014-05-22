@@ -315,6 +315,15 @@ static void draw_truck_route(
   }
 }
 
+static void draw_beam_path(const az_editor_state_t *state,
+                           const az_baddie_t *baddie) {
+  const az_vector_t delta = az_vpolar(10000, baddie->angle);
+  az_vector_t end = az_vadd(baddie->position, delta);
+  az_circle_hits_editor_walls(state, 0.0, baddie->position, delta, &end, NULL);
+  glColor4f(1, 0, 0, 0.5);
+  draw_dashed_line(baddie->position, end);
+}
+
 static void draw_baddie(const az_editor_state_t *state,
                         az_editor_baddie_t *editor_baddie, bool draw_bg) {
   az_baddie_t real_baddie;
@@ -325,7 +334,11 @@ static void draw_baddie(const az_editor_state_t *state,
   if (real_baddie.kind == AZ_BAD_NIGHTBUG ||
       real_baddie.kind == AZ_BAD_NIGHTSHADE ||
       real_baddie.kind == AZ_BAD_NOCTURNE) real_baddie.param = 1.0;
-  if (real_baddie.kind == AZ_BAD_NUCLEAR_MINE) {
+  if (real_baddie.kind == AZ_BAD_DEATH_RAY ||
+      real_baddie.kind == AZ_BAD_HEAT_RAY ||
+      real_baddie.kind == AZ_BAD_SENSOR_LASER) {
+    draw_beam_path(state, &real_baddie);
+  } else if (real_baddie.kind == AZ_BAD_NUCLEAR_MINE) {
     glColor4f(1, 0, 0, 0.5);
     draw_dashed_circle(real_baddie.position, 150);
   } else if (real_baddie.kind == AZ_BAD_PROXY_MINE) {

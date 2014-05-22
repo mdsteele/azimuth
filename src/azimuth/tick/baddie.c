@@ -30,6 +30,7 @@
 #include "azimuth/tick/baddie_crawler.h"
 #include "azimuth/tick/baddie_forcefiend.h"
 #include "azimuth/tick/baddie_kilofuge.h"
+#include "azimuth/tick/baddie_machine.h"
 #include "azimuth/tick/baddie_myco.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
@@ -444,14 +445,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_hornet(state, baddie, time);
       break;
     case AZ_BAD_BEAM_SENSOR:
+      az_tick_bad_beam_sensor(state, baddie, time);
+      break;
     case AZ_BAD_GUN_SENSOR:
-      if (baddie->state == 0) {
-        if (baddie->health < baddie->data->max_health) {
-          baddie->state = 1;
-          az_schedule_script(state, baddie->on_kill);
-        }
-      }
-      baddie->health = baddie->data->max_health;
+      az_tick_bad_gun_sensor(state, baddie, time);
       break;
     case AZ_BAD_ROCKWYRM:
       az_tick_bad_rockwyrm(state, baddie, time);
@@ -523,49 +520,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_small_truck(state, baddie, time);
       break;
     case AZ_BAD_HEAT_RAY:
-      // State 0: Fire beam until cooldown expires.
-      if (baddie->state == 0) {
-        if (baddie->cooldown > 0.0) {
-          // Fire a beam.
-          double beam_damage = 38.0 * time;
-          const az_vector_t beam_start =
-            az_vadd(baddie->position, az_vpolar(15, baddie->angle));
-          az_impact_t impact;
-          az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
-                        AZ_IMPF_NONE, baddie->uid, &impact);
-          if (impact.type == AZ_IMP_BADDIE) {
-            if (impact.target.baddie.baddie->kind == AZ_BAD_BEAM_WALL) {
-              beam_damage /= 3;
-            }
-            az_try_damage_baddie(state, impact.target.baddie.baddie,
-                impact.target.baddie.component, AZ_DMGF_BEAM, beam_damage);
-          } else if (impact.type == AZ_IMP_SHIP) {
-            az_damage_ship(state, beam_damage, false);
-          }
-          // Add particles for the beam.
-          const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
-          const az_color_t beam_color = {255, 128, alt, 192};
-          az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
-                      4.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
-          az_add_speck(state, (impact.type == AZ_IMP_WALL ?
-                               impact.target.wall->data->color1 :
-                               AZ_WHITE), 1.0, impact.position,
-                       az_vpolar(az_random(20.0, 70.0),
-                                 az_vtheta(impact.normal) +
-                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-          az_loop_sound(&state->soundboard, AZ_SND_BEAM_FREEZE);
-        } else {
-          baddie->state = 1;
-          baddie->cooldown = az_random(0.5, 3.0);
-        }
-      }
-      // State 1: Recharge until cooldown expires.
-      else {
-        if (baddie->cooldown <= 0.0) {
-          baddie->state = 0;
-          baddie->cooldown = 1.5;
-        }
-      }
+      az_tick_bad_heat_ray(state, baddie, time);
       break;
     case AZ_BAD_NUCLEAR_MINE:
       baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(90) * time);
@@ -639,38 +594,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_spined_crawler(state, baddie, time);
       break;
     case AZ_BAD_DEATH_RAY:
-      if (baddie->state == 0 || baddie->state == 1) {
-        // Fire a beam.
-        const az_vector_t beam_start =
-          az_vadd(baddie->position, az_vpolar(15, baddie->angle));
-        az_impact_t impact;
-        az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
-                      AZ_IMPF_NONE, baddie->uid, &impact);
-        if (impact.type == AZ_IMP_SHIP) {
-          baddie->state = 1;
-          const double beam_damage = 200.0 * time;
-          az_damage_ship(state, beam_damage, false);
-          // Add particles for the beam.
-          const uint8_t alt = 32 * az_clock_zigzag(4, 1, state->clock);
-          const az_color_t beam_color = {255, 255, 128 + alt, 192};
-          az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
-                      4.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
-          az_add_speck(state, (impact.type == AZ_IMP_WALL ?
-                               impact.target.wall->data->color1 :
-                               AZ_WHITE), 1.0, impact.position,
-                       az_vpolar(az_random(20.0, 70.0),
-                                 az_vtheta(impact.normal) +
-                                 az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-          az_loop_sound(&state->soundboard, AZ_SND_BEAM_PIERCE);
-        } else {
-          baddie->state = 0;
-          if (az_clock_mod(2, 2, state->clock)) {
-            const az_color_t beam_color = {255, 128, 128, 128};
-            az_add_beam(state, beam_color, beam_start, impact.position,
-                        0.0, 1.0);
-          }
-        }
-      }
+      az_tick_bad_death_ray(state, baddie, time);
       break;
     case AZ_BAD_OTH_GUNSHIP:
       az_tick_bad_oth_gunship(state, baddie, time);
@@ -987,6 +911,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_SMALL_AUV:
       az_tick_bad_small_auv(state, baddie, time);
+      break;
+    case AZ_BAD_SENSOR_LASER:
+      az_tick_bad_sensor_laser(state, baddie, time);
       break;
   }
 
