@@ -54,26 +54,41 @@ void az_tick_bad_beam_sensor(
   tick_sensor(state, baddie);
 }
 
+void az_tick_bad_beam_sensor_inv(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_BEAM_SENSOR_INV);
+  if (baddie->state != 1) {
+    if (baddie->health < baddie->data->max_health) {
+      baddie->state = 0;
+    } else if (baddie->state == 0) {
+      baddie->state = 2;
+    } else {
+      baddie->state = 1;
+      az_schedule_script(state, baddie->on_kill);
+    }
+  }
+  baddie->health = baddie->data->max_health;
+}
+
 void az_tick_bad_sensor_laser(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_SENSOR_LASER);
-  if (baddie->state == 0) {
-    const az_vector_t beam_start =
-      az_vadd(baddie->position, az_vpolar(6, baddie->angle));
-    az_impact_t impact;
-    az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
-                  (az_ship_is_decloaked(&state->ship) ?
-                   AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
-    if (impact.type == AZ_IMP_BADDIE &&
-        impact.target.baddie.baddie->kind == AZ_BAD_BEAM_SENSOR) {
-      az_try_damage_baddie(state, impact.target.baddie.baddie,
-                           impact.target.baddie.component,
-                           AZ_DMGF_BEAM, 0.01);
-    }
-    if (az_clock_mod(2, 2, state->clock)) {
-      az_add_beam(state, (az_color_t){255, 128, 128, 128}, beam_start,
-                  impact.position, 0.0, 1.0);
-    }
+  const az_vector_t beam_start =
+    az_vadd(baddie->position, az_vpolar(6, baddie->angle));
+  az_impact_t impact;
+  az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
+                (az_ship_is_decloaked(&state->ship) ?
+                 AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
+  if (impact.type == AZ_IMP_BADDIE &&
+      (impact.target.baddie.baddie->kind == AZ_BAD_BEAM_SENSOR ||
+       impact.target.baddie.baddie->kind == AZ_BAD_BEAM_SENSOR_INV)) {
+    az_try_damage_baddie(state, impact.target.baddie.baddie,
+                         impact.target.baddie.component,
+                         AZ_DMGF_BEAM, 0.01);
+  }
+  if (az_clock_mod(2, 2, state->clock)) {
+    az_add_beam(state, (az_color_t){255, 128, 128, 128}, beam_start,
+                impact.position, 0.0, 1.0);
   }
 }
 

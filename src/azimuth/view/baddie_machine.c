@@ -35,6 +35,30 @@ static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
 }
 
+static void draw_sensor_lamp(GLfloat x_offset, bool lit) {
+  glPushMatrix(); {
+    glTranslatef(x_offset, 0, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      if (lit) {
+        glColor3f(1, 0.2, 0.1);
+      } else glColor3f(0.3, 0.3, 0.3);
+      glVertex2f(0, 0);
+      glColor3f(0.1, 0.1, 0.1);
+      for (int i = 0; i <= 360; i += 20) {
+        glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_QUAD_STRIP); {
+      for (int i = 0; i <= 360; i += 20) {
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2d(5 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
+        glColor3f(0.5, 0.5, 0.5);
+        glVertex2d(3 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 /*===========================================================================*/
 
 void az_draw_bad_gun_sensor(
@@ -67,10 +91,9 @@ void az_draw_bad_gun_sensor(
   } glEnd();
 }
 
-void az_draw_bad_beam_sensor(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
-  assert(baddie->kind == AZ_BAD_BEAM_SENSOR);
-  assert(frozen == 0.0f);
+static void draw_beam_sensor(const az_baddie_t *baddie, bool lamp_lit) {
+  assert(baddie->kind == AZ_BAD_BEAM_SENSOR ||
+         baddie->kind == AZ_BAD_BEAM_SENSOR_INV);
   const float flare = baddie->armor_flare;
   glBegin(GL_TRIANGLE_FAN); {
     if (baddie->state == 0) {
@@ -94,6 +117,21 @@ void az_draw_bad_beam_sensor(
       az_gl_vertex(component->polygon.vertices[i]);
     }
   } glEnd();
+  draw_sensor_lamp(-6, lamp_lit);
+}
+
+void az_draw_bad_beam_sensor(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BEAM_SENSOR);
+  assert(frozen == 0.0f);
+  draw_beam_sensor(baddie, (baddie->state != 0));
+}
+
+void az_draw_bad_beam_sensor_inv(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BEAM_SENSOR_INV);
+  assert(frozen == 0.0f);
+  draw_beam_sensor(baddie, (baddie->state == 1 || az_clock_mod(2, 10, clock)));
 }
 
 void az_draw_bad_sensor_laser(
@@ -110,27 +148,7 @@ void az_draw_bad_sensor_laser(
       az_gl_vertex(polygon.vertices[i]);
     }
   } glEnd();
-  glPushMatrix(); {
-    glTranslatef(-3, 0, 0);
-    glBegin(GL_TRIANGLE_FAN); {
-      if (baddie->state == 0 && az_clock_mod(2, 10, clock)) {
-        glColor3f(1, 0.2, 0.1);
-      } else glColor3f(0.3, 0.3, 0.3);
-      glVertex2f(0, 0);
-      glColor3f(0.1, 0.1, 0.1);
-      for (int i = 0; i <= 360; i += 20) {
-        glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
-      }
-    } glEnd();
-    glBegin(GL_QUAD_STRIP); {
-      for (int i = 0; i <= 360; i += 20) {
-        glColor3f(0.2, 0.2, 0.2);
-        glVertex2d(5 * cos(AZ_DEG2RAD(i)), 5 * sin(AZ_DEG2RAD(i)));
-        glColor3f(0.5, 0.5, 0.5);
-        glVertex2d(3 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
-      }
-    } glEnd();
-  } glPopMatrix();
+  draw_sensor_lamp(-3, (baddie->state == 1 || az_clock_mod(2, 10, clock)));
 }
 
 /*===========================================================================*/

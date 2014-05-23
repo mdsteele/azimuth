@@ -30,6 +30,8 @@ void az_tick_bad_gun_sensor(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 void az_tick_bad_beam_sensor(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_tick_bad_beam_sensor_inv(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
 void az_tick_bad_sensor_laser(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 

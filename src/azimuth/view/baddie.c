@@ -460,6 +460,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_BEAM_SENSOR:
       az_draw_bad_beam_sensor(baddie, frozen, clock);
       break;
+    case AZ_BAD_BEAM_SENSOR_INV:
+      az_draw_bad_beam_sensor_inv(baddie, frozen, clock);
+      break;
     case AZ_BAD_ROCKWYRM:
       az_draw_bad_rockwyrm(baddie);
       break;

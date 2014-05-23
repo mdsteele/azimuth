@@ -30,6 +30,8 @@ void az_draw_bad_gun_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_beam_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_draw_bad_beam_sensor_inv(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_sensor_laser(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 

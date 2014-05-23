@@ -447,6 +447,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_BEAM_SENSOR:
       az_tick_bad_beam_sensor(state, baddie, time);
       break;
+    case AZ_BAD_BEAM_SENSOR_INV:
+      az_tick_bad_beam_sensor_inv(state, baddie, time);
+      break;
     case AZ_BAD_GUN_SENSOR:
       az_tick_bad_gun_sensor(state, baddie, time);
       break;

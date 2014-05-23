@@ -135,6 +135,9 @@ static const az_vector_t beam_sensor_casing_vertices[] = {
 static az_component_data_t beam_sensor_components[] = {
   { .polygon = AZ_INIT_POLYGON(beam_sensor_casing_vertices), .immunities = ~0 }
 };
+static az_component_data_t beam_sensor_inv_components[] = {
+  { .polygon = AZ_INIT_POLYGON(beam_sensor_casing_vertices), .immunities = ~0 }
+};
 
 static const az_vector_t rockwyrm_pincer1_vertices[] = {
   {40, -10}, {20, -7}, {0, -12}, {-15, -12}, {-30, -6},
@@ -865,6 +868,13 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_NO_HOMING_PROJ,
     .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_components)
+  },
+  [AZ_BAD_BEAM_SENSOR_INV] = {
+    .max_health = 1000000.0, .overall_bounding_radius = 30.0,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .static_properties = AZ_BADF_NO_HOMING_PROJ,
+    .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
+    DECL_COMPONENTS(beam_sensor_inv_components)
   },
   [AZ_BAD_ROCKWYRM] = {
     .max_health = 150.0, .overall_bounding_radius = 500.0,
