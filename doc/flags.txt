@@ -1,4 +1,4 @@
-Next flag: 95
+Next flag: 97
 Unused: 5
 
 Bosses
@@ -19,6 +19,7 @@ Minibosses
 65: Killed Oth Orb in Nandiar room 179
 88: Killed Oth Crawlers in Cnidam room 325
 93: Killed Oth Crab in Voquan room 354
+96: Killed Oth Crab in Voquan room 255
 
 Comm Consoles
 =============
@@ -92,6 +93,7 @@ Doors
 90: Opened blue door between Cnidam rooms 336 and 339
 91: Opened blue door between Barrag rooms 287 and 288
 92: Opened red door between Nandiar room 202 and Voquan room 203
+95: Opened cyan door between Voquan rooms 255 and 256
 
 Boss Doors
 ==========
