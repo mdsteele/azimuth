@@ -865,14 +865,14 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = AZ_BADF_NO_HOMING_PROJ,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_components)
   },
   [AZ_BAD_BEAM_SENSOR_INV] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = AZ_BADF_NO_HOMING_PROJ,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 15.0, .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_inv_components)
   },
@@ -1234,7 +1234,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 16.0, .overall_bounding_radius = 31.7,
     .potential_pickups = AZ_PUPF_ALL, .color = {80, 80, 160, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
-    .death_sound = AZ_SND_KILL_TURRET,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
     DECL_COMPONENTS(heavy_turret_components)
