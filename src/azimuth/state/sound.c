@@ -29,6 +29,14 @@
 /*===========================================================================*/
 
 static az_sound_spec_t sound_specs[] = {
+  [AZ_SND_ALARM] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.835, .env_decay = 0.24,
+    .start_freq = 0.385, .freq_slide = 0.12, .freq_delta_slide = 0.1,
+    .repeat_speed = 0.035, .phaser_sweep = -0.15,
+    .lpf_cutoff = 0.32, .lpf_resonance = -0.43,
+    .hpf_cutoff = 0.3, .hpf_ramp = -0.000113648
+  },
   [AZ_SND_BEAM_FREEZE] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_sustain = 1.0, .start_freq = 0.3943662,

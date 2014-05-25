@@ -31,16 +31,22 @@
 
 /*===========================================================================*/
 
+static void aim_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double max_angle, double turn_rate) {
+  if (!az_ship_is_decloaked(&state->ship)) return;
+  baddie->components[0].angle =
+    fmax(-max_angle, fmin(max_angle, az_mod2pi(az_angle_towards(
+      baddie->angle + baddie->components[0].angle, turn_rate * time,
+      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                               baddie->angle)));
+}
+
 void az_tick_bad_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_NORMAL_TURRET ||
          baddie->kind == AZ_BAD_ARMORED_TURRET);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                               baddie->angle)));
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(120));
   // Fire:
   if (baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
@@ -56,12 +62,7 @@ void az_tick_bad_turret(
 void az_tick_bad_beam_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_BEAM_TURRET);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(30) * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                   baddie->angle)));
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(30));
   // If we can see the ship, turn on the beam:
   if (az_ship_within_angle(state, baddie, baddie->components[0].angle,
                            AZ_DEG2RAD(20)) &&
@@ -158,12 +159,7 @@ void az_tick_bad_broken_turret(
 void az_tick_bad_heavy_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_HEAVY_TURRET);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(-AZ_DEG2RAD(57), fmin(AZ_DEG2RAD(57), az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                   baddie->angle)));
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(120));
   // State 0: cooling off for next salvo:
   if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
@@ -186,12 +182,7 @@ void az_tick_bad_heavy_turret(
 void az_tick_bad_rocket_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_ROCKET_TURRET);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(-1.0, fmin(1.0, az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, 2.0 * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                   baddie->angle)));
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(114));
   // Fire:
   if (baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
@@ -207,16 +198,12 @@ void az_tick_bad_rocket_turret(
 void az_tick_bad_crawling_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_CRAWLING_TURRET);
-  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
-                  az_vcross(az_vsub(state->ship.position, baddie->position),
-                            az_vpolar(1.0, baddie->angle)) > 0.0,
-                  1.0, 20.0, 100.0);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(100) * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                                         baddie->angle)));
+  if (az_ship_is_decloaked(&state->ship)) {
+    baddie->state = (az_vcross(az_vsub(state->ship.position, baddie->position),
+                               az_vpolar(1.0, baddie->angle)) > 0.0 ? 1 : 0);
+  }
+  az_crawl_around(state, baddie, time, (baddie->state != 0), 1.0, 20.0, 100.0);
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(85), AZ_DEG2RAD(100));
   // Fire:
   if (baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
@@ -232,16 +219,12 @@ void az_tick_bad_crawling_turret(
 void az_tick_bad_crawling_mortar(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_CRAWLING_MORTAR);
-  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
-                  az_vcross(az_vsub(state->ship.position, baddie->position),
-                            az_vpolar(1.0, baddie->angle)) > 0.0,
-                  1.0, 20.0, 100.0);
-  // Aim gun:
-  baddie->components[0].angle =
-    fmax(AZ_DEG2RAD(-85), fmin(AZ_DEG2RAD(85), az_mod2pi(az_angle_towards(
-      baddie->angle + baddie->components[0].angle, AZ_DEG2RAD(120) * time,
-      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
-                                                         baddie->angle)));
+  if (az_ship_is_decloaked(&state->ship)) {
+    baddie->state = (az_vcross(az_vsub(state->ship.position, baddie->position),
+                               az_vpolar(1.0, baddie->angle)) > 0.0 ? 1 : 0);
+  }
+  az_crawl_around(state, baddie, time, (baddie->state != 0), 1.0, 20.0, 100.0);
+  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(85), AZ_DEG2RAD(120));
   // Fire:
   if (baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,

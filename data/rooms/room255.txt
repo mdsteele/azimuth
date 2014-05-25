@@ -1,4 +1,4 @@
-@R z4 p0 b7 d5 g1 n65 w202
+@R z4 p0 b7 d5 g1 n72 w202
   c(28549.22,648.91,1.530572,0.040633)
 $s:test95,beqz/A,unlock1,A#test96,beqz/B,nix5,nix6,B#test23,bnez/C,nix10,nix11,nix12,nix13,nix14,nix20,halt,C#nix2,nix3,lock7,nix15,nix16,nix17,nix18,nix19;
 !W1 d9 x386.75 y28573.33 a-0.191438 u20
@@ -276,6 +276,13 @@ $e:test23,hnez,test96,hnez,lock7,gpos,gpos4,vsub,vtheta,sang4,push47,sbadk4;
 !N7/33 x1272.03 y28823.69 a-0.040221 u0
 !N7/32 x1197.10 y28826.70 a-0.040221 u0
 !N7/50 x1246.11 y28691.21 a1.532163 u0
+!N5/6 x-262.99 y29219.05 a1.578630 u0
+!N5/2 x-275.65 y29251.32 a-3.132640 u0
+!N5/3 x-267.41 y29178.58 a-3.132429 u0
+!N5/9 x-212.23 y29090.16 a0.007768 u0
+!N5/2 x-258.51 y29083.17 a0.007768 u0
+!N5/1 x-266.93 y29137.51 a1.578668 u0
+!N5/1 x-266.75 y29116.07 a-1.561635 u0
 !B1 x-201.64 y28456.64 a0.001852 u4
 $k:set96,test23,hnez,unlock7;
 !B8 x-201.16 y28692.44 a-3.133966 u0
