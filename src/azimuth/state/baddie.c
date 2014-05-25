@@ -1002,7 +1002,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BOMB) }
   },
   [AZ_BAD_BEAM_WALL] = {
-    .max_health = 50.0, .potential_pickups = AZ_PUPF_NOTHING,
+    .max_health = 25.0, .potential_pickups = AZ_PUPF_NOTHING,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_wall_vertices),

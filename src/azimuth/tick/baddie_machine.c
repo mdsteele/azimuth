@@ -107,7 +107,7 @@ void az_tick_bad_heat_ray(
                     AZ_IMPF_NONE, baddie->uid, &impact);
       if (impact.type == AZ_IMP_BADDIE) {
         if (impact.target.baddie.baddie->kind == AZ_BAD_BEAM_WALL) {
-          beam_damage /= 3;
+          beam_damage /= 6;
         }
         az_try_damage_baddie(state, impact.target.baddie.baddie,
                              impact.target.baddie.component,
