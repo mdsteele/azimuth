@@ -42,7 +42,7 @@
 #define AZ_MAX_NUM_WALLS 250
 
 // The size of the UUID table:
-#define AZ_NUM_UUID_SLOTS 20
+#define AZ_NUM_UUID_SLOTS 30
 
 typedef struct {
   az_baddie_kind_t kind;

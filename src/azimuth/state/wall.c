@@ -1174,6 +1174,24 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {128, 128, 128, 128}, .color2 = {50, 50, 50, 128},
     .underglow = {64, 0, 0, 255}, .impact_damage_coeff = 7.0,
     .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+  },
+  // Green/gray metal block:
+  [125] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {130, 130, 115, 255}, .color2 = {24, 48, 24, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
+  },
+  // Purple/gray metal half-size block:
+  [126] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {140, 140, 128, 255}, .color2 = {24, 48, 24, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
+  },
+  // Green/gray long rectangle metal block:
+  [127] = {
+    .style = AZ_WSTY_TRIFAN,
+    .color1 = {140, 140, 128, 255}, .color2 = {24, 48, 24, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_31)
   }
 };
 

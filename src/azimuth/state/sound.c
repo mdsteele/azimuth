@@ -625,6 +625,13 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.225352108479, .freq_slide = 0.2832,
     .repeat_speed = 0.542253494263
   },
+  [AZ_SND_PISTON_MOVEMENT] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_attack = 0.155, .env_decay = 0.45,
+    .start_freq = 0.94, .freq_delta_slide = 0.33,
+    .phaser_offset = 0.650736, .phaser_sweep = 0.04,
+    .volume_adjust = -0.4
+  },
   [AZ_SND_ROCKWYRM_SCREAM] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_attack = 0.00378904, .env_sustain = 0.26,

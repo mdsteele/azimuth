@@ -64,8 +64,9 @@ static void do_print_sound(az_zfxr_state_t *state) {
   printf("    .wave_kind = %s,\n", wave_name);
 
 #define PRINT_FIELD(fieldname) do { \
-    if (spec->fieldname != 0.0f) { \
-    printf("    .%s = %g,\n", #fieldname, (double)spec->fieldname); } \
+    if (fabs(spec->fieldname) >= 0.0005) { \
+      printf("    .%s = %g,\n", #fieldname, (double)spec->fieldname); \
+    } \
   } while (0)
 
   PRINT_FIELD(env_attack);

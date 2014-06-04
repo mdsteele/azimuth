@@ -96,6 +96,8 @@ static const int wall_data_indices[] = {
   123, 124,
   // Cinderbricks:
   22, 23, 31,
+  // Green/gray metal blocks:
+  125, 126, 127,
   // Miscellaneous:
   79
 };

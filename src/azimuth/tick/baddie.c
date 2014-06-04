@@ -664,6 +664,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_ARMORED_PISTON_EXT:
     case AZ_BAD_INCORPOREAL_PISTON:
     case AZ_BAD_INCORPOREAL_PISTON_EXT: {
+      if (baddie->state != (int)baddie->param) {
+        az_play_sound(&state->soundboard, AZ_SND_PISTON_MOVEMENT);
+        baddie->param = baddie->state;
+      }
       const az_vector_t base_pos =
         az_vadd(baddie->position, az_vrotate(baddie->components[2].position,
                                              baddie->angle));
