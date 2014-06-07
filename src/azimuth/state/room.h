@@ -128,11 +128,11 @@ typedef struct {
 
 // Attempt to open the file located at the given path and load room data from
 // it.  Returns true on success, false on failure.
-bool az_load_room_from_file(const char *filepath, az_room_t *room_out);
+bool az_load_room_from_path(const char *filepath, az_room_t *room_out);
 
 // Attempt to save a room to the file located at the given path.  Return true
 // on success, or false on failure.
-bool az_save_room_to_file(const az_room_t *room, const char *filepath);
+bool az_save_room_to_path(const az_room_t *room, const char *filepath);
 
 // Delete the data arrays owned by a room (but not the room object itself).
 void az_destroy_room(az_room_t *room);

@@ -22,6 +22,7 @@
 #define AZIMUTH_UTIL_PREFS_H_
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "azimuth/util/key.h"
 
@@ -45,17 +46,25 @@ typedef struct {
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs);
 
-// Attempt to open the file located at the given path and load preferences data
-// from it.  Returns true on success, false on failure.
-bool az_load_prefs_from_file(const char *filepath,
+// Attempts to open the file located at the given path and load preferences
+// data from it.  Returns true on success, or false on failure.
+bool az_load_prefs_from_path(const char *filepath,
                              az_preferences_t *prefs_out);
 
-// Attempt to save the given preferences to the file located at the given path.
-// Return true on success, or false on failure.
-bool az_save_prefs_to_file(const az_preferences_t *prefs,
+// Attempts to load preferences data from the given file.  Returns true on
+// success, or false on failure.
+bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out);
+
+// Attempts to save the given preferences to the file located at the given
+// path.  Return true on success, or false on failure.
+bool az_save_prefs_to_path(const az_preferences_t *prefs,
                            const char *filepath);
 
-// Return true if this key may be used for one of the game controls.
+// Attempts to save the given preferences to the given file.  Return true on
+// success, or false on failure.
+bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file);
+
+// Returns true if this key may be used for one of the game controls.
 bool az_is_valid_prefs_key(az_key_id_t key_id);
 
 /*===========================================================================*/

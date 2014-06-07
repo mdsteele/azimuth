@@ -47,27 +47,33 @@ void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   };
 }
 
-bool az_load_prefs_from_file(const char *filepath,
+
+bool az_load_prefs_from_path(const char *filepath,
                              az_preferences_t *prefs_out) {
   assert(filepath != NULL);
+  FILE *file = fopen(filepath, "r");
+  if (file == NULL) return false;
+  const bool ok = az_load_prefs_from_file(file, prefs_out);
+  fclose(file);
+  return ok;
+}
+
+bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
+  assert(file != NULL);
   assert(prefs_out != NULL);
   az_reset_prefs_to_defaults(prefs_out);
 
   // Parse the file.
-  FILE *file = fopen(filepath, "r");
-  if (file == NULL) return false;
   double music_volume, sound_volume;
   int speedrun_timer, fullscreen, keys[AZ_PREFS_NUM_KEYS];
-  const bool ok = (fscanf(
-      file, "@F mv=%lf sv=%lf st=%d fs=%d\n"
-      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
-      &music_volume, &sound_volume, &speedrun_timer, &fullscreen,
-      &keys[AZ_PREFS_UP_KEY_INDEX], &keys[AZ_PREFS_DOWN_KEY_INDEX],
-      &keys[AZ_PREFS_RIGHT_KEY_INDEX], &keys[AZ_PREFS_LEFT_KEY_INDEX],
-      &keys[AZ_PREFS_FIRE_KEY_INDEX], &keys[AZ_PREFS_ORDN_KEY_INDEX],
-      &keys[AZ_PREFS_UTIL_KEY_INDEX], &keys[AZ_PREFS_PAUSE_KEY_INDEX]) >= 12);
-  fclose(file);
-  if (!ok) return false;
+  if (fscanf(file, "@F mv=%lf sv=%lf st=%d fs=%d\n"
+             "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
+             &music_volume, &sound_volume, &speedrun_timer, &fullscreen,
+             &keys[AZ_PREFS_UP_KEY_INDEX], &keys[AZ_PREFS_DOWN_KEY_INDEX],
+             &keys[AZ_PREFS_RIGHT_KEY_INDEX], &keys[AZ_PREFS_LEFT_KEY_INDEX],
+             &keys[AZ_PREFS_FIRE_KEY_INDEX], &keys[AZ_PREFS_ORDN_KEY_INDEX],
+             &keys[AZ_PREFS_UTIL_KEY_INDEX],
+             &keys[AZ_PREFS_PAUSE_KEY_INDEX]) < 12) return false;
 
   // Require all keys to be valid and different.
   for (int i = 0; i < AZ_ARRAY_SIZE(keys); ++i) {
@@ -88,13 +94,20 @@ bool az_load_prefs_from_file(const char *filepath,
   return true;
 }
 
-bool az_save_prefs_to_file(const az_preferences_t *prefs,
+bool az_save_prefs_to_path(const az_preferences_t *prefs,
                            const char *filepath) {
-  assert(prefs != NULL);
   assert(filepath != NULL);
   FILE *file = fopen(filepath, "w");
   if (file == NULL) return false;
-  const bool ok = (fprintf(
+  const bool ok = az_save_prefs_to_file(prefs, file);
+  fclose(file);
+  return ok;
+}
+
+bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
+  assert(prefs != NULL);
+  assert(file != NULL);
+  return (fprintf(
       file, "@F mv=%.03f sv=%.03f st=%d fs=%d\n"
       "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
@@ -107,8 +120,6 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs,
       (int)prefs->keys[AZ_PREFS_ORDN_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_UTIL_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) >= 0);
-  fclose(file);
-  return ok;
 }
 
 bool az_is_valid_prefs_key(az_key_id_t key_id) {

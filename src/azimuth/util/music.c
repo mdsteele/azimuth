@@ -611,18 +611,26 @@ static bool parse_music(az_music_parser_t *parser) {
 
 /*===========================================================================*/
 
-bool az_parse_music_from_file(
+bool az_parse_music_from_path(
     const char *filepath, int num_drums, const az_sound_data_t *drums,
+    az_music_t *music_out) {
+  FILE *file = fopen(filepath, "r");
+  if (file == NULL) return false;
+  const bool success =
+    az_parse_music_from_file(file, num_drums, drums, music_out);
+  fclose(file);
+  return success;
+}
+
+bool az_parse_music_from_file(
+    FILE *file, int num_drums, const az_sound_data_t *drums,
     az_music_t *music_out) {
   assert(music_out != NULL);
   AZ_ZERO_OBJECT(music_out);
-  FILE *file = fopen(filepath, "r");
-  if (file == NULL) return false;
   az_music_parser_t *parser =
     new_music_parser(music_out, file, num_drums, drums);
   const bool success = parse_music(parser);
   free_music_parser(parser);
-  fclose(file);
   return success;
 }
 

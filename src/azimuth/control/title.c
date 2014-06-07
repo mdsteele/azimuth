@@ -39,7 +39,7 @@ static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
   char *save_path = az_strprintf("%s/save.txt", data_dir);
-  (void)az_save_games_to_file(saved_games, save_path);
+  (void)az_save_games_to_path(saved_games, save_path);
   free(save_path);
 }
 
@@ -47,7 +47,7 @@ static void save_preferences(const az_preferences_t *prefs) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
   char *prefs_path = az_strprintf("%s/prefs.txt", data_dir);
-  (void)az_save_prefs_to_file(prefs, prefs_path);
+  (void)az_save_prefs_to_path(prefs, prefs_path);
   free(prefs_path);
 }
 

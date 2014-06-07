@@ -97,7 +97,7 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return false;
   char *save_path = az_strprintf("%s/save.txt", data_dir);
-  const bool success = az_save_games_to_file(saved_games, save_path);
+  const bool success = az_save_games_to_path(saved_games, save_path);
   free(save_path);
   return success;
 }

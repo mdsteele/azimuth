@@ -143,7 +143,7 @@ bool az_init_music_datas(const char *resource_dir) {
     const char *filename = music_filenames[i];
     if (filename == NULL) continue;
     char *music_path = az_strprintf("%s/music/%s", resource_dir, filename);
-    if (!az_parse_music_from_file(music_path, num_drums, drums,
+    if (!az_parse_music_from_path(music_path, num_drums, drums,
                                   &music_datas[i])) {
       AZ_WARNING_ALWAYS("Failed to load music from %s\n", music_path);
       free(music_path);

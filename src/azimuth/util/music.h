@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "azimuth/util/sound.h"
 
@@ -94,8 +95,12 @@ typedef struct {
   az_music_part_t *parts;
 } az_music_t;
 
-bool az_parse_music_from_file(
+bool az_parse_music_from_path(
     const char *filepath, int num_drums, const az_sound_data_t *drums,
+    az_music_t *music_out);
+
+bool az_parse_music_from_file(
+    FILE *file, int num_drums, const az_sound_data_t *drums,
     az_music_t *music_out);
 
 void az_destroy_music(az_music_t *music);

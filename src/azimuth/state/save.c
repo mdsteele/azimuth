@@ -132,7 +132,7 @@ static bool parse_saved_games(const az_planet_t *planet, FILE *file,
   return true;
 }
 
-bool az_load_games_from_file(const az_planet_t *planet,
+bool az_load_games_from_path(const az_planet_t *planet,
                              const char *filepath,
                              az_saved_games_t *games_out) {
   assert(games_out != NULL);
@@ -185,7 +185,7 @@ static bool write_games(const az_saved_games_t *games, FILE *file) {
 
 #undef WRITE_BITFIELD
 
-bool az_save_games_to_file(const az_saved_games_t *games,
+bool az_save_games_to_path(const az_saved_games_t *games,
                            const char *filepath) {
   assert(games != NULL);
   FILE *file = fopen(filepath, "w");

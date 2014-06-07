@@ -199,7 +199,7 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   for (int i = 0; i < planet_out->num_rooms; ++i) {
     char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, i);
     const bool success =
-      az_load_room_from_file(room_path, &planet_out->rooms[i]) &&
+      az_load_room_from_path(room_path, &planet_out->rooms[i]) &&
       planet_out->rooms[i].zone_key < planet_out->num_zones;
     free(room_path);
     if (!success) {
@@ -264,7 +264,7 @@ bool az_save_planet(
   for (int i = 0; i < num_rooms_to_save; ++i) {
     const int key = rooms_to_save[i];
     char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, key);
-    const bool success = az_save_room_to_file(&planet->rooms[key], room_path);
+    const bool success = az_save_room_to_path(&planet->rooms[key], room_path);
     free(room_path);
     if (!success) return false;
   }

@@ -17,6 +17,8 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
+#include <stdio.h>
+
 #include "azimuth/util/audio.h"
 #include "azimuth/util/sound.h"
 #include "test/test.h"
@@ -67,6 +69,37 @@ void test_persist_sound(void) {
   EXPECT_TRUE(soundboard.persists[3].play);
   EXPECT_TRUE(soundboard.persists[3].loop);
   EXPECT_FALSE(soundboard.persists[3].reset);
+}
+
+void test_parse_music(void) {
+  const char *music_string =
+    "@M \"A|AB\" % foo\n"
+    "%% bar\n"
+    "!Part B\n"
+    "1| c3q d e f |\n"
+    "!Part A  % the intro!\n"
+    "1 Ws L30\n"
+    "1| c3q r r g |\n";
+  az_music_t music;
+  {
+    FILE *file = tmpfile();
+    ASSERT_TRUE(file != NULL);
+    EXPECT_TRUE(0 <= fputs(music_string, file));
+    rewind(file);
+    const bool success = az_parse_music_from_file(file, 0, NULL, &music);
+    fclose(file);
+    ASSERT_TRUE(success);
+  }
+  EXPECT_INT_EQ(3, music.spec_length);
+  EXPECT_INT_EQ(1, music.spec[0]);
+  EXPECT_INT_EQ(1, music.spec[1]);
+  EXPECT_INT_EQ(0, music.spec[2]);
+  EXPECT_INT_EQ(1, music.loop_point);
+  EXPECT_INT_EQ(2, music.num_parts);
+  const az_music_track_t *part_b_track_1 = &music.parts[0].tracks[0];
+  EXPECT_INT_EQ(4, part_b_track_1->num_notes);
+  const az_music_track_t *part_a_track_1 = &music.parts[1].tracks[0];
+  EXPECT_INT_EQ(6, part_a_track_1->num_notes);
 }
 
 /*===========================================================================*/

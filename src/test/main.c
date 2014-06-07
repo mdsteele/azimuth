@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_paragraph_length);
   RUN_TEST(test_paragraph_scan);
+  RUN_TEST(test_parse_music);
   RUN_TEST(test_persist_sound);
   RUN_TEST(test_player_flags);
   RUN_TEST(test_player_give_upgrade);
@@ -63,6 +64,8 @@ int main(int argc, char **argv) {
   RUN_TEST(test_player_set_zone_mapped);
   RUN_TEST(test_polygon_contains);
   RUN_TEST(test_position_visible);
+  RUN_TEST(test_prefs_defaults);
+  RUN_TEST(test_prefs_save_load);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);
   RUN_TEST(test_ray_hits_arc);

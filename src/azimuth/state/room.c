@@ -320,7 +320,7 @@ static void parse_room(az_load_room_t *loader) {
   loader->success = true;
 }
 
-bool az_load_room_from_file(const char *filepath, az_room_t *room_out) {
+bool az_load_room_from_path(const char *filepath, az_room_t *room_out) {
   assert(room_out != NULL);
   AZ_ZERO_OBJECT(room_out);
   FILE *file = fopen(filepath, "r");
@@ -443,7 +443,7 @@ static bool write_room(const az_room_t *room, FILE *file) {
 #undef WRITE
 #undef WRITE_SCRIPT
 
-bool az_save_room_to_file(const az_room_t *room, const char *filepath) {
+bool az_save_room_to_path(const az_room_t *room, const char *filepath) {
   FILE *file = fopen(filepath, "w");
   if (file == NULL) return false;
   const bool ok = write_room(room, file);

@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   az_get_drum_kit(&num_drums, &drums);
 
   // Load music:
-  if (!az_parse_music_from_file(argv[1], num_drums, drums, &music)) {
+  if (!az_parse_music_from_path(argv[1], num_drums, drums, &music)) {
     fprintf(stderr, "ERROR: failed to parse music.\n");
     return EXIT_FAILURE;
   }

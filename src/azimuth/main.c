@@ -59,7 +59,7 @@ static void load_saved_games(void) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
   char *save_path = az_strprintf("%s/save.txt", data_dir);
-  if (!az_load_games_from_file(&planet, save_path, &saved_games)) {
+  if (!az_load_games_from_path(&planet, save_path, &saved_games)) {
     az_reset_saved_games(&saved_games);
   }
   free(save_path);
@@ -69,7 +69,7 @@ static void load_preferences(void) {
   const char *data_dir = az_get_app_data_directory();
   if (data_dir == NULL) return;
   char *prefs_path = az_strprintf("%s/prefs.txt", data_dir);
-  if (!az_load_prefs_from_file(prefs_path, &preferences)) {
+  if (!az_load_prefs_from_path(prefs_path, &preferences)) {
     az_reset_prefs_to_defaults(&preferences);
   }
   free(prefs_path);
