@@ -29,7 +29,7 @@ void test_random(void) {
 
   int counts[10] = {0};
   for (int i = 0; i < 10000; ++i) {
-    double r = az_random(0.0, 1.0);
+    const double r = az_random(0.0, 1.0);
     ASSERT_TRUE(r >= 0.0);
     ASSERT_TRUE(r < 1.0);
     int index = (int)(r * 10);
@@ -47,7 +47,7 @@ void test_random(void) {
 void test_randint(void) {
   int counts[13] = {0};
   for (int i = 0; i < 13000; ++i) {
-    int r = az_randint(-7, 5);
+    const int r = az_randint(-7, 5);
     ASSERT_TRUE(r >= -7);
     ASSERT_TRUE(r <= 5);
     ++counts[r + 7];

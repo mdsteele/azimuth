@@ -35,7 +35,6 @@
 #include "azimuth/state/upgrade.h"
 #include "azimuth/state/wall.h" // for az_init_wall_datas
 #include "azimuth/util/misc.h"
-#include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 #include "editor/list.h"
 #include "editor/state.h"
@@ -1612,7 +1611,6 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  az_init_random();
   az_init_baddie_datas();
   az_init_wall_datas();
   az_register_gl_init_func(az_init_wall_drawing);

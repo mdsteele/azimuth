@@ -30,6 +30,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/util.h"
 
@@ -308,6 +309,40 @@ static void draw_trifan_alt(az_color_t color1, az_color_t color2,
   } glEnd();
 }
 
+static void draw_volcanic(double bezel, az_color_t color1, az_color_t color2,
+                          az_color_t color3, az_polygon_t polygon,
+                          double bounding_radius) {
+  assert(bezel > 0.0);
+  draw_bezel(bezel, true, color2, color1, polygon);
+  const double xstep = 10.0 + 0.2 * bezel;
+  const double ystep = (sqrt(3) / 3.0) * xstep;
+  az_color_t color4 = color2; color4.a = 0;
+  az_random_seed_t seed = {3, 7};
+  bool indent = false;
+  for (double y = -bounding_radius; y < bounding_radius; y += ystep) {
+    for (double x = -bounding_radius; x < bounding_radius; x += xstep) {
+      const double rx = 0.4 * xstep * 0.25 * (4.0 + az_rand_sdouble(&seed));
+      const double ry = 0.4 * xstep * 0.25 * (4.0 + az_rand_sdouble(&seed));
+      const double cx = x + 0.3 * xstep * az_rand_sdouble(&seed) +
+        (indent ? 0.5 * xstep : 0);
+      const double cy = y + 0.3 * ystep * az_rand_sdouble(&seed);
+      if (!az_polygon_contains_circle(polygon, fmax(rx, ry),
+                                      (az_vector_t){cx, cy})) continue;
+      const double theta = AZ_TWO_PI * az_rand_udouble(&seed);
+      az_color_t color5 = color3;
+      color5.a = (double)color5.a * (1.0 - hypot(cx, cy) / bounding_radius);
+      glBegin(GL_TRIANGLE_FAN); {
+        az_gl_color(color5); glVertex2f(cx, cy); az_gl_color(color4);
+        for (int i = 0; i <= 360; i += 30) {
+          glVertex2d(cx + rx * cos(AZ_DEG2RAD(i) + theta),
+                     cy + ry * sin(AZ_DEG2RAD(i) + theta));
+        }
+      } glEnd();
+    }
+    indent = !indent;
+  }
+}
+
 static void compile_wall(const az_wall_data_t *data, GLuint list) {
   glNewList(list, GL_COMPILE); {
     switch (data->style) {
@@ -397,6 +432,10 @@ static void compile_wall(const az_wall_data_t *data, GLuint list) {
         break;
       case AZ_WSTY_TRIFAN_ALT:
         draw_trifan_alt(data->color1, data->color2, data->polygon);
+        break;
+      case AZ_WSTY_VOLCANIC:
+        draw_volcanic(data->bezel, data->color1, data->color2, data->color3,
+                      data->polygon, data->bounding_radius);
         break;
     }
   } glEndList();

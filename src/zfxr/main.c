@@ -24,7 +24,6 @@
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
-#include "azimuth/util/random.h"
 #include "zfxr/state.h"
 #include "zfxr/view.h"
 
@@ -56,7 +55,6 @@ static void event_loop(void) {
 }
 
 int main(int argc, char **argv) {
-  az_init_random();
   az_init_zfxr_state(&state);
   az_init_gui(false, true);
 

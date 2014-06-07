@@ -36,7 +36,6 @@
 #include "azimuth/system/resource.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/prefs.h"
-#include "azimuth/util/random.h" // for az_init_random
 #include "azimuth/util/string.h"
 #include "azimuth/view/dialog.h" // for az_init_portrait_drawing
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
@@ -82,7 +81,6 @@ typedef enum {
 } az_controller_t;
 
 int main(int argc, char **argv) {
-  az_init_random();
   az_init_sound_datas();
   az_init_baddie_datas();
   az_init_wall_datas();

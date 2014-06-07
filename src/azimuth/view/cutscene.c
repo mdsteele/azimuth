@@ -30,38 +30,25 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/ship.h"
 
 /*===========================================================================*/
-
-// Below is a simple random number generator, based on the MWC and UNI
-// algorithms from George Marsaglia's post to sci.stat.math on 12 Jan 1999,
-// which can be found here:
-//   https://groups.google.com/forum/#!topic/sci.stat.math/5yb0jwf1stw
-// Using this rather than az_random() allows us to easily produce the same
-// "random" sequence over and over, which we use to generate a starfield that
-// looks random, but can be consistently regenerated on each frame.
-static uint32_t sr_z, sr_w;
-static void reset_simple_random(void) { sr_z = sr_w = 1; }
-static double simple_random(void) {
-  sr_z = 36969 * (sr_z & 0xffff) + (sr_z >> 16);
-  sr_w = 18000 * (sr_w & 0xffff) + (sr_w >> 16);
-  return ((sr_z << 16) + sr_w + 1.0) * 2.328306435454494e-10;
-}
 
 static void draw_moving_stars_layer(
     double spacing, double scale, double speed, double total_time,
     GLfloat alpha) {
   const double modulus = AZ_SCREEN_WIDTH + spacing;
   const double scroll = fmod(total_time * speed, modulus);
-  reset_simple_random();
+  az_random_seed_t seed = {1, 1};
   glBegin(GL_LINES); {
     for (double xoff = 0.0; xoff < modulus; xoff += spacing) {
       for (double yoff = 0.0; yoff < modulus; yoff += spacing) {
         const double x =
-          fmod(xoff + 3.0 * spacing * simple_random() + scroll, modulus);
-        const double y = yoff + 3.0 * spacing * simple_random();
+          fmod(xoff + 3.0 * spacing * az_rand_udouble(&seed) + scroll,
+               modulus);
+        const double y = yoff + 3.0 * spacing * az_rand_udouble(&seed);
         glColor4f(1, 1, 1, alpha);
         glVertex2d(x, y);
         glColor4f(1, 1, 1, 0);
@@ -81,15 +68,15 @@ static void draw_moving_starfield(double time, double scale) {
 #define STAR_SPACING 12
 
 void az_draw_planet_starfield(az_clock_t clock) {
-  reset_simple_random();
+  az_random_seed_t seed = {1, 1};
   glBegin(GL_POINTS); {
     int i = 0;
     for (int xoff = 0; xoff < AZ_SCREEN_WIDTH; xoff += STAR_SPACING) {
       for (int yoff = 0; yoff < AZ_SCREEN_HEIGHT; yoff += STAR_SPACING) {
         const int twinkle = az_clock_zigzag(10, 4, clock + i);
-        glColor4f(1, 1, 1, (twinkle * 0.02) + 0.3 * simple_random());
-        const double x = xoff + 3 * STAR_SPACING * simple_random();
-        const double y = yoff + 3 * STAR_SPACING * simple_random();
+        glColor4f(1, 1, 1, (twinkle * 0.02) + 0.3 * az_rand_udouble(&seed));
+        const double x = xoff + 3 * STAR_SPACING * az_rand_udouble(&seed);
+        const double y = yoff + 3 * STAR_SPACING * az_rand_udouble(&seed);
         glVertex2d(x, y);
         ++i;
       }

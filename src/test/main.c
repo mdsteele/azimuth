@@ -17,14 +17,11 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/util/random.h" // for az_init_random
 #include "test/test.h"
 
 /*===========================================================================*/
 
 int main(int argc, char **argv) {
-  az_init_random();
-
   RUN_TEST(test_alloc);
   RUN_TEST(test_arc_circle_hits_circle);
   RUN_TEST(test_arc_circle_hits_line);
@@ -63,6 +60,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_player_set_room_visited);
   RUN_TEST(test_player_set_zone_mapped);
   RUN_TEST(test_polygon_contains);
+  RUN_TEST(test_polygon_contains_circle);
   RUN_TEST(test_position_visible);
   RUN_TEST(test_prefs_defaults);
   RUN_TEST(test_prefs_save_load);

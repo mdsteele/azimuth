@@ -296,6 +296,21 @@ static const az_vector_t wall_vertices_115[] = {
   {-100, -30}, {-60, -25}, {-20, -32}, {20, -38}, {50, -30}, {70, -23},
   {100, -30}
 };
+static const az_vector_t wall_vertices_128[] = {
+  {50, 1}, {38, 28}, {30, 39}, {18, 47}, {10, 54}, {-10, 55}, {-25, 39},
+  {-35, 22}, {-50, 9}, {-43, -11}, {-40, -36}, {-23, -44}, {-10, -56},
+  {10, -51}, {23, -36}, {40, -26}, {48, -10}
+};
+static const az_vector_t wall_vertices_129[] = {
+  {38, 56}, {31, 78}, {19, 85}, {1, 91}, {-14, 84}, {-37, 64}, {-47, 36},
+  {-68, 15}, {-58, -18}, {-54, -59}, {-31, -73}, {-14, -92}, {14, -84},
+  {31, -59}, {54, -43}, {65, -17}, {68, 2}, {51, 46}
+};
+static const az_vector_t wall_vertices_130[] = {
+  {56, 68}, {46, 94}, {28, 108}, {2, 102}, {-20, 110}, {-55, 78}, {-70, 44},
+  {-100, 18}, {-86, -22}, {-80, -72}, {-46, -88}, {-20, -112}, {20, -102},
+  {46, -72}, {80, -52}, {96, -20}, {100, 2}, {76, 56}
+};
 
 /*===========================================================================*/
 
@@ -456,13 +471,13 @@ static az_wall_data_t wall_datas[] = {
   // Red/gray rectangle cinderbrick:
   [22] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
-    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .color1 = {192, 24, 24, 255}, .color2 = {70, 54, 54, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
   },
   // Red/gray rectangle half-size cinderbrick:
   [23] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
-    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .color1 = {192, 24, 24, 255}, .color2 = {70, 54, 54, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_23)
   },
   // Green/purple hexagonal block:
@@ -510,7 +525,7 @@ static az_wall_data_t wall_datas[] = {
   // Red/gray long rectangle cinderbrick:
   [31] = {
     .style = AZ_WSTY_BEZEL_12, .bezel = 15.0,
-    .color1 = {192, 24, 24, 255}, .color2 = {80, 64, 64, 255},
+    .color1 = {192, 24, 24, 255}, .color2 = {70, 54, 54, 255},
     .elasticity = 0.25, .polygon = AZ_INIT_POLYGON(wall_vertices_31)
   },
   // Yellow square block:
@@ -1164,16 +1179,16 @@ static az_wall_data_t wall_datas[] = {
   // Small red-glowing ash boulder:
   [123] = {
     .style = AZ_WSTY_TRIFAN, .bezel = 30.0,
-    .color1 = {84, 84, 84, 128}, .color2 = {40, 40, 40, 128},
-    .underglow = {40, 0, 0, 255}, .impact_damage_coeff = 7.0,
-    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_73)
+    .color1 = {100, 94, 90, 128}, .color2 = {50, 30, 40, 128},
+    .underglow = {32, 0, 0, 255}, .impact_damage_coeff = 10.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_128)
   },
   // Large red-glowing ash boulder:
   [124] = {
     .style = AZ_WSTY_TRIFAN, .bezel = 50.0,
-    .color1 = {128, 128, 128, 128}, .color2 = {50, 50, 50, 128},
-    .underglow = {64, 0, 0, 255}, .impact_damage_coeff = 7.0,
-    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_74)
+    .color1 = {104, 94, 100, 128}, .color2 = {50, 30, 50, 128},
+    .underglow = {48, 0, 0, 255}, .impact_damage_coeff = 10.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_129)
   },
   // Green/gray metal block:
   [125] = {
@@ -1192,6 +1207,48 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_TRIFAN,
     .color1 = {140, 140, 128, 255}, .color2 = {24, 48, 24, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_31)
+  },
+  // Small dark volcanic rock:
+  [128] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 25.0,
+    .color1 = {50, 47, 45, 255}, .color2 = {25, 15, 20, 255},
+    .color3 = {30, 30, 30, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_128)
+  },
+  // Medium dark volcanic rock:
+  [129] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 30.0,
+    .color1 = {52, 47, 45, 255}, .color2 = {25, 15, 20, 255},
+    .color3 = {30, 30, 30, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_129)
+  },
+  // Large dark volcanic rock:
+  [130] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 45.0,
+    .color1 = {52, 47, 50, 255}, .color2 = {25, 15, 25, 255},
+    .color3 = {30, 30, 30, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_130)
+  },
+  // Small light volcanic rock:
+  [131] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 30.0,
+    .color1 = {100, 95, 90, 255}, .color2 = {25, 15, 20, 255},
+    .color3 = {30, 20, 20, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_128)
+  },
+  // Medium light volcanic rock:
+  [132] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 35.0,
+    .color1 = {105, 95, 90, 255}, .color2 = {25, 15, 20, 255},
+    .color3 = {30, 25, 25, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_129)
+  },
+  // Large light volcanic rock:
+  [133] = {
+    .style = AZ_WSTY_VOLCANIC, .bezel = 50.0,
+    .color1 = {105, 95, 100, 255}, .color2 = {25, 15, 25, 255},
+    .color3 = {40, 20, 0, 192}, .impact_damage_coeff = 5.0,
+    .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_130)
   }
 };
 

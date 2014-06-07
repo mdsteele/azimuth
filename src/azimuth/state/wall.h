@@ -67,7 +67,8 @@ typedef enum {
   AZ_WSTY_TFQS_213,
   AZ_WSTY_TFQS_321,
   AZ_WSTY_TRIFAN,
-  AZ_WSTY_TRIFAN_ALT
+  AZ_WSTY_TRIFAN_ALT,
+  AZ_WSTY_VOLCANIC
 } az_wall_style_t;
 
 typedef struct {

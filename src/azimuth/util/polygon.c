@@ -39,6 +39,15 @@ static bool solve_quadratic(double a, double b, double c,
   return true;
 }
 
+static bool circle_touches_line_segment_internal(
+    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center) {
+  assert(radius >= 0.0);
+  if (!az_circle_touches_line(p1, p2, radius, center)) return false;
+  const az_vector_t seg = az_vsub(p2, p1);
+  return (az_vdot(seg, az_vsub(center, p1)) >= 0.0 &&
+          az_vdot(seg, az_vsub(center, p2)) <= 0.0);
+}
+
 /*===========================================================================*/
 
 bool az_polygon_contains(az_polygon_t polygon, az_vector_t point) {
@@ -82,6 +91,19 @@ bool az_polygon_contains(az_polygon_t polygon, az_vector_t point) {
   return inside;
 }
 
+bool az_polygon_contains_circle(az_polygon_t polygon, double radius,
+                                az_vector_t center) {
+  for (int i = 0; i < polygon.num_vertices; ++i) {
+    if (az_vwithin(center, polygon.vertices[i], radius)) return false;
+  }
+  for (int i = polygon.num_vertices - 1, j = 0; i >= 0; j = i--) {
+    if (circle_touches_line_segment_internal(
+            polygon.vertices[i], polygon.vertices[j],
+            radius, center)) return false;
+  }
+  return az_polygon_contains(polygon, center);
+}
+
 /*===========================================================================*/
 
 bool az_circle_touches_line(
@@ -92,15 +114,6 @@ bool az_circle_touches_line(
     az_vflatten(az_vsub(p1, center), az_vsub(p1, p2));
   // Determine if that vector is no longer than radius.
   return (az_vdot(to_line, to_line) <= radius * radius);
-}
-
-static bool circle_touches_line_segment_internal(
-    az_vector_t p1, az_vector_t p2, double radius, az_vector_t center) {
-  assert(radius >= 0.0);
-  if (!az_circle_touches_line(p1, p2, radius, center)) return false;
-  const az_vector_t seg = az_vsub(p2, p1);
-  return (az_vdot(seg, az_vsub(center, p1)) >= 0.0 &&
-          az_vdot(seg, az_vsub(center, p2)) <= 0.0);
 }
 
 bool az_circle_touches_line_segment(

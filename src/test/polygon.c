@@ -73,6 +73,26 @@ void test_polygon_contains(void) {
   EXPECT_FALSE(az_polygon_contains(null_polygon, AZ_VZERO));
 }
 
+void test_polygon_contains_circle(void) {
+  EXPECT_TRUE(az_polygon_contains_circle(
+      triangle, 0.01, (az_vector_t){-2, -2}));
+  EXPECT_FALSE(az_polygon_contains_circle(
+      triangle, 100.0, (az_vector_t){-2, -2}));
+  EXPECT_FALSE(az_polygon_contains_circle(
+      triangle, 0.1, (az_vector_t){3, 0}));
+  EXPECT_FALSE(az_polygon_contains_circle(
+      triangle, 0.6, (az_vector_t){1.5, 0}));
+  EXPECT_TRUE(az_polygon_contains_circle(
+      triangle, 0.1, (az_vector_t){1.5, 0}));
+  EXPECT_FALSE(az_polygon_contains_circle(
+      triangle, 0.2, (az_vector_t){1.4, 1.9}));
+  EXPECT_TRUE(az_polygon_contains_circle(
+      triangle, 0.01, (az_vector_t){1.4, 1.9}));
+
+  // The null polygon shouldn't contain any circle.
+  EXPECT_FALSE(az_polygon_contains_circle(null_polygon, 0.01, AZ_VZERO));
+}
+
 /*===========================================================================*/
 
 void test_circle_touches_line(void) {

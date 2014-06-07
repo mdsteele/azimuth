@@ -32,9 +32,7 @@
   { .num_vertices = AZ_ARRAY_SIZE(array), .vertices = (array) }
 
 // Represents a closed 2D polygon.  It is usually expected that the polygon is
-// non-self-intersecting, and that the vertices come in counter-clockwise
-// order.  The `vertices` field is generally not considered to own the array
-// that it points to.
+// non-self-intersecting.
 typedef struct {
   int num_vertices;
   const az_vector_t *vertices;
@@ -45,6 +43,10 @@ typedef struct {
 // Test if the point is in the polygon.  The polygon must be
 // non-self-intersecting, but it need not be convex.
 bool az_polygon_contains(az_polygon_t polygon, az_vector_t point);
+
+// Test if the specified circle is completely contained within the polygon.
+bool az_polygon_contains_circle(az_polygon_t polygon, double radius,
+                                az_vector_t center);
 
 /*===========================================================================*/
 

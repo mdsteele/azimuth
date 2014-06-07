@@ -94,6 +94,9 @@ static const int wall_data_indices[] = {
   114, 115, 116, 117, 113,
   // Red-glowing ash boulders:
   123, 124,
+  // Volcanic rocks:
+  128, 129, 130, // dark
+  131, 132, 133, // light
   // Cinderbricks:
   22, 23, 31,
   // Green/gray metal blocks:
