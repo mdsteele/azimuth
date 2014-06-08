@@ -1,4 +1,4 @@
-Next flag: 99
+Next flag: 100
 Unused: 5
 
 Bosses
@@ -10,6 +10,7 @@ Bosses
 45: Killed Forcefiend (Barrag boss, room 231)
 51: Killed Kilofuge (Cnidam boss, room 237)
 59: Killed Nocturne (Voquan boss, room 235)
+99: Killed Magbeest (Sarvari boss, room 423)
 
 Minibosses
 ==========

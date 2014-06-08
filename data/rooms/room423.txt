@@ -1,7 +1,7 @@
-@R z6 p2 b1 d2 g0 n0 w0
+@R z6 p10/99 b1 d2 g0 n0 w0
   c(8122.18,769.30,1.130444,0.033844)
-$s:boss1,lock2,lock3;
+$s:test99,beqz/A,nix1,halt,A#boss1,lock2,lock3;
 !D1 x2937.21 y7578.68 a-0.406538 r426 u2
 !D1 x3601.39 y8366.88 a-1.977151 r422 u3
 !B45 x3493.41 y7748.75 a-1.990101 u1
-$k:unlock2,unlock3;
+$k:set99,unlock2,unlock3;
