@@ -18,30 +18,24 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_VICTORY_H_
-#define AZIMUTH_VIEW_VICTORY_H_
+#ifndef AZIMUTH_CONTROL_UTIL_H_
+#define AZIMUTH_CONTROL_UTIL_H_
 
-#include "azimuth/util/audio.h"
-#include "azimuth/util/clock.h"
+#include <stdbool.h>
 
-/*===========================================================================*/
-
-typedef struct {
-  az_clock_t clock;
-  az_soundboard_t soundboard;
-  double clear_time;
-  int percent_completion;
-
-  enum {
-    AZ_VS_START = 0,
-    AZ_VS_DONE
-  } step;
-} az_victory_state_t;
-
-void az_victory_draw_screen(const az_victory_state_t *state);
-
-void az_tick_victory_state(az_victory_state_t *state, double time);
+#include "azimuth/state/planet.h"
+#include "azimuth/state/save.h"
+#include "azimuth/util/prefs.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_VICTORY_H_
+void az_load_preferences(az_preferences_t *prefs);
+bool az_save_preferences(const az_preferences_t *prefs);
+
+void az_load_saved_games(const az_planet_t *planet,
+                         az_saved_games_t *saved_games);
+bool az_save_saved_games(const az_saved_games_t *saved_games);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_CONTROL_UTIL_H_

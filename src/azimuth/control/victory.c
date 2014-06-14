@@ -21,6 +21,7 @@
 
 #include <assert.h>
 
+#include "azimuth/control/util.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
@@ -32,15 +33,46 @@
 
 /*===========================================================================*/
 
-void az_victory_event_loop(const az_player_t *player) {
+#define AZ_LOW_PERCENT_COMPLETION 15
+
+void az_victory_event_loop(az_saved_games_t *saved_games,
+                           const az_player_t *player) {
   static az_victory_state_t state;
   AZ_ZERO_OBJECT(&state);
   state.clear_time = player->total_time;
+  int num_upgrades = 0;
   for (int i = 0; i < AZ_NUM_UPGRADES; ++i) {
     if (az_has_upgrade(player, (az_upgrade_t)i)) {
-      ++state.num_upgrades;
+      ++num_upgrades;
     }
   }
+  AZ_STATIC_ASSERT(AZ_NUM_UPGRADES == 100);
+  state.percent_completion = num_upgrades;
+
+  // Update records.
+  if (saved_games->highest_percentage < state.percent_completion) {
+    saved_games->highest_percentage = state.percent_completion;
+  }
+  if (saved_games->lowest_percentage < 0 ||
+      saved_games->lowest_percentage > state.percent_completion) {
+    saved_games->lowest_percentage = state.percent_completion;
+  }
+  if (saved_games->best_any_percent_time <= 0.0 ||
+      saved_games->best_any_percent_time > state.clear_time) {
+    saved_games->best_any_percent_time = state.clear_time;
+  }
+  if (state.percent_completion >= 100 &&
+      (saved_games->best_100_percent_time <= 0.0 ||
+       saved_games->best_100_percent_time > state.clear_time)) {
+    saved_games->best_100_percent_time = state.clear_time;
+  }
+  if (state.percent_completion <= AZ_LOW_PERCENT_COMPLETION &&
+      (saved_games->best_low_percent_time <= 0.0 ||
+       saved_games->best_low_percent_time > state.clear_time)) {
+    saved_games->best_low_percent_time = state.clear_time;
+  }
+  az_save_saved_games(saved_games);
+
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   while (true) {

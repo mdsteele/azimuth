@@ -34,7 +34,8 @@
 /*===========================================================================*/
 
 void az_reset_saved_games(az_saved_games_t *games) {
-  AZ_ARRAY_LOOP(game, games->games) game->present = false;
+  AZ_ZERO_OBJECT(games);
+  games->highest_percentage = games->lowest_percentage = -1;
 }
 
 /*===========================================================================*/
@@ -115,10 +116,17 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
 
 static bool parse_saved_games(const az_planet_t *planet, FILE *file,
                               az_saved_games_t *games_out) {
+  if (fscanf(file, "@S hp=%d lp=%d ba=%lf bo=%lf bl=%lf\n",
+             &games_out->highest_percentage, &games_out->lowest_percentage,
+             &games_out->best_any_percent_time,
+             &games_out->best_100_percent_time,
+             &games_out->best_low_percent_time) < 5) return false;
+  if (games_out->highest_percentage > 100 ||
+      games_out->lowest_percentage > 100) return false;
   AZ_ARRAY_LOOP(game, games_out->games) {
-    if (fgetc(file) != '@') return false;
+    if (fgetc(file) != '!') return false;
     switch (fgetc(file)) {
-      case 'S':
+      case 'G':
         game->present = true;
         if (!parse_saved_game(planet, file, &game->player)) return false;
         break;
@@ -164,10 +172,14 @@ static bool write_bitfield(const char *prefix, const uint64_t *array,
   } while (0)
 
 static bool write_games(const az_saved_games_t *games, FILE *file) {
+  fprintf(file, "@S hp=%d lp=%d ba=%.02f bo=%.02f bl=%.02f\n",
+          games->highest_percentage, games->lowest_percentage,
+          games->best_any_percent_time, games->best_100_percent_time,
+          games->best_low_percent_time);
   AZ_ARRAY_LOOP(game, games->games) {
     if (game->present) {
       const az_player_t *player = &game->player;
-      if (fprintf(file, "@S") < 0) return false;
+      if (fprintf(file, "!G") < 0) return false;
       WRITE_BITFIELD("up", player->upgrades);
       WRITE_BITFIELD("rv", player->rooms_visited);
       WRITE_BITFIELD("zm", player->zones_mapped);
@@ -177,7 +189,7 @@ static bool write_games(const az_saved_games_t *games, FILE *file) {
                   player->rockets, player->bombs, player->gun1, player->gun2,
                   player->ordnance) < 0) return false;
     } else {
-      if (fprintf(file, "@N\n") < 0) return false;
+      if (fprintf(file, "!N\n") < 0) return false;
     }
   }
   return true;

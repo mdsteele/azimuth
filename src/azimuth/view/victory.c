@@ -38,10 +38,8 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
   const int seconds = total_seconds % 60;
   az_draw_printf(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 100,
                  "Clear time: %d:%02d:%02d", hours, minutes, seconds);
-  AZ_STATIC_ASSERT(AZ_NUM_UPGRADES == 100);
-  const int percent = state->num_upgrades;
   az_draw_printf(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 200,
-                 "Items collected: %d%%", percent);
+                 "Items collected: %d%%", state->percent_completion);
 }
 
 void az_tick_victory_state(az_victory_state_t *state, double time) {

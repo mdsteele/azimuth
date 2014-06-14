@@ -20,35 +20,21 @@
 #include "azimuth/control/title.h"
 
 #include <assert.h>
-#include <stdlib.h>
 
+#include "azimuth/control/util.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/save.h"
-#include "azimuth/system/resource.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/prefs.h"
-#include "azimuth/util/string.h"
 #include "azimuth/view/title.h"
 
 /*===========================================================================*/
 
 static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
   saved_games->games[slot_index].present = false;
-  const char *data_dir = az_get_app_data_directory();
-  if (data_dir == NULL) return;
-  char *save_path = az_strprintf("%s/save.txt", data_dir);
-  (void)az_save_games_to_path(saved_games, save_path);
-  free(save_path);
-}
-
-static void save_preferences(const az_preferences_t *prefs) {
-  const char *data_dir = az_get_app_data_directory();
-  if (data_dir == NULL) return;
-  char *prefs_path = az_strprintf("%s/prefs.txt", data_dir);
-  (void)az_save_prefs_to_path(prefs, prefs_path);
-  free(prefs_path);
+  az_save_saved_games(saved_games);
 }
 
 static bool try_pick_key(az_title_state_t *state, az_preferences_t *prefs,
@@ -173,7 +159,7 @@ az_title_action_t az_title_event_loop(
     }
     if (prefs_changed && !state.music_slider.grabbed &&
         !state.sound_slider.grabbed) {
-      save_preferences(prefs);
+      az_save_preferences(prefs);
       prefs_changed = false;
     }
   }

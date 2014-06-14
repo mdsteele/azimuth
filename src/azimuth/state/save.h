@@ -35,6 +35,11 @@ typedef struct {
 } az_saved_game_t;
 
 typedef struct {
+  int highest_percentage;
+  int lowest_percentage;
+  double best_any_percent_time;
+  double best_100_percent_time;
+  double best_low_percent_time;
   az_saved_game_t games[AZ_NUM_SAVED_GAME_SLOTS];
 } az_saved_games_t;
 

@@ -21,11 +21,13 @@
 #ifndef AZIMUTH_CONTROL_VICTORY_H_
 #define AZIMUTH_CONTROL_VICTORY_H_
 
+#include "azimuth/state/save.h"
 #include "azimuth/state/player.h"
 
 /*===========================================================================*/
 
-void az_victory_event_loop(const az_player_t *player);
+void az_victory_event_loop(az_saved_games_t *saved_games,
+                           const az_player_t *player);
 
 /*===========================================================================*/
 

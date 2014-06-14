@@ -25,6 +25,7 @@
 #include "azimuth/control/gameover.h"
 #include "azimuth/control/space.h"
 #include "azimuth/control/title.h"
+#include "azimuth/control/util.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
@@ -36,7 +37,6 @@
 #include "azimuth/system/resource.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/prefs.h"
-#include "azimuth/util/string.h"
 #include "azimuth/view/dialog.h" // for az_init_portrait_drawing
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
@@ -52,26 +52,6 @@ static bool load_scenario(void) {
   if (!az_init_music_datas(resource_dir)) return false;
   if (!az_load_planet(resource_dir, &planet)) return false;
   return true;
-}
-
-static void load_saved_games(void) {
-  const char *data_dir = az_get_app_data_directory();
-  if (data_dir == NULL) return;
-  char *save_path = az_strprintf("%s/save.txt", data_dir);
-  if (!az_load_games_from_path(&planet, save_path, &saved_games)) {
-    az_reset_saved_games(&saved_games);
-  }
-  free(save_path);
-}
-
-static void load_preferences(void) {
-  const char *data_dir = az_get_app_data_directory();
-  if (data_dir == NULL) return;
-  char *prefs_path = az_strprintf("%s/prefs.txt", data_dir);
-  if (!az_load_prefs_from_path(prefs_path, &preferences)) {
-    az_reset_prefs_to_defaults(&preferences);
-  }
-  free(prefs_path);
 }
 
 typedef enum {
@@ -91,8 +71,8 @@ int main(int argc, char **argv) {
     printf("Failed to load scenario.\n");
     return EXIT_FAILURE;
   }
-  load_saved_games();
-  load_preferences();
+  az_load_preferences(&preferences);
+  az_load_saved_games(&planet, &saved_games);
   az_init_gui(preferences.fullscreen_on_startup, true);
   az_set_global_music_volume(preferences.music_volume);
   az_set_global_sound_volume(preferences.sound_volume);

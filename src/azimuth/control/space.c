@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include "azimuth/control/paused.h"
+#include "azimuth/control/util.h"
 #include "azimuth/control/victory.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
@@ -33,11 +34,9 @@
 #include "azimuth/state/player.h"
 #include "azimuth/state/save.h"
 #include "azimuth/state/space.h"
-#include "azimuth/system/resource.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/tick/space.h"
 #include "azimuth/util/misc.h"
-#include "azimuth/util/string.h"
 #include "azimuth/view/space.h"
 
 /*===========================================================================*/
@@ -94,12 +93,7 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   az_saved_game_t *saved_game = &saved_games->games[state.save_file_index];
   saved_game->present = true;
   saved_game->player = state.ship.player;
-  const char *data_dir = az_get_app_data_directory();
-  if (data_dir == NULL) return false;
-  char *save_path = az_strprintf("%s/save.txt", data_dir);
-  const bool success = az_save_games_to_path(saved_games, save_path);
-  free(save_path);
-  return success;
+  return az_save_saved_games(saved_games);
 }
 
 static void update_controls(const az_preferences_t *prefs) {
@@ -137,7 +131,7 @@ az_space_action_t az_space_event_loop(
     // Check the current mode; we may need to do something before we move on to
     // handling events.
     if (state.victory) {
-      az_victory_event_loop(&state.ship.player);
+      az_victory_event_loop(saved_games, &state.ship.player);
       return AZ_SA_EXIT_TO_TITLE;
     } else if (state.mode == AZ_MODE_GAME_OVER) {
       // If we're at the end of the game over animation, exit this controller
