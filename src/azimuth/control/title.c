@@ -28,6 +28,7 @@
 #include "azimuth/state/save.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/prefs.h"
+#include "azimuth/view/prefs.h"
 #include "azimuth/view/title.h"
 
 /*===========================================================================*/
@@ -40,17 +41,17 @@ static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
 static bool try_pick_key(az_title_state_t *state, az_preferences_t *prefs,
                          az_key_id_t key_id) {
   assert(state->mode == AZ_TMODE_PICK_KEY);
-  const int picker_index = state->mode_data.pick_key.picker_index;
+  const int picker_index = state->prefs_pane.selected_key_picker_index;
   assert(picker_index >= 0 && picker_index < AZ_PREFS_NUM_KEYS);
-  az_title_key_picker_t *picker = &state->pickers[picker_index];
-  picker->selected = false;
+  az_prefs_key_picker_t *picker = &state->prefs_pane.pickers[picker_index];
   state->mode = AZ_TMODE_PREFS;
+  state->prefs_pane.selected_key_picker_index = -1;
   if (az_is_valid_prefs_key(key_id)) {
     for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
       if (i == picker_index) continue;
       const az_key_id_t other_key = prefs->keys[i];
       if (key_id == other_key) {
-        prefs->keys[i] = state->pickers[i].key = picker->key;
+        prefs->keys[i] = state->prefs_pane.pickers[i].key = picker->key;
         break;
       }
     }
@@ -63,16 +64,7 @@ az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs) {
   static az_title_state_t state;
-  AZ_ZERO_OBJECT(&state);
-  state.planet = planet;
-  state.saved_games = saved_games;
-  state.music_slider.value = prefs->music_volume;
-  state.sound_slider.value = prefs->sound_volume;
-  state.speedrun_timer_checkbox.checked = prefs->speedrun_timer;
-  state.fullscreen_checkbox.checked = prefs->fullscreen_on_startup;
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    state.pickers[i].key = prefs->keys[i];
-  }
+  az_init_title_state(&state, planet, saved_games, prefs);
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   bool prefs_changed = false;
@@ -126,9 +118,6 @@ az_title_action_t az_title_event_loop(
         case AZ_EVENT_MOUSE_DOWN:
           az_title_on_click(&state, event.mouse.x, event.mouse.y);
           break;
-        case AZ_EVENT_MOUSE_MOVE:
-          az_title_on_hover(&state, event.mouse.x, event.mouse.y);
-          break;
         default: break;
       }
     }
@@ -141,24 +130,25 @@ az_title_action_t az_title_event_loop(
     }
 
     // Check if we need to change prefs.
-    if (prefs->music_volume != state.music_slider.value) {
-      prefs->music_volume = state.music_slider.value;
+    const az_prefs_pane_t *pane = &state.prefs_pane;
+    if (prefs->music_volume != pane->music_slider.value) {
+      prefs->music_volume = pane->music_slider.value;
       az_set_global_music_volume(prefs->music_volume);
       prefs_changed = true;
     }
-    if (prefs->sound_volume != state.sound_slider.value) {
-      prefs->sound_volume = state.sound_slider.value;
+    if (prefs->sound_volume != pane->sound_slider.value) {
+      prefs->sound_volume = pane->sound_slider.value;
       az_set_global_sound_volume(prefs->sound_volume);
       prefs_changed = true;
     }
-    if (prefs->speedrun_timer != state.speedrun_timer_checkbox.checked ||
-        prefs->fullscreen_on_startup != state.fullscreen_checkbox.checked) {
-      prefs->speedrun_timer = state.speedrun_timer_checkbox.checked;
-      prefs->fullscreen_on_startup = state.fullscreen_checkbox.checked;
+    if (prefs->speedrun_timer != pane->speedrun_timer_checkbox.checked ||
+        prefs->fullscreen_on_startup != pane->fullscreen_checkbox.checked) {
+      prefs->speedrun_timer = pane->speedrun_timer_checkbox.checked;
+      prefs->fullscreen_on_startup = pane->fullscreen_checkbox.checked;
       prefs_changed = true;
     }
-    if (prefs_changed && !state.music_slider.grabbed &&
-        !state.sound_slider.grabbed) {
+    if (prefs_changed && !pane->music_slider.grabbed &&
+        !pane->sound_slider.grabbed) {
       az_save_preferences(prefs);
       prefs_changed = false;
     }

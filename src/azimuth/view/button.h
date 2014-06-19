@@ -17,54 +17,42 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/control/gameover.h"
+#pragma once
+#ifndef AZIMUTH_VIEW_BUTTON_H_
+#define AZIMUTH_VIEW_BUTTON_H_
 
-#include "azimuth/gui/audio.h"
-#include "azimuth/gui/event.h"
-#include "azimuth/gui/screen.h"
-#include "azimuth/state/planet.h"
-#include "azimuth/state/save.h"
-#include "azimuth/util/misc.h"
-#include "azimuth/view/gameover.h"
+#include "azimuth/util/audio.h"
+#include "azimuth/util/clock.h"
+#include "azimuth/util/polygon.h"
 
 /*===========================================================================*/
 
-az_gameover_action_t az_gameover_event_loop(void) {
-  static az_gameover_state_t state;
-  az_init_gameover_state(&state);
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
+typedef struct {
+  az_polygon_t polygon;
+  int x, y;
+  double hover_pulse;
+  az_clock_t hover_start;
+  bool hovering;
+} az_button_t;
 
-  while (true) {
-    // Tick the state and redraw the screen.
-    az_tick_gameover_state(&state, 1.0/60.0);
-    az_tick_audio(&state.soundboard);
-    az_start_screen_redraw(); {
-      az_gameover_draw_screen(&state);
-    } az_finish_screen_redraw();
+void az_init_button(az_button_t *button, az_polygon_t polygon, int x, int y);
 
-    // Check if we need to return with an action.
-    if (state.mode == AZ_GMODE_QUITTING) {
-      return AZ_GOA_QUIT;
-    }
-    if (state.mode == AZ_GMODE_RETRYING && state.mode_progress >= 1.0) {
-      return AZ_GOA_TRY_AGAIN;
-    }
-    if (state.mode == AZ_GMODE_RETURNING && state.mode_progress >= 1.0) {
-      return AZ_GOA_RETURN_TO_TITLE;
-    }
+void az_draw_standard_button(const az_button_t *button);
+void az_draw_dangerous_button(const az_button_t *button);
 
-    // Get and process GUI events.
-    az_event_t event;
-    while (az_poll_event(&event)) {
-      switch (event.kind) {
-        case AZ_EVENT_MOUSE_DOWN:
-          az_gameover_on_click(&state, event.mouse.x, event.mouse.y);
-          break;
-        default: break;
-      }
-    }
-  }
-  AZ_ASSERT_UNREACHABLE();
-}
+// Call once per frame, before drawing the screen.
+void az_tick_button(az_button_t *button, int xoff, int yoff, bool is_active,
+                    double time, az_clock_t clock,
+                    az_soundboard_t *soundboard);
+
+// Call when the mouse button clicks the given position; returns true if the
+// button was clicked.
+bool az_button_on_click(az_button_t *button, int x, int y);
+
+// Sets the button's hover_pulse as if it had been clicked.  Useful for when
+// the button is activated via a hotkey.
+void az_press_button(az_button_t *button);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_VIEW_BUTTON_H_

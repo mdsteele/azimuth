@@ -26,35 +26,15 @@
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/prefs.h"
+#include "azimuth/view/button.h"
+#include "azimuth/view/prefs.h"
 
 /*===========================================================================*/
 
 typedef struct {
-  bool hovering;
-  az_clock_t hover_start;
-  double hover_pulse;
-} az_title_button_t;
-
-typedef struct {
-  az_title_button_t main, erase;
+  int x, y;
+  az_button_t main, erase, confirm, cancel;
 } az_title_save_slot_t;
-
-typedef struct {
-  az_title_button_t handle;
-  bool grabbed;
-  float value;
-} az_title_slider_t;
-
-typedef struct {
-  az_title_button_t button;
-  bool checked;
-} az_title_checkbox_t;
-
-typedef struct {
-  az_title_button_t button;
-  bool selected;
-  az_key_id_t key;
-} az_title_key_picker_t;
 
 typedef struct {
   const az_planet_t *planet;
@@ -77,17 +57,17 @@ typedef struct {
     struct { double progress; } intro;
     struct { az_clock_t start; } ready;
     struct { int slot_index; bool do_erase; } erasing;
-    struct { int picker_index; } pick_key;
     struct { double progress; int slot_index; } starting;
   } mode_data;
 
   az_title_save_slot_t slots[AZ_NUM_SAVED_GAME_SLOTS];
-  az_title_button_t confirm_button, cancel_button;
-  az_title_button_t prefs_button, about_button, quit_button;
-  az_title_slider_t music_slider, sound_slider;
-  az_title_checkbox_t speedrun_timer_checkbox, fullscreen_checkbox;
-  az_title_key_picker_t pickers[AZ_PREFS_NUM_KEYS];
+  az_button_t prefs_button, about_button, quit_button;
+  az_prefs_pane_t prefs_pane;
 } az_title_state_t;
+
+void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
+                         const az_saved_games_t *saved_games,
+                         const az_preferences_t *prefs);
 
 void az_title_draw_screen(const az_title_state_t *state);
 
@@ -100,7 +80,6 @@ void az_title_skip_intro(az_title_state_t *state);
 // The UI must currently be in NORMAL mode.
 void az_title_start_game(az_title_state_t *state, int slot_index);
 
-void az_title_on_hover(az_title_state_t *state, int x, int y);
 void az_title_on_click(az_title_state_t *state, int x, int y);
 
 /*===========================================================================*/

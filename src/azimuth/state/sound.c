@@ -591,6 +591,18 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.781690120697, .lpf_ramp = -0.464788734913,
     .lpf_resonance = 0.274647891521
   },
+  [AZ_SND_MENU_HOVER] = {
+    .wave_kind = AZ_TRIANGLE_WAVE,
+    .env_attack = 0.0891609, .env_sustain = 0.155,
+    .env_punch = 0.0656827, .env_decay = 0.23,
+    .start_freq = 0.215, .freq_slide = 0.00708617,
+    .freq_delta_slide = -0.0759178,
+    .vibrato_depth = 0.00914664, .vibrato_speed = 0.881547,
+    .arp_mod = -0.67998, .arp_speed = 0.284788, .repeat_speed = 0.431267,
+    .phaser_offset = -0.0525242, .phaser_sweep = -0.0142853,
+    .lpf_cutoff = 0.103765, .lpf_ramp = 0.240105, .lpf_resonance = 0.173952,
+    .hpf_cutoff = 0.00253164, .hpf_ramp = 0.000209616
+  },
   [AZ_SND_METAL_CLINK] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_decay = 0.260563373566, .start_freq = 0.407042229176,

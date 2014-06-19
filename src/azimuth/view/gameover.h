@@ -23,14 +23,9 @@
 
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/view/button.h"
 
 /*===========================================================================*/
-
-typedef struct {
-  bool hovering;
-  az_clock_t hover_start;
-  double hover_pulse;
-} az_gameover_button_t;
 
 typedef struct {
   az_clock_t clock;
@@ -45,19 +40,15 @@ typedef struct {
   } mode;
   double mode_progress;
 
-  az_gameover_button_t retry_button, return_button, quit_button;
+  az_button_t retry_button, return_button, quit_button;
 } az_gameover_state_t;
 
-// Initialize static data for the Game Over view.  This must be called at least
-// once before using the Game Over view (it is idempotent and may safely be
-// called more than once).
-void az_init_gameover_view(void);
+void az_init_gameover_state(az_gameover_state_t *state);
 
 void az_gameover_draw_screen(const az_gameover_state_t *state);
 
 void az_tick_gameover_state(az_gameover_state_t *state, double time);
 
-void az_gameover_on_hover(az_gameover_state_t *state, int x, int y);
 void az_gameover_on_click(az_gameover_state_t *state, int x, int y);
 
 /*===========================================================================*/
