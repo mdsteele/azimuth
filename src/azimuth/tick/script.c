@@ -649,6 +649,9 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
+      case AZ_OP_FLASH:
+        state->darkness = fmin(fmax(0.0, ins.immediate), 1.0);
+        break;
       case AZ_OP_SHAKE:
         az_shake_camera(&state->camera, ins.immediate, ins.immediate * 0.75);
         break;
