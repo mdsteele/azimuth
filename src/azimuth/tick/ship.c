@@ -68,6 +68,8 @@
 #define AZ_CLOAK_DECAY_TIME 4.0
 // Damage per second taken in superheated rooms without Thermal Armor:
 #define AZ_HEAT_DAMAGE_PER_SECOND 5.0
+// Damage per second taken in lava:
+#define AZ_LAVA_DAMAGE_PER_SECOND 6.0
 
 /*===========================================================================*/
 // Basics:
@@ -108,9 +110,10 @@ static void recharge_ship_energy(az_player_t *player, double time) {
 }
 
 static void apply_gravity_to_ship(az_space_state_t *state, double time,
-                                  bool *is_in_water) {
+                                  bool *is_in_water, bool *is_in_lava) {
   assert(is_in_water != NULL);
-  az_apply_gravfields_to_ship(state, time, is_in_water);
+  assert(is_in_lava != NULL);
+  az_apply_gravfields_to_ship(state, time, is_in_water, is_in_lava);
   // Planetary gravity works as follows.  By the spherical shell theorem, the
   // force of gravity on the ship (while inside the planetoid) varies linearly
   // with the distance from the planetoid's center, so the change in velocity
@@ -118,17 +121,19 @@ static void apply_gravity_to_ship(az_space_state_t *state, double time,
   // we should then multiply this scalar by the unit vector pointing from the
   // ship towards the core, which is -position/vnorm(position).  The
   // vnorm(position) factors cancel and we end up with what we have here.
-  const double bouyancy_multiplier = (*is_in_water ? -0.35 : 1.0);
+  const double bouyancy_multiplier = (*is_in_lava ? -0.5 :
+                                      *is_in_water ? -0.35 : 1.0);
   az_vpluseq(&state->ship.velocity,
       az_vmul(state->ship.position, -time * bouyancy_multiplier *
               (AZ_PLANETOID_SURFACE_GRAVITY / AZ_PLANETOID_RADIUS)));
 }
 
 static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
-                               double time) {
+                               bool is_in_lava, double time) {
   const double max_speed = AZ_SHIP_BASE_MAX_SPEED *
     (az_has_upgrade(&ship->player, AZ_UPG_DYNAMIC_ARMOR) ?
-     (is_in_water ? 1.0 : 1.1) : (is_in_water ? 0.4 : 1.0));
+     (is_in_lava ? 0.5 : 1.0) :
+     (is_in_lava ? 0.25 : is_in_water ? 0.4 : 1.0));
   const double drag_coeff =
     AZ_SHIP_BASE_THRUST_ACCEL / (max_speed * max_speed);
   const az_vector_t drag_force =
@@ -155,23 +160,30 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
   // If we're entering or exiting a body of water, make a splash.
   const az_vector_t delta = az_vsub(impact->position, ship->position);
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
-    if (gravfield->kind != AZ_GRAV_WATER) continue;
+    if (!az_is_liquid(gravfield->kind)) continue;
     az_vector_t position, normal;
-    if (az_ray_hits_water_surface(gravfield, ship->position, delta,
-                                  &position, &normal)) {
+    if (az_ray_hits_liquid_surface(gravfield, ship->position, delta,
+                                   &position, &normal)) {
       if (az_vdot(normal, az_vpolar(1, gravfield->angle)) < 0) {
         normal = az_vneg(normal);
       }
       az_particle_t *particle;
       if (az_insert_particle(state, &particle)) {
         particle->kind = AZ_PAR_SPLOOSH;
-        particle->color = (az_color_t){167, 205, 255, 192};
         particle->position = position;
         particle->angle = az_vtheta(normal);
         particle->velocity = AZ_VZERO;
         particle->param1 =
           4.0 * sqrt(fabs(az_vdot(ship->velocity, az_vunit(normal))));
         particle->lifetime = 0.1 * sqrt(particle->param1);
+        if (gravfield->kind == AZ_GRAV_WATER) {
+          particle->color = (az_color_t){167, 205, 255, 192};
+        } else {
+          assert(gravfield->kind == AZ_GRAV_LAVA);
+          particle->color = (az_color_t){255, 205, 167, 192};
+          particle->param1 *= 0.5;
+          particle->lifetime *= 1.5;
+        }
       }
       az_play_sound(&state->soundboard, AZ_SND_SPLASH);
     }
@@ -913,7 +925,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
 // Engines:
 
 static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
-                              double time) {
+                              bool is_in_lava, double time) {
   az_ship_t *ship = &state->ship;
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
@@ -926,8 +938,10 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
     return;
   }
 
-  // We can't use the C-plus drive in water without dynamic armor.
-  if (is_in_water && !az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR)) {
+  // We can't use the C-plus drive in water without dynamic armor; we can't use
+  // it in lava at all.
+  if (is_in_lava ||
+      (is_in_water && !az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR))) {
     ship->cplus.state = AZ_CPLUS_INACTIVE;
     ship->cplus.charge = 0.0;
     ship->cplus.tap_time = 0.0;
@@ -1078,20 +1092,22 @@ static void apply_orion_booster(az_space_state_t *state, double time) {
 }
 
 static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
-                                 double time) {
+                                 bool is_in_lava, double time) {
   const az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
   const bool dynamic = az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR);
   // Calculate the change in velocity imparted by the ship's thrusters.  If
-  // we're in water, we scale it down to account for the added mass effect
+  // we're in liquid, we scale it down to account for the added mass effect
   // (see http://en.wikipedia.org/wiki/Added_mass).  Dynamic Armor reduces this
   // effect somewhat.
   const double impulse = AZ_SHIP_BASE_THRUST_ACCEL * time *
-    (!is_in_water ? 1.0 : dynamic ? 0.6 : 0.4);
+    (dynamic ? (is_in_lava ? 0.4 : is_in_water ? 0.7 : 1.0) :
+               (is_in_lava ? 0.2 : is_in_water ? 0.4 : 1.0));
   // Also, turn more slowly when we're in water (unless we have Dynamic Armor).
   const double turn_rate =
     (ship->cplus.state == AZ_CPLUS_ACTIVE ? AZ_DEG2RAD(60) :
-     AZ_SHIP_TURN_RATE * (is_in_water && !dynamic ? 0.6 : 1.0));
+     AZ_SHIP_TURN_RATE *
+     ((is_in_water || is_in_lava) && !dynamic ? 0.6 : 1.0));
   // Turning left:
   if (controls->left_held && !controls->right_held) {
     ship->angle = az_mod2pi(ship->angle + turn_rate * time);
@@ -1339,12 +1355,12 @@ void az_tick_ship(az_space_state_t *state, double time) {
   }
 
   // Apply various forces:
-  bool is_in_water;
-  apply_gravity_to_ship(state, time, &is_in_water);
-  apply_cplus_drive(state, is_in_water, time);
+  bool is_in_water, is_in_lava;
+  apply_gravity_to_ship(state, time, &is_in_water, &is_in_lava);
+  apply_cplus_drive(state, is_in_water, is_in_lava, time);
   apply_orion_booster(state, time);
-  apply_ship_thrusters(ship, is_in_water, time);
-  apply_drag_to_ship(ship, is_in_water, time);
+  apply_ship_thrusters(ship, is_in_water, is_in_lava, time);
+  apply_drag_to_ship(ship, is_in_water, is_in_lava, time);
 
   // Activate tractor beam if necessary:
   if (controls->util_pressed && !ship->tractor_beam.active &&
@@ -1369,7 +1385,13 @@ void az_tick_ship(az_space_state_t *state, double time) {
     }
   }
 
+  // Weapons:
   fire_weapons(state, time);
+
+  // Apply lava damage:
+  if (is_in_lava) {
+    az_damage_ship(state, AZ_LAVA_DAMAGE_PER_SECOND * time, false);
+  }
 }
 
 /*===========================================================================*/

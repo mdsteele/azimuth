@@ -30,9 +30,12 @@
 void az_tick_gravfields(az_space_state_t *state, double time);
 
 // Apply gravfield forces to the ship.  Additionally, set *ship_is_in_water to
-// whether or not the ship is currently within at least one water gravfield.
+// whether or not the ship is currently within at least one water gravfield,
+// and set *ship_is_in_lava to whether or not the ship is currently within at
+// least one lava gravfield.
 void az_apply_gravfields_to_ship(az_space_state_t *state, double time,
-                                 bool *ship_is_in_water);
+                                 bool *ship_is_in_water,
+                                 bool *ship_is_in_lava);
 
 /*===========================================================================*/
 

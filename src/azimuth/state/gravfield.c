@@ -32,15 +32,21 @@
 bool az_trapezoidal(az_gravfield_kind_t kind) {
   assert(kind != AZ_GRAV_NOTHING);
   switch (kind) {
-    case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_GRAV_NOTHING:
+      AZ_ASSERT_UNREACHABLE();
     case AZ_GRAV_TRAPEZOID:
     case AZ_GRAV_WATER:
+    case AZ_GRAV_LAVA:
       return true;
     case AZ_GRAV_SECTOR_PULL:
     case AZ_GRAV_SECTOR_SPIN:
       return false;
   }
   AZ_ASSERT_UNREACHABLE();
+}
+
+bool az_is_liquid(az_gravfield_kind_t kind) {
+  return (kind == AZ_GRAV_WATER || kind == AZ_GRAV_LAVA);
 }
 
 double az_sector_interior_angle(const az_gravfield_size_t *size) {
@@ -82,10 +88,10 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
   }
 }
 
-bool az_ray_hits_water_surface(
+bool az_ray_hits_liquid_surface(
     const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
-  assert(gravfield->kind == AZ_GRAV_WATER);
+  assert(az_is_liquid(gravfield->kind));
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;

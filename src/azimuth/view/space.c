@@ -201,7 +201,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_particles(state);
   az_draw_doors(state);
   az_draw_specks(state);
-  az_draw_water(state);
+  az_draw_liquid(state);
   az_draw_foreground_nodes(state);
 }
 

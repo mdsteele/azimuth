@@ -32,7 +32,7 @@
 
 static void apply_gravfield_to_ship(
     az_space_state_t *state, az_gravfield_t *gravfield, double time,
-    bool *ship_is_in_water) {
+    bool *ship_is_in_water, bool *ship_is_in_lava) {
   az_ship_t *ship = &state->ship;
   switch (gravfield->kind) {
     case AZ_GRAV_NOTHING: AZ_ASSERT_UNREACHABLE();
@@ -66,6 +66,12 @@ static void apply_gravfield_to_ship(
       // azimuth/tick/ship.c; for now, just note that the ship is in water.
       *ship_is_in_water = true;
       break;
+    case AZ_GRAV_LAVA:
+      // The other effects of lava on the ship (e.g. damage and increased drag)
+      // are handled in azimuth/tick/ship.c; for now, just note that the ship
+      // is in lava.
+      *ship_is_in_lava = true;
+      break;
   }
 }
 
@@ -82,13 +88,17 @@ void az_tick_gravfields(az_space_state_t *state, double time) {
 }
 
 void az_apply_gravfields_to_ship(az_space_state_t *state, double time,
-                                 bool *ship_is_in_water) {
+                                 bool *ship_is_in_water,
+                                 bool *ship_is_in_lava) {
   assert(ship_is_in_water != NULL);
+  assert(ship_is_in_lava != NULL);
   *ship_is_in_water = false;
+  *ship_is_in_lava = false;
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
     if (az_point_within_gravfield(gravfield, state->ship.position)) {
-      apply_gravfield_to_ship(state, gravfield, time, ship_is_in_water);
+      apply_gravfield_to_ship(state, gravfield, time, ship_is_in_water,
+                              ship_is_in_lava);
     }
   }
 }

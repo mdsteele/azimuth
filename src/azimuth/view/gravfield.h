@@ -33,12 +33,13 @@ void az_draw_gravfield_no_transform(const az_gravfield_t *gravfield);
 // Draw a single gravfield.  The GL matrix should be at the camera position.
 void az_draw_gravfield(const az_gravfield_t *gravfield);
 
-// Draw all non-water gravfields.  The GL matrix should be at the camera
+// Draw all non-liquid gravfields.  The GL matrix should be at the camera
 // position.
 void az_draw_gravfields(const az_space_state_t *state);
 
-// Draw all water gravfields.  The GL matrix should be at the camera position.
-void az_draw_water(const az_space_state_t *state);
+// Draw all water and lava gravfields.  The GL matrix should be at the camera
+// position.
+void az_draw_liquid(const az_space_state_t *state);
 
 /*===========================================================================*/
 

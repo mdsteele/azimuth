@@ -195,7 +195,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
               "Damage taken from hitting walls is further reduced by half.");
     case AZ_UPG_DYNAMIC_ARMOR:
       return ("All damage taken is reduced by one fifth.\n"
-              "Drag forces from air and water are reduced.");
+              "Reduces drag forces in water and other liquids.");
     case AZ_UPG_THERMAL_ARMOR:
       return ("Damage is no longer taken from extreme heat.\n"
               "All other damage taken is reduced by one fifth.");

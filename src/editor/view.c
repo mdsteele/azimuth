@@ -380,7 +380,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     tint_screen(0.5);
   }
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
-    if (editor_gravfield->spec.kind == AZ_GRAV_WATER) continue;
+    if (az_is_liquid(editor_gravfield->spec.kind)) continue;
     const az_gravfield_t real_gravfield = {
       .kind = editor_gravfield->spec.kind,
       .position = editor_gravfield->spec.position,
@@ -452,7 +452,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     } glPopMatrix();
   }
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
-    if (editor_gravfield->spec.kind != AZ_GRAV_WATER) continue;
+    if (!az_is_liquid(editor_gravfield->spec.kind)) continue;
     const az_gravfield_t real_gravfield = {
       .kind = editor_gravfield->spec.kind,
       .position = editor_gravfield->spec.position,

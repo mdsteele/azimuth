@@ -28,6 +28,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -127,8 +128,9 @@ static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield) {
   }
 }
 
-static void draw_water_gravfield(const az_gravfield_t *gravfield) {
-  assert(gravfield->kind == AZ_GRAV_WATER);
+static void draw_liquid_gravfield(
+    const az_gravfield_t *gravfield, az_color_t deep_color,
+    az_color_t surface_color, az_color_t mist_color) {
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
@@ -152,31 +154,47 @@ static void draw_water_gravfield(const az_gravfield_t *gravfield) {
     az_mod2pi_nonneg(outer_end_theta - outer_start_theta) / num_steps;
   const double inner_step =
     az_mod2pi_nonneg(inner_end_theta - inner_start_theta) / num_steps;
-  // Draw the water itself:
+  // Draw the liquid itself:
   glBegin(GL_QUAD_STRIP); {
     for (int i = 0; i <= num_steps; ++i) {
       const double inner_theta = inner_start_theta + i * inner_step;
       const double outer_theta = outer_start_theta + i * outer_step;
-      glColor4f(0.1, 0.1, 0.4, 0.6);
+      az_gl_color(deep_color);
       glVertex2d(inner_radius * cos(inner_theta) - position_norm,
                  inner_radius * sin(inner_theta));
-      glColor4f(0.3, 0.6, 1, 0.3);
+      az_gl_color(surface_color);
       glVertex2d(outer_radius * cos(outer_theta) - position_norm,
                  outer_radius * sin(outer_theta));
     }
   } glEnd();
-  // Draw layer of mist above the water:
+  // Draw layer of mist above the liquid:
   glBegin(GL_QUAD_STRIP); {
     for (int i = 0; i <= num_steps; ++i) {
       const double outer_theta = outer_start_theta + i * outer_step;
-      glColor4f(0.3, 0.6, 1, 0.3);
+      az_gl_color(surface_color);
       glVertex2d(outer_radius * cos(outer_theta) - position_norm,
                  outer_radius * sin(outer_theta));
-      glColor4f(1, 1, 1, 0);
+      az_gl_color(mist_color);
       glVertex2d((outer_radius + 6) * cos(outer_theta) - position_norm,
                  (outer_radius + 6) * sin(outer_theta));
     }
   } glEnd();
+}
+
+static void draw_water_gravfield(const az_gravfield_t *gravfield) {
+  assert(gravfield->kind == AZ_GRAV_WATER);
+  draw_liquid_gravfield(gravfield,
+                        (az_color_t){26, 26, 102, 153},
+                        (az_color_t){77, 153, 255, 77},
+                        (az_color_t){255, 255, 255, 0});
+}
+
+static void draw_lava_gravfield(const az_gravfield_t *gravfield) {
+  assert(gravfield->kind == AZ_GRAV_LAVA);
+  draw_liquid_gravfield(gravfield,
+                        (az_color_t){102, 26, 26, 200},
+                        (az_color_t){255, 120, 77, 100},
+                        (az_color_t){255, 200, 150, 0});
 }
 
 /*===========================================================================*/
@@ -197,6 +215,9 @@ void az_draw_gravfield_no_transform(const az_gravfield_t *gravfield) {
     case AZ_GRAV_WATER:
       draw_water_gravfield(gravfield);
       break;
+    case AZ_GRAV_LAVA:
+      draw_lava_gravfield(gravfield);
+      break;
   }
 }
 
@@ -212,14 +233,14 @@ void az_draw_gravfield(const az_gravfield_t *gravfield) {
 void az_draw_gravfields(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
     if (gravfield->kind == AZ_GRAV_NOTHING) continue;
-    if (gravfield->kind == AZ_GRAV_WATER) continue;
+    if (az_is_liquid(gravfield->kind)) continue;
     az_draw_gravfield(gravfield);
   }
 }
 
-void az_draw_water(const az_space_state_t *state) {
+void az_draw_liquid(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(gravfield, state->gravfields) {
-    if (gravfield->kind == AZ_GRAV_WATER) {
+    if (az_is_liquid(gravfield->kind)) {
       az_draw_gravfield(gravfield);
     }
   }
