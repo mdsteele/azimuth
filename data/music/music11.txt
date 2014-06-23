@@ -1,4 +1,4 @@
-@M "SAB|CCADDX"
+@M "SA|BBCCADDXCCDDCCMMABB"
 % Title: "Facing Goliath"
 
 =tempo 130
@@ -14,31 +14,30 @@
 4 Wn   L30  E0,100
 5 Wn   L60  E0,100
 
+
 !Part A
 
 1| c5e c ' ds de ds ' ce c ' ds de ds |
 2| c4e c ' ds de ds ' ce c ' ds de ds |
 3| f1q ' c ' f ' c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x3s x3 x3 x3 x5q x3s x3 x3 x3 x5q |
+5| x3s x3 x3 x3 ' x5q ' x3s x3 x3 x3 ' x5q |
 
 1| c5e c ' ds de ds ' ce c ' ds de ds |
 2| c4e c ' ds de ds ' ce c ' ds de ds |
 3| f1q ' c ' f ' c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x3s x3 x3 x3 x5q x3s x3 x3 x3 x5q |
+5| x3s x3 x3 x3 ' x5q ' x3s x3 x3 x3 ' x5q |
+
 
 !Part B
 
 3| f2e c ' f c ' f c ' f c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
-
-3| f2e c ' f c ' f c ' f c |
-4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
+5| x0e c7 ' x0 c7 ' x0 c7 ' x0 c7 |
 
 1 L0
+
 
 !Part C
 
@@ -46,12 +45,13 @@
 2| re f3 ' g a ' b as g ' ae f |
 3| f2e c ' f c ' f c ' f c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
+5| x0e c7 ' x0 c7 ' x0 c7 ' x0 c7 |
 
 2| a3e fs e ' fe c ' g e ' fq |
 3| f2e c ' f c ' f c ' f c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
+5| x0e c7 ' x0 c7 ' x0 c7 ' x0 c7 |
+
 
 !Part D
 
@@ -59,14 +59,42 @@
 2| re f4 ' g a ' b as g ' ae f |
 3| f2e c ' f c ' f c ' f c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
+5| x0e c7 ' x0 c7 ' x0 c7 ' x0 c7 |
 
 1| g5s g ee ' fq   ' rh       |
 2| a4e gs f ' ge e ' g e# ' fq |
 3| f2e c ' f c ' f c ' f c |
 4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
-5| x0e c7 x0 c7 x0 c7 x0 c7 |
+5| x0e c7 ' x0 c7 ' x0 c7 ' x0 c7 |
+
 
 !Part X
 
 1 L35
+
+
+!Part M
+
+1| f3q r f r |
+2| f4s f  f  f  ' aq ' fs  f  f  f  ' bq |
+3| f2e c ' a c ' f c ' b c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 ' x5q  ' x3s x3 x3 x3 ' x5q  |
+
+1| f3q r g r |
+2| f4s f  f  f  ' c5e a4 ' d5 b4 ' c5 e#4 |
+3| f2e c ' c3 a2 ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 ' x5e x4 ' x5 x4 ' x5 x4 |
+
+1| a3q c4 a3 d4 |
+2| f4s f  f  f  ' ae f ' fs  f  f  f  ' be f |
+3| f2e c ' a c ' f c ' b c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 ' x5q  ' x3s x3 x3 x3 ' x5q  |
+
+1| a3q f e# g |
+2| f4s f  f  f  ' c5 d c b4 ' a b a g ' c5 b4 a g |
+3| f2e c ' c3 a2 ' f c ' f c |
+4| f1e c ' d3s de ds ' f1e c ' d3s de ds |
+5| x3s x3 x3 x3 ' x5e x4 ' x5 x4 ' x5 x4 |
