@@ -922,6 +922,16 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_SENSOR_LASER:
       az_tick_bad_sensor_laser(state, baddie, time);
       break;
+    case AZ_BAD_ERUPTION:
+      if (baddie->state == 0) {
+        baddie->cooldown = az_random(1, 2);
+        baddie->state = 1;
+      } else if (baddie->cooldown <= 0.0) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_ERUPTION, 0, 0, 0);
+        az_play_sound(&state->soundboard, AZ_SND_ERUPTION);
+        baddie->state = 0;
+      }
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

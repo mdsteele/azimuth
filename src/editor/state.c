@@ -146,7 +146,6 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_ARMORED_BOX,
   AZ_BAD_TRAPDOOR,
   AZ_BAD_BEAM_WALL,
-  AZ_BAD_SPARK,
   // Pistons:
   AZ_BAD_PISTON,
   AZ_BAD_ARMORED_PISTON,
@@ -188,6 +187,8 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_CLAM,
   AZ_BAD_FIREBALL_MINE,
   AZ_BAD_ATOM,
+  AZ_BAD_SPARK,
+  AZ_BAD_ERUPTION,
   // Oth:
   AZ_BAD_OTH_RAZOR,
   AZ_BAD_OTH_CRAB_1,
@@ -380,18 +381,18 @@ static void summarize_scenario(const az_planet_t *planet) {
     }
   }
   if (linebreak) { printf("\n"); linebreak = false; }
-  // Print water gravfields that aren't oriented correctly:
+  // Print liquid gravfields that aren't oriented correctly:
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
     const az_room_t *room = &planet->rooms[room_index];
     for (int i = 0; i < room->num_gravfields; ++i) {
       const az_gravfield_spec_t *gravfield = &room->gravfields[i];
-      if (gravfield->kind != AZ_GRAV_WATER) continue;
+      if (!az_is_liquid(gravfield->kind)) continue;
       const double expected =
         (az_vdot(az_vpolar(1, gravfield->angle), gravfield->position) >= 0 ?
          az_vtheta(gravfield->position) :
          az_vtheta(az_vneg(gravfield->position)));
       if (fabs(az_mod2pi(gravfield->angle - expected)) > 0.00001) {
-        printf("\x1b[31mRoom %d: water at (%.02f, %.02f) not vertical\n"
+        printf("\x1b[31mRoom %d: liquid at (%.02f, %.02f) not vertical\n"
                "  (%.06f instead of %.06f)\x1b[m\n",
                room_index, gravfield->position.x, gravfield->position.y,
                gravfield->angle, expected);

@@ -69,6 +69,7 @@ typedef uint_fast16_t az_damage_flags_t;
 #define AZ_DMGF_MEGA_BOMB    ((az_damage_flags_t)(1u << 8))
 #define AZ_DMGF_CPLUS        ((az_damage_flags_t)(1u << 9))
 #define AZ_DMGF_REACTIVE     ((az_damage_flags_t)(1u << 10))
+#define AZ_DMGF_FLAME        ((az_damage_flags_t)(1u << 11))
 // All kinds of damage that are able to flare/destroy destructible walls:
 #define AZ_DMGF_WALL_FLARE (AZ_DMGF_CHARGED | AZ_DMGF_ROCKET | \
     AZ_DMGF_HYPER_ROCKET | AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB | AZ_DMGF_CPLUS)

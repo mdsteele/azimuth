@@ -321,15 +321,25 @@ static const az_proj_data_t proj_data[] = {
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   // Baddie-only projectiles:
+  [AZ_PROJ_ERUPTION] = {
+    .speed = 800.0,
+    .lifetime = 0.4,
+    .splash_damage = 20.0,
+    .splash_radius = 30.0,
+    .damage_kind = AZ_DMGF_FLAME,
+    .properties = AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_FIREBALL_FAST] = {
     .speed = 550.0,
     .lifetime = 2.0,
-    .impact_damage = 10.0
+    .impact_damage = 10.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FLAME
   },
   [AZ_PROJ_FIREBALL_SLOW] = {
     .speed = 260.0,
     .lifetime = 2.0,
-    .impact_damage = 10.0
+    .impact_damage = 10.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FLAME
   },
   [AZ_PROJ_FORCE_WAVE] = {
     .speed = 200.0,
@@ -469,7 +479,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 2.5,
     .splash_radius = 30.0,
     .impact_shake = 0.75,
-    .damage_kind = AZ_DMGF_ROCKET
+    .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME
   },
   [AZ_PROJ_TRINE_TORPEDO_FIREBALL] = {
     .speed = 800.0,
@@ -478,7 +488,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 2.5,
     .splash_radius = 30.0,
     .impact_shake = 0.75,
-    .damage_kind = AZ_DMGF_ROCKET
+    .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME
   }
 };
 

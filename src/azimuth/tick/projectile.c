@@ -33,6 +33,12 @@
 
 /*===========================================================================*/
 
+static bool times_per_second(double per_second, const az_projectile_t *proj,
+                             double time) {
+  return (ceil(per_second * proj->age) >
+          ceil(per_second * (proj->age - time)));
+}
+
 // Remove the projectile and create specks in its place.
 static void expire_projectile(az_space_state_t *state, az_projectile_t *proj) {
   assert(proj->kind != AZ_PROJ_NOTHING);
@@ -127,23 +133,36 @@ static void on_projectile_impact(az_space_state_t *state,
   // Add particles.
   const bool splash = radius > 0.0;
   const bool few_specks = (proj->data->properties & AZ_PROJF_FEW_SPECKS);
+  az_color_t speck_color = AZ_WHITE;
   if (splash || !few_specks) {
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
-      particle->kind = (splash ? AZ_PAR_EXPLOSION : AZ_PAR_BOOM);
-      particle->color = (splash ? (az_color_t){255, 240, 224, 192} : AZ_WHITE);
+      if (proj->data->damage_kind & AZ_DMGF_FLAME) {
+        speck_color = (az_color_t){255, 128, 0, 192};
+        particle->kind = AZ_PAR_FIRE_BOOM;
+        particle->color = speck_color;
+        particle->lifetime = 0.3;
+      } else if (splash) {
+        particle->kind = AZ_PAR_EXPLOSION;
+        particle->color = (az_color_t){255, 240, 224, 192};
+        particle->lifetime = 0.15 * cbrt(radius);
+      } else {
+        particle->kind = AZ_PAR_BOOM;
+        particle->color = AZ_WHITE;
+        particle->lifetime = 0.3;
+      }
       particle->position = proj->position;
       particle->velocity = AZ_VZERO;
-      particle->lifetime = (splash ? 0.15 * cbrt(radius) : 0.3);
+      particle->angle = proj->angle;
       particle->param1 = (splash ? radius : 10.0);
     }
   }
   if (few_specks) {
-    az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+    az_add_speck(state, speck_color, 1.0, proj->position,
                  az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
   } else {
     for (int i = 0; i < 5; ++i) {
-      az_add_speck(state, AZ_WHITE, 1.0, proj->position,
+      az_add_speck(state, speck_color, 1.0, proj->position,
                    az_vpolar(az_random(20, 70), az_random(0, AZ_TWO_PI)));
     }
   }
@@ -370,8 +389,7 @@ static void leave_missile_trail(az_space_state_t *state,
                                 az_projectile_t *proj,
                                 double time, az_color_t color) {
   assert(proj->kind != AZ_PROJ_NOTHING);
-  const double per_second = 20.0;
-  if (ceil(per_second * proj->age) > ceil(per_second * (proj->age - time))) {
+  if (times_per_second(20, proj, time)) {
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
       particle->kind = AZ_PAR_BOOM;
@@ -592,9 +610,7 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
       if (proj->kind == AZ_PROJ_MEGA_BOMB && proj->age >= 0.25 &&
-          (proj->age < 2.0 ?
-           (ceil(2.0 * proj->age) > ceil(2.0 * (proj->age - time))) :
-           (ceil(6.0 * proj->age) > ceil(6.0 * (proj->age - time))))) {
+          times_per_second((proj->age < 2.0 ? 2 : 6), proj, time)) {
         az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
       }
       proj->angle = az_mod2pi(proj->angle + 1.5 * time);
@@ -637,6 +653,11 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
       break;
+    case AZ_PROJ_ERUPTION:
+      if (times_per_second(20, proj, time)) {
+        on_projectile_impact(state, proj, proj->velocity);
+      }
+      break;
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
@@ -673,16 +694,14 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
     } break;
-    case AZ_PROJ_GRENADE: {
-      const double per_second = 15.0;
-      if (ceil(per_second * proj->age) >
-          ceil(per_second * (proj->age - time))) {
+    case AZ_PROJ_GRENADE:
+      if (times_per_second(15, proj, time)) {
         leave_particle_trail(state, proj, AZ_PAR_EMBER,
                              (az_color_t){128, 128, 128, 128}, 0.5, 8.0, 0);
       }
       az_vpluseq(&proj->velocity, az_vwithlen(proj->position, -150 * time));
       proj->angle = az_mod2pi(proj->angle + AZ_DEG2RAD(360) * time);
-    } break;
+      break;
     case AZ_PROJ_GRAVITY_TORPEDO:
       leave_missile_trail(state, proj, time, (az_color_t){64, 64, 192, 255});
       proj->velocity = az_vrotate((az_vector_t){proj->data->speed,

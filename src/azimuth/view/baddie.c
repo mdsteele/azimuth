@@ -285,6 +285,24 @@ static void draw_swooper_wings(
   }
 }
 
+static void draw_eruption_bubble(double max_radius, int frames,
+                                 az_clock_t clock) {
+  glBegin(GL_TRIANGLE_FAN); {
+    const double mod = (double)az_clock_mod(frames, 1, clock) / (double)frames;
+    glColor4f(1, 0.47, 0.3, 0.65 - 0.3 * mod);
+    glVertex2f(0, 0);
+    glColor4f(0.5, 0.235, 0.15, 0.85 - 0.3 * mod);
+    const double radius = max_radius * mod;
+    for (int i = -90; i < 90; i += 10) {
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    }
+    for (int i = 90; i <= 270; i += 10) {
+      glVertex2d(0.25 * radius * cos(AZ_DEG2RAD(i)),
+                 radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
 /*===========================================================================*/
 
 static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
@@ -1042,6 +1060,17 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_SENSOR_LASER:
       az_draw_bad_sensor_laser(baddie, frozen, clock);
+      break;
+    case AZ_BAD_ERUPTION:
+      draw_eruption_bubble(10.0, 47, clock);
+      glPushMatrix(); {
+        glTranslatef(0, -9, 0);
+        draw_eruption_bubble(5.0, 23, clock);
+      } glPopMatrix();
+      glPushMatrix(); {
+        glTranslatef(0, 8, 0);
+        draw_eruption_bubble(6.0, 27, clock);
+      } glPopMatrix();
       break;
   }
 }

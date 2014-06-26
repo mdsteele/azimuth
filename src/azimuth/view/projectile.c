@@ -366,6 +366,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_ERUPTION:
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
       glBegin(GL_TRIANGLE_FAN); {
@@ -375,7 +376,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2i(0, 0);
         if (blink) glColor4f(0.5, 0.375, 0.25, 0); // orange
         else glColor4f(0.5, 0.125, 0.125, 0); // red
-        const double radius = 6.0;
+        const double radius = (proj->kind == AZ_PROJ_ERUPTION ? 18.0 : 6.0);
         for (int i = 0; i <= 360; i += 30) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }

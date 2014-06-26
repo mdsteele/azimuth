@@ -106,7 +106,7 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         const double outer_alpha = tt;
         const double inner_radius = particle->param1 * (1.0 - tt * tt * tt);
         const double outer_radius = particle->param1;
-        for (int i = 0; i <= 360; i += 10) {
+        for (int i = 0; i <= 360; i += 6) {
           const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
           with_color_alpha(particle->color, inner_alpha);
           glVertex2d(inner_radius * c, inner_radius * s);
@@ -115,6 +115,30 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PAR_FIRE_BOOM: {
+      const int i_step = 10;
+      const double liveness = 1.0 - particle->age / particle->lifetime;
+      const double x_radius = particle->param1;
+      const double y_radius = particle->param1 * liveness;
+      for (int i = 0; i < 180; i += i_step) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          const int limit = 180 * liveness;
+          for (int j = 0; j < limit; j += 20) {
+            glColor4f(1.0, 0.75 * j / limit, 0.0,
+                      0.35 + 0.25 * sin(AZ_DEG2RAD(i)) * sin(AZ_DEG2RAD(j)) -
+                      0.35 * j / limit);
+            const double x = x_radius * cos(AZ_DEG2RAD(j));
+            glVertex2d(x, y_radius * cos(AZ_DEG2RAD(i)) *
+                       sin(AZ_DEG2RAD(j)));
+            glVertex2d(x, y_radius * cos(AZ_DEG2RAD(i + i_step)) *
+                       sin(AZ_DEG2RAD(j)));
+          }
+          glVertex2d(x_radius * cos(AZ_DEG2RAD(limit)),
+                     y_radius * cos(AZ_DEG2RAD(i + i_step/2)) *
+                     sin(AZ_DEG2RAD(limit)));
+        } glEnd();
+      }
+    } break;
     case AZ_PAR_LIGHTNING_BOLT:
       if (particle->age >= particle->param2) {
         const int num_steps = az_imax(2, round(particle->param1 / 10.0));
@@ -225,8 +249,8 @@ void az_draw_particles(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(particle, state->particles) {
     if (particle->kind == AZ_PAR_NOTHING) continue;
     glPushMatrix(); {
-      glTranslated(particle->position.x, particle->position.y, 0);
-      glRotated(AZ_RAD2DEG(particle->angle), 0, 0, 1);
+      az_gl_translated(particle->position);
+      az_gl_rotated(particle->angle);
       draw_particle(particle, state->clock);
     } glPopMatrix();
   }

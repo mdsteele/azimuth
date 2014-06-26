@@ -36,6 +36,8 @@ typedef enum {
   AZ_PAR_EMBER,
   // EXPLOSION: An explosion from ordnance.  param1=radius
   AZ_PAR_EXPLOSION,
+  // FIRE_BOOM: A fiery explosion.  param1=radius
+  AZ_PAR_FIRE_BOOM,
   // LIGHTNING_BOLT: A bolt of lightning.  param1=length, param2=charge_time
   AZ_PAR_LIGHTNING_BOLT,
   // OTH_FRAGMENT: A rainbow triangle.  param1=radius, param2=spin_rate

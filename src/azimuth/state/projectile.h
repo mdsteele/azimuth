@@ -74,6 +74,7 @@ typedef enum {
   AZ_PROJ_ORION_BOMB,
   AZ_PROJ_ORION_BLAST,
   // Baddie-only projectiles:
+  AZ_PROJ_ERUPTION,
   AZ_PROJ_FIREBALL_FAST,
   AZ_PROJ_FIREBALL_SLOW,
   AZ_PROJ_FORCE_WAVE,

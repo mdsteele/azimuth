@@ -51,25 +51,27 @@ static az_component_data_t broken_turret_components[] = {
 };
 static az_component_data_t armored_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 }
 };
 static az_component_data_t crawling_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 10.0 }
 };
 static az_component_data_t beam_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM), .impact_damage = 15.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM | AZ_DMGF_FLAME),
+    .impact_damage = 15.0 }
 };
 static az_component_data_t rocket_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 15.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 15.0 }
 };
 static az_component_data_t crawling_mortar_components[] = {
-  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices), .impact_damage = 15.0 }
+  { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
+    .immunities = AZ_DMGF_FLAME, .impact_damage = 15.0 }
 };
 static az_component_data_t heavy_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(double_turret_cannon_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 }
 };
 
 static const az_vector_t zipper_vertices[] = {
@@ -102,11 +104,11 @@ static const az_vector_t clam_shell2_vertices[] = {
 };
 static az_component_data_t clam_components[] = {
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell1_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                   AZ_DMGF_ROCKET | AZ_DMGF_BEAM), .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET |
+                   AZ_DMGF_BEAM | AZ_DMGF_FLAME), .impact_damage = 10.0 },
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell2_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                   AZ_DMGF_ROCKET | AZ_DMGF_BEAM), .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET |
+                   AZ_DMGF_BEAM | AZ_DMGF_FLAME), .impact_damage = 10.0 }
 };
 
 static const az_vector_t nightbug_vertices[] = {
@@ -195,8 +197,8 @@ static const az_vector_t trapdoor_door_vertices[] = {
 };
 static az_component_data_t trapdoor_components[] = {
   { .polygon = AZ_INIT_POLYGON(trapdoor_door_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                   AZ_DMGF_PIERCE | AZ_DMGF_ROCKET) }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE |
+                   AZ_DMGF_ROCKET | AZ_DMGF_FLAME) }
 };
 
 static const az_vector_t swooper_vertices[] = {
@@ -509,30 +511,33 @@ static const az_vector_t piston_segment2_vertices[] = {
 };
 static az_component_data_t piston_components[] = {
   { .polygon = AZ_INIT_POLYGON(piston_segment0_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 },
   { .polygon = AZ_INIT_POLYGON(piston_segment1_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 },
   { .polygon = AZ_INIT_POLYGON(piston_segment2_vertices),
-    .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 }
 };
 static az_component_data_t armored_piston_components[] = {
   { .polygon = AZ_INIT_POLYGON(piston_segment0_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME),
+    .impact_damage = 10.0 },
   { .polygon = AZ_INIT_POLYGON(piston_segment1_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME),
+    .impact_damage = 10.0 },
   { .polygon = AZ_INIT_POLYGON(piston_segment2_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME),
+    .impact_damage = 10.0 }
 };
 static az_component_data_t armored_piston_ext_components[] = {
   { .polygon = AZ_INIT_POLYGON(piston_segment0_vertices),
     .init_position = {-30, 0}, .impact_damage = 10.0,
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED) },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME) },
   { .polygon = AZ_INIT_POLYGON(piston_segment1_vertices),
     .init_position = {-60, 0}, .impact_damage = 10.0,
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED) },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME) },
   { .polygon = AZ_INIT_POLYGON(piston_segment2_vertices),
     .init_position = {-90, 0}, .impact_damage = 10.0,
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED) }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FLAME) }
 };
 static az_component_data_t incorporeal_piston_components[] = {
   { .polygon = AZ_INIT_POLYGON(piston_segment0_vertices) },
@@ -781,7 +786,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(box_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_FREEZE),
+                                  AZ_DMGF_FREEZE | AZ_DMGF_FLAME),
                    .impact_damage = 0.0 }
   },
   [AZ_BAD_CLAM] = {
@@ -828,7 +833,8 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
+                   .impact_damage = 10.0 },
     DECL_COMPONENTS(armored_turret_components)
   },
   [AZ_BAD_DRAGONFLY] = {
@@ -906,7 +912,8 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(trapdoor_hinge_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_ROCKET) },
+                                  AZ_DMGF_PIERCE | AZ_DMGF_ROCKET |
+                                  AZ_DMGF_FLAME) },
     DECL_COMPONENTS(trapdoor_components)
   },
   [AZ_BAD_SWOOPER] = {
@@ -930,7 +937,8 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL, .color = {80, 160, 120, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(beam_turret_components)
   },
@@ -984,7 +992,8 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_truck_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_HEAT_RAY] = {
@@ -1009,7 +1018,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = ~AZ_DMGF_BEAM }
   },
   [AZ_BAD_SPARK] = {
-    .max_health = 1000000.0, .death_sound = AZ_SND_KILL_TURRET,
+    .max_health = 1000000.0,
     .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
                           AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 10.0 }
@@ -1029,7 +1038,8 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_SHARDS,
     .potential_pickups = AZ_PUPF_ALL, .static_properties = AZ_BADF_BOUNCE_PERP,
     .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_FORCEFIEND] = {
@@ -1056,7 +1066,8 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_COPTER_VERT] = {
@@ -1067,7 +1078,8 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(copter_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_URCHIN] = {
@@ -1089,7 +1101,8 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
+                   .impact_damage = 10.0 },
     DECL_COMPONENTS(rocket_turret_components)
   },
   [AZ_BAD_MINI_ARMORED_ZIPPER] = {
@@ -1098,7 +1111,8 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_DRAGONFLY, .death_style = AZ_DEATH_SHARDS,
     .potential_pickups = AZ_PUPF_ALL, .static_properties = AZ_BADF_BOUNCE_PERP,
     .main_body = { .polygon = AZ_INIT_POLYGON(mini_zipper_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_OTH_CRAB_2] = {
@@ -1158,7 +1172,8 @@ static az_baddie_data_t baddie_datas[] = {
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {96, 96, 128, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
-                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
+                   .impact_damage = 10.0 },
     DECL_COMPONENTS(piston_components)
   },
   [AZ_BAD_ARMORED_PISTON] = {
@@ -1168,7 +1183,8 @@ static az_baddie_data_t baddie_datas[] = {
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {128, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(armored_piston_components)
   },
@@ -1179,7 +1195,8 @@ static az_baddie_data_t baddie_datas[] = {
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .color = {128, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(armored_piston_ext_components)
   },
@@ -1206,7 +1223,7 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL, .color = {96, 96, 96, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .impact_damage = 15.0 },
+                   .immunities = AZ_DMGF_FLAME, .impact_damage = 15.0 },
     DECL_COMPONENTS(crawling_mortar_components)
   },
   [AZ_BAD_OTH_ORB_2] = {
@@ -1237,7 +1254,8 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = AZ_DMGF_NORMAL, .impact_damage = 10.0 },
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
+                   .impact_damage = 10.0 },
     DECL_COMPONENTS(heavy_turret_components)
   },
   [AZ_BAD_ECHO_SWOOPER] = {
@@ -1352,7 +1370,8 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_CRAWLER, .death_sound = AZ_SND_KILL_FIRE_CRAWLER,
     .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(fire_crawler_vertices),
-                   .impact_damage = 20.0, .immunities = AZ_DMGF_FREEZE }
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_FLAME),
+                   .impact_damage = 20.0 }
   },
   [AZ_BAD_JUNGLE_CRAWLER] = {
     .max_health = 7.0, .color = {0, 128, 0, 255},
@@ -1391,7 +1410,8 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_CARRIES_CARGO,
     .main_body = { .polygon = AZ_INIT_POLYGON(small_auv_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
-                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM),
+                                  AZ_DMGF_PIERCE | AZ_DMGF_BEAM |
+                                  AZ_DMGF_FLAME),
                    .impact_damage = 8.0 }
   },
   [AZ_BAD_SENSOR_LASER] = {
@@ -1401,6 +1421,12 @@ static az_baddie_data_t baddie_datas[] = {
                           AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .polygon = AZ_INIT_POLYGON(sensor_laser_vertices),
                    .immunities = ~0 }
+  },
+  [AZ_BAD_ERUPTION] = {
+    .max_health = 1000000.0,
+    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
+                          AZ_BADF_NO_HOMING_PROJ),
+    .main_body = { .bounding_radius = 10.0 }
   }
 };
 
