@@ -90,6 +90,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   // For weapon upgrades, select the new weapon.  For capacity upgrades,
   // increase max capacity.
   if (upgrade >= AZ_UPG_GUN_CHARGE && upgrade <= AZ_UPG_GUN_BEAM) {
+    az_select_gun(player, AZ_GUN_CHARGE);
     az_select_gun(player, AZ_GUN_CHARGE + (upgrade - AZ_UPG_GUN_CHARGE));
   } else if (upgrade == AZ_UPG_HYPER_ROCKETS) {
     player->rockets = player->max_rockets;

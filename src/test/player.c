@@ -156,18 +156,21 @@ void test_select_gun(void) {
   EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
   EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
 
-  // When we get a new gun, it is selected.
+  // When we get a new gun, it and the charge gun are selected.
   az_give_upgrade(&player, AZ_UPG_GUN_PHASE);
-  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun1);
-  EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
-  // Selecting a gun swaps out the one selected least recently.
-  az_select_gun(&player, AZ_GUN_CHARGE);
   EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
   EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
+  // Selecting a gun swaps out the one selected least recently.
   az_select_gun(&player, AZ_GUN_TRIPLE);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_PHASE, player.gun2);
+  az_select_gun(&player, AZ_GUN_CHARGE);
   EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
   EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
   // Selecting a gun twice in a row normally has no effect.
+  az_select_gun(&player, AZ_GUN_TRIPLE);
+  EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
+  EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
   az_select_gun(&player, AZ_GUN_TRIPLE);
   EXPECT_INT_EQ(AZ_GUN_CHARGE, player.gun1);
   EXPECT_INT_EQ(AZ_GUN_TRIPLE, player.gun2);
