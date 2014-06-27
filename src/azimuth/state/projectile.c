@@ -288,7 +288,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 10.0,
     .splash_radius = 200.0,
     .impact_shake = 4.0,
-    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET,
+    .damage_kind = (AZ_DMGF_BEAM | AZ_DMGF_FLAME |
+                    AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET),
     .properties = AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_BOMB] = {

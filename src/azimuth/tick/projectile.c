@@ -141,7 +141,7 @@ static void on_projectile_impact(az_space_state_t *state,
         speck_color = (az_color_t){255, 128, 0, 192};
         particle->kind = AZ_PAR_FIRE_BOOM;
         particle->color = speck_color;
-        particle->lifetime = 0.3;
+        particle->lifetime = fmax(0.3, 0.003 * proj->data->splash_radius);
       } else if (splash) {
         particle->kind = AZ_PAR_EXPLOSION;
         particle->color = (az_color_t){255, 240, 224, 192};
@@ -572,6 +572,7 @@ static void projectile_special_logic(az_space_state_t *state,
             state, beam_start, az_vpolar(1000.0, state->ship.angle),
             AZ_IMPF_SHIP, AZ_SHIP_UID, &impact);
         proj->position = impact.position;
+        proj->angle = state->ship.angle;
         // Explode at the impact point.
         if (impact.type == AZ_IMP_BADDIE) {
           on_projectile_hit_baddie(
