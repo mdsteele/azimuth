@@ -1072,6 +1072,12 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
         draw_eruption_bubble(6.0, 27, clock);
       } glPopMatrix();
       break;
+    case AZ_BAD_PYROFLAKKER:
+      az_draw_bad_pyroflakker(baddie, frozen, clock);
+      break;
+    case AZ_BAD_PYROSTALKER:
+      az_draw_bad_pyrostalker(baddie, frozen, clock);
+      break;
   }
 }
 

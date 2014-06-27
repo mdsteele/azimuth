@@ -932,6 +932,12 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->state = 0;
       }
       break;
+    case AZ_BAD_PYROFLAKKER:
+      az_tick_bad_pyroflakker(state, baddie, time);
+      break;
+    case AZ_BAD_PYROSTALKER:
+      az_tick_bad_pyrostalker(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

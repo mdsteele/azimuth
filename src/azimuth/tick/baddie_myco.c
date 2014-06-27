@@ -40,8 +40,30 @@ static void fire_spores(az_space_state_t *state, az_baddie_t *baddie,
                                               baddie->position)) -
                             baddie->angle), -limit), limit);
       az_fire_baddie_projectile(state, baddie, AZ_PROJ_MYCOSPORE, 10.0,
-                                angle, spread * az_random(-1, 1));
+                                angle, az_random(-spread, spread));
       baddie->cooldown = 0.3;
+    }
+    baddie->state = 1;
+  } else baddie->state = 0;
+}
+
+static void fire_fireballs(az_space_state_t *state, az_baddie_t *baddie,
+                           double time, double limit, double spread,
+                           double fast_chance) {
+  if (az_ship_in_range(state, baddie, 350) &&
+      az_can_see_ship(state, baddie)) {
+    if (baddie->cooldown <= 0.0) {
+      const double angle =
+        fmin(fmax(az_mod2pi(az_vtheta(az_vsub(state->ship.position,
+                                              baddie->position)) -
+                            baddie->angle), -limit), limit);
+      az_fire_baddie_projectile(state, baddie,
+                                (az_random(0, 1) < fast_chance ?
+                                 AZ_PROJ_FIREBALL_FAST :
+                                 AZ_PROJ_FIREBALL_SLOW), 10.0,
+                                angle, az_random(-spread, spread));
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
+      baddie->cooldown = 0.2;
     }
     baddie->state = 1;
   } else baddie->state = 0;
@@ -63,6 +85,22 @@ void az_tick_bad_mycostalker(
                             az_vpolar(1.0, baddie->angle)) > 0.0,
                   1.0, 30.0, 100.0);
   fire_spores(state, baddie, time, AZ_DEG2RAD(60), AZ_DEG2RAD(30));
+}
+
+void az_tick_bad_pyroflakker(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_PYROFLAKKER);
+  fire_fireballs(state, baddie, time, AZ_DEG2RAD(20), AZ_DEG2RAD(70), 0.2);
+}
+
+void az_tick_bad_pyrostalker(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_PYROSTALKER);
+  az_crawl_around(state, baddie, time, az_ship_is_decloaked(&state->ship) &&
+                  az_vcross(az_vsub(state->ship.position, baddie->position),
+                            az_vpolar(1.0, baddie->angle)) > 0.0,
+                  1.0, 30.0, 100.0);
+  fire_fireballs(state, baddie, time, AZ_DEG2RAD(65), AZ_DEG2RAD(25), 0.75);
 }
 
 /*===========================================================================*/

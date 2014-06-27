@@ -1427,6 +1427,20 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
                           AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 10.0 }
+  },
+  [AZ_BAD_PYROFLAKKER] = {
+    .max_health = 12.0,
+    .color = {255, 160, 80, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .death_sound = AZ_SND_KILL_FIRE_CRAWLER, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mycoflakker_vertices),
+                   .immunities = AZ_DMGF_FLAME, .impact_damage = 10.0 }
+  },
+  [AZ_BAD_PYROSTALKER] = {
+    .max_health = 15.0,
+    .color = {255, 192, 80, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .death_sound = AZ_SND_KILL_FIRE_CRAWLER, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
+                   .immunities = AZ_DMGF_FLAME, .impact_damage = 12.0 }
   }
 };
 

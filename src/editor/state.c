@@ -178,6 +178,8 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Mushrooms:
   AZ_BAD_MYCOFLAKKER,
   AZ_BAD_MYCOSTALKER,
+  AZ_BAD_PYROFLAKKER,
+  AZ_BAD_PYROSTALKER,
   // Nightbugs:
   AZ_BAD_NIGHTBUG,
   AZ_BAD_NIGHTSHADE,
