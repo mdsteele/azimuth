@@ -137,7 +137,18 @@ static void on_projectile_impact(az_space_state_t *state,
   if (splash || !few_specks) {
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
-      if (proj->data->damage_kind & AZ_DMGF_FLAME) {
+      if (proj->data->damage_kind & AZ_DMGF_FREEZE) {
+        speck_color = (az_color_t){192, 224, 255, 255};
+        if (splash) {
+          particle->kind = AZ_PAR_ICE_BOOM;
+          particle->color = (az_color_t){128, 224, 255, 255};
+          particle->lifetime = 0.6;
+        } else {
+          particle->kind = AZ_PAR_BOOM;
+          particle->color = speck_color;
+          particle->lifetime = 0.3;
+        }
+      } else if (proj->data->damage_kind & AZ_DMGF_FLAME) {
         speck_color = (az_color_t){255, 128, 0, 192};
         particle->kind = AZ_PAR_FIRE_BOOM;
         particle->color = speck_color;

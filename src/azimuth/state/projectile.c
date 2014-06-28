@@ -369,11 +369,11 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_ICE_TORPEDO] = {
     .speed = 400.0,
     .lifetime = 5.0,
-    .impact_damage = 10.0,
-    .splash_damage = 15.0,
+    .impact_damage = 15.0,
+    .splash_damage = 5.0,
     .splash_radius = 120.0,
     .impact_shake = 1.5,
-    .damage_kind = AZ_DMGF_BOMB
+    .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_BOMB
   },
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,

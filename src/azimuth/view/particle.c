@@ -139,6 +139,35 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         } glEnd();
       }
     } break;
+    case AZ_PAR_ICE_BOOM: {
+      const double t0 = particle->age / particle->lifetime;
+      const double t1 = 1.0 - t0;
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, 0);
+        glVertex2f(0, 0);
+        with_color_alpha(particle->color, t1 * t1 * t1);
+        for (int i = 0; i <= 360; i += 6) {
+          glVertex2d(particle->param1 * cos(AZ_DEG2RAD(i)),
+                     particle->param1 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glPushMatrix(); {
+        const double rx = 0.65 * particle->param1;
+        const double ry = sqrt(3.0) * rx / 3.0;
+        const double cx = fmin(1, 4 * t0) * rx;
+        for (int i = 0; i < 6; ++i) {
+          glBegin(GL_TRIANGLE_FAN); {
+            with_color_alpha(particle->color, t1);
+            glVertex2d(cx, 0);
+            with_color_alpha(particle->color, t1 * t1);
+            glVertex2d(cx + rx, 0); glVertex2d(cx,  ry);
+            glVertex2d(cx - rx, 0); glVertex2d(cx, -ry);
+            glVertex2d(cx + rx, 0);
+          } glEnd();
+          glRotatef(60, 0, 0, 1);
+        }
+      } glPopMatrix();
+    } break;
     case AZ_PAR_LIGHTNING_BOLT:
       if (particle->age >= particle->param2) {
         const int num_steps = az_imax(2, round(particle->param1 / 10.0));
