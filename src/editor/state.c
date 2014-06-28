@@ -129,8 +129,9 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_SUPER_HORNET,
   AZ_BAD_MOSQUITO,
   // Bats:
-  AZ_BAD_SWOOPER,
+  AZ_BAD_CAVE_SWOOPER,
   AZ_BAD_ECHO_SWOOPER,
+  AZ_BAD_DEMON_SWOOPER,
   // Crawlers:
   AZ_BAD_CAVE_CRAWLER,
   AZ_BAD_SPINED_CRAWLER,

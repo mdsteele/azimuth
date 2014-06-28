@@ -472,7 +472,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
                             AZ_DEG2RAD(90) : 0));
       }
       break;
-    case AZ_BAD_SWOOPER:
+    case AZ_BAD_CAVE_SWOOPER:
       // State 0: Perch on the nearest wall, then go to state 1.
       if (baddie->state == 0) {
         if (perch_on_ceiling(state, baddie, time)) {
@@ -937,6 +937,44 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_PYROSTALKER:
       az_tick_bad_pyrostalker(state, baddie, time);
+      break;
+    case AZ_BAD_DEMON_SWOOPER:
+      // State 0: Perch on the nearest wall, then go to state 1.
+      if (baddie->state == 0) {
+        if (perch_on_ceiling(state, baddie, time)) {
+          baddie->cooldown = 2.0;
+          baddie->state = 1;
+        }
+      }
+      // State 1: Sit and wait until the ship is nearby, then go to state 2.
+      else if (baddie->state == 1) {
+        if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 250) &&
+            az_can_see_ship(state, baddie)) {
+          baddie->param = 6.0;
+          baddie->state = 2;
+          baddie->cooldown = 0.5;
+        }
+      }
+      // State 2: Chase the ship for up to a few seconds, then go to state 0.
+      else if (baddie->state == 2) {
+        if (az_ship_is_decloaked(&state->ship)) {
+          if (baddie->cooldown <= 0.0 &&
+              az_ship_in_range(state, baddie, 300) &&
+              az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(10))) {
+            for (int i = -1; i <= 1; ++i) {
+              az_fire_baddie_projectile(state, baddie, AZ_PROJ_FIREBALL_FAST,
+                                        8, 0, i * AZ_DEG2RAD(10));
+            }
+            az_play_sound(&state->soundboard, AZ_SND_SONIC_SCREECH);
+            baddie->cooldown = 2.0;
+          }
+          az_fly_towards_ship(state, baddie, time, AZ_DEG2RAD(150),
+                              250.0, 300.0, 250.0, 100.0, 100.0);
+          baddie->param = fmax(0.0, baddie->param - time);
+        } else baddie->param = 0.0;
+        if (baddie->param <= 0.0) baddie->state = 0;
+      } else baddie->state = 0;
+      az_trail_tail_behind(baddie, 0, old_baddie_position, old_baddie_angle);
       break;
   }
 

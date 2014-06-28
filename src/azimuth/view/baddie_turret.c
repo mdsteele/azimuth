@@ -19,6 +19,7 @@
 
 #include "azimuth/view/baddie_turret.h"
 
+#include <assert.h>
 #include <math.h>
 
 #include <GL/gl.h>
@@ -127,6 +128,7 @@ void az_draw_bad_normal_turret(
 
 void az_draw_bad_armored_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_ARMORED_TURRET);
   const float flare = baddie->armor_flare;
   draw_turret(baddie,
               color3(0.20 + 0.1 * flare - 0.1 * frozen,
@@ -147,6 +149,7 @@ void az_draw_bad_armored_turret(
 
 void az_draw_bad_beam_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BEAM_TURRET);
   const float flare = baddie->armor_flare;
   draw_turret(baddie,
               color3(0.20 + 0.1 * flare - 0.1 * frozen,
@@ -167,6 +170,7 @@ void az_draw_bad_beam_turret(
 
 void az_draw_bad_broken_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BROKEN_TURRET);
   const float flare = baddie->armor_flare;
   draw_turret(baddie,
               color3(0.30 + 0.1 * flare - 0.1 * frozen,
@@ -187,6 +191,7 @@ void az_draw_bad_broken_turret(
 
 void az_draw_bad_heavy_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_HEAVY_TURRET);
   const float flare = baddie->armor_flare;
   const az_color_t far_edge = color3(
       0.20 + 0.1 * flare - 0.1 * frozen,
@@ -227,6 +232,7 @@ void az_draw_bad_heavy_turret(
 
 void az_draw_bad_rocket_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_ROCKET_TURRET);
   const float flare = baddie->armor_flare;
   draw_turret(baddie,
               color3(0.20 + 0.1 * flare - 0.1 * frozen,
@@ -247,12 +253,14 @@ void az_draw_bad_rocket_turret(
 
 void az_draw_bad_crawling_turret(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_CRAWLING_TURRET);
   draw_crawling_turret_legs(baddie->armor_flare, frozen, clock);
   az_draw_bad_normal_turret(baddie, frozen, clock);
 }
 
 void az_draw_bad_crawling_mortar(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_CRAWLING_MORTAR);
   const float flare = baddie->armor_flare;
   draw_crawling_turret_legs(flare, frozen, clock);
   draw_turret(baddie,
@@ -270,6 +278,7 @@ void az_draw_bad_crawling_mortar(
 
 void az_draw_bad_security_drone(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_SECURITY_DRONE);
   const float flare = baddie->armor_flare;
   draw_turret_body_outer_edge(
       baddie,

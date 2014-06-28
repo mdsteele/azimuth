@@ -101,9 +101,44 @@ void az_crawl_around(
   }
 }
 
+void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
+                          az_vector_t old_position, double old_angle) {
+  const double dtheta = az_mod2pi(baddie->angle - old_angle);
+  const az_vector_t reldelta =
+    az_vrotate(az_vsub(baddie->position, old_position), -old_angle);
+  az_vector_t prev_new_pos = AZ_VZERO;
+  double prev_new_angle = 0.0;
+  az_vector_t prev_init_pos = AZ_VZERO;
+  double prev_radius = baddie->data->main_body.bounding_radius;
+  for (int i = first_tail_component; i < baddie->data->num_components; ++i) {
+    // First, adjust the component so it stays in the same absolute position.
+    az_component_t *component = &baddie->components[i];
+    component->position = az_vrotate(component->position, -dtheta);
+    component->position = az_vsub(component->position, reldelta);
+    // Calculate the staple point between this component and the previous one.
+    const az_component_data_t *data = &baddie->data->components[i];
+    const double init_dist = az_vdist(data->init_position, prev_init_pos);
+    const double staple_dist_to_prev =
+      0.5 * (prev_radius + init_dist - data->bounding_radius);
+    const az_vector_t staple_pos =
+      az_vadd(prev_new_pos, az_vpolar(-staple_dist_to_prev, prev_new_angle));
+    const double staple_dist_to_this = init_dist - staple_dist_to_prev;
+    // Yank this component to the staple point.
+    prev_new_pos = component->position =
+      az_vadd(staple_pos, az_vwithlen(az_vsub(component->position, staple_pos),
+                                      staple_dist_to_this));
+    prev_new_angle = component->angle =
+      az_vtheta(az_vsub(staple_pos, component->position));
+    prev_init_pos = data->init_position;
+    prev_radius = data->bounding_radius;
+  }
+}
+
 void az_snake_towards(
     az_baddie_t *baddie, double time, int first_tail_component,
     double speed, double wiggle, az_vector_t destination) {
+  const az_vector_t old_position = baddie->position;
+  const double old_angle = baddie->angle;
   const double dest_theta = az_vtheta(az_vsub(destination, baddie->position));
   const az_vector_t goal =
     az_vadd(destination,
@@ -111,24 +146,10 @@ void az_snake_towards(
   const double new_angle = az_angle_towards(
       baddie->angle, AZ_PI * time,
       az_vtheta(az_vsub(goal, baddie->position)));
-  const double dtheta = az_mod2pi(new_angle - baddie->angle);
-  const az_vector_t reldelta = az_vpolar(speed * time, dtheta);
-  az_vector_t prev_old_pos = AZ_VZERO;
-  az_vector_t prev_new_pos = AZ_VZERO;
-  for (int i = first_tail_component; i < baddie->data->num_components; ++i) {
-    az_component_t *component = &baddie->components[i];
-    const double spacing = az_vdist(component->position, prev_old_pos);
-    prev_old_pos = component->position;
-    component->position = az_vrotate(component->position, -dtheta);
-    component->position = az_vsub(component->position, reldelta);
-    component->position = az_vadd(prev_new_pos,
-        az_vwithlen(az_vsub(component->position, prev_new_pos), spacing));
-    component->angle = az_vtheta(az_vsub(prev_new_pos, component->position));
-    prev_new_pos = component->position;
-  }
   baddie->position =
     az_vadd(baddie->position, az_vpolar(speed * time, new_angle));
   baddie->angle = new_angle;
+  az_trail_tail_behind(baddie, first_tail_component, old_position, old_angle);
   baddie->param = az_mod2pi(baddie->param + AZ_TWO_PI * time);
 }
 

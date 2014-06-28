@@ -205,6 +205,26 @@ static const az_vector_t swooper_vertices[] = {
   {8, 0}, {7, 3}, {0, 12}, {-10, 8}, {-16, 6}, {-14, 0}, {-16, -6},
   {-10, -8}, {0, -12}, {7, -3}
 };
+static const az_vector_t demon_swooper_tail_segment_vertices[] = {
+  {3, -2}, {5, 0}, {3, 2}, {-3, 2}, {-5, 0}, {-3, -2}
+};
+static const az_vector_t demon_swooper_stinger_vertices[] = {
+  {5, -2}, {7, 0}, {5, 2}, {1, 2}, {1, 4}, {-7, 0}, {1, -4}, {1, -2}
+};
+static az_component_data_t demon_swooper_components[] = {
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-17, 0} },
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-23, 0} },
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-29, 0} },
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-35, 0} },
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-41, 0} },
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_stinger_vertices),
+    .immunities = AZ_DMGF_FLAME, .init_position = {-49, 0} },
+};
 
 static const az_vector_t ice_crawler_body_vertices[] = {
   {8, 0}, {-2, 15}, {-16, 10}, {-18, 0}, {-16, -10}, {-2, -15}
@@ -916,7 +936,7 @@ static az_baddie_data_t baddie_datas[] = {
                                   AZ_DMGF_FLAME) },
     DECL_COMPONENTS(trapdoor_components)
   },
-  [AZ_BAD_SWOOPER] = {
+  [AZ_BAD_CAVE_SWOOPER] = {
     .max_health = 5.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {0, 128, 0, 255},
     .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
@@ -1441,6 +1461,15 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_FIRE_CRAWLER, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
                    .immunities = AZ_DMGF_FLAME, .impact_damage = 12.0 }
+  },
+  [AZ_BAD_DEMON_SWOOPER] = {
+    .max_health = 15.0, .overall_bounding_radius = 100.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {140, 0, 0, 255},
+    .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
+    .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
+                   .immunities = AZ_DMGF_FLAME, .impact_damage = 8.0 },
+    DECL_COMPONENTS(demon_swooper_components)
   }
 };
 
