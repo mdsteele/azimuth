@@ -1,0 +1,70 @@
+@M "SABBCC|DDEEBCBC"
+
+=tempo 115
+=key 0N     % A minor
+
+
+!Part S
+
+1 Wp50 L30  E0,0
+2 Wp25 L25  E0,25 D+10,30
+3 Wt75 L120 E0,25
+4 Wn   L25  E0,100
+5 Wn   L40  E0,100
+
+
+!Part A
+
+2| rw |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| rh.. f3s g |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part B
+
+2| a3q ' c4q ' de ds d ' eq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| f4e ds d ' ee cs c ' ds c b3e ' a3q |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part C
+
+2| a2q ' c3q ' de ds d ' eq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| f3e ds d ' ee cs c ' ds c b2e ' aq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part D
+
+2| a3e es  e  ' ae es  e  ' ae es  e  ' c4e. rs |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae.  rs |
+5| x1q x7e. x1e x7e. x7q |
+
+
+!Part E
+
+2| re a3e ' c4q ' de ds d ' ee de+ | +e f4e ' de ds e ' ds c b3e ' aq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+ | a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+ | x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| re c4e ' a3q ' bs a ge ' eq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| d3e ds d ' e3e es e ' f3e fs f ' g3e gs g |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |

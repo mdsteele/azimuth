@@ -82,6 +82,18 @@ static const az_sound_spec_t drum_specs[] = {
     .env_sustain = 0.06, .env_punch = 1.0, .env_decay = 0.375,
     .start_freq = 0.255, .freq_slide = -0.17, .freq_delta_slide = 0.05,
     .volume_adjust = 0.5
+  },
+  // Snare:
+  [7] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_attack = 0.0025, .env_sustain = 0.025,
+    .env_punch = 0.08, .env_decay = 0.245,
+    .start_freq = 0.2, .freq_slide = 0.6, .freq_delta_slide = 0.8,
+    .vibrato_depth = 0.853, .vibrato_speed = 0.19,
+    .arp_mod = -0.094, .arp_speed = 0.633, .repeat_speed = 0.24,
+    .phaser_offset = 0.05, .phaser_sweep = 0.048, .lpf_cutoff = 0.572,
+    .lpf_ramp = 0.04, .lpf_resonance = 0.825, .hpf_ramp = 0.0426,
+    .volume_adjust = -0.65
   }
 };
 
@@ -107,7 +119,7 @@ void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out) {
 
 static const char *music_filenames[] = {
   [AZ_MUS_COLONY_ZONE] = "music01.txt",
-  [AZ_MUS_FILIMUN_ZONE] = NULL,
+  [AZ_MUS_FILIMUN_ZONE] = "music02.txt",
   [AZ_MUS_CNIDAM_ZONE] = NULL,
   [AZ_MUS_NANDIAR_ZONE] = "music04.txt",
   [AZ_MUS_VOQUAN_ZONE] = NULL,

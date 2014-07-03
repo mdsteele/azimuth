@@ -651,7 +651,7 @@ void az_destroy_music(az_music_t *music) {
 // How many virtual samples to average together for each sample array entry:
 #define SYNTH_SUPERSAMPLE 8
 // The wave amplitude produced by an L100 note:
-#define BASE_LOUDNESS 5000.0
+#define BASE_LOUDNESS 6500.0
 
 static uint64_t generate_noise(void) {
   // This is a simple linear congruential generator, using the parameters
