@@ -965,7 +965,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
               az_fire_baddie_projectile(state, baddie, AZ_PROJ_FIREBALL_FAST,
                                         8, 0, i * AZ_DEG2RAD(10));
             }
-            az_play_sound(&state->soundboard, AZ_SND_SONIC_SCREECH);
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
             baddie->cooldown = 2.0;
           }
           az_fly_towards_ship(state, baddie, time, AZ_DEG2RAD(150),

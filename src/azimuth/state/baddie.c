@@ -1463,7 +1463,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = AZ_DMGF_FLAME, .impact_damage = 12.0 }
   },
   [AZ_BAD_DEMON_SWOOPER] = {
-    .max_health = 15.0, .overall_bounding_radius = 100.0,
+    .max_health = 15.0, .overall_bounding_radius = 60.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {140, 0, 0, 255},
     .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
     .death_style = AZ_DEATH_EMBERS,

@@ -324,7 +324,7 @@ static const az_proj_data_t proj_data[] = {
   // Baddie-only projectiles:
   [AZ_PROJ_ERUPTION] = {
     .speed = 800.0,
-    .lifetime = 0.4,
+    .lifetime = 0.3,
     .splash_damage = 20.0,
     .splash_radius = 30.0,
     .damage_kind = AZ_DMGF_FLAME,

@@ -59,6 +59,7 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
   const az_gravfield_size_t *size = &gravfield->size;
+  // TODO: Fix this calculation for liquid gravfields.
   if (az_trapezoidal(gravfield->kind)) {
     const double semilength = size->trapezoid.semilength;
     const double front_offset = size->trapezoid.front_offset;
@@ -92,6 +93,7 @@ bool az_ray_hits_liquid_surface(
     const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
   assert(az_is_liquid(gravfield->kind));
+  assert(az_trapezoidal(gravfield->kind));
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
