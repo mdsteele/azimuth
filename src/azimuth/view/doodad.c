@@ -757,6 +757,42 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         }
       } glPopMatrix();
       break;
+    case AZ_DOOD_TUBE_WINDOW_BEND:
+      // Glass:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor4f(1, 1, 1, 0.2); glVertex2f(-32.31, -64);
+        glColor4f(1, 1, 1, 0.3); glVertex2f(-32.31, 0);
+        glColor4f(1, 1, 1, 0.2); glVertex2f(26.51, -64);
+        glColor4f(1, 1, 1, 0.3); glVertex2f(0, 0);
+        glColor4f(1, 1, 1, 0.25); glVertex2f(68.10, -22.41);
+        glColor4f(1, 1, 1, 0.35); glVertex2f(22.85, 22.85);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor4f(1, 1, 1, 0.2); glVertex2f(-32.31, 64);
+        glColor4f(1, 1, 1, 0.3); glVertex2f(-32.31, 0);
+        glColor4f(1, 1, 1, 0.2); glVertex2f(-26.51, 64);
+        glColor4f(1, 1, 1, 0.3); glVertex2f(0, 0);
+        glColor4f(1, 1, 1, 0.2); glVertex2f(-22.41, 68.10);
+        glColor4f(1, 1, 1, 0.35); glVertex2f(22.85, 22.85);
+      } glEnd();
+      // Siding:
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0.6, 0.6, 0.6);
+        glVertex2f(-47.31, 0); glVertex2f(-32.31, 0);
+        glColor3f(0.5, 0.44, 0.44);
+        glVertex2f(-47.31, -78); glVertex2f(-32.31, -64);
+        glVertex2f(32.31, -78); glVertex2f(26.51, -64);
+        glVertex2f(88.61, -21.70); glVertex2f(68.10, -22.41);
+        glColor3f(0.6, 0.6, 0.6);
+        glVertex2f(33.45, 33.45); glVertex2f(22.85, 22.85);
+        glColor3f(0.5, 0.44, 0.44);
+        glVertex2f(-21.70, 88.61); glVertex2f(-22.41, 68.10);
+        glVertex2f(-32.31, 78); glVertex2f(-26.51, 64);
+        glVertex2f(-47.31, 78); glVertex2f(-32.31, 64);
+        glColor3f(0.6, 0.6, 0.6);
+        glVertex2f(-47.31, 0); glVertex2f(-32.31, 0);
+      } glEnd();
+      break;
   }
 }
 
