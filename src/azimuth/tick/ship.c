@@ -881,8 +881,8 @@ static void fire_weapons(az_space_state_t *state, double time) {
                           AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_PHASE:
-          fire_gun_multi(state, 5.0, AZ_PROJ_GUN_PHASE_BURST, 1.0,
-                         11, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
+          fire_gun_single(state, 5.0, AZ_PROJ_GUN_PHASE_BURST,
+                          AZ_SND_FIRE_GUN_NORMAL);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }

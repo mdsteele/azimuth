@@ -107,13 +107,6 @@ static const az_proj_data_t proj_data[] = {
     .homing_rate = AZ_DEG2RAD(200),
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
-  [AZ_PROJ_GUN_PHASE_BURST] = {
-    .speed = 600.0,
-    .lifetime = 0.5,
-    .impact_damage = 0.1,
-    .shrapnel_kind = AZ_PROJ_GUN_PHASE,
-    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
-  },
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
     .lifetime = 0.5,
@@ -141,6 +134,13 @@ static const az_proj_data_t proj_data[] = {
     .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL,
     .properties = AZ_PROJF_FAST_SHRAPNEL
   },
+  [AZ_PROJ_GUN_PHASE_BURST] = {
+    .speed = 900.0,
+    .lifetime = 2.0,
+    .impact_damage = 2.0,
+    .shrapnel_kind = AZ_PROJ_GUN_PHASE_SHRAPNEL,
+    .properties = AZ_PROJF_FAST_SHRAPNEL
+  },
   [AZ_PROJ_GUN_BURST_PIERCE] = {
     .speed = 900.0,
     .lifetime = 2.0,
@@ -164,6 +164,12 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 1.1,
     .impact_damage = 0.5,
     .homing_rate = AZ_DEG2RAD(200)
+  },
+  [AZ_PROJ_GUN_PHASE_SHRAPNEL] = {
+    .speed = 600.0,
+    .lifetime = 0.25,
+    .impact_damage = 0.1,
+    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_PIERCE_SHRAPNEL] = {
     .speed = 500.0,

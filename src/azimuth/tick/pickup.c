@@ -68,6 +68,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
     } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
       pickup->kind = AZ_PUP_NOTHING;
     } else if (az_has_upgrade(player, AZ_UPG_MAGNET_SWEEP) &&
+               az_ship_is_alive(ship) &&
                az_vwithin(pickup->position, ship->position,
                           AZ_MAGNET_SWEEP_MAX_RANGE)) {
       const az_vector_t delta = az_vsub(ship->position, pickup->position);

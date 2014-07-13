@@ -159,7 +159,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_GUN_PHASE:
     case AZ_PROJ_GUN_FREEZE_PHASE:
     case AZ_PROJ_GUN_HOMING_PHASE:
-    case AZ_PROJ_GUN_PHASE_BURST:
+    case AZ_PROJ_GUN_PHASE_SHRAPNEL:
     case AZ_PROJ_GUN_PHASE_PIERCE:
     case AZ_PROJ_SONIC_WAVE:
       glBegin(GL_QUADS); {
@@ -205,6 +205,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_GUN_BURST:
     case AZ_PROJ_GUN_FREEZE_BURST:
     case AZ_PROJ_GUN_HOMING_BURST:
+    case AZ_PROJ_GUN_PHASE_BURST:
     case AZ_PROJ_GUN_BURST_PIERCE:
       glPushMatrix(); {
         glRotated(720.0 * proj->age, 0, 0, 1);

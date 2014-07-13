@@ -117,8 +117,11 @@ static void on_projectile_impact(az_space_state_t *state,
   // If applicable, burst into shrapnel.
   if (proj->data->shrapnel_kind != AZ_PROJ_NOTHING) {
     const double mid_theta = az_vtheta(normal);
-    for (int i = -2; i <= 2; ++i) {
-      const double theta = mid_theta + 0.2 * AZ_PI * (i + az_random(-.5, .5));
+    const int limit = (proj->kind == AZ_PROJ_GUN_PHASE_BURST ? 22 : 2);
+    for (int i = -limit; i <= limit; ++i) {
+      const double theta = mid_theta +
+        (proj->kind == AZ_PROJ_GUN_PHASE_BURST ? AZ_DEG2RAD(i) :
+         0.2 * AZ_PI * (i + az_random(-.5, .5)));
       az_projectile_t *shrapnel = az_add_projectile(
           state, proj->data->shrapnel_kind,
           az_vadd(proj->position, az_vpolar(0.1, theta)), theta, proj->power,
@@ -257,7 +260,8 @@ static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(!(proj->data->properties & AZ_PROJF_PHASED));
-  on_projectile_impact(state, proj, normal);
+  on_projectile_impact(state, proj, (proj->kind == AZ_PROJ_GUN_PHASE_BURST ?
+                                     az_vpolar(1, proj->angle) : normal));
   // Shake the screen.
   const double shake = proj->data->impact_shake;
   if (shake > 0.0) {
