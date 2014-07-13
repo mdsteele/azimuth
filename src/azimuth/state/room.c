@@ -178,16 +178,20 @@ static void parse_door_directive(az_load_room_t *loader) {
 static void parse_gravfield_directive(az_load_room_t *loader) {
   if (loader->room->num_gravfields >= loader->num_gravfields) FAIL();
   int kind, uuid_slot;
-  double x, y, angle, strength;
-  READ("%d x%lf y%lf a%lf s%lf ", &kind, &x, &y, &angle, &strength);
+  double x, y, angle;
+  READ("%d x%lf y%lf a%lf ", &kind, &x, &y, &angle);
   if (kind <= 0 || kind > AZ_NUM_GRAVFIELD_KINDS) FAIL();
   az_gravfield_spec_t *gravfield =
     &loader->room->gravfields[loader->room->num_gravfields];
   gravfield->kind = (az_gravfield_kind_t)kind;
   gravfield->position = (az_vector_t){x, y};
   gravfield->angle = angle;
-  gravfield->strength = strength;
-  if (az_trapezoidal(gravfield->kind)) {
+  if (!az_is_liquid(gravfield->kind)) {
+    double strength;
+    READ("s%lf ", &strength);
+    gravfield->strength = strength;
+  } else gravfield->strength = 1.0;
+  if (az_is_trapezoidal(gravfield->kind)) {
     double front_offset, front_semiwidth, rear_semiwidth, semilength;
     READ("o%lf f%lf r%lf l%lf", &front_offset, &front_semiwidth,
          &rear_semiwidth, &semilength);
@@ -376,10 +380,13 @@ static bool write_room(const az_room_t *room, FILE *file) {
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
     const az_gravfield_spec_t *gravfield = &room->gravfields[i];
-    WRITE("!G%d x%.02f y%.02f a%f s%.02f ",
+    WRITE("!G%d x%.02f y%.02f a%f ",
           (int)gravfield->kind, gravfield->position.x, gravfield->position.y,
-          gravfield->angle, gravfield->strength);
-    if (az_trapezoidal(gravfield->kind)) {
+          gravfield->angle);
+    if (!az_is_liquid(gravfield->kind)) {
+      WRITE("s%.02f ", gravfield->strength);
+    }
+    if (az_is_trapezoidal(gravfield->kind)) {
       WRITE("o%.02f f%.02f r%.02f l%.02f",
             gravfield->size.trapezoid.front_offset,
             gravfield->size.trapezoid.front_semiwidth,

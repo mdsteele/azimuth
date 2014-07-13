@@ -270,7 +270,7 @@ static void draw_gravfield_border(const az_gravfield_spec_t *gravfield) {
   glPushMatrix(); {
     glTranslated(gravfield->position.x, gravfield->position.y, 0);
     glRotated(AZ_RAD2DEG(gravfield->angle), 0, 0, 1);
-    if (az_trapezoidal(gravfield->kind)) {
+    if (az_is_trapezoidal(gravfield->kind)) {
       const double foff = gravfield->size.trapezoid.front_offset;
       const double fsw = gravfield->size.trapezoid.front_semiwidth;
       const double rsw = gravfield->size.trapezoid.rear_semiwidth;
@@ -457,9 +457,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .kind = editor_gravfield->spec.kind,
       .position = editor_gravfield->spec.position,
       .angle = editor_gravfield->spec.angle,
-      .strength = editor_gravfield->spec.strength,
       .size = editor_gravfield->spec.size,
-      .age = state->total_time * editor_gravfield->spec.strength
+      .strength = 1.0, .age = state->total_time
     };
     az_draw_gravfield(&real_gravfield);
     draw_script_and_uuid_slot(

@@ -71,13 +71,16 @@ typedef struct {
 // Returns true if the given gravfield kind is trapezoidal (i.e. it uses the
 // trapezoid field of az_gravfield_size_t), or false if it is sectoral (i.e. it
 // uses the sector field of az_gravfield_size_t).
-bool az_trapezoidal(az_gravfield_kind_t kind);
+bool az_is_trapezoidal(az_gravfield_kind_t kind);
 
 // Returns true if the given gravfield kind is liquid (water or lava).
 bool az_is_liquid(az_gravfield_kind_t kind);
 
+// Returns the interior angle for a sectoral gravfield, in radians.  The angle
+// will be in the range from 0 (exclusive) to 2*pi (inclusive).
 double az_sector_interior_angle(const az_gravfield_size_t *size);
 
+// Returns true if the given point falls within the given gravfield.
 bool az_point_within_gravfield(const az_gravfield_t *gravfield,
                                az_vector_t point);
 

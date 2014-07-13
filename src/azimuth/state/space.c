@@ -100,6 +100,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
   }
   for (int i = 0; i < room->num_gravfields; ++i) {
     const az_gravfield_spec_t *spec = &room->gravfields[i];
+    assert(spec->strength == 1.0 || !az_is_liquid(spec->kind));
     AZ_ARRAY_LOOP(gravfield, state->gravfields) {
       if (gravfield->kind == AZ_GRAV_NOTHING) {
         gravfield->kind = spec->kind;

@@ -639,6 +639,9 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         GET_UID(AZ_UUID_GRAVFIELD, &uid);
         az_gravfield_t *gravfield;
         if (az_lookup_gravfield(state, uid, &gravfield)) {
+          if (az_is_liquid(gravfield->kind)) {
+            SCRIPT_ERROR("invalid gravfield kind");
+          }
           gravfield->strength = value;
         }
       } break;

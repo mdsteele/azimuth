@@ -992,7 +992,15 @@ static void begin_edit_gravfield(void) {
     }
   }
   if (gravfield == NULL) return;
-  if (az_trapezoidal(gravfield->kind)) {
+  if (az_is_liquid(gravfield->kind)) {
+    assert(az_is_trapezoidal(gravfield->kind));
+    az_init_editor_text(
+        &state, AZ_ETA_EDIT_GRAVFIELD, "o%g f%g r%g l%g",
+        gravfield->size.trapezoid.front_offset,
+        gravfield->size.trapezoid.front_semiwidth,
+        gravfield->size.trapezoid.rear_semiwidth,
+        gravfield->size.trapezoid.semilength);
+  } else if (az_is_trapezoidal(gravfield->kind)) {
     az_init_editor_text(
         &state, AZ_ETA_EDIT_GRAVFIELD, "s%g o%g f%g r%g l%g",
         gravfield->strength, gravfield->size.trapezoid.front_offset,
@@ -1012,10 +1020,19 @@ static void try_edit_gravfield(void) {
   assert(state.text.length < AZ_ARRAY_SIZE(state.text.buffer));
   assert(state.text.buffer[state.text.length] == '\0');
   int count;
-  double strength;
-  az_gravfield_size_t size;
-  bool trapezoidal;
-  if (sscanf(state.text.buffer, "s%lf o%lf f%lf r%lf l%lf%n", &strength,
+  double strength = state.brush.gravfield_strength;
+  az_gravfield_size_t size = state.brush.gravfield_size;
+  bool liquid = false, trapezoidal = false;
+  if (sscanf(state.text.buffer, "o%lf f%lf r%lf l%lf%n",
+             &size.trapezoid.front_offset, &size.trapezoid.front_semiwidth,
+             &size.trapezoid.rear_semiwidth, &size.trapezoid.semilength,
+             &count) == 4 && count == state.text.length) {
+    if (size.trapezoid.semilength <= 0.0 ||
+        size.trapezoid.front_semiwidth < 0.0 ||
+        size.trapezoid.rear_semiwidth < 0.0) return;
+    liquid = true;
+    trapezoidal = true;
+  } else if (sscanf(state.text.buffer, "s%lf o%lf f%lf r%lf l%lf%n", &strength,
              &size.trapezoid.front_offset, &size.trapezoid.front_semiwidth,
              &size.trapezoid.rear_semiwidth, &size.trapezoid.semilength,
              &count) == 5 && count == state.text.length) {
@@ -1029,7 +1046,6 @@ static void try_edit_gravfield(void) {
                     &count) == 4 && count == state.text.length) {
     if (size.sector.inner_radius < 0.0 ||
         size.sector.thickness <= 0.0) return;
-    trapezoidal = false;
   } else return;
   state.text.action = AZ_ETA_NOTHING;
   state.brush.gravfield_strength = strength;
@@ -1037,7 +1053,8 @@ static void try_edit_gravfield(void) {
   az_editor_room_t *room = get_current_room();
   AZ_LIST_LOOP(gravfield, room->gravfields) {
     if (!gravfield->selected) continue;
-    if (az_trapezoidal(gravfield->spec.kind) != trapezoidal) continue;
+    if (az_is_liquid(gravfield->spec.kind) != liquid) continue;
+    if (az_is_trapezoidal(gravfield->spec.kind) != trapezoidal) continue;
     gravfield->spec.strength = strength;
     gravfield->spec.size = size;
     set_room_unsaved(room);

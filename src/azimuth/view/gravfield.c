@@ -27,6 +27,7 @@
 #include "azimuth/state/gravfield.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/util.h"
 
@@ -128,9 +129,34 @@ static void draw_sector_spin_gravfield(const az_gravfield_t *gravfield) {
   }
 }
 
+static void draw_lava_bubble(double max_radius, double duration, double period,
+                             double timer) {
+  assert(duration > 0.0);
+  assert(period >= duration);
+  assert(timer >= 0.0);
+  const double phase = fmod(timer, period);
+  if (phase > duration) return;
+  const double mod = phase / duration;
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor4f(1, 0.6, 0.4, 0.4 - 0.3 * mod);
+    glVertex2f(0, 0);
+    glColor4f(0.5, 0.3, 0.2, 0.5 - 0.3 * mod);
+    const double radius = max_radius * mod;
+    for (int i = -90; i < 90; i += 10) {
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    }
+    for (int i = 90; i <= 270; i += 10) {
+      glVertex2d(0.25 * radius * cos(AZ_DEG2RAD(i)),
+                 radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
 static void draw_liquid_gravfield(
     const az_gravfield_t *gravfield, az_color_t deep_color,
     az_color_t surface_color, az_color_t mist_color) {
+  assert(az_is_liquid(gravfield->kind));
+  assert(gravfield->strength == 1.0);
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
@@ -179,6 +205,26 @@ static void draw_liquid_gravfield(
                  (outer_radius + 6) * sin(outer_theta));
     }
   } glEnd();
+  // For lava, draw bubbles:
+  if (gravfield->kind == AZ_GRAV_LAVA) {
+    const double bubble_spacing = 15.0;
+    const double bubble_step = bubble_spacing / outer_radius;
+    double timer = gravfield->age;
+    az_random_seed_t seed = {1, 1};
+    for (double theta = outer_start_theta; theta < outer_end_theta;
+         theta += bubble_step) {
+      glPushMatrix(); {
+        glTranslated(outer_radius * cos(theta) - position_norm,
+                     outer_radius * sin(theta), 0);
+        az_gl_rotated(theta);
+        const double radius = 5.0 + az_rand_sdouble(&seed);
+        const double duration = 0.5 + 0.4 * az_rand_udouble(&seed);
+        const double period = duration + 0.6 + az_rand_udouble(&seed);
+        timer += 3.0 * az_rand_udouble(&seed);
+        draw_lava_bubble(radius, duration, period, timer);
+      } glPopMatrix();
+    }
+  }
 }
 
 static void draw_water_gravfield(const az_gravfield_t *gravfield) {
@@ -224,8 +270,8 @@ void az_draw_gravfield_no_transform(const az_gravfield_t *gravfield) {
 void az_draw_gravfield(const az_gravfield_t *gravfield) {
   assert(gravfield->kind != AZ_GRAV_NOTHING);
   glPushMatrix(); {
-    glTranslated(gravfield->position.x, gravfield->position.y, 0);
-    glRotated(AZ_RAD2DEG(gravfield->angle), 0, 0, 1);
+    az_gl_translated(gravfield->position);
+    az_gl_rotated(gravfield->angle);
     az_draw_gravfield_no_transform(gravfield);
   } glPopMatrix();
 }
