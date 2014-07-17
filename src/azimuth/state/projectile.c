@@ -120,6 +120,13 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 1.5,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
   },
+  [AZ_PROJ_GUN_CHARGED_BURST] = {
+    .speed = 900.0,
+    .lifetime = 2.0,
+    .impact_damage = 1.75,
+    .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
+  },
   [AZ_PROJ_GUN_FREEZE_BURST] = {
     .speed = 900.0,
     .lifetime = 2.0,
