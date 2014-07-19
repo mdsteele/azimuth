@@ -23,9 +23,34 @@ OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
-CFLAGS = -Wall -Wempty-body -Winline -Wmissing-field-initializers \
-         -Wold-style-definition -Winitializer-overrides -Wshadow \
-         -Wsign-compare -Wstrict-prototypes -Wundef -Werror -O1 -I$(SRCDIR)
+#=============================================================================#
+# Determine what OS we're on and what targets we're building.
+
+ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
+               $(BINDIR)/muse $(BINDIR)/zfxr
+
+CFLAGS = -O1 -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
+         -Wmissing-field-initializers -Wold-style-definition -Wshadow \
+         -Wsign-compare -Wstrict-prototypes -Wundef
+
+OS_NAME := $(shell uname)
+ifeq "$(OS_NAME)" "Darwin"
+  CFLAGS += -I$(SRCDIR)/macosx -Winitializer-overrides
+  MAIN_LIBFLAGS = -framework Cocoa -framework SDL -framework OpenGL
+  TEST_LIBFLAGS =
+  MUSE_LIBFLAGS = -framework Cocoa -framework SDL
+  SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
+                    $(OBJDIR)/azimuth/system/resource_mac.o
+  ALL_TARGETS += macosx_app
+else
+  CFLAGS += -Woverride-init -Wno-unused-local-typedefs
+  MAIN_LIBFLAGS = -lm -lSDL -lGL
+  TEST_LIBFLAGS = -lm
+  MUSE_LIBFLAGS = -lm -lSDL
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
+  ALL_TARGETS += linux_app
+endif
+
 C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 
 define compile-sys
@@ -43,29 +68,6 @@ define copy-file
 	@mkdir -p $(@D)
 	@cp $< $@
 endef
-
-#=============================================================================#
-# Determine what OS we're on and what targets we're building.
-
-ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
-               $(BINDIR)/muse $(BINDIR)/zfxr
-
-OS_NAME := $(shell uname)
-ifeq "$(OS_NAME)" "Darwin"
-  CFLAGS += -I$(SRCDIR)/macosx
-  MAIN_LIBFLAGS = -framework Cocoa -framework SDL -framework OpenGL
-  TEST_LIBFLAGS =
-  MUSE_LIBFLAGS = -framework Cocoa -framework SDL
-  SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
-                    $(OBJDIR)/azimuth/system/resource_mac.o
-  ALL_TARGETS += macosx_app
-else
-  MAIN_LIBFLAGS = -lGL -lSDL
-  TEST_LIBFLAGS = -lm
-  MUSE_LIBFLAGS = -lSDL
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
-  ALL_TARGETS += linux_app
-endif
 
 #=============================================================================#
 # Find all of the source files:

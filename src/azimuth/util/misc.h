@@ -63,6 +63,10 @@ void *az_alloc_(const char *funcname, size_t n, size_t size)
 
 // Use this macro to check at compile time that a (compile-time-constant)
 // expression is true.  It is legal at top-level or within a function.
+// We use this instead of C11's _Static_assert declaration because that one
+// doesn't support expressions containing floating-point literals (for example,
+// _Static_assert(0.1 < 0.2, "foo") is invalid, but AZ_STATIC_ASSERT(0.1 < 0.2)
+// works fine).
 #define AZ_STATIC_ASSERT(condition) \
   typedef int AZ_JOIN(az_static_assertion_, __LINE__)[(condition) ? 1 : -1]
 
