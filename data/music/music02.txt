@@ -19,6 +19,14 @@
 3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
 5| x1q x7e. x1e x7e. x7e x0s x0 |
 
+2| rw |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae g |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| rw |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
 2| rh.. f3s g |
 3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
 5| x1q x7e. x1e x7e. x7e x0s x0 |
