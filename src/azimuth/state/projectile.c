@@ -228,6 +228,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 25.0,
     .impact_shake = 0.75,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_HYPER_ROCKET] = {
@@ -237,6 +238,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 20.0,
     .splash_radius = 40.0,
     .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_FREEZE] = {
@@ -246,6 +248,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 3.0,
     .splash_radius = 200.0,
     .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_MEGA_BOMB,
     .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_BARRAGE] = {
@@ -259,6 +262,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 25.0,
     .impact_shake = 0.75,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_HOMING] = {
@@ -269,6 +273,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 20.0,
     .impact_shake = 0.75,
     .homing_rate = AZ_DEG2RAD(270),
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_PHASE] = {
@@ -278,6 +283,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 18.0,
     .splash_radius = 40.0,
     .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET,
     .properties = AZ_PROJF_PHASED
   },
@@ -293,6 +299,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 4.0,
     .splash_radius = 30.0,
     .impact_shake = 1.5,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_PIERCE | AZ_DMGF_ROCKET
   },
   [AZ_PROJ_MISSILE_BEAM] = {
@@ -301,6 +308,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 10.0,
     .splash_radius = 200.0,
     .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = (AZ_DMGF_BEAM | AZ_DMGF_FLAME |
                     AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET),
     .properties = AZ_PROJF_NO_HIT
@@ -310,6 +318,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 25.0,
     .splash_radius = 60.0,
     .impact_shake = 1.5,
+    .impact_sound = AZ_SND_EXPLODE_BOMB,
     .damage_kind = AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT
   },
@@ -318,6 +327,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 75.0,
     .splash_radius = 200.0,
     .impact_shake = 3.0,
+    .impact_sound = AZ_SND_EXPLODE_MEGA_BOMB,
     .damage_kind = AZ_DMGF_MEGA_BOMB | AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT
   },
@@ -377,6 +387,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 15.0,
     .splash_radius = 50.0,
     .impact_shake = 1.5,
+    .impact_sound = AZ_SND_EXPLODE_BOMB,
     .damage_kind = AZ_DMGF_BOMB
   },
   [AZ_PROJ_ICE_TORPEDO] = {
@@ -386,6 +397,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 120.0,
     .impact_shake = 1.5,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_BOMB
   },
   [AZ_PROJ_LASER_PULSE] = {
@@ -397,6 +409,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 25.0,
     .splash_radius = 100.0,
     .impact_shake = 3.0,
+    .impact_sound = AZ_SND_EXPLODE_BOMB,
     .damage_kind = AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
@@ -417,6 +430,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 50.0,
     .splash_radius = 200.0,
     .impact_shake = 5.0,
+    .impact_sound = AZ_SND_EXPLODE_MEGA_BOMB,
     .damage_kind = AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
@@ -433,6 +447,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 25.0,
     .impact_shake = 1.0,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_OTH_ROCKET] = {
@@ -442,6 +457,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 7.5,
     .splash_radius = 30.0,
     .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
   },
   [AZ_PROJ_OTH_SPRAY] = {
@@ -493,6 +509,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 2.5,
     .splash_radius = 30.0,
     .impact_shake = 0.75,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME
   },
   [AZ_PROJ_TRINE_TORPEDO_FIREBALL] = {
@@ -502,6 +519,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 2.5,
     .splash_radius = 30.0,
     .impact_shake = 0.75,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME
   }
 };

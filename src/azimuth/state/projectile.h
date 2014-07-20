@@ -24,6 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/player.h" // for az_damage_flags_t
+#include "azimuth/state/sound.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/util/vector.h"
 
@@ -124,6 +125,7 @@ typedef struct {
   double splash_radius; // radius of explosion (zero for most projectiles)
   double impact_shake; // how much we shake the camera on impact
   double homing_rate; // homing turn rate in radians per second
+  az_sound_key_t impact_sound;
   az_proj_kind_t shrapnel_kind; // if AZ_PROJ_NOTHING, this proj doesn't burst
   az_damage_flags_t damage_kind; // 0 is interpreted as normal damage
   az_proj_flags_t properties;

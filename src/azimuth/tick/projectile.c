@@ -182,35 +182,7 @@ static void on_projectile_impact(az_space_state_t *state,
   }
 
   // Play sound.
-  switch (proj->kind) {
-    case AZ_PROJ_ROCKET:
-    case AZ_PROJ_MISSILE_TRIPLE:
-    case AZ_PROJ_MISSILE_HOMING:
-    case AZ_PROJ_OTH_MINIROCKET:
-    case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
-    case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
-      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_ROCKET);
-      break;
-    case AZ_PROJ_HYPER_ROCKET:
-    case AZ_PROJ_MISSILE_FREEZE:
-    case AZ_PROJ_MISSILE_PHASE:
-    case AZ_PROJ_MISSILE_PIERCE:
-    case AZ_PROJ_MISSILE_BEAM:
-    case AZ_PROJ_ICE_TORPEDO:
-    case AZ_PROJ_OTH_ROCKET:
-      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
-      break;
-    case AZ_PROJ_BOMB:
-    case AZ_PROJ_GRENADE:
-    case AZ_PROJ_MEDIUM_EXPLOSION:
-      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
-      break;
-    case AZ_PROJ_MEGA_BOMB:
-    case AZ_PROJ_NUCLEAR_EXPLOSION:
-      az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
-      break;
-    default: break;
-  }
+  az_play_sound(&state->soundboard, proj->data->impact_sound);
 
   // Gravity torpedos are special: on impact, they create a temporary gravity
   // well that pulls the ship in.
