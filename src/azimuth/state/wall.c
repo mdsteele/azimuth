@@ -1249,6 +1249,45 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {105, 95, 100, 255}, .color2 = {25, 15, 25, 255},
     .color3 = {40, 20, 0, 192}, .impact_damage_coeff = 5.0,
     .elasticity = 0.2, .polygon = AZ_INIT_POLYGON(wall_vertices_130)
+  },
+  // Solid-colored dark green rectangle:
+  [134] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {64, 0, 24, 255}, .color2 = {64, 0, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Short jungle grass wall:
+  [135] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {64, 40, 16, 255}, .color1 = {96, 64, 16, 255},
+    .color3 = {64, 0, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_114)
+  },
+  // Long jungle grass wall:
+  [136] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {64, 40, 16, 255}, .color1 = {96, 64, 16, 255},
+    .color3 = {64, 0, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_115)
+  },
+  // Jungle grass convex wall:
+  [137] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.75,
+    .color2 = {64, 40, 16, 255}, .color1 = {96, 64, 16, 255},
+    .color3 = {64, 0, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Jungle grass concave wall:
+  [138] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.75,
+    .color3 = {64, 40, 16, 255}, .color1 = {96, 64, 16, 255},
+    .color2 = {64, 0, 24, 255},
+    .elasticity = 0.1, .impact_damage_coeff = 2.5,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   }
 };
 
