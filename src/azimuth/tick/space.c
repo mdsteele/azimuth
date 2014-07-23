@@ -619,12 +619,21 @@ static void hold_ship_sounds(az_space_state_t *state) {
 /*===========================================================================*/
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  // Loop a klaxon sound if the countdown timer is active.
+  if (state->countdown.is_active) {
+    az_loop_sound(&state->soundboard,
+                  (state->countdown.time_remaining >
+                   AZ_COUNTDOWN_TIME_REMAINING_LOW ?
+                   AZ_SND_KLAXON_COUNTDOWN : AZ_SND_KLAXON_COUNTDOWN_LOW));
+  }
+
   // Loop a klaxon sound if the ship's shields are low.
   if (az_ship_is_alive(&state->ship) &&
       state->ship.player.shields <= AZ_SHIELDS_LOW_THRESHOLD) {
     az_loop_sound(&state->soundboard,
                   (state->ship.player.shields > AZ_SHIELDS_VERY_LOW_THRESHOLD ?
-                   AZ_SND_KLAXON : AZ_SND_KLAXON_DIRE));
+                   AZ_SND_KLAXON_SHIELDS_LOW :
+                   AZ_SND_KLAXON_SHIELDS_VERY_LOW));
   }
 
   // If we're pausing/unpausing, nothing else should happen.

@@ -448,7 +448,7 @@ static void draw_hud_countdown(const az_countdown_t *countdown,
     tint_hud_rect(width, height);
 
     assert(countdown->time_remaining >= 0.0);
-    if (countdown->time_remaining >= 10.0) {
+    if (countdown->time_remaining > AZ_COUNTDOWN_TIME_REMAINING_LOW) {
       glColor3f(1, 1, 1); // white
     } else {
       if (az_clock_mod(2, 3, clock) == 0) glColor3f(1, 1, 0); // yellow

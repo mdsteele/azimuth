@@ -1,0 +1,127 @@
+@M "SACD|BCEFGFHTTBCD"
+% Title: "The Only Way To Be Sure"
+
+=tempo 165
+=key 2#     % B minor
+
+
+
+!Part S
+
+1 Wp50 L30  E0,25  D+20,50 V+1,50
+2 Wp25 L40  E0,25  D+10,30 V+1,30
+3 Wt25 L200 E0,25  D+5,20
+4 Wn   L30  E0,100
+5 Wn   L70  E0,100
+
+
+
+!Part A
+
+1| f5e fs f ' fe fs f ' fe fs f ' ee f    |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part B
+
+1| b4e f5s f ' fe fs f ' fe fs f ' ee f   |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part C
+
+1| g5e gs g ' ge gs g ' ge gs g ' ge a    |
+3| b1s e2 g b ' e3 b2 g d ' b1s e2 g b ' e3 b2 g d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+1| f5e fs f ' fe fs f ' fe fs f ' fe a    |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part D
+
+1| e5e es e ' ee es e ' de ds d ' ce cs c |
+3| b1s e2 f b ' e3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part E
+
+1| e5e es e ' ee es e ' de ds d ' ce cs c |
+3| b1s e2 f b ' e3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c c c ' c c c c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+
+
+!Part F
+
+1 L40 E50,0
+
+1| re. b3s+q re. bs+q |
+2| b3q ' be bs b ' ae be+ ' +e be |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c1e c3s c ' c c c c ' c1e c3s c ' c c c c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+1| re. b3s+q re. bs+q |
+2| a3e be+ ' +e be ' d4e b3e+ ' +e be |
+3| b1s e2 g b ' e3 b2 g d ' b1s e2 g b ' e3 b2 g d |
+4| c1e c3s c ' c c c c ' c1e c3s c ' c c c c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+1| re. g3s+q re. gs+q |
+2| g3q+ ' +e d4e+ ' +q ' cq |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c1e c3s c ' c c c c ' c1e c3s c ' c c c c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part G
+
+1| re. a3s+q re. as+q |
+2| a3q+ ' +e d4e+ ' +q ' cq |
+3| b1s e2 f b ' e3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c1e c3s c ' c c c c ' c1e c3s c ' c c c c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+!Part H
+
+1| re. a3s+q re. as+q |
+2| a3q ' d4q ' dq ' cq |
+3| b1s e2 f b ' e3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c1q ' c ' c ' c |
+5| x0e c7 ' x7 c7 ' x0 c7 ' x7 c7 |
+
+1 L30 E0,25
+
+
+
+!Part T
+
+1| b4e f5s f ' fe fs f ' fe fs f ' ee f   |
+2| b3q ' be bs b ' ae be+ ' +e be |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c1q ' c ' c1e c3s c ' c c c c |
+5| x0e x7 ' x0 x7 ' x0 x7 ' x0 x7 |
+
+1| g5e gs g ' ge gs g ' ge gs g ' ge a    |
+2| a3e be+ ' +e be ' d4e b3e+ ' +e be |
+3| b1s e2 g b ' e3 b2 g d ' b1s e2 g b ' e3 b2 g d |
+4| c1e c3s c ' c c c c ' c1e c3s c ' c c c c |
+5| x0e x7 ' x0 x7 ' x0 x7 ' x0 x7 |
+
+1| f5e fs f ' fe fs f ' fe fs f ' fe a    |
+2| g3q+ ' +e d4e+ ' +q ' cq |
+3| b1s d2 f b ' d3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e x7 ' x0 x7 ' x0 x7 ' x0 x7 |
+
+1| e5e es e ' ee es e ' de ds d ' ce cs c |
+2| a3q+ ' +e d4e+ ' +q ' cq |
+3| b1s e2 f b ' e3 b2 f d ' b1s d2 f b ' d3 b2 f d |
+4| c3s c ce ' c5q ' c3s c ce ' c5q |
+5| x0e x7 ' x0 x7 ' x0 x7 ' x0 x7 |

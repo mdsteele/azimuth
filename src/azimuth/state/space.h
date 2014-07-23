@@ -76,6 +76,10 @@ typedef struct {
   int num_lines;
 } az_message_t;
 
+// When there is this much time or less left on the countdown, the timer blinks
+// and a more dire klaxon sounds.
+#define AZ_COUNTDOWN_TIME_REMAINING_LOW 30.0
+
 typedef struct {
   bool is_active;
   double active_for; // seconds

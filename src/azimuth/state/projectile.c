@@ -472,7 +472,9 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 75.0,
     .splash_radius = 120.0,
     .impact_shake = 5.0,
-    .damage_kind = ~0,
+    .damage_kind = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE |
+                    AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET |
+                    AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB),
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_SONIC_WAVE] = {

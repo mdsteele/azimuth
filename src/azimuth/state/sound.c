@@ -572,14 +572,26 @@ static az_sound_spec_t sound_specs[] = {
     .env_sustain = 0.10687, .env_punch = 0.24554, .env_decay = 0.463,
     .start_freq = 0.0972442, .freq_slide = 0.05804, .repeat_speed = 0.56475,
   },
-  [AZ_SND_KLAXON] = {
+  [AZ_SND_KLAXON_COUNTDOWN] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.55, .start_freq = 0.25, .freq_slide = 0.112676,
+    .square_duty = 0.873239, .phaser_offset = 0.40845,
+    .volume_adjust = -0.24
+  },
+  [AZ_SND_KLAXON_COUNTDOWN_LOW] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.45, .start_freq = 0.32394, .freq_slide = 0.112676,
+    .square_duty = 0.873239, .phaser_offset = 0.40845,
+    .volume_adjust = -0.19
+  },
+  [AZ_SND_KLAXON_SHIELDS_LOW] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.4507, .start_freq = 0.32394,
     .freq_slide = 0.112676, .freq_delta_slide = -0.197183,
     .square_duty = 0.873239, .phaser_offset = 0.40845,
     .volume_adjust = -0.24
   },
-  [AZ_SND_KLAXON_DIRE] = {
+  [AZ_SND_KLAXON_SHIELDS_VERY_LOW] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.4507, .start_freq = 0.32394,
     .freq_slide = 0.212676, .freq_delta_slide = -0.197183,
