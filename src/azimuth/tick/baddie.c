@@ -808,7 +808,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         if (az_ship_in_range(state, baddie, 80) &&
             az_can_see_ship(state, baddie)) {
           baddie->state = 1;
-          baddie->cooldown = 0.35;
+          baddie->cooldown = 0.5;
           az_play_sound(&state->soundboard, AZ_SND_BLINK_MEGA_BOMB);
         }
       }
