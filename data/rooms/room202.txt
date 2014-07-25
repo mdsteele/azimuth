@@ -1,6 +1,6 @@
 @R z3 p0 b19 d4 g1 n84 w186
   c(36622.89,1293.52,1.876794,0.011140)
-$s:test92,beqz/A,unlock9,A#push8,dup,sstat1,sstat2,wait1,push0,dup,sstat1,sstat2,wait1,jump/A;
+$s:mus4,test92,beqz/A,unlock9,A#push8,dup,sstat1,sstat2,wait1,push0,dup,sstat1,sstat2,wait1,jump/A;
 !W1 d61 x-11532.91 y36263.09 a2.973354 u0
 !W1 d61 x-11617.41 y36264.04 a-3.020730 u0
 !W1 d61 x-11876.80 y36151.80 a-2.757509 u0

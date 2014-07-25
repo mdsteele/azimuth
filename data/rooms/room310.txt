@@ -1,6 +1,6 @@
 @R z2 p0 b11 d4 g3 n73 w157
   c(25233.32,1574.33,1.084067,0.031688)
-$s:dark0.25,test71,heqz,unlock1;
+$s:dark0.25,test49,beqz/A,test50,bnez/A,halt,A#mus3,test71,heqz,unlock1;
 !W1 d93 x11796.86 y24180.55 a-3.061972 u0
 !W1 d9 x11903.42 y23337.52 a-0.470705 u0
 !W1 d93 x12111.48 y24050.67 a2.879521 u0

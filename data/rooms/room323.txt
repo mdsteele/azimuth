@@ -131,7 +131,7 @@ $s:msg96,test50,beqz/A,activ3,halt,A#lock1,lock2,wait2.5,gpos4,gpos7,bolt3,gpos4
 !N5/5 x10447.70 y17696.80 a-2.100230 u0
 !N5/5 x10383.35 y17731.75 a-2.100230 u0
 !N1/0 x10383.98 y17661.66 a1.039292 u0
-$u:test50,beqz/A,dlog,pt1,pb3,tb103,dend,halt,A#safe,dlog,pt1,tt97,set50,tt98,pb3,tb99,tt100,tb101,tt102,has9,bnez/B,set70,B#tb103,dend,unlock1,unlock2;
+$u:test50,beqz/A,dlog,pt1,pb3,tb103,dend,halt,A#safe,dlog,pt1,tt97,set50,mus3,tt98,pb3,tb99,tt100,tb101,tt102,has9,bnez/B,set70,B#tb103,dend,unlock1,unlock2;
 !N5/2 x10432.95 y17687.35 a1.039310 u0
 !N5/2 x10383.24 y17716.15 a-0.529811 u0
 !N8/2 x10314.75 y17544.42 a-0.531491 u6

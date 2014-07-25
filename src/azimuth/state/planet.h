@@ -33,7 +33,6 @@
 typedef struct {
   char *name; // NUL-terminated; owned by zone object
   az_color_t color;
-  az_music_key_t music;
 } az_zone_t;
 
 typedef struct {

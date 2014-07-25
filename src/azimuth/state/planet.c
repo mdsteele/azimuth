@@ -136,12 +136,11 @@ static void parse_zone_directive(az_load_planet_t *loader) {
   if (loader->planet->num_zones >= loader->num_zones) FAIL();
   az_zone_t *zone = &loader->planet->zones[loader->planet->num_zones];
   zone->name = scan_string(loader);
-  int red, green, blue, music;
-  READ(" c(%d,%d,%d) m%d\n", &red, &green, &blue, &music);
+  int red, green, blue;
+  READ(" c(%d,%d,%d)\n", &red, &green, &blue);
   if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 ||
-      blue > 255 || music < 0 || music >= AZ_NUM_MUSIC_KEYS) FAIL();
+      blue > 255) FAIL();
   zone->color = (az_color_t){red, green, blue, 255};
-  zone->music = (az_music_key_t)music;
   ++loader->planet->num_zones;
   scan_to_bang(loader);
 }
@@ -232,8 +231,8 @@ static bool write_planet_header(const az_planet_t *planet, FILE *file) {
         default: WRITE("%c", zone->name[j]); break;
       }
     }
-    WRITE("\" c(%d,%d,%d) m%d\n", (int)zone->color.r, (int)zone->color.g,
-          (int)zone->color.b, (int)zone->music);
+    WRITE("\" c(%d,%d,%d)\n", (int)zone->color.r, (int)zone->color.g,
+          (int)zone->color.b);
   }
   for (int i = 0; i < planet->num_paragraphs; ++i) {
     const char *paragraph = planet->paragraphs[i];
