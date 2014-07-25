@@ -351,6 +351,40 @@ bool az_load_editor_state(az_editor_state_t *state) {
 static void summarize_scenario(const az_planet_t *planet) {
   bool linebreak = false;
   printf("\n");
+  // Print save rooms that don't have appropriate room scripts.
+  for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+    const az_room_t *room = &planet->rooms[room_index];
+    bool found_save_point = false;
+    for (int i = 0; i < room->num_nodes; ++i) {
+      const az_node_spec_t *node = &room->nodes[i];
+      if (node->kind == AZ_NODE_CONSOLE &&
+          node->subkind.console == AZ_CONS_SAVE) {
+        if (found_save_point) {
+          printf("\x1b[31mRoom %d: Multiple save points\x1b[m\n", room_index);
+          linebreak = true;
+        }
+        found_save_point = true;
+      }
+    }
+    if (!found_save_point) continue;
+    bool found_msg0 = false, found_mus = false;
+    if (room->on_start != NULL) {
+      for (int i = 0; i < room->on_start->num_instructions; ++i) {
+        const az_instruction_t ins = room->on_start->instructions[i];
+        if (ins.opcode == AZ_OP_MSG && ins.immediate == 0) found_msg0 = true;
+        if (ins.opcode == AZ_OP_MUS) found_mus = true;
+      }
+    }
+    if (!found_msg0) {
+      printf("\x1b[31mRoom %d: Save point without msg0\x1b[m\n", room_index);
+      linebreak = true;
+    }
+    if (!found_mus) {
+      printf("\x1b[31mRoom %d: Save point without music\x1b[m\n", room_index);
+      linebreak = true;
+    }
+  }
+  if (linebreak) { printf("\n"); linebreak = false; }
   // Print walls/nodes that have a duplicate wall/node right on top.
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
     const az_room_t *room = &planet->rooms[room_index];
