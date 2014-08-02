@@ -30,9 +30,9 @@
 
 // Constants:
 #define AZ_ROCKETS_PER_PICKUP 3
-#define AZ_BOMBS_PER_PICKUP 1
-#define AZ_SHIELDS_PER_SMALL_PICKUP 5
-#define AZ_SHIELDS_PER_MEDIUM_PICKUP 15
+#define AZ_BOMBS_PER_PICKUP 2
+#define AZ_SHIELDS_PER_SMALL_PICKUP 10
+#define AZ_SHIELDS_PER_MEDIUM_PICKUP 20
 #define AZ_SHIELDS_PER_LARGE_PICKUP 50
 // How long pickups last before expiring, in seconds:
 #define AZ_PICKUP_MAX_AGE 10.0
