@@ -177,6 +177,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_CHOMPER_PLANT,
   AZ_BAD_AQUATIC_CHOMPER,
   AZ_BAD_JUNGLE_CHOMPER,
+  AZ_BAD_FIRE_CHOMPER,
   // Mushrooms:
   AZ_BAD_MYCOFLAKKER,
   AZ_BAD_MYCOSTALKER,

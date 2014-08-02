@@ -253,4 +253,52 @@ void az_tick_bad_jungle_chomper(
             (baddie->state > 0));
 }
 
+void az_tick_bad_fire_chomper(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_FIRE_CHOMPER);
+  az_component_t *base = &baddie->components[0];
+  // Get the absolute position of the base.
+  const az_vector_t base_pos =
+    az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
+  const double base_angle = az_mod2pi(baddie->angle + base->angle);
+  // Pick a new position for the head.
+  const bool line_of_sight = az_can_see_ship(state, baddie);
+  const az_vector_t ship_pos = state->ship.position;
+  double head_angle_goal = baddie->angle;
+  az_vector_t head_pos = baddie->position;
+  az_vector_t head_pos_goal = head_pos;
+  if (line_of_sight) {
+    head_pos_goal = az_vadd(az_vadd(base_pos, az_vpolar(60, base_angle)),
+                            az_vwithlen(az_vsub(ship_pos, base_pos), 20));
+    head_angle_goal = az_vtheta(az_vsub(ship_pos, head_pos));
+    if (baddie->cooldown <= 0.0 &&
+        baddie->components[1].angle >= AZ_DEG2RAD(35) &&
+        az_ship_in_range(state, baddie, 400) &&
+        az_ship_within_angle(state, baddie, 0.0, AZ_DEG2RAD(15))) {
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO_FIREBALL,
+          baddie->data->main_body.bounding_radius, 0.0, 0.0);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+      az_vpluseq(&head_pos, az_vpolar(-10, baddie->angle));
+      baddie->cooldown = az_random(2.0, 4.0);
+    }
+  } else {
+    // Sway head side to side.
+    baddie->param += time * 300 / az_vdist(head_pos, ship_pos);
+    head_pos_goal = az_vadd(base_pos, az_vpolar(
+        80, base_angle + AZ_DEG2RAD(10) * sin(baddie->param)));
+    head_angle_goal = az_vtheta(az_vsub(head_pos_goal, base_pos));
+    baddie->cooldown = fmax(1.0, baddie->cooldown);
+  }
+  const double tracking_base = 0.1; // smaller = faster tracking
+  const az_vector_t delta =
+    az_vmul(az_vsub(head_pos_goal, head_pos), 1.0 - pow(tracking_base, time));
+  az_vpluseq(&head_pos, delta);
+  // Update the baddie's position and components.
+  const double head_angle = az_angle_towards(baddie->angle,
+      (line_of_sight ? AZ_DEG2RAD(120) : AZ_DEG2RAD(60)) * time,
+      head_angle_goal);
+  move_head(baddie, time, 0.5, head_pos, head_angle, base_pos, base_angle,
+            (line_of_sight && baddie->cooldown < 0.75));
+}
+
 /*===========================================================================*/

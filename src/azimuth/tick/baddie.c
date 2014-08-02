@@ -976,6 +976,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else baddie->state = 0;
       az_trail_tail_behind(baddie, 0, old_baddie_position, old_baddie_angle);
       break;
+    case AZ_BAD_FIRE_CHOMPER:
+      az_tick_bad_fire_chomper(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

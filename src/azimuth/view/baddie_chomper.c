@@ -192,4 +192,20 @@ void az_draw_bad_jungle_chomper(
   draw_pincers(baddie, true, center_color, side_color);
 }
 
+void az_draw_bad_fire_chomper(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_FIRE_CHOMPER);
+  const float flare = baddie->armor_flare;
+  const az_color_t center_color =
+    color3(0.8f - 0.7f * frozen, 0.3f + 0.2f * flare + 0.5f * frozen,
+           0.1f - 0.1f * flare + 0.9f * frozen);
+  const az_color_t side_color =
+    color3(0.4f - 0.4f * frozen, 0.2f + 0.2f * flare + 0.4f * frozen,
+           0.1f - 0.1f * flare + 0.6f * frozen);
+  draw_stalk(baddie, false, 0.5, center_color, side_color);
+  draw_base(baddie, center_color, side_color);
+  draw_core(baddie, flare, frozen);
+  draw_pincers(baddie, true, center_color, side_color);
+}
+
 /*===========================================================================*/

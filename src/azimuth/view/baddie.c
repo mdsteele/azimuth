@@ -1009,6 +1009,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_DEMON_SWOOPER:
       az_draw_bad_demon_swooper(baddie, frozen, clock);
       break;
+    case AZ_BAD_FIRE_CHOMPER:
+      az_draw_bad_fire_chomper(baddie, frozen, clock);
+      break;
   }
 }
 
