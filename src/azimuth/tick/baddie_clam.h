@@ -18,27 +18,23 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_H_
-#define AZIMUTH_TICK_BADDIE_H_
+#ifndef AZIMUTH_TICK_BADDIE_CLAM_H_
+#define AZIMUTH_TICK_BADDIE_CLAM_H_
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
-#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-void az_tick_baddies(az_space_state_t *state, double time);
+void az_tick_bad_clam(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
 
-// Called when a baddie takes nonzero damage (or is frozen without taking
-// damage) but isn't killed by it.
-void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
-                          double amount, az_damage_flags_t damage_kind);
-
-// Called after a baddie has been killed and removed, but before its script is
-// run.  Not called if the baddie dies in a way that wouldn't run its script.
-void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
-                         az_vector_t position, double angle);
+void az_tick_bad_grabber_plant(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_grabber_plant_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_H_
+#endif // AZIMUTH_TICK_BADDIE_CLAM_H_

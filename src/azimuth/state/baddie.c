@@ -771,6 +771,31 @@ static const az_vector_t sensor_laser_vertices[] = {
   {-15, -20}, {10, -20}, {10, -12}
 };
 
+static const az_vector_t grabber_plant_core_vertices[] = {
+  {-4, -5}, {3, -11}, {5, -10}, {6.5, -6}, {4, 0},
+  {6.5, 6}, {5, 10}, {3, 11}, {-4, 5}
+};
+static const az_vector_t grabber_plant_left_pincer_vertices[] = {
+  {20, 0}, {23,  2}, {20,  9}, {17,  12}, {10,  15}, {1,  14}, {-5, 10},
+  {-7,  7}, {-8, 0}
+};
+static const az_vector_t grabber_plant_right_pincer_vertices[] = {
+  {20, 0}, {23, -2}, {20, -8}, {17, -12}, {10, -15}, {1, -14}, {-6, -9},
+  {-7, -6}, {-8, 0}
+};
+static const az_vector_t grabber_plant_base_vertices[] = {
+  {-22, -20}, {-12, -13}, {-4, -11}, {-2, -8}, {-1, -4}, {0.5, 0},
+  {-1, 4}, {-2, 8}, {-4, 11}, {-12, 14}, {-22, 20}
+};
+static az_component_data_t grabber_plant_components[] = {
+  { .polygon = AZ_INIT_POLYGON(grabber_plant_left_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 },
+  { .polygon = AZ_INIT_POLYGON(grabber_plant_right_pincer_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 },
+  { .polygon = AZ_INIT_POLYGON(grabber_plant_base_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1098,7 +1123,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_CHOMPER_PLANT] = {
     .max_health = 14.0, .overall_bounding_radius = 250.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {32, 128, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(chomper_plant_components)
   },
@@ -1390,14 +1416,16 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MYCOFLAKKER] = {
     .max_health = 8.0,
     .color = {160, 80, 255, 255}, .potential_pickups = AZ_PUPF_ALL,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycoflakker_vertices),
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_MYCOSTALKER] = {
     .max_health = 10.0,
     .color = {192, 80, 224, 255}, .potential_pickups = AZ_PUPF_ALL,
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
                    .impact_damage = 12.0 }
   },
@@ -1443,7 +1471,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_JUNGLE_CHOMPER] = {
     .max_health = 14.0, .overall_bounding_radius = 250.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {128, 192, 0, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(jungle_chomper_components)
   },
@@ -1475,6 +1504,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_PYROFLAKKER] = {
     .max_health = 12.0,
     .color = {255, 160, 80, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_PLANT,
     .death_sound = AZ_SND_KILL_FIRE_CRAWLER, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycoflakker_vertices),
                    .immunities = AZ_DMGF_FLAME, .impact_damage = 10.0 }
@@ -1482,6 +1512,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_PYROSTALKER] = {
     .max_health = 15.0,
     .color = {255, 192, 80, 255}, .potential_pickups = AZ_PUPF_ALL,
+    .hurt_sound = AZ_SND_HURT_PLANT,
     .death_sound = AZ_SND_KILL_FIRE_CRAWLER, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .polygon = AZ_INIT_POLYGON(mycostalker_vertices),
                    .immunities = AZ_DMGF_FLAME, .impact_damage = 12.0 }
@@ -1498,10 +1529,19 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_FIRE_CHOMPER] = {
     .max_health = 14.0, .overall_bounding_radius = 130.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {192, 96, 32, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_EMBERS,
-    .static_properties = AZ_BADF_DRAW_BG,
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .static_properties = AZ_BADF_DRAW_BG, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(fire_chomper_components)
+  },
+  [AZ_BAD_GRABBER_PLANT] = {
+    .max_health = 14.0, .overall_bounding_radius = 30.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {90, 160, 40, 255},
+    .hurt_sound = AZ_SND_HURT_PLANT, .death_sound = AZ_SND_KILL_PLANT,
+    .static_properties = AZ_BADF_DRAW_BG, .death_style = AZ_DEATH_EMBERS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(grabber_plant_core_vertices),
+                   .impact_damage = 10.0 },
+    DECL_COMPONENTS(grabber_plant_components)
   }
 };
 

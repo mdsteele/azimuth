@@ -27,6 +27,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/tick/baddie_chomper.h"
+#include "azimuth/tick/baddie_clam.h"
 #include "azimuth/tick/baddie_crawler.h"
 #include "azimuth/tick/baddie_forcefiend.h"
 #include "azimuth/tick/baddie_kilofuge.h"
@@ -311,35 +312,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_BOX: break; // Do nothing.
     case AZ_BAD_ARMORED_BOX: break; // Do nothing.
     case AZ_BAD_CLAM:
-      {
-        const bool can_see = az_can_see_ship(state, baddie);
-        const double ship_theta =
-          az_vtheta(az_vsub(state->ship.position, baddie->position));
-        if (can_see) {
-          baddie->angle =
-            az_angle_towards(baddie->angle, 0.2 * time, ship_theta);
-        }
-        const double max_angle = AZ_DEG2RAD(40);
-        const double old_angle = baddie->components[0].angle;
-        const double new_angle =
-          (baddie->cooldown <= 0.0 && can_see &&
-           fabs(az_mod2pi(baddie->angle - ship_theta)) < AZ_DEG2RAD(10) ?
-           fmin(max_angle, max_angle -
-                (max_angle - old_angle) * pow(0.00003, time)) :
-           fmax(0.0, old_angle - 1.0 * time));
-        baddie->components[0].angle = new_angle;
-        baddie->components[1].angle = -new_angle;
-        if (baddie->cooldown <= 0.0 && new_angle >= 0.95 * max_angle) {
-          for (int i = -1; i <= 1; ++i) {
-            az_fire_baddie_projectile(state, baddie,
-                (i == 0 ? AZ_PROJ_FIREBALL_SLOW : AZ_PROJ_FIREBALL_FAST),
-                0.5 * baddie->data->main_body.bounding_radius,
-                AZ_DEG2RAD(i * 5), 0.0);
-          }
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
-          baddie->cooldown = 3.0;
-        }
-      }
+      az_tick_bad_clam(state, baddie, time);
       break;
     case AZ_BAD_NIGHTBUG:
       az_fly_towards_ship(state, baddie, time,
@@ -979,6 +952,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_FIRE_CHOMPER:
       az_tick_bad_fire_chomper(state, baddie, time);
       break;
+    case AZ_BAD_GRABBER_PLANT:
+      az_tick_bad_grabber_plant(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
@@ -1000,6 +976,16 @@ void az_tick_baddies(az_space_state_t *state, double time) {
 }
 
 /*===========================================================================*/
+
+void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
+                          double amount, az_damage_flags_t damage_kind) {
+  switch (baddie->kind) {
+    case AZ_BAD_GRABBER_PLANT:
+      az_on_grabber_plant_damaged(state, baddie, amount, damage_kind);
+      break;
+    default: break;
+  }
+}
 
 void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
                          az_vector_t position, double angle) {

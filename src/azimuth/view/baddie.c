@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_chomper.h"
+#include "azimuth/view/baddie_clam.h"
 #include "azimuth/view/baddie_crawler.h"
 #include "azimuth/view/baddie_forcefiend.h"
 #include "azimuth/view/baddie_machine.h"
@@ -328,49 +329,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       draw_box(true, flare);
       break;
     case AZ_BAD_CLAM:
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.75 - 0.75 * frozen, 0.25 + 0.5 * flare, 0.5); // reddish
-        glVertex2d(0.5 * baddie->data->main_body.bounding_radius, 0);
-        glColor3f(0.25 - 0.25 * frozen, 0.5 * flare,
-                  0.25 * frozen + 0.5 * flare); // dark red
-        const double radius = baddie->data->main_body.bounding_radius;
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      for (int i = 0; i < baddie->data->num_components; ++i) {
-        glPushMatrix(); {
-          const az_component_t *component = &baddie->components[i];
-          glTranslated(component->position.x, component->position.y, 0);
-          glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
-          az_polygon_t polygon = baddie->data->components[i].polygon;
-          glBegin(GL_TRIANGLE_FAN); {
-            glColor3f(0.75, 0.25, 1);
-            glVertex2f(0, 0);
-            glColor3f(0.2 + 0.4 * flare, 0.2 - 0.3 * flare, 0.2 - 0.3 * flare);
-            for (int j = 0; j < polygon.num_vertices; ++j) {
-              glVertex2d(polygon.vertices[j].x, polygon.vertices[j].y);
-            }
-          } glEnd();
-          glBegin(GL_QUADS); {
-            const int n = polygon.num_vertices;
-            glVertex2d(polygon.vertices[0].x, polygon.vertices[0].y);
-            glVertex2d(polygon.vertices[n - 1].x, polygon.vertices[n - 1].y);
-            glColor4f(0.25, 0, 0.5, 0);
-            glVertex2d(polygon.vertices[n - 2].x, polygon.vertices[n - 2].y);
-            glVertex2d(polygon.vertices[1].x, polygon.vertices[1].y);
-          } glEnd();
-        } glPopMatrix();
-      }
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor4f(0.5, 0.4, 0.3, 0);
-        glVertex2f(-4, 0);
-        for (int i = 135; i <= 225; i += 15) {
-          if (i == 225) glColor4f(0.5, 0.4, 0.3, 0);
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 13 * sin(AZ_DEG2RAD(i)));
-          if (i == 135) glColor3f(0.2, 0.15, 0.3);
-        }
-      } glEnd();
+      az_draw_bad_clam(baddie, frozen, clock);
       break;
     case AZ_BAD_NIGHTBUG:
       az_draw_bad_nightbug(baddie, frozen, clock);
@@ -1011,6 +970,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_FIRE_CHOMPER:
       az_draw_bad_fire_chomper(baddie, frozen, clock);
+      break;
+    case AZ_BAD_GRABBER_PLANT:
+      az_draw_bad_grabber_plant(baddie, frozen, clock);
       break;
   }
 }

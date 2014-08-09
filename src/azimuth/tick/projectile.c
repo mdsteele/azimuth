@@ -25,6 +25,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/tick/baddie.h" // for az_on_baddie_damaged
 #include "azimuth/tick/door.h" // for az_try_open_door
 #include "azimuth/tick/object.h" // for az_try_damage_baddie
 #include "azimuth/tick/script.h"
@@ -89,6 +90,7 @@ static void on_projectile_impact(az_space_state_t *state,
         if (proj->kind == AZ_PROJ_MISSILE_FREEZE &&
             !(baddie->data->main_body.immunities & AZ_DMGF_FREEZE)) {
           baddie->frozen = 1.0;
+          az_on_baddie_damaged(state, baddie, 0.0, AZ_DMGF_FREEZE);
         }
       }
     }

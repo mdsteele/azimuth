@@ -439,6 +439,12 @@ static az_sound_spec_t sound_specs[] = {
     .arp_mod = 0.54, .arp_speed = 0.595,
     .phaser_offset = -0.43, .hpf_cutoff = 0.485, .volume_adjust = 0.5
   },
+  [AZ_SND_HURT_PLANT] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_punch = 0.164633, .env_decay = 0.28,
+    .start_freq = 0.255, .freq_slide = -0.39, .phaser_sweep = -0.67,
+    .lpf_cutoff = 0.785, .lpf_resonance = -0.9, .hpf_cutoff = 0.23
+  },
   [AZ_SND_HURT_ROCKWYRM] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_attack = 0.00378904, .env_sustain = 0.04,
@@ -555,6 +561,14 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.557146, .phaser_sweep = -0.0230222,
     .lpf_cutoff = 0.701672, .lpf_ramp = 0.410088, .lpf_resonance = 0.741268,
     .hpf_cutoff = 0.226537, .hpf_ramp = 0.0183639, .volume_adjust = 0.7
+  },
+  [AZ_SND_KILL_PLANT] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_sustain = 0.13, .env_punch = 0.34, .env_decay = 0.46,
+    .start_freq = 0.255, .freq_slide = -0.25,
+    .vibrato_depth = 0.32, .vibrato_speed = 0.535,
+    .phaser_offset = 0.81, .phaser_sweep = -0.67,
+    .lpf_cutoff = 0.785, .lpf_resonance = -0.9, .hpf_cutoff = 0.23
   },
   [AZ_SND_KILL_SWOOPER] = {
     .wave_kind = AZ_WOBBLE_WAVE,

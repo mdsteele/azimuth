@@ -342,6 +342,7 @@ bool az_try_damage_baddie(
       }
       baddie->frozen = 1.0;
     }
+    az_on_baddie_damaged(state, baddie, damage_amount, damage_kind);
   }
   // Otherwise, the baddie is dead, so have it killed.
   else {
