@@ -174,11 +174,12 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
               "and press [$f] to drop.  Uses 3 bombs.");
     case AZ_UPG_HIGH_EXPLOSIVES:
       { AZ_STATIC_ASSERT(AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER == 1.5); }
-      return "Your rockets and bombs now deal 50% more damage.";
+      return "Increases the damage of your rockets and bombs by 50%.";
     case AZ_UPG_ATTUNED_EXPLOSIVES:
-      { AZ_STATIC_ASSERT(AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR == 0.5); }
-      return ("Your own rockets and bombs now deal only half\n"
-              "as much splash damage to your own ship.");
+      { AZ_STATIC_ASSERT(AZ_ATTUNED_EXPLOSIVES_RADIUS_FACTOR == 1.5); }
+      { AZ_STATIC_ASSERT(AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR == 0.25); }
+      return ("Increases the blast radius of your rockets and bombs by 50%\n"
+              "and reduces the damage you take from them by 75%.");
     case AZ_UPG_RETRO_THRUSTERS:
       return "Press [$d] to accelerate your ship backwards.";
     case AZ_UPG_CPLUS_DRIVE:
@@ -212,8 +213,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
       return ("Cloaks your ship after locking onto a tractor node for\n"
               "a few seconds.  Firing weapons disables the cloak.");
     case AZ_UPG_MAGNET_SWEEP:
-      return ("Nearby shield and ammo pickups will be\n"
-              "pulled toward your ship.");
+      return ("Pulls nearby shield and ammo pickups toward your ship.");
     case AZ_UPG_INFRASCANNER:
       return "Improves your ship's sensors in low-visibility areas.";
     case AZ_UPG_MILLIWAVE_RADAR:

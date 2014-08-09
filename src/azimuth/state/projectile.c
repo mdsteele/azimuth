@@ -324,7 +324,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_MEGA_BOMB] = {
     .lifetime = 3.0,
-    .splash_damage = 75.0,
+    .splash_damage = 40.0,
     .splash_radius = 200.0,
     .impact_shake = 3.0,
     .impact_sound = AZ_SND_EXPLODE_MEGA_BOMB,

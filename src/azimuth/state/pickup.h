@@ -37,9 +37,13 @@
 // How long pickups last before expiring, in seconds:
 #define AZ_PICKUP_MAX_AGE 10.0
 // How close the ship must be to a pickup to collect it, in pixels:
-#define AZ_PICKUP_COLLECTION_RANGE 20.0
-// How close the ship must be to a pickup for the Magnet Sweep to pull it in:
-#define AZ_MAGNET_SWEEP_MAX_RANGE 80.0
+#define AZ_PICKUP_COLLECT_RANGE 7.0
+// How close the ship must be to a pickup to pull it in *without* the Magnet
+// Sweep, in pixels:
+#define AZ_NORMAL_PICKUP_ATTRACT_RANGE 50.0
+// How close the ship must be to a pickup to pull it in *with* the Magnet
+// Sweep, in pixels:
+#define AZ_MAGNET_SWEEP_ATTRACT_RANGE 120.0
 
 // A bitset of pickup flags, made from OR-ing together the below constants:
 typedef uint_fast8_t az_pickup_flags_t;

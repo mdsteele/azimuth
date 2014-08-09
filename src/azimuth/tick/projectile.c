@@ -59,7 +59,11 @@ static void expire_projectile(az_space_state_t *state, az_projectile_t *proj) {
 static void on_projectile_impact(az_space_state_t *state,
                                  az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
-  const double radius = proj->data->splash_radius;
+  const bool attuned =
+    (proj->fired_by == AZ_SHIP_UID &&
+     az_has_upgrade(&state->ship.player, AZ_UPG_ATTUNED_EXPLOSIVES));
+  const double radius = proj->data->splash_radius *
+    (attuned ? AZ_ATTUNED_EXPLOSIVES_RADIUS_FACTOR : 1.0);
   // If applicable, deal splash damage.
   if (radius > 0.0 && proj->data->splash_damage > 0.0) {
     // Damage the ship if it's within the blast (even if this projectile was
@@ -69,10 +73,7 @@ static void on_projectile_impact(az_space_state_t *state,
       double damage = proj->data->splash_damage * proj->power;
       // The Attuned Explosives upgrade reduces the splash damage the ship
       // takes from its own explosives.
-      if (proj->fired_by == AZ_SHIP_UID &&
-          az_has_upgrade(&state->ship.player, AZ_UPG_ATTUNED_EXPLOSIVES)) {
-        damage *= AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR;
-      }
+      if (attuned) damage *= AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR;
       az_damage_ship(state, damage, false);
     }
     // Damage baddies that are within the blast (except that a baddie is not
@@ -590,7 +591,8 @@ static void projectile_special_logic(az_space_state_t *state,
       }
       if (proj->kind == AZ_PROJ_BOMB &&
           !az_vwithin(proj->position, state->ship.position,
-                      proj->data->splash_radius + 5.0)) {
+                      proj->data->splash_radius *
+                      AZ_ATTUNED_EXPLOSIVES_RADIUS_FACTOR + 5.0)) {
         az_impact_t impact;
         az_circle_impact(state, 25.0, proj->position, AZ_VZERO,
                          ~AZ_IMPF_BADDIE, AZ_NULL_UID, &impact);

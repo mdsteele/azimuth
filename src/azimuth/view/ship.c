@@ -46,7 +46,7 @@ void az_draw_ship(az_space_state_t *state) {
     AZ_ARRAY_LOOP(pickup, state->pickups) {
       if (pickup->kind == AZ_PUP_NOTHING) continue;
       if (az_vwithin(pickup->position, ship->position,
-                     AZ_MAGNET_SWEEP_MAX_RANGE)) {
+                     AZ_MAGNET_SWEEP_ATTRACT_RANGE)) {
         glBegin(GL_TRIANGLE_STRIP); {
           const az_vector_t offset = az_vwithlen(az_vrot90ccw(
               az_vsub(pickup->position, ship->position)), 6.0);
@@ -54,6 +54,7 @@ void az_draw_ship(az_space_state_t *state) {
           az_gl_vertex(az_vadd(pickup->position, offset));
           glColor4f(1, 1, 0.5, 0.2);
           az_gl_vertex(ship->position);
+          glColor4f(1, 1, 0.5, 0.1);
           az_gl_vertex(pickup->position);
           glColor4f(1, 1, 0.5, 0);
           az_gl_vertex(az_vsub(pickup->position, offset));

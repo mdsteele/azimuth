@@ -35,7 +35,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
     pickup->age += time;
     if (az_ship_is_alive(ship) &&
         az_vwithin(pickup->position, ship->position,
-                   AZ_PICKUP_COLLECTION_RANGE)) {
+                   AZ_PICKUP_COLLECT_RANGE)) {
       switch (pickup->kind) {
         case AZ_PUP_NOTHING: AZ_ASSERT_UNREACHABLE();
         case AZ_PUP_ROCKETS:
@@ -67,15 +67,16 @@ void az_tick_pickups(az_space_state_t *state, double time) {
       pickup->kind = AZ_PUP_NOTHING;
     } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
       pickup->kind = AZ_PUP_NOTHING;
-    } else if (az_has_upgrade(player, AZ_UPG_MAGNET_SWEEP) &&
-               az_ship_is_alive(ship) &&
-               az_vwithin(pickup->position, ship->position,
-                          AZ_MAGNET_SWEEP_MAX_RANGE)) {
-      const az_vector_t delta = az_vsub(ship->position, pickup->position);
-      const double speed =
-        300.0 * (1.0 - az_vnorm(delta) / AZ_MAGNET_SWEEP_MAX_RANGE);
-      pickup->position =
-        az_vadd(pickup->position, az_vwithlen(delta, speed * time));
+    } else if (az_ship_is_alive(ship)) {
+      const double attract_range =
+        (az_has_upgrade(player, AZ_UPG_MAGNET_SWEEP) ?
+         AZ_MAGNET_SWEEP_ATTRACT_RANGE : AZ_NORMAL_PICKUP_ATTRACT_RANGE);
+      if (az_vwithin(pickup->position, ship->position, attract_range)) {
+        const az_vector_t delta = az_vsub(ship->position, pickup->position);
+        const double speed = 300.0 * (1.3 - az_vnorm(delta) / attract_range);
+        pickup->position =
+          az_vadd(pickup->position, az_vwithlen(delta, speed * time));
+      }
     }
   }
 }

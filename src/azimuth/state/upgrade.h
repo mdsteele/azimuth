@@ -35,7 +35,9 @@
 // Ordanance power multiplier for High Explosives:
 #define AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER 1.5
 // Multiplier for incoming splash damage, for Attuned Explosives:
-#define AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR 0.5
+#define AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR 0.25
+// Multiplier for splash radius, for Attuned Explosives:
+#define AZ_ATTUNED_EXPLOSIVES_RADIUS_FACTOR 1.5
 
 typedef enum {
   // Guns:
