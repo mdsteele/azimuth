@@ -67,9 +67,9 @@
 // How long the Tractor Cloak lasts, in seconds:
 #define AZ_CLOAK_DECAY_TIME 4.0
 // Damage per second taken in superheated rooms without Thermal Armor:
-#define AZ_HEAT_DAMAGE_PER_SECOND 5.0
+#define AZ_HEAT_DAMAGE_PER_SECOND 7.5
 // Damage per second taken in lava:
-#define AZ_LAVA_DAMAGE_PER_SECOND 6.0
+#define AZ_LAVA_DAMAGE_PER_SECOND 10.0
 
 /*===========================================================================*/
 // Basics:

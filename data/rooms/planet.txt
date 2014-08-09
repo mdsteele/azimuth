@@ -1,4 +1,4 @@
-@P z8 r457 t136 s6 x0.00 y50000.00 a-1.570796
+@P z8 r458 t137 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -614,3 +614,5 @@
   shaft on your map."
 !T135"
   Press [$t] to use the console."
+!T136"
+  Hothouse"

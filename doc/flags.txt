@@ -1,4 +1,4 @@
-Next flag: 100
+Next flag: 102
 Unused: 5
 
 Bosses
@@ -97,6 +97,8 @@ Doors
 95: Opened cyan door between Voquan rooms 255 and 256
 97: Opened cyan door between Voquan room 256 and Barrag room 287
 98: Opened blue door between Sarvari rooms 429 and 455
+100: Opened cyan door between Voquan rooms 377 and 379
+101: Opened cyan door between Voquan rooms 378 and 379
 
 Boss Doors
 ==========
