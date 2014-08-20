@@ -1,4 +1,4 @@
-Next flag: 103
+Next flag: 104
 Unused: 5
 
 Bosses
@@ -108,6 +108,7 @@ Boss Doors
 44: Killed boss door in Barrag room 233
 58: Killed boss door in Voquan room 356
 72: Killed boss door in Cnidam room 326
+103: Killed boss door in Core room 56
 
 Misc
 ====
