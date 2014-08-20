@@ -1288,6 +1288,24 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {64, 0, 24, 255},
     .elasticity = 0.1, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
+  },
+  // Blue-gray pipe:
+  [139] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {128, 128, 192, 255},
+    .color2 = {40, 40, 48, 255}, .color3 = {40, 40, 48, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Blue-gray angle pipe:
+  [140] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {128, 128, 192, 255},
+    .color2 = {40, 40, 48, 255}, .color3 = {40, 40, 48, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  // Blue-gray short angle pipe:
+  [141] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {128, 128, 192, 255},
+    .color2 = {40, 40, 48, 255}, .color3 = {40, 40, 48, 255},
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
   }
 };
 

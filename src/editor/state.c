@@ -47,8 +47,9 @@ static const int wall_data_indices[] = {
   8, 7, // red
   50, 9, 10, // brown
   47, // blue
-  100, 101, 102, // heavy red, and blue square blocks
+  100, // heavy red
   // Pipes:
+  101, 102, 139, 140, 141, // blue
   32, 34, 33, 48, 63, // yellow
   38, 40, 39, 49, 64, // red
   // Brown/gray rocks:
