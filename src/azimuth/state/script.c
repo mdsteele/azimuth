@@ -125,6 +125,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_TM:     return "tm";
     case AZ_OP_MEND:   return "mend";
     case AZ_OP_MUS:    return "mus";
+    case AZ_OP_MUSF:   return "musf";
     case AZ_OP_SND:    return "snd";
     case AZ_OP_WAIT:   return "wait";
     case AZ_OP_DOOM:   return "doom";
@@ -257,6 +258,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_TB:
     case AZ_OP_TM:
     case AZ_OP_MUS:
+    case AZ_OP_MUSF:
     case AZ_OP_SND:
     case AZ_OP_WAIT:
     case AZ_OP_DOOM:

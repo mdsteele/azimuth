@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_paragraph_length);
   RUN_TEST(test_paragraph_scan);
   RUN_TEST(test_parse_music);
+  RUN_TEST(test_parse_music_instructions);
   RUN_TEST(test_persist_sound);
   RUN_TEST(test_player_flags);
   RUN_TEST(test_player_give_upgrade);

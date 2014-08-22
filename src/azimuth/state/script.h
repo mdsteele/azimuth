@@ -136,6 +136,7 @@ typedef enum {
   AZ_OP_MEND, // end monologue
   // Music/sound:
   AZ_OP_MUS, // start music i
+  AZ_OP_MUSF, // set music flag to i
   AZ_OP_SND, // play sound i
   // Timers:
   AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds

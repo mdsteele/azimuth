@@ -71,6 +71,16 @@ void test_persist_sound(void) {
   EXPECT_FALSE(soundboard.persists[3].reset);
 }
 
+#define PARSE_MUSIC_FROM_STRING(music_string, music) do { \
+    FILE *file = tmpfile(); \
+    ASSERT_TRUE(file != NULL); \
+    EXPECT_TRUE(0 <= fputs((music_string), file)); \
+    rewind(file); \
+    const bool success = az_parse_music_from_file(file, 0, NULL, (music)); \
+    fclose(file); \
+    ASSERT_TRUE(success); \
+  } while (false)
+
 void test_parse_music(void) {
   const char *music_string =
     "@M \"A|AB\" % foo\n"
@@ -81,25 +91,38 @@ void test_parse_music(void) {
     "1 Ws L30\n"
     "1| c3q r r g |\n";
   az_music_t music;
-  {
-    FILE *file = tmpfile();
-    ASSERT_TRUE(file != NULL);
-    EXPECT_TRUE(0 <= fputs(music_string, file));
-    rewind(file);
-    const bool success = az_parse_music_from_file(file, 0, NULL, &music);
-    fclose(file);
-    ASSERT_TRUE(success);
-  }
-  EXPECT_INT_EQ(3, music.spec_length);
-  EXPECT_INT_EQ(1, music.spec[0]);
-  EXPECT_INT_EQ(1, music.spec[1]);
-  EXPECT_INT_EQ(0, music.spec[2]);
-  EXPECT_INT_EQ(1, music.loop_point);
-  EXPECT_INT_EQ(2, music.num_parts);
+  PARSE_MUSIC_FROM_STRING(music_string, &music);
+  ASSERT_INT_EQ(4, music.num_instructions);
+  EXPECT_INT_EQ(AZ_MUSOP_PLAY, music.instructions[0].opcode);
+  EXPECT_INT_EQ(1, music.instructions[0].index);
+  EXPECT_INT_EQ(AZ_MUSOP_PLAY, music.instructions[1].opcode);
+  EXPECT_INT_EQ(1, music.instructions[1].index);
+  EXPECT_INT_EQ(AZ_MUSOP_PLAY, music.instructions[2].opcode);
+  EXPECT_INT_EQ(0, music.instructions[2].index);
+  EXPECT_INT_EQ(AZ_MUSOP_JUMP, music.instructions[3].opcode);
+  EXPECT_INT_EQ(1, music.instructions[3].index);
   const az_music_track_t *part_b_track_1 = &music.parts[0].tracks[0];
   EXPECT_INT_EQ(4, part_b_track_1->num_notes);
   const az_music_track_t *part_a_track_1 = &music.parts[1].tracks[0];
   EXPECT_INT_EQ(6, part_a_track_1->num_notes);
+}
+
+void test_parse_music_instructions(void) {
+  const char *music_string =
+    "@M \"$2 x :y z !4x y =5z\"\n";
+  az_music_t music;
+  PARSE_MUSIC_FROM_STRING(music_string, &music);
+  ASSERT_INT_EQ(4, music.num_instructions);
+  EXPECT_INT_EQ(AZ_MUSOP_SETF, music.instructions[0].opcode);
+  EXPECT_INT_EQ(2, music.instructions[0].value);
+  EXPECT_INT_EQ(AZ_MUSOP_JUMP, music.instructions[1].opcode);
+  EXPECT_INT_EQ(3, music.instructions[1].index);
+  EXPECT_INT_EQ(AZ_MUSOP_BFNE, music.instructions[2].opcode);
+  EXPECT_INT_EQ(4, music.instructions[2].value);
+  EXPECT_INT_EQ(1, music.instructions[2].index);
+  EXPECT_INT_EQ(AZ_MUSOP_BFEQ, music.instructions[3].opcode);
+  EXPECT_INT_EQ(5, music.instructions[3].value);
+  EXPECT_INT_EQ(2, music.instructions[3].index);
 }
 
 /*===========================================================================*/

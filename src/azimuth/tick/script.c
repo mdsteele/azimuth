@@ -849,6 +849,9 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         }
         az_change_music(&state->soundboard, (az_music_key_t)music_index);
       } break;
+      case AZ_OP_MUSF:
+        az_change_music_flag(&state->soundboard, (int)ins.immediate);
+        break;
       case AZ_OP_SND: {
         const int sound_index = (int)ins.immediate;
         if (sound_index < 0 || sound_index > AZ_NUM_SOUND_KEYS) {

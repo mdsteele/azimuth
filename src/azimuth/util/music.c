@@ -31,12 +31,13 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/sound.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
 #define MAX_NUM_PARTS 26
 #define MAX_NOTES_PER_TRACK 2048
-#define MAX_SPEC_LENGTH 256
+#define MAX_SPEC_LENGTH 512
 #define HALF_STEPS_PER_OCTAVE 12
 
 // Frequencies in Hz of each note in octave zero:
@@ -70,6 +71,7 @@ typedef struct {
 
   int spec_string_length;
   char spec_string[MAX_SPEC_LENGTH];
+  int spec_num_instructions;
 
   az_music_part_t parts[MAX_NUM_PARTS];
   int part_indices[MAX_NUM_PARTS];  // maps from letter to index in parts
@@ -155,11 +157,16 @@ static int next_char(az_music_parser_t *parser) {
 static void parse_music_header(az_music_parser_t *parser) {
   if (!TRY_READ("@M \"")) PARSE_ERROR("invalid file header\n");
   assert(parser->spec_string_length == 0);
+  assert(parser->spec_num_instructions == 0);
   while (true) {
     const int ch = fgetc(parser->file);
     if (ch == EOF) PARSE_ERROR("EOF in middle of spec string\n");
-    if (ch == '"') break;
-    if (!(ch == '|' || ('A' <= ch && ch <= 'Z'))) {
+    else if (ch == '"') break;
+    else if (ch == '|' || ch == '=' || ch == '!' || ch == '$' ||
+        ch == ':' || ('A' <= ch && ch <= 'Z')) {
+      ++parser->spec_num_instructions;
+    } else if (!(ch == ' ' || ('a' <= ch && ch <= 'z') ||
+                 ('0' <= ch && ch <= '9'))) {
       PARSE_ERROR("invalid char in spec string: '%c'\n", ch);
     }
     if (parser->spec_string_length >= MAX_SPEC_LENGTH) {
@@ -566,29 +573,82 @@ static void parse_music_data(az_music_parser_t *parser) {
 }
 
 static void parse_spec_string(az_music_parser_t *parser) {
-  parser->music->spec_length = 0;
-  parser->music->loop_point = -1;
-  for (int i = 0; i < parser->spec_string_length; ++i) {
-    if (parser->spec_string[i] == '|') {
-      if (parser->music->loop_point >= 0) {
-        PARSE_ERROR("can't have more than one loop point in spec\n");
+  parser->music->num_instructions = parser->spec_num_instructions;
+  parser->music->instructions =
+    AZ_ALLOC(parser->music->num_instructions, az_music_instruction_t);
+  az_music_instruction_t *instructions = parser->music->instructions;
+  int label_table[26] = {0};
+  int instruction_count = 0;
+  int spec_string_index = 0;
+  int loop_point = -1;
+  while (spec_string_index < parser->spec_string_length) {
+    const char ch = parser->spec_string[spec_string_index++];
+    if (ch == '|') {
+      if (loop_point < 0) {
+        loop_point = instruction_count;
+      } else PARSE_ERROR("can't have more than one '|' in spec");
+    } else if ('a' <= ch && ch <= 'z') {
+      label_table[ch - 'a'] = 1 + instruction_count;
+    } else if ('A' <= ch && ch <= 'Z') {
+      const int part_index = parser->part_indices[ch - 'A'];
+      if (part_index < 0) {
+        PARSE_ERROR("spec mentions nonexistent part '%c'\n", ch);
       }
-      parser->music->loop_point = i;
-    } else ++parser->music->spec_length;
+      assert(part_index <= parser->current_part);
+      instructions[instruction_count++] = (az_music_instruction_t){
+        .opcode = AZ_MUSOP_PLAY, .index = part_index
+      };
+    } else if (ch == '=' || ch == '!' || ch == ':' || ch == '$') {
+      int value = 0, index = 0;
+      if (ch == '=' || ch == '!' || ch == '$') {
+        if (spec_string_index >= parser->spec_string_length) {
+          PARSE_ERROR("missing value after '%c' in spec", ch);
+        }
+        const char value_ch = parser->spec_string[spec_string_index++];
+        if (value_ch < '0' || value_ch > '9') {
+          PARSE_ERROR("invalid value '%c' for '%c' in spec", value_ch, ch);
+        }
+        value = value_ch - '0';
+      }
+      if (ch == '=' || ch == '!' || ch == ':') {
+        if (spec_string_index >= parser->spec_string_length) {
+          PARSE_ERROR("missing label after '%c' in spec", ch);
+        }
+        const char label_ch = parser->spec_string[spec_string_index++];
+        if (label_ch < 'a' || label_ch > 'z') {
+          PARSE_ERROR("invalid label '%c' for '%c' in spec", label_ch, ch);
+        }
+        index = label_ch - 'a';
+      }
+      instructions[instruction_count++] = (az_music_instruction_t){
+        .opcode = (ch == '=' ? AZ_MUSOP_BFEQ : ch == '!' ? AZ_MUSOP_BFNE :
+                   ch == ':' ? AZ_MUSOP_JUMP : AZ_MUSOP_SETF),
+        .value = value, .index = index
+      };
+    } else assert(ch == ' ');
   }
-  if (parser->music->loop_point < 0) parser->music->loop_point = 0;
-  parser->music->spec = AZ_ALLOC(parser->music->spec_length, int);
-  for (int i = 0, j = 0; j < parser->spec_string_length; ++j) {
-    const char ch = parser->spec_string[j];
-    if (ch == '|') continue;
-    assert('A' <= ch && ch <= 'Z');
-    const int part_index = parser->part_indices[ch - 'A'];
-    if (part_index < 0) {
-      PARSE_ERROR("spec mentions nonexistent part %c\n", ch);
+  for (int i = 0; i < instruction_count; ++i) {
+    az_music_instruction_t *instruction = &instructions[i];
+    if (instruction->opcode == AZ_MUSOP_BFEQ ||
+        instruction->opcode == AZ_MUSOP_BFNE ||
+        instruction->opcode == AZ_MUSOP_JUMP) {
+      assert(instruction->index >= 0);
+      assert(instruction->index < AZ_ARRAY_SIZE(label_table));
+      const int target = label_table[instruction->index] - 1;
+      if (target < 0) {
+        PARSE_ERROR("jump to nonexistant label '%c' in spec\n",
+                    'a' + instruction->index);
+      }
+      assert(target <= instruction_count);
+      instruction->index = target;
     }
-    assert(part_index <= parser->current_part);
-    parser->music->spec[i++] = part_index;
   }
+  if (loop_point >= 0) {
+    instructions[instruction_count++] = (az_music_instruction_t){
+      .opcode = AZ_MUSOP_JUMP, .index = loop_point
+    };
+  }
+  assert(instruction_count == parser->spec_num_instructions);
 }
 
 static bool parse_music(az_music_parser_t *parser) {
@@ -641,7 +701,7 @@ void az_destroy_music(az_music_t *music) {
     AZ_ARRAY_LOOP(track, part->tracks) free(track->notes);
   }
   free(music->parts);
-  free(music->spec);
+  free(music->instructions);
   AZ_ZERO_OBJECT(music);
 }
 
@@ -664,28 +724,50 @@ static uint64_t generate_noise(void) {
 static void synth_begin_next_part(az_music_synth_t *synth) {
   const az_music_t *music = synth->music;
   assert(music != NULL);
-  ++synth->spec_index;
-  if (synth->spec_index >= music->spec_length) {
-    synth->spec_index = music->loop_point;
-  }
-  assert(synth->spec_index >= 0);
-  assert(synth->spec_index < music->spec_length);
-  const int part_index = music->spec[synth->spec_index];
-  assert(part_index >= 0);
-  assert(part_index < music->num_parts);
-  const az_music_part_t *part = &music->parts[part_index];
-  for (int i = 0; i < AZ_MUSIC_NUM_TRACKS; ++i) {
-    synth->voices[i].track = &part->tracks[i];
-    synth->voices[i].note_index = 0;
-    synth->voices[i].time_from_note_start = 0.0;
+  while (synth->pc < music->num_instructions) {
+    assert(synth->pc >= 0);
+    if (++synth->steps_since_last_sustain > 100) {
+      AZ_WARNING_ONCE("Exceeded music instruction limit\n");
+      synth->pc = music->num_instructions;
+      return;
+    }
+    az_music_instruction_t *ins = &music->instructions[synth->pc++];
+    switch (ins->opcode) {
+      case AZ_MUSOP_NOP: break;
+      case AZ_MUSOP_PLAY: {
+        assert(ins->index >= 0);
+        assert(ins->index < music->num_parts);
+        const az_music_part_t *part = &music->parts[ins->index];
+        for (int i = 0; i < AZ_MUSIC_NUM_TRACKS; ++i) {
+          synth->voices[i].track = &part->tracks[i];
+          synth->voices[i].note_index = 0;
+          synth->voices[i].time_from_note_start = 0.0;
+        }
+      } return;
+      case AZ_MUSOP_SETF:
+        synth->flag = ins->value;
+        break;
+      case AZ_MUSOP_BFEQ:
+        if (synth->flag == ins->value) synth->pc = ins->index;
+        break;
+      case AZ_MUSOP_BFNE:
+        if (synth->flag != ins->value) synth->pc = ins->index;
+        break;
+      case AZ_MUSOP_JUMP:
+        synth->pc = ins->index;
+        break;
+    }
   }
 }
 
 static void synth_advance(az_music_synth_t *synth) {
   while (true) {
+    assert(synth->music != NULL);
+    if (synth->pc >= synth->music->num_instructions) return;
     int num_tracks_finished = 0;
     AZ_ARRAY_LOOP(voice, synth->voices) {
       while (true) {
+        assert(voice->track != NULL);
         if (voice->note_index >= voice->track->num_notes) {
           ++num_tracks_finished;
           break;
@@ -735,25 +817,27 @@ static void synth_advance(az_music_synth_t *synth) {
         ++voice->note_index;
         voice->drum_index = 0;
       }
-    sustain:;
+    sustain:
+      synth->steps_since_last_sustain = 0;
     }
     if (num_tracks_finished < AZ_MUSIC_NUM_TRACKS) return;
     synth_begin_next_part(synth);
   }
 }
 
-void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music) {
+void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music,
+                          int flag) {
   assert(synth != NULL);
   AZ_ZERO_OBJECT(synth);
   if (music == NULL) return;
   synth->music = music;
+  synth->flag = flag;
   AZ_ARRAY_LOOP(voice, synth->voices) {
     voice->waveform = AZ_SQUARE_WAVE;
     voice->duty = 0.5;
     voice->loudness = BASE_LOUDNESS;
     voice->noise_bits = generate_noise();
   }
-  synth->spec_index = -1;
   synth_begin_next_part(synth);
   synth_advance(synth);
 }
@@ -766,6 +850,7 @@ void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
     return;
   }
   for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
+    if (synth->pc >= synth->music->num_instructions) break;
     int sample = 0;
     AZ_ARRAY_LOOP(voice, synth->voices) {
       if (voice->loudness <= 0.0) continue;

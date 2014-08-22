@@ -43,9 +43,17 @@ static void destroy_music(void) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s filename\n", argv[0]);
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr, "Usage: %s filename [flag]\n", argv[0]);
     return EXIT_FAILURE;
+  }
+
+  int music_flag = 0;
+  if (argc >= 3) {
+    if (sscanf(argv[2], "%d", &music_flag) < 1) {
+      fprintf(stderr, "Invalid flag value: %s\n", argv[2]);
+      return EXIT_FAILURE;
+    }
   }
 
   // Initialize drum kit:
@@ -59,7 +67,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   atexit(destroy_music);
-  az_reset_music_synth(&synth, &music);
+  az_reset_music_synth(&synth, &music, music_flag);
 
   // Initialize SDL audio:
   if (SDL_Init(SDL_INIT_AUDIO) != 0) {
@@ -82,13 +90,22 @@ int main(int argc, char **argv) {
 
   // Start playing music:
   SDL_PauseAudio(0); // unpause audio
-  fprintf(stderr, "Press Ctrl-C to stop playing.\n|");
-  fflush(stderr);
-  for (int spin = 0;; spin = (spin + 1) % 4) {
-    fprintf(stderr, "\r%c", "/-\\|"[spin]);
-    fflush(stderr);
-    SDL_Delay(200);
-  }
+  fprintf(stderr, "Press Ctrl-D to stop playing.\n");
+
+  // Read flag values from stdin:
+  int ch;
+  do {
+    fprintf(stdout, "flag> ");
+    fflush(stdout);
+    int flag = 0;
+    while ((ch = getchar()) >= '0' && ch <= '9') {
+      flag = 10 * flag + (ch - '0');
+    }
+    SDL_LockAudio(); {
+      synth.flag = flag;
+    } SDL_UnlockAudio();
+  } while (ch != EOF);
+  fprintf(stdout, "\n");
 
   return EXIT_SUCCESS;
 }

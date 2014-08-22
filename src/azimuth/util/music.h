@@ -87,12 +87,26 @@ typedef struct {
   az_music_track_t tracks[AZ_MUSIC_NUM_TRACKS];
 } az_music_part_t;
 
+typedef enum {
+  AZ_MUSOP_NOP = 0, // Do nothing
+  AZ_MUSOP_PLAY, // Play part <index>
+  AZ_MUSOP_SETF, // Set flag to <value>
+  AZ_MUSOP_BFEQ, // If flag == <value>, jump to <index>
+  AZ_MUSOP_BFNE, // If flag != <value>, jump to <index>
+  AZ_MUSOP_JUMP  // Jump unconditionally to <index>
+} az_music_opcode_t;
+
 typedef struct {
-  int spec_length;
-  int *spec;
-  int loop_point;
+  az_music_opcode_t opcode;
+  int value;
+  int index;
+} az_music_instruction_t;
+
+typedef struct {
   int num_parts;
   az_music_part_t *parts;
+  int num_instructions;
+  az_music_instruction_t *instructions;
 } az_music_t;
 
 bool az_parse_music_from_path(
@@ -109,7 +123,9 @@ void az_destroy_music(az_music_t *music);
 
 typedef struct {
   const az_music_t *music;
-  int spec_index;
+  int flag;
+  int pc;
+  int steps_since_last_sustain;
   double time_index;
   struct {
     const az_music_track_t *track;
@@ -127,7 +143,8 @@ typedef struct {
   } voices[AZ_MUSIC_NUM_TRACKS];
 } az_music_synth_t;
 
-void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music);
+void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music,
+                          int flag);
 
 void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
                          int num_samples);

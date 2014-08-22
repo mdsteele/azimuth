@@ -70,6 +70,11 @@
     if (!_expect_approx(expected, actual, #expected " == " #actual)) return; \
   } while (false)
 
+// Test that the two ints are equal, and return immediately if not.
+#define ASSERT_INT_EQ(expected, actual) do { \
+    if (!_expect_int_eq(expected, actual, #expected " == " #actual)) return; \
+  } while (false)
+
 // If the current test has already failed, return immediately.
 #define RETURN_IF_FAILED() do { \
     if (_current_test_failed) return; \

@@ -174,9 +174,7 @@ static const az_music_t *music_data_for_key(az_music_key_t music_key) {
   const int music_index = (int)music_key;
   assert(music_index >= 0);
   assert(music_index < AZ_ARRAY_SIZE(music_datas));
-  const az_music_t *music = &music_datas[music_index];
-  if (music->spec_length == 0) return NULL;
-  return music;
+  return &music_datas[music_index];
 }
 
 /*===========================================================================*/

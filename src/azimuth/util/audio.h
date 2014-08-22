@@ -33,7 +33,8 @@
 // simply zero it with a memset.  One should not manipulate the fields of this
 // struct directly; instead, use the various functions below.
 typedef struct {
-  bool change_music;
+  bool change_music, change_current_music_flag, change_next_music_flag;
+  int new_current_music_flag, new_next_music_flag;
   const az_music_t *next_music;
   double music_fade_out_seconds;
   int num_oneshots;
@@ -52,6 +53,9 @@ typedef struct {
 // Indicate that we would like to change which music is playing.
 void az_change_music_data(az_soundboard_t *soundboard, const az_music_t *music,
                           double fade_out_seconds);
+
+// Change the music flag.
+void az_change_music_flag(az_soundboard_t *soundboard, int flag);
 
 // Indicate that we should play the given sound (once).  The sound will not
 // loop, and cannot be cancelled or paused once started.

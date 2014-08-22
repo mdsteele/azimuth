@@ -34,6 +34,16 @@ void az_change_music_data(az_soundboard_t *soundboard, const az_music_t *music,
   soundboard->music_fade_out_seconds = fade_out_seconds;
 }
 
+void az_change_music_flag(az_soundboard_t *soundboard, int flag) {
+  if (soundboard->change_music) {
+    soundboard->change_next_music_flag = true;
+    soundboard->new_next_music_flag = flag;
+  } else {
+    soundboard->change_current_music_flag = true;
+    soundboard->new_current_music_flag = flag;
+  }
+}
+
 void az_play_sound_data(az_soundboard_t *soundboard,
                         const az_sound_data_t *sound_data) {
   if (sound_data == NULL) return;

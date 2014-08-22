@@ -62,6 +62,7 @@ static int music_fade_volume = 0; // 0 to MAX_VOLUME
 static int music_fade_slowdown = 0;
 static int music_fade_counter = 0;
 static const az_music_t *next_music = NULL;
+static int next_music_flag = 0;
 
 static struct {
   const az_sound_data_t *data;
@@ -75,11 +76,12 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
   int16_t *samples = (int16_t*)bytes;
 
   if (next_music != NULL && music_fade_volume == 0) {
-    az_reset_music_synth(&music_synth, next_music);
+    az_reset_music_synth(&music_synth, next_music, next_music_flag);
     music_fade_volume = MAX_VOLUME;
     music_fade_slowdown = 0;
     music_fade_counter = 0;
     next_music = NULL;
+    next_music_flag = 0;
   }
   az_synthesize_music(&music_synth, samples, num_samples);
 
@@ -118,7 +120,7 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
         music_fade_counter = music_fade_slowdown;
         --music_fade_volume;
         if (music_fade_volume == 0 && music_synth.music != NULL) {
-          az_reset_music_synth(&music_synth, NULL);
+          az_reset_music_synth(&music_synth, NULL, 0);
         }
       }
     }
@@ -129,17 +131,26 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
 // Music:
 
 static void tick_music(const az_soundboard_t *soundboard) {
+  if (soundboard->change_current_music_flag) {
+    music_synth.flag = soundboard->new_current_music_flag;
+  }
   if (soundboard->change_music) {
     if (soundboard->next_music == music_synth.music) {
       music_fade_slowdown = 0;
       next_music = NULL;
+      next_music_flag = 0;
+      if (soundboard->change_next_music_flag) {
+        music_synth.flag = soundboard->new_next_music_flag;
+      }
     } else {
       music_fade_slowdown =
         (soundboard->music_fade_out_seconds * AZ_AUDIO_RATE) / MAX_VOLUME;
       next_music = soundboard->next_music;
+      next_music_flag = (soundboard->change_next_music_flag ?
+                         soundboard->new_next_music_flag : 0);
     }
     music_fade_counter = music_fade_slowdown;
-  }
+  } else assert(!soundboard->change_next_music_flag);
 }
 
 /*===========================================================================*/
