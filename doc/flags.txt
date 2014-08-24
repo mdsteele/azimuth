@@ -1,16 +1,17 @@
-Next flag: 104
+Next flag: 105
 Unused: 5
 
 Bosses
 ======
 1: Killed Snapdragon (Colony boss, room 20)
 9: Killed Rockwyrm (Filimun boss, room 30)
-23: Killed Zenith Core (Core boss, room 0)
+23: Killed Zenith Core (Final boss, room 0)
 29: Killed Oth Gunship (Nandiar boss, room 134)
 45: Killed Forcefiend (Barrag boss, room 231)
 51: Killed Kilofuge (Cnidam boss, room 237)
 59: Killed Nocturne (Voquan boss, room 235)
 99: Killed Magbeest (Sarvari boss, room 423)
+104: Killed Oth Supergunship (Core boss, room 54)
 
 Minibosses
 ==========
