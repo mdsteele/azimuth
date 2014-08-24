@@ -220,7 +220,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         }
         // We didn't kill the baddie yet, so we're going to bounce off of it
         // and possibly take damage.
-        elasticity = 0.5;
+        elasticity = 0.4;
         rel_velocity = az_vsub(ship->velocity, baddie->velocity);
         if (baddie->frozen == 0.0) {
           ship->tractor_beam.active = false;
@@ -248,6 +248,14 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
             particle->velocity = AZ_VZERO;
             particle->lifetime = 0.4;
             particle->param1 = 15.0;
+          }
+          // If the Reactive Armor killed the baddie, then we take no damage
+          // from the impact and are not knocked around as much.
+          if (baddie->kind == AZ_BAD_NOTHING) {
+            damage = 0.0;
+            elasticity = 0.0;
+            rel_velocity = ship->velocity;
+            induce_temp_invincibility = false;
           }
         }
         // If the baddie hasn't yet been killed, but it's a KAMIKAZE baddie,
