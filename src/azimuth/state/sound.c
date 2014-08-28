@@ -676,6 +676,13 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.650736, .phaser_sweep = 0.04,
     .volume_adjust = -0.4
   },
+  [AZ_SND_REACTIVE_ARMOR] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.10495, .env_punch = 0.362849, .env_decay = 0.33,
+    .start_freq = 0.560445, .freq_slide = -0.1, .freq_delta_slide = 0.042,
+    .vibrato_depth = 0.167017, .vibrato_speed = 0.391652, .phaser_sweep = -0.6,
+    .lpf_cutoff = 0.4, .lpf_resonance = 0.36842, .hpf_cutoff = 0.115,
+  },
   [AZ_SND_ROCKWYRM_SCREAM] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_attack = 0.00378904, .env_sustain = 0.26,

@@ -238,6 +238,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
             az_try_damage_baddie(state, baddie, component, AZ_DMGF_REACTIVE,
                                  0.5 * damage)) {
           ship->reactive_flare = 1.0;
+          az_play_sound(&state->soundboard, AZ_SND_REACTIVE_ARMOR);
           az_particle_t *particle;
           if (az_insert_particle(state, &particle)) {
             particle->kind = AZ_PAR_BOOM;
