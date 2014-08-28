@@ -311,6 +311,48 @@ static const az_vector_t wall_vertices_130[] = {
   {-100, 18}, {-86, -22}, {-80, -72}, {-46, -88}, {-20, -112}, {20, -102},
   {46, -72}, {80, -52}, {96, -20}, {100, 2}, {76, 56}
 };
+static const az_vector_t wall_vertices_142[] = {
+  {44.35, -18.37}, {42, -15}, {42, 15}, {44.35, 18.37},
+  {-44.35, 18.37}, {-42, 15}, {-42, -15}, {-44.35, -18.37}
+};
+static const az_vector_t wall_vertices_143[] = {
+  {44.35, -18.37}, {42, -15}, {42, 15},
+  {44.35, 18.37}, {40.21, 19}, {19, 40.21},
+  {18.37, 44.35}, {15, 42}, {-15, 42},
+  {-18.37, 44.35}, {-18.37, -18.37}
+};
+static const az_vector_t wall_vertices_144[] = {
+  {44.35, -18.37}, {42, -15}, {42, 15},
+  {44.35, 18.37}, {40.21, 19}, {19, 40.21},
+  {18.37, 44.35}, {15, 42}, {-15, 42},
+  {-18.37, 44.35}, {-19, 40.21}, {-40.21, 19},
+  {-44.35, 18.37}, {-7.61, -18.37}
+};
+static const az_vector_t wall_vertices_145[] = {
+  {44.35, -18.37}, {42, -15}, {42, 15},
+  {44.35, 18.37}, {40.21, 19}, {19, 40.21},
+  {18.37, 44.35}, {15, 42}, {-15, 42},
+  {-18.37, 44.35}, {-19, 40.21}, {-40.21, 19},
+  {-44.35, 18.37}, {-42, 15}, {-42, -15}, {-44.35, -18.37}
+};
+static const az_vector_t wall_vertices_146[] = {
+  {44.35, -18.37}, {42, -15}, {42, 15},
+  {44.35, 18.37}, {40.21, 19}, {19, 40.21},
+  {18.37, 44.35}, {15, 42}, {-15, 42},
+  {-18.37, 44.35}, {-19, 40.21}, {-40.21, 19},
+  {-44.35, 18.37}, {-42, 15}, {-42, -15},
+  {-44.35, -18.37}, {-40.21, -19}, {-19, -40.21},
+  {-18.37, -44.35}, {-15, -42}, {15, -42},
+  {18.37, -44.35}, {19, -40.21}, {40.21, -19}
+};
+static const az_vector_t wall_vertices_147[] = {
+  {94, 14}, {82, 18}, {70, 14}, {-70, 14}, {-82, 18}, {-94, 14},
+  {-94, -14}, {-82, -18}, {-70, -14}, {70, -14}, {82, -18}, {94, -14}
+};
+static const az_vector_t wall_vertices_148[] = {
+  {26, 14}, {14, 18}, {-14, 18}, {-26, 14},
+  {-26, -14}, {-14, -18}, {14, -18}, {26, -14}
+};
 
 /*===========================================================================*/
 
@@ -1306,6 +1348,48 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_QUADSTRIP_213, .color1 = {128, 128, 192, 255},
     .color2 = {40, 40, 48, 255}, .color3 = {40, 40, 48, 255},
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_63)
+  },
+  // 2-way steel connector:
+  [142] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 0.3, .color1 = {200, 179, 179, 255},
+    .color2 = {128, 112, 112, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_142)
+  },
+  // 3-way steel connector:
+  [143] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 0.3, .color1 = {200, 200, 179, 255},
+    .color2 = {128, 128, 112, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_143)
+  },
+  // 4-way steel connector:
+  [144] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 0.3, .color1 = {179, 200, 179, 255},
+    .color2 = {112, 128, 112, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_144)
+  },
+  // 5-way steel connector:
+  [145] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 0.3, .color1 = {179, 200, 200, 255},
+    .color2 = {112, 128, 128, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_145)
+  },
+  // 8-way steel connector:
+  [146] = {
+    .style = AZ_WSTY_TFQS_213, .bezel = 0.3, .color1 = {179, 179, 200, 255},
+    .color2 = {112, 112, 128, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_146)
+  },
+  // Long silver bezel pipe:
+  [147] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {179, 179, 179, 255},
+    .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_147)
+  },
+  // Short silver bezel pipe:
+  [148] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {179, 179, 179, 255},
+    .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_148)
   }
 };
 

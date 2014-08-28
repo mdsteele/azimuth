@@ -545,8 +545,8 @@ static void draw_room_minimap(az_editor_state_t *state,
 static void draw_selection_circle(az_vector_t position, double angle,
                                   double radius) {
   glPushMatrix(); {
-    glTranslated(position.x, position.y, 0);
-    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
+    az_gl_translated(position);
+    az_gl_rotated(angle);
     glScaled(radius, radius, 1);
     glColor3f(1, 1, 1); // white
     glBegin(GL_LINE_STRIP); {
@@ -628,6 +628,25 @@ static void draw_camera_view(az_editor_state_t *state) {
     if (!node->selected) continue;
     draw_selection_circle(node->spec.position, node->spec.angle,
                           AZ_NODE_BOUNDING_RADIUS);
+    if (node->spec.kind == AZ_NODE_UPGRADE) {
+      const az_upgrade_t upgrade = node->spec.subkind.upgrade;
+      glPushMatrix(); {
+        az_gl_translated(node->spec.position);
+        az_gl_rotated(node->spec.angle);
+        glScalef(1, -1, 0);
+        glColor3f(1, 1, 1);
+        az_draw_printf(8, AZ_ALIGN_CENTER, 0, -24, "%02d", (int)upgrade);
+        if (AZ_UPG_CAPACITOR_00 <= upgrade &&
+            upgrade <= AZ_UPG_CAPACITOR_MAX) {
+          az_draw_printf(8, AZ_ALIGN_CENTER, 0, 17, "%02d",
+                         (int)upgrade - (int)AZ_UPG_CAPACITOR_00);
+        } else if (AZ_UPG_SHIELD_BATTERY_00 <= upgrade &&
+                   upgrade <= AZ_UPG_SHIELD_BATTERY_MAX) {
+          az_draw_printf(8, AZ_ALIGN_CENTER, 0, 17, "%02d",
+                         (int)upgrade - (int)AZ_UPG_SHIELD_BATTERY_00);
+        }
+      } glPopMatrix();
+    }
   }
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;

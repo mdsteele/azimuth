@@ -35,32 +35,32 @@ node [shape=box, height=0.4, fixedsize=false];
 "Reactive Armor" [color=gray];
 // Shield batteries:
 node [shape=Mcircle, height=0.5, fixedsize=true];
-"S1"  [color=magenta]; // in Filimun entry hall (room 26)
-"S2"  [color=magenta]; // in Filimun shale quarry (room 85)
-"S3"  [color=yellow]; // in Nandiar wind tunnel (room 215)
-"S4"  [color=cyan]; // in Cnidam frozen lake (room 307)
-"S5"  [color=brown]; // past Colony primary reactor (room 160)
-"S6"  [color=blue]; // in center upper Barrag tunnel (room 258)
-"S7"  [color=blue];
-"S8"  [color=cyan];
-"S9"  [color=green];
-"S10" [color=green]; // in big Voquan hex nest (room 358)
-"S11" [color=red];
-"S12" [color=gray];
+"S0"  [color=magenta]; // in Filimun entry hall (room 26)
+"S1"  [color=magenta]; // in Filimun shale quarry (room 85)
+"S2"  [color=yellow]; // in Nandiar wind tunnel (room 215)
+"S3"  [color=cyan]; // in Cnidam frozen lake (room 307)
+"S4"  [color=brown]; // past Colony primary reactor (room 160)
+"S5"  [color=blue]; // in center upper Barrag tunnel (room 258)
+"S6"  [color=blue];
+"S7"  [color=cyan]; // in center Cnidam shaft (room 317)
+"S8"  [color=green];
+"S9" [color=green]; // in big Voquan hex nest (room 358)
+"S10" [color=red];
+"S11" [color=gray];
 // Capacitors:
 node [shape=circle, height=0.5, fixedsize=true];
-"C1"  [color=magenta];
-"C2"  [color=brown];
-"C3"  [color=yellow];
+"C0"  [color=magenta]; // in Filimun Oth Orb room (room 113)
+"C1"  [color=brown]; // behind Colony Energy Recycling Unit (room 72)
+"C2"  [color=yellow]; // in upper Nandiar biolab (room 214)
+"C3"  [color=blue]; // in upper east Barrag ocean (room 293)
 "C4"  [color=blue];
-"C5"  [color=blue];
-"C6"  [color=yellow];
-"C7"  [color=cyan];
-"C8"  [color=cyan];
-"C9"  [color=green];
+"C5"  [color=yellow]; // in central Nandiar lab storage room (room 350)
+"C6"  [color=cyan]; // in grav-shifting Cnidam shaft (room 313)
+"C7"  [color=cyan]; // in room under central Cnidam lake (room 311)
+"C8"  [color=green];
+"C9" [color=red];
 "C10" [color=red];
-"C11" [color=red];
-"C12" [color=gray];
+"C11" [color=gray];
 
 // Bosses:
 node [shape=hexagon, height=0.4, fixedsize=false];
@@ -96,8 +96,8 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 // Dependencies:
 "Start Game" -> "Charge Gun" -> "Snapdragon" -> "Rockets";
 "Rockets" -> "Enter Filimun";
-"Enter Filimun" -> "S1";
-"Enter Filimun" -> "C1";
+"Enter Filimun" -> "S0";
+"Enter Filimun" -> "C0";
 "Enter Filimun" -> "Freeze Gun";
 "Enter Filimun" -> "C-Plus Drive";
 "C-Plus Drive" -> "Triple Gun";
@@ -105,8 +105,8 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 "Freeze Gun" -> "Enter East Colony" [style=dashed];
 "Bombs" -> "Enter East Colony" [style=dashed];
 "Enter East Colony" -> "Hardened Armor";
-"Enter East Colony" -> "C2";
-"C-Plus Drive" -> "C2";
+"Enter East Colony" -> "C1";
+"C-Plus Drive" -> "C1";
 "Freeze Gun" -> "Bombs" [style=dashed];
 "C-Plus Drive" -> "Bombs" [style=dashed];
 "Bombs" -> "Rockwyrm";
@@ -114,14 +114,14 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 "Enter Lower Nandiar Lab" -> "Oth GS";
 "Oth GS" -> "Dynamic Armor";
 "Enter Central Nandiar" -> "Enter West Colony" -> "Tractor Beam";
-"Bombs" -> "S2";
+"Bombs" -> "S1";
 "Enter Central Nandiar" -> "Retro Thrusters";
-"Enter Central Nandiar" -> "S3";
-"Enter Central Nandiar" -> "C3";
+"Enter Central Nandiar" -> "S2";
+"Enter Central Nandiar" -> "C2";
 "Enter Central Nandiar" -> "Homing Gun";
 "Enter Central Nandiar" -> "Thermal Armor" [style=dotted];
 "Hyper Rockets" -> "Infrascanner";
-"Tractor Beam" -> "S5";
+"Tractor Beam" -> "S4";
 "Thermal Armor" -> "Burst Gun";
 "Tractor Beam" -> "Enter Lower Nandiar Lab";
 "Infrascanner" -> "Homing Gun";
@@ -130,51 +130,51 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 "Homing Gun" -> "R+B";
 "Dynamic Armor" -> "Enter Deep Barrag";
 "Enter Deep Barrag" -> "R+B";
-"Infrascanner" -> "C4";
+"Infrascanner" -> "C3";
 "Enter Deep Barrag" -> "Tractor Cloak";
 "Tractor Cloak" -> "Disable Secondary Reactor";
 "Disable Secondary Reactor" -> "Forcefiend";
 "Forcefiend" -> "Phase Gun";
-"Enter Deep Barrag" -> "S6";
-"Enter Deep Barrag" -> "C5";
+"Enter Deep Barrag" -> "S5";
+"Enter Deep Barrag" -> "C4";
 "Disable Secondary Reactor" -> "Fusion Reactor";
 "Hyper Rockets" -> "Enter Upper Cnidam";
-"Enter Upper Cnidam" -> "S4";
+"Enter Upper Cnidam" -> "S3";
 "Phase Gun" -> "Enter Central Cnidam";
 "Phase Gun" -> "High Explosives";
-"Phase Gun" -> "C6";
-"Phase Gun" -> "S7";
+"Phase Gun" -> "C5";
+"Phase Gun" -> "S6";
 "Enter Central Cnidam" -> "Defuse Bomb";
-"Enter Central Cnidam" -> "S8";
+"Enter Central Cnidam" -> "S7";
 "Defuse Bomb" -> "Kilofuge";
 "Defuse Bomb" -> "Magnet Sweep";
-"Defuse Bomb" -> "C7";
+"Defuse Bomb" -> "C6";
 "Kilofuge" -> "Mega Bombs";
 "Mega Bombs" -> "Enter Deep Voquan";
 "Enter Deep Voquan" -> "Milliwave Radar";
 "Enter Deep Voquan" -> "Thermal Armor";
 "Thermal Armor" -> "Enter Deep Sarvari";
 "Enter Deep Voquan" -> "Nocturne";
-"Enter Deep Voquan" -> "S9";
+"Enter Deep Voquan" -> "S8";
 "Nocturne" -> "Orion Booster";
 "Thermal Armor" -> "Attuned Explosives";
-"Mega Bombs" -> "C8";
+"Mega Bombs" -> "C7";
 "Enter Deep Sarvari" -> "Pierce Gun";
 "Pierce Gun" -> "Quantum Reactor" [style=dashed];
 "Orion Booster" -> "Enter Deep Sarvari";
-"Orion Booster" -> "S10";
-"Enter Deep Voquan" -> "S10" [style=dotted];
-"Enter Deep Sarvari" -> "C10";
-"Enter Deep Sarvari" -> "S11";
+"Orion Booster" -> "S9";
+"Enter Deep Voquan" -> "S9" [style=dotted];
+"Enter Deep Sarvari" -> "C9";
+"Enter Deep Sarvari" -> "S10";
 "Enter Deep Sarvari" -> "Magbeest";
 "Burst Gun" -> "Magbeest";
-"Burst Gun" -> "C9";
+"Burst Gun" -> "C8";
 "Magbeest" -> "Beam Gun";
 "Beam Gun" -> "Quantum Reactor" [style=dashed];
 "Beam Gun" -> "Enter Core Zone";
-"Beam Gun" -> "C11";
-"Enter Core Zone" -> "S12";
-"Enter Core Zone" -> "C12";
+"Beam Gun" -> "C10";
+"Enter Core Zone" -> "S11";
+"Enter Core Zone" -> "C11";
 "Enter Core Zone" -> "Oth SGS";
 "Oth SGS" -> "Reactive Armor";
 "Oth SGS" -> "Zenith Core";
