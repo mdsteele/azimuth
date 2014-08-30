@@ -1,4 +1,4 @@
-@M "SN|ABC"
+@M "S=2z xX=1x YzZ|ABC"
 % Title: "Don't Make Me Come Over There"
 
 =tempo 140
@@ -14,19 +14,22 @@
 5 Wn   L25  E0,100
 
 
-!Part N
+!Part X
 
-1| rw | rw |
-2| rw | rw |
 4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
  | c6s c ce ' ce cs c ' ce cs cs ' ce c |
-5| rw | rw |
 
-1| rw | b3s b be ' e4s e ee ' gs f e d ' f e d c |
-2| rw | b2s b be ' e3s e ee ' gs f e d ' f e d c |
+!Part Y
+
 4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
- | c6s c ce ' ce cs c ' ce d3s c ' d c d c |
-5| rq x2 r x2 | x0q x2 x0 x2 |
+5| rq x2 r x2 |
+
+!Part Z
+
+1| b3s b be ' e4s e ee ' gs f e d ' f e d c |
+2| b2s b be ' e3s e ee ' gs f e d ' f e d c |
+4| c6s c ce ' ce cs c ' ce d3s c ' d c d c |
+5| x0q x2 x0 x2 |
 
 
 !Part A

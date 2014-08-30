@@ -95,14 +95,14 @@ int main(int argc, char **argv) {
   // Read flag values from stdin:
   int ch;
   do {
-    fprintf(stdout, "flag> ");
+    fprintf(stdout, "flag=%d> ", music_flag);
     fflush(stdout);
     int flag = 0;
     while ((ch = getchar()) >= '0' && ch <= '9') {
       flag = 10 * flag + (ch - '0');
     }
     SDL_LockAudio(); {
-      synth.flag = flag;
+      synth.flag = music_flag = flag;
     } SDL_UnlockAudio();
   } while (ch != EOF);
   fprintf(stdout, "\n");
