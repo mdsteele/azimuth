@@ -127,9 +127,9 @@ static const az_vector_t oth_snapdragon_triangles[] = {
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_snapdragon_triangles) % 3 == 0);
 
 static const az_vector_t oth_razor_triangles[] = {
-  {12, 0}, {1.5, 2.59808}, {1.5, -2.59808},
-  {-6, 10.3923}, {-3, 0}, {1.5, 2.59808},
-  {-6, -10.3923}, {1.5, -2.59808}, {-3, 0}
+  {18, 0}, {2.25, 3.89712}, {2.25, -3.89712},
+  {-9, 15.58845}, {-4.5, 0}, {2.25, 3.89712},
+  {-9, -15.58845}, {2.25, -3.89712}, {-4.5, 0}
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_triangles) % 3 == 0);
 

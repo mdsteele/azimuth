@@ -1035,7 +1035,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .potential_pickups = AZ_PUPF_SMALL_SHIELDS,
     .static_properties = AZ_BADF_KAMIKAZE,
-    .main_body = { .bounding_radius = 10.0, .impact_damage = 3.0 }
+    .main_body = { .bounding_radius = 15.0, .impact_damage = 3.0 }
   },
   [AZ_BAD_GUN_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,

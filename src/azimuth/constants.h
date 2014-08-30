@@ -84,7 +84,7 @@
 // Nodes:
 
 // How close the ship must be to a console node to use it:
-#define AZ_CONSOLE_RANGE 40.0
+#define AZ_CONSOLE_RANGE 60.0
 // Max range of tractor beam, in pixels:
 #define AZ_TRACTOR_BEAM_MAX_RANGE 300.0
 // How close the ship must be to an upgrade node to pick it up:
