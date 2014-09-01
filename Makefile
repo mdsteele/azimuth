@@ -17,25 +17,45 @@
 # with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  #
 #=============================================================================#
 
+BUILDTYPE ?= debug
+
 SRCDIR = src
 DATADIR = data
-OUTDIR = out
+OUTDIR = out/$(BUILDTYPE)
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
 #=============================================================================#
-# Determine what OS we're on and what targets we're building.
+# Determine our build environment.
 
-ALL_TARGETS := $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
-               $(BINDIR)/muse $(BINDIR)/zfxr
+ALL_TARGETS = $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
+              $(BINDIR)/muse $(BINDIR)/zfxr
 
-CFLAGS = -O1 -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
+CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
          -Wmissing-field-initializers -Wold-style-definition -Wshadow \
          -Wsign-compare -Wstrict-prototypes -Wundef
 
+ifeq "$(BUILDTYPE)" "debug"
+  CFLAGS += -O1 -g
+else
+ifeq "$(BUILDTYPE)" "release"
+  CFLAGS += -O2
+else
+  $(error BUILDTYPE must be 'debug' or 'release')
+endif
+endif
+
+# Use clang if it's available, otherwise use gcc.
+CC := $(shell which clang > /dev/null && echo clang || echo gcc)
+ifeq "$(CC)" "clang"
+  CFLAGS += -Winitializer-overrides -Wno-objc-protocol-method-implementation
+else
+  CFLAGS += -Woverride-init -Wno-unused-local-typedefs
+endif
+
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
-  CFLAGS += -I$(SRCDIR)/macosx -Winitializer-overrides
+  CFLAGS += -I$(SRCDIR)/macosx
   MAIN_LIBFLAGS = -framework Cocoa -framework SDL -framework OpenGL
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa -framework SDL
@@ -43,7 +63,6 @@ ifeq "$(OS_NAME)" "Darwin"
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
-  CFLAGS += -Woverride-init -Wno-unused-local-typedefs
   MAIN_LIBFLAGS = -lm -lSDL -lGL
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lm -lSDL
@@ -56,12 +75,12 @@ C99FLAGS = -std=c99 -pedantic $(CFLAGS)
 define compile-sys
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(CFLAGS) -Wno-objc-protocol-method-implementation
+	@$(CC) -o $@ -c $< $(CFLAGS)
 endef
 define compile-c99
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ -c $< $(C99FLAGS)
+	@$(CC) -o $@ -c $< $(C99FLAGS)
 endef
 define copy-file
 	@echo "Copying $<"
@@ -131,27 +150,27 @@ all: $(ALL_TARGETS)
 $(BINDIR)/azimuth: $(MAIN_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
 
 $(BINDIR)/editor: $(EDIT_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
 
 $(BINDIR)/unit_tests: $(TEST_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) $(TEST_LIBFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(TEST_LIBFLAGS)
 
 $(BINDIR)/muse: $(MUSE_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) $(MUSE_LIBFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(MUSE_LIBFLAGS)
 
 $(BINDIR)/zfxr: $(ZFXR_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	@gcc -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
 
 #=============================================================================#
 # Build rules for compiling system-specific code:
