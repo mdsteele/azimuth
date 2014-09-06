@@ -32,12 +32,15 @@
 
 /*===========================================================================*/
 
-#define MOVE_BODY_STATE 0
-#define MOVE_EVEN_LEGS_STATE 1
-#define MOVE_ODD_LEGS_STATE 2
-#define MELTBEAM_STATE 3
-#define CROSSBEAM_STATE 4
-#define WAITING_STATE 5
+#define MOVE_BODY_FORWARD_STATE 0
+#define MOVE_EVEN_LEGS_FORWARD_STATE 1
+#define MOVE_ODD_LEGS_FORWARD_STATE 2
+#define MOVE_BODY_BACKWARD_STATE 3
+#define MOVE_EVEN_LEGS_BACKWARD_STATE 4
+#define MOVE_ODD_LEGS_BACKWARD_STATE 5
+#define MELTBEAM_STATE 6
+#define CROSSBEAM_STATE 7
+#define WAITING_STATE 8
 
 #define NUM_EYES 3
 #define FIRST_EYE_COMPONENT_INDEX 0
@@ -45,9 +48,9 @@
 #define FIRST_LEG_COMPONENT_INDEX 5
 #define LEG_LENGTH 80.0
 
-#define EYE_TURN_RATE (AZ_DEG2RAD(15))
-#define BODY_SPEED 45.0
-#define FOOT_SPEED 60.0
+#define BASE_EYE_TURN_RATE (AZ_DEG2RAD(15))
+#define BASE_BODY_SPEED 60.0
+#define BASE_FOOT_SPEED 80.0
 
 #define MELTBEAM_MIN_RANGE 350.0
 #define MELTBEAM_MID_RANGE 400.0
@@ -71,6 +74,10 @@ static void init_leg_anchors(const az_baddie_data_t *data) {
 
 /*===========================================================================*/
 
+static double speed_mult(const az_baddie_t *baddie) {
+  return 2.0 - baddie->health / baddie->data->max_health;
+}
+
 // Rotate all three eyes towards pointing at the given absolute position.
 static void turn_eyes_towards(
     az_baddie_t *baddie, double time, az_vector_t target) {
@@ -83,9 +90,18 @@ static void turn_eyes_towards(
     const double goal_angle = az_vtheta(az_vsub(target, abs_eye_position));
     const double old_abs_eye_angle = az_mod2pi(eye->angle + baddie->angle);
     const double new_abs_eye_angle =
-      az_angle_towards(old_abs_eye_angle, EYE_TURN_RATE * time, goal_angle);
+      az_angle_towards(old_abs_eye_angle, speed_mult(baddie) *
+                       BASE_EYE_TURN_RATE * time, goal_angle);
     eye->angle = az_mod2pi(new_abs_eye_angle - baddie->angle);
   }
+}
+
+static void turn_eyes_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  const az_vector_t target =
+    (az_ship_is_decloaked(&state->ship) ? state->ship.position :
+     az_vadd(baddie->position, az_vpolar(5000.0, baddie->angle)));
+  turn_eyes_towards(baddie, time, target);
 }
 
 // Destroy any ice crystals that are touching the Kilofuge.
@@ -114,16 +130,19 @@ static void choose_next_state(
     }
   }
 
-  if (any_crystals_in_range) {
+  if (baddie->param > 0.0) {
+    baddie->state = MOVE_BODY_BACKWARD_STATE;
+    baddie->param -= 1.0;
+  } else if (any_crystals_in_range) {
     baddie->state = MELTBEAM_STATE;
-    baddie->cooldown = 3.0;
+    baddie->cooldown = 3.0 / speed_mult(baddie);
   } else if (az_randint(1, 5) == 1) {
     baddie->state = CROSSBEAM_STATE;
-    baddie->cooldown = 2.5;
+    baddie->cooldown = 2.5 / speed_mult(baddie);
     baddie->components[FIRST_EYE_COMPONENT_INDEX + 1].angle = AZ_DEG2RAD(-45);
     baddie->components[FIRST_EYE_COMPONENT_INDEX + 2].angle = AZ_DEG2RAD(45);
   } else {
-    baddie->state = MOVE_BODY_STATE;
+    baddie->state = MOVE_BODY_FORWARD_STATE;
     az_vector_t rel_impact;
     if (az_ship_is_decloaked(&state->ship) &&
         az_lead_target(az_vsub(state->ship.position,
@@ -136,29 +155,32 @@ static void choose_next_state(
   }
 }
 
-static void move_body_forward(
-    az_space_state_t *state, az_baddie_t *baddie, double time) {
+static void move_body(
+    az_space_state_t *state, az_baddie_t *baddie, double time, int direction) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
-  // Look at the ship.
-  if (az_ship_is_decloaked(&state->ship)) {
-    turn_eyes_towards(baddie, time, state->ship.position);
-  }
+  assert(direction == 1 || direction == -1);
+  turn_eyes_towards_ship(state, baddie, time);
   // Determine our new position, moving along the center of the room.
   const az_camera_bounds_t *bounds =
     &state->planet->rooms[state->ship.player.current_room].camera_bounds;
   const double mid_r = bounds->min_r + 0.5 * bounds->r_span;
   const az_vector_t old_position = baddie->position;
   const double old_angle = baddie->angle;
-  const az_vector_t end_position = az_vpolar(mid_r, bounds->min_theta);
+  const az_vector_t end_position =
+    az_vpolar(mid_r, bounds->min_theta +
+              (direction < 0 ? bounds->theta_span : 0.0));
   if (az_vwithin(old_position, end_position, 20.0)) {
-    choose_next_state(state, baddie);
+    baddie->state = WAITING_STATE;
+    baddie->cooldown = 1.0;
     return;
   }
-  const az_vector_t new_position = az_vwithlen(
-      az_vadd(old_position, az_vpolar(BODY_SPEED * time, old_angle)), mid_r);
+  const az_vector_t new_position =
+    az_vwithlen(az_vadd(old_position,
+                        az_vpolar(direction * speed_mult(baddie) *
+                                  BASE_BODY_SPEED * time, old_angle)), mid_r);
   const double new_angle = az_mod2pi(az_vtheta(old_position) - AZ_HALF_PI);
   // Move legs so that all the feet stay in the same absolute position.  Stop
-  // moving forward when any of the legs are bent too far back.
+  // moving when any of the legs are bent too far.
   int stop_index = -1;
   for (int leg_index = 0; leg_index < NUM_LEGS; ++leg_index) {
     const int component_index = FIRST_LEG_COMPONENT_INDEX + leg_index;
@@ -168,7 +190,9 @@ static void move_body_forward(
     leg->position = az_vrotate(az_vsub(abs_foot_position, new_position),
                                -new_angle);
     leg->angle = az_vtheta(az_vsub(leg->position, leg_anchors[leg_index]));
-    if (fabs(leg->angle) >= 2.0) stop_index = leg_index;
+    if (direction < 0 ? fabs(leg->angle) <= 1.0 : fabs(leg->angle) >= 2.0) {
+      stop_index = leg_index;
+    }
   }
   // Update the baddie position and destroy any ice crystals we run into.
   baddie->position = new_position;
@@ -176,33 +200,35 @@ static void move_body_forward(
   crush_ice_crystals(state, baddie);
   // Whichever legs are bent back, we'll move those legs next.
   if (stop_index >= 0) {
-    baddie->state = (stop_index % 2 == 0 ? MOVE_EVEN_LEGS_STATE :
-                     MOVE_ODD_LEGS_STATE);
+    baddie->state = (direction < 0 ?
+                     (stop_index % 2 == 0 ? MOVE_EVEN_LEGS_BACKWARD_STATE :
+                      MOVE_ODD_LEGS_BACKWARD_STATE) :
+                     (stop_index % 2 == 0 ? MOVE_EVEN_LEGS_FORWARD_STATE :
+                      MOVE_ODD_LEGS_FORWARD_STATE));
   }
 }
 
-static void move_legs_forward(
-    az_space_state_t *state, az_baddie_t *baddie, double time, int parity) {
+static void move_legs(az_space_state_t *state, az_baddie_t *baddie,
+                      double time, int parity, int direction) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   assert(parity == 0 || parity == 1);
-  // Look at the ship.
-  if (az_ship_is_decloaked(&state->ship)) {
-    turn_eyes_towards(baddie, time, state->ship.position);
-  }
+  assert(direction == 1 || direction == -1);
+  turn_eyes_towards_ship(state, baddie, time);
   // Move half of the legs forward; either the even or the odd numbered ones.
   int num_legs_okay = 0;
   for (int leg_index = parity; leg_index < NUM_LEGS; leg_index += 2) {
     const int component_index = FIRST_LEG_COMPONENT_INDEX + leg_index;
     az_component_t *leg = &baddie->components[component_index];
     const az_vector_t anchor = leg_anchors[leg_index];
+    const double delta = speed_mult(baddie) * BASE_FOOT_SPEED * time;
     const az_vector_t goal =
-      az_vadd(anchor, (az_vector_t){40, copysign(80, anchor.y)});
-    if (az_vwithin(leg->position, goal, FOOT_SPEED * time)) {
+      az_vadd(anchor, (az_vector_t){40 * direction, copysign(80, anchor.y)});
+    if (az_vwithin(leg->position, goal, delta)) {
       leg->position = goal;
       ++num_legs_okay;
     } else {
-      az_vpluseq(&leg->position, az_vcaplen(az_vsub(goal, leg->position),
-                                            FOOT_SPEED * time));
+      az_vpluseq(&leg->position,
+                 az_vcaplen(az_vsub(goal, leg->position), delta));
     }
     // Angle the leg so that it still passes through the anchor.
     leg->angle = az_vtheta(az_vsub(leg->position, anchor));
@@ -272,16 +298,14 @@ static void fire_meltbeam(
   // are no ice crystals in range.
   if (lowest_crystal != NULL) {
     turn_eyes_towards(baddie, time, lowest_crystal->position);
-  } else if (az_ship_is_decloaked(&state->ship)) {
-    turn_eyes_towards(baddie, time, state->ship.position);
-  }
+  } else turn_eyes_towards_ship(state, baddie, time);
   fire_beam_from_eye(state, baddie, time, 0, 1.0);
   az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
 
   // When the cooldown timer reachers zero, stop firing the beam.
   if (baddie->cooldown <= 0.0) {
     baddie->state = WAITING_STATE;
-    baddie->cooldown = 1.0;
+    baddie->cooldown = 0.5;
   }
 }
 
@@ -289,9 +313,7 @@ static void fire_crossbeam(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
 
-  if (az_ship_is_decloaked(&state->ship)) {
-    turn_eyes_towards(baddie, time, state->ship.position);
-  }
+  turn_eyes_towards_ship(state, baddie, time);
   fire_beam_from_eye(state, baddie, time, 1, 0.67);
   fire_beam_from_eye(state, baddie, time, 2, 0.67);
   az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
@@ -299,7 +321,7 @@ static void fire_crossbeam(
   // When the cooldown timer reachers zero, stop firing the beams.
   if (baddie->cooldown <= 0.0) {
     baddie->state = WAITING_STATE;
-    baddie->cooldown = 0.5;
+    baddie->cooldown = 0.25;
   }
 }
 
@@ -310,14 +332,23 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   init_leg_anchors(baddie->data);
   switch (baddie->state) {
-    case MOVE_BODY_STATE:
-      move_body_forward(state, baddie, time);
+    case MOVE_BODY_FORWARD_STATE:
+      move_body(state, baddie, time, 1);
       break;
-    case MOVE_EVEN_LEGS_STATE:
-      move_legs_forward(state, baddie, time, 0);
+    case MOVE_EVEN_LEGS_FORWARD_STATE:
+      move_legs(state, baddie, time, 0, 1);
       break;
-    case MOVE_ODD_LEGS_STATE:
-      move_legs_forward(state, baddie, time, 1);
+    case MOVE_ODD_LEGS_FORWARD_STATE:
+      move_legs(state, baddie, time, 1, 1);
+      break;
+    case MOVE_BODY_BACKWARD_STATE:
+      move_body(state, baddie, time, -1);
+      break;
+    case MOVE_EVEN_LEGS_BACKWARD_STATE:
+      move_legs(state, baddie, time, 0, -1);
+      break;
+    case MOVE_ODD_LEGS_BACKWARD_STATE:
+      move_legs(state, baddie, time, 1, -1);
       break;
     case MELTBEAM_STATE:
       fire_meltbeam(state, baddie, time);
@@ -329,9 +360,18 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->cooldown <= 0.0) choose_next_state(state, baddie);
       break;
     default:
-      baddie->state = MOVE_BODY_STATE;
+      baddie->state = MOVE_BODY_FORWARD_STATE;
       break;
   }
+}
+
+void az_on_kilofuge_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind) {
+  const double knockback =
+    ((damage_kind & AZ_DMGF_HYPER_ROCKET) ? 3.0 :
+     (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) ? 1.0 : 0.0);
+  baddie->param = fmax(baddie->param, knockback);
 }
 
 /*===========================================================================*/
