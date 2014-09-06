@@ -34,6 +34,7 @@
 #include "azimuth/view/baddie_clam.h"
 #include "azimuth/view/baddie_crawler.h"
 #include "azimuth/view/baddie_forcefiend.h"
+#include "azimuth/view/baddie_kilofuge.h"
 #include "azimuth/view/baddie_machine.h"
 #include "azimuth/view/baddie_myco.h"
 #include "azimuth/view/baddie_night.h"
@@ -838,25 +839,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_super_hornet(baddie, frozen, clock);
       break;
     case AZ_BAD_KILOFUGE:
-      // TODO: Make real graphics for the Kilofuge.
-      draw_baddie_outline(baddie, frozen, 1);
+      az_draw_bad_kilofuge(baddie, clock);
       break;
-    case AZ_BAD_ICE_CRYSTAL: {
-      const az_polygon_t polygon = baddie->data->main_body.polygon;
-      for (int i = 0; i < polygon.num_vertices; ++i) {
-        const int j = (i + 1) % polygon.num_vertices;
-        if (i == 0) glColor4f(0.5, 1 - flare, 1 - flare, 0.25);
-        else if (i == 2) glColor4f(0.5f * flare, 0.75f - 0.75f * flare,
-                                   0.75f - 0.75f * flare, 0.25);
-        else glColor4f(0.5f * flare, 1 - flare, 1 - flare, 0.25);
-        glBegin(GL_TRIANGLES); {
-          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
-          glVertex2d(polygon.vertices[j].x, polygon.vertices[j].y);
-          glColor4f(flare, 1 - flare, 1 - 0.5 * flare, 0.75);
-          glVertex2d(0, 0);
-        } glEnd();
-      }
-    } break;
+    case AZ_BAD_ICE_CRYSTAL:
+      az_draw_bad_ice_crystal(baddie);
+      break;
     case AZ_BAD_SWITCHER:
       az_draw_bad_switcher(baddie, frozen, clock);
       break;

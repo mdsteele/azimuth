@@ -610,7 +610,7 @@ static const az_vector_t kilofuge_right_pincer_vertices[] = {
   {50, -10}, {100, 0}, {50, -20}, {0, 0}
 };
 static const az_vector_t kilofuge_leg_vertices[] = {
-  {0, 0}, {-100, 10}, {-100, -10}
+  {-100, -10}, {0, 0}, {-100, 10}
 };
 static az_component_data_t kilofuge_components[] = {
   // Eyes:
@@ -1339,14 +1339,13 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_SUPER_HORNET] = {
     .max_health = 20.0, .color = {128, 255, 0, 255},
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
-    .death_style = AZ_DEATH_EMBERS,
-    .potential_pickups = AZ_PUPF_ALL,
+    .death_style = AZ_DEATH_EMBERS, .potential_pickups = AZ_PUPF_ALL,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 12.0 }
   },
   [AZ_BAD_KILOFUGE] = {
     .max_health = 500.0, .overall_bounding_radius = 350.0,
-    .static_properties = AZ_BADF_DRAW_BG, .color = {64, 192, 192, 255},
+    .hurt_sound = AZ_SND_HURT_KILOFUGE, .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(kilofuge_main_body_vertices),
                    .impact_damage = 25.0, .immunities = ~0 },
     DECL_COMPONENTS(kilofuge_components)

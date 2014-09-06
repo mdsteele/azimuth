@@ -431,6 +431,16 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.900347, .lpf_ramp = -0.644483, .lpf_resonance = 0.423428,
     .hpf_cutoff = 0.285813, .hpf_ramp = 0.760594, .volume_adjust = 0.5
   },
+  [AZ_SND_HURT_KILOFUGE] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_attack = 0.1, .env_decay = 0.4,
+    .start_freq = 0.5, .freq_slide = -0.02674, .freq_delta_slide = 0.0555,
+    .vibrato_depth = 0.480421, .vibrato_speed = 0.285732,
+    .arp_mod = -0.403854, .arp_speed = 0.710617, .repeat_speed = 0.339842,
+    .phaser_offset = 0.100114, .phaser_sweep = 0.000345079,
+    .lpf_cutoff = 0.807726, .lpf_ramp = -0.064732, .lpf_resonance = -0.333281,
+    .hpf_cutoff = 0.278757, .hpf_ramp = 0.0216441
+  },
   [AZ_SND_HURT_OTH] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.355, .env_punch = 0.000476076, .env_decay = 0.35,

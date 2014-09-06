@@ -130,9 +130,9 @@ static void choose_next_state(
     }
   }
 
-  if (baddie->param > 0.0) {
+  if (baddie->param > 0.0 || !az_ship_is_alive(&state->ship)) {
     baddie->state = MOVE_BODY_BACKWARD_STATE;
-    baddie->param -= 1.0;
+    baddie->param = fmax(0.0, baddie->param - 1.0);
   } else if (any_crystals_in_range) {
     baddie->state = MELTBEAM_STATE;
     baddie->cooldown = 3.0 / speed_mult(baddie);
