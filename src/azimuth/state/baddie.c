@@ -890,11 +890,10 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_ZENITH_CORE] = {
     .max_health = 1000.0, .color = {255, 0, 255, 255},
-    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
-    .static_properties = AZ_BADF_CARRIES_CARGO,
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
+    .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG),
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
-                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
-                                  AZ_DMGF_REACTIVE) }
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
   },
   [AZ_BAD_ARMORED_TURRET] = {
     .max_health = 8.0, .overall_bounding_radius = 30.5,
