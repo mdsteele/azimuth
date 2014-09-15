@@ -62,4 +62,13 @@ int az_randint(int min, int max) {
   return min + az_rand_uint32(&global_seed) % (uint32_t)(1 + max - min);
 }
 
+az_vector_t az_random_point_in_circle(double radius) {
+  assert(radius >= 0.0);
+  // Select a point using the technique described by this Stack Overflow
+  // answer: http://stackoverflow.com/a/5838055
+  const double u = az_random(0, radius) + az_random(0, radius);
+  return az_vpolar((u > radius ? 2 * radius - u : u),
+                   az_random(0, AZ_TWO_PI));
+}
+
 /*===========================================================================*/

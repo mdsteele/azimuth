@@ -420,6 +420,36 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         GET_OBJECT(&object);
         az_kill_object(state, &object);
       } break;
+      case AZ_OP_GHEAL: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        switch (object.type) {
+          case AZ_OBJ_NOTHING: STACK_PUSH(0.0); break;
+          case AZ_OBJ_SHIP: STACK_PUSH(object.obj.ship->player.shields); break;
+          case AZ_OBJ_BADDIE: STACK_PUSH(object.obj.baddie->health); break;
+          default: SCRIPT_ERROR("invalid object type");
+        }
+      } break;
+      case AZ_OP_SHEAL: {
+        az_object_t object;
+        GET_OBJECT(&object);
+        double new_health;
+        STACK_POP(&new_health);
+        switch (object.type) {
+          case AZ_OBJ_NOTHING: break;
+          case AZ_OBJ_SHIP:
+            if (new_health <= 0.0) az_kill_object(state, &object);
+            else object.obj.ship->player.shields =
+                   fmin(new_health, object.obj.ship->player.max_shields);
+            break;
+          case AZ_OBJ_BADDIE:
+            if (new_health <= 0.0) az_kill_object(state, &object);
+            else object.obj.baddie->health =
+                   fmin(new_health, object.obj.baddie->data->max_health);
+            break;
+          default: SCRIPT_ERROR("invalid object type");
+        }
+      } break;
       case AZ_OP_GPOS: {
         az_object_t object;
         GET_OBJECT(&object);

@@ -101,10 +101,15 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
         mode_data->step = AZ_BDS_FADE;
         mode_data->progress = 0.0;
         for (int i = 0; i < 20; ++i) {
-          const az_vector_t offset = {az_random(-1, 1), az_random(-1, 1)};
-          if (az_vdot(offset, offset) > 1.0) continue;
           az_add_random_pickup(state, ~AZ_PUPF_NOTHING,
-              az_vadd(mode_data->boss.position, az_vmul(offset, 100.0)));
+                               az_vadd(mode_data->boss.position,
+                                       az_random_point_in_circle(100.0)));
+        }
+        AZ_ARRAY_LOOP(uuid, mode_data->boss.cargo_uuids) {
+          az_object_t object;
+          if (az_lookup_object(state, *uuid, &object)) {
+            az_kill_object(state, &object);
+          }
         }
         mode_data->boss.kind = AZ_BAD_NOTHING;
         az_run_script(state, mode_data->boss.on_kill);

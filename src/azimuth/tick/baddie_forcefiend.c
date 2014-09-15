@@ -209,6 +209,7 @@ void az_tick_bad_force_egg(az_space_state_t *state, az_baddie_t *baddie,
 
 void az_tick_bad_forceling(az_space_state_t *state, az_baddie_t *baddie,
                            double time) {
+  assert(baddie->kind == AZ_BAD_FORCELING);
   az_snake_towards(baddie, time, 0, 100.0, 150.0,
                    az_vadd(az_vpolar(150, state->ship.angle +
                                      baddie->state * AZ_DEG2RAD(90)),

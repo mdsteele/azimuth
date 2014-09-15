@@ -85,6 +85,8 @@ typedef enum {
   // Objects:
   AZ_OP_NIX, // remove object i (of any non-ship type)
   AZ_OP_KILL, // kill/break object i (of any type)
+  AZ_OP_GHEAL, // push health of object i (ship or baddie)
+  AZ_OP_SHEAL, // pop top, set health of object i (ship or baddie) to a
   AZ_OP_GPOS, // push (x, y) position of object i (of any type)
   AZ_OP_SPOS, // pop top two, set position of obj i (of any type) to (a, b)
   AZ_OP_GANG, // push angle of object i (of any type)

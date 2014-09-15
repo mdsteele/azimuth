@@ -83,6 +83,8 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_MAP:    return "map";
     case AZ_OP_NIX:    return "nix";
     case AZ_OP_KILL:   return "kill";
+    case AZ_OP_GHEAL:  return "gheal";
+    case AZ_OP_SHEAL:  return "sheal";
     case AZ_OP_GPOS:   return "gpos";
     case AZ_OP_SPOS:   return "spos";
     case AZ_OP_GANG:   return "gang";
@@ -203,6 +205,8 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_DUP:
     case AZ_OP_SWAP:
     case AZ_OP_KILL:
+    case AZ_OP_GHEAL:
+    case AZ_OP_SHEAL:
     case AZ_OP_GPOS:
     case AZ_OP_SPOS:
     case AZ_OP_GANG:

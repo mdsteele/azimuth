@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#include "azimuth/util/vector.h"
+
 /*===========================================================================*/
 
 typedef struct {
@@ -55,6 +57,10 @@ double az_random(double min, double max);
 // Returns a random integer in the (inclusive) range [min, max], using the
 // global random seed.  min must not be greater than max.
 int az_randint(int min, int max);
+
+// Returns a point selected uniformly from the set of points that are within
+// radius of the origin.
+az_vector_t az_random_point_in_circle(double radius);
 
 /*===========================================================================*/
 

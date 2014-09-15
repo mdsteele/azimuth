@@ -1,4 +1,4 @@
-@P z8 r459 t137 s6 x0.00 y50000.00 a-1.570796
+@P z8 r459 t170 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -378,7 +378,7 @@
   The upper door just locked.  I can't override
   it.  Someone or something is interfering with
   the Cnidam mining subsystems.  I am detecting
-  significant $YOth activity$W below -- they must be
+  significant $YOth activity$W below--they must be
   responsible."
 !T91"
   $O!DANGER DANGER!$W  This isn't good.  Hopper, we
@@ -543,13 +543,13 @@
   know of.  Planet-sized minds, and our
   fellow citizens of the galaxy.  We've
   only ever found three of them, each on
-  a different world -- presumably the
+  a different world--presumably the
   creation of some earlier civilization?
   Even after decades of study, we still
   don't know how they work, or how to
   make more of them.  Still, the three
-  we've met so far -- Noumena, Halcyon,
-  and Epicedium -- have been invaluable
+  we've met so far--Noumena, Halcyon,
+  and Epicedium--have been invaluable
   allies, even friends, in our unending
   quest to explore and understand the
   universe we all live in."
@@ -616,3 +616,148 @@
   Press [$t] to use the console."
 !T136"
   Hothouse"
+!T137"
+  \"...\"                                       
+
+  \"You're here.\""
+!T138"
+  \"Trichord survivors!  I got here as fast as I
+  could.  I'm Major Shawna Jemison of the UHP
+  Interstellar Patrol Force.  I'm here to evacuate
+  you!\""
+!T139"
+  \"...I don't think that that will be necessary,
+  Major.  Everything is under control here.  Run
+  along, now.\""
+!T140"
+  \"No, you don't understand!  The Oth are breaking
+  through space all over Zenith as we speak.  And
+  Azimuth is dead; he won't be able to help you
+  anymore.  You didn't know it, but taking over
+  control of the NPS catalysis was too much even
+  for him.  And now all the colony defense systems
+  have gone nuts, and--\""
+!T141"
+  \"We knew.\""
+!T142"
+  \"...you what now?\""
+!T143"
+  \"We knew that handing the NPS controls over to
+  Azimuth would destroy him.  An unfortunate
+  necessity.  And we knew you were on your way
+  here thanks to that damned auto-distress signal.
+  We set all the security turrets to open fire at
+  you, but obviously you didn't take the hint.\""
+!T144"
+  \"I suppose it might have worked better if the
+  defense systems weren't already so badly damaged
+  from the NPS accidents.  Even the bit with the
+  mining explosives didn't work out.\""
+!T145"
+  \"You set the...look, punk, did you not
+  understand the part about how the Oth are
+  ruthless extradimensional horrors that will stop
+  at nothing to destroy you and everything else
+  here?\""
+!T146"
+  \"Don't be silly.  The Oth are a tool; one that
+  we have been working diligently to harness.
+  Well, some of us, anyway; but none of the humans
+  or the few Trichords who objected--once they saw
+  what we were trying to accomplish--survived the
+  retreat to the core, so that problem sort of
+  fixed itself.\""
+!T147"
+  \"Azimuth objected from the start, of course,
+  but now he's dead too.  He was all too eager to
+  protect us, I guess.\""
+!T148"
+  \"He's dead because you murdered him.  You
+  craven son of a--\""
+!T149"
+  \"The point, Major, is that the NPS catalysis
+  engines have been very nearly perfected now.
+  And with the might of the Oth behind us, the
+  Trichord Alliance won't need the humans--or any
+  of the rest of the Joint Federation for that
+  matter--any longer.  This is simply a matter of
+  independence, you see.\""
+!T150"
+  \"The hell it is.  You're going down, hard.\""
+!T151"
+  \"Well, we hardly expected to convince you.  We
+  appreciate all your efforts to rescue us--
+  misguided though they were--but you wasted your
+  time.  And now that you're here...\"
+
+  \"...we have little choice but to destroy you.\""
+!T152"
+  \"Damn you, blasted Human!  This isn't over.\""
+!T153"
+  Core defense systems have been destroyed.
+  Emergency access to central network node has
+  been unlocked.
+
+  Initiating connection..."
+!T154"
+  \"Huh?  What are you blathering about, machine?\""
+!T155"
+  Central network node connected.
+
+  Merging database contents..."
+!T156"
+  Central network node connected.
+
+  Merging neural patterns..."
+!T157"
+  Central network node connected.
+
+  Merging sapience clusters..."
+!T158"
+  \"I am alive.\""
+!T159"
+  \"Azimuth!?\""
+!T160"
+  \"Hopper...\"                     
+
+  \"...thank you.\"      
+
+  \"For everything.\""
+!T161"
+  \"You need to get out of here, Major.  Now that
+  no one who still wanted peace is left here, I am
+  able--and forced--to take the last resort.  I am
+  going to completely obliterate the NPS network.\"
+
+  \"We have to cut the Oth off from this universe
+  forever.\""
+!T162"
+  \"No you don't, you little--\""
+!T163"
+  \"Silence, Rakifsutria.  I knew about your
+  plans the whole time, and I gave you many
+  opportunities to cease them.\"
+
+  \"Now you and I are going to pay the price
+  together to see this ended.\""
+!T164"
+  \"Azimuth, wait.  What are you planning to do?\""
+!T165"
+  \"I'm sorry, Hopper, but I've already done it.\"
+
+  \"Even now the Oth are preparing to come through
+  in force, so we simply don't have any time to
+  lose.\""
+!T166"
+  \"I've started a chain reaction in the NPS grid.
+  In about six minutes this entire planetoid is
+  going to go up in smoke, and me with it.  You
+  need to get to the surface airlock immediately
+  and escape.\""
+!T167"
+  \"You want me to get to the surface, in six
+  minutes, from $/the center of the planet$|!?\""
+!T168"
+  \"There's no time, Hopper, GO!\""
+!T169"
+  "
