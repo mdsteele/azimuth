@@ -65,7 +65,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
     if (az_ray_hits_baddie(other, beam_start, beam_delta,
                            NULL, NULL, &component)) {
       az_try_damage_baddie(state, other, component,
-                           (AZ_DMGF_PIERCE | AZ_DMGF_BEAM), beam_damage);
+                           (AZ_DMGF_HYPER_ROCKET | AZ_DMGF_BEAM), beam_damage);
     }
   }
   // Add particles for the beam.

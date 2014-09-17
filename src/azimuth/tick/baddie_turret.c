@@ -271,4 +271,40 @@ void az_tick_bad_security_drone(
   }
 }
 
+void az_tick_bad_pop_open_turret(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_POP_OPEN_TURRET);
+  const double max_angle = AZ_DEG2RAD(50);
+  const double barrel_turn_rate = AZ_DEG2RAD(40);
+  const bool open_shell =
+    (baddie->state > 0 && az_ship_in_range(state, baddie, 500));
+  // Aim barrel:
+  if (open_shell) {
+    aim_towards_ship(state, baddie, time, max_angle, barrel_turn_rate);
+  } else {
+    baddie->components[0].angle = az_angle_towards(
+        baddie->components[0].angle, barrel_turn_rate * time, 0.0);
+  }
+  // Open/close shell:
+  baddie->components[1].angle =
+    az_angle_towards(baddie->components[1].angle, AZ_DEG2RAD(90) * time,
+                     (open_shell ? max_angle + AZ_DEG2RAD(10) : 0.0));
+  baddie->components[2].angle = -AZ_HALF_PI - baddie->components[1].angle;
+  // Fire:
+  if (open_shell && baddie->cooldown <= 0.0 &&
+      baddie->components[1].angle >
+      fabs(baddie->components[0].angle) + AZ_DEG2RAD(5) &&
+      az_ship_within_angle(state, baddie, baddie->components[0].angle,
+                           AZ_DEG2RAD(6))) {
+    az_fire_baddie_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
+                              baddie->components[0].angle, 0.0);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
+    ++baddie->state;
+    if (baddie->state > 3) {
+      baddie->state = 1;
+      baddie->cooldown = 1.0;
+    } else baddie->cooldown = 0.15;
+  }
+}
+
 /*===========================================================================*/

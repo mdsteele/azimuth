@@ -908,6 +908,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_GRABBER_PLANT:
       az_tick_bad_grabber_plant(state, baddie, time);
       break;
+    case AZ_BAD_POP_OPEN_TURRET:
+      az_tick_bad_pop_open_turret(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

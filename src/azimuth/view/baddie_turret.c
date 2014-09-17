@@ -327,4 +327,53 @@ void az_draw_bad_security_drone(
              0.6 - 0.3 * flare + 0.4 * frozen));
 }
 
+void az_draw_bad_pop_open_turret(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_POP_OPEN_TURRET);
+  const float flare = baddie->armor_flare;
+  const az_color_t inner =
+    color3(0.6f + 0.4f * flare, 0.6f, 0.6f + 0.4f * frozen);
+  const az_color_t outer =
+    color3(0.2f + 0.25f * flare, 0.2f, 0.2f + 0.25f * frozen);
+  // Center:
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(inner);
+    glVertex2f(0, 0);
+    az_gl_color(outer);
+    const double radius = baddie->data->main_body.bounding_radius;
+    for (int i = 0; i <= 360; i += 10) {
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  // Barrel:
+  glPushMatrix(); {
+    glRotated(AZ_RAD2DEG(baddie->components[0].angle), 0, 0, 1);
+    glBegin(GL_QUAD_STRIP); {
+      az_gl_color(outer); glVertex2f(14,  5); glVertex2f(26,  5);
+      az_gl_color(inner); glVertex2f( 5,  0); glVertex2f(26,  0);
+      az_gl_color(outer); glVertex2f(14, -5); glVertex2f(26, -5);
+    } glEnd();
+  } glPopMatrix();
+  // Shell:
+  for (int i = 1; i < 3; ++i) {
+    glPushMatrix(); {
+      az_gl_rotated(baddie->components[i].angle);
+      glBegin(GL_TRIANGLE_FAN); {
+        const az_polygon_t poly = baddie->data->components[i].polygon;
+        glColor3f(0.85, 0.85, 0.75);
+        az_gl_vertex(poly.vertices[0]);
+        glColor3f(0.35, 0.35, 0.25);
+        for (int j = 1; j < poly.num_vertices; ++j) {
+          az_gl_vertex(poly.vertices[j]);
+        }
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.3, 0.3, 0.2); glVertex2f(33, 0); glVertex2f(33, 1);
+        glColor3f(0.5, 0.5, 0.4); glVertex2f(0,  0); glVertex2f(1,  1);
+        glColor3f(0.3, 0.3, 0.2); glVertex2f(0, 33); glVertex2f(1, 33);
+      } glEnd();
+    } glPopMatrix();
+  }
+}
+
 /*===========================================================================*/

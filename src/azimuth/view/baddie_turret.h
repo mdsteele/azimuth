@@ -47,6 +47,9 @@ void az_draw_bad_crawling_mortar(
 void az_draw_bad_security_drone(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_pop_open_turret(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_TURRET_H_

@@ -45,6 +45,9 @@ void az_tick_bad_crawling_mortar(
 void az_tick_bad_security_drone(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_pop_open_turret(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_BADDIE_TURRET_H_

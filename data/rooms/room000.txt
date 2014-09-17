@@ -1,6 +1,6 @@
 @R z7 p8/23 b9 d2 g1 n21 w93
   c(240.00,0.00,4.712389,6.283185)
-$s:test23,beqz/A,nix1,nix10,nix11,nix19,nix20,halt,A#mus12,wait2,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus9,musf1,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,dend,push1,sstat1,mus9,musf2,B#wait0.1,gstat1,eqi2,bnez/B,boss1,musf0,wait1,C#wait0.12,test23,hnez,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz/C,gstat4,isub0,sstat4,jump/C;
+$s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,halt,A#mus12,wait4,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus9,musf1,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,dend,activ1,activ12,activ13,activ14,activ15,activ16,activ17,activ18,activ19,mus9,musf2,B#wait0.1,gstat1,eqi2,bnez/B,boss1,musf0,wait1,C#wait0.12,test23,hnez,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz/C,gstat4,isub0,sstat4,jump/C;
 !W1 d79 x227.59 y-545.94 a-1.161005 u0
 !W1 d79 x547.70 y-226.77 a-0.378890 u0
 !W1 d79 x-552.39 y227.39 a-0.378890 u0
@@ -98,7 +98,7 @@ $s:test23,beqz/A,nix1,nix10,nix11,nix19,nix20,halt,A#mus12,wait2,dlog,pt1,pb6,tb
 !D7 x-326.98 y410.84 a-0.898563 r60 u0
 !G3 x0.00 y0.00 a0.000000 s0.00 w0.00 i45.00 t430.00 u2
 !N8/1 x-115.66 y154.17 a0.643618 u4
-!N2 x1.00 y123.05 a1.570796 u19
+!N2 x1.00 y123.05 a1.570796 u21
 !N2 x-1.00 y-120.00 a-1.579130 u20
 !N4/24 x367.83 y360.28 a-2.356194 u0
 !N4/24 x403.96 y396.41 a-2.356194 u0
@@ -118,13 +118,13 @@ $s:test23,beqz/A,nix1,nix10,nix11,nix19,nix20,halt,A#mus12,wait2,dlog,pt1,pb6,tb
 !N7/9 x-223.00 y0.00 a3.141593 u0
 !N7/9 x-336.25 y0.00 a3.141593 u0
 !N7/50 x-428.75 y0.00 a3.141593 u0
-!B14 x-174.13 y411.96 a-1.241213 u0
-!B14 x173.45 y411.72 a-1.920876 u0
-!B14 x-412.02 y172.92 a-0.345193 u0
-!B14 x-411.48 y-173.81 a0.371521 u0
-!B14 x-173.47 y-411.71 a1.230970 u0
-!B14 x173.72 y-411.65 a1.919062 u0
-!B14 x411.81 y-173.77 a2.772986 u0
-!B14 x412.18 y173.71 a-2.798638 u0
-!B13 x0.00 y0.01 a0.000000 u1:19:20
+!B93 x-179.51 y429.70 a-1.186727 u12
+!B93 x179.62 y429.73 a-1.970706 u13
+!B93 x-430.32 y179.01 a-0.411864 u19
+!B93 x-429.77 y-179.43 a0.394919 u18
+!B93 x-179.28 y-430.41 a1.164695 u17
+!B93 x179.31 y-429.92 a1.954012 u16
+!B93 x429.85 y-179.16 a2.745991 u15
+!B93 x429.91 y179.27 a-2.769202 u14
+!B13 x0.00 y0.01 a0.000000 u1:20:21
 $k:set23,gpos4,spos,gvel,vmuli0.01,svel,push500,sheal,push0,sstr2,mus0,wait0.5,dlog,pt1,pb6,tb152,pt3,tt153,tb154,tt155,pb4,tb156,pt5,tt157,pt0,pb2,tb169,tb158,pt1,tt159,tb160,tb161,pt6,tt162,tb163,pt1,tt164,tb165,tb166,tt167,tb168,dend,kill10,kill11,mus13,doom360,nuke;

@@ -796,6 +796,25 @@ static az_component_data_t grabber_plant_components[] = {
     .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 18.0 }
 };
 
+static const az_vector_t pop_open_turret_cannon_vertices[] = {
+  {26, 5}, {0, 5}, {0, -5}, {26, -5}
+};
+static az_vector_t pop_open_turret_shell_vertices[] = {
+  {0, 0}, {33, 0}, {32.4987, 5.73039}, {31.0098, 11.28666}, {28.5789, 16.5},
+  {25.2795, 21.21195}, {21.21195, 25.2795}, {16.5, 28.5789},
+  {11.28666, 31.0098}, {5.73039, 32.4987}, {0, 33}
+};
+static az_component_data_t pop_open_turret_components[] = {
+  { .polygon = AZ_INIT_POLYGON(pop_open_turret_cannon_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 },
+  { .polygon = AZ_INIT_POLYGON(pop_open_turret_shell_vertices),
+    .immunities = ~(AZ_DMGF_HYPER_ROCKET | AZ_DMGF_CPLUS),
+    .init_angle = AZ_DEG2RAD(0) },
+  { .polygon = AZ_INIT_POLYGON(pop_open_turret_shell_vertices),
+    .immunities = ~(AZ_DMGF_HYPER_ROCKET | AZ_DMGF_CPLUS),
+    .init_angle = AZ_DEG2RAD(-90) }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1540,6 +1559,14 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(grabber_plant_core_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(grabber_plant_components)
+  },
+  [AZ_BAD_POP_OPEN_TURRET] = {
+    .max_health = 8.0, .overall_bounding_radius = 33.5,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {160, 160, 80, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
+    .static_properties = AZ_BADF_DRAW_BG,
+    .main_body = { .bounding_radius = 16.0, .impact_damage = 10.0 },
+    DECL_COMPONENTS(pop_open_turret_components)
   }
 };
 
