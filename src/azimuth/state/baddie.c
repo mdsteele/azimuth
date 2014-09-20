@@ -604,10 +604,10 @@ static const az_vector_t kilofuge_main_body_vertices[] = {
   {-150, 0}, {-80, -150}, {30, -140}, {90, -120}
 };
 static const az_vector_t kilofuge_left_pincer_vertices[] = {
-  {50, 10}, {100, 0}, {50, 20}, {0, 0}
+  {50, 10}, {100, 0}, {50, 20}, {0, 6}, {-5, 0}, {0, -6}
 };
 static const az_vector_t kilofuge_right_pincer_vertices[] = {
-  {50, -10}, {100, 0}, {50, -20}, {0, 0}
+  {50, -10}, {100, 0}, {50, -20}, {0, -6}, {-5, 0}, {0, 6}
 };
 static const az_vector_t kilofuge_leg_vertices[] = {
   {-100, -10}, {0, 0}, {-100, 10}

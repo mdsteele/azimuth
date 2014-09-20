@@ -44,6 +44,8 @@
 
 #define NUM_EYES 3
 #define FIRST_EYE_COMPONENT_INDEX 0
+#define LEFT_PINCER_COMPONENT_INDEX 3
+#define RIGHT_PINCER_COMPONENT_INDEX 4
 #define NUM_LEGS 6
 #define FIRST_LEG_COMPONENT_INDEX 5
 #define LEG_LENGTH 80.0
@@ -76,6 +78,31 @@ static void init_leg_anchors(const az_baddie_data_t *data) {
 
 static double speed_mult(const az_baddie_t *baddie) {
   return 2.0 - baddie->health / baddie->data->max_health;
+}
+
+static void move_pincers_towards(az_baddie_t *baddie, double time,
+                                 double goal_angle) {
+  assert(baddie->kind == AZ_BAD_KILOFUGE);
+  az_component_t *left_pincer =
+    &baddie->components[LEFT_PINCER_COMPONENT_INDEX];
+  az_component_t *right_pincer =
+    &baddie->components[RIGHT_PINCER_COMPONENT_INDEX];
+  const double new_left_angle =
+    az_angle_towards(left_pincer->angle, AZ_DEG2RAD(120) * time, goal_angle);
+  left_pincer->angle = new_left_angle;
+  right_pincer->angle = -new_left_angle;
+}
+
+static void close_pincers(az_baddie_t *baddie, double time) {
+  move_pincers_towards(baddie, time, AZ_DEG2RAD(-45));
+}
+
+static void open_pincers(az_baddie_t *baddie, double time) {
+  move_pincers_towards(baddie, time, AZ_DEG2RAD(10));
+}
+
+static void relax_pincers(az_baddie_t *baddie, double time) {
+  move_pincers_towards(baddie, time, 0);
 }
 
 // Rotate all three eyes towards pointing at the given absolute position.
@@ -159,6 +186,8 @@ static void move_body(
     az_space_state_t *state, az_baddie_t *baddie, double time, int direction) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   assert(direction == 1 || direction == -1);
+  if (direction < 0) close_pincers(baddie, time);
+  else relax_pincers(baddie, time);
   turn_eyes_towards_ship(state, baddie, time);
   // Determine our new position, moving along the center of the room.
   const az_camera_bounds_t *bounds =
@@ -213,6 +242,8 @@ static void move_legs(az_space_state_t *state, az_baddie_t *baddie,
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   assert(parity == 0 || parity == 1);
   assert(direction == 1 || direction == -1);
+  if (direction < 0) close_pincers(baddie, time);
+  else relax_pincers(baddie, time);
   turn_eyes_towards_ship(state, baddie, time);
   // Move half of the legs forward; either the even or the odd numbered ones.
   int num_legs_okay = 0;
@@ -241,12 +272,15 @@ static void fire_beam_from_eye(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     int eye_index, double power) {
   // Fire a beam from the eye.
+  const double eye_radius =
+    baddie->data->components[eye_index].bounding_radius;
   const az_component_t *eye =
     &baddie->components[FIRST_EYE_COMPONENT_INDEX + eye_index];
   const double beam_angle = baddie->angle + eye->angle;
   const az_vector_t beam_start =
     az_vadd(az_vadd(az_vrotate(eye->position, baddie->angle),
-                    baddie->position), az_vpolar(8, beam_angle));
+                    baddie->position),
+            az_vpolar(0.7 * eye_radius, beam_angle));
   az_impact_t impact;
   az_ray_impact(state, beam_start, az_vpolar(5000, beam_angle),
                 AZ_IMPF_NONE, baddie->uid, &impact);
@@ -276,6 +310,7 @@ static void fire_beam_from_eye(
 static void fire_meltbeam(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
+  open_pincers(baddie, time);
 
   // Find the lowest ice crystal within range.
   az_baddie_t *lowest_crystal = NULL;
@@ -312,6 +347,7 @@ static void fire_meltbeam(
 static void fire_crossbeam(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
+  open_pincers(baddie, time);
 
   turn_eyes_towards_ship(state, baddie, time);
   fire_beam_from_eye(state, baddie, time, 1, 0.67);
@@ -357,10 +393,11 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
       fire_crossbeam(state, baddie, time);
       break;
     case WAITING_STATE:
+      close_pincers(baddie, time);
       if (baddie->cooldown <= 0.0) choose_next_state(state, baddie);
       break;
     default:
-      baddie->state = MOVE_BODY_FORWARD_STATE;
+      baddie->state = WAITING_STATE;
       break;
   }
 }
@@ -368,10 +405,16 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
 void az_on_kilofuge_damaged(
     az_space_state_t *state, az_baddie_t *baddie, double amount,
     az_damage_flags_t damage_kind) {
-  const double knockback =
-    ((damage_kind & AZ_DMGF_HYPER_ROCKET) ? 3.0 :
-     (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) ? 1.0 : 0.0);
-  baddie->param = fmax(baddie->param, knockback);
+  const int knockback =
+    ((damage_kind & AZ_DMGF_HYPER_ROCKET) ? 3 :
+     (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) ? 2 : 0);
+  if (knockback > 0) {
+    baddie->param = fmax(baddie->param, knockback);
+    if (baddie->state == MELTBEAM_STATE || baddie->state == CROSSBEAM_STATE) {
+      baddie->state = WAITING_STATE;
+      baddie->cooldown = 0.0;
+    }
+  }
 }
 
 /*===========================================================================*/
