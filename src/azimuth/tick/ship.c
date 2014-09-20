@@ -469,7 +469,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.7; break;
     case AZ_GUN_HOMING: energy_cost *= 1.5; damage_mult *= 0.5; break;
     case AZ_GUN_PHASE: energy_cost *= 2.0; break;
-    case AZ_GUN_BURST: energy_cost *= 2.5; break;
+    case AZ_GUN_BURST: energy_cost *= 2.0; damage_mult *= 1.5; break;
     case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
@@ -568,7 +568,6 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     // Resolve hits:
     bool did_hit = true;
     bool did_damage = false;
-    az_color_t hit_color = AZ_WHITE;
     switch (impact.type) {
       case AZ_IMP_NOTHING: did_hit = false; break;
       case AZ_IMP_BADDIE:
@@ -582,20 +581,18 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
         az_try_open_door(state, impact.target.door, damage_kind);
         break;
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
-      case AZ_IMP_WALL:
-        hit_color = impact.target.wall->data->color1;
-        break;
+      case AZ_IMP_WALL: break;
     }
     if (did_hit) {
       // Add particles off of whatever the beam hits:
-      beam_emit_particles(state, impact.position, impact.normal, hit_color);
+      beam_emit_particles(state, impact.position, impact.normal, AZ_WHITE);
       // If this is a BURST beam, the next beam reflects off of the impact
       // point.  The next beam will be reduced in power.
       if (minor == AZ_GUN_BURST) {
         const double normal_theta = az_vtheta(impact.normal);
         beam_start = az_vadd(impact.position, az_vpolar(0.1, normal_theta));
         beam_init_angle = az_mod2pi(2.0 * normal_theta - beam_angle + AZ_PI);
-        damage_mult *= 0.5;
+        damage_mult *= 2.0 / 3.0;
       }
     }
     // If a BURST beam damages a baddie, or if it doesn't hit anything, it

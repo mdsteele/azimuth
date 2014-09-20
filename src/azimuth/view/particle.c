@@ -72,10 +72,10 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         }
       } glEnd();
       break;
-    case AZ_PAR_BEAM:
+    case AZ_PAR_BEAM: {
+      const double alpha = (particle->lifetime <= 0.0 ? 1.0 :
+                            1.0 - particle->age / particle->lifetime);
       glBegin(GL_QUAD_STRIP); {
-        const double alpha = (particle->lifetime <= 0.0 ? 1.0 :
-                              1.0 - particle->age / particle->lifetime);
         with_color_alpha(particle->color, 0);
         glVertex2d(0, particle->param2);
         glVertex2d(particle->param1, particle->param2);
@@ -86,7 +86,17 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         glVertex2d(0, -particle->param2);
         glVertex2d(particle->param1, -particle->param2);
       } glEnd();
-      break;
+      glBegin(GL_TRIANGLE_FAN); {
+        with_color_alpha(particle->color, alpha);
+        glVertex2d(particle->param1, 0);
+        with_color_alpha(particle->color, 0);
+        for (int i = -90; i <= 90; i += 30) {
+          glVertex2d(particle->param1 +
+                     particle->param2 * cos(AZ_DEG2RAD(i)) * 0.75,
+                     particle->param2 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+    } break;
     case AZ_PAR_EMBER:
       glBegin(GL_TRIANGLE_FAN); {
         with_color_alpha(particle->color, 1);
