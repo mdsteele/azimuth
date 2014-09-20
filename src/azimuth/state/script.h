@@ -113,7 +113,7 @@ typedef enum {
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
   AZ_OP_DARK, // set room darkness goal to i
-  AZ_OP_FLASH, // set room darkness (not goal) to i
+  AZ_OP_BLINK, // set room darkness (not goal) to i
   AZ_OP_SHAKE, // momentarily shake camera by amplitude i
   AZ_OP_QUAKE, // set camera quake amplitude to i
   // Pyrotechnics:
@@ -124,6 +124,7 @@ typedef enum {
   // Cutscenes:
   AZ_OP_FADO, // fade out whole screen (including HUD) and hide dialogue
   AZ_OP_FADI, // fade in screen
+  AZ_OP_FLASH, // flash screen white, then fade back to normal
   AZ_OP_SCENE, // transition to cutscene i (suspend script until scene starts)
   // Messages/dialogue:
   AZ_OP_MSG, // display text i at bottom of screen

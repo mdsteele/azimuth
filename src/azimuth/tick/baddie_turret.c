@@ -296,7 +296,7 @@ void az_tick_bad_pop_open_turret(
       fabs(baddie->components[0].angle) + AZ_DEG2RAD(5) &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
                            AZ_DEG2RAD(6))) {
-    az_fire_baddie_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 20.0,
+    az_fire_baddie_projectile(state, baddie, AZ_PROJ_LASER_PULSE, 26.0,
                               baddie->components[0].angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
     ++baddie->state;

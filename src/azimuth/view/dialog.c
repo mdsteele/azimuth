@@ -47,7 +47,8 @@ static GLuint portrait_display_lists_start;
 #define CPU_C_PAUSED_INDEX 6
 #define TRICHORD_PAUSED_INDEX 7
 #define TRICHORD_TALKING_INDEX 8
-#define NUM_PORTRAIT_DISPLAY_LISTS 9
+#define AZIMUTH_PAUSED_INDEX 9
+#define NUM_PORTRAIT_DISPLAY_LISTS 10
 
 /*===========================================================================*/
 
@@ -343,6 +344,39 @@ static const az_vector_t trichord_talking3_vertices[] = {
   {29, 33}, {24, 28}, {20, 23}, {15, 19}, {7, 16}, {0, 10}
 };
 
+static const az_vector_t azimuth1_vertices[] = {
+  {100, 100}, {73.96, 100}, {62.76, 72.96}, {63.68, 72.58}, {62.53, 69.81},
+  {67.68, 67.68}, {69.81, 62.53}, {72.58, 63.68}, {72.96, 62.76}, {100, 73.96}
+};
+static const az_vector_t azimuth2_vertices[] = {
+  {32.54, 100}, {42.78, 75.26}, {43.71, 75.64}, {44.86, 72.87},
+  {50, 75}, {55.14, 72.87}, {56.29, 75.64}, {57.22, 75.26}, {67.46, 100}
+};
+static const az_vector_t azimuth3_vertices[] = {
+  {0, 100}, {0, 73.96}, {27.04, 62.76}, {27.42, 63.68}, {30.19, 62.53},
+  {32.32, 67.68}, {37.47, 69.81}, {36.32, 72.58}, {37.24, 72.96}, {26.04, 100}
+};
+static const az_vector_t azimuth4_vertices[] = {
+  {0, 32.54}, {24.74, 42.78}, {24.36, 43.71}, {27.13, 44.86},
+  {25, 50}, {27.13, 55.14}, {24.36, 56.29}, {24.74, 57.22}, {0, 67.46}
+};
+static const az_vector_t azimuth5_vertices[] = {
+  {0, 0}, {26.04, 0}, {37.24, 27.04}, {36.32, 27.42}, {37.47, 30.19},
+  {32.32, 32.32}, {30.19, 37.47}, {27.42, 36.32}, {27.04, 37.24}, {0, 26.04}
+};
+static const az_vector_t azimuth6_vertices[] = {
+  {67.46, 0}, {57.22, 24.74}, {56.29, 24.36}, {55.14, 27.13},
+  {50, 25}, {44.86, 27.13}, {43.71, 24.36}, {42.78, 24.74}, {32.54, 0}
+};
+static const az_vector_t azimuth7_vertices[] = {
+  {100, 0}, {100, 26.04}, {72.96, 37.24}, {72.58, 36.32}, {69.81, 37.47},
+  {67.68, 32.32}, {62.53, 30.19}, {63.68, 27.42}, {62.76, 27.04}, {73.96, 0}
+};
+static const az_vector_t azimuth8_vertices[] = {
+  {100, 67.46}, {75.26, 57.22}, {75.64, 56.29}, {72.87, 55.14},
+  {75, 50}, {72.87, 44.86}, {75.64, 43.71}, {75.26, 42.78}, {100, 32.54}
+};
+
 /*===========================================================================*/
 
 void az_init_portrait_drawing(void) {
@@ -469,6 +503,29 @@ void az_init_portrait_drawing(void) {
     const az_polygon_t polygon6 = AZ_INIT_POLYGON(trichord6_vertices);
     draw_portrait_polygon(3, color1, color2, polygon6);
   } glEndList();
+  // Compile Azimuth portrait:
+  glNewList(portrait_display_lists_start + AZIMUTH_PAUSED_INDEX, GL_COMPILE); {
+    const az_color_t color1 = {255, 255, 255, 255};
+    const az_color_t color2 = {0, 128, 128, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(azimuth1_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(azimuth2_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon2);
+    const az_polygon_t polygon3 = AZ_INIT_POLYGON(azimuth3_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon3);
+    const az_polygon_t polygon4 = AZ_INIT_POLYGON(azimuth4_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon4);
+    const az_polygon_t polygon5 = AZ_INIT_POLYGON(azimuth5_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon5);
+    const az_polygon_t polygon6 = AZ_INIT_POLYGON(azimuth6_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon6);
+    const az_polygon_t polygon7 = AZ_INIT_POLYGON(azimuth7_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon7);
+    const az_polygon_t polygon8 = AZ_INIT_POLYGON(azimuth8_vertices);
+    draw_portrait_polygon(6, color1, color2, polygon8);
+    draw_computer_circle(44, 50, color1, (az_color_t){128, 255, 255, 128});
+    draw_computer_circle(56, 50, color1, (az_color_t){128, 255, 255, 128});
+  } glEndList();
 }
 
 /*===========================================================================*/
@@ -507,6 +564,13 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
     case AZ_POR_TRICHORD:
       display_list += (talking && az_clock_mod(2, 5, clock) != 0 ?
                        TRICHORD_TALKING_INDEX : TRICHORD_PAUSED_INDEX);
+      break;
+    case AZ_POR_AZIMUTH:
+      display_list += AZIMUTH_PAUSED_INDEX;
+      if (az_clock_mod(2, (talking ? 3 : 25), clock)) {
+        draw_computer_blinkenlight(44, 50, (az_color_t){192, 192, 192, 255});
+        draw_computer_blinkenlight(56, 50, (az_color_t){192, 192, 192, 255});
+      }
       break;
   }
   assert(glIsList(display_list));

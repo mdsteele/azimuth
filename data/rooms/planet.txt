@@ -1,4 +1,4 @@
-@P z8 r459 t170 s6 x0.00 y50000.00 a-1.570796
+@P z8 r459 t169 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -714,7 +714,7 @@
 
   Merging sapience clusters..."
 !T158"
-  \"I am alive.\""
+  \"...I am alive.\""
 !T159"
   \"Azimuth!?\""
 !T160"
@@ -746,8 +746,8 @@
   \"I'm sorry, Hopper, but I've already done it.\"
 
   \"Even now the Oth are preparing to come through
-  in force, so we simply don't have any time to
-  lose.\""
+  in force, so we simply don't have any more time
+  to lose.\""
 !T166"
   \"I've started a chain reaction in the NPS grid.
   In about six minutes this entire planetoid is
@@ -759,5 +759,3 @@
   minutes, from $/the center of the planet$|!?\""
 !T168"
   \"There's no time, Hopper, GO!\""
-!T169"
-  "

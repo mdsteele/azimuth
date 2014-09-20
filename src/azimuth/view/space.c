@@ -223,12 +223,13 @@ static void draw_doorway_transition(az_space_state_t *state) {
 }
 
 static void draw_global_fade(const az_space_state_t *state) {
-  if (state->global_fade.step != AZ_GFS_INACTIVE) {
-    assert(state->global_fade.fade_alpha >= 0.0);
-    assert(state->global_fade.fade_alpha <= 1.0);
-    tint_screen(0, state->global_fade.fade_alpha);
+  const az_global_fade_state_t *fade = &state->global_fade;
+  if (fade->step != AZ_GFS_INACTIVE) {
+    assert(fade->fade_alpha >= 0.0);
+    assert(fade->fade_alpha <= 1.0);
+    tint_screen(fade->fade_gray, fade->fade_alpha);
   } else {
-    assert(state->global_fade.fade_alpha == 0.0);
+    assert(fade->fade_alpha == 0.0);
   }
 }
 

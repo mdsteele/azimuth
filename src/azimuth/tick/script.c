@@ -682,7 +682,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
-      case AZ_OP_FLASH:
+      case AZ_OP_BLINK:
         state->darkness = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
       case AZ_OP_SHAKE:
@@ -743,12 +743,20 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
         state->global_fade.step = AZ_GFS_FADE_OUT;
         state->global_fade.fade_alpha = 0.0;
+        state->global_fade.fade_gray = 0.0f;
         SUSPEND(&state->sync_vm);
       case AZ_OP_FADI:
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
         state->global_fade.step = AZ_GFS_FADE_IN;
         state->global_fade.fade_alpha = 1.0;
+        state->global_fade.fade_gray = 0.0f;
         state->dialogue.hidden = false;
+        SUSPEND(&state->sync_vm);
+      case AZ_OP_FLASH:
+        assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        state->global_fade.step = AZ_GFS_FADE_IN;
+        state->global_fade.fade_alpha = 1.0;
+        state->global_fade.fade_gray = 1.0f;
         SUSPEND(&state->sync_vm);
       case AZ_OP_SCENE: {
         const int scene_index = (int)ins.immediate;

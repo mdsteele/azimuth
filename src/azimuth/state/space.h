@@ -124,7 +124,8 @@ typedef struct {
 
 typedef struct {
   enum { AZ_GFS_INACTIVE = 0, AZ_GFS_FADE_OUT, AZ_GFS_FADE_IN } step;
-  double fade_alpha;  // 0 to 1
+  double fade_alpha; // 0.0 to 1.0
+  float fade_gray; // 0.0 (black) to 1.0 (white)
 } az_global_fade_state_t;
 
 typedef struct {
