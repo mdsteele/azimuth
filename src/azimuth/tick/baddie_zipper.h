@@ -35,6 +35,9 @@ void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
 
+void az_tick_bad_gnat(az_space_state_t *state, az_baddie_t *baddie,
+                      double time);
+
 void az_tick_bad_dragonfly(az_space_state_t *state, az_baddie_t *baddie,
                            double time);
 

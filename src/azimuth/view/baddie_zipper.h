@@ -41,6 +41,9 @@ void az_draw_bad_fire_zipper(
 void az_draw_bad_mosquito(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_gnat(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 void az_draw_bad_dragonfly(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 

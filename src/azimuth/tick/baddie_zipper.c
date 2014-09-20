@@ -70,12 +70,13 @@ void az_tick_bad_fire_zipper(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
-void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
-                          double time) {
-  assert(baddie->kind == AZ_BAD_MOSQUITO);
-  baddie->angle = az_vtheta(baddie->velocity);
-  const double speed = 200.0;
-  const double turn = AZ_DEG2RAD(120) * time;
+static void tick_mosquito_gnat(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double speed, double turn_rate, double chase_dist, double avoid_dist) {
+  if (az_vnonzero(baddie->velocity)) {
+    baddie->angle = az_vtheta(baddie->velocity);
+  }
+  const double turn = turn_rate * time;
   bool chasing_ship = false;
   if (az_ship_in_range(state, baddie, 200)) {
     const double goal_theta =
@@ -89,7 +90,9 @@ void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
   if (!chasing_ship) {
     bool avoiding = false;
     AZ_ARRAY_LOOP(other, state->baddies) {
-      if (other->kind != AZ_BAD_MOSQUITO || other == baddie) continue;
+      if (other == baddie) continue;
+      if (other->kind != AZ_BAD_MOSQUITO &&
+          other->kind != AZ_BAD_ICE_CRYSTAL) continue;
       if (az_vwithin(baddie->position, other->position,
                      2.0 * baddie->data->overall_bounding_radius)) {
         const double rel =
@@ -102,13 +105,28 @@ void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
     }
     if (!avoiding) {
       const double left =
-        az_baddie_dist_to_wall(state, baddie, 2000, AZ_DEG2RAD(40));
+        az_baddie_dist_to_wall(state, baddie, avoid_dist, AZ_DEG2RAD(40));
       const double right =
-        az_baddie_dist_to_wall(state, baddie, 2000, AZ_DEG2RAD(-40));
-      baddie->angle = az_mod2pi(baddie->angle + (left > right ? turn : -turn));
+        az_baddie_dist_to_wall(state, baddie, avoid_dist, AZ_DEG2RAD(-40));
+      if (left < avoid_dist || right < avoid_dist) {
+        baddie->angle =
+          az_mod2pi(baddie->angle + (left > right ? turn : -turn));
+      }
     }
   }
   baddie->velocity = az_vpolar(speed, baddie->angle);
+}
+
+void az_tick_bad_mosquito(az_space_state_t *state, az_baddie_t *baddie,
+                          double time) {
+  assert(baddie->kind == AZ_BAD_MOSQUITO);
+  tick_mosquito_gnat(state, baddie, time, 200.0, AZ_DEG2RAD(120), 200, 2000);
+}
+
+void az_tick_bad_gnat(az_space_state_t *state, az_baddie_t *baddie,
+                      double time) {
+  assert(baddie->kind == AZ_BAD_GNAT);
+  tick_mosquito_gnat(state, baddie, time, 250.0, AZ_DEG2RAD(180), 50, 50);
 }
 
 void az_tick_bad_dragonfly(az_space_state_t *state, az_baddie_t *baddie,

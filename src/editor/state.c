@@ -216,6 +216,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_FORCELING,
   AZ_BAD_KILOFUGE,
   AZ_BAD_ICE_CRYSTAL,
+  AZ_BAD_GNAT,
   AZ_BAD_NOCTURNE,
   AZ_BAD_ZENITH_CORE,
   AZ_BAD_POP_OPEN_TURRET,

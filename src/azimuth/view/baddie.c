@@ -964,6 +964,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_POP_OPEN_TURRET:
       az_draw_bad_pop_open_turret(baddie, frozen, clock);
       break;
+    case AZ_BAD_GNAT:
+      az_draw_bad_gnat(baddie, frozen, clock);
+      break;
   }
 }
 

@@ -144,6 +144,19 @@ void az_draw_bad_mosquito(
   } glPopMatrix();
 }
 
+void az_draw_bad_gnat(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  const float flare = baddie->armor_flare;
+  glPushMatrix(); {
+    glScalef(0.5, 0.5, 1);
+    draw_zipper_antennae(color3(0.5, 0.25, 0.25));
+    draw_zipper_body(color3(0.5f + 0.5f * flare, 0.25f, 1.0f - flare),
+                     color3(0.25f + 0.75f * flare, 0, 1.0f - flare),
+                     color3(0.4 + 0.4 * flare, 0, frozen), 8);
+    draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
+  } glPopMatrix();
+}
+
 void az_draw_bad_dragonfly(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;

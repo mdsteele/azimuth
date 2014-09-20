@@ -41,6 +41,7 @@
 #define MELTBEAM_STATE 6
 #define CROSSBEAM_STATE 7
 #define WAITING_STATE 8
+#define HIDING_STATE 9
 
 #define NUM_EYES 3
 #define FIRST_EYE_COMPONENT_INDEX 0
@@ -143,27 +144,52 @@ static void crush_ice_crystals(az_space_state_t *state, az_baddie_t *baddie) {
   }
 }
 
+static void release_gnat_swarm(az_space_state_t *state, az_baddie_t *baddie) {
+  const az_component_t *main_eye =
+    &baddie->components[FIRST_EYE_COMPONENT_INDEX];
+  const az_vector_t start_position =
+    az_vadd(az_vrotate(main_eye->position, baddie->angle), baddie->position);
+  for (int i = -50; i <= 50; i += 20) {
+    const double angle = baddie->angle + AZ_DEG2RAD(i);
+    az_baddie_t *gnat =
+      az_add_baddie(state, AZ_BAD_GNAT,
+                    az_vadd(start_position, az_vpolar(10.0, angle)), angle);
+    if (gnat == NULL) break;
+  }
+}
+
 static void choose_next_state(
     az_space_state_t *state, az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
-  // Determine whether there are any crystals in range of the meltbeam.
-  bool any_crystals_in_range = false;
-  AZ_ARRAY_LOOP(other, state->baddies) {
-    if (other->kind != AZ_BAD_ICE_CRYSTAL) continue;
-    if (!az_vwithin(baddie->position, other->position, MELTBEAM_MIN_RANGE) &&
-        az_vwithin(baddie->position, other->position, MELTBEAM_MID_RANGE)) {
-      any_crystals_in_range = true;
-      break;
-    }
-  }
 
   if (baddie->param > 0.0 || !az_ship_is_alive(&state->ship)) {
     baddie->state = MOVE_BODY_BACKWARD_STATE;
     baddie->param = fmax(0.0, baddie->param - 1.0);
-  } else if (any_crystals_in_range) {
-    baddie->state = MELTBEAM_STATE;
-    baddie->cooldown = 3.0 / speed_mult(baddie);
-  } else if (az_randint(1, 5) == 1) {
+    return;
+  }
+
+  if (baddie->state != HIDING_STATE) {
+    bool any_crystals_in_range = false;
+    AZ_ARRAY_LOOP(other, state->baddies) {
+      if (other->kind != AZ_BAD_ICE_CRYSTAL) continue;
+      if (!az_vwithin(baddie->position, other->position, MELTBEAM_MIN_RANGE) &&
+          az_vwithin(baddie->position, other->position, MELTBEAM_MID_RANGE)) {
+        any_crystals_in_range = true;
+        break;
+      }
+    }
+    if (any_crystals_in_range) {
+      baddie->state = MELTBEAM_STATE;
+      baddie->cooldown = 3.0 / speed_mult(baddie);
+      return;
+    }
+  }
+
+  if (az_randint(1, (baddie->state == HIDING_STATE ? 3 : 6)) == 1) {
+    release_gnat_swarm(state, baddie);
+    baddie->state = WAITING_STATE;
+    baddie->cooldown = 2.0 / speed_mult(baddie);
+  } else if (baddie->state != HIDING_STATE && az_randint(1, 10) == 1) {
     baddie->state = CROSSBEAM_STATE;
     baddie->cooldown = 2.5 / speed_mult(baddie);
     baddie->components[FIRST_EYE_COMPONENT_INDEX + 1].angle = AZ_DEG2RAD(-45);
@@ -199,7 +225,7 @@ static void move_body(
     az_vpolar(mid_r, bounds->min_theta +
               (direction < 0 ? bounds->theta_span : 0.0));
   if (az_vwithin(old_position, end_position, 20.0)) {
-    baddie->state = WAITING_STATE;
+    baddie->state = (direction < 0 ? HIDING_STATE : WAITING_STATE);
     baddie->cooldown = 1.0;
     return;
   }
@@ -265,7 +291,10 @@ static void move_legs(az_space_state_t *state, az_baddie_t *baddie,
     leg->angle = az_vtheta(az_vsub(leg->position, anchor));
   }
   crush_ice_crystals(state, baddie);
-  if (num_legs_okay >= NUM_LEGS / 2) choose_next_state(state, baddie);
+  if (num_legs_okay >= NUM_LEGS / 2) {
+    if (direction < 0) baddie->state = HIDING_STATE;
+    choose_next_state(state, baddie);
+  }
 }
 
 static void fire_beam_from_eye(
@@ -339,7 +368,7 @@ static void fire_meltbeam(
 
   // When the cooldown timer reachers zero, stop firing the beam.
   if (baddie->cooldown <= 0.0) {
-    baddie->state = WAITING_STATE;
+    baddie->state = HIDING_STATE;
     baddie->cooldown = 0.5;
   }
 }
@@ -356,7 +385,7 @@ static void fire_crossbeam(
 
   // When the cooldown timer reachers zero, stop firing the beams.
   if (baddie->cooldown <= 0.0) {
-    baddie->state = WAITING_STATE;
+    baddie->state = HIDING_STATE;
     baddie->cooldown = 0.25;
   }
 }
@@ -393,6 +422,10 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
       fire_crossbeam(state, baddie, time);
       break;
     case WAITING_STATE:
+      relax_pincers(baddie, time);
+      if (baddie->cooldown <= 0.0) choose_next_state(state, baddie);
+      break;
+    case HIDING_STATE:
       close_pincers(baddie, time);
       if (baddie->cooldown <= 0.0) choose_next_state(state, baddie);
       break;

@@ -334,6 +334,7 @@ bool az_try_damage_baddie(
     // for it to be frozen, then freeze the baddie (even if the baddie didn't
     // actually take any damage from this hit).
     const double freeze_threshold = 4.0;
+    bool was_frozen = false;
     if ((damage_kind & AZ_DMGF_FREEZE) &&
         !(component->immunities & AZ_DMGF_FREEZE) &&
         baddie->health <= fmax(damage_amount, 1.0) * freeze_threshold) {
@@ -341,8 +342,11 @@ bool az_try_damage_baddie(
         az_play_sound(&state->soundboard, AZ_SND_FREEZE_BADDIE);
       }
       baddie->frozen = 1.0;
+      was_frozen = true;
     }
-    az_on_baddie_damaged(state, baddie, damage_amount, damage_kind);
+    if (damage_was_dealt || was_frozen) {
+      az_on_baddie_damaged(state, baddie, damage_amount, damage_kind);
+    }
   }
   // Otherwise, the baddie is dead, so have it killed.
   else {

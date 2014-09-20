@@ -298,7 +298,7 @@ static const az_vector_t beam_wall_vertices[] = {
   {-52, -15}, {52, -15}, {52, -10}, {50, -10}, {50, 10}, {52, 10}
 };
 
-static const az_vector_t flyer_vertices[] = {
+static const az_vector_t mosquito_vertices[] = {
   {10, 2}, {7.5, 4}, {5, 4.66}, {-5, 2.66}, {-7.5, 1.33},
   {-7.5, -1.33}, {-5, -2.66}, {5, -4.66}, {7.5, -4}, {10, -2}
 };
@@ -1116,7 +1116,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .static_properties = AZ_BADF_KAMIKAZE,
-    .main_body = { .polygon = AZ_INIT_POLYGON(flyer_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(mosquito_vertices),
                    .impact_damage = 6.0 }
   },
   [AZ_BAD_ARMORED_ZIPPER] = {
@@ -1371,8 +1371,9 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ICE_CRYSTAL] = {
     .max_health = 6.0, .color = {64, 192, 192, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .static_properties = AZ_BADF_NO_HOMING_PROJ,
     .main_body = { .polygon = AZ_INIT_POLYGON(ice_crystal_vertices),
-                   .impact_damage = 10.0,
+                   .impact_damage = 8.0,
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE) }
   },
   [AZ_BAD_SWITCHER] = {
@@ -1567,6 +1568,15 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .bounding_radius = 16.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(pop_open_turret_components)
+  },
+  [AZ_BAD_GNAT] = {
+    .max_health = 0.5, .color = {128, 0, 255, 255},
+    .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
+    .death_style = AZ_DEATH_EMBERS,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .static_properties = AZ_BADF_KAMIKAZE,
+    .main_body = { .polygon = AZ_INIT_POLYGON(mosquito_vertices),
+                   .impact_damage = 6.0 }
   }
 };
 
