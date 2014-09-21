@@ -40,6 +40,9 @@ void az_draw_bad_heat_ray(
 void az_draw_bad_death_ray(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_boss_door(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_MACHINE_H_

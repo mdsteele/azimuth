@@ -40,6 +40,9 @@ void az_tick_bad_heat_ray(
 void az_tick_bad_death_ray(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_boss_door(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_BADDIE_MACHINE_H_

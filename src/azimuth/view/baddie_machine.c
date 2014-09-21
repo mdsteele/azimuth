@@ -212,4 +212,82 @@ void az_draw_bad_death_ray(
            color3(0.4 + 0.15 * flare, 0.4, 0.3));
 }
 
+void az_draw_bad_boss_door(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BOSS_DOOR);
+  assert(frozen == 0.0f);
+  const float flare = baddie->armor_flare;
+  // Eye:
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(1.0f, 0.8f - 0.7f * flare, 0.6f - 0.5f * flare);
+    glVertex2f(8, 8);
+    glColor3f(0.8f, 0.4f - 0.3f * flare, 0.1f);
+    const double radius = baddie->data->components[0].bounding_radius;
+    for (int i = 0; i <= 360; i += 10) {
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glPushMatrix(); {
+    az_gl_rotated(baddie->components[0].angle);
+    glTranslatef(15, 0, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4f(baddie->param, 0, 0.25, 1);
+      glVertex2f(0, 0);
+      glColor4f(baddie->param, 0, 0.25, 0.6);
+      for (int i = 0; i <= 360; i += 10) {
+        glVertex2d(2.5 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+  // Eyelids:
+  for (int i = 1; i <= 2; ++i) {
+    glPushMatrix(); {
+      az_gl_rotated(baddie->components[i].angle);
+      glBegin(GL_TRIANGLE_FAN); {
+        const az_polygon_t poly = baddie->data->components[i].polygon;
+        glColor3f(0.75, 0.75, 0.75);
+        az_gl_vertex(poly.vertices[0]);
+        glColor3f(0.25, 0.25, 0.25);
+        for (int j = 1; j < poly.num_vertices; ++j) {
+          az_gl_vertex(poly.vertices[j]);
+        }
+      } glEnd();
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.2, 0.2, 0.2); glVertex2f(22,  0); glVertex2f(22,  1);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f( 0,  0); glVertex2f( 2,  1);
+        glColor3f(0.2, 0.2, 0.2); glVertex2f( 0, 22); glVertex2f( 1, 22);
+      } glEnd();
+    } glPopMatrix();
+  }
+  // Body:
+  glBegin(GL_TRIANGLES); {
+    glColor3f(0.15, 0.15, 0.15);
+    glVertex2f(4, 28); glVertex2f(2, 32); glVertex2f(7, 32.5);
+    glVertex2f(4, -28); glVertex2f(2, -32); glVertex2f(7, -32.5);
+    glVertex2f(-8, 43); glVertex2f(-12, 45); glVertex2f(-7.5, 49);
+    glVertex2f(-8, -43); glVertex2f(-12, -45); glVertex2f(-7.5, -49);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    const az_polygon_t poly = baddie->data->main_body.polygon;
+    const int half = poly.num_vertices / 2;
+    glColor3f(0.6, 0.6, 0.6);
+    glVertex2f(-20, 0);
+    glColor3f(0.2, 0.2, 0.2);
+    for (int i = 0; i < half; ++i) {
+      az_gl_vertex(poly.vertices[i]);
+    }
+    glColor3f(0.4, 0.4, 0.4);
+    glVertex2f(7, 0);
+    glColor3f(0.2, 0.2, 0.2);
+    for (int i = half; i < poly.num_vertices; ++i) {
+      az_gl_vertex(poly.vertices[i]);
+    }
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.2, 0.2, 0.2); glVertex2f(4,  23); glVertex2f(8,  22);
+    glColor3f(0.6, 0.6, 0.6); glVertex2f(4,   0); glVertex2f(8,   0);
+    glColor3f(0.2, 0.2, 0.2); glVertex2f(4, -23); glVertex2f(8, -22);
+  } glEnd();
+}
+
 /*===========================================================================*/

@@ -91,9 +91,7 @@ void az_tick_bad_beam_turret(
     const az_color_t beam_color = {alt/2, 255, alt, 192};
     az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
                 2.0 + 0.5 * az_clock_zigzag(8, 1, state->clock));
-    az_add_speck(state, (impact.type == AZ_IMP_WALL ?
-                         impact.target.wall->data->color1 :
-                         AZ_WHITE), 1.0, impact.position,
+    az_add_speck(state, AZ_WHITE, 1.0, impact.position,
                  az_vpolar(az_random(20.0, 70.0),
                            az_vtheta(impact.normal) +
                            az_random(-AZ_HALF_PI, AZ_HALF_PI)));
