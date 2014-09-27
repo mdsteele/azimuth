@@ -995,6 +995,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ROCKWYRM] = {
     .max_health = 150.0, .overall_bounding_radius = 500.0,
     .color = {192, 255, 128, 255}, .hurt_sound = AZ_SND_HURT_ROCKWYRM,
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .main_body = { .bounding_radius = 24.0, .impact_damage = 5.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
     DECL_COMPONENTS(rockwyrm_components)
@@ -1068,6 +1069,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_OTH_SNAPDRAGON] = {
     .max_health = 60.0, .death_style = AZ_DEATH_OTH,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
   },
@@ -1156,6 +1158,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 450.0, .overall_bounding_radius = 150.0,
     .color = {192, 128, 255, 255}, .death_style = AZ_DEATH_EMBERS,
     .hurt_sound = AZ_SND_HURT_ROCKWYRM, .armor_sound = AZ_SND_HIT_ARMOR,
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .main_body = { .polygon = AZ_INIT_POLYGON(forcefiend_segment0_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 4.0 },
@@ -1248,7 +1251,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = ~AZ_DMGF_CPLUS }
   },
   [AZ_BAD_OTH_GUNSHIP] = {
-    .max_health = 250.0,
+    .max_health = 250.0, .potential_pickups = ~AZ_PUPF_NOTHING,
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
@@ -1386,6 +1389,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_KILOFUGE] = {
     .max_health = 500.0, .overall_bounding_radius = 350.0,
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .hurt_sound = AZ_SND_HURT_KILOFUGE, .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(kilofuge_main_body_vertices),
                    .impact_damage = 25.0, .immunities = ~0 },
@@ -1448,7 +1452,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_NOCTURNE] = {
     .max_health = 500.0, .overall_bounding_radius = 120.0,
-    .color = {192, 96, 0, 255},
+    .color = {192, 96, 0, 255}, .potential_pickups = ~AZ_PUPF_NOTHING,
     .main_body = { .polygon = AZ_INIT_POLYGON(nocturne_main_body_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 20.0 },

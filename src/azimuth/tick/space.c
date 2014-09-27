@@ -101,7 +101,7 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
         mode_data->step = AZ_BDS_FADE;
         mode_data->progress = 0.0;
         for (int i = 0; i < 20; ++i) {
-          az_add_random_pickup(state, ~AZ_PUPF_NOTHING,
+          az_add_random_pickup(state, mode_data->boss.data->potential_pickups,
                                az_vadd(mode_data->boss.position,
                                        az_random_point_in_circle(100.0)));
         }
