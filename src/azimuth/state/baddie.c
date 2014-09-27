@@ -115,11 +115,33 @@ static const az_vector_t nightbug_vertices[] = {
   {17, 0}, {9, 10}, {-11, 5}, {-11, -5}, {9, -10}
 };
 
-static const az_vector_t zenith_core_vertices[] = {
-  { 120, 0}, { 84.852813742385706,  84.852813742385706},
-  {0,  120}, {-84.852813742385706,  84.852813742385706},
-  {-120, 0}, {-84.852813742385706, -84.852813742385706},
-  {0, -120}, { 84.852813742385706, -84.852813742385706}
+static const az_vector_t zenith_core_main_body_vertices[] = {
+  { 100, 0}, { 70.71067811865476,  70.71067811865476},
+  {0,  100}, {-70.71067811865476,  70.71067811865476},
+  {-100, 0}, {-70.71067811865476, -70.71067811865476},
+  {0, -100}, { 70.71067811865476, -70.71067811865476}
+};
+static const az_vector_t zenith_core_plating_vertices[] = {
+  {100, 0}, {70.71067811865476,  70.71067811865476},
+  {49.49747468305833, 49.49747468305833}, {70, 0}
+};
+static az_component_data_t zenith_core_components[] = {
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(0), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(45), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(90), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(135), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(180), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(225), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(270), .immunities = ~0 },
+  { .polygon = AZ_INIT_POLYGON(zenith_core_plating_vertices),
+    .init_angle = AZ_DEG2RAD(315), .immunities = ~0 }
 };
 
 static const az_vector_t dragonfly_vertices[] = {
@@ -908,11 +930,12 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(broken_turret_components)
   },
   [AZ_BAD_ZENITH_CORE] = {
-    .max_health = 1000.0, .color = {255, 0, 255, 255},
-    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
+    .max_health = 1000.0, .overall_bounding_radius = 150.0,
+    .hurt_sound = AZ_SND_HURT_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG),
-    .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_vertices),
-                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
+    .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_main_body_vertices),
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
+    DECL_COMPONENTS(zenith_core_components)
   },
   [AZ_BAD_ARMORED_TURRET] = {
     .max_health = 8.0, .overall_bounding_radius = 30.5,

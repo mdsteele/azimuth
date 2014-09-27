@@ -18,46 +18,35 @@
 =============================================================================*/
 
 #include "azimuth/util/color.h"
-
-#include <assert.h>
-#include <math.h>
-
-#include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "test/test.h"
 
 /*===========================================================================*/
 
-AZ_STATIC_ASSERT(sizeof(az_color_t) == sizeof(int32_t));
+void test_hsva_color(void) {
+  const az_color_t color0 = az_hsva_color(0, 0, 0, 0);
+  EXPECT_INT_EQ(  0, color0.r);
+  EXPECT_INT_EQ(  0, color0.g);
+  EXPECT_INT_EQ(  0, color0.b);
+  EXPECT_INT_EQ(  0, color0.a);
 
-const az_color_t AZ_WHITE = {255, 255, 255, 255};
-const az_color_t AZ_RED = {255, 0, 0, 255};
-const az_color_t AZ_GREEN = {0, 255, 0, 255};
-const az_color_t AZ_BLUE = {0, 0, 255, 255};
+  const az_color_t color1 = az_hsva_color(0.0, 1, 1, 1);
+  EXPECT_INT_EQ(255, color1.r);
+  EXPECT_INT_EQ(  0, color1.g);
+  EXPECT_INT_EQ(  0, color1.b);
+  EXPECT_INT_EQ(255, color1.a);
 
-az_color_t az_hsva_color(double hue_radians, double saturation, double value,
-                         double alpha) {
-  assert(isfinite(hue_radians));
-  assert(0.0 <= saturation && saturation <= 1.0);
-  assert(0.0 <= value && value <= 1.0);
-  assert(0.0 <= alpha && alpha <= 1.0);
-  // The below was adapted from http://www.cs.rit.edu/~ncs/color/t_convert.html
-  const double hh = AZ_RAD2DEG(az_mod2pi_nonneg(hue_radians)) / 60.0;
-  const int ii = (int)hh;
-  const double ff = hh - ii;
-  const uint8_t vv = value * 255;
-  const uint8_t pp = value * (1.0 - saturation) * 255;
-  const uint8_t qq = value * (1.0 - saturation * ff) * 255;
-  const uint8_t tt = value * (1.0 - saturation * (1.0 - ff)) * 255;
-  const uint8_t aa = 255 * alpha;
-  switch (ii) {
-    case 0: return (az_color_t){vv, tt, pp, aa};
-    case 1: return (az_color_t){qq, vv, pp, aa};
-    case 2: return (az_color_t){pp, vv, tt, aa};
-    case 3: return (az_color_t){pp, qq, vv, aa};
-    case 4: return (az_color_t){tt, pp, vv, aa};
-    case 5: return (az_color_t){vv, pp, qq, aa};
-    default: AZ_ASSERT_UNREACHABLE();
-  }
+  const az_color_t color2 = az_hsva_color(AZ_PI, 1, 0.5, 0.25);
+  EXPECT_INT_EQ(  0, color2.r);
+  EXPECT_INT_EQ(127, color2.g);
+  EXPECT_INT_EQ(127, color2.b);
+  EXPECT_INT_EQ( 63, color2.a);
+
+  const az_color_t color3 = az_hsva_color(-1.3, 0.42, 0.71, 0.39);
+  EXPECT_INT_EQ(162, color3.r);
+  EXPECT_INT_EQ(105, color3.g);
+  EXPECT_INT_EQ(181, color3.b);
+  EXPECT_INT_EQ( 99, color3.a);
 }
 
 /*===========================================================================*/

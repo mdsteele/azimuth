@@ -189,7 +189,7 @@ static void choose_next_state(
     release_gnat_swarm(state, baddie);
     baddie->state = WAITING_STATE;
     baddie->cooldown = 2.0 / speed_mult(baddie);
-  } else if (baddie->state != HIDING_STATE && az_randint(1, 10) == 1) {
+  } else if (baddie->state != HIDING_STATE && az_randint(1, 7) == 1) {
     baddie->state = CROSSBEAM_STATE;
     baddie->cooldown = 2.5 / speed_mult(baddie);
     baddie->components[FIRST_EYE_COMPONENT_INDEX + 1].angle = AZ_DEG2RAD(-45);

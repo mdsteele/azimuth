@@ -32,13 +32,15 @@ typedef struct {
 
 // Color constants:
 extern const az_color_t AZ_WHITE;
-extern const az_color_t AZ_GRAY;
 extern const az_color_t AZ_RED;
 extern const az_color_t AZ_GREEN;
 extern const az_color_t AZ_BLUE;
-extern const az_color_t AZ_MAGENTA;
-extern const az_color_t AZ_YELLOW;
-extern const az_color_t AZ_CYAN;
+
+// Convert HSVA values to an az_color_t value.  The hue_radians argument can be
+// any angle, measured in radians; the other three arguments must be in the
+// range [0, 1].
+az_color_t az_hsva_color(double hue_radians, double saturation, double value,
+                         double alpha);
 
 /*===========================================================================*/
 

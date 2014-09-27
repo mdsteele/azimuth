@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
   RUN_TEST(test_create_sound_data);
+  RUN_TEST(test_hsva_color);
   RUN_TEST(test_lead_target);
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);

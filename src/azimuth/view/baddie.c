@@ -32,6 +32,7 @@
 #include "azimuth/util/vector.h"
 #include "azimuth/view/baddie_chomper.h"
 #include "azimuth/view/baddie_clam.h"
+#include "azimuth/view/baddie_core.h"
 #include "azimuth/view/baddie_crawler.h"
 #include "azimuth/view/baddie_forcefiend.h"
 #include "azimuth/view/baddie_kilofuge.h"
@@ -57,7 +58,7 @@ static void draw_component_outline(const az_component_data_t *component) {
   if (poly.num_vertices > 0) {
     glBegin(GL_LINE_LOOP); {
       for (int i = 0; i < poly.num_vertices; ++i) {
-        glVertex2d(poly.vertices[i].x, poly.vertices[i].y);
+        az_gl_vertex(poly.vertices[i]);
       }
     } glEnd();
   } else {
@@ -79,8 +80,8 @@ static void draw_baddie_outline(const az_baddie_t *baddie, float frozen,
   for (int j = 0; j < baddie->data->num_components; ++j) {
     glPushMatrix(); {
       const az_component_t *component = &baddie->components[j];
-      glTranslated(component->position.x, component->position.y, 0);
-      glRotated(AZ_RAD2DEG(component->angle), 0, 0, 1);
+      az_gl_translated(component->position);
+      az_gl_rotated(component->angle);
       draw_component_outline(&baddie->data->components[j]);
     } glPopMatrix();
   }
@@ -356,14 +357,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_broken_turret(baddie, frozen, clock);
       break;
     case AZ_BAD_ZENITH_CORE:
-      // TODO: Make real graphics for the Zenith Core.
-      glColor3f(1 - frozen, 0, 1 - 0.75 * flare); // magenta
-      glBegin(GL_POLYGON); {
-        az_polygon_t polygon = baddie->data->main_body.polygon;
-        for (int i = 0; i < polygon.num_vertices; ++i) {
-          glVertex2d(polygon.vertices[i].x, polygon.vertices[i].y);
-        }
-      } glEnd();
+      az_draw_bad_zenith_core(baddie, clock);
       break;
     case AZ_BAD_ARMORED_TURRET:
       az_draw_bad_armored_turret(baddie, frozen, clock);
