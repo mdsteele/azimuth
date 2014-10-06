@@ -488,17 +488,44 @@ static void summarize_scenario(const az_planet_t *planet) {
             node->subkind.upgrade == (az_upgrade_t)upg) {
           if (num_copies == 0) first_room = room_index;
           else if (num_copies == 1) {
-            printf("\x1b[31m(%d) %s: %d %d", upg, az_upgrade_name(upg),
-                   first_room, room_index);
+            printf("\x1b[31mDuplicate upgrade %d (%s) in rooms: %d %d",
+                   upg, az_upgrade_name(upg), first_room, room_index);
           } else printf(" %d", room_index);
           ++num_copies;
         }
       }
     }
     if (num_copies == 0) {
-      printf("\x1b[34m(%d) %s\x1b[m\n", upg, az_upgrade_name(upg));
+      printf("\x1b[31mMissing upgrade %d (%s)\x1b[m\n",
+             upg, az_upgrade_name(upg));
     } else if (num_copies > 1) printf("\x1b[m\n");
     if (num_copies != 1) linebreak = true;
+  }
+  if (linebreak) { printf("\n"); linebreak = false; }
+  // Print upgrades that don't play upgrade sound/music:
+  for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
+    const az_room_t *room = &planet->rooms[room_index];
+    for (int i = 0; i < room->num_nodes; ++i) {
+      const az_node_spec_t *node = &room->nodes[i];
+      if (node->kind != AZ_NODE_UPGRADE) continue;
+      bool found_sound = false;
+      if (node->on_use != NULL) {
+        for (int j = 0; j < node->on_use->num_instructions; ++j) {
+          const az_instruction_t ins = node->on_use->instructions[j];
+          if ((ins.opcode == AZ_OP_MUS && ins.immediate == 14) ||
+              (ins.opcode == AZ_OP_SND && ins.immediate == 5)) {
+            found_sound = true;
+            break;
+          }
+        }
+      }
+      if (!found_sound) {
+        printf("\x1b[31mRoom %d: Upgrade %d (%s) doesn't play upgrade"
+               " sound/music\x1b[m\n", room_index, (int)node->subkind.upgrade,
+               az_upgrade_name(node->subkind.upgrade));
+        linebreak = true;
+      }
+    }
   }
   if (linebreak) { printf("\n"); linebreak = false; }
   // Print number of rooms in each zone (both total rooms in that zone, and
