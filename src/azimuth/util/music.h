@@ -141,6 +141,7 @@ typedef struct {
     int iphase;
     uint64_t noise_bits;
   } voices[AZ_MUSIC_NUM_TRACKS];
+  bool stopped;
 } az_music_synth_t;
 
 void az_reset_music_synth(az_music_synth_t *synth, const az_music_t *music,

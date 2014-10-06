@@ -1349,10 +1349,10 @@ void az_tick_ship(az_space_state_t *state, double time) {
         const az_upgrade_t upgrade = node->subkind.upgrade;
         const az_script_t *script = node->on_use;
         node->kind = AZ_NODE_NOTHING;
+        az_run_script(state, script);
         state->mode = AZ_MODE_UPGRADE;
         state->upgrade_mode = (az_upgrade_mode_data_t){
-          .step = AZ_UGS_OPEN, .progress = 0.0,
-          .upgrade = upgrade, .script = script
+          .step = AZ_UGS_OPEN, .progress = 0.0, .upgrade = upgrade
         };
         az_give_upgrade(player, upgrade);
         return;

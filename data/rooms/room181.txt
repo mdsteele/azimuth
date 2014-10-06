@@ -151,7 +151,7 @@ $s:mus5;
 !N5/10 x-556.74 y28945.93 a-3.118968 u0
 !N5/10 x-437.77 y28948.62 a-3.118968 u0
 !N3/22 x-726.81 y29313.24 a0.024790 u0
-$u:push17,dup,dup,sbadk5,sbadk6,sbadk7,wait0.5,snd4;
+$u:mus14,push17,dup,dup,sbadk5,sbadk6,sbadk7,wait0.1,mus5,wait0.4,snd4;
 !N7/9 x-612.67 y29424.86 a0.805094 u0
 !N7/9 x-848.47 y29421.17 a-0.760576 u0
 !N2 x-449.65 y29441.79 a0.017737 u0

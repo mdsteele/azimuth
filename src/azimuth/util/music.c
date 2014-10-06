@@ -728,8 +728,7 @@ static void synth_begin_next_part(az_music_synth_t *synth) {
     assert(synth->pc >= 0);
     if (++synth->steps_since_last_sustain > 100) {
       AZ_WARNING_ONCE("Exceeded music instruction limit\n");
-      synth->pc = music->num_instructions;
-      return;
+      break;
     }
     az_music_instruction_t *ins = &music->instructions[synth->pc++];
     switch (ins->opcode) {
@@ -758,12 +757,14 @@ static void synth_begin_next_part(az_music_synth_t *synth) {
         break;
     }
   }
+  synth->pc = music->num_instructions;
+  synth->stopped = true;
 }
 
 static void synth_advance(az_music_synth_t *synth) {
   while (true) {
     assert(synth->music != NULL);
-    if (synth->pc >= synth->music->num_instructions) return;
+    if (synth->stopped) return;
     int num_tracks_finished = 0;
     AZ_ARRAY_LOOP(voice, synth->voices) {
       while (true) {
@@ -850,7 +851,7 @@ void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
     return;
   }
   for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
-    if (synth->pc >= synth->music->num_instructions) break;
+    if (synth->stopped) break;
     int sample = 0;
     AZ_ARRAY_LOOP(voice, synth->voices) {
       if (voice->loudness <= 0.0) continue;

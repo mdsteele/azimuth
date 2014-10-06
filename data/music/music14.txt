@@ -1,0 +1,30 @@
+@M "SAB"
+% Title: "You Will Be Upgraded"
+
+=tempo 150
+=key 3#     % F# minor
+
+
+!Part S
+
+1 Wp75 L40  E0,25  V1,50
+2 Wp50 L20  E0,25  D25,40
+3 Wt25 L250 E0,25
+4 Wn   L40  E0,100
+5 Wn   L60  E0,100
+
+
+!Part A
+
+4| L5 ct L10 c L15 c L20 c ' L25 c L30 c L35 c L40 c |
+
+
+!Part B
+
+4 L20
+
+1| f4e fs f ' ae c5   ' es e g4s g ' ae b     | f5w   |
+2| a3q      ' c       ' a          ' f        | a#4w  |
+3| f2h                ' a                     | f2w   |
+4| L20 c3q  ' ce cs c ' L40 cq     ' cs c c c | cq    |
+5| rw                                         | c8h   |

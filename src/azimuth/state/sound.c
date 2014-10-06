@@ -650,6 +650,12 @@ static az_sound_spec_t sound_specs[] = {
     .env_decay = 0.260563373566, .start_freq = 0.407042229176,
     .phaser_offset = -0.197183, .lpf_cutoff = 0.2253521, .lpf_resonance = 1.0
   },
+  [AZ_SND_MINOR_UPGRADE] = {
+    .wave_kind = AZ_TRIANGLE_WAVE,
+    .env_sustain = 0.0336143, .env_punch = 0.625, .env_decay = 0.97,
+    .start_freq = 0.72, .arp_mod = -0.51, .arp_speed = 0.65,
+    .repeat_speed = 0.545, .phaser_offset = -0.42, .phaser_sweep = 0.4
+  },
   [AZ_SND_NPS_PORTAL] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_attack = 0.8, .env_sustain = 0.178638,

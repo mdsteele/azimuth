@@ -137,7 +137,6 @@ typedef struct {
   enum { AZ_UGS_OPEN, AZ_UGS_MESSAGE, AZ_UGS_CLOSE } step;
   double progress; // 0.0 to 1.0
   az_upgrade_t upgrade;
-  const az_script_t *script;
 } az_upgrade_mode_data_t;
 
 /*===========================================================================*/

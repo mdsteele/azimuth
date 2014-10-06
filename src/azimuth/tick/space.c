@@ -538,9 +538,7 @@ static void tick_upgrade_mode(az_space_state_t *state, double time) {
       assert(mode_data->progress < 1.0);
       mode_data->progress += time / open_close_time;
       if (mode_data->progress >= 1.0) {
-        const az_script_t *script = mode_data->script;
         state->mode = AZ_MODE_NORMAL;
-        az_run_script(state, script);
       }
       break;
   }

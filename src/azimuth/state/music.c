@@ -131,6 +131,7 @@ static const char *music_filenames[] = {
   [AZ_MUS_BOSS2] = "music11.txt",
   [AZ_MUS_SUSPENSE] = "music12.txt",
   [AZ_MUS_ESCAPE] = "music13.txt",
+  [AZ_MUS_UPGRADE] = "music14.txt",
   [AZ_MUS_TITLE] = NULL
 };
 
