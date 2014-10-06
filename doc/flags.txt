@@ -1,4 +1,4 @@
-Next flag: 105
+Next flag: 106
 Unused: 5
 
 Bosses
@@ -125,3 +125,4 @@ Misc
 63: Opened lower-right forcefield in Nandiar room 176
 89: Traversed room 367
 94: Opened forcefield in Barrag room 286
+105: Turned off experimental reactor in Voquan room 459

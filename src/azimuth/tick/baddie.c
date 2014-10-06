@@ -292,7 +292,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_wyrmling(state, baddie, time);
       break;
     case AZ_BAD_TRAPDOOR:
-      if (!az_ship_in_range(state, baddie,
+      if (baddie->state == 0 &&
+          !az_ship_in_range(state, baddie,
                             baddie->data->overall_bounding_radius +
                             AZ_SHIP_DEFLECTOR_RADIUS)) {
         baddie->components[0].angle =
