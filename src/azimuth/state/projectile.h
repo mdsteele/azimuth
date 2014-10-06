@@ -95,6 +95,7 @@ typedef enum {
   AZ_PROJ_OTH_ROCKET,
   AZ_PROJ_OTH_SPRAY,
   AZ_PROJ_PLANETARY_EXPLOSION,
+  AZ_PROJ_PRISMATIC_WALL,
   AZ_PROJ_SONIC_WAVE,
   AZ_PROJ_SPARK,
   AZ_PROJ_SPINE,
@@ -156,6 +157,10 @@ typedef struct {
 void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
                         az_vector_t position, double angle, double power,
                         az_uid_t fired_by);
+
+// Get the polygon vertices for a PRISMATIC_WALL projectile.
+void az_get_prismatic_wall_vertices(const az_projectile_t *proj,
+                                    az_vector_t vertices[4]);
 
 /*===========================================================================*/
 

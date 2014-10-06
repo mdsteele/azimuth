@@ -20,6 +20,7 @@
 #include "azimuth/state/projectile.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
@@ -477,6 +478,13 @@ static const az_proj_data_t proj_data[] = {
                     AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB),
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_PRISMATIC_WALL] = {
+    .speed = 350.0,
+    .lifetime = 1.125,
+    .splash_damage = 60.0,
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
+  },
   [AZ_PROJ_SONIC_WAVE] = {
     .speed = 600.0,
     .lifetime = 0.5,
@@ -542,6 +550,24 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
   proj->power = power;
   proj->fired_by = fired_by;
   proj->last_hit_uid = AZ_NULL_UID;
+}
+
+void az_get_prismatic_wall_vertices(const az_projectile_t *proj,
+                                    az_vector_t vertices[4]) {
+  assert(proj->kind == AZ_PROJ_PRISMATIC_WALL);
+  const double origin = 112.0;
+  const double max_length = 75.0;
+  const double rear_length = fmin(max_length, proj->age * proj->data->speed);
+  const double front_length =
+    fmin(0, (proj->data->lifetime - proj->age) * proj->data->speed -
+         max_length);
+  const double base = origin + proj->data->speed * proj->age;
+  const double front_semiwidth = tan(AZ_DEG2RAD(22.5)) * (base + front_length);
+  const double rear_semiwidth = tan(AZ_DEG2RAD(22.5)) * (base - rear_length);
+  vertices[0] = (az_vector_t){front_length, -front_semiwidth};
+  vertices[1] = (az_vector_t){front_length, front_semiwidth};
+  vertices[2] = (az_vector_t){-rear_length, rear_semiwidth};
+  vertices[3] = (az_vector_t){-rear_length, -rear_semiwidth};
 }
 
 /*===========================================================================*/

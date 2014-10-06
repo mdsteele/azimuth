@@ -40,6 +40,7 @@
 #define FIRE_BEAM_FORWARD_STATE 5
 #define FIRE_BEAM_BACKWARD_STATE 6
 #define PILLBOX_STATE 7
+#define PRISMATIC_STATE 8
 
 /*===========================================================================*/
 
@@ -88,7 +89,6 @@ static void charge_rainbow_beam(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double angle_offset, int next_state) {
   adjust_to_beam_configuration(baddie, time);
-  //turn_offset_towards_ship(state, baddie, time, angle_offset);
   const double particle_lifetime = 0.5;
   const double particle_distance = 50.0;
   if (baddie->cooldown >= particle_lifetime) {
@@ -127,7 +127,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   az_ray_impact(state, beam_start, az_vpolar(1000, beam_angle),
                 (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
   const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
-  const double beam_damage = 200.0 * time;
+  const double beam_damage = 100.0 * time;
   // Damage the ship and any baddies within the beam.
   if (az_ship_is_alive(&state->ship) &&
       az_ray_hits_ship(&state->ship, beam_start, beam_delta,
@@ -160,7 +160,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   }
 
   if (baddie->cooldown <= 0.0) {
-    if (baddie->health <= 0.90 * baddie->data->max_health) {
+    if (baddie->health <= 0.9 * baddie->data->max_health) {
       baddie->state = PILLBOX_STATE;
       baddie->cooldown = 1.0;
     } else start_charging_beam(state, baddie);
@@ -178,7 +178,29 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
     az_fire_baddie_projectile(state, baddie, AZ_PROJ_ROCKET,
                               100.0, angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
-    baddie->cooldown = 0.5;
+    if (baddie->health <= 0.8 * baddie->data->max_health) {
+      baddie->state = PRISMATIC_STATE;
+      baddie->cooldown = 2.0;
+    } else baddie->cooldown = 0.5;
+  }
+}
+
+static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
+                                 double time) {
+  adjust_to_pillbox_configuration(baddie, time);
+  baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
+                                   AZ_DEG2RAD(22.5));
+  if (baddie->cooldown <= 0.0) {
+    double start_angle = AZ_DEG2RAD(22.5) + AZ_DEG2RAD(45) *
+      round((az_vtheta(az_vsub(state->ship.position, baddie->position)) -
+             (baddie->angle + AZ_DEG2RAD(22.5))) / AZ_DEG2RAD(45));
+    if (az_randint(0, 4) == 0) start_angle += AZ_DEG2RAD(45);
+    for (int i = 0; i < 360; i += 90) {
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_PRISMATIC_WALL,
+                                112.0, start_angle + AZ_DEG2RAD(i), 0.0);
+    }
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_PIERCE);
+    baddie->cooldown = 1.0;
   }
 }
 
@@ -215,6 +237,9 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case PILLBOX_STATE:
       fire_pillbox_rockets(state, baddie, time);
+      break;
+    case PRISMATIC_STATE:
+      fire_prismatic_walls(state, baddie, time);
       break;
     default:
       baddie->state = DORMANT_STATE;

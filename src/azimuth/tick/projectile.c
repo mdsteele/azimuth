@@ -767,6 +767,17 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
     } break;
+    case AZ_PROJ_PRISMATIC_WALL: {
+      az_vector_t vertices[4];
+      az_get_prismatic_wall_vertices(proj, vertices);
+      const az_polygon_t polygon = AZ_INIT_POLYGON(vertices);
+      if (az_ship_is_alive(&state->ship) &&
+          az_polygon_contains(polygon, az_vrotate(
+              az_vsub(state->ship.position, proj->position), -proj->angle))) {
+        const double damage = proj->data->splash_damage * proj->power * time;
+        az_damage_ship(state, damage, false);
+      }
+    } break;
     case AZ_PROJ_SPARK:
       leave_particle_trail(state, proj, AZ_PAR_SPARK,
                            (az_color_t){0, 255, 0, 255}, 0.1, 6.0,

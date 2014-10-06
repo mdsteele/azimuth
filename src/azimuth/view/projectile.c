@@ -482,6 +482,16 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2f(-5 * AZ_SCREEN_HEIGHT,  AZ_SCREEN_WIDTH);
       } glEnd();
       break;
+    case AZ_PROJ_PRISMATIC_WALL:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f((az_clock_mod(6, 1, clock + 0) < 3 ? 1.0f : 0.25f),
+                  (az_clock_mod(6, 1, clock + 2) < 3 ? 1.0f : 0.25f),
+                  (az_clock_mod(6, 1, clock + 4) < 3 ? 1.0f : 0.25f), 0.75f);
+        az_vector_t vertices[4];
+        az_get_prismatic_wall_vertices(proj, vertices);
+        AZ_ARRAY_LOOP(vertex, vertices) az_gl_vertex(*vertex);
+      } glEnd();
+      break;
     case AZ_PROJ_SPARK:
       draw_spark(proj->age, 8.0, (az_color_t){0, 255, 0, 0});
       break;
