@@ -56,9 +56,23 @@ endif
 OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
-  MAIN_LIBFLAGS = -framework Cocoa -framework SDL -framework OpenGL
+  # Use the SDL framework if it's installed.  Otherwise, look to see if SDL has
+  # been installed via MacPorts.  Otherwise, give up.
+  ifeq "$(shell test -d /Library/Frameworks/SDL.framework -o \
+                     -d ~/Library/Frameworks/SDL.framework -o \
+                     -d /Network/Library/Frameworks/SDL.framework \
+	        && echo ok)" "ok"
+    SDL_LIBFLAGS = -framework SDL
+  else
+  ifeq "$(shell test -f /opt/local/lib/libSDL.a && echo ok)" "ok"
+    SDL_LIBFLAGS = -L/opt/local/lib -lSDL
+  else
+    $(error SDL does not seem to be installed)
+  endif
+  endif
+  MAIN_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS) -framework OpenGL
   TEST_LIBFLAGS =
-  MUSE_LIBFLAGS = -framework Cocoa -framework SDL
+  MUSE_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
