@@ -1,4 +1,4 @@
-Next flag: 106
+Next flag: 107
 Unused: 5
 
 Bosses
@@ -101,6 +101,7 @@ Doors
 100: Opened cyan door between Voquan rooms 377 and 379
 101: Opened cyan door between Voquan rooms 378 and 379
 102: Opened red door between Cnidam rooms 331 and 407
+106: Opened cyan door between Voquan rooms 391 and 392
 
 Boss Doors
 ==========
