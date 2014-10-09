@@ -433,9 +433,19 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_particle_trail(state, proj, AZ_PAR_EMBER,
                            (az_color_t){0, 96, 255, 128}, 0.2, 8.0, 0.0);
       break;
+    case AZ_PROJ_GUN_CHARGED_PHASE:
+      leave_particle_trail(state, proj, AZ_PAR_TRAIL,
+                           (az_color_t){255, 192, 0, 128},
+                           1.5, proj->data->speed * time, 5.0);
+      break;
     case AZ_PROJ_GUN_CHARGED_PIERCE:
-      leave_particle_trail(state, proj, AZ_PAR_EMBER,
-                           (az_color_t){255, 0, 255, 128}, 0.5, 8.0, 0.0);
+      leave_particle_trail(state, proj, AZ_PAR_TRAIL,
+                           (az_color_t){255, 0, 255, 128},
+                           1.0, proj->data->speed * time, 8.0);
+      if (times_per_second(20, proj, time)) {
+        leave_particle_trail(state, proj, AZ_PAR_EXPLOSION,
+                             (az_color_t){255, 0, 255, 128}, 0.5, 7.0, 0.0);
+      }
       break;
     case AZ_PROJ_GUN_HOMING_PHASE:
       // Check if we're inside a wall.  Homing is turned off when we are.

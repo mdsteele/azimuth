@@ -281,6 +281,22 @@ static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
         glVertex2f(0, 14);
       } glEnd();
       break;
+    case AZ_PAR_TRAIL: {
+      const double scale = 1.0 - particle->age / particle->lifetime;
+      const double alpha = scale * scale * scale;
+      const double semiwidth = alpha * particle->param2;
+      glBegin(GL_TRIANGLE_STRIP); {
+        with_color_alpha(particle->color, 0);
+        glVertex2d(0, semiwidth);
+        glVertex2d(particle->param1, semiwidth);
+        with_color_alpha(particle->color, alpha);
+        glVertex2d(0, 0);
+        glVertex2d(particle->param1, 0);
+        with_color_alpha(particle->color, 0);
+        glVertex2d(0, -semiwidth);
+        glVertex2d(particle->param1, -semiwidth);
+      } glEnd();
+    } break;
   }
 }
 

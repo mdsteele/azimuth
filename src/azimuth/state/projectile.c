@@ -90,9 +90,10 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
     .speed = 800.0,
     .lifetime = 3.0,
-    .impact_damage = 15.0,
+    .impact_damage = 12.0,
+    .homing_rate = AZ_DEG2RAD(20),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
-    .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_FREEZE_PHASE] = {
     .speed = 600.0,
@@ -196,7 +197,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_CHARGED_PIERCE] = {
     .speed = 800.0,
     .lifetime = 3.0,
-    .impact_damage = 12.0,
+    .impact_damage = 15.0,
     .homing_rate = AZ_DEG2RAD(60),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
@@ -473,7 +474,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 75.0,
     .splash_radius = 120.0,
     .impact_shake = 5.0,
-    .damage_kind = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE |
+    .damage_kind = (AZ_DMGF_NORMAL | AZ_DMGF_PIERCE |
                     AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET |
                     AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB),
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS

@@ -51,7 +51,9 @@ typedef enum {
   // SPARK: An energy spark.  param1=radius, param2=spin_rate
   AZ_PAR_SPARK,
   // SPLOOSH: A splash made from entering/exiting water.  param1=amplitude
-  AZ_PAR_SPLOOSH
+  AZ_PAR_SPLOOSH,
+  // TRAIL: Like a contrail.  param1=length, param2=width/2
+  AZ_PAR_TRAIL,
 } az_particle_kind_t;
 
 typedef struct {

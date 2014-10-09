@@ -196,16 +196,14 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       glBegin(GL_TRIANGLE_FAN); {
         glVertex2f(0, 0);
         for (int i = -90; i <= 90; i += 30) {
-          glVertex2d(3 * cos(AZ_DEG2RAD(i)), 3 * sin(AZ_DEG2RAD(i)));
+          glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
-      glBegin(GL_QUADS); {
-        glVertex2f(0, -3);
-        glVertex2f(0, 3);
+      glBegin(GL_TRIANGLE_STRIP); {
+        glVertex2f(0, -4); glVertex2f(0, 4);
         if (az_clock_mod(2, 2, clock)) glColor4f(1, 1, 0, 0);
         else glColor4f(1, 0, 1, 0);
-        glVertex2d(-18 - 400 * proj->age, 3);
-        glVertex2d(-18 - 400 * proj->age, -3);
+        glVertex2f(-18, -4); glVertex2f(-18, 4);
       } glEnd();
       break;
     case AZ_PROJ_GUN_BURST:
