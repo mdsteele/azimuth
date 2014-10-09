@@ -102,11 +102,11 @@ static const az_proj_data_t proj_data[] = {
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_HOMING_PHASE] = {
-    .speed = 600.0,
-    .lifetime = 0.5,
-    .impact_damage = 0.05,
+    .speed = 400.0,
+    .lifetime = 0.75,
+    .impact_damage = 0.75,
     .homing_rate = AZ_DEG2RAD(200),
-    .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
+    .properties = AZ_PROJF_PHASED
   },
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
