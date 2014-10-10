@@ -461,10 +461,18 @@ static void do_mass_rotate(int x, int y, int dx, int dy) {
 }
 
 static void do_rotate_align(bool to_camera) {
-  const double cam_up =
-    (state.spin_camera ? az_vtheta(state.camera) : AZ_HALF_PI);
   const double step = AZ_DEG2RAD(45);
   az_editor_room_t *room = get_current_room();
+  double cam_up = AZ_HALF_PI;
+  if (state.spin_camera) {
+    cam_up = az_vtheta(state.camera);
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
+    if (az_mod2pi_nonneg(cam_up - bounds->min_theta) > bounds->theta_span) {
+      const double mid_theta = bounds->min_theta + 0.5 * bounds->theta_span;
+      cam_up = bounds->min_theta +
+        (az_mod2pi(cam_up - mid_theta) < 0 ? 0.0 : bounds->theta_span);
+    }
+  }
   AZ_EDITOR_OBJECT_LOOP(object, room) {
     if (!*object.selected) continue;
     const double up = (to_camera ? cam_up : az_vtheta(*object.position));
