@@ -148,7 +148,8 @@ void az_tick_bad_death_ray(
       az_vadd(baddie->position, az_vpolar(15, baddie->angle));
     az_impact_t impact;
     az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
-                  AZ_IMPF_NONE, baddie->uid, &impact);
+                  (az_ship_is_decloaked(&state->ship) ?
+                   AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
     if (impact.type == AZ_IMP_SHIP) {
       baddie->state = 1;
       const double beam_damage = 200.0 * time;

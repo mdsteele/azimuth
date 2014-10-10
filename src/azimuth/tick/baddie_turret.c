@@ -42,6 +42,12 @@ static void aim_towards_ship(
                                baddie->angle)));
 }
 
+static void recenter_barrel(az_baddie_t *baddie, double time,
+                            double turn_rate) {
+  baddie->components[0].angle = az_angle_towards(
+      baddie->components[0].angle, turn_rate * time, 0.0);
+}
+
 void az_tick_bad_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_NORMAL_TURRET ||
@@ -62,23 +68,29 @@ void az_tick_bad_turret(
 void az_tick_bad_beam_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_BEAM_TURRET);
-  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(30));
+  const double max_angle = AZ_DEG2RAD(57);
+  const double barrel_turn_rate = AZ_DEG2RAD(30);
+  const bool can_see_ship = az_can_see_ship(state, baddie);
+  if (can_see_ship || baddie->cooldown > 0.0) {
+    aim_towards_ship(state, baddie, time, max_angle, barrel_turn_rate);
+  } else recenter_barrel(baddie, time, barrel_turn_rate);
   // If we can see the ship, turn on the beam:
-  if (az_ship_within_angle(state, baddie, baddie->components[0].angle,
-                           AZ_DEG2RAD(20)) &&
-      az_can_see_ship(state, baddie)) {
+  if (can_see_ship &&
+      az_ship_within_angle(state, baddie, baddie->components[0].angle,
+                           AZ_DEG2RAD(20))) {
     baddie->cooldown = 0.5;
   }
+  // See what the beam would hit:
+  const double beam_theta = baddie->angle + baddie->components[0].angle;
+  const az_vector_t beam_start =
+    az_vadd(baddie->position, az_vpolar(30, beam_theta));
+  az_impact_t impact;
+  az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
+                (baddie->cooldown > 0.0 || az_ship_is_decloaked(&state->ship) ?
+                 AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
   // If beam is still turned on, fire:
   if (baddie->cooldown > 0.0) {
-    // Fire a beam.
-    const double beam_damage = 60.0 * time;
-    const double beam_theta = baddie->angle + baddie->components[0].angle;
-    const az_vector_t beam_start =
-      az_vadd(baddie->position, az_vpolar(30, beam_theta));
-    az_impact_t impact;
-    az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
-                  AZ_IMPF_NONE, baddie->uid, &impact);
+    const double beam_damage = 40.0 * time;
     if (impact.type == AZ_IMP_BADDIE) {
       az_try_damage_baddie(state, impact.target.baddie.baddie,
                            impact.target.baddie.component, AZ_DMGF_BEAM,
@@ -96,6 +108,11 @@ void az_tick_bad_beam_turret(
                            az_vtheta(impact.normal) +
                            az_random(-AZ_HALF_PI, AZ_HALF_PI)));
     az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
+  }
+  // Otherwise, draw a laser-sight.
+  else if (az_clock_mod(2, 2, state->clock)) {
+    const az_color_t beam_color = {255, 128, 128, 48};
+    az_add_beam(state, beam_color, beam_start, impact.position, 0.0, 1.0);
   }
 }
 
@@ -180,12 +197,16 @@ void az_tick_bad_heavy_turret(
 void az_tick_bad_rocket_turret(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_ROCKET_TURRET);
-  aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(114));
+  const double max_angle = AZ_DEG2RAD(57);
+  const double barrel_turn_rate = AZ_DEG2RAD(114);
+  const bool can_see_ship = az_can_see_ship(state, baddie);
+  if (can_see_ship) {
+    aim_towards_ship(state, baddie, time, max_angle, barrel_turn_rate);
+  }
   // Fire:
-  if (baddie->cooldown <= 0.0 &&
+  if (baddie->cooldown <= 0.0 && can_see_ship &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
-                           AZ_DEG2RAD(6)) &&
-      az_can_see_ship(state, baddie)) {
+                           AZ_DEG2RAD(6))) {
     az_fire_baddie_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET, 20.0,
                               baddie->components[0].angle, 0.0);
     baddie->cooldown = 1.5;
@@ -279,10 +300,7 @@ void az_tick_bad_pop_open_turret(
   // Aim barrel:
   if (open_shell) {
     aim_towards_ship(state, baddie, time, max_angle, barrel_turn_rate);
-  } else {
-    baddie->components[0].angle = az_angle_towards(
-        baddie->components[0].angle, barrel_turn_rate * time, 0.0);
-  }
+  } else recenter_barrel(baddie, time, barrel_turn_rate);
   // Open/close shell:
   baddie->components[1].angle =
     az_angle_towards(baddie->components[1].angle, AZ_DEG2RAD(90) * time,
