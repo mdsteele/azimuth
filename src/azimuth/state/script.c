@@ -106,6 +106,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_SSTR:   return "sstr";
     case AZ_OP_GCAM:   return "gcam";
     case AZ_OP_DARK:   return "dark";
+    case AZ_OP_DARKS:  return "darks";
     case AZ_OP_BLINK:  return "blink";
     case AZ_OP_SHAKE:  return "shake";
     case AZ_OP_QUAKE:  return "quake";
@@ -187,6 +188,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GVEL:
     case AZ_OP_SVEL:
     case AZ_OP_GCAM:
+    case AZ_OP_DARKS:
     case AZ_OP_BOOM:
     case AZ_OP_NUKE:
     case AZ_OP_FADO:

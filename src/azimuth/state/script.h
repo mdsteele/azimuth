@@ -113,6 +113,7 @@ typedef enum {
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
   AZ_OP_DARK, // set room darkness goal to i
+  AZ_OP_DARKS, // pop top, set room darkness goal to a
   AZ_OP_BLINK, // set room darkness (not goal) to i
   AZ_OP_SHAKE, // momentarily shake camera by amplitude i
   AZ_OP_QUAKE, // set camera quake amplitude to i

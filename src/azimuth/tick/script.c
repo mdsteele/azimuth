@@ -682,6 +682,11 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
+      case AZ_OP_DARKS: {
+        double value;
+        STACK_POP(&value);
+        state->dark_goal = fmin(fmax(0.0, value), 1.0);
+      } break;
       case AZ_OP_BLINK:
         state->darkness = fmin(fmax(0.0, ins.immediate), 1.0);
         break;
