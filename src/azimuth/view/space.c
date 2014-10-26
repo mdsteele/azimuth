@@ -40,6 +40,7 @@
 #include "azimuth/view/projectile.h"
 #include "azimuth/view/ship.h"
 #include "azimuth/view/speck.h"
+#include "azimuth/view/util.h"
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
@@ -132,6 +133,7 @@ static void draw_darkness(az_space_state_t *state) {
   const GLfloat alpha = state->darkness;
   if (az_has_upgrade(&state->ship.player, AZ_UPG_INFRASCANNER)) {
     const double radius = 100.0;
+    const double spread = 250.0;
     glBegin(GL_TRIANGLE_FAN); {
       glColor4f(0, 0, blue, 0);
       glVertex2f(0, 0);
@@ -140,23 +142,28 @@ static void draw_darkness(az_space_state_t *state) {
         glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
-    glBegin(GL_QUAD_STRIP); {
+    glBegin(GL_TRIANGLE_STRIP); {
       glColor4f(0, 0, blue, alpha);
-      glVertex2f(0, radius); glVertex2f(1000, radius + 300);
+      glVertex2f(0, radius); glVertex2f(1000, radius + spread);
       glColor4f(0, 0, blue, 0);
       glVertex2f(0, 0); glVertex2f(1000, 0);
-      glColor4f(0, 0, blue, alpha);
-      glVertex2f(0, -radius); glVertex2f(1000, -radius - 300);
     } glEnd();
-    glBegin(GL_QUAD_STRIP); {
-      glVertex2f(1000, radius + 300);
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0, 0, blue, alpha);
+      glVertex2f(0, -radius); glVertex2f(1000, -radius - spread);
+      glColor4f(0, 0, blue, 0);
+      glVertex2f(0, 0); glVertex2f(1000, 0);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0, 0, blue, alpha);
+      glVertex2f(1000, radius + spread);
       glVertex2f(1000, 1000);
       for (int i = 90; i <= 270; i += 10) {
         const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
         glVertex2d(radius * c, radius * s);
         glVertex2d(1000 * c, 1000 * s);
       }
-      glVertex2f(1000, -radius - 300);
+      glVertex2f(1000, -radius - spread);
       glVertex2f(1000, -1000);
     } glEnd();
   } else {
@@ -169,7 +176,7 @@ static void draw_darkness(az_space_state_t *state) {
         glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
-    glBegin(GL_QUAD_STRIP); {
+    glBegin(GL_TRIANGLE_STRIP); {
       for (int i = 0; i <= 360; i += 10) {
         const double c = cos(AZ_DEG2RAD(i)), s = sin(AZ_DEG2RAD(i));
         glVertex2d(radius * c, radius * s);
@@ -276,8 +283,8 @@ void az_space_draw_screen(az_space_state_t *state) {
     if (state->darkness > 0.0) {
       glPushMatrix(); {
         transform_to_camera_matrix(state);
-        glTranslated(state->ship.position.x, state->ship.position.y, 0);
-        glRotated(AZ_RAD2DEG(state->ship.angle), 0, 0, 1);
+        az_gl_translated(state->ship.position);
+        az_gl_rotated(state->ship.angle);
         draw_darkness(state);
       } glPopMatrix();
     }
@@ -294,8 +301,8 @@ void az_space_draw_screen(az_space_state_t *state) {
       glPushMatrix(); {
         transform_to_camera_matrix(state);
         const az_vector_t position = state->boss_death_mode.boss.position;
-        glTranslated(position.x, position.y, 0);
-        glRotated(AZ_RAD2DEG(az_vtheta(position)), 0, 0, 1);
+        az_gl_translated(position);
+        az_gl_rotated(az_vtheta(position));
         glBegin(GL_QUADS); {
           const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
           const GLfloat inner = outer * state->boss_death_mode.progress *
