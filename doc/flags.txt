@@ -1,4 +1,4 @@
-Next flag: 107
+Next flag: 109
 Unused: 5
 
 Bosses
@@ -127,3 +127,5 @@ Misc
 89: Traversed room 367
 94: Opened forcefield in Barrag room 286
 105: Turned off experimental reactor in Voquan room 459
+107: Lowered lava in southeastern Cnidam/Sarvari
+108: Pressed button in Cnidam room 340 to open forcefield in Cnidam room 337
