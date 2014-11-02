@@ -1,4 +1,4 @@
-@P z8 r462 t170 s6 x0.00 y50000.00 a-1.570796
+@P z8 r462 t171 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -761,3 +761,5 @@
   \"There's no time, Hopper, GO!\""
 !T169"
   Experimental Reactor Core"
+!T170"
+  Geothermal Control"
