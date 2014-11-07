@@ -212,11 +212,9 @@ void az_draw_bad_death_ray(
            color3(0.4 + 0.15 * flare, 0.4, 0.3));
 }
 
-void az_draw_bad_boss_door(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
-  assert(baddie->kind == AZ_BAD_BOSS_DOOR);
-  assert(frozen == 0.0f);
-  const float flare = baddie->armor_flare;
+/*===========================================================================*/
+
+static void draw_eye_and_eyelids(const az_baddie_t *baddie, float flare) {
   // Eye:
   glBegin(GL_TRIANGLE_FAN); {
     glColor3f(1.0f, 0.8f - 0.7f * flare, 0.6f - 0.5f * flare);
@@ -254,11 +252,18 @@ void az_draw_bad_boss_door(
       } glEnd();
       glBegin(GL_QUAD_STRIP); {
         glColor3f(0.2, 0.2, 0.2); glVertex2f(22,  0); glVertex2f(22,  1);
-        glColor3f(0.4, 0.4, 0.4); glVertex2f( 0,  0); glVertex2f( 2,  1);
+        glColor3f(0.4, 0.4, 0.4); glVertex2f( 0,  0); glVertex2f(1.5, 1.5);
         glColor3f(0.2, 0.2, 0.2); glVertex2f( 0, 22); glVertex2f( 1, 22);
       } glEnd();
     } glPopMatrix();
   }
+}
+
+void az_draw_bad_boss_door(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_BOSS_DOOR);
+  assert(frozen == 0.0f);
+  draw_eye_and_eyelids(baddie, baddie->armor_flare);
   // Body:
   glBegin(GL_TRIANGLES); {
     glColor3f(0.15, 0.15, 0.15);
@@ -284,6 +289,18 @@ void az_draw_bad_boss_door(
     }
   } glEnd();
   glBegin(GL_QUAD_STRIP); {
+    glColor3f(0.2, 0.2, 0.2); glVertex2f(4,  23); glVertex2f(8,  22);
+    glColor3f(0.6, 0.6, 0.6); glVertex2f(4,   0); glVertex2f(8,   0);
+    glColor3f(0.2, 0.2, 0.2); glVertex2f(4, -23); glVertex2f(8, -22);
+  } glEnd();
+}
+
+void az_draw_bad_creepy_eye(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_CREEPY_EYE);
+  assert(frozen == 0.0f);
+  draw_eye_and_eyelids(baddie, 0);
+  glBegin(GL_TRIANGLE_STRIP); {
     glColor3f(0.2, 0.2, 0.2); glVertex2f(4,  23); glVertex2f(8,  22);
     glColor3f(0.6, 0.6, 0.6); glVertex2f(4,   0); glVertex2f(8,   0);
     glColor3f(0.2, 0.2, 0.2); glVertex2f(4, -23); glVertex2f(8, -22);

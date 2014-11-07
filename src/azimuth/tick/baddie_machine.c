@@ -92,6 +92,8 @@ void az_tick_bad_sensor_laser(
   }
 }
 
+/*===========================================================================*/
+
 void az_tick_bad_heat_ray(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_HEAT_RAY);
@@ -173,6 +175,8 @@ void az_tick_bad_death_ray(
     }
   }
 }
+
+/*===========================================================================*/
 
 void az_tick_bad_boss_door(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
@@ -266,6 +270,47 @@ void az_tick_bad_boss_door(
       baddie->cooldown = 1.0;
     }
   }
+}
+
+void az_tick_bad_creepy_eye(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_CREEPY_EYE);
+  const double max_angle = AZ_DEG2RAD(50);
+  const double eye_turn_rate = AZ_DEG2RAD(120);
+  const double eyelid_turn_rate = AZ_DEG2RAD(540);
+  // Aim eye towards ship:
+  baddie->components[0].angle =
+    fmax(-max_angle, fmin(max_angle, az_mod2pi(az_angle_towards(
+      baddie->angle + baddie->components[0].angle, eye_turn_rate * time,
+      az_vtheta(az_vsub(state->ship.position, baddie->position))) -
+                                               baddie->angle)));
+  // Open/close eyelids:
+  const bool can_see_ship = az_ship_is_decloaked(&state->ship) &&
+    (fabs(az_mod2pi(az_vtheta(az_vsub(
+         state->ship.position, baddie->position)) -
+                    baddie->angle)) <= max_angle);
+  if (can_see_ship && baddie->cooldown <= 0.0) {
+    baddie->components[1].angle =
+      az_angle_towards(baddie->components[1].angle, eyelid_turn_rate * time,
+                       max_angle + AZ_DEG2RAD(10));
+  } else {
+    baddie->components[1].angle =
+      az_angle_towards(baddie->components[1].angle,
+                       eyelid_turn_rate * time, 0);
+  }
+  baddie->components[2].angle = -AZ_HALF_PI - baddie->components[1].angle;
+  // Randomly blink:
+  if (baddie->cooldown <= 0.0 && az_random(0, 1) >= pow(0.8, time)) {
+    baddie->cooldown = 0.125;
+  }
+  // Regenerate health:
+  baddie->health = fmin(baddie->data->max_health, baddie->health + 10 * time);
+}
+
+void az_on_creepy_eye_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind) {
+  baddie->cooldown = fmax(0.125, baddie->cooldown + amount * 0.1);
 }
 
 /*===========================================================================*/

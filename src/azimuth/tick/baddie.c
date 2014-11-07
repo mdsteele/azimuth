@@ -818,6 +818,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_GNAT:
       az_tick_bad_gnat(state, baddie, time);
       break;
+    case AZ_BAD_CREEPY_EYE:
+      az_tick_bad_creepy_eye(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
@@ -848,6 +851,9 @@ void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_GRABBER_PLANT:
       az_on_grabber_plant_damaged(state, baddie, amount, damage_kind);
+      break;
+    case AZ_BAD_CREEPY_EYE:
+      az_on_creepy_eye_damaged(state, baddie, amount, damage_kind);
       break;
     default: break;
   }

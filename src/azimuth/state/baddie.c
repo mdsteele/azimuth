@@ -543,6 +543,18 @@ static az_component_data_t boss_door_components[] = {
     .immunities = ~0, .impact_damage = 10.0, .init_angle = AZ_DEG2RAD(-90) }
 };
 
+static az_component_data_t creepy_eye_components[] = {
+  // Eye:
+  { .bounding_radius = 20.0, .impact_damage = 12.0,
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE | AZ_DMGF_PIERCE |
+                   AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB) },
+  // Eyelids:
+  { .polygon = AZ_INIT_POLYGON(boss_door_eyelid_vertices),
+    .immunities = ~0, .impact_damage = 10.0, .init_angle = AZ_DEG2RAD(0) },
+  { .polygon = AZ_INIT_POLYGON(boss_door_eyelid_vertices),
+    .immunities = ~0, .impact_damage = 10.0, .init_angle = AZ_DEG2RAD(-90) }
+};
+
 static const az_vector_t mini_zipper_vertices[] = {
   {14, 2.1}, {10.5, 4.2}, {7, 4.9}, {-7, 2.8}, {-10.5, 1.4}, {-10.5, -1.4},
   {-7, -2.8}, {7, -4.9}, {10.5, -4.2}, {14, -2.1}
@@ -1604,6 +1616,14 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_KAMIKAZE,
     .main_body = { .polygon = AZ_INIT_POLYGON(mosquito_vertices),
                    .impact_damage = 6.0 }
+  },
+  [AZ_BAD_CREEPY_EYE] = {
+    .max_health = 35.0, .overall_bounding_radius = 25.0,
+    .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
+    .static_properties = AZ_BADF_DRAW_BG,
+    .main_body = { .bounding_radius = 1.0, .impact_damage = 10.0,
+                   .immunities = ~0 },
+    DECL_COMPONENTS(creepy_eye_components)
   }
 };
 

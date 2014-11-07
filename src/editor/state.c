@@ -166,6 +166,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_DEATH_RAY,
   AZ_BAD_PROXY_MINE,
   AZ_BAD_NUCLEAR_MINE,
+  AZ_BAD_CREEPY_EYE,
   // Bouncers:
   AZ_BAD_BOUNCER,
   AZ_BAD_BOUNCER_90,

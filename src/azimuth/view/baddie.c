@@ -887,6 +887,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_GNAT:
       az_draw_bad_gnat(baddie, frozen, clock);
       break;
+    case AZ_BAD_CREEPY_EYE:
+      az_draw_bad_creepy_eye(baddie, frozen, clock);
+      break;
   }
 }
 
