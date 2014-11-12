@@ -1620,7 +1620,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_CREEPY_EYE] = {
     .max_health = 35.0, .overall_bounding_radius = 25.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = AZ_BADF_DRAW_BG,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_BEAM |
+                          AZ_BADF_NO_HOMING_PROJ),
     .main_body = { .bounding_radius = 1.0, .immunities = ~0 },
     DECL_COMPONENTS(creepy_eye_components)
   }
