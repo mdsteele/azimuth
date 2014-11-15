@@ -1,4 +1,4 @@
-@M "SAB"
+@M "SABC"
 % Title: "You Will Be Upgraded"
 
 =tempo 150
@@ -21,10 +21,16 @@
 
 !Part B
 
-4 L20
+1| f4e fs f ' ae c5   ' es e g4s g ' ae b     |
+2| a3q      ' c       ' a          ' f        |
+3| f2h                ' a                     |
+4| L20 c3q  ' ce cs c ' L40 cq     ' cs c c c |
 
-1| f4e fs f ' ae c5   ' es e g4s g ' ae b     | f5w   |
-2| a3q      ' c       ' a          ' f        | a#4w  |
-3| f2h                ' a                     | f2w   |
-4| L20 c3q  ' ce cs c ' L40 cq     ' cs c c c | cq    |
-5| rw                                         | c8h   |
+
+!Part C
+
+1| f5w     |
+2| a#4w    |
+3| f2w     |
+4| L20 c3t c c c L25 c c c c ' L35 ct c c c L40 c c c c ' cq |
+5| c8h c8h+e+s |
