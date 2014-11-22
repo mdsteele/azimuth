@@ -24,6 +24,7 @@
 #include "azimuth/state/door.h"
 #include "azimuth/state/space.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
@@ -34,6 +35,8 @@ void az_draw_door(const az_door_t *door, az_clock_t clock);
 // Draw all doors.  The GL matrix should be at the camera position.  Passages
 // will not be drawn (they are invisible).
 void az_draw_doors(const az_space_state_t *state);
+
+void az_draw_door_pipe_fade(az_vector_t position, double angle, float alpha);
 
 void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
                         az_vector_t exit_position, double exit_angle,

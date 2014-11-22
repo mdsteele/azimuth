@@ -224,7 +224,10 @@ static void draw_doorway_transition(az_space_state_t *state) {
                           mode_data->entrance.uid : mode_data->exit.uid);
     az_door_t *door;
     if (az_lookup_door(state, uid, &door) && door->kind != AZ_DOOR_PASSAGE) {
-      az_draw_door(door, state->clock);
+      const double progress =
+        (mode_data->step == AZ_DWS_FADE_OUT ? mode_data->progress :
+         1.0 - mode_data->progress);
+      az_draw_door_pipe_fade(door->position, door->angle, pow(progress, 0.75));
     }
   }
 }

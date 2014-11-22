@@ -73,29 +73,29 @@ static void draw_forcefield(const az_door_t *door, az_clock_t clock) {
   }
 }
 
-static void draw_door_pipe(void) {
+static void draw_door_pipe(GLfloat alpha) {
   glBegin(GL_QUAD_STRIP); {
-    glColor3f(0.25, 0.25, 0.25); // dark gray
+    glColor4f(0.25, 0.25, 0.25, alpha); // dark gray
     glVertex2f(30, 50); glVertex2f(-30, 50);
-    glColor3f(0.5, 0.5, 0.5); // mid gray
+    glColor4f(0.5, 0.5, 0.5, alpha); // mid gray
     glVertex2f(30, 30); glVertex2f(-30, 30);
-    glColor3f(0.7, 0.7, 0.7); // light gray
+    glColor4f(0.7, 0.7, 0.7, alpha); // light gray
     glVertex2f(30, 0); glVertex2f(-30, 0);
-    glColor3f(0.5, 0.5, 0.5); // mid gray
+    glColor4f(0.5, 0.5, 0.5, alpha); // mid gray
     glVertex2f(30, -30); glVertex2f(-30, -30);
-    glColor3f(0.25, 0.25, 0.25); // dark gray
+    glColor4f(0.25, 0.25, 0.25, alpha); // dark gray
     glVertex2f(30, -50); glVertex2f(-30, -50);
   } glEnd();
   glBegin(GL_QUAD_STRIP); {
-    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glColor4f(0.2, 0.2, 0.2, alpha); // dark gray
     glVertex2f(31, 51); glVertex2f(24, 51);
-    glColor3f(0.45, 0.45, 0.45); // mid gray
+    glColor4f(0.45, 0.45, 0.45, alpha); // mid gray
     glVertex2f(31, 31); glVertex2f(24, 31);
-    glColor3f(0.65, 0.65, 0.65); // light gray
+    glColor4f(0.65, 0.65, 0.65, alpha); // light gray
     glVertex2f(31, 0); glVertex2f(24, 0);
-    glColor3f(0.45, 0.45, 0.45); // mid gray
+    glColor4f(0.45, 0.45, 0.45, alpha); // mid gray
     glVertex2f(31, -31); glVertex2f(24, -31);
-    glColor3f(0.2, 0.2, 0.2); // dark gray
+    glColor4f(0.2, 0.2, 0.2, alpha); // dark gray
     glVertex2f(31, -51); glVertex2f(24, -51);
   } glEnd();
 }
@@ -174,7 +174,7 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
       }
     } glEnd();
   }
-  draw_door_pipe();
+  draw_door_pipe(1);
 }
 
 /*===========================================================================*/
@@ -182,8 +182,8 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
 void az_draw_door(const az_door_t *door, az_clock_t clock) {
   assert(door->kind != AZ_DOOR_NOTHING);
   glPushMatrix(); {
-    glTranslated(door->position.x, door->position.y, 0);
-    glRotated(AZ_RAD2DEG(door->angle), 0, 0, 1);
+    az_gl_translated(door->position);
+    az_gl_rotated(door->angle);
     draw_door_internal(door, clock);
   } glPopMatrix();
 }
@@ -198,6 +198,17 @@ void az_draw_doors(const az_space_state_t *state) {
 
 /*===========================================================================*/
 
+void az_draw_door_pipe_fade(az_vector_t position, double angle, float alpha) {
+  glPushMatrix(); {
+    az_gl_translated(position);
+    az_gl_rotated(angle);
+    draw_door_pipe(alpha);
+    glRotated(180, 0, 0, 1);
+    glTranslated(60, 0, 0);
+    draw_door_pipe(alpha);
+  } glPopMatrix();
+}
+
 void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
                         az_vector_t exit_position, double exit_angle,
                         double progress) {
@@ -211,13 +222,13 @@ void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
   const double angle =
     entrance_angle + az_mod2pi(exit_angle + AZ_PI - entrance_angle) * progress;
   glPushMatrix(); {
-    glTranslated(center.x, center.y, 0);
-    glRotated(AZ_RAD2DEG(angle), 0, 0, 1);
+    az_gl_translated(center);
+    az_gl_rotated(angle);
     glTranslated(30, 0, 0);
-    draw_door_pipe();
+    draw_door_pipe(1);
     glRotated(180, 0, 0, 1);
     glTranslated(60, 0, 0);
-    draw_door_pipe();
+    draw_door_pipe(1);
   } glPopMatrix();
 }
 
