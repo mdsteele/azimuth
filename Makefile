@@ -65,7 +65,7 @@ ifeq "$(OS_NAME)" "Darwin"
     SDL_LIBFLAGS = -framework SDL
   else
   ifeq "$(shell test -f /opt/local/lib/libSDL.a && echo ok)" "ok"
-    SDL_LIBFLAGS = -L/opt/local/lib -lSDL
+    SDL_LIBFLAGS = -I/opt/local/include -L/opt/local/lib -lSDL
   else
     $(error SDL does not seem to be installed)
   endif

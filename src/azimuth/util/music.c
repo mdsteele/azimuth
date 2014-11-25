@@ -599,7 +599,7 @@ static void parse_spec_string(az_music_parser_t *parser) {
         .opcode = AZ_MUSOP_PLAY, .index = part_index
       };
     } else if (ch == '=' || ch == '!' || ch == ':' || ch == '$') {
-      int value = 0, index = 0;
+      int flag_value = 0, jump_index = 0;
       if (ch == '=' || ch == '!' || ch == '$') {
         if (spec_string_index >= parser->spec_string_length) {
           PARSE_ERROR("missing value after '%c' in spec", ch);
@@ -608,7 +608,7 @@ static void parse_spec_string(az_music_parser_t *parser) {
         if (value_ch < '0' || value_ch > '9') {
           PARSE_ERROR("invalid value '%c' for '%c' in spec", value_ch, ch);
         }
-        value = value_ch - '0';
+        flag_value = value_ch - '0';
       }
       if (ch == '=' || ch == '!' || ch == ':') {
         if (spec_string_index >= parser->spec_string_length) {
@@ -618,12 +618,12 @@ static void parse_spec_string(az_music_parser_t *parser) {
         if (label_ch < 'a' || label_ch > 'z') {
           PARSE_ERROR("invalid label '%c' for '%c' in spec", label_ch, ch);
         }
-        index = label_ch - 'a';
+        jump_index = label_ch - 'a';
       }
       instructions[instruction_count++] = (az_music_instruction_t){
         .opcode = (ch == '=' ? AZ_MUSOP_BFEQ : ch == '!' ? AZ_MUSOP_BFNE :
                    ch == ':' ? AZ_MUSOP_JUMP : AZ_MUSOP_SETF),
-        .value = value, .index = index
+        .value = flag_value, .index = jump_index
       };
     } else assert(ch == ' ');
   }

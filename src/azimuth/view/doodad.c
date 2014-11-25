@@ -663,25 +663,25 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
       } glEnd();
       // End caps:
       for (int j = -1; j <= 1; j += 2) {
-        float x1 = j * 40;
-        float y1 = 30;
+        float x_1 = j * 40;
+        float y_1 = 30;
         for (int i = 1; i <= 4; ++i) {
-          const float x2 = x1 + j * 2;
-          const float y2 = 8 * cos(AZ_DEG2RAD(i * 20)) + 22;
+          const float x_2 = x_1 + j * 2;
+          const float y_2 = 8 * cos(AZ_DEG2RAD(i * 20)) + 22;
           glBegin(GL_TRIANGLE_STRIP); {
             glColor3f(0.25, 0.25, 0.25);
-            glVertex2f(x1, y1); glVertex2f(x2, y2);
+            glVertex2f(x_1, y_1); glVertex2f(x_2, y_2);
             glColor3f(0.50, 0.50, 0.50);
-            glVertex2f(x1, 0.6f * y1); glVertex2f(x2, 0.6f * y2);
+            glVertex2f(x_1, 0.6f * y_1); glVertex2f(x_2, 0.6f * y_2);
             glColor3f(0.70, 0.70, 0.70);
-            glVertex2f(x1, 0); glVertex2f(x2, 0);
+            glVertex2f(x_1, 0); glVertex2f(x_2, 0);
             glColor3f(0.50, 0.50, 0.50);
-            glVertex2f(x1, -0.6f * y1); glVertex2f(x2, -0.6f * y2);
+            glVertex2f(x_1, -0.6f * y_1); glVertex2f(x_2, -0.6f * y_2);
             glColor3f(0.25, 0.25, 0.25);
-            glVertex2f(x1, -y1); glVertex2f(x2, -y2);
+            glVertex2f(x_1, -y_1); glVertex2f(x_2, -y_2);
           } glEnd();
-          x1 = x2;
-          y1 = y2;
+          x_1 = x_2;
+          y_1 = y_2;
         }
         glBegin(GL_TRIANGLE_STRIP); {
           glColor3f(0.20, 0.20, 0.20);
