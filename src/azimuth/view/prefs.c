@@ -53,7 +53,7 @@ static const az_polygon_t slider_handle_polygon =
   AZ_INIT_POLYGON(slider_handle_vertices);
 
 #define PICKER_WIDTH 30
-#define PICKER_HEIGHT 12
+#define PICKER_HEIGHT 13
 #define PICKERS_TOP 85
 #define PICKER_HORZ_SPACING 108
 #define PICKER_VERT_SPACING 8
@@ -274,6 +274,23 @@ void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y) {
     slider_on_click(&pane->sound_slider, rel_x, rel_y);
     checkbox_on_click(&pane->speedrun_timer_checkbox, rel_x, rel_y);
     checkbox_on_click(&pane->fullscreen_checkbox, rel_x, rel_y);
+  }
+}
+
+void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id) {
+  const int picker_index = pane->selected_key_picker_index;
+  if (picker_index < 0 || picker_index >= AZ_PREFS_NUM_KEYS) return;
+  az_prefs_key_picker_t *picker = &pane->pickers[picker_index];
+  pane->selected_key_picker_index = -1;
+  if (az_is_valid_prefs_key(key_id)) {
+    for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+      if (i == picker_index) continue;
+      if (pane->pickers[i].key == key_id) {
+        pane->pickers[i].key = picker->key;
+        break;
+      }
+    }
+    picker->key = key_id;
   }
 }
 

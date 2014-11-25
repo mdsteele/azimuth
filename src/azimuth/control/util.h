@@ -26,11 +26,15 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/save.h"
 #include "azimuth/util/prefs.h"
+#include "azimuth/view/prefs.h"
 
 /*===========================================================================*/
 
 void az_load_preferences(az_preferences_t *prefs);
 bool az_save_preferences(const az_preferences_t *prefs);
+
+void az_update_prefefences(const az_prefs_pane_t *pane,
+                           az_preferences_t *prefs, bool *prefs_changed);
 
 void az_load_saved_games(const az_planet_t *planet,
                          az_saved_games_t *saved_games);

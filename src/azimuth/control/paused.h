@@ -33,8 +33,7 @@ typedef enum {
 } az_paused_action_t;
 
 az_paused_action_t az_paused_event_loop(
-    const az_planet_t *planet, const az_preferences_t *prefs,
-    az_ship_t *ship);
+    const az_planet_t *planet, az_preferences_t *prefs, az_ship_t *ship);
 
 /*===========================================================================*/
 

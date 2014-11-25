@@ -19,6 +19,11 @@
 
 #include "azimuth/control/paused.h"
 
+#include <assert.h>
+#include <stdbool.h>
+
+#include "azimuth/control/util.h"
+#include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/planet.h"
@@ -29,15 +34,18 @@
 /*===========================================================================*/
 
 az_paused_action_t az_paused_event_loop(
-    const az_planet_t *planet, const az_preferences_t *prefs,
+    const az_planet_t *planet, az_preferences_t *prefs,
     az_ship_t *ship) {
   static az_paused_state_t state;
   az_init_paused_state(&state, planet, prefs, ship);
   az_player_t *player = &ship->player;
 
+  bool prefs_changed = false;
+
   while (true) {
     // Tick the state and redraw the screen.
     az_tick_paused_state(&state, 1.0/60.0);
+    az_tick_audio(&state.soundboard);
     az_start_screen_redraw(); {
       az_paused_draw_screen(&state);
     } az_finish_screen_redraw();
@@ -47,6 +55,11 @@ az_paused_action_t az_paused_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
+          if (state.do_quit) break;
+          if (state.prefs_pane.selected_key_picker_index >= 0) {
+            az_prefs_try_pick_key(&state.prefs_pane, event.key.id);
+            break;
+          }
           switch (event.key.id) {
             case AZ_KEY_RETURN: return AZ_PA_RESUME;
             case AZ_KEY_1: az_select_gun(player, AZ_GUN_CHARGE); break;
@@ -65,10 +78,13 @@ az_paused_action_t az_paused_event_loop(
                 return AZ_PA_RESUME;
               } else if (event.key.id ==
                          state.prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]) {
-                state.show_upgrades_drawer = true;
+                state.current_drawer = AZ_PAUSE_DRAWER_UPGRADES;
               } else if (event.key.id ==
                          state.prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]) {
-                state.show_upgrades_drawer = false;
+                state.current_drawer = AZ_PAUSE_DRAWER_MAP;
+              } else if (event.key.id ==
+                         state.prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) {
+                state.current_drawer = AZ_PAUSE_DRAWER_OPTIONS;
               }
               break;
           }
@@ -81,6 +97,13 @@ az_paused_action_t az_paused_event_loop(
           break;
         default: break;
       }
+    }
+
+    az_update_prefefences(&state.prefs_pane, prefs, &prefs_changed);
+
+    if (state.quitting_fade_alpha >= 1.0) {
+      assert(state.do_quit);
+      return AZ_PA_EXIT_TO_TITLE;
     }
   }
 }

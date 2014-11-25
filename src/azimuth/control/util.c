@@ -23,10 +23,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "azimuth/system/resource.h"
+#include "azimuth/gui/audio.h"
 #include "azimuth/state/save.h"
+#include "azimuth/system/resource.h"
 #include "azimuth/util/prefs.h"
 #include "azimuth/util/string.h"
+#include "azimuth/view/prefs.h"
 
 /*===========================================================================*/
 
@@ -49,6 +51,37 @@ bool az_save_preferences(const az_preferences_t *prefs) {
   const bool success = az_save_prefs_to_path(prefs, prefs_path);
   free(prefs_path);
   return success;
+}
+
+void az_update_prefefences(const az_prefs_pane_t *pane,
+                           az_preferences_t *prefs, bool *prefs_changed) {
+  if (prefs->music_volume != pane->music_slider.value) {
+    prefs->music_volume = pane->music_slider.value;
+    az_set_global_music_volume(prefs->music_volume);
+    *prefs_changed = true;
+  }
+  if (prefs->sound_volume != pane->sound_slider.value) {
+    prefs->sound_volume = pane->sound_slider.value;
+    az_set_global_sound_volume(prefs->sound_volume);
+    *prefs_changed = true;
+  }
+  if (prefs->speedrun_timer != pane->speedrun_timer_checkbox.checked ||
+      prefs->fullscreen_on_startup != pane->fullscreen_checkbox.checked) {
+    prefs->speedrun_timer = pane->speedrun_timer_checkbox.checked;
+    prefs->fullscreen_on_startup = pane->fullscreen_checkbox.checked;
+    *prefs_changed = true;
+  }
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    if (prefs->keys[i] != pane->pickers[i].key) {
+      prefs->keys[i] = pane->pickers[i].key;
+      *prefs_changed = true;
+    }
+  }
+  if (*prefs_changed && !pane->music_slider.grabbed &&
+      !pane->sound_slider.grabbed) {
+    az_save_preferences(prefs);
+    *prefs_changed = false;
+  }
 }
 
 void az_load_saved_games(const az_planet_t *planet,

@@ -517,12 +517,13 @@ void az_title_draw_screen(const az_title_state_t *state) {
                      (state->mode == AZ_TMODE_ABOUT ? "Done" : "About"));
   draw_bottom_button(&state->quit_button, quit_button_active(state), "Quit");
 
+  // Draw mouse cursor:
+  az_draw_cursor();
+
   // Fade out screen:
   if (state->mode == AZ_TMODE_STARTING) {
     fade_screen_black(state->mode_data.starting.progress);
   }
-
-  az_draw_cursor();
 }
 
 /*===========================================================================*/

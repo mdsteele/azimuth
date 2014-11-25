@@ -26,8 +26,11 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/upgrade.h"
+#include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/prefs.h"
+#include "azimuth/view/button.h"
+#include "azimuth/view/prefs.h"
 
 /*===========================================================================*/
 
@@ -35,12 +38,22 @@ typedef struct {
   const az_planet_t *planet;
   const az_preferences_t *prefs;
   az_ship_t *ship;
+  az_soundboard_t soundboard;
   az_clock_t clock;
+  enum {
+    AZ_PAUSE_DRAWER_MAP = 0,
+    AZ_PAUSE_DRAWER_OPTIONS,
+    AZ_PAUSE_DRAWER_UPGRADES
+  } current_drawer;
+  double drawer_slide; // -1.0 (prefs) to 0.0 (map) to 1.0 (upgrades)
   double scroll_y, scroll_y_min;
-  bool show_upgrades_drawer;
-  double drawer_openness; // 0.0 to 1.0
   bool hovering_over_upgrade;
   az_upgrade_t hovered_upgrade;
+  az_prefs_pane_t prefs_pane;
+  az_button_t quit_button;
+  bool confirming_quit, do_quit;
+  az_button_t confirm_button, cancel_button;
+  double quitting_fade_alpha; // 0.0 to 1.0
 } az_paused_state_t;
 
 void az_init_paused_state(

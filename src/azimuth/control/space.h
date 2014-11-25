@@ -34,7 +34,7 @@ typedef enum {
 
 az_space_action_t az_space_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    const az_preferences_t *prefs, int saved_game_index);
+    az_preferences_t *prefs, int saved_game_index);
 
 /*===========================================================================*/
 

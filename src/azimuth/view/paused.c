@@ -36,9 +36,11 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/button.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/hud.h"
 #include "azimuth/view/node.h"
+#include "azimuth/view/prefs.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
 
@@ -58,7 +60,6 @@ static void draw_bezel_box(double bezel, double x, double y,
 /*===========================================================================*/
 // Minimap geometry:
 
-#define DRAWER_SLIDE_DISTANCE 410
 #define MINIMAP_ZOOM 75.0
 #define SCROLL_Y_MAX (AZ_PLANETOID_RADIUS - 180 * MINIMAP_ZOOM)
 #define SCROLL_SPEED (AZ_PLANETOID_RADIUS)
@@ -221,12 +222,12 @@ static void draw_minimap(const az_paused_state_t *state) {
   assert(current_room->zone_key < planet->num_zones);
   const az_zone_t *current_zone = &planet->zones[current_room->zone_key];
   glColor3f(1, 1, 1);
-  az_draw_string(8, AZ_ALIGN_LEFT, 38, 18, "Zenith Planetoid");
+  az_draw_string(8, AZ_ALIGN_CENTER, 320, 17, "Zenith Planetoid");
   az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 46 -
-                 8 * strlen(current_zone->name), 18, "Current location:");
+                 8 * strlen(current_zone->name), 17, "Location:");
   const az_color_t color = current_zone->color;
   glColor3ub(color.r, color.g, color.b);
-  az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 38, 18,
+  az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 38, 17,
                  current_zone->name);
 }
 
@@ -335,7 +336,9 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
 }
 
 /*===========================================================================*/
-// Drawing upgrades:
+// Upgrades drawer:
+
+#define UPGRADE_DRAWER_SLIDE_DISTANCE 410
 
 #define GUN_BOX_WIDTH 60
 #define UPG_BOX_WIDTH 150
@@ -405,22 +408,32 @@ static int round_towards_middle(double amount, double maximum) {
   return (int)(amount - offset) + offset;
 }
 
-static const az_vector_t drawer_vertices[] = {
-  {12.5, 480.5}, {12.5, 18.5}, {22.5, 8.5}, {200.5, 8.5}, {204.5, 12.5},
-  {423.5, 12.5}, {427.5, 8.5}, {627.5, 8.5}, {627.5, 480.5}
+static const az_vector_t upgrade_drawer_vertices[] = {
+  {12.5, 480.5}, {12.5, 20.5}, {22.5, 10.5}, {202.5, 10.5}, {206.5, 14.5},
+  {421.5, 14.5}, {432.5, 3.5}, {627.5, 3.5}, {627.5, 480.5}
 };
 
 static void draw_upgrades(const az_paused_state_t *state) {
   const az_player_t *player = &state->ship->player;
 
-  glColor4f(0, 0, 0, 0.9); // black tint
-  glBegin(GL_POLYGON); {
-    AZ_ARRAY_LOOP(vertex, drawer_vertices) az_gl_vertex(*vertex);
+  glColor4f(0, 0, 0, 0.92); // black tint
+  glBegin(GL_TRIANGLE_FAN); {
+    AZ_ARRAY_LOOP(vertex, upgrade_drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
   glColor3f(0.75, 0.75, 0.75); // light gray
   glBegin(GL_LINE_LOOP); {
-    AZ_ARRAY_LOOP(vertex, drawer_vertices) az_gl_vertex(*vertex);
+    AZ_ARRAY_LOOP(vertex, upgrade_drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
+
+  if (az_clock_mod(2, 40, state->clock)) glColor3f(0.5, 1, 0.5);
+  else glColor3f(0, 1, 0);
+  if (state->current_drawer == AZ_PAUSE_DRAWER_UPGRADES) {
+    az_draw_printf(8, AZ_ALIGN_CENTER, 525, 10, "\x12 MAP [%s] \x12",
+                   az_key_name(state->prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]));
+  } else {
+    az_draw_printf(8, AZ_ALIGN_CENTER, 525, 10, "\x11 UPGRADES [%s] \x11",
+                   az_key_name(state->prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]));
+  }
 
   glColor3f(1, 0, 1);
   draw_bezel_box(2, TANK_BOX_LEFT, SHIELD_BOX_TOP,
@@ -470,7 +483,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
                    player->bombs, player->max_bombs);
   }
 
-  if (state->drawer_openness <= 0.0) return;
+  if (state->drawer_slide <= 0.0) return;
 
   glPushMatrix(); {
     glTranslatef(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
@@ -565,6 +578,102 @@ static void draw_upgrades(const az_paused_state_t *state) {
 }
 
 /*===========================================================================*/
+// Options drawer:
+
+#define OPTIONS_DRAWER_SLIDE_DISTANCE 280
+
+static const az_vector_t options_drawer_vertices[] = {
+  {12.5, -0.5}, {12.5, OPTIONS_DRAWER_SLIDE_DISTANCE + 18.5},
+  {194.5, OPTIONS_DRAWER_SLIDE_DISTANCE + 18.5},
+  {204.5, OPTIONS_DRAWER_SLIDE_DISTANCE + 8.5},
+  {435.5, OPTIONS_DRAWER_SLIDE_DISTANCE + 8.5},
+  {445.5, OPTIONS_DRAWER_SLIDE_DISTANCE - 1.5},
+  {627.5, OPTIONS_DRAWER_SLIDE_DISTANCE - 1.5}, {627.5, -0.5}
+};
+
+#define PREFS_BOX_TOP 30
+#define PREFS_BOX_LEFT ((AZ_SCREEN_WIDTH - AZ_PREFS_BOX_WIDTH) / 2)
+#define PREFS_BOX_MARGIN 5
+
+#define QUIT_BUTTON_WIDTH 120
+#define QUIT_BUTTON_HEIGHT 20
+#define QUIT_BUTTON_LEFT (570 - QUIT_BUTTON_WIDTH)
+#define QUIT_BUTTON_TOP \
+  (PREFS_BOX_TOP + AZ_PREFS_BOX_HEIGHT + 2*PREFS_BOX_MARGIN + 12)
+
+#define CONFIRM_CANCEL_SPACING 20
+#define CONFIRM_BUTTON_LEFT \
+  ((AZ_SCREEN_WIDTH - CONFIRM_CANCEL_SPACING) / 2 - QUIT_BUTTON_WIDTH)
+#define CANCEL_BUTTON_LEFT ((AZ_SCREEN_WIDTH + CONFIRM_CANCEL_SPACING) / 2)
+#define CONFIRM_CANCEL_TOP (PREFS_BOX_TOP + 120)
+
+static const az_vector_t quit_button_vertices[] = {
+  {QUIT_BUTTON_WIDTH - 5.5, 0.5},
+  {QUIT_BUTTON_WIDTH - 0.5, 0.5 * QUIT_BUTTON_HEIGHT},
+  {QUIT_BUTTON_WIDTH - 5.5, QUIT_BUTTON_HEIGHT - 0.5},
+  {5.5, QUIT_BUTTON_HEIGHT - 0.5}, {0.5, 0.5 * QUIT_BUTTON_HEIGHT}, {5.5, 0.5}
+};
+static const az_polygon_t quit_button_polygon =
+  AZ_INIT_POLYGON(quit_button_vertices);
+
+static void draw_prefs(const az_paused_state_t *state) {
+  glColor4f(0, 0, 0, 0.92); // black tint
+  glBegin(GL_TRIANGLE_FAN); {
+    AZ_ARRAY_LOOP(vertex, options_drawer_vertices) az_gl_vertex(*vertex);
+  } glEnd();
+  glColor3f(0.75, 0.75, 0.75); // light gray
+  glBegin(GL_LINE_LOOP); {
+    AZ_ARRAY_LOOP(vertex, options_drawer_vertices) az_gl_vertex(*vertex);
+  } glEnd();
+
+  if (az_clock_mod(2, 40, state->clock)) glColor3f(0.5, 1, 0.5);
+  else glColor3f(0, 1, 0);
+  if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS) {
+    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 4,
+                   "\x11 MAP [%s] \x11",
+                   az_key_name(state->prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]));
+  } else {
+    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 4,
+                   "\x12 OPTIONS [%s] \x12",
+                   az_key_name(state->prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]));
+  }
+
+  glColor3f(0.25, 0.25, 0.25);
+  draw_bezel_box(2, PREFS_BOX_LEFT - PREFS_BOX_MARGIN,
+                 PREFS_BOX_TOP - PREFS_BOX_MARGIN,
+                 AZ_PREFS_BOX_WIDTH + 2 * PREFS_BOX_MARGIN,
+                 AZ_PREFS_BOX_HEIGHT + 2 * PREFS_BOX_MARGIN);
+  if (state->confirming_quit) {
+    glColor3f(1, 1, 1); // white
+    az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, PREFS_BOX_TOP + 58,
+                   "Quit to the main menu?");
+    az_draw_string(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, PREFS_BOX_TOP + 74,
+                   "Progress will not be saved.");
+    if (state->confirm_button.hovering) {
+      glColor3f(1, state->confirm_button.hover_pulse, 0);
+    } else glColor3f(0.3, 0, 0);
+    az_draw_string(8, AZ_ALIGN_CENTER,
+                   CONFIRM_BUTTON_LEFT + QUIT_BUTTON_WIDTH/2,
+                   CONFIRM_CANCEL_TOP + QUIT_BUTTON_HEIGHT/2 - 4, "QUIT");
+    if (state->cancel_button.hovering) {
+      glColor3f(state->cancel_button.hover_pulse, 1, 0);
+    } else glColor3f(0, 0.3, 0);
+    az_draw_string(8, AZ_ALIGN_CENTER,
+                   CANCEL_BUTTON_LEFT + QUIT_BUTTON_WIDTH/2,
+                   CONFIRM_CANCEL_TOP + QUIT_BUTTON_HEIGHT/2 - 4, "CANCEL");
+  } else az_draw_prefs_pane(&state->prefs_pane);
+
+  az_draw_dangerous_button(&state->quit_button);
+  if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
+  else glColor3f(0.75, 0, 0); // red
+  az_draw_string(8, AZ_ALIGN_CENTER, QUIT_BUTTON_LEFT + QUIT_BUTTON_WIDTH/2,
+                 QUIT_BUTTON_TOP + QUIT_BUTTON_HEIGHT/2 - 4, "QUIT TO MENU");
+}
+
+/*===========================================================================*/
+
+// How long it takes to fade out the screen when quitting to main manu:
+#define QUIT_FADE_TIME 1.0
 
 void az_init_paused_state(
     az_paused_state_t *state, const az_planet_t *planet,
@@ -591,29 +700,79 @@ void az_init_paused_state(
   const double current_y = get_room_center(current_room).y;
   state->scroll_y = fmin(fmax(y_min, current_y), SCROLL_Y_MAX);
   state->scroll_y_min = y_min;
+  az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP, prefs);
+  az_init_button(&state->quit_button, quit_button_polygon,
+                 QUIT_BUTTON_LEFT, QUIT_BUTTON_TOP);
+  az_init_button(&state->confirm_button, quit_button_polygon,
+                 CONFIRM_BUTTON_LEFT, CONFIRM_CANCEL_TOP);
+  az_init_button(&state->cancel_button, quit_button_polygon,
+                 CANCEL_BUTTON_LEFT, CONFIRM_CANCEL_TOP);
 }
 
 void az_paused_draw_screen(const az_paused_state_t *state) {
   draw_minimap(state);
   glPushMatrix(); {
-    glTranslated(0, DRAWER_SLIDE_DISTANCE * (1 - state->drawer_openness), 0);
+    if (state->drawer_slide < 0.0) {
+      glTranslated(0, UPGRADE_DRAWER_SLIDE_DISTANCE +
+                   OPTIONS_DRAWER_SLIDE_DISTANCE * -state->drawer_slide, 0);
+    } else {
+      glTranslated(0, UPGRADE_DRAWER_SLIDE_DISTANCE *
+                   (1 - state->drawer_slide), 0);
+    }
     draw_upgrades(state);
+    glTranslated(0, -(OPTIONS_DRAWER_SLIDE_DISTANCE +
+                      UPGRADE_DRAWER_SLIDE_DISTANCE), 0);
+    draw_prefs(state);
   } glPopMatrix();
   az_draw_cursor();
+  if (state->do_quit) {
+    glColor4f(0, 0, 0, state->quitting_fade_alpha);
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(AZ_SCREEN_WIDTH, 0);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+    } glEnd();
+  } else assert(state->quitting_fade_alpha == 0.0);
 }
 
 void az_tick_paused_state(az_paused_state_t *state, double time) {
   ++state->clock;
-  const double drawer_time = 0.3;
-  if (state->show_upgrades_drawer) {
-    state->drawer_openness =
-      fmin(1.0, state->drawer_openness + time / drawer_time);
-  } else {
-    state->drawer_openness =
-      fmax(0.0, state->drawer_openness - time / drawer_time);
-    state->hovering_over_upgrade = false;
+
+  if (state->ship->player.shields <= AZ_SHIELDS_LOW_THRESHOLD) {
+    az_loop_sound(&state->soundboard,
+                  (state->ship->player.shields >
+                   AZ_SHIELDS_VERY_LOW_THRESHOLD ?
+                   AZ_SND_KLAXON_SHIELDS_LOW :
+                   AZ_SND_KLAXON_SHIELDS_VERY_LOW));
   }
-  if (!state->show_upgrades_drawer) {
+
+  if (state->do_quit) {
+    state->quitting_fade_alpha =
+      fmin(1.0, state->quitting_fade_alpha + time / QUIT_FADE_TIME);
+  }
+
+  const double slide_by = time / 0.3;
+  switch (state->current_drawer) {
+    case AZ_PAUSE_DRAWER_MAP:
+      if (state->drawer_slide < 0.0) {
+        state->drawer_slide = fmin(0.0, state->drawer_slide + slide_by);
+      } else {
+        state->drawer_slide = fmax(0.0, state->drawer_slide - slide_by);
+      }
+      break;
+    case AZ_PAUSE_DRAWER_OPTIONS:
+      state->drawer_slide = fmax(-1.0, state->drawer_slide - slide_by);
+      break;
+    case AZ_PAUSE_DRAWER_UPGRADES:
+      state->drawer_slide = fmin(1.0, state->drawer_slide + slide_by);
+      break;
+  }
+  if (state->drawer_slide >= 0.0) {
+    state->confirming_quit = false;
+  }
+
+  if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
     const az_preferences_t *prefs = state->prefs;
     const bool up = az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
     const bool down = az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
@@ -625,10 +784,25 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
     state->scroll_y =
       fmin(fmax(state->scroll_y_min, state->scroll_y), SCROLL_Y_MAX);
   }
+
+  const bool options_active =
+    state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
+    state->drawer_slide == -1.0 && !state->do_quit;
+  const bool prefs_active = options_active && !state->confirming_quit;
+  az_tick_prefs_pane(&state->prefs_pane, prefs_active, time, state->clock,
+                     &state->soundboard);
+  az_tick_button(&state->quit_button, 0, 0, prefs_active, time,
+                 state->clock, &state->soundboard);
+  const bool confirm_cancel_active = options_active && state->confirming_quit;
+  az_tick_button(&state->confirm_button, 0, 0, confirm_cancel_active, time,
+                 state->clock, &state->soundboard);
+  az_tick_button(&state->cancel_button, 0, 0, confirm_cancel_active, time,
+                 state->clock, &state->soundboard);
 }
 
 void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
-  if (!state->show_upgrades_drawer || state->drawer_openness < 1.0) return;
+  if (state->current_drawer != AZ_PAUSE_DRAWER_UPGRADES ||
+      state->drawer_slide < 1.0) return;
   const az_player_t *player = &state->ship->player;
   state->hovering_over_upgrade = false;
   for (int i = 0; i < AZ_ARRAY_SIZE(upgrade_toplefts); ++i) {
@@ -658,13 +832,31 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
 }
 
 void az_paused_on_click(az_paused_state_t *state, int x, int y) {
-  if (state->drawer_openness == (state->show_upgrades_drawer ? 1.0 : 0.0)) {
+  if (state->do_quit) return;
+  if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
+      state->drawer_slide == -1.0) {
+    if (state->confirming_quit) {
+      if (az_button_on_click(&state->confirm_button, x, y)) {
+        state->do_quit = true;
+        az_stop_music(&state->soundboard, QUIT_FADE_TIME);
+      }
+      if (az_button_on_click(&state->cancel_button, x, y)) {
+        state->confirming_quit = false;
+      }
+    } else {
+      az_prefs_pane_on_click(&state->prefs_pane, x, y);
+      if (az_button_on_click(&state->quit_button, x, y)) {
+        state->confirming_quit = true;
+      }
+    }
+  } else if (state->drawer_slide == 0.0 || state->drawer_slide == 1.0) {
+    const bool down = (state->drawer_slide == 0.0);
 #ifndef NDEBUG
     const bool cheat = az_is_shift_key_held() && az_is_key_held(AZ_KEY_TAB);
     if (cheat) {
       for (int i = 0; i < 2; ++i) {
         int top = (i == 0 ? SHIELD_BOX_TOP : ENERGY_BOX_TOP);
-        if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
+        if (down) top += UPGRADE_DRAWER_SLIDE_DISTANCE;
         if (x >= TANK_BOX_LEFT && x <= TANK_BOX_LEFT + UPG_BOX_WIDTH &&
             y >= top && y <= top + UPG_BOX_HEIGHT) {
           const az_upgrade_t first =
@@ -683,7 +875,7 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
         const az_upgrade_t upgrade = (az_upgrade_t)i;
         if (az_has_upgrade(&state->ship->player, upgrade)) continue;
         az_vector_t topleft = upgrade_toplefts[i];
-        if (!state->show_upgrades_drawer) topleft.y += DRAWER_SLIDE_DISTANCE;
+        if (down) topleft.y += UPGRADE_DRAWER_SLIDE_DISTANCE;
         const double right = topleft.x +
           (upgrade <= AZ_UPG_GUN_BEAM ? GUN_BOX_WIDTH : UPG_BOX_WIDTH);
         const double bottom = topleft.y + UPG_BOX_HEIGHT;
@@ -696,7 +888,7 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
 #endif
     for (int i = 0; i < 8; ++i) {
       az_vector_t topleft = upgrade_toplefts[AZ_UPG_GUN_CHARGE + i];
-      if (!state->show_upgrades_drawer) topleft.y += DRAWER_SLIDE_DISTANCE;
+      if (down) topleft.y += UPGRADE_DRAWER_SLIDE_DISTANCE;
       if (x >= topleft.x && x <= topleft.x + GUN_BOX_WIDTH &&
           y >= topleft.y && y <= topleft.y + UPG_BOX_HEIGHT) {
         az_select_gun(&state->ship->player, AZ_GUN_CHARGE + i);
@@ -705,7 +897,7 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
     }
     for (int i = 0; i < 2; ++i) {
       int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
-      if (!state->show_upgrades_drawer) top += DRAWER_SLIDE_DISTANCE;
+      if (down) top += UPGRADE_DRAWER_SLIDE_DISTANCE;
       if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
           y >= top && y <= top + UPG_BOX_HEIGHT) {
 #ifndef NDEBUG

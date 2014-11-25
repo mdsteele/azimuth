@@ -68,6 +68,8 @@ void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
 // Call when the mouse button clicks the given position.
 void az_prefs_pane_on_click(az_prefs_pane_t *pane, int x, int y);
 
+void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_PREFS_H_
