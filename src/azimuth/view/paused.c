@@ -41,6 +41,7 @@
 #include "azimuth/view/hud.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/prefs.h"
+#include "azimuth/view/ship.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
 
@@ -553,7 +554,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
 
   glColor3f(1, 1, 0.5);
   draw_bezel_box(8, 40, 370, AZ_SCREEN_WIDTH - 80, 82);
-  if (state->hovering_over_upgrade) {
+  if (state->hovering == AZ_PAUSE_HOVER_UPGRADE) {
     glPushMatrix(); {
       glTranslatef(73.5, 410.5, 0);
       glScalef(1, -1, 1);
@@ -566,14 +567,31 @@ static void draw_upgrades(const az_paused_state_t *state) {
     } glPopMatrix();
     glColor3f(1, 0.5, 0.5);
     az_draw_printf(8, AZ_ALIGN_LEFT, 106, 387, "%s:",
-                   az_upgrade_name(state->hovered_upgrade));
+                   (state->hovered_upgrade == AZ_UPG_SHIELD_BATTERY_00 ?
+                    "SHIELDS" : state->hovered_upgrade == AZ_UPG_CAPACITOR_00 ?
+                    "ENERGY" : az_upgrade_name(state->hovered_upgrade)));
     az_draw_paragraph(
         8, AZ_ALIGN_LEFT, 106, 409, 16, -1, state->prefs,
-        (state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
+        (state->hovered_upgrade == AZ_UPG_SHIELD_BATTERY_00 ?
+         "Absorbs damage to your ship, and can be refilled by save\n"
+         "points, repair bays, or by collecting blue shield pickups." :
+         state->hovered_upgrade == AZ_UPG_CAPACITOR_00 ?
+         "Powers your primary weapons and other ship systems, and\n"
+         "is automatically refilled over time by your reactor." :
+         state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
          "Press [9] to select, hold [$o] and press [$f] to fire." :
          state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?
          "Press [0] to select, hold [$o] and press [$f] to drop." :
          az_upgrade_description(state->hovered_upgrade)));
+  } else if (state->hovering == AZ_PAUSE_HOVER_SHIP) {
+    const az_ship_t ship = { .position = {75, 411}, .angle = AZ_DEG2RAD(135) };
+    az_draw_ship_body(&ship, state->clock);
+    glColor3f(1, 0.5, 0.5);
+    az_draw_string(8, AZ_ALIGN_LEFT, 106, 387, "COBOLT MK. IX IPF GUNSHIP:");
+    az_draw_paragraph(
+        8, AZ_ALIGN_LEFT, 106, 409, 16, -1, state->prefs,
+        "Fast, maneuverable, and highly adaptable, the Cobolt Mark IX\n"
+        "is the mainstay of the UHP's Interstellar Patrol Force.");
   }
 }
 
@@ -771,6 +789,9 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
   if (state->drawer_slide >= 0.0) {
     state->confirming_quit = false;
   }
+  if (state->drawer_slide <= 0.0) {
+    state->hovering = AZ_PAUSE_HOVER_NOTHING;
+  }
 
   if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
     const az_preferences_t *prefs = state->prefs;
@@ -800,34 +821,44 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
                  state->clock, &state->soundboard);
 }
 
+static bool maybe_hover_upgrade(az_paused_state_t *state, int x, int y,
+                                int left, int top, int width, int height,
+                                az_upgrade_t upgrade) {
+  if (x >= left && x <= left + width && y >= top && y <= top + height) {
+    state->hovering = AZ_PAUSE_HOVER_UPGRADE;
+    state->hovered_upgrade = upgrade;
+    return true;
+  } else return false;
+}
+
 void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
   if (state->current_drawer != AZ_PAUSE_DRAWER_UPGRADES ||
       state->drawer_slide < 1.0) return;
   const az_player_t *player = &state->ship->player;
-  state->hovering_over_upgrade = false;
+  state->hovering = AZ_PAUSE_HOVER_NOTHING;
+  if (235 <= x && x <= 405 && 120 <= y && y <= 325) {
+    state->hovering = AZ_PAUSE_HOVER_SHIP;
+  }
   for (int i = 0; i < AZ_ARRAY_SIZE(upgrade_toplefts); ++i) {
     const az_upgrade_t upgrade = (az_upgrade_t)i;
     if (!az_has_upgrade(player, upgrade)) continue;
     const az_vector_t topleft = upgrade_toplefts[i];
-    const double right =
-      topleft.x + (upgrade <= AZ_UPG_GUN_BEAM ? GUN_BOX_WIDTH : UPG_BOX_WIDTH);
-    const double bottom = topleft.y + UPG_BOX_HEIGHT;
-    if (x >= topleft.x && x <= right && y >= topleft.y && y <= bottom) {
-      state->hovering_over_upgrade = true;
-      state->hovered_upgrade = upgrade;
-      break;
-    }
+    if (maybe_hover_upgrade(state, x, y, topleft.x, topleft.y,
+                            (upgrade <= AZ_UPG_GUN_BEAM ?
+                             GUN_BOX_WIDTH : UPG_BOX_WIDTH),
+                            UPG_BOX_HEIGHT, upgrade)) break;
   }
-  for (int i = 0; i < 2; ++i) {
-    if ((i == 0 ? player->max_rockets : player->max_bombs) == 0) continue;
-    int top = (i == 0 ? ROCKETS_BOX_TOP : BOMBS_BOX_TOP);
-    if (x >= ORDN_BOX_LEFT && x <= ORDN_BOX_LEFT + UPG_BOX_WIDTH &&
-        y >= top && y <= top + UPG_BOX_HEIGHT) {
-      state->hovering_over_upgrade = true;
-      state->hovered_upgrade =
-        (i == 0 ? AZ_UPG_ROCKET_AMMO_00 : AZ_UPG_BOMB_AMMO_00);
-      break;
-    }
+  maybe_hover_upgrade(state, x, y, TANK_BOX_LEFT, SHIELD_BOX_TOP,
+                      UPG_BOX_WIDTH, UPG_BOX_HEIGHT, AZ_UPG_SHIELD_BATTERY_00);
+  maybe_hover_upgrade(state, x, y, TANK_BOX_LEFT, ENERGY_BOX_TOP,
+                      UPG_BOX_WIDTH, UPG_BOX_HEIGHT, AZ_UPG_CAPACITOR_00);
+  if (state->ship->player.max_rockets > 0) {
+    maybe_hover_upgrade(state, x, y, ORDN_BOX_LEFT, ROCKETS_BOX_TOP,
+                        UPG_BOX_WIDTH, UPG_BOX_HEIGHT, AZ_UPG_ROCKET_AMMO_00);
+  }
+  if (state->ship->player.max_bombs > 0) {
+    maybe_hover_upgrade(state, x, y, ORDN_BOX_LEFT, BOMBS_BOX_TOP,
+                        UPG_BOX_WIDTH, UPG_BOX_HEIGHT, AZ_UPG_BOMB_AMMO_00);
   }
 }
 

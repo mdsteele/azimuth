@@ -47,7 +47,11 @@ typedef struct {
   } current_drawer;
   double drawer_slide; // -1.0 (prefs) to 0.0 (map) to 1.0 (upgrades)
   double scroll_y, scroll_y_min;
-  bool hovering_over_upgrade;
+  enum {
+    AZ_PAUSE_HOVER_NOTHING = 0,
+    AZ_PAUSE_HOVER_UPGRADE,
+    AZ_PAUSE_HOVER_SHIP
+  } hovering;
   az_upgrade_t hovered_upgrade;
   az_prefs_pane_t prefs_pane;
   az_button_t quit_button;
