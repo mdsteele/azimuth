@@ -1,4 +1,4 @@
-@P z8 r463 t172 s6 x0.00 y50000.00 a-1.570796
+@P z8 r463 t174 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -765,3 +765,7 @@
   Geothermal Control"
 !T171"
   Inner Core Access Shaft"
+!T172"
+  Bio Lab"
+!T173"
+  Press [$p] to pause the game."
