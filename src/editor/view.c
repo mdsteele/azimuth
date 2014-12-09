@@ -377,7 +377,7 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
     }
   }
   if (room == AZ_LIST_GET(state->planet.rooms, state->current_room)) {
-    tint_screen(0.5);
+    tint_screen(0.6);
   }
   AZ_LIST_LOOP(editor_gravfield, room->gravfields) {
     if (az_is_liquid(editor_gravfield->spec.kind)) continue;

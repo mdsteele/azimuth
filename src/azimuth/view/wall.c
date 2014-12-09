@@ -333,7 +333,7 @@ static void draw_volcanic(double bezel, az_color_t color1, az_color_t color2,
       color5.a = (double)color5.a * (1.0 - hypot(cx, cy) / bounding_radius);
       glBegin(GL_TRIANGLE_FAN); {
         az_gl_color(color5); glVertex2f(cx, cy); az_gl_color(color4);
-        for (int i = 0; i <= 360; i += 30) {
+        for (int i = 0; i <= 360; i += 45) {
           glVertex2d(cx + rx * cos(AZ_DEG2RAD(i) + theta),
                      cy + ry * sin(AZ_DEG2RAD(i) + theta));
         }

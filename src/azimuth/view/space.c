@@ -190,7 +190,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_background_nodes(state);
   glPushMatrix(); {
     glLoadIdentity();
-    tint_screen(0, 0.5);
+    tint_screen(0, 0.6);
   } glPopMatrix();
   az_draw_gravfields(state);
   az_draw_console_and_upgrade_nodes(state);
