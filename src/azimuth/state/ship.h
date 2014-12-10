@@ -64,6 +64,7 @@ typedef struct {
   struct {
     double active_time; // seconds
     double angle;
+    bool locked_on;
   } radar;
   struct {
     bool active;

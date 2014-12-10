@@ -21,6 +21,7 @@
 #ifndef AZIMUTH_STATE_NODE_H_
 #define AZIMUTH_STATE_NODE_H_
 
+#include "azimuth/state/player.h"
 #include "azimuth/state/script.h"
 #include "azimuth/state/uid.h"
 #include "azimuth/state/upgrade.h"
@@ -30,7 +31,7 @@
 /*===========================================================================*/
 
 // The number of different node kinds there are, not counting AZ_NODE_NOTHING:
-#define AZ_NUM_NODE_KINDS 8
+#define AZ_NUM_NODE_KINDS 9
 
 typedef enum {
   AZ_NODE_NOTHING = 0,
@@ -41,7 +42,8 @@ typedef enum {
   AZ_NODE_DOODAD_BG,
   AZ_NODE_FAKE_WALL_FG,
   AZ_NODE_FAKE_WALL_BG,
-  AZ_NODE_MARKER
+  AZ_NODE_MARKER,
+  AZ_NODE_SECRET
 } az_node_kind_t;
 
 // The number of different console kinds there are:
@@ -90,6 +92,7 @@ typedef union {
   az_doodad_kind_t doodad;
   const az_wall_data_t *fake_wall;
   int marker;
+  az_room_key_t secret;
 } az_node_subkind_t;
 
 typedef enum {

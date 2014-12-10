@@ -217,7 +217,8 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_INFRASCANNER:
       return "Improves your ship's sensors in low-visibility areas.";
     case AZ_UPG_MILLIWAVE_RADAR:
-      return "Hold [$t] for a few seconds to scan for nearby items.";
+      return ("Hold [$t] for a few seconds to scan for nearby\n"
+              "upgrades and hidden passageways.");
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
     case AZ_UPG_ROCKET_AMMO_02:

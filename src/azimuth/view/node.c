@@ -1017,6 +1017,20 @@ static void draw_node_internal(const az_node_t *node, az_clock_t clock) {
         az_draw_printf(8, AZ_ALIGN_LEFT, 3, -10, "%d", node->subkind.marker);
       } glPopMatrix();
       break;
+    case AZ_NODE_SECRET:
+      glColor3f(1, 0, 0);
+      glBegin(GL_LINE_LOOP); {
+        glVertex2f( 25,   5); glVertex2f( 25,  -5);
+        glVertex2f( -5,  25); glVertex2f(  5,  25);
+        glVertex2f(-25,  -5); glVertex2f(-25,   5);
+        glVertex2f(  5, -25); glVertex2f( -5, -25);
+      } glEnd();
+      glPushMatrix(); {
+        glScalef(1, -1, 1);
+        az_draw_printf(8, AZ_ALIGN_CENTER, 0, -3, "%d",
+                       (int)node->subkind.secret);
+      } glPopMatrix();
+      break;
   }
 }
 

@@ -1,4 +1,4 @@
-@R z1 p8/9 b1 d3 g2 n26 w31
+@R z1 p8/9 b1 d3 g2 n27 w31
   c(36861.76,396.12,1.410287,0.010454)
 $s:test9,beqz/A,nix1,halt,A#mus0,lock2,lock3,wait0.5,mus11,wait1.5,boss1;
 !W1 d12 x5951.31 y37007.82 a0.092992 u0
@@ -63,5 +63,6 @@ $s:test9,beqz/A,nix1,halt,A#mus0,lock2,lock3,wait0.5,mus11,wait1.5,boss1;
 !N6/13 x5326.31 y36252.55 a2.380457 u0
 !N6/13 x5198.15 y36312.98 a-0.598357 u0
 !N6/14 x5196.61 y36257.53 a-0.598357 u0
+!N9/45 x6209.66 y37031.09 a-0.160509 u0
 !B20 x5667.46 y36915.07 a2.620526 u1
 $k:set9,unlock2,unlock3,mus2;

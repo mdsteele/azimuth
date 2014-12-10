@@ -1190,7 +1190,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // onto.
   az_node_t *tractor_node = NULL;
   if (ship->tractor_beam.active) {
-    assert(az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM));
+    assert(az_has_upgrade(player, AZ_UPG_TRACTOR_BEAM));
     if (!controls->util_held ||
         !az_lookup_node(state, ship->tractor_beam.node_uid, &tractor_node)) {
       ship->tractor_beam.active = false;
@@ -1198,30 +1198,36 @@ void az_tick_ship(az_space_state_t *state, double time) {
   }
 
   // Update the milliwave radar.
+  ship->radar.locked_on = false;
   if (controls->util_held && !ship->tractor_beam.active &&
-      az_has_upgrade(&state->ship.player, AZ_UPG_MILLIWAVE_RADAR)) {
+      az_has_upgrade(player, AZ_UPG_MILLIWAVE_RADAR)) {
     ship->radar.active_time += time;
-    az_node_t *nearest_upgrade = NULL;
+    az_node_t *nearest_node = NULL;
     if (ship->radar.active_time >= AZ_MILLIWAVE_RADAR_SCAN_TIME) {
       double best_distance = INFINITY;
       AZ_ARRAY_LOOP(node, state->nodes) {
-        if (node->kind != AZ_NODE_UPGRADE) continue;
-        const double distance = az_vdist(node->position, ship->position);
-        if (distance < best_distance) {
-          nearest_upgrade = node;
-          best_distance = distance;
+        if (node->kind == AZ_NODE_UPGRADE ||
+            (node->kind == AZ_NODE_SECRET &&
+             node->subkind.secret < state->planet->num_rooms &&
+             !az_test_room_visited(player, node->subkind.secret))) {
+          const double distance = az_vdist(node->position, ship->position);
+          if (distance < best_distance) {
+            nearest_node = node;
+            best_distance = distance;
+          }
         }
       }
-      if (nearest_upgrade != NULL) {
+      if (nearest_node != NULL) {
         ship->radar.angle = az_angle_towards(
             ship->radar.angle, AZ_DEG2RAD(90) * time,
-            az_vtheta(az_vsub(nearest_upgrade->position, ship->position)));
+            az_vtheta(az_vsub(nearest_node->position, ship->position)));
+        ship->radar.locked_on = true;
       }
     }
-    if (nearest_upgrade == NULL &&
+    if (nearest_node == NULL &&
         ship->radar.active_time >= AZ_MILLIWAVE_RADAR_WARMUP_TIME) {
       ship->radar.angle =
-        az_mod2pi(ship->radar.angle + AZ_DEG2RAD(720) * time);
+        az_mod2pi(ship->radar.angle + AZ_DEG2RAD(500) * time);
     }
   } else {
     ship->radar.active_time = 0.0;
@@ -1229,7 +1235,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   }
 
   // Update the tractor cloak.
-  if (az_has_upgrade(&ship->player, AZ_UPG_TRACTOR_CLOAK)) {
+  if (az_has_upgrade(player, AZ_UPG_TRACTOR_CLOAK)) {
     assert(ship->tractor_cloak.charge >= 0.0);
     assert(ship->tractor_cloak.charge <= 1.0);
     if (ship->cplus.state == AZ_CPLUS_ACTIVE) {
@@ -1371,7 +1377,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   // Activate tractor beam if necessary:
   if (controls->util_pressed && !ship->tractor_beam.active &&
-      az_has_upgrade(&state->ship.player, AZ_UPG_TRACTOR_BEAM)) {
+      az_has_upgrade(player, AZ_UPG_TRACTOR_BEAM)) {
     assert(tractor_node == NULL);
     double best_distance = AZ_TRACTOR_BEAM_MAX_RANGE;
     AZ_ARRAY_LOOP(node, state->nodes) {

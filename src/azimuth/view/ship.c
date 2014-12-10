@@ -107,16 +107,16 @@ void az_draw_ship(az_space_state_t *state) {
       (8.0 / AZ_TWO_PI);
     assert(segment >= 0 && segment < 8);
     glPushMatrix(); {
-      glTranslated(ship->position.x, ship->position.y, 0);
-      glRotated(AZ_RAD2DEG(up_angle), 0, 0, 1);
+      az_gl_translated(ship->position);
+      az_gl_rotated(up_angle);
       for (int i = 0; i < 8; ++i) {
+        const bool lit =
+          (i == segment || (!ship->radar.locked_on && i == (segment + 4) % 8));
         glBegin(GL_TRIANGLE_FAN); {
-          glColor4f(1, (i == segment ? 1.0f : 0.0f), 0,
-                    (i == segment ? 0.4f : 0.2f));
+          glColor4f(1, (lit ? 1.0f : 0.0f), 0, (lit ? 0.4f : 0.2f));
           glVertex2f(35, 0);
-          glColor4f(1, (i == segment ? 0.75f : 0.0f),
-                    (i == segment ? 0.5f : 0.0f), 0);
-          const GLfloat y = (i == segment ? -5 : -3);
+          glColor4f(1, (lit ? 0.75f : 0.0f), (lit ? 0.5f : 0.0f), 0);
+          const GLfloat y = (lit ? -5 : -3);
           glVertex2f(45, 0); glVertex2f(30, y);
           glVertex2f(25, 0); glVertex2f(30, -y); glVertex2f(45, 0);
         } glEnd();

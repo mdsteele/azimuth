@@ -159,6 +159,7 @@ typedef struct {
     az_console_kind_t console_kind;
     az_doodad_kind_t doodad_kind;
     int marker_value;
+    az_room_key_t secret_room_key;
     az_upgrade_t upgrade_kind;
     az_wall_kind_t wall_kind;
     int wall_data_index;

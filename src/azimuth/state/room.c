@@ -256,6 +256,10 @@ static void parse_node_directive(az_load_room_t *loader) {
       case AZ_NODE_MARKER:
         node->subkind.marker = subkind;
         break;
+      case AZ_NODE_SECRET:
+        if (subkind < 0) FAIL();
+        node->subkind.secret = (az_room_key_t)subkind;
+        break;
     }
   }
   int uuid_slot;
@@ -425,6 +429,9 @@ static bool write_room(const az_room_t *room, FILE *file) {
           break;
         case AZ_NODE_MARKER:
           subkind = node->subkind.marker;
+          break;
+        case AZ_NODE_SECRET:
+          subkind = (int)node->subkind.secret;
           break;
       }
       WRITE("/%d", subkind);

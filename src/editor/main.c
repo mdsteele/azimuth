@@ -127,6 +127,9 @@ static void set_brush_from_node_subkind(az_editor_node_t *node) {
     case AZ_NODE_MARKER:
       state.brush.marker_value = node->spec.subkind.marker;
       break;
+    case AZ_NODE_SECRET:
+      state.brush.secret_room_key = node->spec.subkind.secret;
+      break;
   }
 }
 
@@ -151,6 +154,9 @@ static void set_node_subkind_from_brush(az_editor_node_t *node) {
       break;
     case AZ_NODE_MARKER:
       node->spec.subkind.marker = state.brush.marker_value;
+      break;
+    case AZ_NODE_SECRET:
+      node->spec.subkind.secret = state.brush.secret_room_key;
       break;
   }
 }
@@ -857,6 +863,11 @@ static void do_change_data(int delta, bool secondary) {
         case AZ_NODE_MARKER:
           node->spec.subkind.marker += delta;
           break;
+        case AZ_NODE_SECRET:
+          { AZ_STATIC_ASSERT(AZ_MAX_NUM_ROOMS < 1000); }
+          node->spec.subkind.secret =
+            az_modulo((int)node->spec.subkind.secret + delta, 1000);
+          break;
       }
       set_brush_from_node_subkind(node);
     } else {
@@ -987,6 +998,20 @@ static void auto_set_door_dest(void) {
       set_room_unsaved(room);
       set_room_unsaved(AZ_LIST_GET(state.planet.rooms, target));
     }
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected || node->spec.kind != AZ_NODE_SECRET) continue;
+    az_room_key_t target = 999;
+    double best_dist = 100.0;
+    AZ_LIST_LOOP(door, room->doors) {
+      const double dist = az_vdist(door->spec.position, node->spec.position);
+      if (dist < best_dist) {
+        target = door->spec.destination;
+        best_dist = dist;
+      }
+    }
+    node->spec.subkind.secret = target;
+    set_room_unsaved(room);
   }
 }
 
@@ -1193,16 +1218,23 @@ static void try_set_current_room(void) {
 
 static void begin_set_door_dest(void) {
   az_editor_room_t *room = get_current_room();
-  bool any_doors = false;
+  bool any_selected = false;
   az_room_key_t key = 0;
   AZ_LIST_LOOP(door, room->doors) {
     if (door->selected) {
-      any_doors = true;
+      any_selected = true;
       key = door->spec.destination;
       break;
     }
   }
-  if (!any_doors) return;
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->selected && node->spec.kind == AZ_NODE_SECRET) {
+      any_selected = true;
+      key = node->spec.subkind.secret;
+      break;
+    }
+  }
+  if (!any_selected) return;
   az_init_editor_text(&state, AZ_ETA_SET_DOOR_DEST, "%03d", key);
 }
 
@@ -1220,6 +1252,11 @@ static void try_set_door_dest(void) {
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
     door->spec.destination = key;
+    set_room_unsaved(room);
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (!node->selected || node->spec.kind != AZ_NODE_SECRET) continue;
+    node->spec.subkind.secret = key;
     set_room_unsaved(room);
   }
 }
