@@ -1,0 +1,91 @@
+@M "SAB|CDD"
+% Title: "Lights On, Guns Out"
+
+=tempo 120
+=key 3b     % C minor
+
+
+!Part S
+
+1 Wp25 L30  E0,25  D+10,20
+2 Wt75 L50  E0,33  D-10,10
+3 Wt50 L150        D-20,20
+4 Wn   L35  E0,100
+5 Wn   L35  E0,100
+
+
+!Part A
+
+3 E300,0
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| rw+w |
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c2w+w |
+
+
+!Part B
+
+3 E0,100
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c2w |
+5| x0q x2 x0 x2 |
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+5| x0q x2 x0 x2 |
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+5| x0q x2 x0 x2 |
+
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+5| x0q x2 x0s x2e. x2e c7 |
+
+
+!Part C
+
+1| rw |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| rw |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| rw |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| rh. ' c3s b2 d3 b2 |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0s x2e. ' x2q |
+
+
+!Part D
+
+1| c3h. ' cs b2 c3 e |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| d3e. b2e. bh be |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| a2e. e3e. dq b2q be |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| a2e. e3e. dq b2e e3 b2e |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0s x2e. ' x2q |

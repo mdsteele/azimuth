@@ -91,4 +91,4 @@ $e:test23,hnez,test1,hnez,wait2,gpos1,dup2,dup4,gpos4,bolt3,gpos5,bolt3,gpos6,bo
 !N8/0 x-3071.54 y48643.32 a0.063134 u6
 !N8/0 x-2925.87 y48541.87 a0.063134 u7
 !B1 x-3065.97 y48533.48 a-3.063915 u1
-$k:set1,unlock3,mus1;
+$k:set1,unlock3,mus0;
