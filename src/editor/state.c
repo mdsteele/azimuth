@@ -103,6 +103,7 @@ static const int wall_data_indices[] = {
   22, 23, 31,
   // Green/gray metal blocks:
   125, 126, 127,
+  149, 150, 151,
   // Silver bezel pipes and connectors:
   148, 79, 147, // pipes
   142, 143, 144, 145, 146 // connectors

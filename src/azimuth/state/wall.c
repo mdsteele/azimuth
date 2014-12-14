@@ -353,6 +353,9 @@ static const az_vector_t wall_vertices_148[] = {
   {26, 14}, {14, 18}, {-14, 18}, {-26, 14},
   {-26, -14}, {-14, -18}, {14, -18}, {26, -14}
 };
+static const az_vector_t wall_vertices_149[] = {
+  {50, -50}, {50, 50}, {-50, 50}
+};
 
 /*===========================================================================*/
 
@@ -1238,7 +1241,7 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {130, 130, 115, 255}, .color2 = {24, 48, 24, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_22)
   },
-  // Purple/gray metal half-size block:
+  // Green/gray metal half-size block:
   [126] = {
     .style = AZ_WSTY_TRIFAN,
     .color1 = {140, 140, 128, 255}, .color2 = {24, 48, 24, 255},
@@ -1390,7 +1393,26 @@ static az_wall_data_t wall_datas[] = {
     .style = AZ_WSTY_QUADSTRIP_213, .color1 = {179, 179, 179, 255},
     .color2 = {64, 64, 64, 255}, .color3 = {64, 64, 64, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_148)
-  }
+  },
+  // Green/gray triangular full metal panel:
+  [149] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {111, 120, 111, 255}, .color2 = {36, 48, 36, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_149)
+  },
+  // Green/gray square full metal panel:
+  [150] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {111, 120, 111, 255}, .color2 = {36, 48, 36, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_1)
+  },
+  // Green/gray square empty metal panel:
+  [151] = {
+    .style = AZ_WSTY_GIRDER_CAPS, .bezel = 10.0,
+    .color1 = {111, 130, 111, 255}, .color2 = {36, 48, 36, 255},
+    .color3 = {36, 48, 36, 255},
+    .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_1)
+  },
 };
 
 /*===========================================================================*/
