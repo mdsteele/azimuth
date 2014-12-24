@@ -160,12 +160,12 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_SHRAPNEL] = {
     .speed = 500.0,
     .lifetime = 0.8,
-    .impact_damage = 0.5
+    .impact_damage = 1.0
   },
   [AZ_PROJ_GUN_FREEZE_SHRAPNEL] = {
     .speed = 500.0,
     .lifetime = 0.8,
-    .impact_damage = 0.5,
+    .impact_damage = 1.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE
   },
   [AZ_PROJ_GUN_HOMING_SHRAPNEL] = {
@@ -183,7 +183,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_PIERCE_SHRAPNEL] = {
     .speed = 500.0,
     .lifetime = 1.5,
-    .impact_damage = 0.8,
+    .impact_damage = 1.6,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
   },
