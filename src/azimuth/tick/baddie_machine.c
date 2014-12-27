@@ -32,6 +32,18 @@
 
 /*===========================================================================*/
 
+static void make_incorporeal_when_under_wall(az_space_state_t *state,
+                                             az_baddie_t *baddie) {
+  AZ_ARRAY_LOOP(wall, state->walls) {
+    if (wall->kind == AZ_WALL_NOTHING) continue;
+    if (az_point_touches_wall(wall, baddie->position)) {
+      baddie->temp_properties |= AZ_BADF_INCORPOREAL |
+        AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ;
+      break;
+    }
+  }
+}
+
 static void tick_sensor(az_space_state_t *state, az_baddie_t *baddie) {
   if (baddie->state == 0) {
     if (baddie->health < baddie->data->max_health) {
@@ -45,6 +57,14 @@ static void tick_sensor(az_space_state_t *state, az_baddie_t *baddie) {
 void az_tick_bad_gun_sensor(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_GUN_SENSOR);
+  make_incorporeal_when_under_wall(state, baddie);
+  tick_sensor(state, baddie);
+}
+
+void az_tick_bad_bomb_sensor(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_BOMB_SENSOR);
+  make_incorporeal_when_under_wall(state, baddie);
   tick_sensor(state, baddie);
 }
 
