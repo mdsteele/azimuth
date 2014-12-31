@@ -61,28 +61,29 @@ static void draw_sensor_lamp(GLfloat x_offset, bool lit) {
 
 /*===========================================================================*/
 
-static void draw_gun_sensor(const az_baddie_t *baddie) {
-  assert(baddie->kind == AZ_BAD_GUN_SENSOR ||
-         baddie->kind == AZ_BAD_BOMB_SENSOR);
-  const float flare = baddie->armor_flare;
+static void draw_projectile_sensor(
+    const az_baddie_t *baddie, az_clock_t clock,
+    az_color_t inner, az_color_t outer) {
+  if (baddie->state != 0) {
+    const double flare = baddie->armor_flare;
+    inner = az_transition_color((az_color_t){64, 192, 64, 255}, inner, flare);
+    outer = az_transition_color((az_color_t){32, 64, 32, 255}, outer, flare);
+  }
+  // Sensor target:
   glBegin(GL_TRIANGLE_FAN); {
-    if (baddie->state == 0) {
-      if (baddie->kind == AZ_BAD_BOMB_SENSOR) {
-        glColor3f(0.5, 0.4 + 0.35 * flare, 0.75);
-      } else glColor3f(0.75, 0.4 + 0.35 * flare, 0.5);
-    } else glColor3f(0.25 + 0.5 * flare, 0.75, 0.5);
-    glVertex2f(5, 0);
-    if (baddie->state == 0) {
-      if (baddie->kind == AZ_BAD_BOMB_SENSOR) {
-        glColor4f(0.5 * flare, 0.2 + 0.3 * flare, 0.25, 0.5);
-      } else glColor4f(0.25, 0.2 + 0.3 * flare, 0.5 * flare, 0.5);
-    } else glColor4f(0.1 + 0.15 * flare, 0.25 + 0.25 * flare,
-                     0.5 * flare, 0.5);
-    for (int i = 0, j = baddie->data->main_body.polygon.num_vertices;
-         i >= 0; i = --j) {
-      az_gl_vertex(baddie->data->main_body.polygon.vertices[i]);
+    az_gl_color(inner);
+    glVertex2f(4, 0);
+    az_gl_color(outer);
+    const double radius = baddie->data->main_body.bounding_radius;
+    const int flash = (baddie->state != 0 ? 99999 :
+                       15 * az_clock_mod(12, 1, clock) - 90);
+    for (int i = -90; i <= 90; i += 15) {
+      if (i == flash) az_gl_color(inner);
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      if (i == flash) az_gl_color(outer);
     }
   } glEnd();
+  // Casing:
   glBegin(GL_TRIANGLE_FAN); {
     glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-7, 0);
@@ -92,39 +93,47 @@ static void draw_gun_sensor(const az_baddie_t *baddie) {
       az_gl_vertex(component->polygon.vertices[i]);
     }
   } glEnd();
+  draw_sensor_lamp(-6, (baddie->state != 0));
 }
 
 void az_draw_bad_gun_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_GUN_SENSOR);
   assert(frozen == 0.0f);
-  draw_gun_sensor(baddie);
+  draw_projectile_sensor(baddie, clock, (az_color_t){255, 255, 192, 255},
+                         (az_color_t){51, 51, 38, 255});
 }
 
 void az_draw_bad_bomb_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_BOMB_SENSOR);
   assert(frozen == 0.0f);
-  draw_gun_sensor(baddie);
+  draw_projectile_sensor(baddie, clock, (az_color_t){64, 64, 255, 255},
+                         (az_color_t){0, 0, 128, 255});
 }
 
-static void draw_beam_sensor(const az_baddie_t *baddie, bool lamp_lit) {
+void az_draw_bad_rocket_sensor(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_ROCKET_SENSOR);
+  assert(frozen == 0.0f);
+  draw_projectile_sensor(baddie, clock, (az_color_t){255, 64, 64, 255},
+                         (az_color_t){102, 0, 0, 255});
+}
+
+static void draw_beam_sensor(const az_baddie_t *baddie, az_clock_t clock,
+                             bool lamp_lit) {
   assert(baddie->kind == AZ_BAD_BEAM_SENSOR ||
          baddie->kind == AZ_BAD_BEAM_SENSOR_INV);
+  // Sensor target:
   const float flare = baddie->armor_flare;
-  glBegin(GL_TRIANGLE_FAN); {
-    if (baddie->state == 0) {
-      glColor3f(0.75, 0.25 + 0.5 * flare, 0.5); // reddish
-    } else glColor3f(0.25 + 0.5 * flare, 0.75, 0.5); // greenish
-    glVertex2f(8, 0);
-    if (baddie->state == 0) {
-      glColor3f(0.25, 0.5 * flare, 0.5 * flare); // dark red
-    } else glColor3f(0.25 * flare, 0.25 + 0.25 * flare, 0.5 * flare);
-    const double radius = baddie->data->main_body.bounding_radius;
-    for (int i = 0; i <= 360; i += 15) {
-      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
-    }
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.75 + 0.25 * flare, 0.75 - 0.5 * flare, 0.75 - 0.5 * flare);
+    glVertex2f(0, -18); glVertex2f(0, 18);
+    glColor3f(0.25 + 0.25 * flare + 0.05 * az_clock_zigzag(5, 5, clock),
+              0.25, 0.25);
+    glVertex2f(8, -18); glVertex2f(8, 18);
   } glEnd();
+  // Casing:
   glBegin(GL_TRIANGLE_FAN); {
     glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-5, 0);
@@ -134,21 +143,22 @@ static void draw_beam_sensor(const az_baddie_t *baddie, bool lamp_lit) {
       az_gl_vertex(component->polygon.vertices[i]);
     }
   } glEnd();
-  draw_sensor_lamp(-6, lamp_lit);
+  draw_sensor_lamp(-3, lamp_lit);
 }
 
 void az_draw_bad_beam_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_BEAM_SENSOR);
   assert(frozen == 0.0f);
-  draw_beam_sensor(baddie, (baddie->state != 0));
+  draw_beam_sensor(baddie, clock, (baddie->state != 0));
 }
 
 void az_draw_bad_beam_sensor_inv(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_BEAM_SENSOR_INV);
   assert(frozen == 0.0f);
-  draw_beam_sensor(baddie, (baddie->state == 1 || az_clock_mod(2, 10, clock)));
+  draw_beam_sensor(baddie, clock,
+                   (baddie->state == 1 || az_clock_mod(2, 10, clock)));
 }
 
 void az_draw_bad_sensor_laser(

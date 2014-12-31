@@ -68,6 +68,13 @@ void az_tick_bad_bomb_sensor(
   tick_sensor(state, baddie);
 }
 
+void az_tick_bad_rocket_sensor(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_ROCKET_SENSOR);
+  make_incorporeal_when_under_wall(state, baddie);
+  tick_sensor(state, baddie);
+}
+
 void az_tick_bad_beam_sensor(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_BEAM_SENSOR);

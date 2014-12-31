@@ -60,4 +60,15 @@ az_color_t az_hsva_color(double hue_radians, double saturation, double value,
   }
 }
 
+az_color_t az_transition_color(az_color_t color0, az_color_t color1,
+                               double param) {
+  assert(0.0 <= param && param <= 1.0);
+  return (az_color_t){
+    color0.r + param * ((int)color1.r - (int)color0.r),
+    color0.g + param * ((int)color1.g - (int)color0.g),
+    color0.b + param * ((int)color1.b - (int)color0.b),
+    color0.a + param * ((int)color1.a - (int)color0.a)
+  };
+}
+
 /*===========================================================================*/

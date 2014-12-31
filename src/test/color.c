@@ -49,4 +49,33 @@ void test_hsva_color(void) {
   EXPECT_INT_EQ( 99, color3.a);
 }
 
+void test_transition_color(void) {
+  const az_color_t color0 = {0, 213, 255, 100};
+  const az_color_t color1 = {255, 213, 0, 200};
+
+  const az_color_t color_000 = az_transition_color(color0, color1, 0.00);
+  EXPECT_INT_EQ(  0, color_000.r);
+  EXPECT_INT_EQ(213, color_000.g);
+  EXPECT_INT_EQ(255, color_000.b);
+  EXPECT_INT_EQ(100, color_000.a);
+
+  const az_color_t color_025 = az_transition_color(color0, color1, 0.25);
+  EXPECT_INT_EQ( 63, color_025.r);
+  EXPECT_INT_EQ(213, color_025.g);
+  EXPECT_INT_EQ(191, color_025.b);
+  EXPECT_INT_EQ(125, color_025.a);
+
+  const az_color_t color_050 = az_transition_color(color0, color1, 0.50);
+  EXPECT_INT_EQ(127, color_050.r);
+  EXPECT_INT_EQ(213, color_050.g);
+  EXPECT_INT_EQ(127, color_050.b);
+  EXPECT_INT_EQ(150, color_050.a);
+
+  const az_color_t color_100 = az_transition_color(color0, color1, 1.00);
+  EXPECT_INT_EQ(255, color_100.r);
+  EXPECT_INT_EQ(213, color_100.g);
+  EXPECT_INT_EQ(  0, color_100.b);
+  EXPECT_INT_EQ(200, color_100.a);
+}
+
 /*===========================================================================*/

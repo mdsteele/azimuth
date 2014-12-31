@@ -30,6 +30,8 @@ void az_draw_bad_gun_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_bomb_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_draw_bad_rocket_sensor(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_beam_sensor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_beam_sensor_inv(

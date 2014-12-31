@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_signmod);
   RUN_TEST(test_strdup);
   RUN_TEST(test_strprintf);
+  RUN_TEST(test_transition_color);
   RUN_TEST(test_uids);
   RUN_TEST(test_vcaplen);
   RUN_TEST(test_vpolar);

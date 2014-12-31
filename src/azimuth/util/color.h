@@ -42,6 +42,11 @@ extern const az_color_t AZ_BLUE;
 az_color_t az_hsva_color(double hue_radians, double saturation, double value,
                          double alpha);
 
+// Return a color that transitions smoothly from color0 to color1 as param
+// transitions from 0 to 1.  The param argument must be in the range [0, 1].
+az_color_t az_transition_color(az_color_t color0, az_color_t color1,
+                               double param);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_COLOR_H_
