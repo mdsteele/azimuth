@@ -1,0 +1,44 @@
+@M "S|AABAABB"
+
+=tempo 130
+=key 3b     % C minor
+
+
+!Part S
+
+1 Wt50 L150  E0,25
+2 Wp25 L25  E0,25
+3 Wt50 L120 E0,25
+4 Wn   L25  E0,100
+5 Wn   L40  E0,100
+
+
+!Part A
+
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4e |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+
+!Part B
+
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4e |
+1| g4s ge ge fs ge ' as ae ae gs ae |
+ | g4s ge ge fs ge ' fe es d ee ds c |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4e |
+1| c4s ge ge fs ge ' c4s ae ae gs ae |
+ | g4s ge ge fs ge ' aq g |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+1| g4s ge ge fs ge ' as ae ae gs ae |
+ | g4s ge ge fs ge ' fe es d ee ds c |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+1| c4s ee ee ds ee ' dq b3 |
+ | c4q c ' c c |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |

@@ -27,7 +27,7 @@
 /*===========================================================================*/
 
 // The number of different music keys there are, not counting AZ_MUS_NOTHING:
-#define AZ_NUM_MUSIC_KEYS 16
+#define AZ_NUM_MUSIC_KEYS 17
 
 typedef enum {
   AZ_MUS_NOTHING = 0,
@@ -40,12 +40,13 @@ typedef enum {
   AZ_MUS_SARVARI_ZONE,
   AZ_MUS_CORE_ZONE,
   AZ_MUS_ZENITH_CORE,
-  AZ_MUS_BOSS1,
-  AZ_MUS_BOSS2,
+  AZ_MUS_BOSS_1,
+  AZ_MUS_BOSS_2,
   AZ_MUS_SUSPENSE,
   AZ_MUS_ESCAPE,
   AZ_MUS_UPGRADE,
   AZ_MUS_COLONY_2,
+  AZ_MUS_BOSS_3,
   AZ_MUS_TITLE
 } az_music_key_t;
 

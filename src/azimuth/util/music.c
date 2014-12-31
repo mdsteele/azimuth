@@ -38,25 +38,12 @@
 #define MAX_NUM_PARTS 26
 #define MAX_NOTES_PER_TRACK 2048
 #define MAX_SPEC_LENGTH 512
+
 #define HALF_STEPS_PER_OCTAVE 12
 
-// Frequencies in Hz of each note in octave zero:
-static const double pitch_frequencies[] = {
-  16.3515978313, // c0
-  17.3239144361, // c#0
-  18.3540479948, // d0
-  19.4454364826, // d#0
-  20.6017223071, // e0
-  21.8267644646, // f0
-  23.1246514195, // f#0
-  24.4997147489, // g0
-  25.9565435987, // g#0
-  27.5000000000, // a0
-  29.1352350949, // a#0
-  30.8677063285  // b0
-};
-
-AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(pitch_frequencies) == HALF_STEPS_PER_OCTAVE);
+// Pitch number (in half steps above c0) and frequency (in Hz) of a4:
+#define A4_PITCH (9 + 4 * HALF_STEPS_PER_OCTAVE)
+#define A4_FREQUENCY 440.0
 
 /*===========================================================================*/
 
@@ -103,6 +90,7 @@ typedef struct {
   int octave;
   int global_transpose; // num half steps
   int local_transpose[AZ_MUSIC_NUM_TRACKS]; // num half steps
+  double pitch_bend[AZ_MUSIC_NUM_TRACKS]; // num half steps
   const az_sound_data_t *current_drum;
   double base_duration; // 1 = whole note
   double extra_duration; // 1 = whole note
@@ -250,6 +238,7 @@ static void finish_part(az_music_parser_t *parser) {
   }
   AZ_ZERO_ARRAY(parser->tracks);
   AZ_ZERO_ARRAY(parser->local_transpose);
+  AZ_ZERO_ARRAY(parser->pitch_bend);
 }
 
 static void parse_part_heading(az_music_parser_t *parser) {
@@ -314,6 +303,14 @@ static void parse_loudness(az_music_parser_t *parser) {
   if (!TRY_READ("%lf", &volume)) PARSE_ERROR("invalid Loudness param\n");
   note->attributes.loudness.volume =
     parser->loudness_multiplier * fmax(0.0, volume / 100.0);
+}
+
+static void parse_pitch_bend(az_music_parser_t *parser) {
+  assert(parser->current_track >= 0);
+  assert(parser->current_track < AZ_MUSIC_NUM_TRACKS);
+  double half_steps;
+  if (!TRY_READ("%lf", &half_steps)) PARSE_ERROR("invalid Pitchbend param\n");
+  parser->pitch_bend[parser->current_track] = half_steps;
 }
 
 static void parse_transpose(az_music_parser_t *parser) {
@@ -400,14 +397,16 @@ static void emit_note(az_music_parser_t *parser) {
     note->attributes.rest.duration = duration_seconds;
   } else {
     note->type = AZ_NOTE_TONE;
-    const int absolute_pitch =
-      az_imax(0, parser->base_pitch + parser->pitch_adjust +
-              HALF_STEPS_PER_OCTAVE * parser->octave +
-              parser->global_transpose +
-              parser->local_transpose[parser->current_track]);
-    const int octave = absolute_pitch / HALF_STEPS_PER_OCTAVE;
-    const int pitch = absolute_pitch % HALF_STEPS_PER_OCTAVE;
-    note->attributes.tone.frequency = pitch_frequencies[pitch] * (1 << octave);
+    const int absolute_unbent_pitch =
+      parser->base_pitch + parser->pitch_adjust +
+      HALF_STEPS_PER_OCTAVE * parser->octave +
+      parser->global_transpose +
+      parser->local_transpose[parser->current_track];
+    const double a4_relative_bent_pitch =
+      (absolute_unbent_pitch - A4_PITCH) +
+      parser->pitch_bend[parser->current_track];
+    note->attributes.tone.frequency =
+      A4_FREQUENCY * pow(2, a4_relative_bent_pitch / HALF_STEPS_PER_OCTAVE);
     note->attributes.tone.duration = duration_seconds;
   }
 }
@@ -439,6 +438,7 @@ static void parse_music_data(az_music_parser_t *parser) {
           case 'D': parse_dutymod(parser); break;
           case 'E': parse_envelope(parser); break;
           case 'L': parse_loudness(parser); break;
+          case 'P': parse_pitch_bend(parser); break;
           case 'T': parse_transpose(parser); break;
           case 'V': parse_vibrato(parser); break;
           case 'W': parse_waveform(parser); break;
