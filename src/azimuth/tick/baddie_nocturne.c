@@ -45,8 +45,8 @@
 #define MIN_MINIONS_TO_PHASE_OUT 6
 
 // How long it takes (in seconds) to phase in/out:
-#define PHASE_IN_TIME 1.0
-#define PHASE_OUT_TIME 2.5
+#define PHASE_IN_TIME 1.2
+#define PHASE_OUT_TIME 0.8
 
 // If baddie->param is less than this, the Nocturne is incorporeal:
 #define MIN_PARAM_TO_BE_CORPOREAL 0.6
@@ -85,6 +85,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
     baddie->temp_properties |=
       AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ;
   }
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   switch (baddie->state) {
     case PHASED_OUT_STATE:
       assert(baddie->param == 0.0);
@@ -141,6 +142,14 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
         // If we've spawned enough minions, start phasing out.
         if (get_num_minions(state, baddie) >= MIN_MINIONS_TO_PHASE_OUT) {
           baddie->state = PHASING_OUT_STATE;
+          if (hurt >= 0.20) {
+            for (int i = 0; i < 360; i += 36) {
+              az_fire_baddie_projectile(
+                  state, baddie, AZ_PROJ_BOUNCING_FIREBALL,
+                  20, AZ_DEG2RAD(i), 0);
+            }
+            az_play_sound(&state->soundboard, AZ_SND_EXPLODE_FIREBALL_LARGE);
+          }
         } else {
           // Otherwise, fire some seeds.
           // TODO: Fire other kinds of seeds too (chomper plants?).

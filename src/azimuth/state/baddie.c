@@ -741,35 +741,35 @@ static az_component_data_t nocturne_components[] = {
   // Inner left upper arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_inner_upper_arm_vertices),
     .init_position = {35, 20}, .init_angle = AZ_DEG2RAD(20),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Inner left lower arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_inner_lower_arm_vertices),
     .init_position = {63.19, 30.26}, .init_angle = AZ_DEG2RAD(0),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Inner right upper arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_inner_upper_arm_vertices),
     .init_position = {35, -20}, .init_angle = AZ_DEG2RAD(-20),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Inner right lower arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_inner_lower_arm_vertices),
     .init_position = {63.19, -30.26}, .init_angle = AZ_DEG2RAD(0),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Outer front left arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_outer_front_arm_vertices),
     .init_position = {25, 40}, .init_angle = AZ_DEG2RAD(40),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Outer front right arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_outer_front_arm_vertices),
     .init_position = {25, -40}, .init_angle = AZ_DEG2RAD(-40),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Outer rear left arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_outer_rear_arm_vertices),
     .init_position = {-47, 52}, .init_angle = AZ_DEG2RAD(135),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
   // Outer rear right arm:
   { .polygon = AZ_INIT_POLYGON(nocturne_outer_rear_arm_vertices),
     .init_position = {-47, -52}, .init_angle = AZ_DEG2RAD(-135),
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS), .impact_damage = 30 },
+    .immunities = ~0, .impact_damage = 30 },
 };
 
 static const az_vector_t mycoflakker_vertices[] = {
@@ -1475,6 +1475,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_NOCTURNE] = {
     .max_health = 500.0, .overall_bounding_radius = 120.0,
     .color = {192, 96, 0, 255}, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .hurt_sound = AZ_SND_HURT_NOCTURNE, .armor_sound = AZ_SND_HIT_ARMOR,
     .main_body = { .polygon = AZ_INIT_POLYGON(nocturne_main_body_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
                    .impact_damage = 20.0 },

@@ -85,6 +85,11 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.2, .freq_slide = 0.05,
     .vibrato_depth = 0.05, .vibrato_speed = 0.6, .volume_adjust = -0.25
   },
+  [AZ_SND_BOUNCE_FIREBALL] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_decay = 0.15, .start_freq = 0.28,
+    .square_duty = 0.86, .hpf_cutoff = 0.00528305
+  },
   [AZ_SND_CHARGED_GUN] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_sustain = 0.323943674564,
@@ -221,6 +226,22 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.1548265, .freq_slide = -0.36946,
     .vibrato_depth = 0.63161, .vibrato_speed = 0.38466,
     .phaser_offset = 0.12768, .phaser_sweep = -0.28872
+  },
+  [AZ_SND_EXPLODE_FIREBALL_LARGE] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.536445, .env_punch = 0.375285, .env_decay = 0.40906,
+    .start_freq = 0.0733247, .freq_slide = 0.141984,
+    .freq_delta_slide = -0.255949,
+    .vibrato_depth = 0.018219, .vibrato_speed = 0.480838,
+    .arp_mod = -0.727803, .arp_speed = 0.498527, .repeat_speed = 0.858864,
+    .phaser_offset = -0.0352152, .phaser_sweep = 0.794248,
+    .lpf_cutoff = 0.815116, .lpf_ramp = -0.051331, .lpf_resonance = 0.653169
+  },
+  [AZ_SND_EXPLODE_FIREBALL_SMALL] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.325, .env_punch = 0.724659, .env_decay = 0.36,
+    .start_freq = 0.115, .freq_slide = -0.17, .repeat_speed = 0.543458,
+    .phaser_offset = -0.43, .phaser_sweep = 0.11
   },
   [AZ_SND_EXPLODE_HYPER_ROCKET] = {
     .wave_kind = AZ_NOISE_WAVE,
@@ -440,6 +461,12 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.100114, .phaser_sweep = 0.000345079,
     .lpf_cutoff = 0.807726, .lpf_ramp = -0.064732, .lpf_resonance = -0.333281,
     .hpf_cutoff = 0.278757, .hpf_ramp = 0.0216441
+  },
+  [AZ_SND_HURT_NOCTURNE] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_decay = 0.5,
+    .start_freq = 0.195, .freq_slide = 0.31, .freq_delta_slide = -0.29,
+    .vibrato_depth = 0.305, .vibrato_speed = 0.75, .hpf_cutoff = 0.4
   },
   [AZ_SND_HURT_OTH] = {
     .wave_kind = AZ_SQUARE_WAVE,

@@ -231,10 +231,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else if (baddie->state == 1) {
         baddie->param = fmin(1.0, baddie->param + time / 0.5);
         if (baddie->cooldown <= 0.0 && baddie->param == 1.0) {
-          for (int i = 0; i < 2; ++i) {
-            az_fire_baddie_projectile(
-                state, baddie, AZ_PROJ_FIREBALL_FAST, 20.0, 0.0,
-                az_random(-AZ_DEG2RAD(10), AZ_DEG2RAD(10)));
+          for (int i = -1; i <= 1; i += 2) {
+            az_fire_baddie_projectile(state, baddie, AZ_PROJ_NIGHTBLADE,
+                                      20.0, 0.0, AZ_DEG2RAD(10 * i));
           }
           baddie->cooldown = 5.0;
           baddie->state = 0;

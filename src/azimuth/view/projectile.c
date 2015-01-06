@@ -372,6 +372,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_BOUNCING_FIREBALL:
     case AZ_PROJ_ERUPTION:
     case AZ_PROJ_FIREBALL_FAST:
     case AZ_PROJ_FIREBALL_SLOW:
@@ -382,7 +383,8 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2i(0, 0);
         if (blink) glColor4f(0.5, 0.375, 0.25, 0); // orange
         else glColor4f(0.5, 0.125, 0.125, 0); // red
-        const double radius = (proj->kind == AZ_PROJ_ERUPTION ? 18.0 : 6.0);
+        const double radius = (proj->kind == AZ_PROJ_BOUNCING_FIREBALL ||
+                               proj->kind == AZ_PROJ_ERUPTION ? 18.0 : 6.0);
         for (int i = 0; i <= 360; i += 30) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
@@ -451,6 +453,22 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_MYCOSPORE:
       draw_spark(0.25 * proj->age, 8.0, (az_color_t){128, 96, 96, 0});
       draw_spark(0.07 * proj->age, 4.0, (az_color_t){64, 96, 64, 0});
+      break;
+    case AZ_PROJ_NIGHTBLADE:
+      glPushMatrix(); {
+        az_gl_rotated(proj->age * AZ_DEG2RAD(-720));
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.6, 0.6, 0.6);
+          glVertex2f(0, 0);
+          glColor3f(0.6, 0.3, 0.0);
+          for (int i = 0; i < 360; i += 120) {
+            glVertex2d(8 * cos(AZ_DEG2RAD(i)), 8 * sin(AZ_DEG2RAD(i)));
+            glVertex2d(2.5 * cos(AZ_DEG2RAD(i + 10)),
+                       2.5 * sin(AZ_DEG2RAD(i + 10)));
+          }
+          glVertex2d(6, 0);
+        } glEnd();
+      } glPopMatrix();
       break;
     case AZ_PROJ_NIGHTSEED:
       glBegin(GL_TRIANGLE_FAN); {

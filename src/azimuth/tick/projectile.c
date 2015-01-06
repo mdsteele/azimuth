@@ -235,6 +235,16 @@ static void on_projectile_hit_wall(az_space_state_t *state,
                                    az_projectile_t *proj, az_vector_t normal) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(!(proj->data->properties & AZ_PROJF_PHASED));
+  // Bouncing fireballs are special: they bounce off walls the first few hits.
+  if (proj->kind == AZ_PROJ_BOUNCING_FIREBALL && proj->param < 3) {
+    ++proj->param;
+    az_vpluseq(&proj->position, az_vwithlen(normal, 0.5));
+    az_vpluseq(&proj->velocity, az_vmul(az_vproj(proj->velocity, normal), -2));
+    proj->angle = az_vtheta(proj->velocity);
+    az_play_sound(&state->soundboard, AZ_SND_BOUNCE_FIREBALL);
+    return;
+  }
+  // Explode the projectile.
   on_projectile_impact(state, proj, (proj->kind == AZ_PROJ_GUN_PHASE_BURST ?
                                      az_vpolar(1, proj->angle) : normal));
   // Shake the screen.
@@ -294,10 +304,11 @@ static void on_projectile_hit_baddie(
   assert(proj->kind != AZ_PROJ_NOTHING);
   assert(proj->fired_by == AZ_SHIP_UID || proj->fired_by == AZ_NULL_UID);
   proj->last_hit_uid = baddie->uid;
+  const double prev_flare = baddie->armor_flare;
   if (!az_try_damage_baddie(state, baddie, component, proj->data->damage_kind,
                             proj->data->impact_damage * proj->power)) {
     az_play_sound(&state->soundboard, baddie->data->armor_sound);
-  } else if (baddie->kind != AZ_BAD_NOTHING) {
+  } else if (baddie->kind != AZ_BAD_NOTHING && prev_flare < 0.75) {
     az_play_sound(&state->soundboard, baddie->data->hurt_sound);
   }
   // Note that at this point, the baddie may now be dead and removed.  So we
@@ -674,6 +685,12 @@ static void projectile_special_logic(az_space_state_t *state,
                                  (time / proj->data->lifetime));
           }
         }
+      }
+      break;
+    case AZ_PROJ_BOUNCING_FIREBALL:
+      if (times_per_second(15, proj, time)) {
+        leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                             (az_color_t){255, 128, 0, 128}, 0.3, 15.0, 0.0);
       }
       break;
     case AZ_PROJ_ERUPTION:
