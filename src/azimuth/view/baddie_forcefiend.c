@@ -127,7 +127,7 @@ static void draw_fish(const az_baddie_t *baddie, az_color_t inner,
 }
 
 static void draw_forcefiend_bone(const az_baddie_t *baddie, int idx,
-                                  GLfloat cx) {
+                                 GLfloat cx) {
   const az_component_t *component = &baddie->components[idx];
   glPushMatrix(); {
     az_gl_translated(component->position);

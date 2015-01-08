@@ -32,6 +32,8 @@ void az_draw_bad_nightbug(
 void az_draw_bad_nightshade(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_nocturne(const az_baddie_t *baddie, az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_NIGHT_H_

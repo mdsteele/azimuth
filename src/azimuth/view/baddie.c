@@ -53,6 +53,7 @@ static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
 }
 
+#if 0
 static void draw_component_outline(const az_component_data_t *component) {
   const az_polygon_t poly = component->polygon;
   if (poly.num_vertices > 0) {
@@ -86,6 +87,7 @@ static void draw_baddie_outline(const az_baddie_t *baddie, float frozen,
     } glPopMatrix();
   }
 }
+#endif
 
 static void draw_atom_electron(double radius, az_vector_t position,
                                double angle) {
@@ -822,8 +824,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_small_fish(baddie, frozen, clock);
       break;
     case AZ_BAD_NOCTURNE:
-      // TODO: Make real graphics for the Nocturne.
-      draw_baddie_outline(baddie, frozen, baddie->param);
+      az_draw_bad_nocturne(baddie, clock);
       break;
     case AZ_BAD_MYCOFLAKKER:
       az_draw_bad_mycoflakker(baddie, frozen, clock);

@@ -41,7 +41,7 @@ static bool times_per_second(double per_second, const az_projectile_t *proj,
 }
 
 // Remove the projectile and create specks in its place.
-static void expire_projectile(az_space_state_t *state, az_projectile_t *proj) {
+void az_expire_projectile(az_space_state_t *state, az_projectile_t *proj) {
   assert(proj->kind != AZ_PROJ_NOTHING);
   if (!(proj->data->properties & AZ_PROJF_FEW_SPECKS)) {
     const double base_speed = 0.5 * az_vnorm(proj->velocity);
@@ -511,7 +511,7 @@ static void projectile_special_logic(az_space_state_t *state,
           if (other_proj->fired_by != AZ_SHIP_UID &&
               !(other_proj->data->properties & AZ_PROJF_NO_HIT) &&
               az_vwithin(other_proj->position, proj->position, radius)) {
-            expire_projectile(state, other_proj);
+            az_expire_projectile(state, other_proj);
           }
         }
         // Damage enemies within the blast (over the lifetime of the blast):
@@ -889,7 +889,7 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
   projectile_special_logic(state, proj, time);
   if (proj->kind == AZ_PROJ_NOTHING) return;
   if (proj->age > proj->data->lifetime) {
-    expire_projectile(state, proj);
+    az_expire_projectile(state, proj);
     return;
   }
 

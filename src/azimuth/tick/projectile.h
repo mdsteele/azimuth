@@ -21,9 +21,12 @@
 #ifndef AZIMUTH_TICK_PROJECTILE_H_
 #define AZIMUTH_TICK_PROJECTILE_H_
 
+#include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
+
+void az_expire_projectile(az_space_state_t *state, az_projectile_t *proj);
 
 void az_tick_projectiles(az_space_state_t *state, double time);
 

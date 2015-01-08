@@ -33,6 +33,7 @@
 #include "azimuth/state/uid.h"
 #include "azimuth/state/wall.h"
 #include "azimuth/tick/baddie.h"
+#include "azimuth/tick/projectile.h"
 #include "azimuth/tick/script.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
@@ -365,11 +366,18 @@ bool az_try_damage_baddie(
       };
       baddie->kind = AZ_BAD_NOTHING;
       // When a boss dies, kill all other baddies in the room, except for
-      // baddies that are _permanently_ incorporeal.
+      // baddies that are _permanently_ incorporeal.  Also expire certain kinds
+      // of projectiles.
       AZ_ARRAY_LOOP(other, state->baddies) {
         if (other->kind == AZ_BAD_NOTHING) continue;
         if (other->data->static_properties & AZ_BADF_INCORPOREAL) continue;
         az_kill_baddie(state, other);
+      }
+      AZ_ARRAY_LOOP(proj, state->projectiles) {
+        if (proj->kind == AZ_PROJ_BOUNCING_FIREBALL ||
+            proj->kind == AZ_PROJ_NIGHTSEED) {
+          az_expire_projectile(state, proj);
+        }
       }
       return true;
     }

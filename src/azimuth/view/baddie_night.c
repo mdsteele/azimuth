@@ -26,8 +26,14 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
+
+static az_color_t color4(float r, float g, float b, float a) {
+  return (az_color_t){r * 255, g * 255, b * 255, a * 255};
+}
 
 static void gl_matrix_wobble(double param) {
   if (0.0 < param && param < 1.0) {
@@ -136,6 +142,55 @@ void az_draw_bad_nightshade(
     }
     glScalef(1.1, 1.1, 1);
     draw_nightbug_body(0.25f, invis, flare, frozen, clock);
+  } glPopMatrix();
+}
+
+/*===========================================================================*/
+
+void az_draw_bad_nocturne(const az_baddie_t *baddie, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_NOCTURNE);
+  const float flare = baddie->armor_flare;
+  const double invis = fmax(baddie->param, flare);
+  const float hurt = 1.0 - baddie->health / baddie->data->max_health;
+  const az_color_t inner =
+    color4(0.25f + 0.5f * hurt + 0.25f * flare, 0.8f - 0.8f * hurt,
+           0.0f, invis);
+  const az_color_t outer =
+    color4(0.2f + 0.2f * hurt + 0.4f * flare, 0.3f - 0.2f * hurt, 0.0f,
+           invis * invis * invis);
+  glPushMatrix(); {
+    gl_matrix_wobble(baddie->param);
+    // Legs:
+    for (int i = 0; i < 8; ++i) {
+      glPushMatrix(); {
+        az_gl_translated(baddie->components[i].position);
+        az_gl_rotated(baddie->components[i].angle);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(0.5, 0.6, 0.5, invis * invis);
+          glVertex2f(0, 0);
+          glColor4f(0.25, 0.3, 0.25, invis * invis);
+          const az_polygon_t polygon = baddie->data->components[i].polygon;
+          for (int j = polygon.num_vertices - 1, k = 0;
+               j < polygon.num_vertices; j = k++) {
+            az_gl_vertex(polygon.vertices[j]);
+          }
+        } glEnd();
+      } glPopMatrix();
+    }
+    // Body:
+    glPushMatrix(); {
+      for (int i = 0; i < 2; ++i) {
+        if (i == 1) glScaled(1, -1, 1);
+        glBegin(GL_TRIANGLE_FAN); {
+          az_gl_color(inner); glVertex2f(-12, 24);
+          az_gl_color(outer); glVertex2f(40, 0); glVertex2f(44, 10);
+          glVertex2f(15, 60); glVertex2f(-15, 70); glVertex2f(-70, 45);
+          glVertex2f(-105, 2); glVertex2f(-100, 0);
+          az_gl_color(inner); glVertex2f(0, 0);
+          az_gl_color(outer); glVertex2f(40, 0);
+        } glEnd();
+      }
+    } glPopMatrix();
   } glPopMatrix();
 }
 
