@@ -353,10 +353,11 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 20.0,
     .splash_damage = 5.0,
     .splash_radius = 25.0,
-    .shrapnel_kind = AZ_PROJ_FIREBALL_SLOW,
     .impact_shake = 0.75,
     .impact_sound = AZ_SND_EXPLODE_FIREBALL_SMALL,
-    .damage_kind = AZ_DMGF_FLAME
+    .shrapnel_kind = AZ_PROJ_FIREBALL_SLOW,
+    .damage_kind = AZ_DMGF_FLAME,
+    .properties = AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_ERUPTION] = {
     .speed = 800.0,
@@ -411,7 +412,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 120.0,
     .impact_shake = 1.5,
     .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
-    .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_BOMB
+    .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_BOMB,
+    .properties = AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,

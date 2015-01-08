@@ -330,7 +330,8 @@ static void on_projectile_hit_ship(
       (proj->data->impact_damage + proj->data->splash_damage) +
       8.0 * proj->data->impact_shake));
   // Damage the ship and explode the projectile:
-  az_damage_ship(state, proj->data->impact_damage * proj->power, false);
+  az_damage_ship(state, proj->data->impact_damage * proj->power,
+                 (bool)(proj->data->properties & AZ_PROJF_TEMP_INVINC));
   on_projectile_hit_target(state, proj, normal);
 }
 

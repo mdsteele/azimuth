@@ -119,6 +119,8 @@ typedef uint_fast8_t az_proj_flags_t;
 #define AZ_PROJF_PHASED        ((az_proj_flags_t)(1u << 3))
 // PIERCING: projectile pierces through multiple targets
 #define AZ_PROJF_PIERCING      ((az_proj_flags_t)(1u << 4))
+// TEMP_INVINC: makes ship temp invincible on a direct impact
+#define AZ_PROJF_TEMP_INVINC   ((az_proj_flags_t)(1u << 5))
 
 typedef struct {
   double speed;
