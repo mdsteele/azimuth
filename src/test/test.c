@@ -19,6 +19,7 @@
 
 #include "test/test.h"
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> // for EXIT_FAILURE and EXIT_SUCCESS
@@ -65,6 +66,17 @@ bool _expect_true(bool condition, const char *message) {
   if (condition) return true;
   test_failure();
   printf(" \x1b[1;31mFAILED:\x1b[m %s\n", message);
+  return false;
+}
+
+bool _expect_within(double expected, double actual, double threshold,
+                    const char *message) {
+  const double difference = fabs(expected - actual);
+  if (difference <= threshold) return true;
+  test_failure();
+  printf(" \x1b[1;31mFAILED:\x1b[m %s\n  %.20g vs. %.20g\n"
+         "  (difference %.20g > %.20g)\n",
+         message, expected, actual, difference, threshold);
   return false;
 }
 

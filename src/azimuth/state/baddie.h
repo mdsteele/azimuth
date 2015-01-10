@@ -40,7 +40,7 @@
 #define AZ_MAX_BADDIE_CARGO_UUIDS 4
 
 // The number of different baddie kinds there are, not counting AZ_BAD_NOTHING:
-#define AZ_NUM_BADDIE_KINDS 97
+#define AZ_NUM_BADDIE_KINDS 98
 
 typedef enum {
   AZ_BAD_NOTHING = 0,
@@ -141,6 +141,7 @@ typedef enum {
   AZ_BAD_CREEPY_EYE,
   AZ_BAD_BOMB_SENSOR,
   AZ_BAD_ROCKET_SENSOR,
+  AZ_BAD_SPIKED_VINE,
 } az_baddie_kind_t;
 
 typedef enum {
@@ -176,6 +177,8 @@ typedef uint_fast8_t az_baddie_flags_t;
 #define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 6))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
 #define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 7))
+// NO_HOMING: all homing weapons ignore this baddie
+#define AZ_BADF_NO_HOMING (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ)
 
 typedef struct {
   double overall_bounding_radius;

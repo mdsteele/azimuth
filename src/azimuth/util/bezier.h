@@ -18,29 +18,36 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_CHOMPER_H_
-#define AZIMUTH_TICK_BADDIE_CHOMPER_H_
+#ifndef AZIMUTH_UTIL_BEZIER_H_
+#define AZIMUTH_UTIL_BEZIER_H_
 
-#include "azimuth/state/baddie.h"
-#include "azimuth/state/space.h"
-
-/*===========================================================================*/
-
-void az_tick_bad_chomper_plant(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_aquatic_chomper(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_jungle_chomper(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_fire_chomper(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_spiked_vine(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_CHOMPER_H_
+az_vector_t az_cubic_bezier_point(
+    az_vector_t start, az_vector_t ctrl1, az_vector_t ctrl2, az_vector_t end,
+    double param);
+
+double az_cubic_bezier_angle(
+    az_vector_t start, az_vector_t ctrl1, az_vector_t ctrl2, az_vector_t end,
+    double param);
+
+// Calculate the arc length between two points on a cubic bezier curve.  This
+// is done numerically, so the result is approximate; increase the num_steps
+// argument to get a more accurate result.
+double az_cubic_bezier_arc_length(
+    az_vector_t start, az_vector_t ctrl1, az_vector_t ctrl2, az_vector_t end,
+    int num_steps, double param_start, double param_end);
+
+// Calculate the parameter (from 0 to 1) for the point on the given cubic
+// bezier curve that lies arc_length away from the point for param_start.  This
+// is done numerically, so the result is approximate; increase the num_steps
+// argument to get a more accurate result.
+double az_cubic_bezier_arc_param(
+    az_vector_t start, az_vector_t ctrl1, az_vector_t ctrl2, az_vector_t end,
+    int num_steps, double param_start, double arc_length);
+
+/*===========================================================================*/
+
+#endif // AZIMUTH_UTIL_BEZIER_H_

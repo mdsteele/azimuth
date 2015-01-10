@@ -826,6 +826,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_ROCKET_SENSOR:
       az_tick_bad_rocket_sensor(state, baddie, time);
       break;
+    case AZ_BAD_SPIKED_VINE:
+      az_tick_bad_spiked_vine(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

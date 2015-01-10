@@ -856,11 +856,35 @@ static az_component_data_t pop_open_turret_components[] = {
     .init_angle = AZ_DEG2RAD(-90) }
 };
 
+static az_vector_t spiked_vine_base_vertices[] = {
+  {14, 4}, {8, 11}, {0, 14}, {0, -14}, {8, -11}, {14, -4}
+};
+static az_vector_t spiked_vine_segment_vertices[] = {
+  {15, 0}, {12, 4}, {-12, 4}, {-15, 0}, {-12, -4}, {12, -4}
+};
+static az_vector_t spiked_vine_tip_vertices[] = {
+  {-4, 0}, {0, -4}, {20, 0}, {0, 4}
+};
+static az_component_data_t spiked_vine_components[] = {
+  // Base:
+  { .polygon = AZ_INIT_POLYGON(spiked_vine_base_vertices),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 },
+  // Vine:
+#define VINE_SEGMENT() \
+  { .polygon = AZ_INIT_POLYGON(spiked_vine_segment_vertices), \
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 }
+
+  VINE_SEGMENT(), VINE_SEGMENT(), VINE_SEGMENT(), VINE_SEGMENT(),
+  VINE_SEGMENT(), VINE_SEGMENT(), VINE_SEGMENT(), VINE_SEGMENT(),
+  VINE_SEGMENT(), VINE_SEGMENT(), VINE_SEGMENT()
+#undef VINE_SEGMENT
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_INCORPOREAL |
-                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+                          AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_NORMAL_TURRET] = {
@@ -1133,7 +1157,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_HEAT_RAY] = {
     .max_health = 40.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = AZ_BADF_NO_HOMING,
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~(AZ_DMGF_CPLUS | AZ_DMGF_HYPER_ROCKET) }
   },
@@ -1147,14 +1171,13 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_WALL] = {
     .max_health = 25.0, .potential_pickups = AZ_PUPF_NOTHING,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = AZ_BADF_NO_HOMING,
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_wall_vertices),
                    .immunities = ~AZ_DMGF_BEAM }
   },
   [AZ_BAD_SPARK] = {
     .max_health = 1000000.0,
-    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 10.0 }
   },
   [AZ_BAD_MOSQUITO] = {
@@ -1268,7 +1291,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_DEATH_RAY] = {
     .max_health = 100.0, .potential_pickups = AZ_PUPF_ALL,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = AZ_BADF_NO_HOMING,
     .main_body = { .polygon = AZ_INIT_POLYGON(heat_ray_vertices),
                    .immunities = ~AZ_DMGF_CPLUS }
   },
@@ -1305,7 +1328,7 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
-                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+                          AZ_BADF_NO_HOMING),
     .color = {96, 96, 128, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
@@ -1316,7 +1339,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 39.0, .overall_bounding_radius = 110.0,
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
-                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+                          AZ_BADF_NO_HOMING),
     .color = {128, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
@@ -1328,7 +1351,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 39.0, .overall_bounding_radius = 110.0,
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
-                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+                          AZ_BADF_NO_HOMING),
     .color = {128, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
@@ -1340,8 +1363,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000000.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
-                          AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ), .color = {96, 96, 96, 255},
+                          AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
+    .color = {96, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices) },
     DECL_COMPONENTS(incorporeal_piston_components)
   },
@@ -1349,8 +1372,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000000.0, .overall_bounding_radius = 110.0,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG |
-                          AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ), .color = {96, 96, 96, 255},
+                          AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
+    .color = {96, 96, 96, 255},
     .main_body = { .polygon = AZ_INIT_POLYGON(piston_head_vertices) },
     DECL_COMPONENTS(incorporeal_piston_ext_components)
   },
@@ -1559,14 +1582,13 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000000.0, .color = {160, 160, 160, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
-                          AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ),
+                          AZ_BADF_NO_HOMING),
     .main_body = { .polygon = AZ_INIT_POLYGON(sensor_laser_vertices),
                    .immunities = ~0 }
   },
   [AZ_BAD_ERUPTION] = {
     .max_health = 1000000.0,
-    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 10.0 }
   },
   [AZ_BAD_PYROFLAKKER] = {
@@ -1631,16 +1653,14 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_CREEPY_EYE] = {
     .max_health = 35.0, .overall_bounding_radius = 25.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 1.0, .immunities = ~0 },
     DECL_COMPONENTS(creepy_eye_components)
   },
   [AZ_BAD_BOMB_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_BEAM |
-                          AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 15.0,
                    .immunities = ~(AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB) },
     DECL_COMPONENTS(bomb_sensor_components)
@@ -1652,6 +1672,16 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 15.0,
                    .immunities = ~(AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET) },
     DECL_COMPONENTS(rocket_sensor_components)
+  },
+  [AZ_BAD_SPIKED_VINE] = {
+    .max_health = 20.0, .overall_bounding_radius = 300.0,
+    .color = {48, 192, 96, 255}, .hurt_sound = AZ_SND_HURT_PLANT,
+    .death_sound = AZ_SND_KILL_PLANT, .death_style = AZ_DEATH_EMBERS,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING),
+    .main_body = { .polygon = AZ_INIT_POLYGON(spiked_vine_tip_vertices),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
+                   .impact_damage = 10.0 },
+    DECL_COMPONENTS(spiked_vine_components)
   }
 };
 

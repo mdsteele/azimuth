@@ -897,6 +897,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_ROCKET_SENSOR:
       az_draw_bad_rocket_sensor(baddie, frozen, clock);
       break;
+    case AZ_BAD_SPIKED_VINE:
+      az_draw_bad_spiked_vine(baddie, frozen, clock);
+      break;
   }
 }
 

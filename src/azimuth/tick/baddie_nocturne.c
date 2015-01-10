@@ -57,10 +57,7 @@ static int get_num_minions(const az_space_state_t *state,
                            const az_baddie_t *master) {
   int num_minions = 0;
   AZ_ARRAY_LOOP(baddie, state->baddies) {
-    if (baddie->kind == AZ_BAD_NOTHING) continue;
-    if (baddie == master) continue;
-    if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
-    ++num_minions;
+    if (baddie->kind == AZ_BAD_NIGHTBUG) ++num_minions;
   }
   return num_minions;
 }

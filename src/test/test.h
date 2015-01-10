@@ -35,6 +35,10 @@
 // Test that the condition is false.
 #define EXPECT_FALSE(condition) EXPECT_TRUE(!(condition))
 
+// Test that the two doubles are within threshold of each other.
+#define EXPECT_WITHIN(expected, actual, threshold) \
+  _expect_within(expected, actual, threshold, #expected " == " #actual)
+
 // Test that the two doubles are (approximately) equal.
 #define EXPECT_APPROX(expected, actual) \
   _expect_approx(expected, actual, #expected " == " #actual)
@@ -89,6 +93,9 @@ extern bool _current_test_failed;
 void _run_test(const char *name, void (*function)(void));
 
 bool _expect_true(bool condition, const char *message);
+
+bool _expect_within(double expected, double actual, double threshold,
+                    const char *message);
 
 bool _expect_approx(double expected, double actual, const char *message);
 

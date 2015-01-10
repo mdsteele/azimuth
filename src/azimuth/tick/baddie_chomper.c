@@ -27,43 +27,38 @@
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/object.h"
 #include "azimuth/util/audio.h"
+#include "azimuth/util/bezier.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
+// Arrange the stalk segments along a cubic bezier curve from the head to the
+// base.
 static void realign_segments(
-    az_baddie_t *baddie, double scale,
+    az_baddie_t *baddie, int start_index, double scale,
     az_vector_t head_pos, double head_angle,
     az_vector_t base_pos, double base_angle) {
-  // Arrange the stalk segments along a cubic bezier curve from the head
-  // to the base.
   const az_vector_t ctrl1 =
     az_vsub(head_pos, az_vpolar(60 * scale, head_angle));
   const az_vector_t ctrl2 =
     az_vadd(base_pos, az_vpolar(50 * scale, base_angle));
-  for (int i = 0; i < 9; ++i) {
-    az_component_t *segment = &baddie->components[i + 3];
-    const double t = (0.5 + i) / 10.0;
-    const double s = 1.0 - t;
+  const int num_segments = baddie->data->num_components - start_index;
+  for (int i = 0; i < num_segments; ++i) {
+    az_component_t *segment = &baddie->components[i + start_index];
+    const double t = (0.5 + i) / (double)(num_segments + 1);
     segment->position = az_vrotate(az_vsub(
-        az_vadd(az_vadd(az_vmul(head_pos, s*s*s),
-                        az_vmul(ctrl1, 3*s*s*t)),
-                az_vadd(az_vmul(ctrl2, 3*s*t*t),
-                        az_vmul(base_pos, t*t*t))),
+        az_cubic_bezier_point(head_pos, ctrl1, ctrl2, base_pos, t),
         baddie->position), -baddie->angle);
-    segment->angle = az_mod2pi(az_vtheta(az_vadd(
-        az_vadd(az_vmul(head_pos, -3*s*s),
-                az_vmul(ctrl1, 3*s*s - 6*s*t)),
-        az_vadd(az_vmul(ctrl2, 6*s*t - 3*t*t),
-                az_vmul(base_pos, 3*t*t)))) - baddie->angle);
+    segment->angle = az_mod2pi(
+        az_cubic_bezier_angle(head_pos, ctrl1, ctrl2, base_pos, t) -
+        baddie->angle);
   }
 }
 
-static void move_head(
-    az_baddie_t *baddie, double time, double scale,
-    az_vector_t head_pos, double head_angle,
-    az_vector_t base_pos, double base_angle, bool open_jaws) {
+static void update_head_and_base(
+    az_baddie_t *baddie, az_vector_t head_pos, double head_angle,
+    az_vector_t base_pos, double base_angle) {
   // The baddie is centered on the head, so move the baddie to where we
   // want the head to be.
   baddie->position = head_pos;
@@ -74,9 +69,17 @@ static void move_head(
   base->position = az_vrotate(az_vsub(base_pos, baddie->position),
                               -baddie->angle);
   base->angle = az_mod2pi(base_angle - baddie->angle);
+}
+
+static void move_head(
+    az_baddie_t *baddie, double time, double scale,
+    az_vector_t head_pos, double head_angle,
+    az_vector_t base_pos, double base_angle, bool open_jaws) {
+  update_head_and_base(baddie, head_pos, head_angle, base_pos, base_angle);
   // Arrange the stalk segments along a cubic bezier curve from the head
   // to the base.
-  realign_segments(baddie, scale, head_pos, head_angle, base_pos, base_angle);
+  realign_segments(baddie, 3, scale,
+                   head_pos, head_angle, base_pos, base_angle);
   // Open/close the jaws.
   const double max_angle = AZ_DEG2RAD(40);
   const double old_angle = baddie->components[1].angle;
@@ -299,6 +302,62 @@ void az_tick_bad_fire_chomper(
       head_angle_goal);
   move_head(baddie, time, 0.5, head_pos, head_angle, base_pos, base_angle,
             (line_of_sight && baddie->cooldown < 0.75));
+}
+
+void az_tick_bad_spiked_vine(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_SPIKED_VINE);
+  // Grow longer over time.
+  const double max_length_per_segment = 23.0;
+  const double time_to_fully_extend = 14.0;  // seconds
+  baddie->param = fmax(0.7, baddie->param + time);
+  const double progress = fmin(1.0, baddie->param / time_to_fully_extend);
+  const double length_per_segment =
+    max_length_per_segment * (0.5 + 0.5 * progress);
+  const double length_limit = 11.4 * max_length_per_segment * progress;
+  // Get the absolute position of the base.
+  az_component_t *base = &baddie->components[0];
+  const az_vector_t base_pos =
+    az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
+  const double base_angle = az_mod2pi(baddie->angle + base->angle);
+  // Pick a new position for the tip.
+  const double ship_theta_offset =
+    (az_ship_is_decloaked(&state->ship) &&
+     az_vwithin(base_pos, state->ship.position, 1.1 * length_limit) ?
+     fmin(fmax(az_mod2pi(az_vtheta(az_vsub(state->ship.position, base_pos)) -
+                         base_angle), -AZ_DEG2RAD(20)), AZ_DEG2RAD(20)) : 0.0);
+  const double head_angle_goal = base_angle + ship_theta_offset +
+    AZ_DEG2RAD(30) * progress * cos(baddie->param * AZ_PI);
+  const double head_angle =
+    az_angle_towards(baddie->angle, AZ_DEG2RAD(120) * time, head_angle_goal);
+  const az_vector_t head_pos_goal = az_vadd(base_pos, az_vrotate(
+      az_vpolar(length_limit, base_angle),
+      AZ_DEG2RAD(10) * progress *
+      sin(baddie->param * AZ_PI) + ship_theta_offset));
+  az_vector_t head_pos = baddie->position;
+  const double tracking_base = 0.2; // smaller = faster tracking
+  const az_vector_t delta =
+    az_vmul(az_vsub(head_pos_goal, head_pos), 1.0 - pow(tracking_base, time));
+  az_vpluseq(&head_pos, delta);
+  // Update the baddie's position and components.
+  update_head_and_base(baddie, head_pos, head_angle, base_pos, base_angle);
+  const az_vector_t ctrl1 =
+    az_vsub(head_pos, az_vpolar(60 * progress, head_angle));
+  const az_vector_t ctrl2 =
+    az_vadd(base_pos, az_vpolar(100 * progress, base_angle));
+  double param = az_cubic_bezier_arc_param(
+      head_pos, ctrl1, ctrl2, base_pos, 1000, 0.0, length_per_segment * 0.5);
+  for (int i = 1; i < 12; ++i) {
+    az_component_t *segment = &baddie->components[i];
+    segment->position = az_vrotate(az_vsub(
+        az_cubic_bezier_point(head_pos, ctrl1, ctrl2, base_pos, param),
+        baddie->position), -baddie->angle);
+    segment->angle = az_mod2pi(
+        az_cubic_bezier_angle(head_pos, ctrl1, ctrl2, base_pos, param) -
+        baddie->angle);
+    param = az_cubic_bezier_arc_param(
+        head_pos, ctrl1, ctrl2, base_pos, 1000, param, length_per_segment);
+  }
 }
 
 /*===========================================================================*/
