@@ -375,7 +375,8 @@ bool az_try_damage_baddie(
       }
       AZ_ARRAY_LOOP(proj, state->projectiles) {
         if (proj->kind == AZ_PROJ_BOUNCING_FIREBALL ||
-            proj->kind == AZ_PROJ_NIGHTSEED) {
+            proj->kind == AZ_PROJ_NIGHTSEED ||
+            proj->kind == AZ_PROJ_SPIKED_VINE_SEED) {
           az_expire_projectile(state, proj);
         }
       }

@@ -25,6 +25,7 @@
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
 #include "azimuth/state/uid.h"
+#include "azimuth/state/wall.h"
 #include "azimuth/tick/baddie.h" // for az_on_baddie_damaged
 #include "azimuth/tick/door.h" // for az_try_open_door
 #include "azimuth/tick/object.h" // for az_try_damage_baddie
@@ -883,6 +884,23 @@ static void projectile_special_logic(az_space_state_t *state,
   }
 }
 
+static void on_spiked_vine_seed_hit_wall(
+    az_space_state_t *state, az_projectile_t *proj, az_wall_t *wall,
+    az_vector_t normal) {
+  assert(proj->kind == AZ_PROJ_SPIKED_VINE_SEED);
+  const int wall_index = az_wall_data_index(wall->data);
+  if (wall_index != 45 && wall_index != 59 && wall_index != 60 &&
+      wall_index != 61) return;
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind != AZ_BAD_SPIKED_VINE) continue;
+    if (az_circle_touches_baddie(baddie, 40.0, proj->position, NULL)) return;
+  }
+  const double angle =
+    az_vnonzero(normal) ? az_vtheta(normal) : az_mod2pi(proj->angle + AZ_PI);
+  az_add_baddie(state, AZ_BAD_SPIKED_VINE,
+                az_vadd(proj->position, az_vpolar(-5.0, angle)), angle);
+}
+
 static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
                             double time) {
   // Age the projectile, and remove it if it is expired.
@@ -996,6 +1014,10 @@ static void tick_projectile(az_space_state_t *state, az_projectile_t *proj,
     case AZ_IMP_WALL:
       az_try_break_wall(state, impact.target.wall, proj->data->damage_kind,
                         proj->position);
+      if (proj->kind == AZ_PROJ_SPIKED_VINE_SEED) {
+        on_spiked_vine_seed_hit_wall(state, proj, impact.target.wall,
+                                     impact.normal);
+      }
       on_projectile_hit_wall(state, proj, impact.normal);
       break;
   }

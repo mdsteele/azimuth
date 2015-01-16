@@ -471,6 +471,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       } glPopMatrix();
       break;
     case AZ_PROJ_NIGHTSEED:
+    case AZ_PROJ_SPIKED_VINE_SEED:
       glBegin(GL_TRIANGLE_FAN); {
         const double radius = 6.0;
         glColor3f(0.6, 0.9, 0.75);

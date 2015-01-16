@@ -516,6 +516,14 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 4.0,
     .impact_damage = 3.0
   },
+  [AZ_PROJ_SPIKED_VINE_SEED] = {
+    .speed = 500.0,
+    .lifetime = 5.0,
+    .impact_damage = 5.0,
+    .splash_damage = 5.0,
+    .splash_radius = 30.0,
+    .impact_shake = 0.5
+  },
   [AZ_PROJ_SPINE] = {
     .speed = 200.0,
     .lifetime = 4.0,

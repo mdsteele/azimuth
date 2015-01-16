@@ -53,13 +53,13 @@
 
 /*===========================================================================*/
 
-static int get_num_minions(const az_space_state_t *state,
-                           const az_baddie_t *master) {
-  int num_minions = 0;
+static int num_baddies_of_kind(const az_space_state_t *state,
+                               const az_baddie_kind_t kind) {
+  int num_baddies = 0;
   AZ_ARRAY_LOOP(baddie, state->baddies) {
-    if (baddie->kind == AZ_BAD_NIGHTBUG) ++num_minions;
+    if (baddie->kind == kind) ++num_baddies;
   }
-  return num_minions;
+  return num_baddies;
 }
 
 static bool spot_is_clear(az_space_state_t *state, az_vector_t position) {
@@ -87,7 +87,8 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
     case PHASED_OUT_STATE:
       assert(baddie->param == 0.0);
       assert(az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL));
-      if (get_num_minions(state, baddie) > MAX_MINIONS_TO_PHASE_IN) {
+      if (num_baddies_of_kind(state, AZ_BAD_NIGHTBUG) >
+          MAX_MINIONS_TO_PHASE_IN) {
         baddie->cooldown = 1.5;
       }
       if (baddie->cooldown <= 0.0) {
@@ -136,10 +137,22 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
             az_vtheta(az_vsub(state->ship.position, baddie->position)));
       }
       if (baddie->param == 1.0 && baddie->cooldown <= 0.0) {
-        // If we've spawned enough minions, start phasing out.
-        if (get_num_minions(state, baddie) >= MIN_MINIONS_TO_PHASE_OUT) {
+        // If there aren't enough spiked vines, make more.
+        if (hurt > 0.2 &&
+            num_baddies_of_kind(state, AZ_BAD_SPIKED_VINE) < 6 * hurt) {
           baddie->state = PHASING_OUT_STATE;
-          if (hurt >= 0.20) {
+          const int step = (hurt > 0.6 ? 36 : 72);
+          for (int i = 0; i < 360; i += step) {
+            az_fire_baddie_projectile(
+                state, baddie, AZ_PROJ_SPIKED_VINE_SEED,
+                20, AZ_DEG2RAD(i), 0);
+          }
+        }
+        // If we've spawned enough nightbugs, start phasing out.
+        else if (num_baddies_of_kind(state, AZ_BAD_NIGHTBUG) >=
+                 MIN_MINIONS_TO_PHASE_OUT - (int)(3.0 * hurt)) {
+          baddie->state = PHASING_OUT_STATE;
+          if (hurt >= 0.4) {
             for (int i = 0; i < 360; i += 36) {
               az_fire_baddie_projectile(
                   state, baddie, AZ_PROJ_BOUNCING_FIREBALL,
@@ -147,17 +160,12 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
             }
             az_play_sound(&state->soundboard, AZ_SND_EXPLODE_FIREBALL_LARGE);
           }
-        } else {
-          // Otherwise, fire some seeds.
-          // TODO: Fire other kinds of seeds too (chomper plants?).
+        }
+        // Otherwise, fire some nightseeds.
+        else {
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_NIGHTSEED,
                                     45, 0, 0);
           baddie->cooldown = 0.5;
-          // TODO: Attacks should get more intense as the boss takes damage.
-          // TODO: Should have other attacks too.  One possibility: we should
-          // grab the ship with a tongue and start pulling it in, and whack it
-          // with our arms when the ship gets close.  If the ship stays away
-          // long enough, give up.
         }
       }
       break;
@@ -166,6 +174,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmax(0.0, baddie->param - time / PHASE_OUT_TIME);
       if (baddie->param == 0.0) {
         baddie->state = PHASED_OUT_STATE;
+        baddie->cooldown = 1.5;
       }
       break;
     default:
