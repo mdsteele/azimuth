@@ -29,6 +29,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/background.h"
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/door.h"
@@ -603,8 +604,11 @@ static void draw_camera_view(az_editor_state_t *state) {
   // Draw current room:
   az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
                                        state->current_room);
-  if (!az_editor_is_in_minimap_mode(state)) draw_room(state, room);
-  else draw_room_minimap(state, room, state->current_room);
+  if (!az_editor_is_in_minimap_mode(state)) {
+    az_draw_background_pattern(room->background_pattern, &room->camera_bounds,
+                               state->camera, state->clock);
+    draw_room(state, room);
+  } else draw_room_minimap(state, room, state->current_room);
 
   // Draw the camera bounds, and a dot for the camera center.
   draw_camera_center_bounds(room);

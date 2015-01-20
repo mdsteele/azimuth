@@ -947,6 +947,13 @@ static void do_wallify_nodes(void) {
   if (any) set_room_unsaved(room);
 }
 
+static void do_change_background_pattern(int delta) {
+  az_editor_room_t *room = get_current_room();
+  room->background_pattern =
+    az_modulo(room->background_pattern + delta, AZ_NUM_BG_PATTERNS);
+  set_room_unsaved(room);
+}
+
 static void do_change_zone(int delta) {
   az_editor_room_t *room = get_current_room();
   room->zone_key = az_modulo(room->zone_key + delta,
@@ -1534,6 +1541,7 @@ static void event_loop(void) {
               break;
             case AZ_KEY_K:
               if (event.key.command) begin_set_marker_flag();
+              else do_change_background_pattern(event.key.shift ? -1 : 1);
               break;
             case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:

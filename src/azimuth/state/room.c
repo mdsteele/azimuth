@@ -97,6 +97,14 @@ static void parse_room_header(az_load_room_t *loader) {
     if (marker_flag < 0 || marker_flag >= AZ_MAX_NUM_FLAGS) FAIL();
     loader->room->marker_flag = (az_flag_t)marker_flag;
   }
+  // TODO: Once all rooms have explicit backgrounds, clean this up.
+  int background_index = 0;
+  READ(" ");
+  const char ch = fgetc(loader->file);
+  ungetc(ch, loader->file);
+  if (ch == 'k') READ("k%d", &background_index);
+  if (background_index < 0 || background_index >= AZ_NUM_BG_PATTERNS) FAIL();
+  loader->room->background_pattern = (az_background_pattern_t)background_index;
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
   double min_r, r_span, min_theta, theta_span;
   READ(" b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n",
@@ -363,11 +371,11 @@ static bool write_room(const az_room_t *room, FILE *file) {
   if (room->properties & (AZ_ROOMF_MARK_IF_CLR | AZ_ROOMF_MARK_IF_SET)) {
     WRITE("/%d", (int)room->marker_flag);
   }
-  WRITE(" b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",
-        room->num_baddies, room->num_doors, room->num_gravfields,
-        room->num_nodes, room->num_walls, room->camera_bounds.min_r,
-        room->camera_bounds.r_span, room->camera_bounds.min_theta,
-        room->camera_bounds.theta_span);
+  WRITE(" k%d b%d d%d g%d n%d w%d\n  c(%.02f,%.02f,%f,%f)\n",
+        room->background_pattern, room->num_baddies, room->num_doors,
+        room->num_gravfields, room->num_nodes, room->num_walls,
+        room->camera_bounds.min_r, room->camera_bounds.r_span,
+        room->camera_bounds.min_theta, room->camera_bounds.theta_span);
   WRITE_SCRIPT('s', room->on_start);
   for (int i = 0; i < room->num_walls; ++i) {
     const az_wall_spec_t *wall = &room->walls[i];

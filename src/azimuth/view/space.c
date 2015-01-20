@@ -29,6 +29,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/vector.h"
+#include "azimuth/view/background.h"
 #include "azimuth/view/baddie.h"
 #include "azimuth/view/cutscene.h"
 #include "azimuth/view/door.h"
@@ -187,6 +188,11 @@ static void draw_darkness(az_space_state_t *state) {
 }
 
 static void draw_camera_view(az_space_state_t *state) {
+  const az_room_t *room =
+    &state->planet->rooms[state->ship.player.current_room];
+  az_draw_background_pattern(
+      room->background_pattern, &room->camera_bounds, state->camera.center,
+      state->clock);
   az_draw_background_nodes(state);
   glPushMatrix(); {
     glLoadIdentity();

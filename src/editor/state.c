@@ -315,6 +315,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
     eroom->marker_flag = room->marker_flag;
     eroom->camera_bounds = room->camera_bounds;
     eroom->on_start = az_clone_script(room->on_start);
+    eroom->background_pattern = room->background_pattern;
     // Convert baddies:
     AZ_LIST_INIT(eroom->baddies, room->num_baddies);
     for (int i = 0; i < room->num_baddies; ++i) {
@@ -628,6 +629,7 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     room->marker_flag = eroom->marker_flag;
     room->camera_bounds = eroom->camera_bounds;
     room->on_start = az_clone_script(eroom->on_start);
+    room->background_pattern = eroom->background_pattern;
     // Convert baddies:
     room->num_baddies = AZ_LIST_SIZE(eroom->baddies);
     room->baddies = AZ_ALLOC(room->num_baddies, az_baddie_spec_t);

@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+#include "azimuth/state/background.h"
 #include "azimuth/state/baddie.h" // for az_baddie_kind_t
 #include "azimuth/state/camera.h" // for az_camera_bounds_t
 #include "azimuth/state/door.h" // for az_door_kind_t
@@ -113,6 +114,7 @@ typedef struct {
   az_flag_t marker_flag; // if MARKER, show marker until this flag is set
   az_camera_bounds_t camera_bounds;
   az_script_t *on_start; // NULL if no script
+  az_background_pattern_t background_pattern;
   // Initial room objects:
   int num_baddies;
   az_baddie_spec_t *baddies;
