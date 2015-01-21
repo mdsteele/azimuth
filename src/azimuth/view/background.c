@@ -44,7 +44,7 @@ static const az_background_data_t background_datas[] = {
     .parallax = 0.25, .repeat_horz = 200.0, .repeat_vert = 200.0
   },
   [AZ_BG_GREEN_HEX_TRELLIS] = {
-    .parallax = 0.2, .repeat_horz = 180.0, .repeat_vert = 120.0
+    .parallax = 0.2, .repeat_horz = 180.0, .repeat_vert = 104.0
   }
 };
 
@@ -110,18 +110,47 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       } glEnd();
     } break;
     case AZ_BG_GREEN_HEX_TRELLIS: {
-      // TODO: Make this look better.
-      glBegin(GL_LINES); {
-        glColor3f(0, 0.25, 0);
-        glVertex2f(-90.0, -30.0); glVertex2f(-60.0, -30.0);
-        glVertex2f(90.0, -30.0); glVertex2f(60.0, -30.0);
-        glVertex2f(-60.0, -30.0); glVertex2f(-45.0, 0.0);
-        glVertex2f(60.0, -30.0); glVertex2f(45.0, 0.0);
-        glVertex2f(-60.0, -30.0); glVertex2f(-30.0, -90.0);
-        glVertex2f(60.0, -30.0); glVertex2f(30.0, -90.0);
-        glVertex2f(-30.0, -90.0); glVertex2f(30.0, -90.0);
-        glVertex2f(-30.0, -90.0); glVertex2f(-45.0, -120.0);
-        glVertex2f(30.0, -90.0); glVertex2f(45.0, -120.0);
+      const az_color_t color1 = {32, 48, 32, 255};
+      const az_color_t color2 = {24, 24, 24, 255};
+      const float thick1 = 3.0f;
+      const float thick2 = thick1 * (0.25 + 0.5 * sqrt(3));
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-45 - thick2, 0);
+        az_gl_color(color2); glVertex2f(-45 + thick2, 0);
+        az_gl_color(color1); glVertex2f(-60 - thick2, -26);
+        az_gl_color(color2); glVertex2f(-60 + thick2, -26);
+        az_gl_color(color1); glVertex2f(-30 - thick2, -78);
+        az_gl_color(color2); glVertex2f(-30 + thick2, -78);
+        az_gl_color(color1); glVertex2f(-45 - thick2, -104);
+        az_gl_color(color2); glVertex2f(-45 + thick2, -104);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(45 - thick2, 0);
+        az_gl_color(color2); glVertex2f(45 + thick2, 0);
+        az_gl_color(color1); glVertex2f(60 - thick2, -26);
+        az_gl_color(color2); glVertex2f(60 + thick2, -26);
+        az_gl_color(color1); glVertex2f(30 - thick2, -78);
+        az_gl_color(color2); glVertex2f(30 + thick2, -78);
+        az_gl_color(color1); glVertex2f(45 - thick2, -104);
+        az_gl_color(color2); glVertex2f(45 + thick2, -104);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1);
+        glVertex2f(-90, -26 + thick1); glVertex2f(-61, -26 + thick1);
+        az_gl_color(color2);
+        glVertex2f(-90, -26 - thick1); glVertex2f(-61, -26 - thick1);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1);
+        glVertex2f(90, -26 + thick1); glVertex2f(61, -26 + thick1);
+        az_gl_color(color2);
+        glVertex2f(90, -26 - thick1); glVertex2f(61, -26 - thick1);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1);
+        glVertex2f(-29, -78 + thick1); glVertex2f(29, -78 + thick1);
+        az_gl_color(color2);
+        glVertex2f(-29, -78 - thick1); glVertex2f(29, -78 - thick1);
       } glEnd();
     } break;
   }
