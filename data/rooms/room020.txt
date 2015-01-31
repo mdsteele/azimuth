@@ -1,4 +1,4 @@
-@R z0 p8/1 k0 b1 d2 g1 n50 w35
+@R z0 p8/1 k3 b1 d2 g1 n50 w35
   c(48469.79,320.93,1.629536,0.008697)
 $s:test23,hnez,test1,hnez,mus12,lock2,lock3;
 !W3 d33 x-3054.40 y48335.14 a1.633985 u0

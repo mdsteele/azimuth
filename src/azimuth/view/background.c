@@ -45,10 +45,51 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_GREEN_HEX_TRELLIS] = {
     .parallax = 0.2, .repeat_horz = 180.0, .repeat_vert = 104.0
+  },
+  [AZ_BG_YELLOW_PANELLING] = {
+    .parallax = 0.2, .repeat_horz = 360.0, .repeat_vert = 400.0
   }
 };
 
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(background_datas) == AZ_NUM_BG_PATTERNS);
+
+static void draw_rivet(az_color_t color1, az_color_t color2,
+                       float x, float y) {
+  const float r = 3;
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color1); glVertex2f(x, y); az_gl_color(color2);
+    glVertex2f(x + r, y); glVertex2f(x, y + r); glVertex2f(x - r, y);
+    glVertex2f(x, y - r); glVertex2f(x + r, y);
+  } glEnd();
+}
+
+static void draw_panel(az_color_t color1, az_color_t color2,
+                       float x_min, float y_min, float x_max, float y_max) {
+  const float gap = 1;
+  const float thick = 5;
+  const float space = 20;
+  const float hspace = space / 2;
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1); glVertex2f(x_min + gap, y_min + gap);
+    az_gl_color(color2); glVertex2f(x_min + thick, y_min + thick);
+    az_gl_color(color1); glVertex2f(x_max - gap, y_min + gap);
+    az_gl_color(color2); glVertex2f(x_max - thick, y_min + thick);
+    az_gl_color(color1); glVertex2f(x_max - gap, y_max - gap);
+    az_gl_color(color2); glVertex2f(x_max - thick, y_max - thick);
+    az_gl_color(color1); glVertex2f(x_min + gap, y_max - gap);
+    az_gl_color(color2); glVertex2f(x_min + thick, y_max - thick);
+    az_gl_color(color1); glVertex2f(x_min + gap, y_min + gap);
+    az_gl_color(color2); glVertex2f(x_min + thick, y_min + thick);
+  } glEnd();
+  for (float x = x_min + hspace; x < x_max; x += space) {
+    draw_rivet(color1, color2, x, y_min + hspace);
+    draw_rivet(color1, color2, x, y_max - hspace);
+  }
+  for (float y = y_min + hspace + space; y < y_max - space; y += space) {
+    draw_rivet(color1, color2, x_min + hspace, y);
+    draw_rivet(color1, color2, x_max - hspace, y);
+  }
+}
 
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
@@ -152,6 +193,36 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
         az_gl_color(color2);
         glVertex2f(-29, -78 - thick1); glVertex2f(29, -78 - thick1);
       } glEnd();
+    } break;
+    case AZ_BG_YELLOW_PANELLING: {
+      const az_color_t color1 = {60, 45, 30, 255};
+      const az_color_t color2 = {30, 20, 10, 255};
+      const az_color_t color3 = {40, 35, 20, 255};
+      const float horz = 30;
+      const float vert = 50;
+      const float bottom =
+        -background_datas[AZ_BG_YELLOW_PANELLING].repeat_vert;
+      draw_panel(color2, color1, -5 * horz, -4 * vert, -1 * horz, 0);
+      draw_panel(color2, color1, -1 * horz, -4 * vert,  1 * horz, 0);
+      draw_panel(color2, color1, -5 * horz, -6 * vert,  1 * horz, -4 * vert);
+      draw_panel(color2, color1,  1 * horz, -2 * vert,  5 * horz, 0);
+      draw_panel(color2, color1,  1 * horz, -6 * vert,  5 * horz, -2 * vert);
+      draw_panel(color2, color1, -5 * horz, -8 * vert, -3 * horz, -6 * vert);
+      draw_panel(color2, color1, -3 * horz, -8 * vert,  5 * horz, -6 * vert);
+      for (int sign = -1; sign <= 1; sign += 2) {
+        for (int y = bottom + 20; y <= 0; y += 20) {
+          glBegin(GL_TRIANGLE_STRIP); {
+            az_gl_color(color2);
+            glVertex2f(sign * (5 * horz + 2), y);
+            glVertex2f(sign * (5 * horz + 2), y - 19);
+            az_gl_color(color3);
+            glVertex2f(sign * 170, y);
+            glVertex2f(sign * 170, y - 19);
+            glVertex2f(sign * 180, y);
+            glVertex2f(sign * 180, y - 19);
+          } glEnd();
+        }
+      }
     } break;
   }
 }

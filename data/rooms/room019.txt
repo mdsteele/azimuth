@@ -1,4 +1,4 @@
-@R z0 p0 b0 d2 g1 n11 w30
+@R z0 p0 k3 b0 d2 g1 n11 w30
   c(48793.34,0.00,1.616286,0.000000)
 $s:test23,beqz/A,nix3,nix4,halt,A#test2,hnez,lock1,lock2;
 !W1 d50 x-2309.22 y48822.57 a-0.394337 u0
