@@ -99,6 +99,9 @@ static const int wall_data_indices[] = {
   // Volcanic rocks:
   128, 129, 130, // dark
   131, 132, 133, // light
+  // Glowing jewel columns:
+  154, 155, // thin
+  152, 153, // thick
   // Cinderbricks:
   22, 23, 31,
   // Green/gray metal blocks:

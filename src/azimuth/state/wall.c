@@ -356,6 +356,19 @@ static const az_vector_t wall_vertices_148[] = {
 static const az_vector_t wall_vertices_149[] = {
   {50, -50}, {50, 50}, {-50, 50}
 };
+static const az_vector_t wall_vertices_153[] = {
+  {50, 15}, {48, 21}, {46, 23}, {44, 24.2}, {42, 24.8}, {40, 25}, {-50, 25},
+  {-50, -25}, {40, -25}, {42, -24.8}, {44, -24.2}, {46, -23}, {48, -21},
+  {50, -15}
+};
+static const az_vector_t wall_vertices_154[] = {
+  {50, 15}, {-50, 15}, {-50, -15}, {50, -15}
+};
+static const az_vector_t wall_vertices_155[] = {
+  {50, 5}, {49, 11}, {48, 13}, {47, 14.2}, {46, 14.8}, {45, 15}, {-50, 15},
+  {-50, -15}, {45, -15}, {46, -14.8}, {47, -14.2}, {48, -13}, {49, -11},
+  {50, -5}
+};
 
 /*===========================================================================*/
 
@@ -1412,6 +1425,34 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {111, 130, 111, 255}, .color2 = {36, 48, 36, 255},
     .color3 = {36, 48, 36, 255},
     .elasticity = 0.5, .polygon = AZ_INIT_POLYGON(wall_vertices_1)
+  },
+  // Glowing jewel column thick:
+  [152] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {96, 64, 128, 40},
+    .color2 = {96, 64, 128, 196}, .color3 = {96, 64, 128, 196},
+    .underglow = {20, 32, 45, 255}, .impact_damage_coeff = 3.0,
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Glowing jewel column thick end cap:
+  [153] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {96, 64, 128, 40},
+    .color2 = {96, 64, 128, 196}, .color3 = {96, 64, 128, 196},
+    .underglow = {20, 32, 45, 255}, .impact_damage_coeff = 3.0,
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_153)
+  },
+  // Glowing jewel column thin:
+  [154] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {96, 64, 128, 40},
+    .color2 = {96, 64, 128, 196}, .color3 = {96, 64, 128, 196},
+    .underglow = {20, 32, 45, 255}, .impact_damage_coeff = 3.0,
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_154)
+  },
+  // Glowing jewel column thin end cap:
+  [155] = {
+    .style = AZ_WSTY_QUADSTRIP_213, .color1 = {96, 64, 128, 40},
+    .color2 = {96, 64, 128, 196}, .color3 = {96, 64, 128, 196},
+    .underglow = {20, 32, 45, 255}, .impact_damage_coeff = 3.0,
+    .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_155)
   },
 };
 
