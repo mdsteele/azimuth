@@ -33,6 +33,7 @@
 #include "azimuth/tick/baddie_forcefiend.h"
 #include "azimuth/tick/baddie_kilofuge.h"
 #include "azimuth/tick/baddie_machine.h"
+#include "azimuth/tick/baddie_magbeest.h"
 #include "azimuth/tick/baddie_myco.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
@@ -828,6 +829,15 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_SPIKED_VINE:
       az_tick_bad_spiked_vine(state, baddie, time);
+      break;
+    case AZ_BAD_MAGBEEST_HEAD:
+      az_tick_bad_magbeest_head(state, baddie, time);
+      break;
+    case AZ_BAD_MAGBEEST_LEGS_L:
+      az_tick_bad_magbeest_legs_l(state, baddie, time);
+      break;
+    case AZ_BAD_MAGBEEST_LEGS_R:
+      az_tick_bad_magbeest_legs_r(state, baddie, time);
       break;
   }
 
