@@ -449,6 +449,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2f(-20, 1.5); glVertex2f(-20, -1.5);
       } glEnd();
       break;
+    case AZ_PROJ_MAGMA_EXPLOSION: break; // invisible
     case AZ_PROJ_MEDIUM_EXPLOSION: break; // invisible
     case AZ_PROJ_MYCOSPORE:
       draw_spark(0.25 * proj->age, 8.0, (az_color_t){128, 96, 96, 0});

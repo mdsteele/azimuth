@@ -134,4 +134,30 @@ void az_draw_bad_magbeest_legs_r(const az_baddie_t *baddie, az_clock_t clock) {
   // TODO: draw base casing
 }
 
+void az_draw_bad_magma_bomb(const az_baddie_t *baddie, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_MAGMA_BOMB);
+  const float flare = baddie->armor_flare;
+  const bool blink = (baddie->cooldown < 1.5 &&
+                      0 != (int)(4 * baddie->cooldown) % 2);
+  const double radius = baddie->data->main_body.bounding_radius;
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.35f + 0.6f * flare, 0.35f, 0.35f); glVertex2f(0, 0);
+    glColor3f(0.1f + 0.4f * flare, 0.1f, 0.1f);
+    for (int i = 0; i <= 360; i += 20) {
+      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glBegin(GL_LINE_STRIP); {
+    if (blink) glColor3f(0.8, 0.6, 0.6);
+    else glColor3f(0.3, 0.1, 0.1);
+    glVertex2f(0, radius);
+    if (blink) glColor3f(1, 0.7, 0.7);
+    else glColor3f(0.6, 0.4, 0.4);
+    glVertex2f(0, 0);
+    if (blink) glColor3f(0.8, 0.6, 0.6);
+    else glColor3f(0.3, 0.1, 0.1);
+    glVertex2f(0, -radius);
+  } glEnd();
+}
+
 /*===========================================================================*/

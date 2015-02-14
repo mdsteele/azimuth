@@ -627,6 +627,7 @@ static void projectile_special_logic(az_space_state_t *state,
       break;
     case AZ_PROJ_BOMB:
     case AZ_PROJ_MEGA_BOMB:
+    case AZ_PROJ_MAGMA_EXPLOSION:
     case AZ_PROJ_MEDIUM_EXPLOSION:
     case AZ_PROJ_NUCLEAR_EXPLOSION:
       if (proj->age >= proj->data->lifetime) {

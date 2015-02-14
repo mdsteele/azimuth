@@ -913,6 +913,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_magbeest_legs_r(baddie, clock);
       draw_baddie_outline(baddie, frozen, 1.0); // TODO
       break;
+    case AZ_BAD_MAGMA_BOMB:
+      az_draw_bad_magma_bomb(baddie, clock);
+      break;
   }
 }
 

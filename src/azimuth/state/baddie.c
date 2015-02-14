@@ -901,27 +901,27 @@ static az_vector_t magbeest_long_leg_vertices[] = {
   {0, 10}, {180, 10}, {180, -10}, {0, -10}
 };
 static az_component_data_t magbeest_legs_l_components[] = {
-  { .polygon = AZ_INIT_POLYGON(magbeest_magnet_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_magnet_vertices), .immunities = ~0,
     .init_position = {20, 35}, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices), .immunities = ~0,
     .init_position = {-20, -25}, .init_angle = AZ_PI, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices), .immunities = ~0,
     .init_position = {-300, -25}, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices), .immunities = ~0,
     .init_position = {-20, 25}, .init_angle = AZ_PI, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices), .immunities = ~0,
     .init_position = {-300, 25}, .impact_damage = 20.0 }
 };
 static az_component_data_t magbeest_legs_r_components[] = {
-  { .polygon = AZ_INIT_POLYGON(magbeest_gatling_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_gatling_vertices), .immunities = ~0,
     .init_position = {20, -35}, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices), .immunities = ~0,
     .init_position = {-20, -25}, .init_angle = AZ_PI, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices), .immunities = ~0,
     .init_position = {-300, -25}, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_long_leg_vertices), .immunities = ~0,
     .init_position = {-20, 25}, .init_angle = AZ_PI, .impact_damage = 20.0 },
-  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices),
+  { .polygon = AZ_INIT_POLYGON(magbeest_short_leg_vertices), .immunities = ~0,
     .init_position = {-300, 25}, .impact_damage = 20.0 }
 };
 
@@ -1744,7 +1744,7 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
     .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_base_vertices),
-                   .impact_damage = 20.0 },
+                   .immunities = ~0, .impact_damage = 20.0 },
     DECL_COMPONENTS(magbeest_legs_l_components)
   },
   [AZ_BAD_MAGBEEST_LEGS_R] = {
@@ -1753,8 +1753,16 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
     .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_base_vertices),
-                   .impact_damage = 20.0 },
+                   .immunities = ~0, .impact_damage = 20.0 },
     DECL_COMPONENTS(magbeest_legs_r_components)
+  },
+  [AZ_BAD_MAGMA_BOMB] = {
+    .max_health = 20.0, .color = {80, 80, 80, 255},
+    .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .main_body = { .bounding_radius = 12.0, .impact_damage = 10.0,
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE |
+                                  AZ_DMGF_FLAME) },
   }
 };
 
