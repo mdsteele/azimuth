@@ -273,6 +273,11 @@ void az_add_random_pickup(az_space_state_t *state,
 
 /*===========================================================================*/
 
+const az_camera_bounds_t *az_current_camera_bounds(
+    const az_space_state_t *state) {
+  return &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+}
+
 bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,
                       az_baddie_t **baddie_out) {
   const int index = az_uid_index(uid);

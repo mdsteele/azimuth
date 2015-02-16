@@ -196,8 +196,7 @@ static void on_projectile_impact(az_space_state_t *state,
   }
   // Ice torpedos are special: on impact, they create a number of ice crystals.
   else if (proj->kind == AZ_PROJ_ICE_TORPEDO) {
-    const az_camera_bounds_t *bounds =
-      &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+    const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
     const double crystal_radius =
       az_get_baddie_data(AZ_BAD_ICE_CRYSTAL)->overall_bounding_radius;
     for (int i = 0; i < 20; ++i) {

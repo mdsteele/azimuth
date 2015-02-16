@@ -23,12 +23,23 @@
 #include <math.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/object.h"
 #include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/object.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+#define HEAD_POPDOWN_STATE 0
+#define HEAD_POPUP_STATE 1
+
+// How fast the head pops up/down, in pixels/second:
+#define HEAD_POP_SPEED 250
+// How far above baseline the head pops up:
+#define HEAD_POPUP_DIST 350
 
 /*===========================================================================*/
 
@@ -46,13 +57,97 @@ static az_vector_t choose_random_marker_position(az_space_state_t *state) {
   AZ_ASSERT_UNREACHABLE();
 }
 
+static az_baddie_t *lookup_legs(az_space_state_t *state, az_baddie_t *baddie,
+                                int cargo_index) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  az_object_t object;
+  if (az_lookup_object(state, baddie->cargo_uuids[cargo_index], &object) &&
+      object.type == AZ_OBJ_BADDIE) {
+    return object.obj.baddie;
+  } else return NULL;
+}
+
+static void arrange_head_piston(az_baddie_t *baddie, int piston_index,
+                                az_vector_t abs_foot_pos) {
+  const az_vector_t rel_foot_pos =
+    az_vrotate(az_vsub(abs_foot_pos, baddie->position), -baddie->angle);
+  const double rel_angle = az_vtheta(rel_foot_pos);
+  const az_vector_t rel_base_pos = az_vwithlen(rel_foot_pos, 60);
+  const az_vector_t delta = az_vsub(rel_base_pos, rel_foot_pos);
+  for (int i = 0; i < 5; ++i) {
+    az_component_t *component = &baddie->components[5 * piston_index + i];
+    component->position = az_vadd(rel_foot_pos, az_vmul(delta, 0.25 * i));
+    component->angle = rel_angle;
+  }
+}
+
+static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
+                             double delta) {
+  az_shake_camera(&state->camera, 0.0, 1.0);
+  const az_vector_t abs_foot_0_pos =
+    az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
+            baddie->position);
+  const az_vector_t abs_foot_1_pos =
+    az_vadd(az_vrotate(baddie->components[5].position, baddie->angle),
+            baddie->position);
+  az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
+  arrange_head_piston(baddie, 0, abs_foot_0_pos);
+  arrange_head_piston(baddie, 1, abs_foot_1_pos);
+}
+
+/*===========================================================================*/
+
 void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
                                double time) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  az_baddie_t *legs_l = lookup_legs(state, baddie, 0);
+  az_baddie_t *legs_r = lookup_legs(state, baddie, 1);
+  if (legs_l == NULL || legs_l->kind != AZ_BAD_MAGBEEST_LEGS_L ||
+      legs_r == NULL || legs_r->kind != AZ_BAD_MAGBEEST_LEGS_R) return;
+  if (az_ship_is_decloaked(&state->ship)) {
+    baddie->components[10].angle =
+      az_mod2pi(az_vtheta(az_vsub(state->ship.position, baddie->position)) -
+                baddie->angle);
+  }
+  const double baseline =
+    az_current_camera_bounds(state)->min_r - AZ_SCREEN_HEIGHT/2;
+  const double head_top =
+    az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
+  switch (baddie->state) {
+    case HEAD_POPDOWN_STATE:
+      if (head_top > baseline) {
+        head_pop_up_down(state, baddie, -HEAD_POP_SPEED * time);
+      } else {
+        baddie->temp_properties |= AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING;
+      }
+      if (baddie->cooldown <= 0.0) {
+        baddie->position = choose_random_marker_position(state);
+        baddie->angle = az_vtheta(baddie->position);
+        arrange_head_piston(baddie, 0, az_vadd(baddie->position,
+            az_vpolar(50, baddie->angle + AZ_DEG2RAD(110))));
+        arrange_head_piston(baddie, 1, az_vadd(baddie->position,
+            az_vpolar(50, baddie->angle - AZ_DEG2RAD(110))));
+        baddie->state = HEAD_POPUP_STATE;
+        baddie->cooldown = 3.0;
+      }
+      break;
+    case HEAD_POPUP_STATE:
+      if (head_top < baseline + HEAD_POPUP_DIST) {
+        head_pop_up_down(state, baddie, HEAD_POP_SPEED * time);
+      }
+      if (baddie->cooldown <= 0.0) {
+        baddie->state = HEAD_POPDOWN_STATE;
+        baddie->cooldown = 5.0;
+      }
+      break;
+    default:
+      baddie->state = HEAD_POPDOWN_STATE;
+      break;
+  }
   // TODO: control legs
   // TODO: laser sight
   // Magma bombs:
-  if (baddie->cooldown <= 0.0) {
+  if (false && baddie->cooldown <= 0.0) {
     baddie->cooldown = 3.0;
     const az_vector_t target = choose_random_marker_position(state);
     az_baddie_t *bomb = az_add_baddie(state, AZ_BAD_MAGMA_BOMB,

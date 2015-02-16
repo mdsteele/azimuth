@@ -95,8 +95,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
         // Try to teleport to a clear spot; if successful within a reasonable
         // number of tries, start phasing in (otherwise, we'll try again next
         // frame).
-        const az_camera_bounds_t *bounds =
-          &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+        const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
         const double camera_r = az_vnorm(state->camera.center);
         const double min_r =
           fmax(bounds->min_r, camera_r - AZ_SCREEN_HEIGHT/2);

@@ -233,6 +233,10 @@ void az_add_random_pickup(az_space_state_t *state,
                           az_pickup_flags_t potential_pickups,
                           az_vector_t position);
 
+// Gets the camera bounds for the current room.
+const az_camera_bounds_t *az_current_camera_bounds(
+    const az_space_state_t *state);
+
 // Look up the specified object based on its UID and return true, or return
 // false if the object with that UID doesn't currently exist.
 bool az_lookup_baddie(az_space_state_t *state, az_uid_t uid,

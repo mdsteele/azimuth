@@ -29,8 +29,7 @@
 
 void az_tick_camera(az_space_state_t *state, az_vector_t goal, double time) {
   az_camera_t *camera = &state->camera;
-  const az_camera_bounds_t *bounds =
-    &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   az_track_camera_towards(camera, az_clamp_to_bounds(bounds, goal), time);
   if (camera->wobble_goal > camera->wobble_intensity) {
     camera->wobble_intensity += time;

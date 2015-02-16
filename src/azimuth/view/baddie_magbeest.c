@@ -60,8 +60,54 @@ static void draw_magbeest_leg(const az_baddie_t *baddie, int leg_index) {
 
 void az_draw_bad_magbeest_head(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
-  // TODO: draw casing
-  // TODO: draw eye
+  const float flare = baddie->armor_flare;
+  // Pistons:
+  for (int i = 0; i < 10; ++i) {
+    const az_component_t *component = &baddie->components[i];
+    const az_vector_t vertex = baddie->data->components[i].polygon.vertices[0];
+    const float x_max = vertex.x;
+    const float thick = vertex.y;
+    glPushMatrix(); {
+      az_gl_translated(component->position);
+      az_gl_rotated(component->angle);
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(-80,  thick); glVertex2f(x_max,  thick);
+        glColor3f(0.4, 0.5, 0.5);
+        glVertex2f(-80,      0); glVertex2f(x_max,      0);
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(-80, -thick); glVertex2f(x_max, -thick);
+      } glEnd();
+    } glPopMatrix();
+  }
+  // Casing:
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.4, 0.5, 0.5);
+    const az_polygon_t polygon = baddie->data->main_body.polygon;
+    for (int i = 0; i < polygon.num_vertices; ++i) {
+      az_gl_vertex(polygon.vertices[i]);
+    }
+  } glEnd();
+  // Eye:
+  glPushMatrix(); {
+    const az_component_t *eye = &baddie->components[10];
+    assert(!az_vnonzero(eye->position));
+    az_gl_rotated(eye->angle);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.25f + 0.75f * flare, 0.25f, 0.25f); glVertex2f(0, 0);
+      glColor3f(0.07f + 0.3f * flare, 0.07f, 0.07f);
+      const double radius = baddie->data->components[10].bounding_radius;
+      for (int i = 0; i <= 360; i += 20) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(1, 0.3, 0); glVertex2f(15, 0); glColor4f(1, 0.3, 0, 0);
+      for (int i = 0; i <= 360; i += 30) {
+        glVertex2d(15 + 4 * cos(AZ_DEG2RAD(i)), 6 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
 }
 
 void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {

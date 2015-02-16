@@ -35,8 +35,7 @@
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
-  const az_camera_bounds_t *bounds =
-    &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   // Open/close jaws:
   const double jaw_angle =

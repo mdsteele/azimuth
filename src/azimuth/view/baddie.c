@@ -903,7 +903,6 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_MAGBEEST_HEAD:
       az_draw_bad_magbeest_head(baddie, clock);
-      draw_baddie_outline(baddie, frozen, 1.0); // TODO
       break;
     case AZ_BAD_MAGBEEST_LEGS_L:
       az_draw_bad_magbeest_legs_l(baddie, clock);

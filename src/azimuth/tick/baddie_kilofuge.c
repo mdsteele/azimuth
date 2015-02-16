@@ -216,8 +216,7 @@ static void move_body(
   else relax_pincers(baddie, time);
   turn_eyes_towards_ship(state, baddie, time);
   // Determine our new position, moving along the center of the room.
-  const az_camera_bounds_t *bounds =
-    &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   const double mid_r = bounds->min_r + 0.5 * bounds->r_span;
   const az_vector_t old_position = baddie->position;
   const double old_angle = baddie->angle;

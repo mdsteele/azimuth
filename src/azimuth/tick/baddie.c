@@ -701,8 +701,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         // Check if we're about to hit a wall.
         const double dist =
           az_baddie_dist_to_wall(state, baddie, 100.0, rel_angle);
-        const az_camera_bounds_t *bounds =
-          &state->planet->rooms[state->ship.player.current_room].camera_bounds;
+        const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
         // If we've somehow ended up within a wall (or nearly so) or outside
         // the room, head back to the ship position to try to fix it.
         if (dist < 1.0 || !az_position_visible(bounds, baddie->position)) {
