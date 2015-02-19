@@ -261,6 +261,13 @@ bool az_arc_circle_hits_polygon_trans(
 
 /*===========================================================================*/
 
+// Find the position of the knee of a two-piece leg, given the location of the
+// hip and the foot, the lengths of the two leg segments, and the rough
+// direction in which the knee should point (to choose between the two possible
+// solutions).
+az_vector_t az_find_knee(az_vector_t hip, az_vector_t foot, double thigh,
+                         double shin, az_vector_t knee_dir);
+
 // Given the position and velocity of a target relative to the shooter, and the
 // speed of a projectile, determine if it's possible to fire the projectile
 // such that it will hit the target.  If so, store the position (relative to

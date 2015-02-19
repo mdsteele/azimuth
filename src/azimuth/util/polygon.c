@@ -811,6 +811,36 @@ bool az_arc_circle_hits_polygon_trans(
 
 /*===========================================================================*/
 
+az_vector_t az_find_knee(az_vector_t hip, az_vector_t foot, double thigh,
+                         double shin, az_vector_t knee_dir) {
+  const double dist = az_vdist(hip, foot);
+  // Here is the triangle formed by the leg, with vertices H (hip), K (knee),
+  // and F (foot) and edge lengths t (thigh), s (shin), and d (dist):
+  //        K
+  //      t/ \s
+  //      /   \
+  //     H--d--F
+  // We know the location of H and F and want to find the location of K.  Using
+  // H as our origin, and HF as our x-axis, we can decompose K into (x, y)
+  // coordinates.  If p is the angle between HF and HK, then x = t*cos(p).
+  // Moreover, by the law of cosines, we have:
+  //   s^2 = d^2 + t^2 - 2*d*t*cos(p)
+  //   s^2 = d^2 + t^2 - 2*d*x
+  //   x = (d^2 + t^2 - s^2) / (2*d)
+  const double knee_x =
+    (dist * dist + thigh * thigh - shin * shin) / (2 * dist);
+  // Now that we have x and t, we can use the Pythagorean theorem to find y:
+  const double knee_y = sqrt(fmax(0, thigh * thigh - knee_x * knee_x));
+  // Now we just need to transform (x, y) back into our original coordinate
+  // space.  The one thing to keep in mind is that we want to make the y-axis
+  // point in roughly the same direction as knee_dir.
+  const az_vector_t unit_x = az_vunit(az_vsub(foot, hip));
+  az_vector_t unit_y = az_vrot90ccw(unit_x);
+  if (az_vdot(unit_y, knee_dir) < 0) unit_y = az_vneg(unit_y);
+  return az_vadd(hip, az_vadd(az_vmul(unit_x, knee_x),
+                              az_vmul(unit_y, knee_y)));
+}
+
 bool az_lead_target(az_vector_t rel_position, az_vector_t rel_velocity,
                     double proj_speed, az_vector_t *rel_impact_out) {
   assert(proj_speed > 0.0);

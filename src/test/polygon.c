@@ -1064,6 +1064,29 @@ void test_arc_circle_hits_polygon_trans(void) {
 
 /*===========================================================================*/
 
+void test_find_knee(void) {
+  // Leg forms equilateral triangle:
+  EXPECT_VAPPROX(((az_vector_t){2, 2 + sqrt(3)}), az_find_knee(
+      (az_vector_t){1, 2}, (az_vector_t){3, 2}, 2, 2, az_vpolar(1, 1.5)));
+  EXPECT_VAPPROX(((az_vector_t){2, 2 - sqrt(3)}), az_find_knee(
+      (az_vector_t){1, 2}, (az_vector_t){3, 2}, 2, 2, az_vpolar(1, -0.1)));
+  // Leg forms right triangle:
+  EXPECT_VAPPROX(((az_vector_t){-2, 3}), az_find_knee(
+      (az_vector_t){-2, 6}, (az_vector_t){-6, 3}, 3, 4, az_vpolar(1, -0.5)));
+  EXPECT_VAPPROX(((az_vector_t){-6, 6}), az_find_knee(
+      (az_vector_t){-2, 6}, (az_vector_t){-6, 3}, 4, 3, az_vpolar(1, 3.0)));
+  // Leg forms straight line:
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), az_find_knee(
+      (az_vector_t){-1, -1}, (az_vector_t){4, 4}, 3*sqrt(2), 2*sqrt(2),
+      az_vpolar(1, 1.5)));
+  EXPECT_VAPPROX(((az_vector_t){2, 2}), az_find_knee(
+      (az_vector_t){-1, -1}, (az_vector_t){4, 4}, 3*sqrt(2), 2*sqrt(2),
+      az_vpolar(1, -1.5)));
+  // Hip/foot dist longer than leg itself (should handle gracefully):
+  EXPECT_VAPPROX(((az_vector_t){2.3125, 5}), az_find_knee(
+      (az_vector_t){-2, 5}, (az_vector_t){6, 5}, 3, 2, az_vpolar(1, 1.5)));
+}
+
 void test_lead_target(void) {
   az_vector_t impact = nix;
 

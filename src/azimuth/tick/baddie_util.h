@@ -29,19 +29,19 @@
 /*===========================================================================*/
 // Detecting ship:
 
-// Return true if the ship is present and within the given range of the baddie;
-// false otherwise.
+// Return true if the ship is decloaked and within the given range of the
+// baddie; false otherwise.
 bool az_ship_in_range(
     const az_space_state_t *state, const az_baddie_t *baddie, double range);
 
-// Return true if the ship is present and if the vector from the baddie to the
-// ship is within the given angle of the baddie's forward direction plus the
-// offset; false otherwise.
+// Return true if the ship is decloaked and if the vector from the baddie to
+// the ship is within the given angle of the baddie's forward direction plus
+// the offset; false otherwise.
 bool az_ship_within_angle(
     const az_space_state_t *state, const az_baddie_t *baddie,
     double offset, double angle);
 
-// Return true if the ship is present and if the baddie has a clear
+// Return true if the ship is decloaked and if the baddie has a clear
 // line-of-sight to the ship (blocked by walls/doors, but not by other
 // baddies); false otherwise.
 bool az_can_see_ship(az_space_state_t *state, const az_baddie_t *baddie);
