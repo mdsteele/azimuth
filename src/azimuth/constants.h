@@ -107,10 +107,6 @@
 /*===========================================================================*/
 // Weapons:
 
-// How much damage the BEAM gun normally deals per second:
-#define AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND 15.0
-// How much energy the BEAM gun normally uses per second:
-#define AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND 75.0
 // How much rocket ammo is used up when we fire a hyper rocket:
 #define AZ_ROCKETS_PER_HYPER_ROCKET 3
 // How much rocket ammo is used up when we fire a gun/rocket combo:

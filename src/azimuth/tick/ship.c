@@ -50,6 +50,10 @@
 #define AZ_ORDN_CHARGING_TIME 0.6
 // How much damage triple-gun projectiles do compared to normal ones:
 #define AZ_TRIPLE_DAMAGE_MULT 0.8
+// How much damage the BEAM gun normally deals per second:
+#define AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND 20.0
+// How much energy the BEAM gun normally uses per second:
+#define AZ_BEAM_GUN_BASE_ENERGY_PER_SECOND 50.0
 // How long it takes the ship's shield flare to die down, in seconds:
 #define AZ_SHIP_SHIELD_FLARE_TIME 0.5
 // Wall elasticity for closed doors:
@@ -466,11 +470,11 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     case AZ_GUN_NONE: break;
     case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
     case AZ_GUN_FREEZE: break;
-    case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.7; break;
-    case AZ_GUN_HOMING: energy_cost *= 1.5; damage_mult *= 0.5; break;
-    case AZ_GUN_PHASE: energy_cost *= 2.0; break;
-    case AZ_GUN_BURST: energy_cost *= 2.0; damage_mult *= 1.5; break;
-    case AZ_GUN_PIERCE: energy_cost *= 3.0; damage_mult *= 2.0; break;
+    case AZ_GUN_TRIPLE: energy_cost *= 2.0; damage_mult *= 0.8; break;
+    case AZ_GUN_HOMING: damage_mult *= 0.5; break;
+    case AZ_GUN_PHASE: break;
+    case AZ_GUN_BURST: damage_mult *= 1.5; break;
+    case AZ_GUN_PIERCE: energy_cost *= 2.0; damage_mult *= 2.0; break;
     case AZ_GUN_BEAM: AZ_ASSERT_UNREACHABLE();
   }
   if (!try_use_energy(ship, energy_cost, true)) return;
