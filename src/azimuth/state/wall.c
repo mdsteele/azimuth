@@ -369,6 +369,18 @@ static const az_vector_t wall_vertices_155[] = {
   {-50, -15}, {45, -15}, {46, -14.8}, {47, -14.2}, {48, -13}, {49, -11},
   {50, -5}
 };
+static const az_vector_t wall_vertices_156[] = {
+  {-60, 0}, {-55, -8}, {-46, -9}, {-35, 0}, {-20, 15}, {-7, 18},
+  {0, 18}, {12, 12}, {28, 11}, {47, -9}, {55, -8},
+  {60, 0}, {55, 9}, {50, 10}, {31, 26}, {16, 26}, {2, 34},
+  {-11, 31}, {-23, 30}, {-40, 22}, {-50, 10}, {-55, 8}
+};
+static const az_vector_t wall_vertices_157[] = {
+  {-115, 0}, {-110, -8}, {-92, -7}, {-70, 5}, {-40, 15}, {-14, 18},
+  {0, 18}, {24, 12}, {56, 11}, {94, -9}, {110, -8},
+  {115, 0}, {110, 9}, {100, 10}, {62, 26}, {32, 26}, {4, 34},
+  {-22, 31}, {-46, 30}, {-80, 22}, {-100, 10}, {-110, 8}
+};
 
 /*===========================================================================*/
 
@@ -1453,6 +1465,20 @@ static az_wall_data_t wall_datas[] = {
     .color2 = {96, 64, 128, 196}, .color3 = {96, 64, 128, 196},
     .underglow = {20, 32, 45, 255}, .impact_damage_coeff = 3.0,
     .elasticity = 0.4, .polygon = AZ_INIT_POLYGON(wall_vertices_155)
+  },
+  // Short green twisted vine:
+  [156] = {
+    .style = AZ_WSTY_QUADSTRIP_ALT_213, .color1 = {70, 80, 40, 255},
+    .color2 = {24, 40, 32, 255}, .color3 = {24, 40, 32, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_156)
+  },
+  // Long green twisted vine:
+  [157] = {
+    .style = AZ_WSTY_QUADSTRIP_ALT_213, .color1 = {70, 80, 40, 255},
+    .color2 = {24, 40, 32, 255}, .color3 = {24, 40, 32, 255},
+    .elasticity = 0.3, .impact_damage_coeff = 4.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_157)
   },
 };
 

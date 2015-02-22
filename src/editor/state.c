@@ -94,6 +94,8 @@ static const int wall_data_indices[] = {
   // Jungle grass walls:
   114, 115, 116, 117, 113, // green
   135, 136, 137, 138, 134, // orange
+  // Green twisted vines:
+  156, 157,
   // Red-glowing ash boulders:
   123, 124,
   // Volcanic rocks:
