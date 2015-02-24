@@ -1,4 +1,4 @@
-Next flag: 112
+Next flag: 115
 
 Bosses
 ======
@@ -34,6 +34,9 @@ Comm Consoles
 76: Used comm console in Nandiar room 135
 77: Used comm console in Barrag room 295, unlocked doors to deep Barrag
 80: Used comm console in Barrag room 232
+112: Used comm console in Voquan room 345
+113: Used comm console in Sarvari room 414
+114: Used comm console in Core room 148
 
 Map Markers
 ===========

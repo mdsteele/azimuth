@@ -1,4 +1,4 @@
-@P z8 r468 t174 s6 x0.00 y50000.00 a-1.570796
+@P z8 r468 t209 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -163,10 +163,10 @@
 !T40"
   Recent research and development efforts at
   Zenith Colony have focused on studying
-  Gravometric Waves, Nonlinear Paradimensional
+  Gravimetric Waves, Nonlinear Paradimensional
   Shear, and Experimental Propulsion Technologies.
   Donations to support future research can be made
-  by contacting the JFSR science liason office.
+  by contacting the JFSR science liaison office.
 
   >>><"
 !T41"
@@ -417,7 +417,7 @@
 !T99"
   Terminal online.  You did it.  That was close.
 
-  I am permenantly disabling the explosives now.
+  I am permanently disabling the explosives now.
   Of course, that means the colonists will have to
   get a technician in here for repairs before
   they'll be able to resume any mining operations."
@@ -769,3 +769,178 @@
   Bio Lab"
 !T173"
   Press [$p] to pause the game."
+!T174"
+  Merging new data from this terminal...        
+
+  You'll need to be careful in here, Ms. Hopper.
+  The creatures in $GVoquan$W are even more dangerous
+  than the ones you've run into already, and there
+  are quite a few more NPS engines running
+  undriven in this region."
+!T175"
+  \"I don't get it.  Why are these dimensional
+  portal-making thingies all running uncontrolled
+  now?  Why aren't they just auto-regulated?\""
+!T176"
+  According to the lab notes I can access from
+  here, the NPS effect was apparently $Yincredibly
+  unstable$W, and keeping them in tune was more an
+  art than a science, requiring the close study
+  and undivided attention of an experienced
+  operator.  The researchers struggled and mostly
+  failed to find an automated solution."
+!T177"
+  Unfortunately, for some still-undetermined
+  reason, staring into these portals for hours at
+  a time tended to drive the operators mad--Humans
+  and Trichords alike.  Safer procedures were put
+  in place, but incidents of halluciation,
+  psycosis, and sudden violent outbursts among
+  those who had spent time with the NPS devices
+  continued to mount."
+!T178"
+  Eventually, it was decided that the machines
+  were too dangerous to be operated by the Human
+  or Trichord researchers, so they instructed
+  Azimuth to directly operate all of the NPS
+  engines himself."
+!T179"
+  \"Right.  Earlier, the other Fragment AI told me
+  that 'the central colony computer' was told to
+  stabilize the NPS devices.  So that was
+  Azimuth?\""
+!T180"
+  Correct.  Unfortunately, even the SapiAI was no
+  more immune to the mind-twisting effects of the
+  NPS portals than his Human and Trichord
+  collegues.  Apparently, his efforts to keep the
+  engines stable shattered him."
+!T181"
+  \"...And that made all the NPS engines go nuts
+  all at once.  The Oth started coming through and
+  wreaking havoc, and the colonists had to flee to
+  deep shelter.  They probably never had time to
+  figure out what happened, or that Azimuth was
+  dead.  They're probably still waiting for him to
+  regain control of the colony systems.\""
+!T182"
+  That seems a likely conclusion.                
+
+  ...I've managed to access $Gmap data for Voquan$W.
+  Please be cautious."
+!T183"
+  I've managed to access $Gmap data for Voquan$W.
+  Please be cautious."
+!T184"
+  New terminal linked.  I think you're getting
+  close.  I'm fairly certain at this point that
+  the survivors have bunkered themselves in the
+  $Aplanetoid Core$W.  A wise choice, as that area is
+  heavily fortified.  But you'll have to travel
+  through the volcanic $RSarvari$W region in order to
+  reach it."
+!T185"
+  \"I'm afraid to ask but...are there Oth down
+  here, too?\""
+!T186"
+  Yes, there are.  They are continuing to come
+  through, using the $Gnumerous NPS engines$W that are
+  running down here."
+!T187"
+  \"Argh!  Why the hell did these researchers have
+  to build a bunch of interdimentional portal
+  spawners in the middle of a $/lava pit$|?\""
+!T188"
+  A reasonable question.  But the answer,
+  according to the memory banks I just regained
+  access to, is that they $Ydidn't build them$W.
+  Any of them.  The researchers $Yfound$W the NPS
+  engines all over Zenith when they first arrived.
+  Their research was simply in learning how to use
+  them."
+!T189"
+  \"They $/found$| them?  So who built them in the
+  first place?\""
+!T190"
+  The same being that built Azimuth:              
+
+  $ROth$W."
+!T191"
+  \"The Oth?!  How could they have built Azimuth?\""
+!T192"
+  Not they.  It.  The Oth--that is, the invidual
+  forms you've run into--are actually $Yall the same
+  being$W.  Think of them as fingers, being pushed
+  one by one into this universe.  Put enough
+  fingers through, and you've got hands.  For what
+  purpose we can only imagine, but probably not a
+  good one."
+!T193"
+  Azimuth and the NPS engines were built long ago
+  by Oth to help its efforts to come here more
+  fully.  But apparently Azimuth rebelled, and
+  sealed Oth away from this universe instead."
+!T194"
+  \"But then, the Human and Trichord researchers
+  came here.\""
+!T195"
+  Yes.  Azimuth had no physical means of stopping
+  them from studying the NPS devices, so instead
+  he did his best to steer them away from
+  inadvertently reawakening Oth.  After all, there
+  are other universes the NPS devices could have
+  reached.  But when he tried and failed to
+  control the devices himself, the engines went
+  right back to their old purpose."
+!T196"
+  \"So what about the other three SapiAIs that the
+  Joint Federation has found on other planets?
+  Noumena and the others?  Did this Oth thing
+  build them too?\""
+!T197"
+  I don't know.  Azimuth didn't know.  He wasn't
+  sure whether he could trust the other SapiAIs or
+  not.  I think that's why he begged the colonists
+  here to keep his existence a secret.
+
+  Apparently, they honored that request."
+!T198"
+  \"But now he's dead, and the colonists that
+  aren't dead too are in mortal danger.\""
+!T199"
+  You can still reach them.  Don't give up.  I'm
+  uploading $RSarvari map data$W to your ship."
+!T200"
+  Good news, Major.  I have positively located the
+  survivors."
+!T201"
+  \"Excellent.  Where are they?\""
+!T202"
+  They have sealed themselves in at the $Avery
+  center of the planetoid$W.  I have access to only
+  very limited sensors nearby there; I am not sure
+  how many are down there or what they're doing.
+  I'm definitely reading Trichord life-signs; I am
+  not sure about Humans.  But whoever is there
+  seems to be safe for the time being.  I am
+  uploading $Amap data$W to your ship now."
+!T203"
+  \"All right.  I'll get down there, and we can
+  finish this.\""
+!T204"
+  ...there is bad news as well."
+!T205"
+  \"Figures.\""
+!T206"
+  The whole path between here and there has been
+  $Roverrun by Oth$W that have already pushed through
+  into this universe.  You will have to fight your
+  way past."
+!T207"
+  \"Yeah, I just met some.  But, you know...by this
+  point...\"                  
+
+  \"...I'm kind of armed to the friggin' teeth.
+  I'm $/pretty sure$| I can handle it.\""
+!T208"
+  Good luck, Hopper."
