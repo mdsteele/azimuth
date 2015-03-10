@@ -28,6 +28,10 @@
 
 /*===========================================================================*/
 
+static void gl_gray(GLfloat gray) {
+  glColor3f(gray, gray, gray);
+}
+
 static void draw_drill_spikes(double angle_offset, az_clock_t clock) {
   for (int i = 0; i < 4; ++i) {
     const double radians =
@@ -806,6 +810,19 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glColor3f(0.25, 0.25, 0.25); // dark gray
         glVertex2f(30, -50); glVertex2f(-30, -50);
       } glEnd();
+      for (int i = 0; i < 4; ++i) {
+        const double theta = AZ_DEG2RAD(22.5 + 45 * i);
+        const double yc = 50 * cos(theta);
+        glBegin(GL_TRIANGLE_STRIP); {
+          const double semi = 0.5 + 0.5 * sin(theta);
+          gl_gray(0.1 + 0.53 * sin(theta));
+          glVertex2d(-30, yc + semi); glVertex2d(30, yc + semi);
+          gl_gray(0.1 + 0.43 * sin(theta));
+          glVertex2d(-30, yc);        glVertex2d(30, yc);
+          gl_gray(0.1 + 0.53 * sin(theta));
+          glVertex2d(-30, yc - semi); glVertex2d(30, yc - semi);
+        } glEnd();
+      }
       break;
     case AZ_DOOD_RED_TUBE_INSIDE:
       glBegin(GL_QUAD_STRIP); {

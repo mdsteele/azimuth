@@ -48,6 +48,13 @@ typedef enum {
   AZ_DOOR_BOSS // to be used with AZ_BAD_BOSS_DOOR
 } az_door_kind_t;
 
+typedef enum {
+  AZ_DOORMARK_NORMAL = 0,
+  AZ_DOORMARK_COMM,
+  AZ_DOORMARK_REFILL,
+  AZ_DOORMARK_SAVE
+} az_door_marker_t;
+
 // Determine whether damage of the given kind will open a door of the given
 // kind.  The door kind must not be AZ_DOOR_NOTHING.
 bool az_can_open_door(az_door_kind_t door_kind, az_damage_flags_t damage_kind);
@@ -56,6 +63,7 @@ bool az_can_open_door(az_door_kind_t door_kind, az_damage_flags_t damage_kind);
 
 typedef struct {
   az_door_kind_t kind; // if AZ_DOOR_NOTHING, this door is not present
+  az_door_marker_t marker;
   az_uid_t uid;
   const az_script_t *on_open; // not owned; NULL if no script
   az_vector_t position;

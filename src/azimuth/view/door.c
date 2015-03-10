@@ -35,6 +35,14 @@
 
 /*===========================================================================*/
 
+static void gl_gray(GLfloat gray, GLfloat alpha) {
+  assert(gray >= 0.0f && gray <= 1.0f);
+  assert(alpha >= 0.0f && alpha <= 1.0f);
+  glColor4f(gray, gray, gray, alpha);
+}
+
+/*===========================================================================*/
+
 static void draw_passage(void) {
   glColor3f(0, 1, 0); // green
   glBegin(GL_LINE_STRIP); {
@@ -73,7 +81,9 @@ static void draw_forcefield(const az_door_t *door, az_clock_t clock) {
   }
 }
 
-static void draw_door_pipe(GLfloat alpha) {
+static void draw_door_pipe(GLfloat alpha, az_color_t light_color,
+                           uint8_t light_mask) {
+  // Tube:
   glBegin(GL_QUAD_STRIP); {
     glColor4f(0.25, 0.25, 0.25, alpha); // dark gray
     glVertex2f(30, 50); glVertex2f(-30, 50);
@@ -86,6 +96,52 @@ static void draw_door_pipe(GLfloat alpha) {
     glColor4f(0.25, 0.25, 0.25, alpha); // dark gray
     glVertex2f(30, -50); glVertex2f(-30, -50);
   } glEnd();
+  // Struts:
+  const GLfloat beta = pow(alpha, 4);
+  for (int i = 0; i < 4; ++i) {
+    const double theta = AZ_DEG2RAD(22.5 + 45 * i);
+    const double yc = 50 * cos(theta);
+    glBegin(GL_TRIANGLE_STRIP); {
+      const double semi = 2 + 2 * sin(theta);
+      gl_gray(0.1 + 0.53 * sin(theta), beta);
+      glVertex2d(8, yc + semi); glVertex2d(24, yc + semi);
+      gl_gray(0.1 + 0.43 * sin(theta), beta);
+      glVertex2d(4, yc);        glVertex2d(24, yc);
+      gl_gray(0.1 + 0.53 * sin(theta), beta);
+      glVertex2d(8, yc - semi); glVertex2d(24, yc - semi);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      const double semi = 0.5 + 0.5 * sin(theta);
+      gl_gray(0.1 + 0.53 * sin(theta), beta);
+      glVertex2d(-30, yc + semi); glVertex2d(5, yc + semi);
+      gl_gray(0.1 + 0.43 * sin(theta), beta);
+      glVertex2d(-30, yc);        glVertex2d(5, yc);
+      gl_gray(0.1 + 0.53 * sin(theta), beta);
+      glVertex2d(-30, yc - semi); glVertex2d(5, yc - semi);
+    } glEnd();
+    // Lights:
+    if (light_mask & (1 << i)) {
+      az_color_t dim_color = light_color;
+      dim_color.a = 0;
+      glBegin(GL_TRIANGLE_FAN); {
+        const double xr = 7 + 3 * sin(theta);
+        const double yr = 3 + 3 * sin(theta);
+        az_gl_color(light_color);
+        glVertex2d(16, yc);
+        az_gl_color(dim_color);
+        for (int j = 0; j <= 360; j += 30) {
+          glVertex2d(16 + xr * cos(AZ_DEG2RAD(j)),
+                     yc + yr * sin(AZ_DEG2RAD(j)));
+        }
+      } glEnd();
+    } else {
+      glBegin(GL_LINES); {
+        glColor4f(0, 0, 0, 0.25 * beta);
+        glVertex2d(13, yc); glVertex2d(19, yc);
+      } glEnd();
+    }
+  }
+  // Rim:
   glBegin(GL_QUAD_STRIP); {
     glColor4f(0.2, 0.2, 0.2, alpha); // dark gray
     glVertex2f(31, 51); glVertex2f(24, 51);
@@ -177,7 +233,7 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
 
   if (door->lockedness > 0.0) {
     glPushMatrix(); {
-      glTranslated(-12 * (1.0 - pow(door->lockedness, 4)), 0, 0);
+      glTranslated(-12 + 11 * pow(door->lockedness, 4), 0, 0);
       for (int i = 0; i < 2; ++i) {
         glBegin(GL_TRIANGLE_FAN); {
           glColor3f(0.5, 0.5, 0.5); glVertex2f(30, 6);
@@ -206,7 +262,26 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     } glPopMatrix();
   }
 
-  draw_door_pipe(1);
+  az_color_t light_color = AZ_WHITE;
+  uint8_t light_mask = 0;
+  if (door->kind != AZ_DOOR_LOCKED && door->kind != AZ_DOOR_ALWAYS_OPEN) {
+    switch (door->marker) {
+      case AZ_DOORMARK_NORMAL: break;
+      case AZ_DOORMARK_COMM:
+        light_color = (az_color_t){128, 192, 255, 255};
+        light_mask = az_clock_mod(2, 25, clock) == 0 ? 0 : 0xF;
+        break;
+      case AZ_DOORMARK_REFILL:
+        light_color = (az_color_t){255, 255, 128, 255};
+        light_mask = 0x1 << az_clock_mod(4, 10, clock);
+        break;
+      case AZ_DOORMARK_SAVE:
+        light_color = (az_color_t){128, 255, 128, 255};
+        light_mask = 0xE0 >> az_clock_mod(8, 7, clock);
+        break;
+    }
+  }
+  draw_door_pipe(1, light_color, light_mask);
 }
 
 /*===========================================================================*/
@@ -234,10 +309,10 @@ void az_draw_door_pipe_fade(az_vector_t position, double angle, float alpha) {
   glPushMatrix(); {
     az_gl_translated(position);
     az_gl_rotated(angle);
-    draw_door_pipe(alpha);
+    draw_door_pipe(alpha, AZ_WHITE, 0);
     glRotated(180, 0, 0, 1);
     glTranslated(60, 0, 0);
-    draw_door_pipe(alpha);
+    draw_door_pipe(alpha, AZ_WHITE, 0);
   } glPopMatrix();
 }
 
@@ -257,10 +332,10 @@ void az_draw_door_shift(az_vector_t entrance_position, double entrance_angle,
     az_gl_translated(center);
     az_gl_rotated(angle);
     glTranslated(30, 0, 0);
-    draw_door_pipe(1);
+    draw_door_pipe(1, AZ_WHITE, 0);
     glRotated(180, 0, 0, 1);
     glTranslated(60, 0, 0);
-    draw_door_pipe(1);
+    draw_door_pipe(1, AZ_WHITE, 0);
   } glPopMatrix();
 }
 
