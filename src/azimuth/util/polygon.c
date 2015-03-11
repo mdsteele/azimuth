@@ -817,9 +817,9 @@ az_vector_t az_find_knee(az_vector_t hip, az_vector_t foot, double thigh,
   // Here is the triangle formed by the leg, with vertices H (hip), K (knee),
   // and F (foot) and edge lengths t (thigh), s (shin), and d (dist):
   //        K
-  //      t/ \s
-  //      /   \
-  //     H--d--F
+  //      t/ \s     ^ knee_y
+  //      /   \     |
+  //     H--d--F    +--> knee_x
   // We know the location of H and F and want to find the location of K.  Using
   // H as our origin, and HF as our x-axis, we can decompose K into (x, y)
   // coordinates.  If p is the angle between HF and HK, then x = t*cos(p).
