@@ -94,6 +94,18 @@ static const az_sound_spec_t drum_specs[] = {
     .phaser_offset = 0.05, .phaser_sweep = 0.048, .lpf_cutoff = 0.572,
     .lpf_ramp = 0.04, .lpf_resonance = 0.825, .hpf_ramp = 0.0426,
     .volume_adjust = -0.65
+  },
+  // Alien beeps:
+  [8] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_attack = 0.0295, .env_sustain = 0.56,
+    .env_punch = 0.104, .env_decay = 0.7,
+    .start_freq = 0.3, .freq_delta_slide = 0.02,
+    .vibrato_depth = 0.49, .vibrato_speed = 0.11482,
+    .arp_mod = 0.554, .arp_speed = 0.455, .repeat_speed = 0.255,
+    .phaser_offset = 0.111, .phaser_sweep = -0.06,
+    .lpf_cutoff = 0.247, .lpf_ramp = 0.343, .lpf_resonance = 0.2867,
+    .hpf_cutoff = 0.3, .hpf_ramp = -0.64
   }
 };
 
@@ -134,6 +146,7 @@ static const char *music_filenames[] = {
   [AZ_MUS_UPGRADE] = "music14.txt",
   [AZ_MUS_COLONY_2] = "music15.txt",
   [AZ_MUS_BOSS_3] = "music16.txt",
+  [AZ_MUS_RESPITE] = "music17.txt",
   [AZ_MUS_TITLE] = NULL
 };
 

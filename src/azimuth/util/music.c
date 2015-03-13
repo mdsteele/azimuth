@@ -373,9 +373,10 @@ static void start_drum(az_music_parser_t *parser) {
     PARSE_ERROR("can't start drum before setting the current track\n");
   }
   int drum_number;
-  if (!TRY_READ("%d", &drum_number) ||
-      drum_number < 0 || drum_number >= parser->num_drums) {
-    PARSE_ERROR("invalid drum number\n");
+  if (!TRY_READ("%d", &drum_number)) {
+    PARSE_ERROR("missing drum number\n");
+  } else if (drum_number < 0 || drum_number >= parser->num_drums) {
+    PARSE_ERROR("invalid drum number: %d\n", drum_number);
   }
   parser->current_drum = &parser->drums[drum_number];
   parser->state = BEGIN_DURATION;

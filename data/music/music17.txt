@@ -1,0 +1,31 @@
+@M "S !0a W|aABAACA"
+% Title: "Respite"
+
+=tempo 120
+
+
+!Part S
+
+2 Wp50  L0    E400,15
+3 Wt50  L200  E400,15  D+10,20  V1,50
+5 Wn    L40
+
+
+!Part W
+
+3| rh a2h+w+w+w g2w+w+w+w |
+5| rw+w+w+w+w x8w rw+w |
+
+!Part A
+
+2| a3w+w+w+w g3w+w+w+w |
+3| a2w+w+w+w g2w+w+w+w |
+5| rw+w x8w rw+w x8w rw x8w |
+
+!Part B
+
+2 L5
+
+!Part C
+
+2 L0
