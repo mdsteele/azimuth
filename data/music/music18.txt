@@ -1,0 +1,30 @@
+@M "S|ABABCB"
+% Title: "Revelation"
+
+=key 2#     % B minor
+=tempo 110
+
+
+!Part S
+
+1 Wp50 L40  E0,0
+2 Wp25 L30  E0,25
+3 Wt25 L200 E15,15
+4 Wn   L30  E0,100
+5 Wn   L70  E0,100
+
+
+!Part A
+
+2| rq ' b4s b f bs+ ' +s be fs ' be b |
+3| b2w |
+
+!Part B
+
+2| rq ' a4s a e as+ ' +s ae es ' ae a |
+3| a2w |
+
+!Part C
+
+2| rq ' g4s g d gs+ ' +s ge ds ' ge g |
+3| g2w |

@@ -1,6 +1,6 @@
-@R z7 p8/23 b9 d2 g1 n21 w93
+@R z7 p8/23 k0 b9 d2 g1 n21 w93
   c(240.00,0.00,4.712389,6.283185)
-$s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,halt,A#mus12,wait4,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus9,musf1,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,dend,activ1,mus9,musf2,wait1,activ12,activ13,activ14,activ15,activ16,activ17,activ18,activ19,B#wait0.1,gstat1,eqi2,bnez/B,boss1,musf0,wait1,C#wait0.12,test23,hnez,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz/C,gstat4,isub0,sstat4,jump/C;
+$s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,halt,A#mus12,wait4,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,mus0,tb209,dend,activ1,mus9,musf1,wait1,activ12,activ13,activ14,activ15,activ16,activ17,activ18,activ19,B#wait0.1,gstat1,eqi2,bnez/B,boss1,musf0,wait1,C#wait0.12,test23,hnez,gstat4,muli20,gstr2,add,dup,sstr2,gstat4,muli600,div,gei1,beqz/C,gstat4,isub0,sstat4,jump/C;
 !W1 d79 x227.59 y-545.94 a-1.161005 u0
 !W1 d79 x547.70 y-226.77 a-0.378890 u0
 !W1 d79 x-552.39 y227.39 a-0.378890 u0

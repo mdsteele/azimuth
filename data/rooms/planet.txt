@@ -1,4 +1,4 @@
-@P z8 r468 t209 s6 x0.00 y50000.00 a-1.570796
+@P z8 r468 t210 s6 x0.00 y50000.00 a-1.570796
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -688,9 +688,7 @@
   \"Well, we hardly expected to convince you.  We
   appreciate all your efforts to rescue us--
   misguided though they were--but you wasted your
-  time.  And now that you're here...\"
-
-  \"...we have little choice but to destroy you.\""
+  time.  And now that you're here...\""
 !T152"
   \"Damn you, blasted Human!  This isn't over.\""
 !T153"
@@ -944,3 +942,5 @@
   I'm $/pretty sure$| I can handle it.\""
 !T208"
   Good luck, Hopper."
+!T209"
+  \"...we have little choice but to destroy you.\""
