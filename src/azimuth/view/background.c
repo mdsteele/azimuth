@@ -48,6 +48,9 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_YELLOW_PANELLING] = {
     .parallax = 0.2, .repeat_horz = 360.0, .repeat_vert = 400.0
+  },
+  [AZ_BG_PURPLE_ROCK_WALL] = {
+    .parallax = 0.25, .repeat_horz = 300.0, .repeat_vert = 300.0
   }
 };
 
@@ -91,6 +94,63 @@ static void draw_panel(az_color_t color1, az_color_t color2,
   }
 }
 
+static void draw_rock_wall(az_color_t color1, az_color_t color2,
+                           float width, float height) {
+  glPushMatrix(); {
+    glScalef(width / 200.0f, height / 200.0f, 1.0f);
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(-40, 0); az_gl_color(color2);
+      glVertex2f(-100, 0); glVertex2f(-30, -30); glVertex2f(20, 0);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(70, 0); az_gl_color(color2);
+      glVertex2f(20, 0); glVertex2f(-30, -30); glVertex2f(0, -56);
+      glVertex2f(75, -40); glVertex2f(100, 0);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(100, -44); az_gl_color(color2);
+      glVertex2f(100, 0); glVertex2f(75, -40); glVertex2f(100, -109);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(-100, -44); az_gl_color(color2);
+      glVertex2f(-100, 0); glVertex2f(-30, -30); glVertex2f(0, -56);
+      glVertex2f(-40, -85); glVertex2f(-100, -109);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(40, -80); az_gl_color(color2);
+      glVertex2f(100, -109); glVertex2f(75, -40); glVertex2f(0, -56);
+      glVertex2f(-40, -85); glVertex2f(10, -121); glVertex2f(100, -109);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(-50, -135); az_gl_color(color2);
+      glVertex2f(-100, -109); glVertex2f(-57, -170); glVertex2f(-15, -162);
+      glVertex2f(10, -121); glVertex2f(-40, -85); glVertex2f(-100, -109);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(-100, -161); az_gl_color(color2);
+      glVertex2f(-100, -109); glVertex2f(-57, -170); glVertex2f(-100, -200);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(-40, -200); az_gl_color(color2);
+      glVertex2f(-100, -200); glVertex2f(-57, -170); glVertex2f(-15, -162);
+      glVertex2f(20, -200);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(40, -160); az_gl_color(color2);
+      glVertex2f(100, -109); glVertex2f(10, -121); glVertex2f(-15, -162);
+      glVertex2f(20, -200); glVertex2f(65, -179); glVertex2f(100, -109);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(100, -161); az_gl_color(color2);
+      glVertex2f(100, -109); glVertex2f(65, -179); glVertex2f(100, -200);
+    } glEnd();
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(color1); glVertex2f(70, -200); az_gl_color(color2);
+      glVertex2f(100, -200); glVertex2f(65, -179); glVertex2f(20, -200);
+    } glEnd();
+  } glPopMatrix();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -99,56 +159,7 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
     case AZ_BG_BROWN_ROCK_WALL: {
       const az_color_t color1 = {40, 38, 35, 255};
       const az_color_t color2 = {20, 15, 10, 255};
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(-40, 0); az_gl_color(color2);
-        glVertex2f(-100, 0); glVertex2f(-30, -30); glVertex2f(20, 0);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(70, 0); az_gl_color(color2);
-        glVertex2f(20, 0); glVertex2f(-30, -30); glVertex2f(0, -56);
-        glVertex2f(75, -40); glVertex2f(100, 0);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(100, -44); az_gl_color(color2);
-        glVertex2f(100, 0); glVertex2f(75, -40); glVertex2f(100, -109);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(-100, -44); az_gl_color(color2);
-        glVertex2f(-100, 0); glVertex2f(-30, -30); glVertex2f(0, -56);
-        glVertex2f(-40, -85); glVertex2f(-100, -109);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(40, -80); az_gl_color(color2);
-        glVertex2f(100, -109); glVertex2f(75, -40); glVertex2f(0, -56);
-        glVertex2f(-40, -85); glVertex2f(10, -121); glVertex2f(100, -109);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(-50, -135); az_gl_color(color2);
-        glVertex2f(-100, -109); glVertex2f(-57, -170); glVertex2f(-15, -162);
-        glVertex2f(10, -121); glVertex2f(-40, -85); glVertex2f(-100, -109);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(-100, -161); az_gl_color(color2);
-        glVertex2f(-100, -109); glVertex2f(-57, -170); glVertex2f(-100, -200);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(-40, -200); az_gl_color(color2);
-        glVertex2f(-100, -200); glVertex2f(-57, -170); glVertex2f(-15, -162);
-        glVertex2f(20, -200);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(40, -160); az_gl_color(color2);
-        glVertex2f(100, -109); glVertex2f(10, -121); glVertex2f(-15, -162);
-        glVertex2f(20, -200); glVertex2f(65, -179); glVertex2f(100, -109);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(100, -161); az_gl_color(color2);
-        glVertex2f(100, -109); glVertex2f(65, -179); glVertex2f(100, -200);
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(color1); glVertex2f(70, -200); az_gl_color(color2);
-        glVertex2f(100, -200); glVertex2f(65, -179); glVertex2f(20, -200);
-      } glEnd();
+      draw_rock_wall(color1, color2, 200, 200);
     } break;
     case AZ_BG_GREEN_HEX_TRELLIS: {
       const az_color_t color1 = {32, 48, 32, 255};
@@ -223,6 +234,11 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
           } glEnd();
         }
       }
+    } break;
+    case AZ_BG_PURPLE_ROCK_WALL: {
+      const az_color_t color1 = {40, 35, 50, 255};
+      const az_color_t color2 = {20, 15, 25, 255};
+      draw_rock_wall(color1, color2, 300, 300);
     } break;
   }
 }
