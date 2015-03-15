@@ -51,6 +51,9 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_PURPLE_ROCK_WALL] = {
     .parallax = 0.25, .repeat_horz = 300.0, .repeat_vert = 300.0
+  },
+  [AZ_BG_RED_GIRDERS] = {
+    .parallax = 0.75, .repeat_horz = 230.0, .repeat_vert = 215.0
   }
 };
 
@@ -154,6 +157,7 @@ static void draw_rock_wall(az_color_t color1, az_color_t color2,
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
+  const float bottom = -background_datas[pattern].repeat_vert;
   switch (pattern) {
     case AZ_BG_SOLID_BLACK: break;
     case AZ_BG_BROWN_ROCK_WALL: {
@@ -211,8 +215,6 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color3 = {40, 35, 20, 255};
       const float horz = 30;
       const float vert = 50;
-      const float bottom =
-        -background_datas[AZ_BG_YELLOW_PANELLING].repeat_vert;
       draw_panel(color2, color1, -5 * horz, -4 * vert, -1 * horz, 0);
       draw_panel(color2, color1, -1 * horz, -4 * vert,  1 * horz, 0);
       draw_panel(color2, color1, -5 * horz, -6 * vert,  1 * horz, -4 * vert);
@@ -239,6 +241,32 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color1 = {40, 35, 50, 255};
       const az_color_t color2 = {20, 15, 25, 255};
       draw_rock_wall(color1, color2, 300, 300);
+    } break;
+    case AZ_BG_RED_GIRDERS: {
+      const az_color_t color1 = {40, 20, 0, 255};
+      const az_color_t color2 = {30, 15, 0, 255};
+      const az_color_t color3 = {25, 12, 0, 255};
+      for (int sign = -1; sign <= 1; sign += 2) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          az_gl_color(color1);
+          glVertex2f(sign * 100, 0); glVertex2f(sign * -100, -185);
+          az_gl_color(color3);
+          glVertex2f(sign * 100, -15); glVertex2f(sign * -100, -200);
+        } glEnd();
+      }
+      for (int sign = -1; sign <= 1; sign += 2) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          az_gl_color(color3);
+          glVertex2f(sign * 115, 0); glVertex2f(sign * 115, bottom);
+          glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          az_gl_color(color1);
+          glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
+          az_gl_color(color2);
+          glVertex2f(sign * 100, 0); glVertex2f(sign * 100, bottom);
+        } glEnd();
+      }
     } break;
   }
 }
