@@ -54,6 +54,12 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_RED_GIRDERS] = {
     .parallax = 0.75, .repeat_horz = 230.0, .repeat_vert = 215.0
+  },
+  [AZ_BG_GREEN_ROCK_WALL] = {
+    .parallax = 0.35, .repeat_horz = 230.0, .repeat_vert = 215.0
+  },
+  [AZ_BG_GREEN_ROCK_WALL_WITH_GIRDERS] = {
+    .parallax = 0.35, .repeat_horz = 230.0, .repeat_vert = 215.0
   }
 };
 
@@ -154,6 +160,31 @@ static void draw_rock_wall(az_color_t color1, az_color_t color2,
   } glPopMatrix();
 }
 
+static void draw_girders(az_color_t color1, az_color_t color2,
+                         az_color_t color3, float bottom) {
+  for (int sign = -1; sign <= 1; sign += 2) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(color1);
+      glVertex2f(sign * 100, 0); glVertex2f(sign * -100, -185);
+      az_gl_color(color3);
+      glVertex2f(sign * 100, -15); glVertex2f(sign * -100, -200);
+    } glEnd();
+  }
+  for (int sign = -1; sign <= 1; sign += 2) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(color3);
+      glVertex2f(sign * 115, 0); glVertex2f(sign * 115, bottom);
+      glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      az_gl_color(color1);
+      glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
+      az_gl_color(color2);
+      glVertex2f(sign * 100, 0); glVertex2f(sign * 100, bottom);
+    } glEnd();
+  }
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -246,27 +277,21 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color1 = {40, 20, 0, 255};
       const az_color_t color2 = {30, 15, 0, 255};
       const az_color_t color3 = {25, 12, 0, 255};
-      for (int sign = -1; sign <= 1; sign += 2) {
-        glBegin(GL_TRIANGLE_STRIP); {
-          az_gl_color(color1);
-          glVertex2f(sign * 100, 0); glVertex2f(sign * -100, -185);
-          az_gl_color(color3);
-          glVertex2f(sign * 100, -15); glVertex2f(sign * -100, -200);
-        } glEnd();
-      }
-      for (int sign = -1; sign <= 1; sign += 2) {
-        glBegin(GL_TRIANGLE_STRIP); {
-          az_gl_color(color3);
-          glVertex2f(sign * 115, 0); glVertex2f(sign * 115, bottom);
-          glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
-        } glEnd();
-        glBegin(GL_TRIANGLE_STRIP); {
-          az_gl_color(color1);
-          glVertex2f(sign * 105, 0); glVertex2f(sign * 105, bottom);
-          az_gl_color(color2);
-          glVertex2f(sign * 100, 0); glVertex2f(sign * 100, bottom);
-        } glEnd();
-      }
+      draw_girders(color1, color2, color3, bottom);
+    } break;
+    case AZ_BG_GREEN_ROCK_WALL: {
+      const az_color_t color1 = {35, 50, 40, 255};
+      const az_color_t color2 = {15, 25, 20, 255};
+      draw_rock_wall(color1, color2, 230, 215);
+    } break;
+    case AZ_BG_GREEN_ROCK_WALL_WITH_GIRDERS: {
+      const az_color_t color1 = {35, 50, 40, 255};
+      const az_color_t color2 = {15, 25, 20, 255};
+      draw_rock_wall(color1, color2, 230, 215);
+      const az_color_t color3 = {25, 30, 0, 255};
+      const az_color_t color4 = {15, 20, 0, 255};
+      const az_color_t color5 = {10, 15, 0, 255};
+      draw_girders(color3, color4, color5, bottom);
     } break;
   }
 }

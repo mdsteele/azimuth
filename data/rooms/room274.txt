@@ -1,4 +1,4 @@
-@R z5 p0 b0 d3 g2 n88 w38
+@R z5 p0 k3 b0 d3 g2 n88 w38
   c(25234.19,0.00,1.298522,0.000000)
 $s:msg79,test30,heqz,dark0.75,push0,dup,sstr3,sstr4,push1,dup,sstat1,sstat2;
 !W1 d6 x6523.20 y24248.22 a-0.272235 u0

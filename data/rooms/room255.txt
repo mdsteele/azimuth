@@ -1,4 +1,4 @@
-@R z4 p0 b7 d5 g1 n73 w202
+@R z4 p0 k3 b7 d5 g1 n73 w202
   c(28549.22,648.91,1.530572,0.040633)
 $s:test95,beqz/A,unlock1,A#test96,beqz/B,nix5,nix6,B#test23,bnez/C,nix10,nix11,nix12,nix13,nix14,nix20,halt,C#nix2,nix3,lock7,nix15,nix16,nix17,nix18,nix19;
 !W1 d9 x386.75 y28573.33 a-0.191438 u20
