@@ -300,8 +300,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   if (!az_load_planet("data", &planet)) return false;
 
   state->current_room = state->planet.start_room = planet.start_room;
-  state->planet.start_position = planet.start_position;
-  state->planet.start_angle = planet.start_angle;
+  state->planet.on_start = az_clone_script(planet.on_start);
   // Convert paragraphs:
   AZ_LIST_INIT(state->planet.paragraphs, planet.num_paragraphs);
   for (int i = 0; i < planet.num_paragraphs; ++i) {
@@ -600,8 +599,7 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   assert(num_rooms >= 0);
   az_planet_t planet = {
     .start_room = state->planet.start_room,
-    .start_position = state->planet.start_position,
-    .start_angle = state->planet.start_angle,
+    .on_start = az_clone_script(state->planet.on_start),
     .num_paragraphs = num_paragraphs,
     .paragraphs = AZ_ALLOC(num_paragraphs, char*),
     .num_zones = num_zones,
@@ -786,6 +784,8 @@ void az_center_editor_camera_on_current_room(az_editor_state_t *state) {
 void az_destroy_editor_state(az_editor_state_t *state) {
   az_clear_clipboard(state);
   AZ_LIST_DESTROY(state->clipboard);
+  az_free_script(state->planet.on_start);
+  state->planet.on_start = NULL;
   AZ_LIST_LOOP(room, state->planet.rooms) {
     az_free_script(room->on_start);
     AZ_LIST_LOOP(baddie, room->baddies) az_free_script(baddie->spec.on_kill);

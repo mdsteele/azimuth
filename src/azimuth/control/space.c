@@ -48,6 +48,19 @@ static const char save_success_paragraph[] =
 
 static az_space_state_t state;
 
+static void position_ship_at_save_point_if_any(void) {
+  const az_room_t *room = &state.planet->rooms[state.ship.player.current_room];
+  state.ship.position = az_bounds_center(&room->camera_bounds);
+  AZ_ARRAY_LOOP(node, state.nodes) {
+    if (node->kind == AZ_NODE_CONSOLE &&
+        node->subkind.console == AZ_CONS_SAVE) {
+      state.ship.position = node->position;
+      state.ship.angle = node->angle;
+      break;
+    }
+  }
+}
+
 static void begin_saved_game(
     const az_planet_t *planet, const az_saved_games_t *saved_games,
     const az_preferences_t *prefs, int saved_game_index) {
@@ -64,27 +77,16 @@ static void begin_saved_game(
   if (saved_game->present) {
     // Resume saved game:
     state.ship.player = saved_game->player;
-    const az_room_t *room = &planet->rooms[state.ship.player.current_room];
-    az_enter_room(&state, room);
-    state.ship.position = az_bounds_center(&room->camera_bounds);
-    AZ_ARRAY_LOOP(node, state.nodes) {
-      if (node->kind == AZ_NODE_CONSOLE &&
-          node->subkind.console == AZ_CONS_SAVE) {
-        state.ship.position = node->position;
-        state.ship.angle = node->angle;
-        break;
-      }
-    }
+    az_enter_room(&state, &planet->rooms[state.ship.player.current_room]);
+    position_ship_at_save_point_if_any();
+    az_after_entering_room(&state);
   } else {
     // Begin new game:
     az_init_player(&state.ship.player);
+    state.intro = true;
     state.ship.player.current_room = planet->start_room;
-    az_enter_room(&state, &planet->rooms[planet->start_room]);
-    state.ship.position = planet->start_position;
-    state.ship.angle = planet->start_angle;
+    az_run_script(&state, planet->on_start);
   }
-
-  az_after_entering_room(&state);
 }
 
 static bool save_current_game(az_saved_games_t *saved_games) {
@@ -119,6 +121,15 @@ az_space_action_t az_space_event_loop(
   begin_saved_game(planet, saved_games, prefs, saved_game_index);
 
   while (true) {
+    // If we just finished the game intro, start us on the first room.
+    if (state.intro && state.sync_vm.script == NULL) {
+      state.intro = false;
+      save_current_game(saved_games);
+      az_enter_room(&state, &planet->rooms[planet->start_room]);
+      position_ship_at_save_point_if_any();
+      az_after_entering_room(&state);
+    }
+
     // Tick the state and redraw the screen.
     update_controls(prefs);
     az_tick_space_state(&state, 1.0/60.0);

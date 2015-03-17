@@ -63,15 +63,15 @@ void az_after_entering_room(az_space_state_t *state) {
       wall->kind = AZ_WALL_NOTHING;
     }
   }
-  // Clamp the camera to be within the current room's camera bounds.
   const az_room_t *room =
     &state->planet->rooms[state->ship.player.current_room];
-  state->camera.center =
-    az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
   state->camera.quake_vert = 0.0;
   // Run the room script (if any).
   az_run_script(state, room->on_start);
   state->darkness = state->dark_goal;
+  // Clamp the camera to be within the current room's camera bounds.
+  state->camera.center =
+    az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
 }
 
 /*===========================================================================*/
@@ -440,7 +440,7 @@ static void tick_monologue(az_space_state_t *state, double time) {
   assert(monologue->step != AZ_MLS_INACTIVE);
   assert(monologue->step != AZ_MLS_BLANK);
   const double open_close_time = 0.5; // seconds
-  const double char_time = 0.03; // seconds
+  const double char_time = 0.05; // seconds
   switch (monologue->step) {
     case AZ_MLS_INACTIVE:
     case AZ_MLS_BLANK:

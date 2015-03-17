@@ -170,8 +170,7 @@ typedef struct {
   az_room_key_t current_room;
   struct {
     az_room_key_t start_room;
-    az_vector_t start_position;
-    double start_angle;
+    az_script_t *on_start;
     AZ_LIST_DECLARE(char*, paragraphs);
     AZ_LIST_DECLARE(az_zone_t, zones);
     AZ_LIST_DECLARE(az_editor_room_t, rooms);

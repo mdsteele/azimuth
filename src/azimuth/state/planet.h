@@ -27,6 +27,7 @@
 #include "azimuth/state/player.h" // for az_room_key_t
 #include "azimuth/state/room.h"
 #include "azimuth/state/music.h" // for az_music_key_t
+#include "azimuth/state/script.h"
 
 /*===========================================================================*/
 
@@ -37,8 +38,7 @@ typedef struct {
 
 typedef struct {
   az_room_key_t start_room;
-  az_vector_t start_position;
-  double start_angle;
+  az_script_t *on_start;
   int num_paragraphs;
   char **paragraphs;
   int num_zones;

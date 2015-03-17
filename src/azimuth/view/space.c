@@ -266,10 +266,12 @@ void az_space_draw_screen(az_space_state_t *state) {
 
   if (fade_alpha < 1.0) {
     // Draw what the camera sees.
-    glPushMatrix(); {
-      transform_to_camera_matrix(state);
-      draw_camera_view(state);
-    } glPopMatrix();
+    if (!state->intro) {
+      glPushMatrix(); {
+        transform_to_camera_matrix(state);
+        draw_camera_view(state);
+      } glPopMatrix();
+    }
 
     // If we're in a superheated room, make everything glow red.
     const az_room_flags_t properties = room_properties(state);

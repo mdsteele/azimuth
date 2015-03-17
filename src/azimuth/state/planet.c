@@ -96,10 +96,8 @@ static char *scan_string(az_load_planet_t *loader) {
 
 static void parse_planet_header(az_load_planet_t *loader) {
   int num_zones, num_rooms, num_paragraphs, start_room_num;
-  double start_x, start_y, start_angle;
-  READ("@P z%d r%d t%d s%d x%lf y%lf a%lf\n",
-       &num_zones, &num_rooms, &num_paragraphs, &start_room_num,
-       &start_x, &start_y, &start_angle);
+  READ("@P z%d r%d t%d s%d\n",
+       &num_zones, &num_rooms, &num_paragraphs, &start_room_num);
   if (num_zones < 1 || num_zones > AZ_MAX_NUM_ZONES ||
       num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
       num_paragraphs < 0 || num_paragraphs > AZ_MAX_NUM_PARAGRAPHS ||
@@ -113,8 +111,10 @@ static void parse_planet_header(az_load_planet_t *loader) {
   loader->planet->num_paragraphs = 0;
   loader->planet->paragraphs = AZ_ALLOC(num_paragraphs, char*);
   loader->planet->start_room = start_room_num;
-  loader->planet->start_position = (az_vector_t){.x = start_x, .y = start_y};
-  loader->planet->start_angle = start_angle;
+  char ch = '\0';
+  if (fscanf(loader->file, " $s%c", &ch) < 1 || ch != ':') FAIL();
+  loader->planet->on_start = az_fscan_script(loader->file);
+  if (loader->planet->on_start == NULL) FAIL();
   scan_to_bang(loader);
 }
 
@@ -217,10 +217,14 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   } while (false)
 
 static bool write_planet_header(const az_planet_t *planet, FILE *file) {
-  WRITE("@P z%d r%d t%d s%d x%.02f y%.02f a%f\n",
+  WRITE("@P z%d r%d t%d s%d\n",
         planet->num_zones, planet->num_rooms, planet->num_paragraphs,
-        planet->start_room, planet->start_position.x, planet->start_position.y,
-        planet->start_angle);
+        planet->start_room);
+  if (planet->on_start != NULL) {
+    WRITE("$s:");
+    if (!az_fprint_script(planet->on_start, file)) return false;
+    WRITE("\n");
+  }
   for (int i = 0; i < planet->num_zones; ++i) {
     const az_zone_t *zone = &planet->zones[i];
     WRITE("!Z\"");
@@ -278,6 +282,7 @@ bool az_save_planet(
 
 void az_destroy_planet(az_planet_t *planet) {
   assert(planet != NULL);
+  az_free_script(planet->on_start);
   for (int i = 0; i < planet->num_paragraphs; ++i) {
     free(planet->paragraphs[i]);
   }

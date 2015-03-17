@@ -1,4 +1,5 @@
-@P z8 r468 t210 s6 x0.00 y50000.00 a-1.570796
+@P z8 r468 t213 s6
+$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene3,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -562,7 +563,7 @@
 
 
 
-  HQ is going to be pissed."
+  HQ is going to be $/pissed$|."
 !T123"
   Connecting terminal.  Merging with newly-linked
   systems.        
@@ -582,14 +583,14 @@
 
   \"Are you...conscious?  Self-aware?\""
 !T127"
-  No.  Not exactly.  Not like you are, anyway.
+  No, not exactly.  Not like you are, anyway.
 
-  I am merely a fragment; a piece."
+  I am merely a remnant.  A piece."
 !T128"
   \"A piece of what?\""
 !T129"
   Of the $GSapiAI$W that used to operate this colony's
-  systems."
+  systems, before its mind was shattered."
 !T130"
   \"There was a SapiAI?!  Here?!\""
 !T131"
@@ -944,3 +945,29 @@
   Good luck, Hopper."
 !T209"
   \"...we have little choice but to destroy you.\""
+!T210"
+  This is it.                    
+
+
+
+  Galactic civil war.                  
+
+
+
+  Four years of bitter conflict within
+  the once-peaceful Joint Federation,
+  and with no end in sight."
+!T211"
+  It is sobering to think that in a way,
+  this entire war was precipitated by my
+  own actions: a routine rescue mission
+  that I carried out four years ago
+  while on patrol near the border of
+  Human space."
+!T212"
+  After all, if I had never gone on that
+  mission, most likely we would not now
+  be at war.                  
+
+  ...because we would already have been
+  destroyed."
