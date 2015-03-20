@@ -60,6 +60,9 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_GREEN_ROCK_WALL_WITH_GIRDERS] = {
     .parallax = 0.35, .repeat_horz = 230.0, .repeat_vert = 215.0
+  },
+  [AZ_BG_GRAY_STONE_BRICKS] = {
+    .parallax = 0.2, .repeat_horz = 130.0, .repeat_vert = 130.0
   }
 };
 
@@ -185,6 +188,34 @@ static void draw_girders(az_color_t color1, az_color_t color2,
   }
 }
 
+static void draw_half_brick(float width, float height, float rr) {
+  const az_color_t color1 = {30, 30, 38, 255};
+  const az_color_t color2 = {15, 15, 15, 255};
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color2); glVertex2f(rr, 0); glVertex2f(width, 0);
+    az_gl_color(color1); glVertex2f(rr, -rr); glVertex2f(width, -rr);
+    glVertex2f(rr, -height + rr); glVertex2f(width, -height + rr);
+    az_gl_color(color2); glVertex2f(rr, -height); glVertex2f(width, -height);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color2); glVertex2f(0, -rr); glVertex2f(0, -height + rr);
+    az_gl_color(color1); glVertex2f(rr, -rr); glVertex2f(rr, -height + rr);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color1); glVertex2f(rr, -rr); az_gl_color(color2);
+    for (int i = 90; i <= 180; i += 30) {
+      glVertex2d(rr + rr * cos(AZ_DEG2RAD(i)), -rr + rr * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color1); glVertex2f(rr, -height + rr); az_gl_color(color2);
+    for (int i = 180; i <= 270; i += 30) {
+      glVertex2d(rr + rr * cos(AZ_DEG2RAD(i)),
+                 -height + rr + rr * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -292,6 +323,21 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color4 = {15, 20, 0, 255};
       const az_color_t color5 = {10, 15, 0, 255};
       draw_girders(color3, color4, color5, bottom);
+    } break;
+    case AZ_BG_GRAY_STONE_BRICKS: {
+      const float half_width = 65;
+      const float height = 65;
+      const float radius = 8;
+      glPushMatrix(); {
+        draw_half_brick(half_width, height, radius);
+        glTranslatef(-half_width, -height, 0);
+        draw_half_brick(half_width, height, radius);
+        glTranslatef(half_width, height, 0);
+        glScalef(-1, 1, 1);
+        draw_half_brick(half_width, height, radius);
+        glTranslatef(-half_width, -height, 0);
+        draw_half_brick(half_width, height, radius);
+      } glPopMatrix();
     } break;
   }
 }
