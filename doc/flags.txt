@@ -1,4 +1,4 @@
-Next flag: 115
+Next flag: 116
 
 Bosses
 ======
@@ -21,6 +21,7 @@ Minibosses
 88: Killed Oth Crawlers in Cnidam room 325
 93: Killed Oth Crab in Voquan room 354
 96: Killed Oth Crab in Voquan room 255
+115: Killed Oth Brawler in Voquan room 377
 
 Comm Consoles
 =============
