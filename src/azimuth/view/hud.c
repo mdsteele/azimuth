@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include <GL/gl.h>
 
@@ -34,25 +35,48 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/dialog.h"
+#include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
 
 /*===========================================================================*/
 
-static void draw_box(double left, double top, double width, double height,
-                     az_color_t frame_color) {
-  glColor4f(0, 0, 0, 0.875); // black tint
+static void draw_mbox(double left, double top, double width, double height) {
+  glColor4f(0, 0, 0, 0.875);
   glBegin(GL_QUADS); {
     glVertex2d(left, top);
     glVertex2d(left + width, top);
     glVertex2d(left + width, top + height);
     glVertex2d(left, top + height);
   } glEnd();
-  glColor3ub(frame_color.r, frame_color.g, frame_color.b);
+  glColor3f(0, 0, 0);
   glBegin(GL_LINE_LOOP); {
     glVertex2d(left, top);
     glVertex2d(left + width, top);
     glVertex2d(left + width, top + height);
     glVertex2d(left, top + height);
+  } glEnd();
+}
+
+static void draw_dbox(double left, double top, double width, double height) {
+  glColor4f(0, 0, 0, 0.875);
+  glBegin(GL_QUADS); {
+    glVertex2d(left - 2, top - 2);
+    glVertex2d(left + width + 2, top - 2);
+    glVertex2d(left + width + 2, top + height + 2);
+    glVertex2d(left - 2, top + height + 2);
+  } glEnd();
+  glColor3f(0, 0.5, 0);
+  glBegin(GL_LINE_LOOP); {
+    glVertex2d(left - 0.5, top - 0.5);
+    glVertex2d(left + width + 0.5, top - 0.5);
+    glVertex2d(left + width + 0.5, top + height + 0.5);
+    glVertex2d(left - 0.5, top + height + 0.5);
+  } glEnd();
+  glBegin(GL_LINE_LOOP); {
+    glVertex2d(left - 2.5, top - 2.5);
+    glVertex2d(left + width + 2.5, top - 2.5);
+    glVertex2d(left + width + 2.5, top + height + 2.5);
+    glVertex2d(left - 2.5, top + height + 2.5);
   } glEnd();
 }
 
@@ -233,9 +257,8 @@ static void draw_minimap_rooms(const az_space_state_t *state) {
 }
 
 static void draw_minimap(const az_space_state_t *state) {
-  draw_box(MINIMAP_LEFT - 0.5, MINIMAP_TOP - 0.5,
-           MINIMAP_WIDTH + 1, MINIMAP_HEIGHT + 1,
-           (az_color_t){0, 0, 0, 255});
+  draw_mbox(MINIMAP_LEFT - 0.5, MINIMAP_TOP - 0.5,
+            MINIMAP_WIDTH + 1, MINIMAP_HEIGHT + 1);
 
   glEnable(GL_SCISSOR_TEST); {
     glScissor(MINIMAP_LEFT, AZ_SCREEN_HEIGHT - MINIMAP_TOP - MINIMAP_HEIGHT,
@@ -485,13 +508,13 @@ static void draw_dialogue_frames(double openness) {
       (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - DIALOG_BOX_WIDTH) / 2;
     const int tcy =
       (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - PORTRAIT_BOX_HEIGHT) / 2;
-    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2, AZ_GREEN);
+    draw_dbox(tcx - sw, tcy - sh, sw * 2, sh * 2);
     // Bottom portrait:
     const int bcx =
       (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + DIALOG_BOX_WIDTH) / 2;
     const int bcy =
       (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + PORTRAIT_BOX_HEIGHT) / 2;
-    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2, AZ_GREEN);
+    draw_dbox(bcx - sw, bcy - sh, sw * 2, sh * 2);
   }
   { // Dialogue boxes:
     const double sw = 0.5 * DIALOG_BOX_WIDTH * openness;
@@ -501,13 +524,13 @@ static void draw_dialogue_frames(double openness) {
       (AZ_SCREEN_WIDTH + DIALOG_HORZ_SPACING + PORTRAIT_BOX_WIDTH) / 2;
     const int tcy =
       (AZ_SCREEN_HEIGHT - DIALOG_VERT_SPACING - DIALOG_BOX_HEIGHT) / 2;
-    draw_box(tcx - sw, tcy - sh, sw * 2, sh * 2, AZ_GREEN);
+    draw_dbox(tcx - sw, tcy - sh, sw * 2, sh * 2);
     // Bottom dialogue box:
     const int bcx =
       (AZ_SCREEN_WIDTH - DIALOG_HORZ_SPACING - PORTRAIT_BOX_WIDTH) / 2;
     const int bcy =
       (AZ_SCREEN_HEIGHT + DIALOG_VERT_SPACING + DIALOG_BOX_HEIGHT) / 2;
-    draw_box(bcx - sw, bcy - sh, sw * 2, sh * 2, AZ_GREEN);
+    draw_dbox(bcx - sw, bcy - sh, sw * 2, sh * 2);
   }
 }
 
@@ -638,42 +661,53 @@ void az_draw_monologue(const az_space_state_t *state) {
 /*===========================================================================*/
 
 #define UPGRADE_BOX_WIDTH 500
-#define UPGRADE_BOX_HEIGHT 94
+#define UPGRADE_BOX_HEIGHT_1 110
+#define UPGRADE_BOX_HEIGHT_2 130
 
-static void draw_upgrade_box_frame(double openness) {
+static void draw_upgrade_box_frame(double openness, double max_height) {
   assert(openness >= 0.0);
   assert(openness <= 1.0);
   const double width = sqrt(openness) * UPGRADE_BOX_WIDTH;
-  const double height = openness * openness * UPGRADE_BOX_HEIGHT;
+  const double height = openness * openness * max_height;
   const double left = 0.5 * (AZ_SCREEN_WIDTH - width);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
-  draw_box(left, top, width, height, AZ_GREEN);
+  draw_dbox(left, top, width, height);
 }
 
-static void draw_upgrade_box_message(const az_preferences_t *prefs,
-                                     az_upgrade_t upgrade) {
+static void draw_upgrade_box_message(
+    const az_preferences_t *prefs, az_upgrade_t upgrade, double height,
+    az_clock_t clock) {
   const char *name = az_upgrade_name(upgrade);
   const char *description = az_upgrade_description(upgrade);
-  const double top = 0.5 * (AZ_SCREEN_HEIGHT - UPGRADE_BOX_HEIGHT);
+  const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
+  glPushMatrix(); {
+    glTranslated(AZ_SCREEN_WIDTH/2 + 0.5, top + 58.5, 0);
+    glScalef(1, -1, 1);
+    az_draw_upgrade_icon(upgrade, clock);
+  } glPopMatrix();
   glColor3f(1, 1, 1); // white
   az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 18, name);
-  az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 48, 20, -1,
+  az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 86, 20, -1,
                     prefs, description);
 }
 
 static void draw_upgrade_box(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_UPGRADE);
   const az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
+  const double height =
+    (strchr(az_upgrade_description(mode_data->upgrade), '\n') ?
+     UPGRADE_BOX_HEIGHT_2 : UPGRADE_BOX_HEIGHT_1);
   switch (mode_data->step) {
     case AZ_UGS_OPEN:
-      draw_upgrade_box_frame(mode_data->progress);
+      draw_upgrade_box_frame(mode_data->progress, height);
       break;
     case AZ_UGS_MESSAGE:
-      draw_upgrade_box_frame(1.0);
-      draw_upgrade_box_message(state->prefs, mode_data->upgrade);
+      draw_upgrade_box_frame(1.0, height);
+      draw_upgrade_box_message(state->prefs, mode_data->upgrade, height,
+                               state->clock);
       break;
     case AZ_UGS_CLOSE:
-      draw_upgrade_box_frame(1.0 - mode_data->progress);
+      draw_upgrade_box_frame(1.0 - mode_data->progress, height);
       break;
   }
 }
