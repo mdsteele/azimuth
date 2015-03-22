@@ -206,11 +206,9 @@ static az_vector_t force_field_to_position(
   return drift;
 }
 
-void az_drift_towards_ship(
+static void drift_common(
     az_space_state_t *state, az_baddie_t *baddie, double time,
-    double max_speed, double ship_force, double wall_force) {
-  az_vector_t drift = force_field_to_ship(
-      state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
+    double max_speed, double wall_force, az_vector_t drift) {
   AZ_ARRAY_LOOP(other, state->baddies) {
     if (other->kind == AZ_BAD_NOTHING) continue;
     if (other == baddie) continue;
@@ -223,6 +221,23 @@ void az_drift_towards_ship(
   }
   baddie->velocity =
     az_vcaplen(az_vadd(baddie->velocity, az_vmul(drift, time)), max_speed);
+}
+
+void az_drift_towards_ship(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    double max_speed, double ship_force, double wall_force) {
+  const az_vector_t drift = force_field_to_ship(
+      state, baddie, ship_force, 0.0, 1000.0, wall_force, 2.0 * wall_force);
+  drift_common(state, baddie, time, max_speed, wall_force, drift);
+}
+
+void az_drift_towards_position(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    az_vector_t goal, double max_speed, double goal_force, double wall_force) {
+  const az_vector_t drift =
+    force_field_to_position(state, baddie, goal, goal_force,
+                            wall_force, 2.0 * wall_force);
+  drift_common(state, baddie, time, max_speed, wall_force, drift);
 }
 
 static void fly_common(

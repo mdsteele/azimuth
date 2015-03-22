@@ -31,6 +31,82 @@
 
 /*===========================================================================*/
 
+void az_tick_bad_oth_brawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_OTH_BRAWLER);
+  const double turn_rate = AZ_DEG2RAD(180);
+  const az_vector_t ship_delta =
+    az_vsub(state->ship.position, baddie->position);
+  const bool aimed =
+    fabs(az_mod2pi(az_vtheta(ship_delta) - baddie->angle)) <= AZ_DEG2RAD(10);
+  // Figure out if we have a clear shot at the ship (ignoring walls that can be
+  // destroyed by rockets, because we can just punch through those).
+  bool clear_shot = true;
+  az_impact_t impact;
+  az_ray_impact(state, baddie->position, ship_delta,
+                (AZ_IMPF_BADDIE | AZ_IMPF_WALL), baddie->uid, &impact);
+  if (impact.type != AZ_IMP_SHIP) clear_shot = false;
+  else {
+    AZ_ARRAY_LOOP(wall, state->walls) {
+      if (wall->kind == AZ_WALL_NOTHING ||
+          wall->kind == AZ_WALL_DESTRUCTIBLE_CHARGED ||
+          wall->kind == AZ_WALL_DESTRUCTIBLE_ROCKET) continue;
+      if (az_ray_hits_wall(wall, baddie->position, ship_delta, NULL, NULL)) {
+        clear_shot = false;
+        break;
+      }
+    }
+  }
+  // Fire weapons:
+  bool strafe = false;
+  if (baddie->state <= 0) {
+    if (clear_shot) strafe = true;
+    if (baddie->cooldown <= 0.0 && clear_shot && aimed) {
+      baddie->state = 5;
+    }
+  }
+  if (baddie->state > 0) {
+    strafe = true;
+    if (baddie->cooldown <= 0.0) {
+      if (baddie->state == 1) {
+        for (int i = -1; i <= 1; ++i) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_SPRAY,
+                                    35.0, AZ_DEG2RAD(39) * i,
+                                    AZ_DEG2RAD(-20) * i);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
+      } else {
+        const double angle = (baddie->state % 2 ? -1 : 1) * AZ_DEG2RAD(35);
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                  20.0, angle, -angle);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+      }
+      --baddie->state;
+      if (baddie->state > 0) baddie->cooldown = 0.3;
+      else baddie->cooldown = 2.0;
+    }
+  }
+  // Navigate:
+  if (strafe) {
+    const az_vector_t goal1 =
+      az_vadd(az_vpolar(200.0, state->ship.angle - AZ_DEG2RAD(110)),
+              state->ship.position);
+    const az_vector_t goal2 =
+      az_vadd(az_vpolar(200.0, state->ship.angle + AZ_DEG2RAD(110)),
+              state->ship.position);
+    const az_vector_t goal =
+      (az_vdist(goal1, baddie->position) < az_vdist(goal2, baddie->position) ?
+       goal1 : goal2);
+    az_drift_towards_position(state, baddie, time, goal, 300.0, 500.0, 100.0);
+    baddie->angle = az_angle_towards(baddie->angle, turn_rate * time,
+                                     az_vtheta(az_vsub(state->ship.position,
+                                                       baddie->position)));
+  } else {
+    az_fly_towards_ship(state, baddie, time,
+                        turn_rate, 300.0, 100.0, 20.0, 100.0, 100.0);
+  }
+}
+
 void az_tick_bad_oth_crab_1(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_CRAB_1);

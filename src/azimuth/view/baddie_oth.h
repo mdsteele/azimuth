@@ -26,6 +26,9 @@
 
 /*===========================================================================*/
 
+void az_draw_bad_oth_brawler(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 void az_draw_bad_oth_crab(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 

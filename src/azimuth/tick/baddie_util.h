@@ -83,6 +83,10 @@ void az_drift_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double max_speed, double ship_force, double wall_force);
 
+void az_drift_towards_position(
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    az_vector_t goal, double max_speed, double goal_force, double wall_force);
+
 void az_fly_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double turn_rate, double max_speed, double forward_accel,

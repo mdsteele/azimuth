@@ -915,6 +915,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_MAGMA_BOMB:
       az_draw_bad_magma_bomb(baddie, clock);
       break;
+    case AZ_BAD_OTH_BRAWLER:
+      az_draw_bad_oth_brawler(baddie, frozen, clock);
+      break;
   }
 }
 

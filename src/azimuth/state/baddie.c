@@ -265,6 +265,13 @@ static az_component_data_t ice_crawler_components[] = {
     .impact_damage = 15.0 }
 };
 
+static const az_vector_t oth_brawler_vertices[] = {
+  {0, 20}, {-29, 16}, {-10, 11.33}, {-15, 7}, {-15, -7}, {-10, -11.33},
+  {-29, -16}, {0, -20}, {17, -30}, {32, -26}, {19, -22}, {10, -13.33},
+  {15, -10}, {15, -8}, {25, -5}, {36, 0}, {25, 5}, {15, 8}, {15, 10},
+  {10, 13.33}, {19, 22}, {32, 26}, {17, 30}
+};
+
 static const az_vector_t oth_crab_vertices[] = {
   {0, 20}, {-5, 16}, {-25, 22}, {-10, 11}, {-15, 7},
   {-15, -7}, {-10, -11}, {-25, -22}, {-5, -16}, {0, -20},
@@ -1806,6 +1813,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 12.0, .impact_damage = 10.0,
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FREEZE |
                                   AZ_DMGF_FLAME) },
+  },
+  [AZ_BAD_OTH_BRAWLER] = {
+    .max_health = 90.0, .potential_pickups = AZ_PUPF_LARGE_SHIELDS,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
+    .death_style = AZ_DEATH_OTH,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_brawler_vertices),
+                   .impact_damage = 20.0 }
   }
 };
 

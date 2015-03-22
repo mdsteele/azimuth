@@ -26,6 +26,9 @@
 
 /*===========================================================================*/
 
+void az_tick_bad_oth_brawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 void az_tick_bad_oth_crab_1(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 

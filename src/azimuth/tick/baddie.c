@@ -841,6 +841,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_MAGMA_BOMB:
       az_tick_bad_magma_bomb(state, baddie, time);
       break;
+    case AZ_BAD_OTH_BRAWLER:
+      az_tick_bad_oth_brawler(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
