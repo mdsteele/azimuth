@@ -1,4 +1,4 @@
-Next flag: 116
+Next flag: 117
 
 Bosses
 ======
@@ -107,6 +107,7 @@ Doors
 109: Opened red door bewteen Cnidam rooms 337 and 461
 110: Opened blue door between Sarvari rooms 432 and 464
 111: Opened blue door between Voquan rooms 143 and 375
+116: Opened cyan door between Barrag rooms 266 and 276
 
 Boss Doors
 ==========
