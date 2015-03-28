@@ -191,6 +191,12 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_FIRE_CHOMPER,
   AZ_BAD_GRABBER_PLANT,
   AZ_BAD_SPIKED_VINE,
+  // Aquatic:
+  AZ_BAD_FORCELING,
+  AZ_BAD_SMALL_FISH,
+  AZ_BAD_LARGE_FISH,
+  AZ_BAD_CLAM,
+  AZ_BAD_FIREBALL_MINE,
   // Mushrooms:
   AZ_BAD_MYCOFLAKKER,
   AZ_BAD_MYCOSTALKER,
@@ -201,9 +207,6 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_NIGHTSHADE,
   // Miscellaneous:
   AZ_BAD_LEAPER,
-  AZ_BAD_SMALL_FISH,
-  AZ_BAD_CLAM,
-  AZ_BAD_FIREBALL_MINE,
   AZ_BAD_ATOM,
   AZ_BAD_SPARK,
   AZ_BAD_ERUPTION,
@@ -224,7 +227,6 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_OTH_GUNSHIP,
   AZ_BAD_FORCEFIEND,
   AZ_BAD_FORCE_EGG,
-  AZ_BAD_FORCELING,
   AZ_BAD_KILOFUGE,
   AZ_BAD_ICE_CRYSTAL,
   AZ_BAD_GNAT,

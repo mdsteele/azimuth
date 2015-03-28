@@ -43,84 +43,56 @@ static void avg_vertex(az_vector_t v1, az_vector_t v2) {
   az_gl_vertex(az_vmul(az_vadd(v1, v2), 0.5));
 }
 
+static void draw_fins(az_color_t inner, az_color_t outer, GLfloat fin_scale,
+                      GLfloat y_base, GLfloat y_tip, az_clock_t clock) {
+  for (int i = -1; i <= 1; i += 2) {
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(inner); glVertex2f(fin_scale, i * fin_scale * y_base);
+      az_gl_color(outer); glVertex2f(8 * fin_scale, i * fin_scale * y_base);
+      glVertex2f(-4 * fin_scale - az_clock_zigzag(4, 7, clock),
+                 i * fin_scale * y_tip);
+      glVertex2f(-2 * fin_scale, i * fin_scale * y_base);
+    } glEnd();
+  }
+}
+
 static void draw_fish(const az_baddie_t *baddie, az_color_t inner,
                       az_color_t outer, GLfloat fin_scale, az_clock_t clock) {
+  assert(baddie->data->num_components == 2);
   const az_component_t *middle = &baddie->components[0];
   const az_component_t *tail = &baddie->components[1];
   const az_vector_t *hvertices = baddie->data->main_body.polygon.vertices;
-  const az_vector_t *mvertices =
-    baddie->data->components[0].polygon.vertices;
-  const az_vector_t *tvertices =
-    baddie->data->components[1].polygon.vertices;
+  const az_vector_t *mvertices = baddie->data->components[0].polygon.vertices;
+  const az_vector_t *tvertices = baddie->data->components[1].polygon.vertices;
   // Fins:
-  for (int i = -1; i <= 1; i += 2) {
-    glBegin(GL_TRIANGLE_FAN); {
-      az_gl_color(inner); glVertex2f(fin_scale, 5 * i * fin_scale);
-      az_gl_color(outer); glVertex2f(8 * fin_scale, 5 * i * fin_scale);
-      glVertex2f(-4 * fin_scale - az_clock_zigzag(4, 7, clock),
-                 12 * i * fin_scale);
-      glVertex2f(-2 * fin_scale, 5 * i * fin_scale);
-    } glEnd();
-  }
+  draw_fins(inner, outer, fin_scale, 5, 12, clock);
   glPushMatrix(); {
     az_gl_translated(middle->position);
     az_gl_rotated(middle->angle);
-    for (int i = -1; i <= 1; i += 2) {
-      glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(inner); glVertex2f(fin_scale, 3 * i * fin_scale);
-        az_gl_color(outer); glVertex2f(8 * fin_scale, 3 * i * fin_scale);
-        glVertex2f(-4 * fin_scale - az_clock_zigzag(4, 7, clock),
-                   9 * i * fin_scale);
-        glVertex2f(-2 * fin_scale, 3 * i * fin_scale);
-      } glEnd();
-    }
+    draw_fins(inner, outer, fin_scale, 3, 9, clock);
   } glPopMatrix();
   // Head:
   glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(inner);
-    glVertex2f(0, 0);
-    az_gl_color(outer);
+    az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
     for (int i = 0; i < 7; ++i) az_gl_vertex(hvertices[i]);
   } glEnd();
   // Body:
   glBegin(GL_TRIANGLE_STRIP); {
     az_gl_color(outer); az_gl_vertex(hvertices[6]);
     az_gl_color(inner); glVertex2f(0, 0);
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[1], middle->angle),
-                         middle->position));
-    az_gl_color(inner);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[0], middle->angle),
-                         middle->position));
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[2], middle->angle),
-                         middle->position));
+    az_gl_color(outer); az_gl_vertex(transform(middle, mvertices[1]));
+    az_gl_color(inner); az_gl_vertex(transform(middle, mvertices[0]));
+    az_gl_color(outer); az_gl_vertex(transform(middle, mvertices[2]));
     az_gl_color(inner); az_gl_vertex(middle->position);
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(tvertices[0], tail->angle),
-                         tail->position));
-    az_gl_color(inner);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[3], middle->angle),
-                         middle->position));
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(tvertices[1], tail->angle),
-                         tail->position));
-    az_gl_vertex(az_vadd(az_vrotate(tvertices[2], tail->angle),
-                         tail->position));
-    az_gl_color(inner);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[3], middle->angle),
-                         middle->position));
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[4], middle->angle),
-                         middle->position));
-    az_gl_color(inner);
-    az_gl_vertex(middle->position);
-    az_gl_color(outer);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[5], middle->angle),
-                         middle->position));
-    az_gl_color(inner);
-    az_gl_vertex(az_vadd(az_vrotate(mvertices[0], middle->angle),
-                         middle->position));
+    az_gl_color(outer); az_gl_vertex(transform(tail, tvertices[0]));
+    az_gl_color(inner); az_gl_vertex(transform(middle, mvertices[3]));
+    az_gl_color(outer); az_gl_vertex(transform(tail, tvertices[1]));
+                        az_gl_vertex(transform(tail, tvertices[2]));
+    az_gl_color(inner); az_gl_vertex(transform(middle, mvertices[3]));
+    az_gl_color(outer); az_gl_vertex(transform(middle, mvertices[4]));
+    az_gl_color(inner); az_gl_vertex(middle->position);
+    az_gl_color(outer); az_gl_vertex(transform(middle, mvertices[5]));
+    az_gl_color(inner); az_gl_vertex(transform(middle, mvertices[0]));
     az_gl_color(outer); az_gl_vertex(hvertices[0]);
     az_gl_color(inner); glVertex2f(0, 0);
   } glEnd();
@@ -309,6 +281,86 @@ void az_draw_bad_small_fish(const az_baddie_t *baddie, float frozen,
     color3(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
            0.3f - 0.2f * flare + 0.3f * frozen);
   draw_fish(baddie, inner, outer, 1.0, clock);
+}
+
+void az_draw_bad_large_fish(const az_baddie_t *baddie, float frozen,
+                            az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_LARGE_FISH);
+  const az_component_t *mid1 = &baddie->components[0];
+  const az_component_t *mid2 = &baddie->components[1];
+  const az_component_t *tail = &baddie->components[2];
+  const az_vector_t *hvertices = baddie->data->main_body.polygon.vertices;
+  const az_vector_t *m1vertices = baddie->data->components[0].polygon.vertices;
+  const az_vector_t *m2vertices = baddie->data->components[1].polygon.vertices;
+  const az_vector_t *tvertices = baddie->data->components[2].polygon.vertices;
+  const float flare = baddie->armor_flare;
+  const az_color_t inner =
+    color3(0.8f + 0.2f * flare, 0.1f - 0.1f * flare + 0.5f * frozen,
+           0.3f - 0.3f * flare + 0.7f * frozen);
+  const az_color_t outer =
+    color3(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
+           0.3f - 0.2f * flare + 0.3f * frozen);
+  const az_color_t tip = color3(0.3, 0.25, 0.25);
+  // Fins:
+  glPushMatrix(); {
+    glTranslatef(-5, 0, 0);
+    draw_fins(inner, outer, 1.5, 5, 13, clock);
+  } glPopMatrix();
+  glPushMatrix(); {
+    az_gl_translated(mid1->position);
+    az_gl_rotated(mid1->angle);
+    draw_fins(inner, outer, 1.5, 3, 9, clock);
+  } glPopMatrix();
+  // Pincers:
+  for (int i = -1; i <= 1; i += 2) {
+    glPushMatrix(); {
+      glScalef(1, i, 1);
+      glTranslatef(13, 1, 0);
+      glRotatef(0.5f * az_clock_zigzag(30, 1, clock), 0, 0, 1);
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.6, 0.5, 0.5); glVertex2f(0, 0); az_gl_color(tip);
+        glVertex2f(0, -1); glVertex2f(12, 0);
+        glVertex2f(7, 3); glVertex2f(0, 5);
+      } glEnd();
+    } glPopMatrix();
+  }
+  // Head:
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
+    for (int i = 1; i < 6; ++i) az_gl_vertex(hvertices[i]);
+  } glEnd();
+  // Body:
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(outer); az_gl_vertex(hvertices[5]);
+    az_gl_color(inner); glVertex2f(0, 0);
+    az_gl_color(outer); avg_vertex(hvertices[6],
+                                   transform(mid1, m1vertices[1]));
+    az_gl_color(inner); avg_vertex(hvertices[7],
+                                   transform(mid1, m1vertices[0]));
+    az_gl_color(outer); avg_vertex(transform(mid1, m1vertices[2]),
+                                   transform(mid2, m2vertices[1]));
+    az_gl_color(inner); avg_vertex(transform(mid1, m1vertices[3]),
+                                   transform(mid2, m2vertices[0]));
+    az_gl_color(outer); avg_vertex(transform(mid2, m2vertices[2]),
+                                   transform(tail, tvertices[0]));
+    az_gl_color(inner); avg_vertex(transform(mid2, m2vertices[3]),
+                                   transform(tail, tvertices[3]));
+    az_gl_color(tip); az_gl_vertex(transform(tail, tvertices[1]));
+    az_gl_color(outer); avg_vertex(transform(mid2, m2vertices[4]),
+                                   transform(tail, tvertices[2]));
+    az_gl_color(inner); avg_vertex(transform(mid2, m2vertices[3]),
+                                   transform(tail, tvertices[3]));
+    az_gl_color(outer); avg_vertex(transform(mid1, m1vertices[4]),
+                                   transform(mid2, m2vertices[5]));
+    az_gl_color(inner); avg_vertex(transform(mid1, m1vertices[3]),
+                                   transform(mid2, m2vertices[0]));
+    az_gl_color(outer); avg_vertex(hvertices[0],
+                                   transform(mid1, m1vertices[5]));
+    az_gl_color(inner); avg_vertex(hvertices[7],
+                                   transform(mid1, m1vertices[0]));
+    az_gl_color(outer); az_gl_vertex(hvertices[1]);
+    az_gl_color(inner); glVertex2f(0, 0);
+  } glEnd();
 }
 
 /*===========================================================================*/

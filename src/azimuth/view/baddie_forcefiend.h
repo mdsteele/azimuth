@@ -36,6 +36,9 @@ void az_draw_bad_forceling(const az_baddie_t *baddie, float frozen,
 void az_draw_bad_small_fish(const az_baddie_t *baddie, float frozen,
                             az_clock_t clock);
 
+void az_draw_bad_large_fish(const az_baddie_t *baddie, float frozen,
+                            az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_FORCEFIEND_H_

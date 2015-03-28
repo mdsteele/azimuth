@@ -726,6 +726,28 @@ static az_component_data_t small_fish_components[] = {
     .init_position = {-30, 0}, .impact_damage = 12.0 }
 };
 
+static const az_vector_t large_fish_head_vertices[] = {
+  {-12, -10}, {9, -12}, {15, -8}, {18, 0}, {15, 8}, {9, 12}, {-12, 10},
+  {-15, 0}
+};
+static const az_vector_t large_fish_mid1_vertices[] = {
+  {15, 0}, {12, 10}, {-12, 7}, {-15, 0}, {-12, -7}, {12, -10}
+};
+static const az_vector_t large_fish_mid2_vertices[] = {
+  {15, 0}, {12, 7}, {-12, 4}, {-15, 0}, {-12, -4}, {12, -7}
+};
+static const az_vector_t large_fish_tail_vertices[] = {
+  {12, 4}, {-15, 0}, {12, -4}, {13, 0}
+};
+static az_component_data_t large_fish_components[] = {
+  { .polygon = AZ_INIT_POLYGON(large_fish_mid1_vertices),
+    .init_position = {-22.5, 0}, .impact_damage = 15.0 },
+  { .polygon = AZ_INIT_POLYGON(large_fish_mid2_vertices),
+    .init_position = {-45, 0}, .impact_damage = 15.0 },
+  { .polygon = AZ_INIT_POLYGON(large_fish_tail_vertices),
+    .init_position = {-67.5, 0}, .impact_damage = 15.0 }
+};
+
 // TODO: Update the various Nocturne component polygons once we have real
 //   graphics for the Nocturne.
 static const az_vector_t nocturne_main_body_vertices[] = {
@@ -985,8 +1007,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 5.0, .overall_bounding_radius = 30.5,
     .color = {160, 160, 160, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
-    .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
-                          AZ_PUPF_ROCKETS),
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(turret_components)
@@ -1060,7 +1081,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 3.0, .overall_bounding_radius = 30.5,
     .color = {160, 160, 160, 255},
     .potential_pickups = (AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS |
-                          AZ_PUPF_ROCKETS),
+                          AZ_PUPF_ROCKETS | AZ_PUPF_BOMBS),
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
                    .impact_damage = 5.0 },
@@ -1156,8 +1177,6 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_TRAPDOOR] = {
     .max_health = 3.0, .overall_bounding_radius = 95.6,
-    .potential_pickups = (AZ_PUPF_LARGE_SHIELDS | AZ_PUPF_ROCKETS |
-                          AZ_PUPF_BOMBS),
     .static_properties = AZ_BADF_DRAW_BG, .color = {160, 160, 160, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(trapdoor_hinge_vertices),
@@ -1820,6 +1839,15 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_brawler_vertices),
                    .impact_damage = 20.0 }
+  },
+  [AZ_BAD_LARGE_FISH] = {
+    .max_health = 20.0, .overall_bounding_radius = 90.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {230, 0, 105, 255},
+    .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
+    .main_body = { .polygon = AZ_INIT_POLYGON(large_fish_head_vertices),
+                   .impact_damage = 20.0 },
+    DECL_COMPONENTS(large_fish_components)
   }
 };
 

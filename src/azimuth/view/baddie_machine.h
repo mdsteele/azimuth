@@ -39,6 +39,13 @@ void az_draw_bad_beam_sensor_inv(
 void az_draw_bad_sensor_laser(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_draw_bad_armored_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_draw_bad_incorporeal_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 void az_draw_bad_heat_ray(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 void az_draw_bad_death_ray(

@@ -180,6 +180,69 @@ void az_draw_bad_sensor_laser(
 
 /*===========================================================================*/
 
+static void draw_piston_segment(az_color_t inner, az_color_t outer,
+                                GLfloat max_x, GLfloat sw) {
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(outer); glVertex2f(-15,  6 + sw); glVertex2f(max_x,  6 + sw);
+    az_gl_color(inner); glVertex2f(-15,  6);      glVertex2f(max_x,  6);
+    az_gl_color(outer); glVertex2f(-15,  6 - sw); glVertex2f(max_x,  6 - sw);
+  } glEnd();
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(outer); glVertex2f(-15, -6 + sw); glVertex2f(max_x, -6 + sw);
+    az_gl_color(inner); glVertex2f(-15, -6);      glVertex2f(max_x, -6);
+    az_gl_color(outer); glVertex2f(-15, -6 - sw); glVertex2f(max_x, -6 - sw);
+  } glEnd();
+}
+
+static void draw_piston(const az_baddie_t *baddie, az_color_t inner,
+                        az_color_t outer) {
+  draw_piston_segment(inner, outer, 21, 3);
+  glBegin(GL_QUAD_STRIP); {
+    az_gl_color(inner); glVertex2f(21, -10); glVertex2f(21, 10);
+    az_gl_color(outer); glVertex2f(27, -9); glVertex2f(27, 9);
+  } glEnd();
+  for (int i = 0; i < 3; ++i) {
+    glPushMatrix(); {
+      glTranslated(baddie->components[i].position.x, 0, 0);
+      draw_piston_segment(inner, outer, 19 - 2 * i, 4 + i);
+    } glPopMatrix();
+  }
+}
+
+void az_draw_bad_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_PISTON);
+  const float flare = baddie->armor_flare;
+  draw_piston(baddie,
+              color3(0.65f + 0.35f * flare, 0.65f + 0.2f * frozen,
+                     0.7f + 0.3f * frozen),
+              color3(0.25f + 0.5f * flare, 0.25f + 0.15f * frozen,
+                     0.3f + 0.2f * frozen));
+}
+
+void az_draw_bad_armored_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_ARMORED_PISTON ||
+         baddie->kind == AZ_BAD_ARMORED_PISTON_EXT);
+  const float flare = baddie->armor_flare;
+  draw_piston(baddie,
+              color3(0.7f + 0.3f * flare, 0.65f + 0.2f * frozen,
+                     0.65f + 0.35f * frozen),
+              color3(0.3f + 0.5f * flare, 0.25f + 0.15f * frozen,
+                     0.25f + 0.2f * frozen));
+}
+
+void az_draw_bad_incorporeal_piston(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_INCORPOREAL_PISTON ||
+         baddie->kind == AZ_BAD_INCORPOREAL_PISTON_EXT);
+  assert(frozen == 0);
+  assert(baddie->armor_flare == 0);
+  draw_piston(baddie, color3(0.2, 0.2, 0.2), color3(0.1, 0.1, 0.1));
+}
+
+/*===========================================================================*/
+
 static void draw_ray(
     const az_baddie_t *baddie, az_clock_t clock, bool lamp,
     az_color_t dark, az_color_t medium, az_color_t light) {

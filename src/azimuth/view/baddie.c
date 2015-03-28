@@ -207,35 +207,6 @@ static void draw_mine_arms(GLfloat length, float flare, float frozen) {
   } glPopMatrix();
 }
 
-static void draw_piston_segment(az_color_t inner, az_color_t outer,
-                                GLfloat max_x, GLfloat sw) {
-  glBegin(GL_QUAD_STRIP); {
-    az_gl_color(outer); glVertex2f(-15,  6 + sw); glVertex2f(max_x,  6 + sw);
-    az_gl_color(inner); glVertex2f(-15,  6);      glVertex2f(max_x,  6);
-    az_gl_color(outer); glVertex2f(-15,  6 - sw); glVertex2f(max_x,  6 - sw);
-  } glEnd();
-  glBegin(GL_QUAD_STRIP); {
-    az_gl_color(outer); glVertex2f(-15, -6 + sw); glVertex2f(max_x, -6 + sw);
-    az_gl_color(inner); glVertex2f(-15, -6);      glVertex2f(max_x, -6);
-    az_gl_color(outer); glVertex2f(-15, -6 - sw); glVertex2f(max_x, -6 - sw);
-  } glEnd();
-}
-
-static void draw_piston(const az_baddie_t *baddie, az_color_t inner,
-                        az_color_t outer) {
-  draw_piston_segment(inner, outer, 21, 3);
-  glBegin(GL_QUAD_STRIP); {
-    az_gl_color(inner); glVertex2f(21, -10); glVertex2f(21, 10);
-    az_gl_color(outer); glVertex2f(27, -9); glVertex2f(27, 9);
-  } glEnd();
-  for (int i = 0; i < 3; ++i) {
-    glPushMatrix(); {
-      glTranslated(baddie->components[i].position.x, 0, 0);
-      draw_piston_segment(inner, outer, 19 - 2 * i, 4 + i);
-    } glPopMatrix();
-  }
-}
-
 static void draw_eruption_bubble(double max_radius, int frames,
                                  az_clock_t clock) {
   glBegin(GL_TRIANGLE_FAN); {
@@ -722,23 +693,15 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_BAD_PISTON:
-      draw_piston(baddie,
-                  color3(0.65f + 0.35f * flare, 0.65f + 0.2f * frozen,
-                         0.7f + 0.3f * frozen),
-                  color3(0.25f + 0.5f * flare, 0.25f + 0.15f * frozen,
-                         0.3f + 0.2f * frozen));
+      az_draw_bad_piston(baddie, frozen, clock);
       break;
     case AZ_BAD_ARMORED_PISTON:
     case AZ_BAD_ARMORED_PISTON_EXT:
-      draw_piston(baddie,
-                  color3(0.7f + 0.3f * flare, 0.65f + 0.2f * frozen,
-                         0.65f + 0.35f * frozen),
-                  color3(0.3f + 0.5f * flare, 0.25f + 0.15f * frozen,
-                         0.25f + 0.2f * frozen));
+      az_draw_bad_armored_piston(baddie, frozen, clock);
       break;
     case AZ_BAD_INCORPOREAL_PISTON:
     case AZ_BAD_INCORPOREAL_PISTON_EXT:
-      draw_piston(baddie, color3(0.2, 0.2, 0.2), color3(0.1, 0.1, 0.1));
+      az_draw_bad_incorporeal_piston(baddie, frozen, clock);
       break;
     case AZ_BAD_CRAWLING_MORTAR:
       az_draw_bad_crawling_mortar(baddie, frozen, clock);
@@ -917,6 +880,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_OTH_BRAWLER:
       az_draw_bad_oth_brawler(baddie, frozen, clock);
+      break;
+    case AZ_BAD_LARGE_FISH:
+      az_draw_bad_large_fish(baddie, frozen, clock);
       break;
   }
 }
