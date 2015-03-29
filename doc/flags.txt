@@ -1,4 +1,4 @@
-Next flag: 117
+Next flag: 119
 
 Bosses
 ======
@@ -108,6 +108,7 @@ Doors
 110: Opened blue door between Sarvari rooms 432 and 464
 111: Opened blue door between Voquan rooms 143 and 375
 116: Opened cyan door between Barrag rooms 266 and 276
+117: Opened cyan door between Barrag rooms 269 and 278
 
 Boss Doors
 ==========
@@ -117,6 +118,7 @@ Boss Doors
 58: Killed boss door in Voquan room 356
 72: Killed boss door in Cnidam room 326
 103: Killed boss door in Core room 56
+118: Killed boss door in Sarvari room 419
 
 Misc
 ====
@@ -128,7 +130,7 @@ Misc
 20: Opened first door (Colony room 6), disable flying/shooting tutorial
 22: Turned off death rays in Core room 146
 25: Burst through rock floor in Filimun room 93
-30: Turned off secondary reactor in Barrag room 274
+30: Turned off reactor in Barrag room 274, opening forcefields in room 269
 39: Turned on drill in Filimun room 84
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176

@@ -25,6 +25,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -137,6 +138,7 @@ void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
 void az_snake_towards(
     az_baddie_t *baddie, double time, int first_tail_component,
     double speed, double wiggle, az_vector_t destination) {
+  if (baddie->param == 0.0) baddie->param = az_random(-AZ_PI, AZ_PI);
   const az_vector_t old_position = baddie->position;
   const double old_angle = baddie->angle;
   const double dest_theta = az_vtheta(az_vsub(destination, baddie->position));
@@ -150,7 +152,7 @@ void az_snake_towards(
     az_vadd(baddie->position, az_vpolar(speed * time, new_angle));
   baddie->angle = new_angle;
   az_trail_tail_behind(baddie, first_tail_component, old_position, old_angle);
-  baddie->param = az_mod2pi(baddie->param + AZ_TWO_PI * time);
+  baddie->param = AZ_TWO_PI + az_mod2pi(baddie->param + AZ_TWO_PI * time);
 }
 
 static void apply_walls_to_force_field(
