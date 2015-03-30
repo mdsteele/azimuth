@@ -144,6 +144,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Crawlers:
   AZ_BAD_CAVE_CRAWLER,
   AZ_BAD_SPINED_CRAWLER,
+  AZ_BAD_CRAB_CRAWLER,
   AZ_BAD_ICE_CRAWLER,
   AZ_BAD_JUNGLE_CRAWLER,
   AZ_BAD_FIRE_CRAWLER,

@@ -435,6 +435,7 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
 void az_on_kilofuge_damaged(
     az_space_state_t *state, az_baddie_t *baddie, double amount,
     az_damage_flags_t damage_kind) {
+  assert(baddie->kind == AZ_BAD_KILOFUGE);
   const int knockback =
     ((damage_kind & AZ_DMGF_HYPER_ROCKET) ? 3 :
      (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) ? 2 : 0);

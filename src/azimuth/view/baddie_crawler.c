@@ -135,6 +135,55 @@ void az_draw_bad_spined_crawler(
   } glPopMatrix();
 }
 
+void az_draw_bad_crab_crawler(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_CRAB_CRAWLER);
+  const float flare = baddie->armor_flare;
+  draw_normal_feet(frozen, clock, (baddie->state == 3));
+  // Body:
+  glPushMatrix(); {
+    glTranslatef((baddie->state == 3 ? -2.5f :
+                  -0.25f * az_clock_zigzag(5, 5, clock)), 0, 0);
+    const az_color_t inner =
+      color3(0.6f + 0.4f * flare - 0.4f * frozen, 0.4f - 0.2f * flare,
+             0.2f + 0.8f * frozen);
+    const az_color_t outer =
+      color3(0.24f + 0.4f * flare - 0.15f * frozen, 0.12f - 0.05f * flare,
+             0.06f + 0.5f * frozen);
+    // Antennae:
+    glBegin(GL_LINE_STRIP); {
+      az_gl_color(outer);
+      glVertex2f(7, -9); glVertex2f(-3, 0); glVertex2f(7, 9);
+    } glEnd();
+    // Shell:
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(inner); glVertex2f(-13, 0); az_gl_color(outer);
+      glVertex2f(-15, 0);
+      for (int i = -120; i <= 120; i += 30) {
+        glVertex2d(11 * cos(AZ_DEG2RAD(i)) - 7, 16 * sin(AZ_DEG2RAD(i)));
+      }
+      glVertex2f(-15, 0);
+    } glEnd();
+  } glPopMatrix();
+  // Claws:
+  for (int i = 0; i < 2; ++i) {
+    glPushMatrix(); {
+      az_gl_translated(baddie->components[i].position);
+      az_gl_rotated(baddie->components[i].angle);
+      glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.6f - 0.4f * frozen, 0.3f, 0.3f + 0.7f * frozen);
+        glVertex2f(-4, (i == 0 ? 3 : -3));
+        glColor3f(0.24f - 0.15f * frozen, 0.1f, 0.1f + 0.5f * frozen);
+        const az_polygon_t polygon = baddie->data->components[i].polygon;
+        for (int j = polygon.num_vertices - 1, k = 0;
+             j < polygon.num_vertices; j = k++) {
+          az_gl_vertex(polygon.vertices[j]);
+        }
+      } glEnd();
+    } glPopMatrix();
+  }
+}
+
 void az_draw_bad_ice_crawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_ICE_CRAWLER);

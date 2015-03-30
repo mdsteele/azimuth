@@ -33,6 +33,12 @@ void az_tick_bad_cave_crawler(
 void az_tick_bad_spined_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_crab_crawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_crab_crawler_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind);
+
 void az_tick_bad_ice_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 

@@ -337,7 +337,11 @@ void az_tick_bad_creepy_eye(
 void az_on_creepy_eye_damaged(
     az_space_state_t *state, az_baddie_t *baddie, double amount,
     az_damage_flags_t damage_kind) {
-  baddie->cooldown = fmax(0.125, baddie->cooldown + amount * 0.1);
+  if (damage_kind == 0) {
+    baddie->cooldown = fmax(0.125, fmax(baddie->cooldown, amount * 0.1));
+  } else {
+    baddie->cooldown = fmax(0.125, baddie->cooldown + amount * 0.1);
+  }
 }
 
 /*===========================================================================*/

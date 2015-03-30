@@ -996,6 +996,29 @@ static az_component_data_t magbeest_legs_r_components[] = {
     .init_position = {-300, 25}, .impact_damage = 20.0 }
 };
 
+static const az_vector_t crab_crawler_body_vertices[] = {
+  {-14.5, -11}, {-8, -16}, {-2, -13.8564}, {1.75833, -8}, {3.5, 0},
+  {1.75833, 8}, {-2, 13.8564}, {-8, 16}, {-14.5, 11}, {-18, 0}
+};
+static az_vector_t crab_crawler_left_claw_vertices[] = {
+  {12, 15}, {2, 13}, {-3, 10}, {-6, 7}, {-8, 0}, {-6, -6}, {-2, -5},
+  {1, -1}, {4, 4}, {9, 10}, {5, 9}
+};
+static az_vector_t crab_crawler_right_claw_vertices[] = {
+  {12, -15}, {2, -13}, {-3, -10}, {-6, -7}, {-8, 0}, {-6, 6}, {-2, 5},
+  {1, 1}, {4, -4}, {9, -10}, {5, -9}
+};
+static az_component_data_t crab_crawler_components[] = {
+  { .polygon = AZ_INIT_POLYGON(crab_crawler_left_claw_vertices),
+    .init_position = {-8, 9}, .impact_damage = 12.0,
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_BEAM |
+                   AZ_DMGF_FLAME) },
+  { .polygon = AZ_INIT_POLYGON(crab_crawler_right_claw_vertices),
+    .init_position = {-8, -9}, .impact_damage = 12.0,
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_BEAM |
+                   AZ_DMGF_FLAME) }
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1848,6 +1871,15 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(large_fish_head_vertices),
                    .impact_damage = 20.0 },
     DECL_COMPONENTS(large_fish_components)
+  },
+  [AZ_BAD_CRAB_CRAWLER] = {
+    .max_health = 6.0, .overall_bounding_radius = 32.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {128, 64, 32, 255},
+    .hurt_sound = AZ_SND_HURT_CRAWLER, .armor_sound = AZ_SND_HIT_ARMOR,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .main_body = { .polygon = AZ_INIT_POLYGON(crab_crawler_body_vertices),
+                   .impact_damage = 12.0 },
+    DECL_COMPONENTS(crab_crawler_components)
   }
 };
 

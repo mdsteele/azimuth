@@ -74,6 +74,70 @@ void az_tick_bad_spined_crawler(
   } else baddie->state = 0;
 }
 
+void az_tick_bad_crab_crawler(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_CRAB_CRAWLER);
+  const double claw_max_angle = AZ_DEG2RAD(90);
+  const double claw_open_time = 0.75;
+  const double claw_open_rate = claw_max_angle / claw_open_time;
+  const double claw_close_rate = claw_max_angle / 0.1;
+  bool open_claws = true;
+  if (baddie->state == 1 || baddie->state == 2) {
+    az_crawl_around(state, baddie, time, (baddie->state == 1),
+                    3.0, 25.0, 100.0);
+    const az_vector_t rel_ship_position =
+      az_vsub(state->ship.position, baddie->position);
+    // Fire at the ship when the ship is facing away:
+    if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 200.0) &&
+        fabs(az_mod2pi(state->ship.angle -
+                       az_vtheta(rel_ship_position))) < AZ_DEG2RAD(60) &&
+        az_can_see_ship(state, baddie)) {
+      double fire_angle = az_vtheta(rel_ship_position);
+      az_vector_t rel_impact_position;
+      if (az_lead_target(rel_ship_position, state->ship.velocity,
+                         550.0, &rel_impact_position)) {
+        fire_angle = az_vtheta(rel_impact_position);
+      }
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_FIREBALL_FAST,
+                                5.0, fire_angle - baddie->angle, 0.0);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
+      baddie->cooldown = 1.8;
+    }
+    // Reverse direction if we get near a marker node:
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind != AZ_NODE_MARKER) continue;
+      if (!az_vwithin(node->position, baddie->position, 50.0)) continue;
+      const double rel_angle =
+        az_mod2pi(az_vtheta(az_vsub(node->position, baddie->position)) -
+                  baddie->angle);
+      if (baddie->state == 1 && rel_angle < 0.0) baddie->state = 2;
+      else if (baddie->state == 2 && rel_angle > 0.0) baddie->state = 1;
+    }
+  } else if (baddie->state == 3) {
+    if (baddie->cooldown <= 0.0) baddie->state = az_randint(1, 2);
+    else if (baddie->cooldown > claw_open_time) open_claws = false;
+  } else {
+    baddie->state = az_randint(1, 2);
+  }
+  // Open/close claws:
+  const double old_claw_angle = baddie->components[1].angle;
+  const double new_claw_angle =
+    (open_claws ?
+     az_angle_towards(old_claw_angle, claw_open_rate * time, 0.0) :
+     az_angle_towards(old_claw_angle, claw_close_rate * time, claw_max_angle));
+  baddie->components[0].angle = -new_claw_angle;
+  baddie->components[1].angle = new_claw_angle;
+}
+
+void az_on_crab_crawler_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind) {
+  assert(baddie->kind == AZ_BAD_CRAB_CRAWLER);
+  baddie->velocity = AZ_VZERO;
+  baddie->state = 3;
+  baddie->cooldown = 2.5;
+}
+
 void az_tick_bad_ice_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_ICE_CRAWLER);
