@@ -605,8 +605,11 @@ static void draw_camera_view(az_editor_state_t *state) {
   az_editor_room_t *room = AZ_LIST_GET(state->planet.rooms,
                                        state->current_room);
   if (!az_editor_is_in_minimap_mode(state)) {
-    az_draw_background_pattern(room->background_pattern, &room->camera_bounds,
-                               state->camera, state->clock);
+    if (state->zoom_level < 2.5) {
+      az_draw_background_pattern(room->background_pattern,
+                                 &room->camera_bounds,
+                                 state->camera, state->clock);
+    }
     draw_room(state, room);
   } else draw_room_minimap(state, room, state->current_room);
 
