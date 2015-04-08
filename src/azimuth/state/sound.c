@@ -719,6 +719,22 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.650736, .phaser_sweep = 0.04,
     .volume_adjust = -0.4
   },
+  [AZ_SND_PLANET_DEFORM] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_attack = 0.985, .env_sustain = 0.535, .env_decay = 0.965,
+    .start_freq = 0.08, .freq_slide = 0.10, .freq_delta_slide = -0.02,
+    .vibrato_depth = 0.145, .vibrato_speed = 0.55,
+    .square_duty = 0.92, .duty_sweep = -0.12,
+    .phaser_sweep = 0.09, .lpf_cutoff = 0.00252298, .volume_adjust = -0.5
+  },
+  [AZ_SND_PLANET_EXPLODE] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_attack = 0.3, .env_sustain = 0.9,
+    .env_punch = 0.75, .env_decay = 0.8,
+    .start_freq = 0.115, .freq_slide = 0.06,
+    .vibrato_depth = 0.24, .vibrato_speed = 0.54,
+    .phaser_offset = 0.35, .phaser_sweep = -0.08
+  },
   [AZ_SND_REACTIVE_ARMOR] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.10495, .env_punch = 0.362849, .env_decay = 0.33,

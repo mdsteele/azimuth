@@ -1,5 +1,5 @@
-@P z8 r469 t213 s6
-$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene3,scene0;
+@P z8 r469 t217 s6
+$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene4,wait1.5,scene3,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -549,8 +549,8 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   Even after decades of study, we still
   don't know how they work, or how to
   make more of them.  Still, the three
-  we've met so far--Noumena, Halcyon,
-  and Epicedium--have been invaluable
+  we've met so far--Noumena, Epicede,
+  and Halcyon--have been invaluable
   allies, even friends, in our unending
   quest to explore and understand the
   universe we all live in."
@@ -971,3 +971,49 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 
   ...because we would already have been
   destroyed."
+!T213"
+  With the NPS engines obliterated along
+  with the rest of Zenith Colony, the
+  portals are gone, and Oth has been
+  sealed away from our universe forever.
+
+  I raced back to the nearest navsat to
+  deliver the news of the Trichords'
+  treachery, and of Azimuth's sacrifice
+  to protect us all.
+
+  It was not long before war broke out
+  between the Trichord Interstellar
+  Alliance and the rest of the Joint
+  Federation."
+!T214"
+  And what would have happened if I had
+  never reawakened Azimuth?  Could the
+  Trichords really have controlled the
+  Oth and become a dominant military
+  power?
+
+  Or would thousands--or millions--of
+  Oth fingers broken free into our
+  universe and laid waste to all of us?
+
+  We'll never know."
+!T215"
+  Still, even without the Oth at their
+  side, the Trichord Alliance is a still
+  a formidable enemy.  By now the war
+  has ground down to a bitter stalemate.
+
+  Even the three remaining SapiAIs have
+  been pulled into the fray--Noumena in
+  Trichord space, and Epicede and
+  Halcyon in Federation space.
+
+  Which, given what I learned from
+  Azimuth, brings me back to the
+  questions now most on my mind..."
+!T216"
+  Just where did the other SapiAIs come
+  from?                      
+
+  And what else aren't they telling us?"

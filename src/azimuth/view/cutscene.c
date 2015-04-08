@@ -33,6 +33,7 @@
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/ship.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -84,38 +85,55 @@ void az_draw_planet_starfield(az_clock_t clock) {
   } glEnd();
 }
 
-#define PLANET_RADIUS 130.0
+#define BASE_PLANET_RADIUS 130.0
 
-void az_draw_zenith_planet(az_clock_t clock) {
+static double planet_radius(double theta, double deform) {
+  assert(0.0 <= deform && deform <= 1.0);
+  return (deform <= 0.0 ? BASE_PLANET_RADIUS :
+          BASE_PLANET_RADIUS * (1.0 - pow(deform, 5)) *
+          (1.0 + 0.5 * pow(deform, 3) *
+           (cos(17 * theta + AZ_TWO_PI * deform) +
+            sin(7 * theta))));
+}
+
+static void draw_zenith_planet_internal(double deform, az_clock_t clock) {
+  assert(0.0 <= deform && deform <= 1.0);
   glPushMatrix(); {
     glTranslated(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
 
     // Draw the planet itself:
     glBegin(GL_TRIANGLE_FAN); {
-      glColor4f(0.1, 0, 0.1, 1);
-      glVertex2d(0.15 * PLANET_RADIUS, -0.23 * PLANET_RADIUS);
+      glColor4f(0.5, 0.3, 0.5, 1);
+      const double spot_theta = AZ_DEG2RAD(-125);
+      const double spot_radius = 0.15 * planet_radius(spot_theta, deform);
+      glVertex2d(spot_radius * cos(spot_theta), spot_radius * sin(spot_theta));
       glColor4f(0.25, 0.15, 0.15, 1);
-      for (int theta = 0; theta <= 360; theta += 6) {
-        glVertex2d(PLANET_RADIUS * cos(AZ_DEG2RAD(theta)),
-                   PLANET_RADIUS * sin(AZ_DEG2RAD(theta)));
+      for (int i = 0; i <= 360; i += 3) {
+        const double theta = AZ_DEG2RAD(i);
+        const double radius = planet_radius(theta, deform);
+        glVertex2d(radius * cos(theta), radius * sin(theta));
       }
     } glEnd();
 
     // Draw planet "atmosphere":
-    const double atmosphere_thickness = 18.0 + az_clock_zigzag(10, 8, clock);
+    const double atmosphere_thickness =
+      18.0 + (1.0 - deform) * az_clock_zigzag(10, 8, clock);
     glBegin(GL_TRIANGLE_STRIP); {
-      for (int theta = 0; theta <= 360; theta += 6) {
+      for (int i = 0; i <= 360; i += 3) {
+        const double theta = AZ_DEG2RAD(i);
+        const double radius = planet_radius(theta, deform);
         glColor4f(0, 1, 1, 0.5);
-        glVertex2d(PLANET_RADIUS * cos(AZ_DEG2RAD(theta)),
-                   PLANET_RADIUS * sin(AZ_DEG2RAD(theta)));
+        glVertex2d(radius * cos(theta), radius * sin(theta));
         glColor4f(0, 1, 1, 0);
-        glVertex2d((PLANET_RADIUS + atmosphere_thickness) *
-                   cos(AZ_DEG2RAD(theta + 3)),
-                   (PLANET_RADIUS + atmosphere_thickness) *
-                   sin(AZ_DEG2RAD(theta + 3)));
+        glVertex2d((radius + atmosphere_thickness) * cos(theta),
+                   (radius + atmosphere_thickness) * sin(theta));
       }
     } glEnd();
   } glPopMatrix();
+}
+
+void az_draw_zenith_planet(az_clock_t clock) {
+  draw_zenith_planet_internal(0.0, clock);
 }
 
 static void tint_screen(GLfloat gray, GLfloat alpha) {
@@ -190,6 +208,68 @@ static void draw_zenith_scene(
   az_draw_zenith_planet(clock);
 }
 
+static void draw_escape_scene(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_ESCAPE);
+  az_draw_planet_starfield(clock);
+  if (cutscene->step == 0) {
+    // Step 0: Deform planet
+    draw_zenith_planet_internal(cutscene->param1, clock);
+  } else if (cutscene->step == 1) {
+    // Step 1: Asplode planet, with ship escaping
+    glPushMatrix(); {
+      // Explosion:
+      glTranslated(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
+      glBegin(GL_TRIANGLE_FAN); {
+        const double blast = pow(fmin(1.0, 3 * cutscene->param1), 3);
+        glColor4f(blast, 1, 1, 0.5 + 0.5 * blast);
+        glVertex2f(0, 0);
+        glColor4f(blast, 1, 1, blast);
+        for (int i = 0; i <= 360; i += 3) {
+          const double theta = AZ_DEG2RAD(i);
+          const double radius = 18.0 + blast * AZ_SCREEN_RADIUS;
+          glVertex2d(1.5 * radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      // Escaping ship shadow:
+      glPushMatrix(); {
+        const double translation = 1.2 * pow(cutscene->param1, 4);
+        glTranslated(-320 * translation, 270 * translation, 0);
+        const GLfloat scale_factor = 3.0 * translation;
+        glScalef(scale_factor, 0.66f * scale_factor, 1);
+        az_gl_rotated(AZ_DEG2RAD(125));
+        glColor3f(0, 0, 0);
+        // Engines:
+        glBegin(GL_QUADS); {
+          // Struts:
+          glVertex2f( 1,  9); glVertex2f(-7,  9);
+          glVertex2f(-7, -9); glVertex2f( 1, -9);
+          // Port engine:
+          glVertex2f(-10,  12); glVertex2f(  6,  12);
+          glVertex2f(  8,   7); glVertex2f(-11,   7);
+          // Starboard engine:
+          glVertex2f(  8,  -7); glVertex2f(-11,  -7);
+          glVertex2f(-10, -12); glVertex2f(  6, -12);
+        } glEnd();
+        // Main body:
+        glBegin(GL_TRIANGLE_FAN); {
+          glVertex2f(20, 0); glVertex2f( 15,  4); glVertex2f(-14,  4);
+          glVertex2f(-15,  3); glVertex2f(-16,  0); glVertex2f(-15, -3);
+          glVertex2f(-14, -4); glVertex2f( 15, -4);
+        } glEnd();
+      } glPopMatrix();
+    } glPopMatrix();
+  } else if (cutscene->step == 2) {
+    // Step 2: Explosion fades away
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor4f(1, 1, 1, 1.0 - cutscene->param1);
+      glVertex2i(0, 0); glVertex2i(AZ_SCREEN_WIDTH, 0);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+    } glEnd();
+  }
+}
+
 /*===========================================================================*/
 
 void az_draw_cutscene(const az_space_state_t *state) {
@@ -209,7 +289,9 @@ void az_draw_cutscene(const az_space_state_t *state) {
     case AZ_SCENE_ZENITH:
       draw_zenith_scene(cutscene, state->clock);
       break;
-    case AZ_SCENE_ESCAPE: break; // TODO
+    case AZ_SCENE_ESCAPE:
+      draw_escape_scene(cutscene, state->clock);
+      break;
     case AZ_SCENE_HOMECOMING: break; // TODO
   }
   if (cutscene->fade_alpha > 0.0) tint_screen(0, cutscene->fade_alpha);
