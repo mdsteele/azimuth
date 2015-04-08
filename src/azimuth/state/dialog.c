@@ -109,7 +109,21 @@ static int paragraph_line_length_internal(
         case '\0': break;
         // A "$$" escape inserts a literal '$' character, so that adds 1 to
         // the length of the line.
-        case '$': ++line_length; break;
+        case '$': ++line_end; ++line_length; break;
+        // A "$_" escape prints nothing, but artificially increases the
+        // calculated length of the line by the two-digit number specified
+        // after it.
+        case '_': {
+          ++line_end;
+          int pause = 0, stop = line_end + 2;
+          for (; line_end < stop && paragraph[line_end] != '\0'; ++line_end) {
+            if (paragraph[line_end] >= '0' && paragraph[line_end] <= '9' &&
+                pause >= 0) {
+              pause = pause * 10 + (paragraph[line_end] - '0');
+            } else pause = -1;
+          }
+          if (pause >= 0 && line_end == stop) line_length += pause;
+        } break;
         // A "$X" escape adds no length, but we need to skip over the six hex
         // digits that come after it.  However, we must take care not to
         // advance line_end past the end of the paragraph if the escape is

@@ -228,6 +228,17 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 
 /*===========================================================================*/
 
+static bool decimal_parse(char c1, char c2, int *out) {
+  int value = 0;
+  if ('0' <= c1 && c1 <= '9') value += c1 - '0';
+  else return false;
+  value *= 10;
+  if ('0' <= c2 && c2 <= '9') value += c2 - '0';
+  else return false;
+  *out = value;
+  return true;
+}
+
 static bool hex_parse(char c1, char c2, uint8_t *out) {
   int value = 0;
   if ('0' <= c1 && c1 <= '9') value += c1 - '0';
@@ -256,6 +267,7 @@ void az_draw_paragraph(
   // after printing max_chars characters.
   int chars_printed = 0; // how many chars we've printed so far
   int chars_before_line = 0; // how many chars we'd printed when line started
+  int line_pauses = 0; // how many chars "printed" on this line were pauses
   int line_start = 0; // index into paragraph for first char of current line
   double line_top = top; // y-position of top of the current line
   while (true) {
@@ -277,7 +289,7 @@ void az_draw_paragraph(
     int fragment_start = line_start;
     while (true) {
       const double fragment_left =
-        line_left + height * (chars_printed - chars_before_line);
+        line_left + height * (chars_printed - line_pauses - chars_before_line);
       // Determine where the fragment ends.  It ends at the next $-escape, at
       // the end of the line (or of the whole string), or when we reach
       // max_chars printed characters -- whichever comes first.
@@ -319,6 +331,33 @@ void az_draw_paragraph(
         // can just back up fragment_start by one so that the second '$' is
         // included as the beginning of the next fragment.
         case '$': --fragment_start; break;
+        // Handle pauses:
+        case '_': {
+          // First, make sure that we won't hit the end of the string trying to
+          // read the next two characters after the "$_".  If we will, print a
+          // warning and quit.
+          if (paragraph[fragment_start + 0] == '\0' ||
+              paragraph[fragment_start + 1] == '\0') {
+            AZ_WARNING_ONCE("Incomplete $_ escape: $_%s\n",
+                            paragraph + fragment_start);
+            return;
+          }
+          // Parse out the decimal value.  If it's valid, pause appropriately;
+          // if not, print a warning and then just ignore the whole escape.
+          int pause;
+          if (decimal_parse(paragraph[fragment_start + 0],
+                            paragraph[fragment_start + 1], &pause)) {
+            if (pause > max_chars - chars_printed) {
+              pause = max_chars - chars_printed;
+            }
+            chars_printed += pause;
+            line_pauses += pause;
+          } else {
+            AZ_WARNING_ONCE("Malformed $_ escape: $_%.2s\n",
+                            paragraph + fragment_start);
+          }
+          fragment_start += 2;
+        } break;
         // Handle italics controls:
         case '/': italic = true; break;
         case '|': italic = false; break;
@@ -397,6 +436,7 @@ void az_draw_paragraph(
     }
     // Advance to the next line.
     chars_before_line = chars_printed;
+    line_pauses = 0;
     line_start = fragment_start;
     line_top += spacing;
   }

@@ -55,6 +55,7 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 // printing max_chars characters; set this to -1 to print the whole paragraph.
 // The permitted escapes are:
 //   $$ - insert a literal '$' character
+//   $_dd - pause for (dd) chars-worth of time, where dd are decimal digits
 //   $/ - switch to italic font
 //   $| - switch back to roman (non-italic) font
 //   $W - set color to white
@@ -65,6 +66,7 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 //   $M - set color to magenta
 //   $Y - set color to yellow
 //   $C - set color to cyan
+//   $O - set color to orange
 //   $Xrrggbb - set color to {rr, gg, bb}, where rrggbb are hex digits
 //   $u - insert name of prefs UP key
 //   $d - insert name of prefs DOWN key

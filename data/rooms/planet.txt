@@ -143,7 +143,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"Looks like another uplink.  Computer, where
   are the surviving colonists?\""
 !T37"
-  Welcome, visitor, to Zenith Colony!            
+  Welcome, visitor, to Zenith Colony!$_12
 
   Query: Historical log patterns indicate that at
   any given time the majority of the colonists are
@@ -174,7 +174,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"That's not what I...no!  Gah!  There's been
   some kind of disaster here.  What went wrong?\""
 !T42"
-  Query: ...                               
+  Query: ...$_31
 
   No information is available on that topic.
 
@@ -190,7 +190,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   >>><"
 !T45"
   Link established.  Merging new database
-  contents.               
+  contents.$_15
 
   ERR**####...error corrected."
 !T46"
@@ -313,7 +313,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   colony's distress signal.  Do you know where the
   survivors are?\""
 !T71"
-  Greetings Hopper.  Checking sensors...         
+  Greetings Hopper.  Checking sensors...$_09
 
   $O[WARN]$W Most planetary sensors are cut off.
   There appear to be numerous damaged links
@@ -499,10 +499,10 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   underground oceans in $X4060e0Barrag$W, east of here."
 !T113"
   Connections to this uplink have been restored.
-  $OERR**####$W...error corrected.  Merging new nodes
-  into network.        
+  $OERR**####$W$_12...error corrected.  Merging new nodes
+  into network.$_08
 
-  ...                                 
+  .$_15.$_15.$_30
 
   Thank you."
 !T114"
@@ -513,9 +513,9 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   but without much success so far.  My systems are
   still badly damaged."
 !T116"
-  \"Okay, I'll have to keep search...hold it.  Did
-  you just say 'I think'?  And 'thank you'?
-  That's...not how standard-issue Fed computers
+  \"Okay, I'll have to keep search...$_15hold it.$_15  Did
+  you just say 'I think'?$_08  And 'thank you'?$_08
+  That's...$_12not how standard-issue Fed computers
   usually talk.\"
 
   \"Are you an AI or something?\""
@@ -529,7 +529,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"That's...  ...um, okay.  What remains of $/what$|?
   And what's a Fragment AI, anyway?\""
 !T119"
-  Unknown.                          
+  Unknown.$_26
 
   ...Sorry."
 !T120"
@@ -566,9 +566,9 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   HQ is going to be $/pissed$|."
 !T123"
   Connecting terminal.  Merging with newly-linked
-  systems.        
+  systems.$_08
 
-  ...                                 
+  .$_15.$_15.$_30
 
   I find myself...strangely awake."
 !T124"
@@ -618,7 +618,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T136"
   Hothouse"
 !T137"
-  \"...\"                                       
+  \"...\"$_39
 
   \"You're here.\""
 !T138"
@@ -717,9 +717,9 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T159"
   \"Azimuth!?\""
 !T160"
-  \"Hopper...\"                     
+  \"Hopper...\"$_21
 
-  \"...thank you.\"      
+  \"...thank you.\"$_06
 
   \"For everything.\""
 !T161"
@@ -769,7 +769,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T173"
   Press [$p] to pause the game."
 !T174"
-  Merging new data from this terminal...        
+  Merging new data from this terminal...$_08
 
   You'll need to be careful in here, Ms. Hopper.
   The creatures in $GVoquan$W are even more dangerous
@@ -823,7 +823,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   dead.  They're probably still waiting for him to
   regain control of the colony systems.\""
 !T182"
-  That seems a likely conclusion.                
+  That seems a likely conclusion.$_16
 
   ...I've managed to access $Gmap data for Voquan$W.
   Please be cautious."
@@ -861,7 +861,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"They $/found$| them?  So who built them in the
   first place?\""
 !T190"
-  The same being that built Azimuth:              
+  The same being that built Azimuth:$_14
 
   $ROth$W."
 !T191"
@@ -937,7 +937,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   way past."
 !T207"
   \"Yeah, I just met some.  But, you know...by this
-  point...\"                  
+  point...\"$_18
 
   \"...I'm kind of armed to the friggin' teeth.
   I'm $/pretty sure$| I can handle it.\""
@@ -946,11 +946,14 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T209"
   \"...we have little choice but to destroy you.\""
 !T210"
-  This is it.                    
+  $|
+
+
+  This is it.$_20
 
 
 
-  Galactic civil war.                  
+  Galactic civil war.$_18
 
 
 
@@ -958,6 +961,11 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   the once-peaceful Joint Federation,
   and with no end in sight."
 !T211"
+  $|
+
+
+
+
   It is sobering to think that in a way,
   this entire war was precipitated by my
   own actions: a routine rescue mission
@@ -965,9 +973,15 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   while on patrol near the border of
   Human space."
 !T212"
+  $|
+
+
+
+
   After all, if I had never gone on that
   mission, most likely we would not now
-  be at war.                  
+  be at war.$_18
+
 
   ...because we would already have been
   destroyed."
@@ -1014,6 +1028,6 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   questions now most on my mind..."
 !T216"
   Just where did the other SapiAIs come
-  from?                      
+  from?$_22
 
   And what else aren't they telling us?"
