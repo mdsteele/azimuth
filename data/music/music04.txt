@@ -1,4 +1,4 @@
-@M "S=2z xX=1x YzZ|ABC"
+@M "S =2z xX=1x Y|zZABCABCD"
 % Title: "Don't Make Me Come Over There"
 
 =tempo 140
@@ -25,6 +25,8 @@
 5| rq x2 r x2 |
 
 !Part Z
+
+2 E0,25
 
 1| b3s b be ' e4s e ee ' gs f e d ' f e d c |
 2| b2s b be ' e3s e ee ' gs f e d ' f e d c |
@@ -122,3 +124,17 @@
 4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
  | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
 5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+
+!Part D
+
+1| E0,100 b3w E0,15 | rw |
+2| E0,100 rq b5 r b5 | r b5 r b5 |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+ | c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 | x0q x2 x0 x2 |
+
+1| rw |
+2| rq b5 r b5 |
+4| c6s c ce ' ce cs c ' ce cs cs+'s cs ce |
+5| x0q x2 x0 x2 |
