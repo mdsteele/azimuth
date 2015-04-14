@@ -709,7 +709,7 @@ void az_init_paused_state(
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
     if (test_room_mapped(player, room) || az_test_room_visited(player, i)) {
-      y_min = fmin(y_min, get_room_center(room).y + 120 * MINIMAP_ZOOM);
+      y_min = fmin(y_min, get_room_center(room).y + 140 * MINIMAP_ZOOM);
     }
   }
   const az_room_key_t current_room_key = player->current_room;
