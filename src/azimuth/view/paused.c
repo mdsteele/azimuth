@@ -136,6 +136,8 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
     az_draw_minimap_room(planet, room, visited, false);
   }
 
+  if (state->current_drawer != AZ_PAUSE_DRAWER_MAP) return;
+
   // Draw map labels:
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
@@ -226,10 +228,30 @@ static void draw_minimap(const az_paused_state_t *state) {
   az_draw_string(8, AZ_ALIGN_CENTER, 320, 17, "Zenith Planetoid");
   az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 46 -
                  8 * strlen(current_zone->name), 17, "Location:");
-  const az_color_t color = current_zone->color;
-  glColor3ub(color.r, color.g, color.b);
+  az_gl_color(current_zone->color);
   az_draw_string(8, AZ_ALIGN_RIGHT, AZ_SCREEN_WIDTH - 38, 17,
                  current_zone->name);
+
+  if (state->scroll_y_min < SCROLL_Y_MAX) {
+    const az_color_t normal = {64, 192, 255, 255};
+    const az_color_t hilight = {255, 255, 255, 255};
+    const az_color_t dark = {32, 32, 32, 255};
+    const bool disabled = (state->current_drawer != AZ_PAUSE_DRAWER_MAP);
+    const bool blink = az_clock_mod(2, 20, state->clock);
+    if (disabled || state->scroll_y >= SCROLL_Y_MAX) az_gl_color(dark);
+    else if (blink) az_gl_color(hilight);
+    else az_gl_color(normal);
+    az_draw_printf(8, AZ_ALIGN_CENTER, 78, 367, "[%s]",
+                   az_key_name(state->prefs->keys[AZ_PREFS_UP_KEY_INDEX]));
+    if (disabled) az_gl_color(dark);
+    else az_gl_color(normal);
+    az_draw_string(8, AZ_ALIGN_CENTER, 78, 380, "SCROLL");
+    if (disabled || state->scroll_y <= state->scroll_y_min) az_gl_color(dark);
+    else if (blink) az_gl_color(hilight);
+    else az_gl_color(normal);
+    az_draw_printf(8, AZ_ALIGN_CENTER, 78, 393, "[%s]",
+                   az_key_name(state->prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]));
+  }
 }
 
 /*===========================================================================*/
