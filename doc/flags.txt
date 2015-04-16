@@ -1,4 +1,4 @@
-Next flag: 119
+Next flag: 120
 
 Bosses
 ======
@@ -22,6 +22,7 @@ Minibosses
 93: Killed Oth Crab in Voquan room 354
 96: Killed Oth Crab in Voquan room 255
 115: Killed Oth Brawler in Voquan room 377
+119: Killed Oth Crab in Barrag room 279
 
 Comm Consoles
 =============
