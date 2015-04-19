@@ -1,0 +1,81 @@
+@M "SABC|DMM"
+% Title: "Crystal Quest"
+
+=tempo 120
+=key 2b     % G minor
+
+
+!Part S
+
+1 Wp25 L30  E0,25  D5,50
+2 Wp75 L30  E0,100        V1,50
+3 Wt75 L150 E0,25  D15,50
+4 Wn   L30  E0,100
+5 Wn   L40  E0,100
+
+
+!Part A
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+
+
+!Part B
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+4| c3e r c r c r c r | c3e r c r c r c r |
+
+
+!Part C
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+4| c3e r c r c r c r | c3e r c r c r c r |
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+4| c3e r c r c r c r | c3e r c r c r c r |
+
+
+!Part D
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e r |
+2| g6q |
+4| L9 c5s c c c ' L12 c c c c ' L15 c c c c ' L18 c c c c |
+ | L21 c5s c c c ' L24 c c c c ' L27 c c c c ' L30 c3e r |
+5| rw | rh. x0q |
+
+
+!Part M
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+3| g4q d g3 b4 | a4q f f d |
+4| c3e c7 c3 c7 c3 c7 c3 c7 | c3e c7 c3 c7 c3 c7 c3 c7 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+3| e4q f g e | f4q g a f |
+4| c3e c7 c3 c7 c3 c7 c3 c7 | c3e c7 c3 c7 c3 c7 c3 c7 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+3| g4q d g3 b4 | a4q c5 b4 g |
+4| c3e c7 c3 c7 c3 c7 c3 c7 | c3e c7 c3 c7 c3 c7 c3 c7 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+1| g4e g3 ' g3e. g3s+ ' +s g3s ge ' g3e g4s g |
+ | g4e g3 ' g3e. g3s+ ' +s g3s ge ' f4s f f f |
+2| rq g5 r g | rq g5 r g |
+3| e4q f g e | f4q g a f |
+4| c3e c7 c3 c7 c3 c7 c3 c7 | c3e c7 c3 c7 c3 c7 c3 c7 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |

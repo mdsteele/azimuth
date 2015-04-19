@@ -132,7 +132,7 @@ void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out) {
 static const char *music_filenames[] = {
   [AZ_MUS_COLONY_1] = "music01.txt",
   [AZ_MUS_FILIMUN_ZONE] = "music02.txt",
-  [AZ_MUS_CNIDAM_ZONE] = NULL,
+  [AZ_MUS_CNIDAM_ZONE] = "music03.txt",
   [AZ_MUS_NANDIAR_ZONE] = "music04.txt",
   [AZ_MUS_VOQUAN_ZONE] = NULL,
   [AZ_MUS_BARRAG_ZONE] = "music06.txt",
