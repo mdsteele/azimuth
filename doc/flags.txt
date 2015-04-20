@@ -1,4 +1,4 @@
-Next flag: 120
+Next flag: 121
 
 Bosses
 ======
@@ -110,6 +110,7 @@ Doors
 111: Opened blue door between Voquan rooms 143 and 375
 116: Opened cyan door between Barrag rooms 266 and 276
 117: Opened cyan door between Barrag rooms 269 and 278
+120: Opened cyan door between Core rooms 0 and 64
 
 Boss Doors
 ==========
