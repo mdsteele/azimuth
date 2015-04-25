@@ -63,6 +63,9 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_GRAY_STONE_BRICKS] = {
     .parallax = 0.2, .repeat_horz = 130.0, .repeat_vert = 130.0
+  },
+  [AZ_BG_RED_GRAY_CINDERBLOCKS] = {
+    .parallax = 0.2, .repeat_horz = 90.0, .repeat_vert = 118.8
   }
 };
 
@@ -188,7 +191,7 @@ static void draw_girders(az_color_t color1, az_color_t color2,
   }
 }
 
-static void draw_half_brick(float width, float height, float rr) {
+static void draw_half_stone_brick(float width, float height, float rr) {
   const az_color_t color1 = {30, 30, 38, 255};
   const az_color_t color2 = {15, 15, 15, 255};
   glBegin(GL_TRIANGLE_STRIP); {
@@ -213,6 +216,27 @@ static void draw_half_brick(float width, float height, float rr) {
       glVertex2d(rr + rr * cos(AZ_DEG2RAD(i)),
                  -height + rr + rr * sin(AZ_DEG2RAD(i)));
     }
+  } glEnd();
+}
+
+static void draw_half_cinderblock(float width, float height) {
+  const az_color_t color1 = {64, 8, 8, 255};
+  const az_color_t color2 = {24, 18, 18, 255};
+  const float bezel = 13.5;
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color2);
+    glVertex2f(0, 0); glVertex2f(width, 0);
+    glVertex2f(0, -height); glVertex2f(width, -height);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1); glVertex2f(width, 0);
+    az_gl_color(color2); glVertex2f(width, -bezel);
+    az_gl_color(color1); glVertex2f(0, 0);
+    az_gl_color(color2); glVertex2f(bezel, -bezel);
+    az_gl_color(color1); glVertex2f(0, -height);
+    az_gl_color(color2); glVertex2f(bezel, -height + bezel);
+    az_gl_color(color1); glVertex2f(width, -height);
+    az_gl_color(color2); glVertex2f(width, -height + bezel);
   } glEnd();
 }
 
@@ -329,14 +353,30 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const float height = 65;
       const float radius = 8;
       glPushMatrix(); {
-        draw_half_brick(half_width, height, radius);
-        glTranslatef(-half_width, -height, 0);
-        draw_half_brick(half_width, height, radius);
-        glTranslatef(half_width, height, 0);
+        glTranslatef(-0.5f * half_width, 0, 0);
+        draw_half_stone_brick(1.5f * half_width, height, radius);
+        glTranslatef(half_width, -height, 0);
+        draw_half_stone_brick(0.5f * half_width, height, radius);
+        glTranslatef(-half_width, height, 0);
         glScalef(-1, 1, 1);
-        draw_half_brick(half_width, height, radius);
+        draw_half_stone_brick(0.5f * half_width, height, radius);
         glTranslatef(-half_width, -height, 0);
-        draw_half_brick(half_width, height, radius);
+        draw_half_stone_brick(1.5f * half_width, height, radius);
+      } glPopMatrix();
+    } break;
+    case AZ_BG_RED_GRAY_CINDERBLOCKS: {
+      const float half_width = 45;
+      const float height = 59.4;
+      glPushMatrix(); {
+        glTranslatef(-0.5f * half_width, 0, 0);
+        draw_half_cinderblock(1.5f * half_width, height);
+        glTranslatef(half_width, -height, 0);
+        draw_half_cinderblock(0.5f * half_width, height);
+        glTranslatef(-half_width, height, 0);
+        glScalef(-1, 1, 1);
+        draw_half_cinderblock(0.5f * half_width, height);
+        glTranslatef(-half_width, -height, 0);
+        draw_half_cinderblock(1.5f * half_width, height);
       } glPopMatrix();
     } break;
   }

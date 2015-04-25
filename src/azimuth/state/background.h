@@ -24,7 +24,7 @@
 /*===========================================================================*/
 
 // The number of background patterns there are, including AZ_BG_SOLID_BLACK:
-#define AZ_NUM_BG_PATTERNS 9
+#define AZ_NUM_BG_PATTERNS 10
 
 typedef enum {
   AZ_BG_SOLID_BLACK = 0,
@@ -36,6 +36,7 @@ typedef enum {
   AZ_BG_GREEN_ROCK_WALL,
   AZ_BG_GREEN_ROCK_WALL_WITH_GIRDERS,
   AZ_BG_GRAY_STONE_BRICKS,
+  AZ_BG_RED_GRAY_CINDERBLOCKS,
 } az_background_pattern_t;
 
 /*===========================================================================*/
