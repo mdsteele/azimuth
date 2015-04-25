@@ -1,3 +1,7 @@
-@R z7 p0 b0 d1 g0 n0 w0
+@R z7 p0 k0 b0 d2 g0 n2 w0
   c(3485.52,2222.99,0.333728,0.000000)
+$s:dark0.3,gpos21,vnorm,gpos20,vnorm,sub,B#dup,gpos,vnorm,gpos20,vnorm,sub,swap,div,muli0.5,isub0.8,darks,wait0.1,jump/B;
 !D1 x5298.16 y2146.87 a-1.237068 r149 u0
+!D1 x3091.49 y1071.81 a0.333728 r152 u0
+!N8/0 x3522.33 y1221.18 a-1.237068 u20
+!N8/0 x5165.91 y1791.00 a-1.237068 u21
