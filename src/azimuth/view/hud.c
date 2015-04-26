@@ -37,6 +37,7 @@
 #include "azimuth/view/dialog.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -97,13 +98,16 @@ static void tint_hud_rect(GLfloat width, GLfloat height) {
 #define HUD_BAR_HEIGHT 9
 #define SHIELDS_ENERGY_HEIGHT (25 + 2 * HUD_PADDING)
 
-static void draw_hud_bar(float left, float top, float cur, float max) {
+static void draw_hud_bar(az_color_t inner, az_color_t outer,
+                         float left, float top, float cur, float max) {
   // Draw bar:
-  glBegin(GL_QUADS); {
-    glVertex2f(left, top);
-    glVertex2f(left, top + HUD_BAR_HEIGHT);
-    glVertex2f(left + cur, top + HUD_BAR_HEIGHT);
-    glVertex2f(left + cur, top);
+  glBegin(GL_TRIANGLE_STRIP); {
+    const float right = left + cur;
+    const float middle = top + 0.45f * HUD_BAR_HEIGHT;
+    const float bottom = top + HUD_BAR_HEIGHT;
+    az_gl_color(outer); glVertex2f(left, top);    glVertex2f(right, top);
+    az_gl_color(inner); glVertex2f(left, middle); glVertex2f(right, middle);
+    az_gl_color(outer); glVertex2f(left, bottom); glVertex2f(right, bottom);
   } glEnd();
   // Draw outline:
   glColor3f(1, 1, 1); // white
@@ -128,15 +132,22 @@ static void draw_hud_shields_energy(const az_player_t *player,
     az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "SHIELD");
     az_draw_string(8, AZ_ALIGN_LEFT, 0, 16, "ENERGY");
 
+    az_color_t inner = {0, 192, 192, 255};
+    az_color_t outer = {0, 154, 154, 255};
     if (player->shields <= AZ_SHIELDS_VERY_LOW_THRESHOLD) {
-      if (az_clock_mod(2, 3, clock)) glColor3f(1, 0, 0);
-      else glColor3f(0.2, 0, 0);
+      if (az_clock_mod(2, 3, clock)) {
+        inner = outer = (az_color_t){255, 0, 0, 255};
+      } else {
+        inner = outer = (az_color_t){51, 0, 0, 255};
+      }
     } else if (player->shields <= AZ_SHIELDS_LOW_THRESHOLD) {
-      glColor3f(0.5 + 0.1 * az_clock_zigzag(6, 5, clock), 0, 0);
-    } else glColor3f(0, 0.75, 0.75); // cyan
-    draw_hud_bar(50, 0, player->shields, player->max_shields);
-    glColor3f(0.75, 0, 0.75); // magenta
-    draw_hud_bar(50, 15, player->energy, player->max_energy);
+      inner = (az_color_t){125 + 26 * az_clock_zigzag(6, 5, clock), 0, 0, 255};
+      outer = (az_color_t){(4 * (int)inner.r) / 5, 0, 0, 255};
+    }
+    draw_hud_bar(inner, outer, 50, 0, player->shields, player->max_shields);
+    draw_hud_bar((az_color_t){192, 0, 192, 255},
+                 (az_color_t){154, 0, 154, 255},
+                 50, 15, player->energy, player->max_energy);
   } glPopMatrix();
 }
 
@@ -417,8 +428,9 @@ static void draw_hud_boss_health(az_space_state_t *state) {
       az_draw_string(8, AZ_ALIGN_LEFT, 0, 1, "BOSS");
       assert(baddie->health > 0.0);
       assert(baddie->data->max_health > 0.0);
-      glColor3f(1, 0.25, 0); // red-orange
-      draw_hud_bar(35, 0, (baddie->health / baddie->data->max_health) *
+      draw_hud_bar((az_color_t){255, 64, 0, 255},
+                   (az_color_t){204, 51, 0, 255},
+                   35, 0, (baddie->health / baddie->data->max_health) *
                    BOSS_BAR_WIDTH, BOSS_BAR_WIDTH);
     } glPopMatrix();
   }
