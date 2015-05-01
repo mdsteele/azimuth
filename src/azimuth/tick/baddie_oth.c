@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/object.h"
 #include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie_util.h"
@@ -284,10 +285,67 @@ void az_tick_bad_oth_snapdragon(
 
 /*===========================================================================*/
 
+#define TRACTOR_MIN_LENGTH 100.0
+#define TRACTOR_MAX_LENGTH 200.0
+#define TRACTOR_COMPONENT_INDEX (AZ_MAX_BADDIE_COMPONENTS - 1)
+
+static bool tractor_locked_on(
+    const az_baddie_t *baddie, az_vector_t *tractor_pos_out,
+    double *tractor_length_out) {
+  const az_component_t *component =
+    &baddie->components[TRACTOR_COMPONENT_INDEX];
+  const double tractor_length = component->angle;
+  if (tractor_length == 0) return false;
+  assert(tractor_length >= TRACTOR_MIN_LENGTH &&
+         tractor_length <= TRACTOR_MAX_LENGTH);
+  if (tractor_pos_out != NULL) *tractor_pos_out = component->position;
+  if (tractor_length_out != NULL) *tractor_length_out = tractor_length;
+  return true;
+}
+
+static void set_tractor_node(az_baddie_t *baddie, const az_node_t *node) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  if (node == NULL) {
+    baddie->components[11].angle = 0;
+    return;
+  }
+  assert(node->kind == AZ_NODE_TRACTOR);
+  const double tractor_length = az_vdist(baddie->position, node->position);
+  assert(tractor_length >= TRACTOR_MIN_LENGTH &&
+         tractor_length <= TRACTOR_MAX_LENGTH);
+  baddie->components[11].position = node->position;
+  baddie->components[11].angle = tractor_length;
+}
+
+static void try_lock_on_tractor(az_space_state_t *state, az_baddie_t *baddie) {
+  if (tractor_locked_on(baddie, NULL, NULL)) return;
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind != AZ_NODE_TRACTOR) continue;
+    const double dist = az_vdist(baddie->position, node->position);
+    if (dist < TRACTOR_MIN_LENGTH || dist > TRACTOR_MAX_LENGTH) continue;
+    set_tractor_node(baddie, node);
+    break;
+  }
+}
+
 void az_tick_bad_oth_gunship(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+
+  // Handle tractor beam:
+  az_vector_t tractor_position;
+  double tractor_length;
+  if (tractor_locked_on(baddie, &tractor_position, &tractor_length)) {
+    baddie->position = az_vadd(az_vwithlen(az_vsub(baddie->position,
+                                                   tractor_position),
+                                           tractor_length),
+                               tractor_position);
+    baddie->velocity = az_vflatten(baddie->velocity,
+        az_vsub(baddie->position, tractor_position));
+    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
+  }
+
   switch (baddie->state) {
     // State 0: Intro.
     case 0:
@@ -371,6 +429,7 @@ void az_tick_bad_oth_gunship(
       break;
     // State 5: Dogfight.
     case 5: {
+      try_lock_on_tractor(state, baddie); // TODO
       az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
           az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
@@ -380,6 +439,7 @@ void az_tick_bad_oth_gunship(
         az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
         baddie->cooldown = 0.1;
         if (az_random(0, 1) < 0.1) {
+          set_tractor_node(baddie, NULL);
           baddie->state = 6 + az_randint(0, az_imin(3, (int)(4.0 * hurt)));
         }
       }

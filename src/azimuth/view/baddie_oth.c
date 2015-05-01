@@ -27,6 +27,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
@@ -199,7 +200,7 @@ static void draw_oth(
     const az_vector_t center =
       az_vdiv(az_vadd(az_vadd(vs[0], vs[1]), vs[2]), 3);
     glPushMatrix(); {
-      glTranslated(center.x, center.y, 0);
+      az_gl_translated(center);
       if (spin) glRotated(az_clock_mod(360, 1, clock) -
                           AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
       glBegin(GL_TRIANGLES); {
@@ -210,8 +211,7 @@ static void draw_oth(
           const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 1.0f : 0.25f);
           glColor3f(r + flare * (1.0f - r), (1.0f - 0.5f * flare) * g,
                     (1.0f - flare) * b + frozen * (1.0f - b));
-          const az_vector_t rel = az_vsub(vs[j], center);
-          glVertex2d(rel.x, rel.y);
+          az_gl_vertex(az_vsub(vs[j], center));
         }
       } glEnd();
     } glPopMatrix();
@@ -240,6 +240,34 @@ void az_draw_bad_oth_crawler(
 
 void az_draw_bad_oth_gunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  if (baddie->components[11].angle != 0) {
+    const az_vector_t start = baddie->components[11].position;
+    const az_vector_t delta = az_vsub(baddie->position, start);
+    const double dist = az_vnorm(delta);
+    const double thick = 4;
+    const float redblue = az_clock_mod(2, 2, clock) == 0 ? 1.0 : 0.0;
+    glPushMatrix(); {
+      az_gl_rotated(-baddie->angle);
+      az_gl_translated(az_vneg(delta));
+      az_gl_rotated(az_vtheta(delta));
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(redblue, 1, redblue, 0.5); glVertex2d(0, 0);
+        glColor4f(redblue, 1, redblue, 0);
+        for (int i = 90; i <= 270; i += 20) {
+          glVertex2d(thick * cos(AZ_DEG2RAD(i)), thick * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor4f(redblue, 1, redblue, 0);
+        glVertex2d(0,  thick); glVertex2d(dist,  thick);
+        glColor4f(redblue, 1, redblue, 0.5);
+        glVertex2d(0,      0); glVertex2d(dist,      0);
+        glColor4f(redblue, 1, redblue, 0);
+        glVertex2d(0, -thick); glVertex2d(dist, -thick);
+      } glEnd();
+    } glPopMatrix();
+  }
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
            AZ_ARRAY_SIZE(oth_gunship_triangles));
 }
