@@ -220,7 +220,7 @@ static void draw_camera_edge_bounds(const az_editor_room_t *room) {
 
 static void camera_to_screen_orient(const az_editor_state_t *state,
                                     az_vector_t position) {
-  glTranslated(position.x, position.y, 0);
+  az_gl_translated(position);
   glScaled(1, -1, 1);
   if (state->spin_camera) {
     glRotated(90.0 - AZ_RAD2DEG(az_vtheta(state->camera)), 0, 0, 1);
@@ -657,9 +657,16 @@ static void draw_camera_view(az_editor_state_t *state) {
   }
   AZ_LIST_LOOP(baddie, room->baddies) {
     if (!baddie->selected) continue;
+    const double bounding_radius =
+      az_get_baddie_data(baddie->spec.kind)->overall_bounding_radius;
     draw_selection_circle(baddie->spec.position, baddie->spec.angle,
-                          az_get_baddie_data(baddie->spec.kind)->
-                          overall_bounding_radius);
+                          bounding_radius);
+    glPushMatrix(); {
+      camera_to_screen_orient(state, baddie->spec.position);
+      glColor3f(1, 1, 1);
+      az_draw_printf(8, AZ_ALIGN_CENTER, 0, -bounding_radius - 9, "%d",
+                     (int)baddie->spec.kind);
+    } glPopMatrix();
   }
   AZ_LIST_LOOP(door, room->doors) {
     if (!door->selected) continue;
