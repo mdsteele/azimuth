@@ -142,6 +142,7 @@ static void draw_cloak_glow(float alpha) {
 }
 
 void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
+  const az_ordnance_t ordnance = ship->player.ordnance;
   glPushMatrix(); {
     glTranslated(ship->position.x, ship->position.y, 0);
     glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
@@ -205,7 +206,7 @@ void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
       if (ship->ordn_charge > 0.0) {
         assert(ship->ordn_charge <= 1.0);
         glPushMatrix(); {
-          glTranslated(20, 0, 0);
+          glTranslated(ordnance == AZ_ORDN_BOMBS ? -15 : 20, 0, 0);
           const double mid_radius = ship->ordn_charge *
             (4.0 + 0.6 * az_clock_zigzag(10, 1, clock));
           const int offset = 6 * az_clock_mod(60, 1, clock);
