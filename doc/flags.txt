@@ -1,4 +1,4 @@
-Next flag: 122
+Next flag: 123
 
 Bosses
 ======
@@ -24,6 +24,7 @@ Minibosses
 115: Killed Oth Brawler in Voquan room 377
 119: Killed Oth Crab in Barrag room 279
 121: Killed Oth Crab in Voquan room 381
+122: Killed Oth Brawler in Sarvari room 444
 
 Comm Consoles
 =============
