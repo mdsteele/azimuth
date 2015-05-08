@@ -40,7 +40,7 @@
 // Planetoid:
 
 // The maximum number of progress flags allowed in the game scenario:
-#define AZ_MAX_NUM_FLAGS 128
+#define AZ_MAX_NUM_FLAGS 256
 // The maximum number of rooms allowed in the game scenario:
 #define AZ_MAX_NUM_ROOMS 960
 // The maximum number of zones allowed in the game scenario:
