@@ -1,4 +1,4 @@
-@R z6 p2 b17 d5 g27 n27 w262
+@R z6 p2 k0 b18 d5 g27 n27 w262
   c(10625.32,1018.98,1.967441,0.142976)
 $s:activ32;
 !W1 d132 x-3970.52 y10293.60 a-2.910614 u0
@@ -355,3 +355,4 @@ $k:snd2,deact23,push900,sstr6,push-900,sstr15,push900,sstr16,push900,sstr17,push
 $k:snd2,deact25,deact26,deact33,push0,sstr11,push900,sstr12,push-900,sstr13,push900,sstr14,push900,sstr19,push-900,sstr20,push0,sstr21,push0,sstr22;
 !B7 x-5839.77 y10128.05 a0.523031 u0
 !B7 x-6045.74 y9885.28 a0.539621 u0
+!B7 x-5293.17 y9020.27 a2.701822 u0
