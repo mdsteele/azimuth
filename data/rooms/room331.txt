@@ -1,6 +1,8 @@
-@R z2 p0 b0 d2 g0 n0 w0
+@R z2 p0 k0 b0 d3 g0 n0 w0
   c(16447.23,1162.65,1.496548,0.029246)
-$s:test102,heqz,unlock1;
+$s:test102,beqz/A,unlock1,A#test123,beqz/@,unlock2;
 !D1 x1512.84 y16374.56 a3.067491 r332 u0
 !D3 x488.66 y17345.11 a-0.045005 r407 u1
 $o:set102;
+!D6 x947.65 y17797.65 a-1.623992 r341 u2
+$o:set123;

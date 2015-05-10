@@ -1,4 +1,4 @@
-Next flag: 123
+Next flag: 124
 
 Bosses
 ======
@@ -113,6 +113,7 @@ Doors
 116: Opened cyan door between Barrag rooms 266 and 276
 117: Opened cyan door between Barrag rooms 269 and 278
 120: Opened cyan door between Core rooms 0 and 64
+123: Opened cyan door between Cnidam rooms 331 and 341
 
 Boss Doors
 ==========
