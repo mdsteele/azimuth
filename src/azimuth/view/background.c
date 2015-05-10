@@ -35,37 +35,54 @@
 
 typedef struct {
   double parallax;
+  enum {
+    POLAR,
+    RECT
+  } repeat_style;
   double repeat_horz;
   double repeat_vert;
 } az_background_data_t;
 
 static const az_background_data_t background_datas[] = {
   [AZ_BG_BROWN_ROCK_WALL] = {
-    .parallax = 0.25, .repeat_horz = 200.0, .repeat_vert = 200.0
+    .parallax = 0.25, .repeat_style = RECT,
+    .repeat_horz = 200.0, .repeat_vert = 200.0
   },
   [AZ_BG_GREEN_HEX_TRELLIS] = {
-    .parallax = 0.2, .repeat_horz = 180.0, .repeat_vert = 104.0
+    .parallax = 0.2, .repeat_style = RECT,
+    .repeat_horz = 180.0, .repeat_vert = 104.0
   },
   [AZ_BG_YELLOW_PANELLING] = {
-    .parallax = 0.2, .repeat_horz = 360.0, .repeat_vert = 400.0
+    .parallax = 0.2, .repeat_style = POLAR,
+    .repeat_horz = 360.0, .repeat_vert = 400.0
   },
   [AZ_BG_PURPLE_ROCK_WALL] = {
-    .parallax = 0.25, .repeat_horz = 300.0, .repeat_vert = 300.0
+    .parallax = 0.25, .repeat_style = RECT,
+    .repeat_horz = 300.0, .repeat_vert = 300.0
   },
   [AZ_BG_RED_GIRDERS] = {
-    .parallax = 0.75, .repeat_horz = 230.0, .repeat_vert = 215.0
+    .parallax = 0.75, .repeat_style = POLAR,
+    .repeat_horz = 230.0, .repeat_vert = 215.0
   },
   [AZ_BG_GREEN_ROCK_WALL] = {
-    .parallax = 0.35, .repeat_horz = 230.0, .repeat_vert = 215.0
+    .parallax = 0.35, .repeat_style = RECT,
+    .repeat_horz = 230.0, .repeat_vert = 215.0
   },
   [AZ_BG_GREEN_ROCK_WALL_WITH_GIRDERS] = {
-    .parallax = 0.35, .repeat_horz = 230.0, .repeat_vert = 215.0
+    .parallax = 0.15, .repeat_style = POLAR,
+    .repeat_horz = 230.0, .repeat_vert = 215.0
   },
   [AZ_BG_GRAY_STONE_BRICKS] = {
-    .parallax = 0.2, .repeat_horz = 130.0, .repeat_vert = 130.0
+    .parallax = 0.2, .repeat_style = POLAR,
+    .repeat_horz = 130.0, .repeat_vert = 130.0
   },
   [AZ_BG_RED_GRAY_CINDERBLOCKS] = {
-    .parallax = 0.2, .repeat_horz = 90.0, .repeat_vert = 118.8
+    .parallax = 0.2, .repeat_style = POLAR,
+    .repeat_horz = 90.0, .repeat_vert = 118.8
+  },
+  [AZ_BG_GREEN_BUBBLES] = {
+    .parallax = 0.35, .repeat_style = RECT,
+    .repeat_horz = 150.0, .repeat_vert = 150.0
   }
 };
 
@@ -240,6 +257,32 @@ static void draw_half_cinderblock(float width, float height) {
   } glEnd();
 }
 
+static void draw_green_bubble(double center_x, double center_y, double radius,
+                              int slowdown, az_clock_t clock) {
+  slowdown *= 2;
+  const double inner =
+    radius * (0.4 + 0.01 * az_clock_zigzag(20, slowdown, clock));
+  glPushMatrix(); {
+    glTranslated(center_x, center_y, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.2, 0.2, 0);
+      glVertex2f(-0.1 * radius, 0.1 * radius);
+      glColor3f(0, 0.2, 0);
+      for (int i = 0; i <= 360; i += 30) {
+        glVertex2d(inner * cos(AZ_DEG2RAD(i)), inner * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = 0; i <= 360; i += 30) {
+        glColor3f(0, 0.2, 0);
+        glVertex2d(inner * cos(AZ_DEG2RAD(i)), inner * sin(AZ_DEG2RAD(i)));
+        glColor4f(0, 0.1, 0.2, 0);
+        glVertex2d(1.5 * radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -379,6 +422,14 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
         draw_half_cinderblock(1.5f * half_width, height);
       } glPopMatrix();
     } break;
+    case AZ_BG_GREEN_BUBBLES: {
+      draw_green_bubble(0, -90, 50, 6, clock);
+      draw_green_bubble(-40, -25, 40, 5, clock);
+      draw_green_bubble(30, -40, 35, 4, clock);
+      draw_green_bubble(-55, -120, 32, 3, clock);
+      draw_green_bubble(40, -130, 30, 2, clock);
+      draw_green_bubble(63, -75, 27, 3, clock + 5);
+    } break;
   }
 }
 
@@ -394,11 +445,6 @@ void az_draw_background_pattern(
     camera_bounds->min_r + camera_bounds->r_span + AZ_SCREEN_HEIGHT/2;
   const double base_origin_theta =
     camera_bounds->min_theta + 0.5 * camera_bounds->theta_span;
-  // Compute the repeat strides for this background pattern.
-  assert(data->repeat_horz > 0.0);
-  assert(data->repeat_vert > 0.0);
-  const double theta_step = atan(data->repeat_horz / base_origin_r);
-  const double r_step = data->repeat_vert;
   // Apply parallax to get a "shifted" origin.
   assert(data->parallax >= 0.0);
   assert(data->parallax <= 1.0);
@@ -415,33 +461,75 @@ void az_draw_background_pattern(
     az_vwithlen(camera_center, AZ_SCREEN_HEIGHT/2);
   const az_vector_t topright_corner =
     az_vadd(az_vadd(camera_center, halfscreen_horz), halfscreen_vert);
+  const az_vector_t topleft_corner =
+    az_vadd(az_vsub(camera_center, halfscreen_horz), halfscreen_vert);
   const az_vector_t bottomright_corner =
     az_vsub(az_vadd(camera_center, halfscreen_horz), halfscreen_vert);
   const az_vector_t bottomleft_corner =
     az_vsub(az_vsub(camera_center, halfscreen_horz), halfscreen_vert);
-  const double min_r = az_vnorm(camera_center) - AZ_SCREEN_HEIGHT/2;
-  const double min_theta = az_vtheta(bottomright_corner) - 0.5 * theta_step;
   // Draw copies of the background to cover the whole camera rect.
-  const double r_start = shifted_origin_r +
-    r_step * ceil((min_r - shifted_origin_r) / r_step);
-  const double r_span = az_vnorm(topright_corner) + r_step - r_start;
-  const int num_r_steps = ceil(r_span / r_step);
-  const double theta_start = shifted_origin_theta +
-    theta_step * ceil((min_theta - shifted_origin_theta) / theta_step);
-  const double theta_span =
-    az_mod2pi_nonneg(az_vtheta(bottomleft_corner) + 0.5 * theta_step -
-                     theta_start);
-  const int num_theta_steps = ceil(theta_span / theta_step);
-  for (int i = 0; i < num_r_steps; ++i) {
-    for (int j = 0; j < num_theta_steps; ++j) {
-      const az_vector_t position =
-        az_vpolar(r_start + i * r_step, theta_start + j * theta_step);
-      glPushMatrix(); {
-        az_gl_translated(position);
-        az_gl_rotated(az_vtheta(position) - AZ_HALF_PI);
-        draw_bg_patch(pattern, clock);
-      } glPopMatrix();
-    }
+  switch (data->repeat_style) {
+    case POLAR: {
+      assert(data->repeat_horz > 0.0);
+      assert(data->repeat_vert > 0.0);
+      const double theta_step = atan(data->repeat_horz / base_origin_r);
+      const double r_step = data->repeat_vert;
+      const double min_r = az_vnorm(camera_center) - AZ_SCREEN_HEIGHT/2;
+      const double min_theta =
+        az_vtheta(bottomright_corner) - 0.5 * theta_step;
+      const double r_start = shifted_origin_r +
+        r_step * ceil((min_r - shifted_origin_r) / r_step);
+      const double r_span = az_vnorm(topright_corner) + r_step - r_start;
+      const int num_r_steps = ceil(r_span / r_step);
+      const double theta_start = shifted_origin_theta +
+        theta_step * ceil((min_theta - shifted_origin_theta) / theta_step);
+      const double theta_span =
+        az_mod2pi_nonneg(az_vtheta(bottomleft_corner) + 0.5 * theta_step -
+                         theta_start);
+      const int num_theta_steps = ceil(theta_span / theta_step);
+      for (int i = 0; i < num_r_steps; ++i) {
+        for (int j = 0; j < num_theta_steps; ++j) {
+          const az_vector_t position =
+            az_vpolar(r_start + i * r_step, theta_start + j * theta_step);
+          glPushMatrix(); {
+            az_gl_translated(position);
+            az_gl_rotated(az_vtheta(position) - AZ_HALF_PI);
+            draw_bg_patch(pattern, clock);
+          } glPopMatrix();
+        }
+      }
+    } break;
+    case RECT: {
+      const double x_step = data->repeat_horz;
+      const double y_step = data->repeat_vert;
+      assert(x_step > 0.0 && y_step > 0.0);
+      const double min_x =
+        fmin(fmin(topleft_corner.x, topright_corner.x),
+             fmin(bottomleft_corner.x, bottomright_corner.x)) - 0.5 * x_step;
+      const double min_y =
+        fmin(fmin(topleft_corner.y, topright_corner.y),
+             fmin(bottomleft_corner.y, bottomright_corner.y));
+      const double max_x =
+        fmax(fmax(topleft_corner.x, topright_corner.x),
+             fmax(bottomleft_corner.x, bottomright_corner.x)) + 0.5 * x_step;
+      const double max_y =
+        fmax(fmax(topleft_corner.y, topright_corner.y),
+             fmax(bottomleft_corner.y, bottomright_corner.y)) + y_step;
+      const double x_start = shifted_origin.x +
+        x_step * ceil((min_x - shifted_origin.x) / x_step);
+      const double y_start = shifted_origin.y +
+        y_step * ceil((min_y - shifted_origin.y) / y_step);
+      const int num_x_steps = ceil((max_x - min_x) / x_step);
+      const int num_y_steps = ceil((max_y - min_y) / y_step);
+      for (int i = 0; i < num_x_steps; ++i) {
+        for (int j = 0; j < num_y_steps; ++j) {
+          glPushMatrix(); {
+            glTranslated(x_start + i * x_step, y_start + j * y_step, 0);
+            draw_bg_patch(pattern, clock);
+          } glPopMatrix();
+        }
+      }
+    } break;
   }
 }
 
