@@ -77,6 +77,14 @@ static void draw_oth_projectile(const az_projectile_t *proj, double radius,
   } glEnd();
 }
 
+static void draw_scrap_metal(void) {
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.75, 0.5, 1); glVertex2f(0, 0); glColor3f(0.2, 0.1, 0.3);
+    glVertex2f(10, 2); glVertex2f(0, 8); glVertex2f(-3, 3);
+    glVertex2f(-10, 0); glVertex2f(2, -6); glVertex2f(3, -3);
+  } glEnd();
+}
+
 static void draw_spark(double age, double radius, az_color_t color) {
   glBegin(GL_TRIANGLE_FAN); {
     glColor4f(1, 1, 1, 0.8);
@@ -515,6 +523,15 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         az_get_prismatic_wall_vertices(proj, vertices);
         AZ_ARRAY_LOOP(vertex, vertices) az_gl_vertex(*vertex);
       } glEnd();
+      break;
+    case AZ_PROJ_SCRAP_METAL:
+      draw_scrap_metal();
+      break;
+    case AZ_PROJ_SCRAP_SHRAPNEL:
+      glPushMatrix(); {
+        glScalef(0.5, 0.5, 1);
+        draw_scrap_metal();
+      } glPopMatrix();
       break;
     case AZ_PROJ_SPARK:
       draw_spark(proj->age, 8.0, (az_color_t){0, 255, 0, 0});

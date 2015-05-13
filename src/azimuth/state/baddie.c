@@ -1019,6 +1019,10 @@ static az_component_data_t crab_crawler_components[] = {
                    AZ_DMGF_FLAME) }
 };
 
+static const az_vector_t scrap_metal_vertices[] = {
+  {10, 2}, {0, 8}, {-3, 3}, {-10, 0}, {2, -6}, {3, -3}
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1880,6 +1884,15 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(crab_crawler_body_vertices),
                    .impact_damage = 12.0 },
     DECL_COMPONENTS(crab_crawler_components)
+  },
+  [AZ_BAD_SCRAP_METAL] = {
+    .max_health = 0.1, .color = {160, 128, 192, 255},
+    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_KAMIKAZE),
+    .main_body = { .polygon = AZ_INIT_POLYGON(scrap_metal_vertices),
+                   .impact_damage = 10.0,
+                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_FLAME) }
   }
 };
 

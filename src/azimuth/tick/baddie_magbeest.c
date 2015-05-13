@@ -34,11 +34,16 @@
 
 /*===========================================================================*/
 
+// Head states:
 #define HEAD_POPDOWN_STATE 0
 #define HEAD_POPUP_STATE 1
-
+// Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
+// Legs-L states:
+#define MAGNET_FINISH_ATTRACT_STATE 2
+#define MAGNET_START_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 20)
+// Legs-R states:
 #define GATLING_STOP_FIRING_STATE 2
 #define GATLING_START_FIRING_STATE (GATLING_STOP_FIRING_STATE + 28)
 
@@ -168,7 +173,7 @@ static void init_legs_popup(az_baddie_t *baddie, az_vector_t marker_position) {
   arrange_leg(baddie, 1, az_vadd(baddie->position,
       az_vpolar(50, baddie->angle + AZ_DEG2RAD(135))));
   baddie->state = LEGS_POPUP_STATE;
-  baddie->cooldown = 3.0;
+  baddie->cooldown = 2.0;
 }
 
 /*===========================================================================*/
@@ -253,6 +258,88 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  // Use magnet:
+  if (baddie->state >= MAGNET_FINISH_ATTRACT_STATE &&
+      baddie->state <= MAGNET_START_SPAWN_STATE) {
+    az_component_t *magnet = &baddie->components[0];
+    const az_vector_t magnet_abs_position =
+      az_vadd(az_vrotate(az_vadd(az_vpolar(20.0, magnet->angle),
+                                 magnet->position), baddie->angle),
+              baddie->position);
+    // Aim the magnet at the ship:
+    if (az_ship_is_decloaked(&state->ship)) {
+      const double old_angle = magnet->angle;
+      magnet->angle = az_mod2pi(az_angle_towards(
+          magnet->angle + baddie->angle, AZ_DEG2RAD(100) * time,
+          az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+                                baddie->angle);
+      // Pull scrap metal along with swinging magnetetic field:
+      const double dtheta = az_mod2pi(magnet->angle - old_angle);
+      AZ_ARRAY_LOOP(scrap, state->baddies) {
+        if (scrap->kind != AZ_BAD_SCRAP_METAL) continue;
+        scrap->position =
+          az_vadd(az_vrotate(az_vsub(scrap->position, magnet_abs_position),
+                             0.7 * dtheta), magnet_abs_position);
+      }
+    }
+    const double magnet_abs_angle = az_mod2pi(magnet->angle + baddie->angle);
+    // Spawn scrap metal:
+    if (baddie->state != MAGNET_FINISH_ATTRACT_STATE &&
+        baddie->cooldown <= 0.0) {
+      az_add_baddie(state, AZ_BAD_SCRAP_METAL,
+                    az_vadd(magnet_abs_position,
+                            az_vpolar(1500.0, magnet_abs_angle +
+                                      az_random(-AZ_DEG2RAD(10),
+                                                AZ_DEG2RAD(10)))),
+                    az_random(-AZ_PI, AZ_PI));
+      --baddie->state;
+      baddie->cooldown = 0.1;
+    }
+    // Apply force to scrap metal:
+    double max_scrap_dist = 0.0;
+    AZ_ARRAY_LOOP(scrap, state->baddies) {
+      if (scrap->kind != AZ_BAD_SCRAP_METAL) continue;
+      az_vpluseq(&scrap->position, az_vwithlen(
+          az_vsub(scrap->position, magnet_abs_position), -500.0 * time));
+      scrap->angle = az_mod2pi(scrap->angle + AZ_DEG2RAD(300) * time);
+      max_scrap_dist =
+        fmax(max_scrap_dist, az_vdist(scrap->position, magnet_abs_position));
+    }
+    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
+    // Apply force to ship:
+    if (az_ship_is_alive(&state->ship)) {
+      const az_vector_t delta =
+        az_vsub(state->ship.position, magnet_abs_position);
+      if (az_mod2pi(az_vtheta(delta) - magnet_abs_angle) <= AZ_DEG2RAD(10)) {
+        az_vpluseq(&state->ship.velocity, az_vwithlen(delta, -300.0 * time));
+      }
+    }
+    // Fire:
+    if (baddie->state == MAGNET_FINISH_ATTRACT_STATE &&
+        max_scrap_dist < 10.0) {
+      int num_scraps = 0;
+      AZ_ARRAY_LOOP(scrap, state->baddies) {
+        if (scrap->kind != AZ_BAD_SCRAP_METAL) continue;
+        az_projectile_t *proj =
+          az_add_projectile(state, AZ_PROJ_SCRAP_METAL, scrap->position,
+                            magnet_abs_angle +
+                            az_random(-AZ_DEG2RAD(15), AZ_DEG2RAD(15)),
+                            1.0, baddie->uid);
+        if (proj != NULL) {
+          proj->angle = az_random(-AZ_PI, AZ_PI);
+          proj->velocity = az_vmul(proj->velocity, az_random(0.75, 1.25));
+          ++num_scraps;
+        }
+        scrap->kind = AZ_BAD_NOTHING;
+      }
+      if (num_scraps > 0) {
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+      }
+      baddie->state = LEGS_POPDOWN_STATE;
+    }
+    return;
+  }
+  // Pop up/down:
   const double baseline =
     az_current_camera_bounds(state)->min_r - AZ_SCREEN_HEIGHT/2;
   const double base_top =
@@ -270,14 +357,13 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
         legs_pop_up_down(state, baddie, LEGS_POP_SPEED * time);
       }
       if (baddie->cooldown <= 0.0) {
-        baddie->state = LEGS_POPDOWN_STATE;
+        baddie->state = MAGNET_START_SPAWN_STATE;
       }
       break;
     default:
       baddie->state = LEGS_POPDOWN_STATE;
       break;
   }
-  // TODO: pull in scrap with magnet, then fling it back out
   // TODO: fusion beam
 }
 

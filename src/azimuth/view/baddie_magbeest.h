@@ -32,6 +32,8 @@ void az_draw_bad_magbeest_legs_r(const az_baddie_t *baddie, az_clock_t clock);
 
 void az_draw_bad_magma_bomb(const az_baddie_t *baddie, az_clock_t clock);
 
+void az_draw_bad_scrap_metal(const az_baddie_t *baddie);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_MAGBEEST_H_

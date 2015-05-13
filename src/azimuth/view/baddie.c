@@ -887,6 +887,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_CRAB_CRAWLER:
       az_draw_bad_crab_crawler(baddie, frozen, clock);
       break;
+    case AZ_BAD_SCRAP_METAL:
+      az_draw_bad_scrap_metal(baddie);
+      break;
   }
 }
 

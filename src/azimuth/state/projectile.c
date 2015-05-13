@@ -512,6 +512,19 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_SCRAP_METAL] = {
+    .speed = 800.0,
+    .lifetime = 5.0,
+    .impact_damage = 15.0,
+    .impact_shake = 1.0,
+    .impact_sound = AZ_SND_EXPLODE_ROCKET,
+    .shrapnel_kind = AZ_PROJ_SCRAP_SHRAPNEL
+  },
+  [AZ_PROJ_SCRAP_SHRAPNEL] = {
+    .speed = 500.0,
+    .lifetime = 1.0,
+    .impact_damage = 3.0
+  },
   [AZ_PROJ_SONIC_WAVE] = {
     .speed = 600.0,
     .lifetime = 0.5,

@@ -819,6 +819,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_CRAB_CRAWLER:
       az_tick_bad_crab_crawler(state, baddie, time);
       break;
+    case AZ_BAD_SCRAP_METAL: break; // Do nothing.
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

@@ -828,6 +828,18 @@ static void projectile_special_logic(az_space_state_t *state,
         az_damage_ship(state, damage, false);
       }
     } break;
+    case AZ_PROJ_SCRAP_METAL:
+      proj->angle = az_mod2pi(proj->angle + AZ_DEG2RAD(720) * time);
+      if (times_per_second(20, proj, time)) {
+        leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                             (az_color_t){255, 0, 128, 128}, 0.3, 8.0, 0.0);
+      }
+      break;
+    case AZ_PROJ_SCRAP_SHRAPNEL:
+      proj->angle = az_mod2pi(proj->angle + AZ_DEG2RAD(360) * time);
+      az_add_speck(state, (az_color_t){255, 0, 128, 255}, 0.2,
+                   proj->position, AZ_VZERO);
+      break;
     case AZ_PROJ_SPARK:
       leave_particle_trail(state, proj, AZ_PAR_SPARK,
                            (az_color_t){0, 255, 0, 255}, 0.1, 6.0,

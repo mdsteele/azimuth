@@ -117,6 +117,18 @@ void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
   draw_magbeest_leg(baddie, 2);
   draw_magbeest_leg(baddie, 3);
   draw_magbeest_leg(baddie, 4);
+  // Magnetic field:
+  if (baddie->state >= 2 && az_clock_mod(2, 2, clock)) {
+    glPushMatrix(); {
+      const az_component_t *magnet = &baddie->components[0];
+      az_gl_translated(magnet->position);
+      az_gl_rotated(magnet->angle);
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(0, 0.5, 1, 0.15); glVertex2f(25, 0); glVertex2f(25, 15);
+        glVertex2f(1500, 264); glVertex2f(1500, -264); glVertex2f(25, -15);
+      } glEnd();
+    } glPopMatrix();
+  }
   // TODO: draw magnet
   // TODO: draw base casing
 }
@@ -203,6 +215,20 @@ void az_draw_bad_magma_bomb(const az_baddie_t *baddie, az_clock_t clock) {
     if (blink) glColor3f(0.8, 0.6, 0.6);
     else glColor3f(0.3, 0.1, 0.1);
     glVertex2f(0, -radius);
+  } glEnd();
+}
+
+void az_draw_bad_scrap_metal(const az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_SCRAP_METAL);
+  const az_polygon_t polygon = baddie->data->main_body.polygon;
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.75, 0.5, 1);
+    glVertex2f(0, 0);
+    glColor3f(0.2, 0.1, 0.3);
+    for (int i = polygon.num_vertices - 1, j = 0;
+         i < polygon.num_vertices; i = j++) {
+      az_gl_vertex(polygon.vertices[i]);
+    }
   } glEnd();
 }
 
