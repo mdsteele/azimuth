@@ -143,6 +143,19 @@ static az_sound_spec_t sound_specs[] = {
     .vibrato_depth = 0.2, .vibrato_speed = 0.2,
     .square_duty = 0.53694, .volume_adjust = -0.7
   },
+  [AZ_SND_CORE_BEAM_CHARGE] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_attack = 0.15, .env_sustain = 0.65, .env_decay = 0.31,
+    .start_freq = 0.35, .freq_slide = 0.12, .freq_delta_slide = 0.05,
+    .vibrato_depth = 0.08, .vibrato_speed = 0.57,
+    .phaser_offset = -0.63, .phaser_sweep = 0.06
+  },
+  [AZ_SND_CORE_BEAM_FIRE] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_sustain = 0.1971831, .start_freq = 0.38,
+    .vibrato_depth = 0.105, .vibrato_speed = 0.57,
+    .phaser_offset = 0.42, .phaser_sweep = 0.06, .volume_adjust = -0.5
+  },
   [AZ_SND_CPLUS_ACTIVE] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.2827, .env_punch = 0.61646, .env_decay = 1.0,

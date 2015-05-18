@@ -1115,7 +1115,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(broken_turret_components)
   },
   [AZ_BAD_ZENITH_CORE] = {
-    .max_health = 1000.0, .overall_bounding_radius = 150.0,
+    .max_health = 1000.0, .overall_bounding_radius = 250.0,
     .hurt_sound = AZ_SND_HURT_TURRET,
     .static_properties = (AZ_BADF_CARRIES_CARGO | AZ_BADF_DRAW_BG),
     .main_body = { .polygon = AZ_INIT_POLYGON(zenith_core_main_body_vertices),

@@ -45,24 +45,37 @@
 /*===========================================================================*/
 
 static void move_component_towards(az_baddie_t *baddie, double time, int idx,
-                                   az_vector_t goal) {
+                                   az_vector_t goal_position,
+                                   double goal_angle) {
   az_component_t *component = &baddie->components[idx];
   az_vpluseq(&component->position,
-             az_vcaplen(az_vsub(goal, component->position), 20.0 * time));
+             az_vcaplen(az_vsub(goal_position, component->position),
+                        30.0 * time));
+  component->angle = az_angle_towards(component->angle, AZ_DEG2RAD(45) * time,
+                                      goal_angle);
 }
 
 static void adjust_to_beam_configuration(az_baddie_t *baddie, double time) {
   for (int i = 0; i < 8; ++i) {
     const az_vector_t goal = {0, (i < 4 ? 20 : -20)};
-    move_component_towards(baddie, time, i, goal);
+    move_component_towards(baddie, time, i, goal, i * AZ_DEG2RAD(45));
   }
 }
 
 static void adjust_to_pillbox_configuration(az_baddie_t *baddie, double time) {
   for (int i = 0; i < 8; ++i) {
     const az_vector_t goal =
-      az_vpolar(25, AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45));
-    move_component_towards(baddie, time, i, goal);
+      az_vpolar(40, AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45));
+    move_component_towards(baddie, time, i, goal, i * AZ_DEG2RAD(45));
+  }
+}
+
+static void adjust_to_sawblade_configuration(az_baddie_t *baddie,
+                                             double time) {
+  for (int i = 0; i < 8; ++i) {
+    const az_vector_t goal_position = az_vpolar(110, i * AZ_DEG2RAD(45));
+    const double goal_angle = az_mod2pi(AZ_DEG2RAD(85) + i * AZ_DEG2RAD(45));
+    move_component_towards(baddie, time, i, goal_position, goal_angle);
   }
 }
 
@@ -71,9 +84,10 @@ static void start_charging_beam(az_space_state_t *state, az_baddie_t *baddie) {
                            az_vpolar(1.0, baddie->angle)) >= 0.0 ?
                    CHARGE_BEAM_FORWARD_STATE : CHARGE_BEAM_BACKWARD_STATE);
   baddie->cooldown = 1.0;
-  // TODO: Play a sound
+  az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
 }
 
+// Turn the angle_offset side of the baddie towards the ship.
 static void turn_offset_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double angle_offset) {
@@ -83,12 +97,54 @@ static void turn_offset_towards_ship(
                 angle_offset));
 }
 
+static bool double_towards(double *value, double delta, double goal) {
+  assert(delta >= 0.0);
+  if (*value < goal - delta) *value += delta;
+  else if (*value > goal + delta) *value -= delta;
+  else {
+    *value = goal;
+    return true;
+  }
+  return false;
+}
+
+static bool adjust_gravity(az_space_state_t *state, double time,
+                           double goal, bool rotational) {
+  const double delta = 165.0 * time;
+  az_gravfield_t *pull_grav = NULL;
+  az_gravfield_t *spin_grav = NULL;
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (gravfield->kind == AZ_GRAV_SECTOR_PULL) pull_grav = gravfield;
+    else if (gravfield->kind == AZ_GRAV_SECTOR_SPIN) spin_grav = gravfield;
+  }
+  az_gravfield_t *reduce_grav = (rotational ? pull_grav : spin_grav);
+  az_gravfield_t *adjust_grav = (rotational ? spin_grav : pull_grav);
+  if (reduce_grav != NULL &&
+      !double_towards(&reduce_grav->strength, delta, 0.0)) return false;
+  if (adjust_grav != NULL &&
+      !double_towards(&adjust_grav->strength, delta, goal)) return false;
+  return true;
+}
+
+static void spin_gravity_back_and_forth(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  const double goal = 600.0 * baddie->param;
+  if (adjust_gravity(state, time, goal, true)) baddie->param = -baddie->param;
+}
+
+static void pull_gravity_in_and_out(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  const double goal = 500.0 * baddie->param;
+  if (adjust_gravity(state, time, goal, false)) baddie->param = -baddie->param;
+}
+
 /*===========================================================================*/
 
 static void charge_rainbow_beam(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double angle_offset, int next_state) {
   adjust_to_beam_configuration(baddie, time);
+  spin_gravity_back_and_forth(state, baddie, time);
   const double particle_lifetime = 0.5;
   const double particle_distance = 50.0;
   if (baddie->cooldown >= particle_lifetime) {
@@ -117,7 +173,13 @@ static void charge_rainbow_beam(
 static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
                               double time, double angle_offset) {
   adjust_to_beam_configuration(baddie, time);
+  spin_gravity_back_and_forth(state, baddie, time);
   turn_offset_towards_ship(state, baddie, time, angle_offset);
+  if (baddie->param == 0.0 && baddie->cooldown < 4.5) {
+    baddie->param = -copysign(1.0, az_mod2pi(
+        az_vtheta(az_vsub(state->ship.position, baddie->position)) -
+        (baddie->angle + angle_offset)));
+  }
 
   // Fire a beam, piercing through the ship and other baddies.
   const double beam_angle = baddie->angle + angle_offset;
@@ -133,7 +195,6 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
       az_ray_hits_ship(&state->ship, beam_start, beam_delta,
                        NULL, NULL)) {
     az_damage_ship(state, beam_damage, false);
-    az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
     az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
   }
   AZ_ARRAY_LOOP(other, state->baddies) {
@@ -158,6 +219,18 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
                            az_vtheta(impact.normal) +
                            az_random(-AZ_HALF_PI, AZ_HALF_PI)));
   }
+  az_particle_t *particle;
+  if (az_clock_mod(2, 1, state->clock) == 0 &&
+      az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_EXPLOSION;
+    particle->color = beam_color;
+    particle->position = impact.position;
+    particle->velocity = AZ_VZERO;
+    particle->angle = beam_angle;
+    particle->lifetime = 0.5;
+    particle->param1 = 8.0;
+  }
+  az_loop_sound(&state->soundboard, AZ_SND_CORE_BEAM_FIRE);
 
   if (baddie->cooldown <= 0.0) {
     if (baddie->health <= 0.9 * baddie->data->max_health) {
@@ -170,6 +243,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
 static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
   adjust_to_pillbox_configuration(baddie, time);
+  pull_gravity_in_and_out(state, baddie, time);
   baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
   if (baddie->cooldown <= 0.0) {
     const double angle = AZ_DEG2RAD(45) *
@@ -187,7 +261,8 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
 
 static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
-  adjust_to_pillbox_configuration(baddie, time);
+  adjust_to_sawblade_configuration(baddie, time);
+  adjust_gravity(state, time, 400.0, false);
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
                                    AZ_DEG2RAD(22.5));
   if (baddie->cooldown <= 0.0) {
@@ -207,6 +282,16 @@ static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
                              double time) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  // If the ship accidentally gets caught inside the baddie, knock it away.
+  if (az_ship_is_alive(&state->ship) &&
+      az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS,
+                               state->ship.position, NULL)) {
+    const az_vector_t unit =
+      az_vunit(az_vsub(state->ship.position, baddie->position));
+    if (az_vdot(state->ship.velocity, unit) < 100.0) {
+      az_vpluseq(&state->ship.velocity, az_vmul(unit, 800.0));
+    }
+  }
   switch (baddie->state) {
     case INITIAL_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
