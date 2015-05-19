@@ -1,0 +1,118 @@
+@M "S aA=1fBA=1fCA=1fBD=1gC=2a:y fF:m gG:m yY |mM"
+
+=tempo 80
+=key 3b     % C minor
+=loudness 0.7
+
+
+!Part S
+
+1 Wp50 L20  E5,10  D-45,2
+2 Wp60 L55  E0,25  D-5,5   V+1,60
+3 Wt34 L200 E0,50
+4 Wn   L20  E0,100
+5 Wt50 L50  E0,50  D+10,40 V+2,50
+
+
+
+!Part A
+
+1| c3q r r |
+3| c2q c c |
+4| d2q c d |
+
+!Part B
+
+1| re c3s c |
+3| c2q |
+4| c2q |
+
+!Part C
+
+1| b2s b b b |
+3| b1q |
+4| c2q |
+
+!Part D
+
+1| c3q r re b2s b |
+3| c2q c2 c |
+4| d2q c d |
+
+!Part F
+
+2| re c4s d |
+1| re c3s d |
+
+!Part G
+
+2| re    c4s d |
+1| b2s b c3s d |
+
+
+
+!Part Y
+
+2| rw |
+1| c3e b2s b ' c3e b2s b ' c3e b2s b ' c3e b2s b |
+3| c2q c c c |
+4| d2q c d c |
+
+2| rh.. c4s d |
+1| c3s b2 c3 b2 ' c3s b2 c3 b2 ' c3q. c3s d |
+3| c2q c c r |
+4| d2q c d r |
+
+
+
+!Part M
+
+3 T-12
+
+2| e4q. fs e dq b3 |
+5| c5h g5h |
+1| g3h b2h |
+3| c3q c b2 b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| g3e. e4 de c4q+s g3s c4 d |
+5| e5h d5q b4q |
+1| g2h c2h |
+3| g2q g c2 c |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ce c |
+
+2| e4q. fs e dq b3 |
+5| c5h g4h |
+1| g3h b2h |
+3| c3q c b2 b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| g4e. a ge fe. c de |
+5| e5h b4h |
+1| e3h d3h |
+3| e3q e d3 d |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ds c d c |
+
+2| e4q. fs e dq b3 |
+5| c5h E0,10 e5q g5q |
+1| g3h b2h |
+3| c3q c b2 b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| e4e. d b3e c4q. cs d |
+5| e5e c5e ' d5e b4e ' E0,50 c5h |
+1| g2h a2h |
+3| g2q g a2 a |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ce c |
+
+2| e4q. fs e dq b3 |
+5| c5h b4h |
+1| g2h b2h |
+3| g2q g b2 b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ds c d c |
+
+2| c4h. re c4s d |
+5| c5w |
+1| g3w |
+3| c3w |
+4| c3q ' ce ds c ' c3e dt c d c ' ds c dt c d c |

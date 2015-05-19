@@ -148,7 +148,7 @@ static const char *music_filenames[] = {
   [AZ_MUS_BOSS_3] = "music16.txt",
   [AZ_MUS_RESPITE] = "music17.txt",
   [AZ_MUS_REVELATION] = "music18.txt",
-  [AZ_MUS_TITLE] = NULL
+  [AZ_MUS_TITLE] = "music19.txt"
 };
 
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(music_filenames) == AZ_NUM_MUSIC_KEYS + 1);

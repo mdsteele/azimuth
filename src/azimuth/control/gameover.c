@@ -33,6 +33,7 @@ az_gameover_action_t az_gameover_event_loop(void) {
   static az_gameover_state_t state;
   az_init_gameover_state(&state);
   az_change_music(&state.soundboard, AZ_MUS_TITLE);
+  az_change_music_flag(&state.soundboard, 2);
 
   while (true) {
     // Tick the state and redraw the screen.

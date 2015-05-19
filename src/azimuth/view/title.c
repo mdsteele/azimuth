@@ -590,6 +590,7 @@ void az_title_skip_intro(az_title_state_t *state) {
   assert(state->mode == AZ_TMODE_INTRO);
   state->mode = AZ_TMODE_READY;
   state->mode_data.ready.start = state->clock;
+  az_change_music_flag(&state->soundboard, 1);
 }
 
 void az_title_start_game(az_title_state_t *state, int slot_index) {
