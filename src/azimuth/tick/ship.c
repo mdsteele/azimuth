@@ -638,10 +638,13 @@ static void charge_weapons(az_space_state_t *state, double time) {
   }
   // Charge ordnance:
   if ((player->ordnance == AZ_ORDN_ROCKETS &&
-       az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS)) ||
+       az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS) &&
+       player->rockets >= AZ_ROCKETS_PER_HYPER_ROCKET) ||
       (player->ordnance == AZ_ORDN_BOMBS &&
-       (az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) ||
-        az_has_upgrade(player, AZ_UPG_ORION_BOOSTER)))) {
+       ((az_has_upgrade(player, AZ_UPG_MEGA_BOMBS) &&
+         player->bombs >= AZ_BOMBS_PER_MEGA_BOMB) ||
+        (az_has_upgrade(player, AZ_UPG_ORION_BOOSTER) &&
+         player->bombs >= AZ_BOMBS_PER_ORION_BOOST)))) {
     if (controls->ordn_held) {
       disable_ship_tractor_cloak(state);
       if (ship->ordn_charge < 1.0) {
