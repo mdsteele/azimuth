@@ -1,4 +1,4 @@
-@P z8 r471 t217 s6
+@P z8 r471 t226 s6
 $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene4,wait1.5,scene3,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -1031,3 +1031,64 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   from?$_22
 
   And what else aren't they telling us?"
+!T217"
+  Node connected; new files located.
+
+  Accessing recorded message, dated approximately
+  eight months ago:
+
+  [$_04=$_04=$_04=$_04=$_04=$_04=$_04=$_04] (ready)"
+!T218"
+  \"Begin personal log entry: Rakif Vkati.\"
+
+  \"Dr. Marsh has had a keen insight regarding the
+  NPS engines that I think will prove useful to
+  our efforts here.  I've assigned some of my
+  reports to investigate further.  I believe we
+  will be able to make concrete progress on the
+  practical applications very soon.\""
+!T219"
+  \"I've transmitted some of our questions over to
+  Noumena to see what she thinks--in a heavily
+  abstracted form, of course.  This would all be a
+  lot simpler if we didn't have to keep this work
+  quiet from her and the other SapiAIs, but I and
+  Dr. Marsh are agreed that it's the right thing
+  to do--at least for now--even if we think so for
+  rather different reasons.\""
+!T220"
+  \"Meanwhile, although many of my Trichord
+  colleagues are still uneasy about working with
+  the Humans here--just as many citizens of the
+  Trichord Interstellar Alliance are uneasy about
+  being part of the Joint Federation--I believe
+  that the work being done here is making them
+  more...optimisitic for the future.  A future--\""
+!T221"
+  $OERROR:$W Remaining message data has been
+  corrupted by systems damage and cannot be
+  recovered.
+
+  >>><"
+!T222"
+  \"Hmm.  Considering how badly things went here,
+  maybe they shouldn't have been keeping their
+  work secret.\"
+
+  \"Back to work.  Computer, I need physical
+  access to the area directly below here.  What
+  can you do for me?\""
+!T223"
+  Status: $X4060e0Lower Barrag depths$W are secured by
+  forcefields powered by this reactor.  Forcefield
+  controls are inoperable.  Reactor controls are
+  available.
+
+  >>><"
+!T224"
+  \"All right, let's shut down the reactor then.\""
+!T225"
+  Confirmed.  Shutting down secondary reactor and
+  switching to auxiliary lighting.
+
+  >>><"

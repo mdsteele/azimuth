@@ -69,16 +69,33 @@ static void draw_computer_circle(
 }
 
 static void draw_computer_blinkenlight(
-    double cx, double cy, az_color_t color1) {
+    double cx, double cy, az_color_t color) {
   const double r = 2;
   glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(color1);
+    az_gl_color(color);
     glVertex2d(cx, cy);
     for (int i = 0; i <= 360; i += 30) {
       const double c = cos(AZ_DEG2RAD(i));
       const double s = sin(AZ_DEG2RAD(i));
       glVertex2d(cx + r * c, cy + r * s);
     }
+  } glEnd();
+}
+
+static void draw_video_lines(az_color_t color, az_clock_t clock) {
+  const int num_lines = 6;
+  const float spacing = 100.0 / num_lines;
+  const float offset = az_clock_mod(60, 1, clock) / 60.0;
+  glBegin(GL_LINES); {
+    az_gl_color(color);
+    glVertex2f(100.0f * offset, 0);
+    glVertex2f(0, spacing * offset);
+    for (int i = 0; i < num_lines - 1; ++i) {
+      glVertex2f(0, spacing * (offset + i + 1));
+      glVertex2f(100, spacing * (offset + i));
+    }
+    glVertex2f(100, spacing * (offset + num_lines - 1));
+    glVertex2f(100.0f * offset, 100);
   } glEnd();
 }
 
@@ -533,6 +550,7 @@ void az_init_portrait_drawing(void) {
 void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
   assert(portrait != AZ_POR_NOTHING);
   GLuint display_list = portrait_display_lists_start;
+  az_color_t video_lines = {.a = 0};
   switch (portrait) {
     case AZ_POR_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_POR_HOPPER:
@@ -572,9 +590,18 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
         draw_computer_blinkenlight(56, 50, (az_color_t){192, 192, 192, 255});
       }
       break;
+    case AZ_POR_TRICHORD_VIDEO:
+      display_list += (talking && az_clock_mod(2, 5, clock) != 0 ?
+                       TRICHORD_TALKING_INDEX : TRICHORD_PAUSED_INDEX);
+      video_lines = (az_color_t){255, 0, 0, 128};
+      break;
   }
   assert(glIsList(display_list));
-  glCallList(display_list);
+  if (video_lines.a == 0u) glCallList(display_list);
+  else if (az_clock_mod(3, 1, clock) != 0) {
+    glCallList(display_list);
+    draw_video_lines(video_lines, clock);
+  }
 }
 
 /*===========================================================================*/
