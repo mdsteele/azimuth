@@ -29,7 +29,7 @@
 /*===========================================================================*/
 
 // The number of different portraits there are, not counting AZ_POR_NOTHING:
-#define AZ_NUM_PORTRAITS 8
+#define AZ_NUM_PORTRAITS 10
 
 typedef enum {
   AZ_POR_NOTHING = 0,
@@ -41,6 +41,8 @@ typedef enum {
   AZ_POR_TRICHORD,
   AZ_POR_AZIMUTH,
   AZ_POR_TRICHORD_VIDEO,
+  AZ_POR_HUMAN,
+  AZ_POR_HUMAN_VIDEO,
 } az_portrait_t;
 
 typedef enum {

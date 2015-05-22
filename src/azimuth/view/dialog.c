@@ -48,7 +48,9 @@ static GLuint portrait_display_lists_start;
 #define TRICHORD_PAUSED_INDEX 7
 #define TRICHORD_TALKING_INDEX 8
 #define AZIMUTH_PAUSED_INDEX 9
-#define NUM_PORTRAIT_DISPLAY_LISTS 10
+#define HUMAN_PAUSED_INDEX 10
+#define HUMAN_TALKING_INDEX 11
+#define NUM_PORTRAIT_DISPLAY_LISTS 12
 
 /*===========================================================================*/
 
@@ -394,6 +396,60 @@ static const az_vector_t azimuth8_vertices[] = {
   {75, 50}, {72.87, 44.86}, {75.64, 43.71}, {75.26, 42.78}, {100, 32.54}
 };
 
+static const az_vector_t human_paused_vertices[] = {
+  {100, 100}, {0, 100},
+  // Left shoulder:
+  {0, 0}, {5, 5.5}, {8, 8}, {14, 11}, {20, 13}, {31.5, 17.5},
+  // Left neck wisp of hair:
+  {32, 19.7}, {27, 18.5}, {20.5, 19}, {20.4, 19.1}, {20.5, 19.2}, {25, 19.5},
+  {28.4, 21}, {30.7, 23.3},
+  // Left side of head:
+  {28.5, 29.3}, {25.5, 35.6}, {24.7, 38}, {24.5, 42.2},
+  // Left side wisp of hair:
+  {19, 40.5}, {18.9, 40.55}, {19, 40.7}, {23.1, 44.2},
+  // Top half of head:
+  {24.6, 46.8}, {29, 57}, {33.7, 72.2}, {36.8, 77.4}, {40.3, 80.4},
+  {44.3, 82.3}, {49.1, 83}, {51.2, 84.1}, {54.5, 84.1}, {60, 83},
+  {63.5, 80.7}, {69, 75.4}, {72.5, 70}, {74.5, 67}, {78.3, 59}, {80, 52},
+  // Right side wisp of hair:
+  {80.6, 46}, {80.1, 40.6}, {79, 36.1}, {75.2, 29.5}, {75.1, 29.4},
+  {75, 29.5}, {76.7, 35},
+  // Right side of head:
+  {76.7, 39}, {72, 30.3}, {71, 28},
+  // Right side of neck/collar:
+  {71, 26.5}, {72, 24.5}, {74.5, 22.5}, {77.5, 21.5}, {79, 20.5}, {79.5, 18.5},
+  // Right shoulder:
+  {78.5, 13}, {83, 10}, {92.5, 6}, {100, 0}
+};
+
+static const az_vector_t human_talking_vertices[] = {
+  {100, 100}, {0, 100},
+  // Left shoulder:
+  {0, 0}, {5, 5.5}, {8, 8}, {14, 11}, {20, 13}, {31.5, 17.5},
+
+  // Left neck wisp of hair:
+  {32, 20.7}, {27, 19.5}, {20.5, 20}, {20.4, 20.1}, {20.5, 20.2}, {25, 20.5},
+  {28.4, 22}, {30.7, 24.3},
+  // Left side of head:
+  {28.5, 30.3}, {25.5, 36.6}, {24.7, 39}, {24.5, 43.2},
+  // Left side wisp of hair:
+  {19, 41.5}, {18.9, 41.55}, {19, 41.7}, {23.1, 45.2},
+  // Top half of head:
+  {24.6, 47.8}, {29, 58}, {33.7, 73.2}, {36.8, 78.4}, {40.3, 81.4},
+  {44.3, 83.3}, {49.1, 84}, {51.2, 85.1}, {54.5, 85.1}, {60, 84},
+  {63.5, 81.7}, {69, 76.4}, {72.5, 71}, {74.5, 68}, {78.3, 60}, {80, 53},
+  // Right side wisp of hair:
+  {80.6, 47}, {80.1, 41.6}, {79, 37.1}, {75.2, 30.5}, {75.1, 30.4},
+  {75, 30.5}, {76.7, 36},
+  // Right side of head:
+  {76.7, 40}, {72, 31.3}, {71, 29},
+
+  // Right side of neck/collar:
+  {71, 26.5}, {72, 24.5}, {74.5, 22.5}, {77.5, 21.5}, {79, 20.5}, {79.5, 18.5},
+  // Right shoulder:
+  {78.5, 13}, {83, 10}, {92.5, 6}, {100, 0}
+};
+
 /*===========================================================================*/
 
 void az_init_portrait_drawing(void) {
@@ -543,6 +599,21 @@ void az_init_portrait_drawing(void) {
     draw_computer_circle(44, 50, color1, (az_color_t){128, 255, 255, 128});
     draw_computer_circle(56, 50, color1, (az_color_t){128, 255, 255, 128});
   } glEndList();
+  // Compile Human portrait:
+  {
+    const double bezel = 3.7;
+    const az_color_t color1 = {160, 92, 64, 255};
+    const az_color_t color2 = {160, 64, 92, 0};
+    glNewList(portrait_display_lists_start + HUMAN_PAUSED_INDEX, GL_COMPILE); {
+      const az_polygon_t polygon = AZ_INIT_POLYGON(human_paused_vertices);
+      draw_portrait_polygon(bezel, color1, color2, polygon);
+    } glEndList();
+    glNewList(portrait_display_lists_start + HUMAN_TALKING_INDEX,
+              GL_COMPILE); {
+      const az_polygon_t polygon = AZ_INIT_POLYGON(human_talking_vertices);
+      draw_portrait_polygon(bezel, color1, color2, polygon);
+    } glEndList();
+  }
 }
 
 /*===========================================================================*/
@@ -594,6 +665,15 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
       display_list += (talking && az_clock_mod(2, 5, clock) != 0 ?
                        TRICHORD_TALKING_INDEX : TRICHORD_PAUSED_INDEX);
       video_lines = (az_color_t){255, 0, 0, 128};
+      break;
+    case AZ_POR_HUMAN:
+      display_list += (talking && az_clock_mod(2, 6, clock) != 0 ?
+                       HUMAN_TALKING_INDEX : HUMAN_PAUSED_INDEX);
+      break;
+    case AZ_POR_HUMAN_VIDEO:
+      display_list += (talking && az_clock_mod(2, 6, clock) != 0 ?
+                       HUMAN_TALKING_INDEX : HUMAN_PAUSED_INDEX);
+      video_lines = (az_color_t){160, 92, 64, 255};
       break;
   }
   assert(glIsList(display_list));
