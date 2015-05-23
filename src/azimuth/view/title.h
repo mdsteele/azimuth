@@ -54,7 +54,7 @@ typedef struct {
     AZ_TMODE_QUITTING
   } mode;
   union {
-    struct { double progress; } intro;
+    struct { int step; double progress; } intro;
     struct { az_clock_t start; } ready;
     struct { int slot_index; bool do_erase; } erasing;
     struct { double progress; int slot_index; } starting;

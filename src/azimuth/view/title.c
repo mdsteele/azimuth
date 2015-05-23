@@ -181,28 +181,80 @@ static void draw_title_letter(char ch, float hilight) {
   }
 }
 
+static void draw_subtitle_text(const char *text) {
+  glColor3f(1, 1, 1);
+  az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2,
+                 AZ_SCREEN_HEIGHT/2 - 8, text);
+}
+
 static void draw_background(const az_title_state_t *state) {
-  az_draw_planet_starfield(state->clock);
-  az_draw_zenith_planet(state->clock);
+  double title_progress = 0.0, flash = 0.0;
+  if (state->mode == AZ_TMODE_INTRO) {
+    double blacken = 0.0, create = 0.0;
+    switch (state->mode_data.intro.step) {
+      case 0:
+        glColor4f(1, 1, 1, 1.0 - state->mode_data.intro.progress);
+        az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2,
+                       400, "aeons ago, the birth of a planet");
+        break;
+      case 1:
+        blacken = state->mode_data.intro.progress;
+        flash = fmax(0.0, 1.0 - 2.0 * blacken);
+        break;
+      case 2:
+        draw_subtitle_text("a game by mdsteele");
+        return;
+      case 3:
+        create = 0.25 * state->mode_data.intro.progress;
+        blacken = 1.0;
+        break;
+      case 4:
+        draw_subtitle_text("created 2012-2015");
+        return;
+      case 5:
+        create = 0.25 + 0.75 * state->mode_data.intro.progress;
+        blacken = 1.0;
+        title_progress = state->mode_data.intro.progress;
+        break;
+    }
+    az_draw_planet_starfield(state->clock);
+    az_draw_zenith_planet_formation(blacken, create, state->clock);
+  } else {
+    title_progress = 1.0;
+    az_draw_planet_starfield(state->clock);
+    az_draw_zenith_planet(state->clock);
+  }
 
   // Draw game title:
-  glPushMatrix(); {
-    glTranslatef(AZ_SCREEN_WIDTH / 2, 150, 0);
-    glTranslatef(-3 * 80 + 0.5, 0.5, 0);
-    for (int i = 0; i < 7; ++i) {
-      glPushMatrix(); {
-        if (state->mode == AZ_TMODE_INTRO) {
-          const GLfloat angle = (i % 2 ? -45 : 45);
-          glRotatef(angle, 0, 0, 1);
-          glScalef(state->mode_data.intro.progress, 1, 1);
-          glRotatef(-angle, 0, 0, 1);
-        }
-        draw_title_letter("AZIMUTH"[i], fmax(0.0, 0.005 * (az_clock_zigzag(
-            200, 1, state->clock + 10 * (7 - i)) - 140)));
-      } glPopMatrix();
-      glTranslatef(80, 0, 0);
-    }
-  } glPopMatrix();
+  if (title_progress > 0.0) {
+    glPushMatrix(); {
+      glTranslatef(AZ_SCREEN_WIDTH / 2, 150, 0);
+      glTranslatef(-3 * 80 + 0.5, 0.5, 0);
+      for (int i = 0; i < 7; ++i) {
+        glPushMatrix(); {
+          if (title_progress < 1.0) {
+            const GLfloat angle = (i % 2 ? -45 : 45);
+            glRotatef(angle, 0, 0, 1);
+            glScalef(title_progress, 1, 1);
+            glRotatef(-angle, 0, 0, 1);
+          }
+          draw_title_letter("AZIMUTH"[i], fmax(0.0, 0.005 * (az_clock_zigzag(
+              200, 1, state->clock + 10 * (7 - i)) - 140)));
+        } glPopMatrix();
+        glTranslatef(80, 0, 0);
+      }
+    } glPopMatrix();
+  }
+
+  if (flash > 0.0) {
+    glColor4f(1, 1, 1, flash);
+    glBegin(GL_QUADS); {
+      glVertex2i(0, 0);
+      glVertex2i(AZ_SCREEN_WIDTH, 0);
+      glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+      glVertex2i(0, AZ_SCREEN_HEIGHT);
+    } glEnd();
+  }
 }
 
 /*===========================================================================*/
@@ -528,16 +580,37 @@ void az_title_draw_screen(const az_title_state_t *state) {
 
 /*===========================================================================*/
 
-#define INTRO_TIME 3.0
 #define STARTING_TIME 0.9
+
+static bool advance_intro(az_title_state_t *state, double step_duration,
+                          double time) {
+  state->mode_data.intro.progress =
+    fmin(1.0, state->mode_data.intro.progress + time / step_duration);
+  if (state->mode_data.intro.progress >= 1.0) {
+    state->mode_data.intro.progress = 0.0;
+    ++state->mode_data.intro.step;
+    return true;
+  } else return false;
+}
 
 static void tick_mode(az_title_state_t *state, double time) {
   switch (state->mode) {
     case AZ_TMODE_INTRO:
-      state->mode_data.intro.progress =
-        fmin(1.0, state->mode_data.intro.progress + time / INTRO_TIME);
-      if (state->mode_data.intro.progress >= 1.0) {
-        az_title_skip_intro(state);
+      switch (state->mode_data.intro.step) {
+        case 0:
+          if (advance_intro(state, 3.0, time)) {
+            az_change_music(&state->soundboard, AZ_MUS_TITLE);
+          }
+          break;
+        case 1: advance_intro(state, 3.0, time); break;
+        case 2: advance_intro(state, 3.0, time); break;
+        case 3: advance_intro(state, 3.0, time); break;
+        case 4: advance_intro(state, 3.0, time); break;
+        case 5:
+          if (advance_intro(state, 6.0, time)) {
+            az_title_skip_intro(state);
+          }
+          break;
       }
       break;
     case AZ_TMODE_STARTING:
@@ -590,6 +663,7 @@ void az_title_skip_intro(az_title_state_t *state) {
   assert(state->mode == AZ_TMODE_INTRO);
   state->mode = AZ_TMODE_READY;
   state->mode_data.ready.start = state->clock;
+  az_change_music(&state->soundboard, AZ_MUS_TITLE);
   az_change_music_flag(&state->soundboard, 1);
 }
 

@@ -43,7 +43,6 @@ az_title_action_t az_title_event_loop(
     az_preferences_t *prefs) {
   static az_title_state_t state;
   az_init_title_state(&state, planet, saved_games, prefs);
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
 
   bool prefs_changed = false;
 
