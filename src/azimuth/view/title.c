@@ -193,9 +193,9 @@ static void draw_background(const az_title_state_t *state) {
     double blacken = 0.0, create = 0.0;
     switch (state->mode_data.intro.step) {
       case 0:
-        glColor4f(1, 1, 1, 1.0 - state->mode_data.intro.progress);
+        glColor4f(0.5, 1, 1, 1.0 - state->mode_data.intro.progress);
         az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2,
-                       400, "aeons ago, the birth of a planet");
+                       400, "Aeons ago, the birth of a planet:");
         break;
       case 1:
         blacken = state->mode_data.intro.progress;
@@ -598,7 +598,7 @@ static void tick_mode(az_title_state_t *state, double time) {
     case AZ_TMODE_INTRO:
       switch (state->mode_data.intro.step) {
         case 0:
-          if (advance_intro(state, 3.0, time)) {
+          if (advance_intro(state, 4.0, time)) {
             az_change_music(&state->soundboard, AZ_MUS_TITLE);
           }
           break;

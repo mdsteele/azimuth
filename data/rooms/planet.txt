@@ -23,7 +23,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   here?  Where is everyone?  And what the hell was
   that...thing?\""
 !T6"
-  Query: Unknown.
+  Identity of attacker: Unknown.
 
   Status: Automated disaster-control security
   systems are active, although many of them have
@@ -36,11 +36,11 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T8"
   Scanning records...
 
-  Of 976 registered colonists on Zenith, $Y178 human
-  and 51 trichord fatalities$W have been reported in
+  Of 473 registered colonists on Zenith, $Y214 human
+  and 91 trichord fatalities$W have been reported in
   the past 48 hours."
 !T9"
-  \"Dammit!  ...But most of them are still alive?
+  \"Dammit!  ...But some of them are still alive?
   Where are they?\""
 !T10"
   ERR@@@##...unknown.  Earlier sensor reports
