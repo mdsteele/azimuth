@@ -63,7 +63,7 @@ static void deselect_all_rooms(void) {
 static void do_select_room(int x, int y, bool multi) {
   const az_vector_t pt = az_pixel_to_position(&state, x, y);
   AZ_LIST_LOOP(room, state.planet.rooms) {
-    az_camera_bounds_t *bounds = &room->camera_bounds;
+    const az_camera_bounds_t *bounds = &room->camera_bounds;
     const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
     const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
     const double theta_extra =
@@ -947,6 +947,85 @@ static void do_wallify_nodes(void) {
   if (any) set_room_unsaved(room);
 }
 
+static double doodad_flip_adjust(const az_doodad_kind_t doodad_kind) {
+  switch (doodad_kind) {
+    case AZ_DOOD_PIPE_CORNER:
+      return AZ_DEG2RAD(-90);
+    case AZ_DOOD_PIPE_ELBOW:
+      return AZ_DEG2RAD(-45);
+    case AZ_DOOD_GRASS_TUFT_1:
+    case AZ_DOOD_GRASS_TUFT_2:
+    case AZ_DOOD_GRASS_TUFT_3:
+      return AZ_DEG2RAD(180);
+    case AZ_DOOD_TUBE_WINDOW_BEND:
+      return AZ_DEG2RAD(135);
+    default:
+      return 0;
+  }
+}
+
+static double wall_flip_adjust(const az_wall_data_t *wall_data) {
+  switch (az_wall_data_index(wall_data)) {
+    case 3: case 4: case 6: case 7: case 8: case 9: case 10:
+    case 20: case 35: case 50: case 51: case 106: case 107: case 108:
+      return 0;
+    case 43: case 44: case 59: case 60: case 95: case 96:
+    case 116: case 117: case 121: case 122: case 137: case 138:
+      return AZ_DEG2RAD(90);
+    case 34: case 40: case 102: case 143: case 149:
+      return AZ_DEG2RAD(-90);
+    case 2: case 30: case 48: case 49: case 63: case 64: case 140: case 141:
+      return AZ_DEG2RAD(135);
+    case 27: case 144:
+      return AZ_DEG2RAD(-135);
+    default:
+      return AZ_DEG2RAD(180);
+  }
+}
+
+static void do_flip_room_horz(void) {
+  az_editor_room_t *room = get_current_room();
+  const az_camera_bounds_t *bounds = &room->camera_bounds;
+  const double mid_theta = bounds->min_theta + 0.5 * bounds->theta_span;
+  const az_vector_t axis = az_vpolar(1, mid_theta);
+  AZ_EDITOR_OBJECT_LOOP(object, room) {
+    az_vpluseq(object.position,
+               az_vmul(az_vflatten(*object.position, axis), -2));
+    *object.angle = az_mod2pi(mid_theta -
+                              az_mod2pi(*object.angle - mid_theta));
+  }
+  AZ_LIST_LOOP(gravfield, room->gravfields) {
+    if (az_is_trapezoidal(gravfield->spec.kind)) {
+      gravfield->spec.size.trapezoid.front_offset *= -1;
+    } else {
+      gravfield->spec.angle =
+        az_mod2pi(gravfield->spec.angle -
+                  az_sector_interior_angle(&gravfield->spec.size));
+      if (gravfield->spec.kind == AZ_GRAV_SECTOR_SPIN) {
+        gravfield->spec.strength *= -1;
+      }
+    }
+  }
+  AZ_LIST_LOOP(node, room->nodes) {
+    if (node->spec.kind == AZ_NODE_UPGRADE) {
+      node->spec.angle = az_mod2pi(node->spec.angle + AZ_PI);
+    } else if (node->spec.kind == AZ_NODE_FAKE_WALL_BG ||
+               node->spec.kind == AZ_NODE_FAKE_WALL_FG) {
+      node->spec.angle = az_mod2pi(
+          node->spec.angle + wall_flip_adjust(node->spec.subkind.fake_wall));
+    } else if (node->spec.kind == AZ_NODE_DOODAD_BG ||
+               node->spec.kind == AZ_NODE_DOODAD_FG) {
+      node->spec.angle = az_mod2pi(
+          node->spec.angle + doodad_flip_adjust(node->spec.subkind.doodad));
+    }
+  }
+  AZ_LIST_LOOP(wall, room->walls) {
+    wall->spec.angle = az_mod2pi(
+        wall->spec.angle + wall_flip_adjust(wall->spec.data));
+  }
+  set_room_unsaved(room);
+}
+
 static void do_change_background_pattern(int delta) {
   az_editor_room_t *room = get_current_room();
   room->background_pattern =
@@ -1537,7 +1616,8 @@ static void event_loop(void) {
               break;
             case AZ_KEY_G: state.tool = AZ_TOOL_GRAVFIELD; break;
             case AZ_KEY_H:
-              if (event.key.shift) do_toggle_property(AZ_ROOMF_HEATED);
+              if (event.key.command && event.key.shift) do_flip_room_horz();
+              else if (event.key.shift) do_toggle_property(AZ_ROOMF_HEATED);
               break;
             case AZ_KEY_K:
               if (event.key.command) begin_set_marker_flag();
