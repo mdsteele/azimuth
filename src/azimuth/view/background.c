@@ -83,6 +83,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_GREEN_BUBBLES] = {
     .parallax = 0.35, .repeat_style = RECT,
     .repeat_horz = 150.0, .repeat_vert = 150.0
+  },
+  [AZ_BG_PURPLE_COLUMNS] = {
+    .parallax = 0.35, .repeat_style = POLAR,
+    .repeat_horz = 140.0, .repeat_vert = 170.0
   }
 };
 
@@ -277,10 +281,41 @@ static void draw_green_bubble(double center_x, double center_y, double radius,
         glColor3f(0, 0.2, 0);
         glVertex2d(inner * cos(AZ_DEG2RAD(i)), inner * sin(AZ_DEG2RAD(i)));
         glColor4f(0, 0.1, 0.2, 0);
-        glVertex2d(1.5 * radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        glVertex2d(1.5 * radius * cos(AZ_DEG2RAD(i)),
+                   radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
   } glPopMatrix();
+}
+
+static void draw_purple_column(float center_x, double top, float semi_width,
+                               float height, bool cap) {
+  const az_color_t outer = {48, 32, 64, 255};
+  const az_color_t inner = {24, 16, 32, 255};
+  if (cap) {
+    const float cap_height = 5;
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(inner);
+      glVertex2f(center_x, top - cap_height);
+      az_gl_color(outer);
+      glVertex2f(center_x - semi_width, top - cap_height);
+      glVertex2f(center_x, top);
+      glVertex2f(center_x + semi_width, top - cap_height);
+    } glEnd();
+    top -= cap_height;
+    height -= cap_height;
+  }
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(outer);
+    glVertex2f(center_x - semi_width, top);
+    glVertex2f(center_x - semi_width, top - height);
+    az_gl_color(inner);
+    glVertex2f(center_x, top);
+    glVertex2f(center_x, top - height);
+    az_gl_color(outer);
+    glVertex2f(center_x + semi_width, top);
+    glVertex2f(center_x + semi_width, top - height);
+  } glEnd();
 }
 
 // Draw one patch of the background pattern.  It should cover the rect from
@@ -429,6 +464,21 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_green_bubble(-55, -120, 32, 3, clock);
       draw_green_bubble(40, -130, 30, 2, clock);
       draw_green_bubble(63, -75, 27, 3, clock + 5);
+    } break;
+    case AZ_BG_PURPLE_COLUMNS: {
+      draw_purple_column(-50, 0, 20, 15, false);
+      draw_purple_column(50, 0, 20, 53, false);
+      draw_purple_column(0, 0, 20, 35, false);
+      draw_purple_column(35, 0, 20, 53, false);
+      draw_purple_column(-28, 0, 20, 53, false);
+      draw_purple_column(-14, 0, 20, 120, false);
+      draw_purple_column(-50, -10, 20, 160, true);
+      draw_purple_column(20, -30, 20, 65, true);
+      draw_purple_column(50, -48, 20, 122, true);
+      draw_purple_column(0, -60, 20, 110, true);
+      draw_purple_column(35, -90, 20, 80, true);
+      draw_purple_column(-28, -115, 20, 55, true);
+      draw_purple_column(-14, -160, 20, 10, true);
     } break;
   }
 }

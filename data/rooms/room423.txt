@@ -1,4 +1,4 @@
-@R z6 p10/99 k0 b3 d2 g1 n11 w123
+@R z6 p10/99 k11 b3 d2 g1 n11 w123
   c(8089.04,179.56,1.126736,0.088369)
 $s:test99,beqz/A,nix1,halt,A#mus10,boss1,lock2,lock3;
 !W1 d153 x2610.59 y7408.76 a1.215105 u0
