@@ -54,8 +54,8 @@ Doors
 4: Opened cyan door between Sarvari room 144 and Core room 145
 7: Opened red door between Colony rooms 15 and 16
 11: Opened blue door between Filimun rooms 108 and 109
-12: Opened blue door between Colony rooms 73 and 75 (around room 74)
-13: Opened red door between Colony rooms 125 and 128
+12: Opened blue door between Colony rooms 70 and 78 (around room 71)
+13: Opened pink door between Colony rooms 125 and 128
 15: Opened pink door between Filimun room 47 and Nandiar room 48
 16: Opened pink door between Filimun room 43 and Nandiar room 44
 17: Opened blue door between Filimun rooms 110 and 117
