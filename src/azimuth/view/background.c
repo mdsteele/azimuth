@@ -87,6 +87,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_PURPLE_COLUMNS] = {
     .parallax = 0.35, .repeat_style = POLAR,
     .repeat_horz = 140.0, .repeat_vert = 170.0
+  },
+  [AZ_BG_GRAY_SHALE_ROCK] = {
+    .parallax = 0.2, .repeat_style = POLAR,
+    .repeat_horz = 200.0, .repeat_vert = 180.0
   }
 };
 
@@ -318,6 +322,32 @@ static void draw_purple_column(float center_x, double top, float semi_width,
   } glEnd();
 }
 
+static void draw_half_shale_rock(float x_0, float y_0, float x_1, float y_1,
+                                 float x_2, float y_2, float x_3, float y_3,
+                                 float x_4, float y_4, float x_5, float y_5) {
+  const az_color_t color1 = {50, 50, 51, 255};
+  const az_color_t color2 = {23, 24, 25, 255};
+  const az_color_t color3 = {42, 42, 43, 255};
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color3); glVertex2f(0.5 * (x_0 + x_1), 0.5 * (y_0 + y_1));
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+    az_gl_color(color2); glVertex2f(x_2, y_2); glVertex2f(x_1, y_1);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color3); glVertex2f(0.25 * (x_0 + x_2 + x_3 + x_4),
+                                    0.25 * (y_0 + y_2 + y_3 + y_4));
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+    az_gl_color(color2);
+    glVertex2f(x_2, y_2); glVertex2f(x_3, y_3); glVertex2f(x_4, y_4);
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+  } glEnd();
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color3); glVertex2f(0.5 * (x_0 + x_5), 0.5 * (y_0 + y_5));
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+    az_gl_color(color2); glVertex2f(x_4, y_4); glVertex2f(x_5, y_5);
+  } glEnd();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -479,6 +509,23 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_purple_column(35, -90, 20, 80, true);
       draw_purple_column(-28, -115, 20, 55, true);
       draw_purple_column(-14, -160, 20, 10, true);
+    } break;
+    case AZ_BG_GRAY_SHALE_ROCK: {
+      // Top rock:
+      draw_half_shale_rock(100, -30, 100, 0, 20, 0,
+                           0, -33, -8, -64, 100, -58);
+      draw_half_shale_rock(-100, -30, -100, 0, 20, 0,
+                           0, -33, -8, -64, -100, -58);
+      // Middle rock:
+      draw_half_shale_rock(100, -90, 100, -115, -45, -120,
+                           0, -93, 12, -62, 100, -58);
+      draw_half_shale_rock(-100, -90,  -100, -115, -45, -120,
+                           0, -93, 12, -62, -100, -58);
+      // Bottom rock:
+      draw_half_shale_rock(-10, -150, 0, -118, -100, -115,
+                           -100, -143, -100, -180, 0, -180);
+      draw_half_shale_rock(-10, -150, 0, -118, 115, -114,
+                           100, -143, 100, -180, 0, -180);
     } break;
   }
 }
