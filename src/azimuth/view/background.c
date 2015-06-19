@@ -91,6 +91,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_GRAY_SHALE_ROCK] = {
     .parallax = 0.2, .repeat_style = POLAR,
     .repeat_horz = 200.0, .repeat_vert = 180.0
+  },
+  [AZ_BG_CRYSTAL_CAVE] = {
+    .parallax = 0.25, .repeat_style = RECT,
+    .repeat_horz = 120.0, .repeat_vert = 100.0
   }
 };
 
@@ -329,22 +333,36 @@ static void draw_half_shale_rock(float x_0, float y_0, float x_1, float y_1,
   const az_color_t color2 = {23, 24, 25, 255};
   const az_color_t color3 = {42, 42, 43, 255};
   glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(color3); glVertex2f(0.5 * (x_0 + x_1), 0.5 * (y_0 + y_1));
+    az_gl_color(color3); glVertex2f(0.5f * (x_0 + x_1), 0.5f * (y_0 + y_1));
     az_gl_color(color1); glVertex2f(x_0, y_0);
     az_gl_color(color2); glVertex2f(x_2, y_2); glVertex2f(x_1, y_1);
   } glEnd();
   glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(color3); glVertex2f(0.25 * (x_0 + x_2 + x_3 + x_4),
-                                    0.25 * (y_0 + y_2 + y_3 + y_4));
+    az_gl_color(color3); glVertex2f(0.25f * (x_0 + x_2 + x_3 + x_4),
+                                    0.25f * (y_0 + y_2 + y_3 + y_4));
     az_gl_color(color1); glVertex2f(x_0, y_0);
     az_gl_color(color2);
     glVertex2f(x_2, y_2); glVertex2f(x_3, y_3); glVertex2f(x_4, y_4);
     az_gl_color(color1); glVertex2f(x_0, y_0);
   } glEnd();
   glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(color3); glVertex2f(0.5 * (x_0 + x_5), 0.5 * (y_0 + y_5));
+    az_gl_color(color3); glVertex2f(0.5f * (x_0 + x_5), 0.5f * (y_0 + y_5));
     az_gl_color(color1); glVertex2f(x_0, y_0);
     az_gl_color(color2); glVertex2f(x_4, y_4); glVertex2f(x_5, y_5);
+  } glEnd();
+}
+
+static void draw_crystal_cell(float x_0, float y_0, float x_1, float y_1,
+                              float x_2, float y_2) {
+  const az_color_t color1 = {64, 48, 40, 255};
+  const az_color_t color2 = {24, 6, 16, 128};
+  const az_color_t color3 = {42, 34, 48, 255};
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color3); glVertex2f(0.33333333f * (x_0 + x_1 + x_2),
+                                    0.33333333f * (y_0 + y_1 + y_2));
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+    az_gl_color(color2); glVertex2f(x_1, y_1); glVertex2f(x_2, y_2);
+    az_gl_color(color1); glVertex2f(x_0, y_0);
   } glEnd();
 }
 
@@ -355,8 +373,8 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
   switch (pattern) {
     case AZ_BG_SOLID_BLACK: break;
     case AZ_BG_BROWN_ROCK_WALL: {
-      const az_color_t color1 = {40, 38, 35, 255};
-      const az_color_t color2 = {20, 15, 10, 255};
+      const az_color_t color1 = {48, 45, 42, 255};
+      const az_color_t color2 = {24, 18, 12, 255};
       draw_rock_wall(color1, color2, 200, 200);
     } break;
     case AZ_BG_GREEN_HEX_TRELLIS: {
@@ -526,6 +544,22 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
                            -100, -143, -100, -180, 0, -180);
       draw_half_shale_rock(-10, -150, 0, -118, 115, -114,
                            100, -143, 100, -180, 0, -180);
+    } break;
+    case AZ_BG_CRYSTAL_CAVE: {
+      glBegin(GL_TRIANGLE_STRIP); {
+        const float gray = 0.003f * az_clock_zigzag(100, 1, clock);
+        glColor3f(gray, gray, gray);
+        glVertex2f(-60,    0); glVertex2f(60,    0);
+        glVertex2f(-60, -100); glVertex2f(60, -100);
+      } glEnd();
+      draw_crystal_cell(-10, -58, -20, 0, -60, -58);
+      draw_crystal_cell(-60, 0, -20, 0, -60, -58);
+      draw_crystal_cell(-10, -58, -20, 0, 60, -58);
+      draw_crystal_cell(60, 0, -20, 0, 60, -58);
+      draw_crystal_cell(-10, -58, -20, -100, -60, -58);
+      draw_crystal_cell(-60, -100, -20, -100, -60, -58);
+      draw_crystal_cell(-10, -58, -20, -100, 60, -58);
+      draw_crystal_cell(60, -100, -20, -100, 60, -58);
     } break;
   }
 }
