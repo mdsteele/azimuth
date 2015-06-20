@@ -1,4 +1,4 @@
-@P z8 r471 t235 s6
+@P z8 r471 t240 s6
 $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene4,wait1.5,scene3,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -260,45 +260,41 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T62"
   \"Hmm, this looks like the controls for the
   colony's transmitter array.  Maybe I can get a
-  message to HQ, let them know what's going on?\"
+  message to HQ, let them know what's going on?\"$_18
 
   \"Computer, open a comm link to the nearest IPF
   navsat.\""
 !T63"
-  ERROR: ENODEV
+  $OERROR:$W ENODEV
 
   Cannot comply with request.  The planetary
   transmitter array is currently non-functional.
+  Cause: Irreparable damage sustained to the
+  primary ansibular rods.
 
   >>><"
 !T64"
   \"Blast it.  My ship can't broadcast far enough
   from here, and I can't risk taking three hours
   just to fly back out to range; not until I know
-  the survivors are safe.\"
+  the survivors are safe.\"$_08
 
-  \"Computer, what's wrong with the transmitter?
-  Can you bring it back online?\""
+  \"Computer, can you at least get me $/some$| kind of
+  information that'll help me rescue the colonists
+  here?\""
 !T65"
-  Query: The planetary transmitter array has been
-  rendered non-functional due to severe damage to
-  the ansibular rods.  Preliminary analysis
-  indicates that the proximate cause of the damage
-  was a high-pressure fuel line explosion just
-  outside the antenna housing.  Prognosis: the
-  entire ansible assembly requires replacement.
-  >>><"
-!T66"
-  \"Crap.  I'll take that as a 'no' to my second
-  question.  At least now I know why the distress
-  signal cut out.\"
+  Query 'information, colonists'...$_10
+  Accessing recorded message, dated approximately
+  three years ago:
 
-  \"Computer, can I at least get a map of the
-  facility?  This place is bigger than I
-  expected.\""
+  [$_04=$_04=$_04=$_04=$_04=$_04=$_04=$_04] (ready)"
+!T66"
+  \"Okay, that's $/not exactly$| the kind of
+  information I had in mind.  I was thinking more
+  like, you know, a map of the facility?\""
 !T67"
-  Accessing database.  $Xc06000Map data$W is available for
-  download.
+  Accessing database.  $Xc06000Colony map data$W is
+  available for download.
 
   >>><"
 !T68"
@@ -1150,5 +1146,35 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"Okay computer, looks like I need to go deeper.\""
 !T234"
   Affirmative.  Lowering nearby lava levels.
+
+  >>><"
+!T235"
+  \"Greetings!  Esteemed visitors.  My name is
+  Dr. Radia Hamilton, co-PI of Zenith Research
+  Colony, along with my Trichord counterpart,
+  Dr. Rakif Vkati.  Um, it is my pleasure to
+  welcome you to our facility.\""
+!T236"
+  \"Zenith Reseach Colony was founded by the JSFR
+  as a cooperative effort between the Human and
+  Trichord governments.  As you know, the JSFR,
+  founded by the Proscions and Humans and later
+  joined by the Urtazkans, Trichords, Fmapi, and
+  of course the three SapiAIs, is dedicated to
+  fostering mutual peace and understanding between
+  its member species.\""
+!T237"
+  \"We at Zenith are$_04.$_04.$_04.$_12uh,$_02 very proud to
+  contribute to that effort, as well as to the
+  greater understanding of neo-spacial physics and
+  the furtherment of$_04.$_04.$_04.$_24um,$_24 whatever my next line
+  was supposed to be.$_24  Yes.$_18  Yes we are.$_12  Even if
+  the Alliance bureaucrats I have to deal with
+  $/are$| stupid stubborn gits, the lot of them.\""
+!T238"
+  \"$/Sigh$|.$_15  C'mon, Radia.  You can get through
+  this dumb video speech.$_08  Just one more take...\""
+!T239"
+  Message ends.
 
   >>><"
