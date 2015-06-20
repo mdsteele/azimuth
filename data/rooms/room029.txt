@@ -1,4 +1,4 @@
-@R z1 p0 b10 d5 g0 n14 w100
+@R z1 p0 k1 b10 d5 g0 n14 w100
   c(43594.01,447.42,1.553482,0.031725)
 $s:test23,beqz/A,unlock1,lock2,lock3,lock4,lock5,halt,A#test33,heqz,unlock1;
 !W1 d9 x487.72 y43452.25 a3.129861 u0
