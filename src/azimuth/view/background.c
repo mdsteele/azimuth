@@ -95,6 +95,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_CRYSTAL_CAVE] = {
     .parallax = 0.25, .repeat_style = RECT,
     .repeat_horz = 120.0, .repeat_vert = 100.0
+  },
+  [AZ_BG_ICE_CAVE] = {
+    .parallax = 0.25, .repeat_style = RECT,
+    .repeat_horz = 96.0, .repeat_vert = 160.0
   }
 };
 
@@ -366,6 +370,16 @@ static void draw_crystal_cell(float x_0, float y_0, float x_1, float y_1,
   } glEnd();
 }
 
+static void draw_ice_cell(float x_0, float y_0, float x_1, float y_1,
+                          float x_2, float y_2) {
+  const az_color_t color1 = {32, 72, 72, 255};
+  const az_color_t color2 = {16, 48, 32, 255};
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color1); glVertex2f(x_0, y_0);
+    az_gl_color(color2); glVertex2f(x_1, y_1); glVertex2f(x_2, y_2);
+  } glEnd();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -560,6 +574,16 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_crystal_cell(-60, -100, -20, -100, -60, -58);
       draw_crystal_cell(-10, -58, -20, -100, 60, -58);
       draw_crystal_cell(60, -100, -20, -100, 60, -58);
+    } break;
+    case AZ_BG_ICE_CAVE: {
+      draw_ice_cell(-8, -93, -16, 0, -48, -93);
+      draw_ice_cell(-48, 0, -16, 0, -48, -93);
+      draw_ice_cell(-8, -93, -16, 0, 48, -93);
+      draw_ice_cell(48, 0, -16, 0, 48, -93);
+      draw_ice_cell(-8, -93, -16, -160, -48, -93);
+      draw_ice_cell(-48, -160, -16, -160, -48, -93);
+      draw_ice_cell(-8, -93, -16, -160, 48, -93);
+      draw_ice_cell(48, -160, -16, -160, 48, -93);
     } break;
   }
 }
