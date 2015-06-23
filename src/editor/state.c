@@ -243,6 +243,43 @@ static az_baddie_kind_t baddie_kinds[] = {
 static int reverse_baddie_kinds[AZ_ARRAY_SIZE(baddie_kinds)];
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie_kinds) == AZ_NUM_BADDIE_KINDS);
 
+static az_doodad_kind_t doodad_kinds[] = {
+  // Pipes:
+  AZ_DOOD_PIPE_STRAIGHT,
+  AZ_DOOD_PIPE_CORNER,
+  AZ_DOOD_PIPE_TEE,
+  AZ_DOOD_PIPE_ELBOW,
+  AZ_DOOD_PIPE_SHORT,
+  // Machines:
+  AZ_DOOD_SUPPLY_BOX,
+  AZ_DOOD_MACHINE_FAN,
+  AZ_DOOD_NPS_ENGINE,
+  AZ_DOOD_NUCLEAR_BOMB,
+  AZ_DOOD_WARNING_LIGHT,
+  // Tubes and windows:
+  AZ_DOOD_RED_TUBE_INSIDE,
+  AZ_DOOD_RED_TUBE_WINDOW,
+  AZ_DOOD_RED_TUBE_BROKEN_WINDOW,
+  AZ_DOOD_RED_TUBE_WINDOW_BEND,
+  AZ_DOOD_YELLOW_TUBE_INSIDE,
+  AZ_DOOD_OCTO_WINDOW,
+  // Drills and chains:
+  AZ_DOOD_DRILL_TIP,
+  AZ_DOOD_DRILL_SHAFT_STILL,
+  AZ_DOOD_DRILL_SHAFT_SPIN,
+  AZ_DOOD_SHORT_CHAIN,
+  AZ_DOOD_LONG_CHAIN,
+  // Plants:
+  AZ_DOOD_GRASS_TUFT_1,
+  AZ_DOOD_GRASS_TUFT_2,
+  AZ_DOOD_GRASS_TUFT_3,
+  AZ_DOOD_HANGING_VINE,
+  // Misc:
+  AZ_DOOD_DOOR_PIPE,
+};
+static int reverse_doodad_kinds[AZ_ARRAY_SIZE(doodad_kinds)];
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(doodad_kinds) == AZ_NUM_DOODAD_KINDS);
+
 static bool reverse_indices_initialized = false;
 
 static void init_reverse_indices(void) {
@@ -253,6 +290,9 @@ static void init_reverse_indices(void) {
   }
   for (int i = 0; i < AZ_NUM_BADDIE_KINDS; ++i) {
     reverse_baddie_kinds[baddie_kinds[i] - 1] = i;
+  }
+  for (int i = 0; i < AZ_NUM_DOODAD_KINDS; ++i) {
+    reverse_doodad_kinds[doodad_kinds[i]] = i;
   }
   reverse_indices_initialized = true;
 }
@@ -296,7 +336,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   state->brush.gravfield_size.trapezoid.semilength = 100.0;
   state->brush.node_kind = AZ_NODE_TRACTOR;
   state->brush.console_kind = AZ_CONS_SAVE;
-  state->brush.doodad_kind = AZ_DOOD_WARNING_LIGHT;
+  state->brush.doodad_kind = AZ_DOOD_PIPE_STRAIGHT;
   state->brush.upgrade_kind = AZ_UPG_GUN_CHARGE;
   state->brush.wall_kind = AZ_WALL_INDESTRUCTIBLE;
   AZ_LIST_INIT(state->clipboard, 0);
@@ -814,6 +854,14 @@ az_baddie_kind_t az_advance_baddie_kind(az_baddie_kind_t kind, int delta) {
   assert(0 <= kind_index && kind_index < AZ_NUM_BADDIE_KINDS);
   const int old = reverse_baddie_kinds[kind_index];
   return baddie_kinds[az_modulo(old + delta, AZ_NUM_BADDIE_KINDS)];
+}
+
+az_doodad_kind_t az_advance_doodad_kind(az_doodad_kind_t kind, int delta) {
+  assert(reverse_indices_initialized);
+  const int kind_index = (int)kind;
+  assert(0 <= kind_index && kind_index < AZ_NUM_DOODAD_KINDS);
+  const int old = reverse_doodad_kinds[kind_index];
+  return doodad_kinds[az_modulo(old + delta, AZ_NUM_DOODAD_KINDS)];
 }
 
 int az_advance_wall_data_index(int wall_data_index, int delta) {

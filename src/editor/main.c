@@ -851,8 +851,7 @@ static void do_change_data(int delta, bool secondary) {
         case AZ_NODE_DOODAD_FG:
         case AZ_NODE_DOODAD_BG:
           node->spec.subkind.doodad =
-            az_modulo((int)node->spec.subkind.doodad + delta,
-                      AZ_NUM_DOODAD_KINDS);
+            az_advance_doodad_kind(node->spec.subkind.doodad, delta);
           break;
         case AZ_NODE_FAKE_WALL_FG:
         case AZ_NODE_FAKE_WALL_BG:
@@ -957,7 +956,7 @@ static double doodad_flip_adjust(const az_doodad_kind_t doodad_kind) {
     case AZ_DOOD_GRASS_TUFT_2:
     case AZ_DOOD_GRASS_TUFT_3:
       return AZ_DEG2RAD(180);
-    case AZ_DOOD_TUBE_WINDOW_BEND:
+    case AZ_DOOD_RED_TUBE_WINDOW_BEND:
       return AZ_DEG2RAD(135);
     default:
       return 0;

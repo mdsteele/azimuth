@@ -206,6 +206,7 @@ void az_center_editor_camera_on_current_room(az_editor_state_t *state);
 void az_destroy_editor_state(az_editor_state_t *state);
 
 az_baddie_kind_t az_advance_baddie_kind(az_baddie_kind_t kind, int delta);
+az_doodad_kind_t az_advance_doodad_kind(az_doodad_kind_t kind, int delta);
 int az_advance_wall_data_index(int wall_data_index, int delta);
 
 /*===========================================================================*/

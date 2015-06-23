@@ -222,10 +222,10 @@ static void set_object_state(az_object_t *object, double value) {
           if (value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_SPIN;
         } else if (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN) {
           if (!value) node->subkind.doodad = AZ_DOOD_DRILL_SHAFT_STILL;
-        } else if (node->subkind.doodad == AZ_DOOD_TUBE_WINDOW) {
-          if (value) node->subkind.doodad = AZ_DOOD_BROKEN_TUBE_WINDOW;
-        } else if (node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW) {
-          if (!value) node->subkind.doodad = AZ_DOOD_TUBE_WINDOW;
+        } else if (node->subkind.doodad == AZ_DOOD_RED_TUBE_WINDOW) {
+          if (value) node->subkind.doodad = AZ_DOOD_RED_TUBE_BROKEN_WINDOW;
+        } else if (node->subkind.doodad == AZ_DOOD_RED_TUBE_BROKEN_WINDOW) {
+          if (!value) node->subkind.doodad = AZ_DOOD_RED_TUBE_WINDOW;
         }
       }
     } break;
@@ -512,7 +512,8 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
             } else if ((node->kind == AZ_NODE_DOODAD_FG ||
                         node->kind == AZ_NODE_DOODAD_BG) &&
                        (node->subkind.doodad == AZ_DOOD_DRILL_SHAFT_SPIN ||
-                        node->subkind.doodad == AZ_DOOD_BROKEN_TUBE_WINDOW)) {
+                        node->subkind.doodad ==
+                        AZ_DOOD_RED_TUBE_BROKEN_WINDOW)) {
               value = 1.0;
             }
           } break;

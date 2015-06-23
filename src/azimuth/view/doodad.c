@@ -322,7 +322,7 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glColor3f(0.15, 0.15, 0.15); glVertex2f( 25,  20);
       } glEnd();
       break;
-    case AZ_DOOD_TUBE_WINDOW:
+    case AZ_DOOD_RED_TUBE_WINDOW:
       // Glass:
       glBegin(GL_QUADS); {
         glColor4f(1, 1, 1, 0.25); glVertex2f(-85, 64);
@@ -403,7 +403,7 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         }
       } glPopMatrix();
       break;
-    case AZ_DOOD_TUBE_INSIDE:
+    case AZ_DOOD_YELLOW_TUBE_INSIDE:
       glBegin(GL_QUAD_STRIP); {
         glColor3f(0.6, 0.6, 0.5); glVertex2f(-70,  70); glVertex2f(70,  70);
         glColor3f(0.4, 0.4, 0.3); glVertex2f(-67,  45); glVertex2f(67,  45);
@@ -607,7 +607,7 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glColor3f(0,    0.3, 0); glVertex2f(6.5, 0);
       } glEnd();
       break;
-    case AZ_DOOD_BROKEN_TUBE_WINDOW:
+    case AZ_DOOD_RED_TUBE_BROKEN_WINDOW:
       // Broken glass:
       glBegin(GL_TRIANGLES); {
         glColor4f(1, 1, 1, 0.31);
@@ -757,7 +757,7 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         }
       } glPopMatrix();
       break;
-    case AZ_DOOD_TUBE_WINDOW_BEND:
+    case AZ_DOOD_RED_TUBE_WINDOW_BEND:
       // Glass:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor4f(1, 1, 1, 0.2); glVertex2f(-32.31, -64);
@@ -805,6 +805,15 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(30, -30); glVertex2f(-30, -30);
         glColor3f(0.25, 0.25, 0.25); // dark gray
         glVertex2f(30, -50); glVertex2f(-30, -50);
+      } glEnd();
+      break;
+    case AZ_DOOD_RED_TUBE_INSIDE:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.6, 0.5, 0.5); glVertex2f(-110,  70); glVertex2f(110,  70);
+        glColor3f(0.4, 0.3, 0.3); glVertex2f(-107,  45); glVertex2f(107,  45);
+        glColor3f(0.2, 0.15, 0.15); glVertex2f(-105, 0); glVertex2f(105,   0);
+        glColor3f(0.4, 0.3, 0.3); glVertex2f(-107, -45); glVertex2f(107, -45);
+        glColor3f(0.6, 0.5, 0.5); glVertex2f(-110, -70); glVertex2f(110, -70);
       } glEnd();
       break;
   }
