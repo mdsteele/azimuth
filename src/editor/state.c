@@ -591,12 +591,14 @@ static void summarize_scenario(const az_planet_t *planet) {
   // "populated" rooms in that zone, so we can tell how many more rooms need to
   // be fleshed out):
   printf("\x1b[33;1m        Zone  Rem  Pop  TTL  Frac"
-         "   \x1b[31mRk \x1b[34mBm \x1b[36mSh \x1b[35mCp\x1b[m\n");
-  int total_pop_rooms = 0;
+         "   \x1b[31mRk \x1b[34mBm \x1b[36mSh \x1b[35mCp"
+         "  \x1b[32m!BG\x1b[m\n");
+  int total_pop_rooms = 0, total_black_backgrounds = 0;
   for (int zone_index = 0; zone_index < planet->num_zones; ++zone_index) {
     const az_zone_t *zone = &planet->zones[zone_index];
     int num_rooms = 0, num_pop_rooms = 0;
     int num_rockets = 0, num_bombs = 0, num_shields = 0, num_capacitors = 0;
+    int num_black_backgrounds = 0;
     for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
       const az_room_t *room = &planet->rooms[room_index];
       if (room->zone_key != (az_zone_key_t)zone_index) continue;
@@ -618,16 +620,23 @@ static void summarize_scenario(const az_planet_t *planet) {
         if (upgrade >= AZ_UPG_CAPACITOR_00 &&
             upgrade <= AZ_UPG_CAPACITOR_MAX) ++num_capacitors;
       }
+      if (room->background_pattern == AZ_BG_SOLID_BLACK) {
+        ++num_black_backgrounds;
+        ++total_black_backgrounds;
+      }
     }
-    printf("%12s  %3d  %3d  %3d  %3d%%   %2d %2d %2d %2d\n", zone->name,
+    printf("%12s  %3d  %3d  %3d  %3d%%   %2d %2d %2d %2d  %3d\n", zone->name,
            (num_rooms - num_pop_rooms), num_pop_rooms, num_rooms,
            (int)(100.0 * (double)num_pop_rooms / (double)num_rooms),
-           num_rockets, num_bombs, num_shields, num_capacitors);
+           num_rockets, num_bombs, num_shields, num_capacitors,
+           num_black_backgrounds);
   }
-  printf("\x1b[1m       TOTAL  %3d  %3d  %3d  %3d%%\x1b[m\n",
+  printf("\x1b[1m       TOTAL  %3d  %3d  %3d  %3d%%"
+         "                %3d\x1b[m\n",
          (planet->num_rooms - total_pop_rooms), total_pop_rooms,
          planet->num_rooms,
-         (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms));
+         (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms),
+         total_black_backgrounds);
 }
 
 bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
