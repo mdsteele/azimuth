@@ -81,7 +81,7 @@ static const int wall_data_indices[] = {
   18, 19, // icicles
   99, // frozen layer of water
   // Snow walls:
-  94, 93, 95, 96,
+  94, 93, 95, 96, 158,
   // Cave walls:
   120, 119, 121, 122, 118,
   // Purple rocks:
