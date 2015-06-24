@@ -1218,7 +1218,7 @@ static az_wall_data_t wall_datas[] = {
   [119] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
     .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {12, 4, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_42)
   },
@@ -1226,7 +1226,7 @@ static az_wall_data_t wall_datas[] = {
   [120] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
     .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {12, 4, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   },
@@ -1234,7 +1234,7 @@ static az_wall_data_t wall_datas[] = {
   [121] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.6,
     .color1 = {64, 16, 128, 255}, .color2 = {80, 24, 144, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {12, 4, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   },
@@ -1242,7 +1242,7 @@ static az_wall_data_t wall_datas[] = {
   [122] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.6,
     .color1 = {64, 16, 128, 255}, .color3 = {80, 24, 144, 255},
-    .color2 = {0, 0, 0, 255},
+    .color2 = {12, 4, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   },
