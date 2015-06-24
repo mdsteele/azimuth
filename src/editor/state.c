@@ -606,6 +606,10 @@ static void summarize_scenario(const az_planet_t *planet) {
       if (room->num_walls >= 8) {
         ++num_pop_rooms;
         ++total_pop_rooms;
+        if (room->background_pattern == AZ_BG_SOLID_BLACK) {
+          ++num_black_backgrounds;
+          ++total_black_backgrounds;
+        }
       }
       for (int node_index = 0; node_index < room->num_nodes; ++node_index) {
         const az_node_spec_t *node = &room->nodes[node_index];
@@ -619,10 +623,6 @@ static void summarize_scenario(const az_planet_t *planet) {
             upgrade <= AZ_UPG_SHIELD_BATTERY_MAX) ++num_shields;
         if (upgrade >= AZ_UPG_CAPACITOR_00 &&
             upgrade <= AZ_UPG_CAPACITOR_MAX) ++num_capacitors;
-      }
-      if (room->background_pattern == AZ_BG_SOLID_BLACK) {
-        ++num_black_backgrounds;
-        ++total_black_backgrounds;
       }
     }
     printf("%12s  %3d  %3d  %3d  %3d%%   %2d %2d %2d %2d  %3d\n", zone->name,
