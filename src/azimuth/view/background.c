@@ -28,6 +28,7 @@
 #include "azimuth/state/background.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/util.h"
 
@@ -108,6 +109,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_GREEN_DIAMONDS] = {
     .parallax = 0.2, .repeat_style = ROOM_RECT,
     .repeat_horz = 120.0, .repeat_vert = 120.0
+  },
+  [AZ_BG_VOLCANIC_ROCK] = {
+    .parallax = 0.25, .repeat_style = ABS_RECT,
+    .repeat_horz = 250.0, .repeat_vert = 250.0
   }
 };
 
@@ -645,6 +650,37 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_green_diamond_quarter(0, 0, -60, 60, -10, 10);
       draw_green_diamond_quarter(-60, -60, 60, 60, 10, 10);
       draw_green_diamond_quarter(60, -60, -60, 60, -10, 10);
+    } break;
+    case AZ_BG_VOLCANIC_ROCK: {
+      const az_color_t color1 = {52, 47, 50, 255};
+      const az_color_t color2 = {25, 15, 25, 255};
+      const az_color_t color3 = {25, 15, 25, 0};
+      const az_color_t color4 = {30, 30, 30, 255};
+      draw_rock_wall(color1, color2, 250, 250);
+      const double xstep = 30.0;
+      const double ystep = (sqrt(3) / 3.0) * xstep;
+      az_random_seed_t seed = {3, 7};
+      bool indent = false;
+      for (double y = -10; y > -250; y -= ystep) {
+        for (double x = -120; x < 120; x += xstep) {
+          const double rx =
+            0.25 * xstep * 0.25 * (4.0 + az_rand_sdouble(&seed));
+          const double ry =
+            0.25 * xstep * 0.25 * (4.0 + az_rand_sdouble(&seed));
+          const double cx = x + 0.3 * xstep * az_rand_sdouble(&seed) +
+            (indent ? 0.5 * xstep : 0);
+          const double cy = y + 0.3 * ystep * az_rand_sdouble(&seed);
+          const double theta = AZ_TWO_PI * az_rand_udouble(&seed);
+          glBegin(GL_TRIANGLE_FAN); {
+            az_gl_color(color4); glVertex2f(cx, cy); az_gl_color(color3);
+            for (int i = 0; i <= 360; i += 45) {
+              glVertex2d(cx + rx * cos(AZ_DEG2RAD(i) + theta),
+                         cy + ry * sin(AZ_DEG2RAD(i) + theta));
+            }
+          } glEnd();
+        }
+        indent = !indent;
+      }
     } break;
   }
 }
