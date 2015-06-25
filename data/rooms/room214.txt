@@ -1,4 +1,4 @@
-@R z3 p0 b22 d7 g0 n58 w118
+@R z3 p0 k3 b22 d7 g0 n58 w118
   c(44990.99,0.00,1.817577,0.026172)
 $s:test54,beqz/A,unlock1,A#has78,heqz,dark0.5,activ2,activ3,activ4,activ5,activ6,activ7,activ8,activ9,activ10;
 !W1 d33 x-10785.03 y43763.28 a-2.894682 u0

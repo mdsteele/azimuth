@@ -666,7 +666,7 @@ static az_wall_data_t wall_datas[] = {
   [42] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {64, 128, 0, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_42)
   },
@@ -674,14 +674,14 @@ static az_wall_data_t wall_datas[] = {
   [43] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {64, 128, 0, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   },
   // Grass/dirt concave wall:
   [44] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.5,
-    .color1 = {96, 48, 0, 255}, .color2 = {0, 0, 0, 255},
+    .color1 = {96, 48, 0, 255}, .color2 = {24, 12, 0, 255},
     .color3 = {64, 128, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
@@ -690,7 +690,7 @@ static az_wall_data_t wall_datas[] = {
   [45] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {128, 64, 32, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_42)
   },
@@ -783,14 +783,14 @@ static az_wall_data_t wall_datas[] = {
   [59] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {128, 64, 32, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
   },
   // Dust/dirt concave wall:
   [60] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = -0.5,
-    .color1 = {96, 48, 0, 255}, .color2 = {0, 0, 0, 255},
+    .color1 = {96, 48, 0, 255}, .color2 = {24, 12, 0, 255},
     .color3 = {128, 64, 32, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_43)
@@ -799,7 +799,7 @@ static az_wall_data_t wall_datas[] = {
   [61] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {128, 64, 32, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   },
@@ -807,7 +807,7 @@ static az_wall_data_t wall_datas[] = {
   [62] = {
     .style = AZ_WSTY_QUADSTRIP_213, .bezel = 0.5,
     .color1 = {96, 48, 0, 255}, .color2 = {64, 128, 0, 255},
-    .color3 = {0, 0, 0, 255},
+    .color3 = {24, 12, 0, 255},
     .elasticity = 0.15, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_61)
   },
@@ -1486,6 +1486,20 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {12, 4, 24, 255}, .color2 = {12, 4, 24, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.5,
     .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Solid-colored dark brown rectangle (for dirt walls):
+  [159] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {24, 12, 0, 255}, .color2 = {24, 12, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
+  // Solid-colored dark brown small rectangle (for dirt walls):
+  [160] = {
+    .style = AZ_WSTY_TRIFAN_ALT,
+    .color1 = {24, 12, 0, 255}, .color2 = {24, 12, 0, 255},
+    .elasticity = 0.25, .impact_damage_coeff = 2.0,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_0)
   },
 };
 
