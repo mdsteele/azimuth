@@ -99,6 +99,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_ICE_CAVE] = {
     .parallax = 0.25, .repeat_style = RECT,
     .repeat_horz = 96.0, .repeat_vert = 160.0
+  },
+  [AZ_BG_PURPLE_BUBBLES] = {
+    .parallax = 0.35, .repeat_style = RECT,
+    .repeat_horz = 300.0, .repeat_vert = 300.0
   }
 };
 
@@ -273,31 +277,47 @@ static void draw_half_cinderblock(float width, float height) {
   } glEnd();
 }
 
-static void draw_green_bubble(double center_x, double center_y, double radius,
-                              int slowdown, az_clock_t clock) {
-  slowdown *= 2;
-  const double inner =
+static void draw_bubble(double center_x, double center_y, double radius,
+                        int slowdown, az_clock_t clock, az_color_t inner,
+                        az_color_t mid, az_color_t outer) {
+  const double mid_radius =
     radius * (0.4 + 0.01 * az_clock_zigzag(20, slowdown, clock));
   glPushMatrix(); {
     glTranslated(center_x, center_y, 0);
     glBegin(GL_TRIANGLE_FAN); {
-      glColor3f(0.2, 0.2, 0);
+      az_gl_color(inner);
       glVertex2f(-0.1 * radius, 0.1 * radius);
-      glColor3f(0, 0.2, 0);
+      az_gl_color(mid);
       for (int i = 0; i <= 360; i += 30) {
-        glVertex2d(inner * cos(AZ_DEG2RAD(i)), inner * sin(AZ_DEG2RAD(i)));
+        glVertex2d(mid_radius * cos(AZ_DEG2RAD(i)),
+                   mid_radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
     glBegin(GL_TRIANGLE_STRIP); {
       for (int i = 0; i <= 360; i += 30) {
-        glColor3f(0, 0.2, 0);
-        glVertex2d(inner * cos(AZ_DEG2RAD(i)), inner * sin(AZ_DEG2RAD(i)));
-        glColor4f(0, 0.1, 0.2, 0);
+        az_gl_color(mid);
+        glVertex2d(mid_radius * cos(AZ_DEG2RAD(i)),
+                   mid_radius * sin(AZ_DEG2RAD(i)));
+        az_gl_color(outer);
         glVertex2d(1.5 * radius * cos(AZ_DEG2RAD(i)),
                    radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
   } glPopMatrix();
+}
+
+static void draw_green_bubble(double center_x, double center_y, double radius,
+                              int slowdown, az_clock_t clock) {
+  draw_bubble(center_x, center_y, radius, slowdown, clock,
+              (az_color_t){51, 51, 0, 255}, (az_color_t){0, 51, 0, 255},
+              (az_color_t){0, 25, 51, 0});
+}
+
+static void draw_purple_bubble(double center_x, double center_y, double radius,
+                               int slowdown, az_clock_t clock) {
+  draw_bubble(center_x, center_y, radius, slowdown, clock,
+              (az_color_t){40, 25, 51, 255}, (az_color_t){25, 0, 51, 255},
+              (az_color_t){0, 0, 51, 0});
 }
 
 static void draw_purple_column(float center_x, double top, float semi_width,
@@ -520,12 +540,12 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       } glPopMatrix();
     } break;
     case AZ_BG_GREEN_BUBBLES: {
-      draw_green_bubble(0, -90, 50, 6, clock);
-      draw_green_bubble(-40, -25, 40, 5, clock);
-      draw_green_bubble(30, -40, 35, 4, clock);
-      draw_green_bubble(-55, -120, 32, 3, clock);
-      draw_green_bubble(40, -130, 30, 2, clock);
-      draw_green_bubble(63, -75, 27, 3, clock + 5);
+      draw_green_bubble(0, -90, 50, 12, clock);
+      draw_green_bubble(-40, -25, 40, 10, clock);
+      draw_green_bubble(30, -40, 35, 8, clock);
+      draw_green_bubble(-55, -120, 32, 6, clock);
+      draw_green_bubble(40, -130, 30, 4, clock);
+      draw_green_bubble(63, -75, 27, 6, clock + 5);
     } break;
     case AZ_BG_PURPLE_COLUMNS: {
       draw_purple_column(-50, 0, 20, 15, false);
@@ -584,6 +604,17 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_ice_cell(-48, -160, -16, -160, -48, -93);
       draw_ice_cell(-8, -93, -16, -160, 48, -93);
       draw_ice_cell(48, -160, -16, -160, 48, -93);
+    } break;
+    case AZ_BG_PURPLE_BUBBLES: {
+      glPushMatrix(); {
+        glScalef(2, 2, 1);
+        draw_purple_bubble(0, -90, 50, 6, clock);
+        draw_purple_bubble(-40, -25, 40, 5, clock);
+        draw_purple_bubble(30, -40, 35, 4, clock);
+        draw_purple_bubble(-55, -120, 32, 3, clock);
+        draw_purple_bubble(40, -130, 30, 2, clock);
+        draw_purple_bubble(63, -75, 27, 3, clock + 5);
+      } glPopMatrix();
     } break;
   }
 }
