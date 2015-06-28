@@ -26,6 +26,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/tick/baddie_bouncer.h"
 #include "azimuth/tick/baddie_chomper.h"
 #include "azimuth/tick/baddie_clam.h"
 #include "azimuth/tick/baddie_core.h"
@@ -185,21 +186,10 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_zipper(state, baddie, bounced);
       break;
     case AZ_BAD_BOUNCER:
-      if (az_vnonzero(baddie->velocity)) {
-        baddie->angle = az_vtheta(baddie->velocity);
-      }
-      baddie->velocity = az_vpolar(150.0, baddie->angle);
+      az_tick_bad_bouncer(state, baddie, time);
       break;
     case AZ_BAD_ATOM:
-      az_drift_towards_ship(state, baddie, time, 70, 100, 100);
-      for (int i = 0; i < baddie->data->num_components; ++i) {
-        az_component_t *component = &baddie->components[i];
-        component->angle = az_mod2pi(component->angle + 3.5 * time);
-        component->position = az_vpolar(4.0, component->angle);
-        component->position.x *= 5.0;
-        component->position =
-          az_vrotate(component->position, i * AZ_DEG2RAD(120));
-      }
+      az_tick_bad_atom(state, baddie, time);
       break;
     case AZ_BAD_SPINER:
       az_drift_towards_ship(state, baddie, time, 40, 10, 100);
@@ -480,14 +470,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       }
       break;
     case AZ_BAD_BOUNCER_90:
-      if (az_vnonzero(baddie->velocity)) {
-        if (bounced) {
-          baddie->velocity =
-            az_vflatten(baddie->velocity, az_vpolar(1, baddie->angle));
-        }
-        baddie->angle = az_vtheta(baddie->velocity);
-      }
-      baddie->velocity = az_vpolar(170.0, baddie->angle);
+      az_tick_bad_bouncer_90(state, baddie, bounced);
       break;
     case AZ_BAD_PISTON:
     case AZ_BAD_ARMORED_PISTON:
@@ -626,10 +609,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_switcher(state, baddie, bounced);
       break;
     case AZ_BAD_FAST_BOUNCER:
-      if (az_vnonzero(baddie->velocity)) {
-        baddie->angle = az_vtheta(baddie->velocity);
-      }
-      baddie->velocity = az_vpolar(385.0, baddie->angle);
+      az_tick_bad_fast_bouncer(state, baddie, time);
       break;
     case AZ_BAD_PROXY_MINE:
       baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(120) * time);
@@ -820,6 +800,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_crab_crawler(state, baddie, time);
       break;
     case AZ_BAD_SCRAP_METAL: break; // Do nothing.
+    case AZ_BAD_RED_ATOM:
+      az_tick_bad_red_atom(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).

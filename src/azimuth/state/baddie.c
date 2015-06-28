@@ -79,17 +79,32 @@ static const az_vector_t zipper_vertices[] = {
   {-15, -2}, {-10, -4}, {10, -7}, {15, -6}, {20, -3}
 };
 
+#define ATOM_ELECTRON_IMMUNITIES \
+  (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE | \
+   AZ_DMGF_FLAME | AZ_DMGF_BEAM)
 static az_component_data_t atom_components[] = {
   { .init_position = {20, 0},
-    .bounding_radius = 6.3, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
+    .bounding_radius = 6.3, .immunities = ATOM_ELECTRON_IMMUNITIES,
     .impact_damage = 15.0 },
   { .init_position = {-1.675, -4.977}, .init_angle = AZ_DEG2RAD(100),
-    .bounding_radius = 6.5, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
+    .bounding_radius = 6.5, .immunities = ATOM_ELECTRON_IMMUNITIES,
     .impact_damage = 15.0 },
   { .init_position = {8.212, 16.96}, .init_angle = AZ_DEG2RAD(200),
-    .bounding_radius = 6.7, .immunities = ~(AZ_DMGF_PIERCE | AZ_DMGF_CPLUS),
+    .bounding_radius = 6.7, .immunities = ATOM_ELECTRON_IMMUNITIES,
     .impact_damage = 15.0 }
 };
+static az_component_data_t red_atom_components[] = {
+  { .init_position = {25, 0},
+    .bounding_radius = 8, .immunities = ATOM_ELECTRON_IMMUNITIES,
+    .impact_damage = 25.0 },
+  { .init_position = {-2.09375, -6.22125}, .init_angle = AZ_DEG2RAD(100),
+    .bounding_radius = 8, .immunities = ATOM_ELECTRON_IMMUNITIES,
+    .impact_damage = 25.0 },
+  { .init_position = {10.265, 21.2}, .init_angle = AZ_DEG2RAD(200),
+    .bounding_radius = 8, .immunities = ATOM_ELECTRON_IMMUNITIES,
+    .impact_damage = 25.0 }
+};
+#undef ATOM_ELECTRON_IMMUNITIES
 
 static const az_vector_t box_vertices[] = {
   {16, 8}, {11, 13}, {-11, 13}, {-16, 8},
@@ -1893,6 +1908,13 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .polygon = AZ_INIT_POLYGON(scrap_metal_vertices),
                    .impact_damage = 10.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_FLAME) }
+  },
+  [AZ_BAD_RED_ATOM] = {
+    .max_health = 25.0, .overall_bounding_radius = 60.0,
+    .potential_pickups = AZ_PUPF_ALL, .color = {192, 64, 64, 255},
+    .death_sound = AZ_SND_KILL_ATOM,
+    .main_body = { .bounding_radius = 12.0, .impact_damage = 25.0 },
+    DECL_COMPONENTS(red_atom_components)
   }
 };
 

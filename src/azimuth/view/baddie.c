@@ -30,6 +30,7 @@
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/baddie_bouncer.h"
 #include "azimuth/view/baddie_chomper.h"
 #include "azimuth/view/baddie_clam.h"
 #include "azimuth/view/baddie_core.h"
@@ -89,24 +90,6 @@ static void draw_baddie_outline(const az_baddie_t *baddie, float frozen,
   }
 }
 #endif
-
-static void draw_atom_electron(double radius, az_vector_t position,
-                               double angle) {
-  const double cmult = 1.0 + 0.2 * sin(angle);
-  const double rmult = 1.0 + 0.08 * sin(angle);
-  glPushMatrix(); {
-    glTranslated(position.x, position.y, 0);
-    glBegin(GL_TRIANGLE_FAN); {
-      glColor3f(cmult * 0.5, cmult * 0.7, cmult * 0.5); // greenish-gray
-      glVertex2d(-1, 1);
-      glColor3f(cmult * 0.20, cmult * 0.15, cmult * 0.25); // dark purple-gray
-      for (int i = 0; i <= 360; i += 15) {
-        glVertex2d(radius * rmult * cos(AZ_DEG2RAD(i)),
-                   radius * rmult * sin(AZ_DEG2RAD(i)));
-      }
-    } glEnd();
-  } glPopMatrix();
-}
 
 static void draw_spiner_spine(float flare, float frozen) {
   glBegin(GL_TRIANGLE_STRIP); {
@@ -249,47 +232,10 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_BOUNCER:
-      glBegin(GL_TRIANGLE_FAN); {
-        const int zig = az_clock_zigzag(15, 1, clock);
-        glColor3f(1 - 0.75 * frozen, 0.25 + 0.01 * zig + 0.5 * flare,
-                  0.25 + 0.75 * frozen); // red
-        glVertex2f(0, 0);
-        glColor3f(0.25 + 0.02 * zig - 0.25 * frozen, 0.5 * flare,
-                  0.25 * frozen); // dark red
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.5, 0.25, 1);
-        glVertex2f(0, 7);
-        glColor4f(0.5, 0.25, 1, 0);
-        glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
-        glVertex2f(-3, 2); glVertex2f(3, 2);
-      } glEnd();
+      az_draw_bad_bouncer(baddie, frozen, clock);
       break;
     case AZ_BAD_ATOM:
-      for (int i = 0; i < baddie->data->num_components; ++i) {
-        const az_component_t *component = &baddie->components[i];
-        if (component->angle >= 0.0) continue;
-        draw_atom_electron(baddie->data->components[i].bounding_radius,
-                           component->position, component->angle);
-      }
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(flare, 1 - 0.5 * flare, frozen); // green
-        glVertex2f(-2, 2);
-        glColor3f(0.4 * flare, 0.3 - 0.3 * flare, 0.1 + 0.4 * frozen);
-        const double radius = baddie->data->main_body.bounding_radius;
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      for (int i = 0; i < baddie->data->num_components; ++i) {
-        const az_component_t *component = &baddie->components[i];
-        if (component->angle < 0.0) continue;
-        draw_atom_electron(baddie->data->components[i].bounding_radius,
-                           component->position, component->angle);
-      }
+      az_draw_bad_atom(baddie, frozen, clock);
       break;
     case AZ_BAD_SPINER:
       draw_spiner(color3(1 - frozen, 1 - 0.5 * flare, frozen),
@@ -675,22 +621,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       } glPopMatrix();
     } break;
     case AZ_BAD_BOUNCER_90:
-      glBegin(GL_TRIANGLE_FAN); {
-        const int zig = az_clock_zigzag(30, 1, clock);
-        glColor3f(0.25f + 0.75f * flare, 1 - frozen, 1 - flare);
-        glVertex2f(0, 0);
-        glColor3f(0.5f * flare + 0.01f * zig, 0.25f + 0.25f * flare,
-                  0.25f + 0.25f * frozen);
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.5, 0.25, 1); glVertex2f(0, 7);
-        glColor4f(0.5, 0.25, 1, 0);
-        glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
-        glVertex2f(-3, 2); glVertex2f(3, 2);
-      } glEnd();
+      az_draw_bad_bouncer_90(baddie, frozen, clock);
       break;
     case AZ_BAD_PISTON:
       az_draw_bad_piston(baddie, frozen, clock);
@@ -734,24 +665,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_switcher(baddie, frozen, clock);
       break;
     case AZ_BAD_FAST_BOUNCER:
-      glBegin(GL_TRIANGLE_FAN); {
-        const int zig = az_clock_zigzag(15, 1, clock);
-        glColor3f(1.0f - 0.75f * frozen, 0.5f + 0.01f * zig + 0.3f * flare,
-                  0.25f + 0.75f * frozen);
-        glVertex2f(0, 0);
-        glColor3f(0.25f + 0.02f * zig - 0.25f * frozen, 0.1f + 0.5f * flare,
-                  0.25f * frozen);
-        for (int i = 0; i <= 360; i += 15) {
-          glVertex2d(15 * cos(AZ_DEG2RAD(i)), 15 * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(0.25, 0.5, 1);
-        glVertex2f(0, 7);
-        glColor4f(0.25, 0.5, 1, 0);
-        glVertex2f(3, 2); glVertex2f(3, 12); glVertex2f(-3, 12);
-        glVertex2f(-3, 2); glVertex2f(3, 2);
-      } glEnd();
+      az_draw_bad_fast_bouncer(baddie, frozen, clock);
       break;
     case AZ_BAD_PROXY_MINE:
       draw_mine_arms(15, flare, frozen);
@@ -889,6 +803,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_SCRAP_METAL:
       az_draw_bad_scrap_metal(baddie);
+      break;
+    case AZ_BAD_RED_ATOM:
+      az_draw_bad_red_atom(baddie, frozen, clock);
       break;
   }
 }

@@ -209,6 +209,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   // Miscellaneous:
   AZ_BAD_LEAPER,
   AZ_BAD_ATOM,
+  AZ_BAD_RED_ATOM,
   AZ_BAD_SPARK,
   AZ_BAD_ERUPTION,
   // Oth:
