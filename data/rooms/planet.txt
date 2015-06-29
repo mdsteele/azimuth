@@ -167,7 +167,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   Gravimetric Waves, Nonlinear Paradimensional
   Shear, and Experimental Propulsion Technologies.
   Donations to support future research can be made
-  by contacting the JFSR science liaison office.
+  by contacting the JFSR Science Liaison Office.
 
   >>><"
 !T41"
