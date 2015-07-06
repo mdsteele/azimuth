@@ -1553,7 +1553,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL, .static_properties = AZ_BADF_BOUNCE_PERP,
     .main_body = { .polygon = AZ_INIT_POLYGON(zipper_vertices),
-                   .impact_damage = 12.0 }
+                   .impact_damage = 12.0, .immunities = AZ_DMGF_FLAME }
   },
   [AZ_BAD_SUPER_SPINER] = {
     .max_health = 25.0, .color = {0, 192, 64, 255},
@@ -1913,7 +1913,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 25.0, .overall_bounding_radius = 60.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {192, 64, 64, 255},
     .death_sound = AZ_SND_KILL_ATOM,
-    .main_body = { .bounding_radius = 12.0, .impact_damage = 25.0 },
+    .main_body = { .bounding_radius = 12.0, .impact_damage = 25.0,
+                   .immunities = AZ_DMGF_FLAME },
     DECL_COMPONENTS(red_atom_components)
   }
 };
