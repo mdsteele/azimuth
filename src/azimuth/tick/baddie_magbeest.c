@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/object.h"
@@ -37,6 +38,8 @@
 // Head states:
 #define HEAD_POPDOWN_STATE 0
 #define HEAD_POPUP_STATE 1
+#define HEAD_LASER_SEEK_STATE 2
+#define HEAD_WAITING_STATE 3
 // Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
@@ -96,6 +99,24 @@ static az_baddie_t *lookup_legs(az_space_state_t *state, az_baddie_t *baddie,
   } else return NULL;
 }
 
+static void turn_eye_towards(az_space_state_t *state, az_baddie_t *baddie,
+                             az_vector_t goal, double time) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  const double turn_rate = AZ_DEG2RAD(45);
+  baddie->components[10].angle =
+    az_mod2pi(az_angle_towards(
+        baddie->angle + baddie->components[10].angle, turn_rate * time,
+        az_vtheta(az_vsub(goal, baddie->position))) - baddie->angle);
+}
+
+static void turn_eye_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
+                                  double time) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  if (az_ship_is_decloaked(&state->ship)) {
+    turn_eye_towards(state, baddie, state->ship.position, time);
+  }
+}
+
 static void arrange_head_piston(az_baddie_t *baddie, int piston_index,
                                 az_vector_t abs_foot_pos) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
@@ -123,6 +144,22 @@ static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
   az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
   arrange_head_piston(baddie, 0, abs_foot_0_pos);
   arrange_head_piston(baddie, 1, abs_foot_1_pos);
+}
+
+static bool head_laser_sight(az_space_state_t *state, az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  const double beam_theta = baddie->angle + baddie->components[10].angle;
+  const az_vector_t beam_start =
+    az_vadd(baddie->position, az_vpolar(15, beam_theta));
+  az_impact_t impact;
+  az_ray_impact(state, beam_start, az_vpolar(10000, beam_theta),
+                (az_ship_is_decloaked(&state->ship) ?
+                 AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
+  if (az_clock_mod(2, 2, state->clock)) {
+    const az_color_t beam_color = {255, 128, 128, 48};
+    az_add_beam(state, beam_color, beam_start, impact.position, 0.0, 1.0);
+  }
+  return (impact.type == AZ_IMP_SHIP);
 }
 
 static void arrange_leg(az_baddie_t *baddie, int leg_index,
@@ -186,17 +223,13 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
   if (legs_l == NULL || legs_l->kind != AZ_BAD_MAGBEEST_LEGS_L ||
       legs_r == NULL || legs_r->kind != AZ_BAD_MAGBEEST_LEGS_R) return;
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
-  if (az_ship_is_decloaked(&state->ship)) {
-    baddie->components[10].angle =
-      az_mod2pi(az_vtheta(az_vsub(state->ship.position, baddie->position)) -
-                baddie->angle);
-  }
   const double baseline =
     az_current_camera_bounds(state)->min_r - AZ_SCREEN_HEIGHT/2;
   const double head_top =
     az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
   switch (baddie->state) {
     case HEAD_POPDOWN_STATE:
+      turn_eye_towards(state, baddie, az_vmul(baddie->position, 2), time);
       if (head_top > baseline) {
         head_pop_up_down(state, baddie, -HEAD_POP_SPEED * time);
       } else {
@@ -222,14 +255,27 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
         arrange_head_piston(baddie, 1, az_vadd(baddie->position,
             az_vpolar(50, baddie->angle - AZ_DEG2RAD(110))));
         baddie->state = HEAD_POPUP_STATE;
-        baddie->cooldown = 3.0;
+        baddie->cooldown = 3.5;
       }
       break;
     case HEAD_POPUP_STATE:
+      turn_eye_towards(state, baddie, az_vmul(baddie->position, 2), time);
       if (head_top < baseline + HEAD_POPUP_DIST) {
         head_pop_up_down(state, baddie, HEAD_POP_SPEED * time);
+      } else {
+        baddie->state = HEAD_LASER_SEEK_STATE;
       }
-      if (baddie->cooldown <= 0.0) {
+      break;
+    case HEAD_LASER_SEEK_STATE:
+    case HEAD_WAITING_STATE:
+      turn_eye_towards_ship(state, baddie, time);
+      if (head_laser_sight(state, baddie) &&
+          baddie->state == HEAD_LASER_SEEK_STATE) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_ROCKET, 15.0,
+                                  baddie->components[10].angle, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+        baddie->state = HEAD_WAITING_STATE;
+      } else if (baddie->cooldown <= 0.0) {
         baddie->state = HEAD_POPDOWN_STATE;
         baddie->cooldown = 5.0;
       }
@@ -239,7 +285,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       break;
   }
   // TODO: control legs
-  // TODO: laser sight
+  // TODO: occasionally cause scrap metal to fall from ceiling?
   // Magma bombs:
   if (false && baddie->cooldown <= 0.0) {
     baddie->cooldown = 3.0;
