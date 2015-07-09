@@ -764,6 +764,22 @@ static void projectile_special_logic(az_space_state_t *state,
                            az_vpolar(az_random(-8.0, 8.0),
                                      proj->angle + AZ_HALF_PI)), AZ_VZERO);
       break;
+    case AZ_PROJ_MAGNET_FUSION_BEAM: {
+      // Calculate the impact point.
+      const az_vector_t beam_start = proj->position;
+      az_impact_t impact;
+      az_ray_impact(state, beam_start, az_vpolar(10000.0, proj->angle),
+                    AZ_IMPF_NONE, proj->fired_by, &impact);
+      proj->position = impact.position;
+      // Explode at the impact point.
+      if (impact.type == AZ_IMP_SHIP) {
+        on_projectile_hit_ship(state, proj, impact.normal);
+      } else on_projectile_hit_wall(state, proj, impact.normal);
+      // Add a particle for the beam.
+      az_add_beam(state, (az_color_t){255, 64, 0, 192}, beam_start,
+                  impact.position, 0.5, 5.0);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_MISSILE_BEAM);
+    } break;
     case AZ_PROJ_MYCOSPORE:
       proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
             proj->data->speed * cos(7.0 * proj->age)}, proj->angle);

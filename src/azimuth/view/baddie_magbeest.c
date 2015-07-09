@@ -118,14 +118,17 @@ void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
   draw_magbeest_leg(baddie, 3);
   draw_magbeest_leg(baddie, 4);
   // Magnetic field:
-  if (baddie->state >= 2 && az_clock_mod(2, 2, clock)) {
+  if (baddie->state >= 3 && az_clock_mod(2, 2, clock)) {
     glPushMatrix(); {
+      const float scale = (baddie->state == 3 ? baddie->cooldown / 3.0 : 1.0);
       const az_component_t *magnet = &baddie->components[0];
       az_gl_translated(magnet->position);
       az_gl_rotated(magnet->angle);
       glBegin(GL_TRIANGLE_FAN); {
-        glColor4f(0, 0.5, 1, 0.15); glVertex2f(25, 0); glVertex2f(25, 15);
-        glVertex2f(1500, 264); glVertex2f(1500, -264); glVertex2f(25, -15);
+        glColor4f(1.0f - scale, 0.5f * scale, scale, 0.15);
+        glVertex2f(25, 0); glVertex2f(25, 15 * scale);
+        glVertex2f(1500, 264 * scale); glVertex2f(1500, -264 * scale);
+        glVertex2f(25, -15 * scale);
       } glEnd();
     } glPopMatrix();
   }

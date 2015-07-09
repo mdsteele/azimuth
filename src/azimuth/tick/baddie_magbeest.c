@@ -44,7 +44,9 @@
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
 // Legs-L states:
-#define MAGNET_FINISH_ATTRACT_STATE 2
+#define MAGNET_FUSION_BEAM_RECOVER_STATE 2
+#define MAGNET_FUSION_BEAM_CHARGE_STATE 3
+#define MAGNET_FINISH_ATTRACT_STATE 4
 #define MAGNET_START_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 20)
 // Legs-R states:
 #define GATLING_STOP_FIRING_STATE 2
@@ -58,6 +60,8 @@
 #define LEGS_POP_SPEED 200
 // How far above baseline the legs pop up:
 #define LEGS_POPUP_DIST 320
+// How long it takes the fusion beam to fire, in seconds:
+#define MAGNET_FUSION_BEAM_CHARGE_TIME 3.0
 
 /*===========================================================================*/
 
@@ -304,14 +308,44 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  az_component_t *magnet = &baddie->components[0];
+  const az_vector_t magnet_abs_position =
+    az_vadd(az_vrotate(az_vadd(az_vpolar(20.0, magnet->angle),
+                               magnet->position), baddie->angle),
+            baddie->position);
+  // Fusion beam:
+  if (baddie->state == MAGNET_FUSION_BEAM_CHARGE_STATE) {
+    const double factor = baddie->cooldown / MAGNET_FUSION_BEAM_CHARGE_TIME;
+    // Aim the magnet at the ship:
+    if (az_ship_is_decloaked(&state->ship)) {
+      const double turn_rate = AZ_DEG2RAD(40) + AZ_DEG2RAD(60) * factor;
+      magnet->angle = az_mod2pi(az_angle_towards(
+          magnet->angle + baddie->angle, turn_rate * time,
+          az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+                                baddie->angle);
+    }
+    const double magnet_abs_angle = az_mod2pi(magnet->angle + baddie->angle);
+    // Apply force to ship:
+    if (az_ship_is_alive(&state->ship)) {
+      const az_vector_t delta =
+        az_vsub(state->ship.position, magnet_abs_position);
+      const double arc = AZ_DEG2RAD(10) * factor;
+      if (az_mod2pi(az_vtheta(delta) - magnet_abs_angle) <= arc) {
+        az_vpluseq(&state->ship.velocity, az_vwithlen(delta, -300.0 * time));
+      }
+    }
+    // Fire:
+    if (baddie->cooldown <= 0.0) {
+      az_add_projectile(state, AZ_PROJ_MAGNET_FUSION_BEAM, magnet_abs_position,
+                        magnet_abs_angle, 1.0, baddie->uid);
+      baddie->state = MAGNET_FUSION_BEAM_RECOVER_STATE;
+      baddie->cooldown = 1.0;
+    }
+    return;
+  }
   // Use magnet:
   if (baddie->state >= MAGNET_FINISH_ATTRACT_STATE &&
       baddie->state <= MAGNET_START_SPAWN_STATE) {
-    az_component_t *magnet = &baddie->components[0];
-    const az_vector_t magnet_abs_position =
-      az_vadd(az_vrotate(az_vadd(az_vpolar(20.0, magnet->angle),
-                                 magnet->position), baddie->angle),
-              baddie->position);
     // Aim the magnet at the ship:
     if (az_ship_is_decloaked(&state->ship)) {
       const double old_angle = magnet->angle;
@@ -403,14 +437,25 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
         legs_pop_up_down(state, baddie, LEGS_POP_SPEED * time);
       }
       if (baddie->cooldown <= 0.0) {
-        baddie->state = MAGNET_START_SPAWN_STATE;
+        if (az_random(0.0, 1.0) < 1.0 - pow(0.75, baddie->param)) {
+          baddie->state = MAGNET_FUSION_BEAM_CHARGE_STATE;
+          baddie->cooldown = MAGNET_FUSION_BEAM_CHARGE_TIME;
+          baddie->param = 0.0;
+        } else {
+          baddie->state = MAGNET_START_SPAWN_STATE;
+          baddie->param += 1.0;
+        }
+      }
+      break;
+    case MAGNET_FUSION_BEAM_RECOVER_STATE:
+      if (baddie->cooldown <= 0.0) {
+        baddie->state = LEGS_POPDOWN_STATE;
       }
       break;
     default:
       baddie->state = LEGS_POPDOWN_STATE;
       break;
   }
-  // TODO: fusion beam
 }
 
 void az_tick_bad_magbeest_legs_r(az_space_state_t *state, az_baddie_t *baddie,

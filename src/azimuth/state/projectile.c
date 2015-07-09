@@ -427,6 +427,15 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_FLAME,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_MAGNET_FUSION_BEAM] = {
+    .impact_damage = 20.0,
+    .splash_damage = 20.0,
+    .splash_radius = 100.0,
+    .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
+    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_MEDIUM_EXPLOSION] = {
     .splash_damage = 25.0,
     .splash_radius = 100.0,
