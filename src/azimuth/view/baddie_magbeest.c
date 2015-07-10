@@ -34,7 +34,7 @@
 /*===========================================================================*/
 
 // Comparison function for use with qsort.  Sorts doubles by their cosines.
-static int compare_cosines(const void* v1, const void* v2) {
+static int compare_cosines(const void *v1, const void *v2) {
   const double c1 = cos(*(double*)v1);
   const double c2 = cos(*(double*)v2);
   return (c1 < c2 ? -1 : c1 > c2 ? 1 : 0);

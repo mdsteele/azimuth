@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/object.h"
@@ -40,6 +41,8 @@
 #define HEAD_POPUP_STATE 1
 #define HEAD_LASER_SEEK_STATE 2
 #define HEAD_WAITING_STATE 3
+#define HEAD_QUICK_POPUP_STATE 4
+#define HEAD_QUICK_POPDOWN_STATE 5
 // Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
@@ -65,6 +68,14 @@
 
 /*===========================================================================*/
 
+// Comparison function for use with qsort.  Sorts az_vector_t structs by their
+// theta values.
+static int compare_thetas(const void *v1, const void *v2) {
+  const double t1 = az_vtheta(*(az_vector_t*)v1);
+  const double t2 = az_vtheta(*(az_vector_t*)v2);
+  return (t1 < t2 ? 1 : t1 > t2 ? -1 : 0);
+}
+
 static void get_marker_positions(
     az_space_state_t *state, az_vector_t positions_out[], int num_positions) {
   int i = 0;
@@ -74,6 +85,12 @@ static void get_marker_positions(
     if (i >= num_positions) break;
   }
   while (i < num_positions) positions_out[i++] = AZ_VZERO;
+}
+
+static void sort_marker_positions(
+    az_space_state_t *state, az_vector_t positions_out[], int num_positions) {
+  get_marker_positions(state, positions_out, num_positions);
+  qsort(positions_out, num_positions, sizeof(az_vector_t), compare_thetas);
 }
 
 static void shuffle_marker_positions(
@@ -92,6 +109,8 @@ static az_vector_t choose_random_marker_position(az_space_state_t *state) {
   shuffle_marker_positions(state, positions, AZ_ARRAY_SIZE(positions));
   return positions[0];
 }
+
+/*===========================================================================*/
 
 static az_baddie_t *lookup_legs(az_space_state_t *state, az_baddie_t *baddie,
                                 int cargo_index) {
@@ -138,6 +157,7 @@ static void arrange_head_piston(az_baddie_t *baddie, int piston_index,
 
 static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
                              double delta) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
   az_shake_camera(&state->camera, 0.0, 1.0);
   const az_vector_t abs_foot_0_pos =
     az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
@@ -148,6 +168,16 @@ static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
   az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
   arrange_head_piston(baddie, 0, abs_foot_0_pos);
   arrange_head_piston(baddie, 1, abs_foot_1_pos);
+}
+
+static void init_head_popup(az_baddie_t *baddie, az_vector_t marker_position) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  baddie->position = marker_position;
+  baddie->angle = az_vtheta(baddie->position);
+  arrange_head_piston(baddie, 0, az_vadd(baddie->position,
+      az_vpolar(50, baddie->angle + AZ_DEG2RAD(110))));
+  arrange_head_piston(baddie, 1, az_vadd(baddie->position,
+      az_vpolar(50, baddie->angle - AZ_DEG2RAD(110))));
 }
 
 static bool head_laser_sight(az_space_state_t *state, az_baddie_t *baddie) {
@@ -241,25 +271,25 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       }
       if (baddie->cooldown <= 0.0) {
         az_vector_t marker_positions[4];
-        shuffle_marker_positions(state, marker_positions,
-                                 AZ_ARRAY_SIZE(marker_positions));
-        // Position legs:
-        if (hurt > 0.0) {
-          const bool both = hurt > 0.25;
-          const bool left = both || az_randint(0, 1) != 0;
-          const bool right = both || !left;
-          if (left) init_legs_popup(legs_l, marker_positions[1]);
-          if (right) init_legs_popup(legs_r, marker_positions[2]);
+        if (hurt >= 0.5) {
+          sort_marker_positions(state, marker_positions,
+                                AZ_ARRAY_SIZE(marker_positions));
+          baddie->state = HEAD_QUICK_POPUP_STATE;
+        } else {
+          shuffle_marker_positions(state, marker_positions,
+                                   AZ_ARRAY_SIZE(marker_positions));
+          baddie->state = HEAD_POPUP_STATE;
+          baddie->cooldown = 3.5;
+          // Position legs:
+          if (hurt > 0.0) {
+            const bool both = hurt >= 0.25;
+            const bool left = both || az_randint(0, 1) != 0;
+            const bool right = both || !left;
+            if (left) init_legs_popup(legs_l, marker_positions[1]);
+            if (right) init_legs_popup(legs_r, marker_positions[2]);
+          }
         }
-        // Position head:
-        baddie->position = marker_positions[0];
-        baddie->angle = az_vtheta(baddie->position);
-        arrange_head_piston(baddie, 0, az_vadd(baddie->position,
-            az_vpolar(50, baddie->angle + AZ_DEG2RAD(110))));
-        arrange_head_piston(baddie, 1, az_vadd(baddie->position,
-            az_vpolar(50, baddie->angle - AZ_DEG2RAD(110))));
-        baddie->state = HEAD_POPUP_STATE;
-        baddie->cooldown = 3.5;
+        init_head_popup(baddie, marker_positions[0]);
       }
       break;
     case HEAD_POPUP_STATE:
@@ -282,6 +312,37 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       } else if (baddie->cooldown <= 0.0) {
         baddie->state = HEAD_POPDOWN_STATE;
         baddie->cooldown = 5.0;
+      }
+      break;
+    case HEAD_QUICK_POPUP_STATE:
+      turn_eye_towards_ship(state, baddie, time);
+      if (head_top < baseline + HEAD_POPUP_DIST) {
+        head_pop_up_down(state, baddie, 1.5 * HEAD_POP_SPEED * time);
+      } else {
+        baddie->state = HEAD_QUICK_POPDOWN_STATE;
+        baddie->cooldown = 1.5;
+      }
+      break;
+    case HEAD_QUICK_POPDOWN_STATE:
+      turn_eye_towards_ship(state, baddie, time);
+      if (head_top > baseline) {
+        head_pop_up_down(state, baddie, -1.5 * HEAD_POP_SPEED * time);
+      } else {
+        baddie->temp_properties |= AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING;
+      }
+      if (baddie->cooldown <= 0.0) {
+        az_vector_t marker_positions[4];
+        sort_marker_positions(state, marker_positions,
+                              AZ_ARRAY_SIZE(marker_positions));
+        int new_index = 3;
+        for (int i = 0; i < 3; ++i) {
+          if (az_vwithin(baddie->position, marker_positions[i], 50)) {
+            new_index = i + 1;
+            break;
+          }
+        }
+        init_head_popup(baddie, marker_positions[new_index]);
+        baddie->state = HEAD_QUICK_POPUP_STATE;
       }
       break;
     default:
