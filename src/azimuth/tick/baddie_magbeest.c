@@ -33,6 +33,7 @@
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -43,16 +44,25 @@
 #define HEAD_WAITING_STATE 3
 #define HEAD_QUICK_POPUP_STATE 4
 #define HEAD_QUICK_POPDOWN_STATE 5
+#define HEAD_CEILING_SPIDER_MOVE_BODY_STATE 6
+#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE 7
+#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE 8
+#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE 9
+#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE 10
 // Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
 // Legs-L states:
-#define MAGNET_FUSION_BEAM_RECOVER_STATE 2
-#define MAGNET_FUSION_BEAM_CHARGE_STATE 3
-#define MAGNET_FINISH_ATTRACT_STATE 4
+#define MAGNET_COOLDOWN_STATE 2
+#define MAGNET_RECOVER_STATE 3
+#define MAGNET_FUSION_BEAM_CHARGE_STATE 4
+#define MAGNET_FINISH_ATTRACT_STATE 5
+#define MAGNET_MEDIUM_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 10)
 #define MAGNET_START_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 20)
 // Legs-R states:
-#define GATLING_STOP_FIRING_STATE 2
+#define GATLING_COOLDOWN_STATE 2
+#define GATLING_STOP_FIRING_STATE 3
+#define GATLING_MID_FIRING_STATE (GATLING_STOP_FIRING_STATE + 14)
 #define GATLING_START_FIRING_STATE (GATLING_STOP_FIRING_STATE + 28)
 
 // How fast the head pops up/down, in pixels/second:
@@ -65,6 +75,12 @@
 #define LEGS_POPUP_DIST 320
 // How long it takes the fusion beam to fire, in seconds:
 #define MAGNET_FUSION_BEAM_CHARGE_TIME 3.0
+// How long it takes to shift a pair of legs when in spider mode:
+#define SPIDER_MOVE_LEGS_TIME 0.5
+// How fast a spider foot can move, in pixels/second:
+#define SPIDER_FOOT_SPEED 200
+// How fast the spider body can move, in pixels/second:
+#define SPIDER_BODY_SPEED 75
 
 /*===========================================================================*/
 
@@ -102,12 +118,6 @@ static void shuffle_marker_positions(
     positions_out[i] = positions_out[j];
     positions_out[j] = tmp;
   }
-}
-
-static az_vector_t choose_random_marker_position(az_space_state_t *state) {
-  az_vector_t positions[4];
-  shuffle_marker_positions(state, positions, AZ_ARRAY_SIZE(positions));
-  return positions[0];
 }
 
 /*===========================================================================*/
@@ -158,6 +168,7 @@ static void arrange_head_piston(az_baddie_t *baddie, int piston_index,
 static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
                              double delta) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
+  // TODO: Loop a sound while shaking the room
   az_shake_camera(&state->camera, 0.0, 1.0);
   const az_vector_t abs_foot_0_pos =
     az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
@@ -197,7 +208,7 @@ static bool head_laser_sight(az_space_state_t *state, az_baddie_t *baddie) {
 }
 
 static void arrange_leg(az_baddie_t *baddie, int leg_index,
-                        az_vector_t abs_foot_pos) {
+                        az_vector_t abs_foot_pos, double abs_knee_theta) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L ||
          baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
   assert(leg_index == 0 || leg_index == 1);
@@ -212,7 +223,7 @@ static void arrange_leg(az_baddie_t *baddie, int leg_index,
   const az_vector_t rel_hip_pos = thigh->position;
   const az_vector_t rel_knee_pos =
     az_find_knee(rel_hip_pos, rel_foot_pos, thigh_length, shin_length,
-                 az_vpolar(1, baddie->angle));
+                 az_vpolar(1, abs_knee_theta - baddie->angle));
   shin->position = rel_foot_pos;
   shin->angle = az_vtheta(az_vsub(rel_knee_pos, rel_foot_pos));
   thigh->angle = az_vtheta(az_vsub(rel_knee_pos, rel_hip_pos));
@@ -230,8 +241,8 @@ static void legs_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
     az_vadd(az_vrotate(baddie->components[4].position, baddie->angle),
             baddie->position);
   az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
-  arrange_leg(baddie, 0, abs_foot_0_pos);
-  arrange_leg(baddie, 1, abs_foot_1_pos);
+  arrange_leg(baddie, 0, abs_foot_0_pos, baddie->angle);
+  arrange_leg(baddie, 1, abs_foot_1_pos, baddie->angle);
 }
 
 static void init_legs_popup(az_baddie_t *baddie, az_vector_t marker_position) {
@@ -240,11 +251,83 @@ static void init_legs_popup(az_baddie_t *baddie, az_vector_t marker_position) {
   baddie->position = marker_position;
   baddie->angle = az_vtheta(baddie->position);
   arrange_leg(baddie, 0, az_vadd(baddie->position,
-      az_vpolar(50, baddie->angle - AZ_DEG2RAD(135))));
+      az_vpolar(50, baddie->angle - AZ_DEG2RAD(135))), baddie->angle);
   arrange_leg(baddie, 1, az_vadd(baddie->position,
-      az_vpolar(50, baddie->angle + AZ_DEG2RAD(135))));
+      az_vpolar(50, baddie->angle + AZ_DEG2RAD(135))), baddie->angle);
   baddie->state = LEGS_POPUP_STATE;
   baddie->cooldown = 2.0;
+}
+
+static az_vector_t get_abs_foot_position(az_baddie_t *legs_l,
+                                         az_baddie_t *legs_r, int leg_index) {
+  assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
+  assert(leg_index >= 0 && leg_index < 4);
+  az_baddie_t *legs = (leg_index < 2 ? legs_r : legs_l);
+  const int component_index = (leg_index % 2 ? 2 : 4);
+  return az_vadd(az_vrotate(legs->components[component_index].position,
+                            legs->angle), legs->position);
+}
+
+static void arrange_spider_leg(az_baddie_t *legs_l, az_baddie_t *legs_r,
+                               int leg_index, az_vector_t abs_foot_pos) {
+  assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
+  assert(leg_index >= 0 && leg_index < 4);
+  switch (leg_index) {
+    case 0: arrange_leg(legs_r, 1, abs_foot_pos, legs_l->angle); break;
+    case 1: arrange_leg(legs_r, 0, abs_foot_pos, legs_l->angle); break;
+    case 2: arrange_leg(legs_l, 1, abs_foot_pos, legs_r->angle); break;
+    case 3: arrange_leg(legs_l, 0, abs_foot_pos, legs_r->angle); break;
+  }
+}
+
+static void move_spider_foot_towards(az_baddie_t *legs_l, az_baddie_t *legs_r,
+                                     int leg_index, az_vector_t goal,
+                                     double time) {
+  const az_vector_t old_position =
+    get_abs_foot_position(legs_l, legs_r, leg_index);
+  const az_vector_t new_position =
+    az_vadd(old_position, az_vcaplen(az_vsub(goal, old_position),
+                                     SPIDER_FOOT_SPEED * time));
+  arrange_spider_leg(legs_l, legs_r, leg_index, new_position);
+}
+
+static void shift_spider_body(az_baddie_t *head, az_baddie_t *legs_l,
+                              az_baddie_t *legs_r, az_vector_t delta) {
+  assert(head->kind == AZ_BAD_MAGBEEST_HEAD);
+  assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
+  az_vector_t abs_foot_positions[4];
+  for (int i = 0; i < 4; ++i) {
+    abs_foot_positions[i] = get_abs_foot_position(legs_l, legs_r, i);
+  }
+  const double towards_wall =
+    az_mod2pi(az_vtheta(az_vsub(abs_foot_positions[3],
+                                abs_foot_positions[0])) + AZ_HALF_PI);
+  az_vpluseq(&head->position, delta);
+  head->angle = az_mod2pi(towards_wall + AZ_DEG2RAD(45));
+  legs_r->position = az_vadd(head->position,
+                             az_vpolar(50, towards_wall + AZ_DEG2RAD(45)));
+  legs_r->angle = az_mod2pi(towards_wall - AZ_DEG2RAD(135));
+  legs_l->position = az_vadd(head->position,
+                             az_vpolar(50, towards_wall - AZ_DEG2RAD(45)));
+  legs_l->angle = az_mod2pi(towards_wall + AZ_DEG2RAD(135));
+  for (int i = 0; i < 4; ++i) {
+    arrange_spider_leg(legs_l, legs_r, i, abs_foot_positions[i]);
+  }
+}
+
+static az_vector_t ceiling_spider_foot_goal(az_space_state_t *state,
+                                            az_vector_t rough_goal) {
+  // TODO: lift foot away from wall while moving
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  const az_vector_t start =
+    az_vcaplen(rough_goal, bounds->min_r + bounds->r_span);
+  az_impact_t impact;
+  az_ray_impact(state, start, az_vwithlen(start, 1000),
+                (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), AZ_NULL_UID, &impact);
+  return impact.position;
 }
 
 /*===========================================================================*/
@@ -255,10 +338,13 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
   az_baddie_t *legs_l = lookup_legs(state, baddie, 0);
   az_baddie_t *legs_r = lookup_legs(state, baddie, 1);
   if (legs_l == NULL || legs_l->kind != AZ_BAD_MAGBEEST_LEGS_L ||
-      legs_r == NULL || legs_r->kind != AZ_BAD_MAGBEEST_LEGS_R) return;
+      legs_r == NULL || legs_r->kind != AZ_BAD_MAGBEEST_LEGS_R) {
+    AZ_WARNING_ONCE("Magbeest head can't find legs.\n");
+    return;
+  }
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
-  const double baseline =
-    az_current_camera_bounds(state)->min_r - AZ_SCREEN_HEIGHT/2;
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  const double baseline = bounds->min_r - AZ_SCREEN_HEIGHT/2;
   const double head_top =
     az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
   switch (baddie->state) {
@@ -341,29 +427,178 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
             break;
           }
         }
-        init_head_popup(baddie, marker_positions[new_index]);
-        baddie->state = HEAD_QUICK_POPUP_STATE;
+        if (new_index < 3) {
+          init_head_popup(baddie, marker_positions[new_index]);
+          baddie->state = HEAD_QUICK_POPUP_STATE;
+        } else {
+          const double up_theta = bounds->min_theta + 0.3 * bounds->theta_span;
+          baddie->position =
+            az_vpolar(bounds->min_r + bounds->r_span + 50, up_theta);
+          baddie->angle = up_theta + AZ_DEG2RAD(45);
+          baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+          baddie->cooldown = 3.0;
+          legs_l->position = az_vadd(baddie->position,
+                                     az_vpolar(50, up_theta - AZ_DEG2RAD(45)));
+          legs_l->angle = az_mod2pi(up_theta + AZ_DEG2RAD(135));
+          legs_l->state = MAGNET_RECOVER_STATE;
+          legs_l->param2 = 1;
+          legs_r->position = az_vadd(baddie->position,
+                                     az_vpolar(50, up_theta + AZ_DEG2RAD(45)));
+          legs_r->angle = az_mod2pi(up_theta - AZ_DEG2RAD(135));
+          legs_r->state = GATLING_STOP_FIRING_STATE;
+          legs_r->param2 = 1;
+          arrange_head_piston(baddie, 0, legs_l->position);
+          arrange_head_piston(baddie, 1, legs_r->position);
+          const az_vector_t ceiling =
+            az_vadd(baddie->position, az_vpolar(140, up_theta));
+          const az_vector_t side_unit =
+            az_vpolar(1, up_theta - AZ_DEG2RAD(90));
+          arrange_spider_leg(legs_l, legs_r, 0, ceiling_spider_foot_goal(
+              state, az_vadd(ceiling, az_vmul(side_unit, -200))));
+          arrange_spider_leg(legs_l, legs_r, 1, ceiling_spider_foot_goal(
+              state, az_vadd(ceiling, az_vmul(side_unit, -100))));
+          arrange_spider_leg(legs_l, legs_r, 2, ceiling_spider_foot_goal(
+              state, az_vadd(ceiling, az_vmul(side_unit,  100))));
+          arrange_spider_leg(legs_l, legs_r, 3, ceiling_spider_foot_goal(
+              state, az_vadd(ceiling, az_vmul(side_unit,  200))));
+        }
       }
       break;
+    case HEAD_CEILING_SPIDER_MOVE_BODY_STATE: {
+      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
+      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
+      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
+      const az_vector_t goal =
+        az_vadd(az_vmul(az_vadd(foot_0_pos, foot_3_pos), 0.5),
+                az_vwithlen(az_vrot90ccw(az_vsub(foot_0_pos, foot_3_pos)),
+                            140));
+      shift_spider_body(baddie, legs_l, legs_r,
+                        az_vcaplen(az_vsub(goal, baddie->position),
+                                   SPIDER_BODY_SPEED * time));
+      if (az_vwithin(baddie->position, goal, 1)) {
+        baddie->param = 0.0;
+        if (az_mod2pi(az_vtheta(state->ship.position) -
+                      az_vtheta(baddie->position)) < 0) {
+          if (az_vtheta(baddie->position) >= bounds->min_theta) {
+            if (az_vwithin(foot_2_pos, foot_3_pos, 120)) {
+              baddie->state = HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE;
+            } else {
+              baddie->state = HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE;
+            }
+          }
+        } else {
+          if (az_vtheta(baddie->position) <=
+              bounds->min_theta + bounds->theta_span) {
+            if (az_vwithin(foot_2_pos, foot_3_pos, 120)) {
+              baddie->state = HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE;
+            } else {
+              baddie->state = HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE;
+            }
+          }
+        }
+      }
+    } break;
+    case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      const az_vector_t foot_1_pos = get_abs_foot_position(legs_l, legs_r, 1);
+      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
+      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
+      const az_vector_t foot_0_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_1_pos,
+                                                az_vmul(unit_left, 150)));
+      const az_vector_t foot_2_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_3_pos,
+                                                az_vmul(unit_left, 150)));
+      move_spider_foot_towards(legs_l, legs_r, 0, foot_0_goal, time);
+      move_spider_foot_towards(legs_l, legs_r, 2, foot_2_goal, time);
+      // TODO: Make a sound when the foot lands on the wall
+      if (baddie->param >= 1.0) {
+        baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
+      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
+      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
+      const az_vector_t foot_1_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_0_pos,
+                                                az_vmul(unit_left, -100)));
+      const az_vector_t foot_3_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_2_pos,
+                                                az_vmul(unit_left, -100)));
+      move_spider_foot_towards(legs_l, legs_r, 1, foot_1_goal, time);
+      move_spider_foot_towards(legs_l, legs_r, 3, foot_3_goal, time);
+      if (baddie->param >= 1.0) {
+        baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      const az_vector_t foot_1_pos = get_abs_foot_position(legs_l, legs_r, 1);
+      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
+      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
+      const az_vector_t foot_0_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_1_pos,
+                                                az_vmul(unit_left, 100)));
+      const az_vector_t foot_2_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_3_pos,
+                                                az_vmul(unit_left, 100)));
+      move_spider_foot_towards(legs_l, legs_r, 0, foot_0_goal, time);
+      move_spider_foot_towards(legs_l, legs_r, 2, foot_2_goal, time);
+      if (baddie->param >= 1.0) {
+        baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
+      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
+      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
+      const az_vector_t foot_1_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_0_pos,
+                                                az_vmul(unit_left, -150)));
+      const az_vector_t foot_3_goal =
+        ceiling_spider_foot_goal(state, az_vadd(foot_2_pos,
+                                                az_vmul(unit_left, -150)));
+      move_spider_foot_towards(legs_l, legs_r, 1, foot_1_goal, time);
+      move_spider_foot_towards(legs_l, legs_r, 3, foot_3_goal, time);
+      if (baddie->param >= 1.0) {
+        baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
     default:
       baddie->state = HEAD_POPDOWN_STATE;
       break;
   }
-  // TODO: control legs
-  // TODO: occasionally cause scrap metal to fall from ceiling?
-  // Magma bombs:
-  if (false && baddie->cooldown <= 0.0) {
-    baddie->cooldown = 3.0;
-    const az_vector_t target = choose_random_marker_position(state);
-    az_baddie_t *bomb = az_add_baddie(state, AZ_BAD_MAGMA_BOMB,
-                                      baddie->position, baddie->angle);
-    if (bomb != NULL) {
-      const az_vector_t delta = az_vsub(target, baddie->position);
-      bomb->velocity = az_vadd(az_vwithlen(delta, 400.0),
-                               az_vwithlen(baddie->position,
-                                           0.4 * az_vnorm(delta)));
+  if (baddie->state >= HEAD_CEILING_SPIDER_MOVE_BODY_STATE) {
+    turn_eye_towards_ship(state, baddie, time);
+    // Magma bombs:
+    if (baddie->cooldown <= 0.0) {
+      baddie->cooldown = 5.0;
+      az_vector_t marker_positions[4];
+      get_marker_positions(state, marker_positions,
+                           AZ_ARRAY_SIZE(marker_positions));
+      az_vector_t target = AZ_VZERO;
+      double best_dist = INFINITY;
+      AZ_ARRAY_LOOP(position, marker_positions) {
+        const double dist = az_vdist(*position, state->ship.position);
+        if (dist < best_dist) {
+          target = *position;
+          best_dist = dist;
+        }
+      }
+      az_baddie_t *bomb = az_add_baddie(state, AZ_BAD_MAGMA_BOMB,
+                                        baddie->position, baddie->angle);
+      if (bomb != NULL) {
+        const az_vector_t delta = az_vsub(target, baddie->position);
+        bomb->velocity = az_vadd(az_vwithlen(delta, 400.0),
+                                 az_vwithlen(baddie->position,
+                                             0.4 * az_vnorm(delta)));
+      }
     }
   }
+  // TODO: occasionally cause scrap metal to fall from ceiling?
 }
 
 void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
@@ -399,7 +634,7 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
     if (baddie->cooldown <= 0.0) {
       az_add_projectile(state, AZ_PROJ_MAGNET_FUSION_BEAM, magnet_abs_position,
                         magnet_abs_angle, 1.0, baddie->uid);
-      baddie->state = MAGNET_FUSION_BEAM_RECOVER_STATE;
+      baddie->state = MAGNET_RECOVER_STATE;
       baddie->cooldown = 1.0;
     }
     return;
@@ -434,7 +669,7 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
                                                 AZ_DEG2RAD(10)))),
                     az_random(-AZ_PI, AZ_PI));
       --baddie->state;
-      baddie->cooldown = 0.1;
+      baddie->cooldown = az_random(0.06, 0.12);
     }
     // Apply force to scrap metal:
     double max_scrap_dist = 0.0;
@@ -476,7 +711,8 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
       if (num_scraps > 0) {
         az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
       }
-      baddie->state = LEGS_POPDOWN_STATE;
+      baddie->state = MAGNET_RECOVER_STATE;
+      baddie->cooldown = 0.5;
     }
     return;
   }
@@ -496,6 +732,16 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
     case LEGS_POPUP_STATE:
       if (base_top < baseline + LEGS_POPUP_DIST) {
         legs_pop_up_down(state, baddie, LEGS_POP_SPEED * time);
+      } else {
+        baddie->state = MAGNET_COOLDOWN_STATE;
+      }
+      break;
+    case MAGNET_COOLDOWN_STATE:
+      if (az_ship_is_decloaked(&state->ship)) {
+        magnet->angle = az_mod2pi(az_angle_towards(
+            magnet->angle + baddie->angle, AZ_DEG2RAD(100) * time,
+            az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+                                  baddie->angle);
       }
       if (baddie->cooldown <= 0.0) {
         if (az_random(0.0, 1.0) < 1.0 - pow(0.75, baddie->param)) {
@@ -503,14 +749,20 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
           baddie->cooldown = MAGNET_FUSION_BEAM_CHARGE_TIME;
           baddie->param = 0.0;
         } else {
-          baddie->state = MAGNET_START_SPAWN_STATE;
+          baddie->state = (baddie->param2 > 0 ? MAGNET_MEDIUM_SPAWN_STATE :
+                           MAGNET_START_SPAWN_STATE);
           baddie->param += 1.0;
         }
       }
       break;
-    case MAGNET_FUSION_BEAM_RECOVER_STATE:
+    case MAGNET_RECOVER_STATE:
       if (baddie->cooldown <= 0.0) {
-        baddie->state = LEGS_POPDOWN_STATE;
+        if (baddie->param2 > 0) {
+          baddie->state = MAGNET_COOLDOWN_STATE;
+          baddie->cooldown = 6.9;
+        } else {
+          baddie->state = LEGS_POPDOWN_STATE;
+        }
       }
       break;
     default:
@@ -578,7 +830,19 @@ void az_tick_bad_magbeest_legs_r(az_space_state_t *state, az_baddie_t *baddie,
         baddie->state = GATLING_START_FIRING_STATE;
       }
       break;
+    case GATLING_COOLDOWN_STATE:
+      if (baddie->cooldown <= 0.0) {
+        baddie->state = GATLING_MID_FIRING_STATE;
+      }
+      break;
     case GATLING_STOP_FIRING_STATE:
+      if (baddie->param2 > 0) {
+        baddie->state = GATLING_COOLDOWN_STATE;
+        baddie->cooldown = 4.2;
+      } else {
+        baddie->state = LEGS_POPDOWN_STATE;
+      }
+      break;
     default:
       baddie->state = LEGS_POPDOWN_STATE;
       break;

@@ -118,9 +118,9 @@ void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
   draw_magbeest_leg(baddie, 3);
   draw_magbeest_leg(baddie, 4);
   // Magnetic field:
-  if (baddie->state >= 3 && az_clock_mod(2, 2, clock)) {
+  if (baddie->state >= 4 && az_clock_mod(2, 2, clock)) {
     glPushMatrix(); {
-      const float scale = (baddie->state == 3 ? baddie->cooldown / 3.0 : 1.0);
+      const float scale = (baddie->state == 4 ? baddie->cooldown / 3.0 : 1.0);
       const az_component_t *magnet = &baddie->components[0];
       az_gl_translated(magnet->position);
       az_gl_rotated(magnet->angle);

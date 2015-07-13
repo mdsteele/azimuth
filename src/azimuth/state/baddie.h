@@ -222,6 +222,7 @@ typedef struct {
   double frozen; // from 0.0 (unfrozen) to 1.0 (was just now frozen)
   double cooldown; // time until baddie can attack again, in seconds
   double param; // the meaning of this is baddie-kind-specific
+  double param2; // the meaning of this is baddie-kind-specific
   int state; // the meaning of this is baddie-kind-specific
   az_baddie_flags_t temp_properties;
   az_component_t components[AZ_MAX_BADDIE_COMPONENTS];
