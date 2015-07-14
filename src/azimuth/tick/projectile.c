@@ -769,7 +769,7 @@ static void projectile_special_logic(az_space_state_t *state,
       const az_vector_t beam_start = proj->position;
       az_impact_t impact;
       az_ray_impact(state, beam_start, az_vpolar(10000.0, proj->angle),
-                    AZ_IMPF_NONE, proj->fired_by, &impact);
+                    AZ_IMPF_BADDIE, proj->fired_by, &impact);
       proj->position = impact.position;
       // Explode at the impact point.
       if (impact.type == AZ_IMP_SHIP) {

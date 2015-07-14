@@ -1868,7 +1868,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(magbeest_legs_r_components)
   },
   [AZ_BAD_MAGMA_BOMB] = {
-    .max_health = 20.0, .color = {80, 80, 80, 255},
+    .max_health = 8.0, .color = {80, 80, 80, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .main_body = { .bounding_radius = 12.0, .impact_damage = 10.0,

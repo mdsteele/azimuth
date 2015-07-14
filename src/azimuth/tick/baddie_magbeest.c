@@ -78,7 +78,7 @@
 // How long it takes to shift a pair of legs when in spider mode:
 #define SPIDER_MOVE_LEGS_TIME 0.5
 // How fast a spider foot can move, in pixels/second:
-#define SPIDER_FOOT_SPEED 200
+#define SPIDER_FOOT_SPEED 300
 // How fast the spider body can move, in pixels/second:
 #define SPIDER_BODY_SPEED 75
 
@@ -330,6 +330,32 @@ static az_vector_t ceiling_spider_foot_goal(az_space_state_t *state,
   return impact.position;
 }
 
+static void move_spider_legs(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r, int parity, double goal_offset, int horz_sign,
+    double time) {
+  assert(head->kind == AZ_BAD_MAGBEEST_HEAD);
+  assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
+  assert(parity == 0 || parity == 1);
+  const az_vector_t unit_down = az_vunit(az_vneg(head->position));
+  const az_vector_t unit_left = az_vunit(az_vrot90ccw(head->position));
+  const double horz = copysign(50.0, horz_sign) * (1.0 - head->param);
+  const double vert = (60.0 / AZ_PI) * atan(0.15 * fabs(horz));
+  for (int leg_index = parity; leg_index < 4; leg_index += 2) {
+    const az_vector_t other_foot_pos =
+      get_abs_foot_position(legs_l, legs_r, leg_index ^ 1);
+    const az_vector_t final_goal =
+      ceiling_spider_foot_goal(state,
+                               az_vadd(other_foot_pos,
+                                       az_vmul(unit_left, goal_offset)));
+    const az_vector_t current_goal =
+      az_vadd(final_goal, az_vadd(az_vmul(unit_left, horz),
+                                  az_vmul(unit_down, vert)));
+    move_spider_foot_towards(legs_l, legs_r, leg_index, current_goal, time);
+  }
+}
+
 /*===========================================================================*/
 
 void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
@@ -500,69 +526,29 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
     } break;
     case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      const az_vector_t foot_1_pos = get_abs_foot_position(legs_l, legs_r, 1);
-      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
-      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
-      const az_vector_t foot_0_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_1_pos,
-                                                az_vmul(unit_left, 150)));
-      const az_vector_t foot_2_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_3_pos,
-                                                az_vmul(unit_left, 150)));
-      move_spider_foot_towards(legs_l, legs_r, 0, foot_0_goal, time);
-      move_spider_foot_towards(legs_l, legs_r, 2, foot_2_goal, time);
-      // TODO: Make a sound when the foot lands on the wall
+      move_spider_legs(state, baddie, legs_l, legs_r, 0, 150, -1, time);
       if (baddie->param >= 1.0) {
+        // TODO: Make a sound for the feet landing on the wall
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
     case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
-      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
-      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
-      const az_vector_t foot_1_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_0_pos,
-                                                az_vmul(unit_left, -100)));
-      const az_vector_t foot_3_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_2_pos,
-                                                az_vmul(unit_left, -100)));
-      move_spider_foot_towards(legs_l, legs_r, 1, foot_1_goal, time);
-      move_spider_foot_towards(legs_l, legs_r, 3, foot_3_goal, time);
+      move_spider_legs(state, baddie, legs_l, legs_r, 1, -100, -1, time);
       if (baddie->param >= 1.0) {
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
     case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      const az_vector_t foot_1_pos = get_abs_foot_position(legs_l, legs_r, 1);
-      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
-      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
-      const az_vector_t foot_0_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_1_pos,
-                                                az_vmul(unit_left, 100)));
-      const az_vector_t foot_2_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_3_pos,
-                                                az_vmul(unit_left, 100)));
-      move_spider_foot_towards(legs_l, legs_r, 0, foot_0_goal, time);
-      move_spider_foot_towards(legs_l, legs_r, 2, foot_2_goal, time);
+      move_spider_legs(state, baddie, legs_l, legs_r, 0, 100, 1, time);
       if (baddie->param >= 1.0) {
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
     case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
-      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
-      const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
-      const az_vector_t foot_1_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_0_pos,
-                                                az_vmul(unit_left, -150)));
-      const az_vector_t foot_3_goal =
-        ceiling_spider_foot_goal(state, az_vadd(foot_2_pos,
-                                                az_vmul(unit_left, -150)));
-      move_spider_foot_towards(legs_l, legs_r, 1, foot_1_goal, time);
-      move_spider_foot_towards(legs_l, legs_r, 3, foot_3_goal, time);
+      move_spider_legs(state, baddie, legs_l, legs_r, 1, -150, 1, time);
       if (baddie->param >= 1.0) {
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
