@@ -41,6 +41,8 @@ static int compare_cosines(const void *v1, const void *v2) {
 }
 
 static void draw_magbeest_leg(const az_baddie_t *baddie, int leg_index) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L ||
+         baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
   assert(0 <= leg_index && leg_index < baddie->data->num_components);
   const az_component_t *leg = &baddie->components[leg_index];
   const double length =
@@ -48,12 +50,91 @@ static void draw_magbeest_leg(const az_baddie_t *baddie, int leg_index) {
   glPushMatrix(); {
     az_gl_translated(leg->position);
     az_gl_rotated(leg->angle);
+    // Leg:
     glBegin(GL_TRIANGLE_STRIP); {
       glColor3f(0.2, 0.2, 0.2); glVertex2f(0,  10); glVertex2f(length,  10);
       glColor3f(0.4, 0.5, 0.5); glVertex2f(0,   0); glVertex2f(length,   0);
       glColor3f(0.2, 0.2, 0.2); glVertex2f(0, -10); glVertex2f(length, -10);
     } glEnd();
+    if (leg_index % 2 == 0) {
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(length - 10, 10); glVertex2f(length - 10, -10);
+        glVertex2f(length, -10); glVertex2f(length, 10);
+      } glEnd();
+      // Foot:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.3, 0.35, 0.35); glVertex2f(0, 0);
+        glColor3f(0.2, 0.2, 0.2);
+        for (int i = -90; i <= 90; i += 15) {
+          glVertex2d(-5 * cos(AZ_DEG2RAD(i)), 10 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+    } else {
+      // Knee:
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.3, 0.3, 0.3);
+        glVertex2f(length - 10, 10); glVertex2f(length - 10, -10);
+        for (int i = -90; i <= 90; i += 15) {
+          glVertex2d(10 * cos(AZ_DEG2RAD(i)) + length,
+                     10 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      // Screw:
+      // TODO: Make the screw turn with the other leg segment
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.35, 0.4, 0.4);
+        for (int i = 0; i < 360; i += 30) {
+          glVertex2d(5 * cos(AZ_DEG2RAD(i)) + length,
+                     5 * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_LINES); {
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2f(length, -5); glVertex2f(length, 5);
+      } glEnd();
+    }
   } glPopMatrix();
+}
+
+static void draw_magbeest_legs_base(const az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L ||
+         baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
+  // Casing:
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.4, 0.5, 0.5);
+    const az_polygon_t polygon = baddie->data->main_body.polygon;
+    for (int i = 0; i < polygon.num_vertices; ++i) {
+      az_gl_vertex(polygon.vertices[i]);
+    }
+  } glEnd();
+  // Rim:
+  glBegin(GL_TRIANGLE_STRIP); {
+    const az_polygon_t polygon = baddie->data->main_body.polygon;
+    for (int i = polygon.num_vertices - 1, j = 0;
+         i < polygon.num_vertices; i = j++) {
+      glColor3f(0.15, 0.2, 0.2);
+      az_gl_vertex(polygon.vertices[i]);
+      glColor3f(0.4, 0.5, 0.5);
+      az_gl_vertex(az_vmul(polygon.vertices[i], 0.8));
+    }
+  } glEnd();
+  // Leg screws:
+  // TODO: Make the screw turn with the leg segment
+  for (int j = 0; j < 2; ++j) {
+    const double y = -25 + 50 * j;
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.35, 0.4, 0.4);
+      for (int i = 0; i < 360; i += 30) {
+        glVertex2d(5 * cos(AZ_DEG2RAD(i)) - 20,
+                   5 * sin(AZ_DEG2RAD(i)) + y);
+      }
+    } glEnd();
+    glBegin(GL_LINES); {
+      glColor3f(0.2, 0.2, 0.2);
+      glVertex2f(-20, y - 5); glVertex2f(-20, y + 5);
+    } glEnd();
+  }
 }
 
 /*===========================================================================*/
@@ -113,36 +194,81 @@ void az_draw_bad_magbeest_head(const az_baddie_t *baddie, az_clock_t clock) {
 void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L);
   // Legs:
-  draw_magbeest_leg(baddie, 1);
   draw_magbeest_leg(baddie, 2);
-  draw_magbeest_leg(baddie, 3);
+  draw_magbeest_leg(baddie, 1);
   draw_magbeest_leg(baddie, 4);
-  // Magnetic field:
-  if (baddie->state >= 4 && az_clock_mod(2, 2, clock)) {
-    glPushMatrix(); {
+  draw_magbeest_leg(baddie, 3);
+  // Base:
+  draw_magbeest_legs_base(baddie);
+  // Magnet:
+  glPushMatrix(); {
+    const az_component_t *magnet = &baddie->components[0];
+    az_gl_translated(magnet->position);
+    az_gl_rotated(magnet->angle);
+    // Magnetic field:
+    if (baddie->state >= 4 && az_clock_mod(2, 2, clock)) {
       const float scale = (baddie->state == 4 ? baddie->cooldown / 3.0 : 1.0);
-      const az_component_t *magnet = &baddie->components[0];
-      az_gl_translated(magnet->position);
-      az_gl_rotated(magnet->angle);
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1.0f - scale, 0.5f * scale, scale, 0.15);
         glVertex2f(25, 0); glVertex2f(25, 15 * scale);
         glVertex2f(1500, 264 * scale); glVertex2f(1500, -264 * scale);
         glVertex2f(25, -15 * scale);
       } glEnd();
-    } glPopMatrix();
-  }
-  // TODO: draw magnet
-  // TODO: draw base casing
+    }
+    // Casing:
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.6, 0.6, 0.6);
+      glVertex2f(0, 0); glVertex2f(25, -15); glVertex2f(25, 15);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(25, -20);
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(25, -15);
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(-5, 0);
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(0, 0);
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(25, 20);
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(25, 15);
+    } glEnd();
+    // Hinge:
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(1, 1, 1); glVertex2f(0, 0);
+      glColor3f(0.25, 0.25, 0.25);
+      for (int i = 30; i <= 330; i += 30) {
+        glVertex2d(7 * cos(AZ_DEG2RAD(i)), 7 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    // Screw:
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.35, 0.4, 0.4);
+      for (int i = 0; i < 360; i += 30) {
+        glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    // TODO: Make the screw stay fixed to the casing
+    glBegin(GL_LINES); {
+      glColor3f(0.2, 0.2, 0.2);
+      glVertex2f(0, -4); glVertex2f(0, 4);
+    } glEnd();
+    // Dish:
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = -35; i <= 35; i += 5) {
+        glColor3f(0.25, 0.25, 0.25);
+        glVertex2d(55 - 30 * cos(AZ_DEG2RAD(i)), 30 * sin(AZ_DEG2RAD(i)));
+        glColor3f(0.7, 0.7, 0.7);
+        glVertex2d(55 - 38 * cos(AZ_DEG2RAD(i)), 38 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
 }
 
 void az_draw_bad_magbeest_legs_r(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
   // Legs:
-  draw_magbeest_leg(baddie, 1);
   draw_magbeest_leg(baddie, 2);
-  draw_magbeest_leg(baddie, 3);
+  draw_magbeest_leg(baddie, 1);
   draw_magbeest_leg(baddie, 4);
+  draw_magbeest_leg(baddie, 3);
+  // Base:
+  draw_magbeest_legs_base(baddie);
   // Gatling gun:
   glPushMatrix(); {
     const az_component_t *gun = &baddie->components[0];
@@ -192,7 +318,6 @@ void az_draw_bad_magbeest_legs_r(const az_baddie_t *baddie, az_clock_t clock) {
       glColor3f(0.50, 0.50, 0.50); glVertex2f(12, 10);
     } glEnd();
   } glPopMatrix();
-  // TODO: draw base casing
 }
 
 void az_draw_bad_magma_bomb(const az_baddie_t *baddie, az_clock_t clock) {

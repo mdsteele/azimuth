@@ -970,21 +970,26 @@ static az_component_data_t magbeest_head_components[] = {
   { .bounding_radius = 22.0,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS | AZ_DMGF_FLAME) }
 };
-static az_vector_t magbeest_legs_base_vertices[] = {
-  {20, -35}, {20, 35}, {-20, 35}, {-20, -35}
+static az_vector_t magbeest_legs_l_base_vertices[] = {
+  {10, -35}, {20, -25}, {20, 45}, {-20, 45}, {-30, 35}, {-30, -35}
+};
+static az_vector_t magbeest_legs_r_base_vertices[] = {
+  {20, -45}, {20, 25}, {10, 35}, {-30, 35}, {-30, -35}, {-20, -45}
 };
 static az_vector_t magbeest_magnet_vertices[] = {
-  {0, 0}, {25, 15}, {25, -15}
+  {-7, 0}, {-4.9, -4.9}, {0, -7}, {4, -6}, {21, -17}, {24, -21.8},
+  {30.2, -17.1}, {26, -10}, {24.5, 0}, {26, 10}, {30.2, 17.2}, {24, 21.7},
+  {21, 17}, {4, 6}, {0, 7}, {-4.9, 4.9}
 };
 static az_vector_t magbeest_gatling_vertices[] = {
   {-20, 15}, {-20, -15}, {15, -15}, {15, -9}, {50, -9}, {50, 9}, {15, 9},
   {15, 15}
 };
 static az_vector_t magbeest_short_leg_vertices[] = {
-  {0, 10}, {100, 10}, {100, -10}, {0, -10}
+  {0, 10}, {100, 10}, {107, 7}, {110, 0}, {107, -7}, {100, -10}, {0, -10}
 };
 static az_vector_t magbeest_long_leg_vertices[] = {
-  {0, 10}, {180, 10}, {180, -10}, {0, -10}
+  {0, 10}, {180, 10}, {187, 7}, {190, 0}, {187, -7}, {180, -10}, {0, -10}
 };
 static az_component_data_t magbeest_legs_l_components[] = {
   { .polygon = AZ_INIT_POLYGON(magbeest_magnet_vertices), .immunities = ~0,
@@ -1854,7 +1859,7 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {128, 128, 128, 255}, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
-    .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_base_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_l_base_vertices),
                    .immunities = ~0, .impact_damage = 20.0 },
     DECL_COMPONENTS(magbeest_legs_l_components)
   },
@@ -1863,7 +1868,7 @@ static az_baddie_data_t baddie_datas[] = {
     .color = {128, 128, 128, 255}, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
-    .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_base_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_r_base_vertices),
                    .immunities = ~0, .impact_damage = 20.0 },
     DECL_COMPONENTS(magbeest_legs_r_components)
   },

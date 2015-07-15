@@ -230,19 +230,20 @@ static void arrange_leg(az_baddie_t *baddie, int leg_index,
 }
 
 static void legs_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
-                             double delta) {
+                             double baseline, double delta) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L ||
          baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
   az_shake_camera(&state->camera, 0.0, 1.0);
-  const az_vector_t abs_foot_0_pos =
-    az_vadd(az_vrotate(baddie->components[2].position, baddie->angle),
-            baddie->position);
-  const az_vector_t abs_foot_1_pos =
-    az_vadd(az_vrotate(baddie->components[4].position, baddie->angle),
-            baddie->position);
   az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
-  arrange_leg(baddie, 0, abs_foot_0_pos, baddie->angle);
-  arrange_leg(baddie, 1, abs_foot_1_pos, baddie->angle);
+  const double feet_rho = 0.5 * (az_vnorm(baddie->position) - baseline) +
+    baseline - 0.505 * LEGS_POPUP_DIST;
+  const az_vector_t unit_left = az_vunit(az_vrot90ccw(baddie->position));
+  arrange_leg(baddie, 0, az_vwithlen(az_vadd(baddie->position,
+                                             az_vmul(unit_left, -40)),
+                                     feet_rho), baddie->angle);
+  arrange_leg(baddie, 1, az_vwithlen(az_vadd(baddie->position,
+                                             az_vmul(unit_left, 40)),
+                                     feet_rho), baddie->angle);
 }
 
 static void init_legs_popup(az_baddie_t *baddie, az_vector_t marker_position) {
@@ -320,7 +321,6 @@ static void shift_spider_body(az_baddie_t *head, az_baddie_t *legs_l,
 
 static az_vector_t ceiling_spider_foot_goal(az_space_state_t *state,
                                             az_vector_t rough_goal) {
-  // TODO: lift foot away from wall while moving
   const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   const az_vector_t start =
     az_vcaplen(rough_goal, bounds->min_r + bounds->r_span);
@@ -457,6 +457,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
           init_head_popup(baddie, marker_positions[new_index]);
           baddie->state = HEAD_QUICK_POPUP_STATE;
         } else {
+          // TODO: Better transition to ceiling spider mode
           const double up_theta = bounds->min_theta + 0.3 * bounds->theta_span;
           baddie->position =
             az_vpolar(bounds->min_r + bounds->r_span + 50, up_theta);
@@ -473,8 +474,10 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
           legs_r->angle = az_mod2pi(up_theta - AZ_DEG2RAD(135));
           legs_r->state = GATLING_STOP_FIRING_STATE;
           legs_r->param2 = 1;
-          arrange_head_piston(baddie, 0, legs_l->position);
-          arrange_head_piston(baddie, 1, legs_r->position);
+          arrange_head_piston(baddie, 0, az_vadd(baddie->position,
+              az_vpolar(70, up_theta - AZ_DEG2RAD(45))));
+          arrange_head_piston(baddie, 1, az_vadd(baddie->position,
+              az_vpolar(70, up_theta + AZ_DEG2RAD(45))));
           const az_vector_t ceiling =
             az_vadd(baddie->position, az_vpolar(140, up_theta));
           const az_vector_t side_unit =
@@ -591,8 +594,14 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L);
   az_component_t *magnet = &baddie->components[0];
-  const az_vector_t magnet_abs_position =
-    az_vadd(az_vrotate(az_vadd(az_vpolar(20.0, magnet->angle),
+  const az_vector_t magnet_abs_hinge_pos =
+    az_vadd(az_vrotate(magnet->position, baddie->angle), baddie->position);
+  const az_vector_t magnet_abs_emitter_pos =
+    az_vadd(az_vrotate(az_vadd(az_vpolar(25.0, magnet->angle),
+                               magnet->position), baddie->angle),
+            baddie->position);
+  const az_vector_t magnet_abs_collect_pos =
+    az_vadd(az_vrotate(az_vadd(az_vpolar(35.0, magnet->angle),
                                magnet->position), baddie->angle),
             baddie->position);
   // Fusion beam:
@@ -603,14 +612,14 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
       const double turn_rate = AZ_DEG2RAD(40) + AZ_DEG2RAD(60) * factor;
       magnet->angle = az_mod2pi(az_angle_towards(
           magnet->angle + baddie->angle, turn_rate * time,
-          az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+          az_vtheta(az_vsub(state->ship.position, magnet_abs_hinge_pos))) -
                                 baddie->angle);
     }
     const double magnet_abs_angle = az_mod2pi(magnet->angle + baddie->angle);
     // Apply force to ship:
     if (az_ship_is_alive(&state->ship)) {
       const az_vector_t delta =
-        az_vsub(state->ship.position, magnet_abs_position);
+        az_vsub(state->ship.position, magnet_abs_hinge_pos);
       const double arc = AZ_DEG2RAD(10) * factor;
       if (az_mod2pi(az_vtheta(delta) - magnet_abs_angle) <= arc) {
         az_vpluseq(&state->ship.velocity, az_vwithlen(delta, -300.0 * time));
@@ -618,8 +627,9 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
     }
     // Fire:
     if (baddie->cooldown <= 0.0) {
-      az_add_projectile(state, AZ_PROJ_MAGNET_FUSION_BEAM, magnet_abs_position,
-                        magnet_abs_angle, 1.0, baddie->uid);
+      az_add_projectile(state, AZ_PROJ_MAGNET_FUSION_BEAM,
+                        magnet_abs_emitter_pos, magnet_abs_angle, 1.0,
+                        baddie->uid);
       baddie->state = MAGNET_RECOVER_STATE;
       baddie->cooldown = 1.0;
     }
@@ -633,15 +643,15 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
       const double old_angle = magnet->angle;
       magnet->angle = az_mod2pi(az_angle_towards(
           magnet->angle + baddie->angle, AZ_DEG2RAD(100) * time,
-          az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+          az_vtheta(az_vsub(state->ship.position, magnet_abs_hinge_pos))) -
                                 baddie->angle);
       // Pull scrap metal along with swinging magnetetic field:
       const double dtheta = az_mod2pi(magnet->angle - old_angle);
       AZ_ARRAY_LOOP(scrap, state->baddies) {
         if (scrap->kind != AZ_BAD_SCRAP_METAL) continue;
         scrap->position =
-          az_vadd(az_vrotate(az_vsub(scrap->position, magnet_abs_position),
-                             0.7 * dtheta), magnet_abs_position);
+          az_vadd(az_vrotate(az_vsub(scrap->position, magnet_abs_hinge_pos),
+                             0.7 * dtheta), magnet_abs_hinge_pos);
       }
     }
     const double magnet_abs_angle = az_mod2pi(magnet->angle + baddie->angle);
@@ -649,7 +659,7 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
     if (baddie->state != MAGNET_FINISH_ATTRACT_STATE &&
         baddie->cooldown <= 0.0) {
       az_add_baddie(state, AZ_BAD_SCRAP_METAL,
-                    az_vadd(magnet_abs_position,
+                    az_vadd(magnet_abs_hinge_pos,
                             az_vpolar(1500.0, magnet_abs_angle +
                                       az_random(-AZ_DEG2RAD(10),
                                                 AZ_DEG2RAD(10)))),
@@ -662,16 +672,17 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
     AZ_ARRAY_LOOP(scrap, state->baddies) {
       if (scrap->kind != AZ_BAD_SCRAP_METAL) continue;
       az_vpluseq(&scrap->position, az_vwithlen(
-          az_vsub(scrap->position, magnet_abs_position), -500.0 * time));
+          az_vsub(scrap->position, magnet_abs_collect_pos), -500.0 * time));
       scrap->angle = az_mod2pi(scrap->angle + AZ_DEG2RAD(300) * time);
       max_scrap_dist =
-        fmax(max_scrap_dist, az_vdist(scrap->position, magnet_abs_position));
+        fmax(max_scrap_dist, az_vdist(scrap->position,
+                                      magnet_abs_collect_pos));
     }
     az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
     // Apply force to ship:
     if (az_ship_is_alive(&state->ship)) {
       const az_vector_t delta =
-        az_vsub(state->ship.position, magnet_abs_position);
+        az_vsub(state->ship.position, magnet_abs_hinge_pos);
       if (az_mod2pi(az_vtheta(delta) - magnet_abs_angle) <= AZ_DEG2RAD(10)) {
         az_vpluseq(&state->ship.velocity, az_vwithlen(delta, -300.0 * time));
       }
@@ -710,14 +721,14 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
   switch (baddie->state) {
     case LEGS_POPDOWN_STATE:
       if (base_top > baseline) {
-        legs_pop_up_down(state, baddie, -LEGS_POP_SPEED * time);
+        legs_pop_up_down(state, baddie, baseline, -LEGS_POP_SPEED * time);
       } else {
         baddie->temp_properties |= AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING;
       }
       break;
     case LEGS_POPUP_STATE:
       if (base_top < baseline + LEGS_POPUP_DIST) {
-        legs_pop_up_down(state, baddie, LEGS_POP_SPEED * time);
+        legs_pop_up_down(state, baddie, baseline, LEGS_POP_SPEED * time);
       } else {
         baddie->state = MAGNET_COOLDOWN_STATE;
       }
@@ -726,7 +737,7 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
       if (az_ship_is_decloaked(&state->ship)) {
         magnet->angle = az_mod2pi(az_angle_towards(
             magnet->angle + baddie->angle, AZ_DEG2RAD(100) * time,
-            az_vtheta(az_vsub(state->ship.position, magnet_abs_position))) -
+            az_vtheta(az_vsub(state->ship.position, magnet_abs_hinge_pos))) -
                                   baddie->angle);
       }
       if (baddie->cooldown <= 0.0) {
@@ -803,14 +814,14 @@ void az_tick_bad_magbeest_legs_r(az_space_state_t *state, az_baddie_t *baddie,
   switch (baddie->state) {
     case LEGS_POPDOWN_STATE:
       if (base_top > baseline) {
-        legs_pop_up_down(state, baddie, -LEGS_POP_SPEED * time);
+        legs_pop_up_down(state, baddie, baseline, -LEGS_POP_SPEED * time);
       } else {
         baddie->temp_properties |= AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING;
       }
       break;
     case LEGS_POPUP_STATE:
       if (base_top < baseline + LEGS_POPUP_DIST) {
-        legs_pop_up_down(state, baddie, LEGS_POP_SPEED * time);
+        legs_pop_up_down(state, baddie, baseline, LEGS_POP_SPEED * time);
       }
       if (baddie->cooldown <= 0.0) {
         baddie->state = GATLING_START_FIRING_STATE;

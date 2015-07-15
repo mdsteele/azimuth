@@ -527,7 +527,8 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 15.0,
     .impact_shake = 1.0,
     .impact_sound = AZ_SND_EXPLODE_ROCKET,
-    .shrapnel_kind = AZ_PROJ_SCRAP_SHRAPNEL
+    .shrapnel_kind = AZ_PROJ_SCRAP_SHRAPNEL,
+    .properties = AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_SCRAP_SHRAPNEL] = {
     .speed = 500.0,

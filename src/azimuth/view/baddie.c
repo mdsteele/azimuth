@@ -55,7 +55,7 @@ static az_color_t color3(float r, float g, float b) {
   return (az_color_t){r * 255, g * 255, b * 255, 255};
 }
 
-#if 1
+#if 0
 static void draw_component_outline(const az_component_data_t *component) {
   const az_polygon_t poly = component->polygon;
   if (poly.num_vertices > 0) {
@@ -783,11 +783,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_MAGBEEST_LEGS_L:
       az_draw_bad_magbeest_legs_l(baddie, clock);
-      draw_baddie_outline(baddie, frozen, 1.0); // TODO
       break;
     case AZ_BAD_MAGBEEST_LEGS_R:
       az_draw_bad_magbeest_legs_r(baddie, clock);
-      draw_baddie_outline(baddie, frozen, 1.0); // TODO
       break;
     case AZ_BAD_MAGMA_BOMB:
       az_draw_bad_magma_bomb(baddie, clock);
