@@ -25,6 +25,8 @@
 #include <GL/gl.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/baddie_oth.h"
+#include "azimuth/util/bezier.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/view/util.h"
@@ -201,8 +203,12 @@ static void draw_oth(
       az_vdiv(az_vadd(az_vadd(vs[0], vs[1]), vs[2]), 3);
     glPushMatrix(); {
       az_gl_translated(center);
-      if (spin) glRotated(az_clock_mod(360, 1, clock) -
-                          AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
+      if (spin) {
+        glRotated((baddie->kind == AZ_BAD_OTH_RAZOR ?
+                   (baddie->state % 2 ? 6 : -6) : 1) *
+                  az_clock_mod(360, 1, clock) -
+                  AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
+      }
       glBegin(GL_TRIANGLES); {
         for (int j = 0; j < 3; ++j) {
           const az_clock_t clk = clock + 2 * j;
@@ -218,22 +224,67 @@ static void draw_oth(
   }
 }
 
+static void next_tendril_color(int *color_index, az_clock_t clock) {
+  const az_clock_t clk = clock + 2 * (*color_index++ % 3);
+  const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 0.75f : 0.25f);
+  const GLfloat g = (az_clock_mod(6, 2, clk + 2) < 3 ? 0.75f : 0.25f);
+  const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 0.75f : 0.25f);
+  glColor4f(r, g, b, 0.5f);
+}
+
+static void draw_tendrils(const az_baddie_t *baddie,
+                          const az_oth_tendrils_data_t *tendrils,
+                          az_clock_t clock) {
+  assert(tendrils->num_tendrils <= AZ_MAX_BADDIE_COMPONENTS);
+  for (int i = 0; i < tendrils->num_tendrils; ++i) {
+    const az_component_t *tip =
+      &baddie->components[AZ_MAX_BADDIE_COMPONENTS - 1 - i];
+    const az_vector_t base = tendrils->tendril_bases[i];
+    const double dist = az_vdist(base, tip->position);
+    const az_vector_t ctrl1 = az_vadd(az_vwithlen(base, 0.4 * dist), base);
+    const az_vector_t ctrl2 = az_vadd(az_vpolar(-0.4 * dist, tip->angle),
+                                      tip->position);
+    glBegin(GL_TRIANGLE_STRIP); {
+      int color_index = 0;
+      for (double t = 0.0; t <= 1.0; t += 0.0625) {
+        const az_vector_t point = az_cubic_bezier_point(
+            base, ctrl1, ctrl2, tip->position, t);
+        const double angle = az_cubic_bezier_angle(
+            base, ctrl1, ctrl2, tip->position, t);
+        const az_vector_t perp =
+          az_vpolar(tendrils->semithick * (1.0 - t), angle + AZ_HALF_PI);
+        next_tendril_color(&color_index, clock);
+        az_gl_vertex(az_vadd(point, perp));
+        next_tendril_color(&color_index, clock);
+        az_gl_vertex(az_vsub(point, perp));
+      }
+    } glEnd();
+  }
+}
+
 /*===========================================================================*/
 
 void az_draw_bad_oth_brawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_BRAWLER);
+  draw_tendrils(baddie, &AZ_OTH_BRAWLER_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_brawler_triangles,
            AZ_ARRAY_SIZE(oth_brawler_triangles));
 }
 
 void az_draw_bad_oth_crab(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_CRAB_1 ||
+         baddie->kind == AZ_BAD_OTH_CRAB_2);
+  draw_tendrils(baddie, &AZ_OTH_CRAB_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_crab_triangles,
            AZ_ARRAY_SIZE(oth_crab_triangles));
 }
 
 void az_draw_bad_oth_crawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_CRAWLER);
+  draw_tendrils(baddie, &AZ_OTH_CRAWLER_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_crawler_triangles,
            AZ_ARRAY_SIZE(oth_crawler_triangles));
 }
@@ -241,8 +292,9 @@ void az_draw_bad_oth_crawler(
 void az_draw_bad_oth_gunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
-  if (baddie->components[11].angle != 0) {
-    const az_vector_t start = baddie->components[11].position;
+  const az_component_t *tractor_component = &baddie->components[6];
+  if (tractor_component->angle != 0) {
+    const az_vector_t start = tractor_component->position;
     const az_vector_t delta = az_vsub(baddie->position, start);
     const double dist = az_vnorm(delta);
     const double thick = 4;
@@ -268,24 +320,32 @@ void az_draw_bad_oth_gunship(
       } glEnd();
     } glPopMatrix();
   }
+  draw_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
            AZ_ARRAY_SIZE(oth_gunship_triangles));
 }
 
 void az_draw_bad_oth_orb(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_ORB_1 ||
+         baddie->kind == AZ_BAD_OTH_ORB_2);
+  draw_tendrils(baddie, &AZ_OTH_ORB_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_orb_triangles,
            AZ_ARRAY_SIZE(oth_orb_triangles));
 }
 
 void az_draw_bad_oth_razor(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_RAZOR);
+  draw_tendrils(baddie, &AZ_OTH_RAZOR_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_razor_triangles,
            AZ_ARRAY_SIZE(oth_razor_triangles));
 }
 
 void az_draw_bad_oth_snapdragon(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_SNAPDRAGON);
+  draw_tendrils(baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_snapdragon_triangles,
            AZ_ARRAY_SIZE(oth_snapdragon_triangles));
 }

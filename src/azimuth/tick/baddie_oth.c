@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "azimuth/state/baddie.h"
+#include "azimuth/state/baddie_oth.h"
 #include "azimuth/state/object.h"
 #include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
@@ -32,9 +33,38 @@
 
 /*===========================================================================*/
 
+static void tick_tendrils(az_space_state_t *state, az_baddie_t *baddie,
+                          const az_oth_tendrils_data_t *tendrils,
+                          double old_angle, double time) {
+  assert(tendrils->num_tendrils <= AZ_MAX_BADDIE_COMPONENTS);
+  const double dtheta = baddie->angle - old_angle;
+  for (int i = 0; i < tendrils->num_tendrils; ++i) {
+    az_component_t *tip =
+      &baddie->components[AZ_MAX_BADDIE_COMPONENTS - 1 - i];
+    const az_vector_t dpos = az_vmul(baddie->velocity, time);
+    tip->position = az_vadd(az_vrotate(tip->position, -dtheta),
+                            az_vrotate(dpos, baddie->angle));
+    tip->angle -= dtheta;
+    const az_vector_t base = tendrils->tendril_bases[i];
+    const az_vector_t goal_pos =
+      az_vadd(az_vwithlen(base, az_vnorm(base) + tendrils->length),
+              az_vpolar(tendrils->drift, AZ_DEG2RAD(120) * i +
+                        AZ_DEG2RAD(120) * state->ship.player.total_time));
+    const double goal_angle = az_vtheta(goal_pos);
+    const double tracking_factor = 1.0 - pow(tendrils->tracking_base, time);
+    az_vpluseq(&tip->position, az_vmul(az_vsub(goal_pos, tip->position),
+                                       tracking_factor));
+    tip->angle = az_mod2pi(tip->angle +
+        az_mod2pi(goal_angle - tip->angle) * tracking_factor);
+  }
+}
+
+/*===========================================================================*/
+
 void az_tick_bad_oth_brawler(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_BRAWLER);
+  const double old_angle = baddie->angle;
   const double turn_rate = AZ_DEG2RAD(180);
   const az_vector_t ship_delta =
     az_vsub(state->ship.position, baddie->position);
@@ -106,11 +136,13 @@ void az_tick_bad_oth_brawler(
     az_fly_towards_ship(state, baddie, time,
                         turn_rate, 300.0, 100.0, 20.0, 100.0, 100.0);
   }
+  tick_tendrils(state, baddie, &AZ_OTH_BRAWLER_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_crab_1(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_CRAB_1);
+  const double old_angle = baddie->angle;
   az_fly_towards_ship(state, baddie, time,
                       2.0, 40.0, 100.0, 20.0, 100.0, 100.0);
   if (baddie->cooldown <= 0.0 &&
@@ -122,11 +154,13 @@ void az_tick_bad_oth_crab_1(
       baddie->cooldown = 2.0;
     }
   }
+  tick_tendrils(state, baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_crab_2(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_CRAB_2);
+  const double old_angle = baddie->angle;
   az_fly_towards_ship(state, baddie, time,
                       2.0, 100.0, 200.0, 50.0, 100.0, 100.0);
   baddie->param = fmax(0.0, baddie->param - time);
@@ -148,11 +182,13 @@ void az_tick_bad_oth_crab_2(
     az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
     baddie->param = 0.9;
   }
+  tick_tendrils(state, baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_crawler(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_CRAWLER);
+  const double old_angle = baddie->angle;
   az_crawl_around(state, baddie, time, true, 3.0, 40.0, 100.0);
   if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
     az_vector_t rel_impact;
@@ -165,11 +201,13 @@ void az_tick_bad_oth_crawler(
       baddie->cooldown = az_random(1.0, 2.0);
     }
   }
+  tick_tendrils(state, baddie, &AZ_OTH_CRAWLER_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_orb_1(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_ORB_1);
+  const double old_angle = baddie->angle;
   az_drift_towards_ship(state, baddie, time, 80, 20, 100);
   if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 500)) {
     for (int i = 0; i < 360; i += 20) {
@@ -180,11 +218,13 @@ void az_tick_bad_oth_orb_1(
     az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
     baddie->cooldown = 2.0;
   }
+  tick_tendrils(state, baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_orb_2(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_ORB_2);
+  const double old_angle = baddie->angle;
   az_drift_towards_ship(state, baddie, time, 80, 20, 100);
   if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 500) &&
       az_can_see_ship(state, baddie)) {
@@ -193,11 +233,13 @@ void az_tick_bad_oth_orb_2(
                               az_random(-AZ_PI, AZ_PI), 0.0);
     baddie->cooldown = 0.1;
   }
+  tick_tendrils(state, baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time);
 }
 
 void az_tick_bad_oth_razor(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_RAZOR);
+  const double old_angle = baddie->angle;
   if (baddie->state == 0) {
     baddie->velocity = az_vpolar(az_random(300, 500), baddie->angle);
     baddie->state = 2;
@@ -207,11 +249,12 @@ void az_tick_bad_oth_razor(
   }
   if (baddie->state == 2) {
     az_drift_towards_ship(state, baddie, time, 400, 500, 100);
-    baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(180) * time);
   } else if (baddie->state == 3) {
     baddie->velocity = az_vwithlen(baddie->velocity, 300.0);
-    baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(180) * time);
   } else baddie->state = 0;
+  baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
+                                   az_vtheta(baddie->velocity));
+  tick_tendrils(state, baddie, &AZ_OTH_RAZOR_TENDRILS, old_angle, time);
 }
 
 /*===========================================================================*/
@@ -219,6 +262,7 @@ void az_tick_bad_oth_razor(
 void az_tick_bad_oth_snapdragon(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_SNAPDRAGON);
+  const double old_angle = baddie->angle;
   az_fly_towards_ship(state, baddie, time,
                       5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
   if (baddie->cooldown <= 0.0) {
@@ -281,13 +325,14 @@ void az_tick_bad_oth_snapdragon(
         break;
     }
   }
+  tick_tendrils(state, baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, old_angle, time);
 }
 
 /*===========================================================================*/
 
 #define TRACTOR_MIN_LENGTH 100.0
 #define TRACTOR_MAX_LENGTH 200.0
-#define TRACTOR_COMPONENT_INDEX (AZ_MAX_BADDIE_COMPONENTS - 1)
+#define TRACTOR_COMPONENT_INDEX 6
 
 static bool tractor_locked_on(
     const az_baddie_t *baddie, az_vector_t *tractor_pos_out,
@@ -306,15 +351,15 @@ static bool tractor_locked_on(
 static void set_tractor_node(az_baddie_t *baddie, const az_node_t *node) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   if (node == NULL) {
-    baddie->components[11].angle = 0;
+    baddie->components[TRACTOR_COMPONENT_INDEX].angle = 0;
     return;
   }
   assert(node->kind == AZ_NODE_TRACTOR);
   const double tractor_length = az_vdist(baddie->position, node->position);
   assert(tractor_length >= TRACTOR_MIN_LENGTH &&
          tractor_length <= TRACTOR_MAX_LENGTH);
-  baddie->components[11].position = node->position;
-  baddie->components[11].angle = tractor_length;
+  baddie->components[TRACTOR_COMPONENT_INDEX].position = node->position;
+  baddie->components[TRACTOR_COMPONENT_INDEX].angle = tractor_length;
 }
 
 static void try_lock_on_tractor(az_space_state_t *state, az_baddie_t *baddie) {
@@ -331,6 +376,7 @@ static void try_lock_on_tractor(az_space_state_t *state, az_baddie_t *baddie) {
 void az_tick_bad_oth_gunship(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  const double old_angle = baddie->angle;
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
 
   // Handle tractor beam:
@@ -502,6 +548,7 @@ void az_tick_bad_oth_gunship(
       baddie->state = 0;
       break;
   }
+  tick_tendrils(state, baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle, time);
 }
 
 /*===========================================================================*/
