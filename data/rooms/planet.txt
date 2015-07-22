@@ -1,4 +1,4 @@
-@P z8 r471 t240 s6
+@P z8 r471 t241 s6
 $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene4,wait1.5,scene3,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -933,10 +933,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   way past."
 !T207"
   \"Yeah, I just met some.  But, you know...by this
-  point...\"$_18
-
-  \"...I'm kind of armed to the friggin' teeth.
-  I'm $/pretty sure$| I can handle it.\""
+  point...\""
 !T208"
   Good luck, Hopper."
 !T209"
@@ -1178,3 +1175,6 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   Message ends.
 
   >>><"
+!T240"
+  \"...I'm kind of armed to the friggin' teeth.
+  I'm $/pretty sure$| I can handle it.\""

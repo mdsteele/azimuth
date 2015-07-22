@@ -211,7 +211,7 @@
 
 !Part J
 
-1| c4h |
-2| c5h a4s g f e g f e d |
-3| c2h |
+1| c4e r c r c r c r |
+2| c5q c a4s g f e g f e d |
+3| c2q c c c |
 4| c1h L50 c2s c3 c c c1 c2 c c L30 |

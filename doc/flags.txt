@@ -1,4 +1,4 @@
-Next flag: 128
+Next flag: 129
 
 Bosses
 ======
@@ -148,3 +148,4 @@ Misc
 105: Turned off experimental reactor in Voquan room 459
 107: Lowered lava in southeastern Cnidam/Sarvari
 108: Pressed button in Cnidam room 340 to open forcefield in Cnidam room 337
+128: Core music changed
