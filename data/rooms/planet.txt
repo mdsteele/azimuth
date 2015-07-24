@@ -729,7 +729,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T162"
   \"No you don't, you little--\""
 !T163"
-  \"Silence, Rakifsutria.  I knew about your
+  \"Silence, Rakif Vkati.  I knew about your
   plans the whole time, and I gave you many
   opportunities to cease them.\"
 
