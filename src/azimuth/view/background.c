@@ -113,6 +113,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_VOLCANIC_ROCK] = {
     .parallax = 0.25, .repeat_style = ABS_RECT,
     .repeat_horz = 250.0, .repeat_vert = 250.0
+  },
+  [AZ_BG_BROWN_TREE_TRUNKS] = {
+    .parallax = 0.25, .repeat_style = POLAR,
+    .repeat_horz = 200.0, .repeat_vert = 400.0
   }
 };
 
@@ -429,6 +433,17 @@ static void draw_green_diamond_quarter(float left, float top, float width,
   } glEnd();
 }
 
+static void draw_tree_branch(
+    GLfloat x_0, GLfloat y_0, GLfloat x_1, GLfloat y_1,
+    GLfloat x_2, GLfloat y_2, GLfloat x_3, GLfloat y_3) {
+  const az_color_t color1 = {48, 45, 42, 255};
+  const az_color_t color2 = {24, 18, 12, 255};
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color1); glVertex2f(x_0, y_0); az_gl_color(color2);
+    glVertex2f(x_1, y_1); glVertex2f(x_2, y_2); glVertex2f(x_3, y_3);
+  } glEnd();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -681,6 +696,62 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
         }
         indent = !indent;
       }
+    } break;
+    case AZ_BG_BROWN_TREE_TRUNKS: {
+      const az_color_t color1 = {48, 45, 42, 255};
+      const az_color_t color2 = {24, 18, 12, 255};
+      // Trunks:
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-100,    0); glVertex2f(-100, -115);
+        az_gl_color(color2); glVertex2f( -50,    0); glVertex2f( -50,  -45);
+        az_gl_color(color1); glVertex2f(   0,    0); glVertex2f(   0, -115);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(   0,    0); glVertex2f(   0, -180);
+        az_gl_color(color2); glVertex2f(  50,    0); glVertex2f(  50, -110);
+        az_gl_color(color1); glVertex2f( 100,    0); glVertex2f( 100, -180);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color2); glVertex2f(-100, -115); glVertex2f(-100, -290);
+        az_gl_color(color1); glVertex2f( -50,  -45); glVertex2f( -50, -315);
+        az_gl_color(color2); glVertex2f(   0, -115); glVertex2f(   0, -245);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color2); glVertex2f(   0, -180); glVertex2f(   0, -310);
+        az_gl_color(color1); glVertex2f(  50, -110); glVertex2f(  50, -380);
+        az_gl_color(color2); glVertex2f( 100, -180); glVertex2f( 100, -310);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-100, -290); glVertex2f(-100, -400);
+        az_gl_color(color2); glVertex2f( -50, -315); glVertex2f( -50, -400);
+        az_gl_color(color1); glVertex2f(   0, -245); glVertex2f(   0, -400);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(   0, -310); glVertex2f(   0, -400);
+        az_gl_color(color2); glVertex2f(  50, -380); glVertex2f(  50, -400);
+        az_gl_color(color1); glVertex2f( 100, -310); glVertex2f( 100, -400);
+      } glEnd();
+      // Top-left trunk branches:
+      draw_tree_branch( -50, -105,  -50,  -45, -10,   -5,  -15,  -95);
+      draw_tree_branch( -50, -105,  -50,  -45, -90,    0,  -75,  -95);
+      draw_tree_branch( -60, -130,  -53,  -95, -90,  -35, -100, -125);
+      draw_tree_branch( -35, -120,    0, -115,  40,  -45,  -25,  -80);
+      // Top-right trunk branches:
+      draw_tree_branch(  50, -170,   50, -110,  10,  -40,   25, -150);
+      draw_tree_branch(  50, -170,   50, -110,  90,  -55,   75, -150);
+      draw_tree_branch(  60, -200,   53, -160,  90, -100,  100, -190);
+      draw_tree_branch(  40, -190,    0, -180, -30, -120,   30, -150);
+      // Split-bottom trunk branches:
+      draw_tree_branch( 100, -370,  100, -290,  60, -240,   75, -350);
+      // Mid-bottom trunk branches:
+      draw_tree_branch(   0, -350,  -20, -320, -10, -220,   25, -330);
+      draw_tree_branch(   0, -350,   20, -320,  85, -285,   45, -370);
+      // Split-bottom trunk branches:
+      draw_tree_branch(-100, -370, -100, -290, -75, -195,  -65, -310);
+      draw_tree_branch( -85, -365,  -70, -310,   5, -240,  -50, -350);
+      draw_tree_branch(  85, -380,   50, -385,   0, -305,   80, -345);
+      // Mid-bottom trunk branches:
+      draw_tree_branch(   0, -350,  -20, -320, -90, -320,  -45, -370);
     } break;
   }
 }
