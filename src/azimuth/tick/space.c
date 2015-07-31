@@ -281,10 +281,13 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
       if (mode_data->progress >= 1.0) {
         // Replace state with new room data.
         const az_room_key_t origin_key = state->ship.player.current_room;
+        const az_zone_key_t old_zone_key =
+          state->planet->rooms[origin_key].zone_key;
         const az_room_key_t dest_key = mode_data->destination;
         az_clear_space(state);
         assert(0 <= dest_key && dest_key < state->planet->num_rooms);
         const az_room_t *new_room = &state->planet->rooms[dest_key];
+        const az_zone_key_t new_zone_key = new_room->zone_key;
         az_enter_room(state, new_room);
         state->ship.player.current_room = dest_key;
         // Pick a door to exit out of.
@@ -326,6 +329,11 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
           mode_data->exit.uid = exit->uid;
           mode_data->exit.position = exit->position;
           mode_data->exit.angle = exit->angle;
+        }
+        // If entering a new zone, display a message.
+        if (new_zone_key != old_zone_key) {
+          const az_zone_t *new_zone = &state->planet->zones[new_zone_key];
+          az_set_message(state, new_zone->entering_message);
         }
         // Record that we are now in the new room.  We have to set the ship
         // position _before_ this, because this will remove destructable walls

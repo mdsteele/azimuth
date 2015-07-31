@@ -355,9 +355,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   // Convert zones:
   AZ_LIST_INIT(state->planet.zones, planet.num_zones);
   for (int i = 0; i < planet.num_zones; ++i) {
-    az_zone_t *zone = AZ_LIST_ADD(state->planet.zones);
-    *zone = planet.zones[i];
-    zone->name = az_strdup(planet.zones[i].name);
+    az_clone_zone(&planet.zones[i], AZ_LIST_ADD(state->planet.zones));
   }
   // Convert rooms:
   AZ_LIST_INIT(state->planet.rooms, planet.num_rooms);
@@ -669,9 +667,7 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   }
   // Convert zones:
   for (int i = 0; i < num_zones; ++i) {
-    az_zone_t *zone = AZ_LIST_GET(state->planet.zones, i);
-    planet.zones[i] = *zone;
-    planet.zones[i].name = az_strdup(zone->name);
+    az_clone_zone(AZ_LIST_GET(state->planet.zones, i), &planet.zones[i]);
   }
   // Convert rooms:
   az_room_key_t *rooms_to_save = AZ_ALLOC(num_rooms_to_save, az_room_key_t);

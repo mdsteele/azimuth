@@ -141,6 +141,8 @@ static void parse_zone_directive(az_load_planet_t *loader) {
   if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 ||
       blue > 255) FAIL();
   zone->color = (az_color_t){red, green, blue, 255};
+  zone->entering_message = az_strprintf("Entering: $X%02x%02x%02x%s",
+                                        red, green, blue, zone->name);
   ++loader->planet->num_zones;
   scan_to_bang(loader);
 }
@@ -289,6 +291,7 @@ void az_destroy_planet(az_planet_t *planet) {
   free(planet->paragraphs);
   for (int i = 0; i < planet->num_zones; ++i) {
     free(planet->zones[i].name);
+    free(planet->zones[i].entering_message);
   }
   free(planet->zones);
   for (int i = 0; i < planet->num_rooms; ++i) {
@@ -296,6 +299,12 @@ void az_destroy_planet(az_planet_t *planet) {
   }
   free(planet->rooms);
   AZ_ZERO_OBJECT(planet);
+}
+
+void az_clone_zone(const az_zone_t *original, az_zone_t *clone_out) {
+  clone_out->name = az_strdup(original->name);
+  clone_out->entering_message = az_strdup(original->entering_message);
+  clone_out->color = original->color;
 }
 
 /*===========================================================================*/

@@ -33,6 +33,7 @@
 
 typedef struct {
   char *name; // NUL-terminated; owned by zone object
+  char *entering_message; // NUL-terminated; owned by zone object
   az_color_t color;
 } az_zone_t;
 
@@ -54,6 +55,8 @@ bool az_save_planet(const az_planet_t *planet, const char *resource_dir,
 
 // Delete the data arrays owned by a planet (but not the planet object itself).
 void az_destroy_planet(az_planet_t *planet);
+
+void az_clone_zone(const az_zone_t *original, az_zone_t *clone_out);
 
 /*===========================================================================*/
 
