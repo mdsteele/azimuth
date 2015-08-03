@@ -339,6 +339,9 @@ static void draw_baddie(const az_editor_state_t *state,
       real_baddie.kind == AZ_BAD_HEAT_RAY ||
       real_baddie.kind == AZ_BAD_SENSOR_LASER) {
     draw_beam_path(state, &real_baddie);
+  } else if (real_baddie.kind == AZ_BAD_FIREBALL_MINE) {
+    glColor4f(1, 0, 0, 0.5);
+    draw_dashed_circle(real_baddie.position, 200);
   } else if (real_baddie.kind == AZ_BAD_NUCLEAR_MINE) {
     glColor4f(1, 0, 0, 0.5);
     draw_dashed_circle(real_baddie.position, 150);

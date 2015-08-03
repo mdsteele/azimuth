@@ -1215,8 +1215,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
       AZ_ARRAY_LOOP(node, state->nodes) {
         if (node->kind == AZ_NODE_UPGRADE ||
             (node->kind == AZ_NODE_SECRET &&
-             node->subkind.secret < state->planet->num_rooms &&
-             !az_test_room_visited(player, node->subkind.secret))) {
+             (node->subkind.secret >= state->planet->num_rooms ||
+              !az_test_room_visited(player, node->subkind.secret)))) {
           const double distance = az_vdist(node->position, ship->position);
           if (distance < best_distance) {
             nearest_node = node;

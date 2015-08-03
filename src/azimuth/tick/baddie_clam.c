@@ -44,6 +44,7 @@ void az_tick_bad_clam(
   const double old_angle = baddie->components[0].angle;
   const double new_angle =
     (baddie->cooldown <= 0.0 && can_see &&
+     az_ship_in_range(state, baddie, 450.0) &&
      fabs(az_mod2pi(baddie->angle - ship_theta)) < AZ_DEG2RAD(10) ?
      fmin(max_angle,
           max_angle - (max_angle - old_angle) * pow(0.00003, time)) :
