@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <GL/gl.h>
 
@@ -181,10 +182,26 @@ static void draw_title_letter(char ch, float hilight) {
   }
 }
 
-static void draw_subtitle_text(const char *text) {
+static void draw_subtitle_text(const char *text, bool copyright) {
   glColor3f(1, 1, 1);
   az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2,
                  AZ_SCREEN_HEIGHT/2 - 8, text);
+  if (copyright) {
+    glPushMatrix(); {
+      glTranslatef(AZ_SCREEN_WIDTH/2 - strlen(text) * 8 + 0.5f,
+                   AZ_SCREEN_HEIGHT/2 - 8 + 0.5f, 0);
+      glBegin(GL_LINE_LOOP); {
+        glVertex2f(2, 0); glVertex2f(10, 0);
+        glVertex2f(12, 2); glVertex2f(12, 10);
+        glVertex2f(10, 12); glVertex2f(2, 12);
+        glVertex2f(0, 10); glVertex2f(0, 2);
+      } glEnd();
+      glBegin(GL_LINE_STRIP); {
+        glVertex2f(9, 3); glVertex2f(3, 3);
+        glVertex2f(3, 9); glVertex2f(9, 9);
+      } glEnd();
+    } glPopMatrix();
+  }
 }
 
 static void draw_background(const az_title_state_t *state) {
@@ -202,14 +219,14 @@ static void draw_background(const az_title_state_t *state) {
         flash = fmax(0.0, 1.0 - 2.0 * blacken);
         break;
       case 2:
-        draw_subtitle_text("a game by mdsteele");
+        draw_subtitle_text("mdsteele presents", false);
         return;
       case 3:
         create = 0.25 * state->mode_data.intro.progress;
         blacken = 1.0;
         break;
       case 4:
-        draw_subtitle_text("created 2012-2015");
+        draw_subtitle_text(" 2012-2015", true);
         return;
       case 5:
         create = 0.25 + 0.75 * state->mode_data.intro.progress;
