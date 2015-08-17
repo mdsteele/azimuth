@@ -1,0 +1,72 @@
+@M "S!1a bB:b |aAAB"
+
+=tempo 120
+=key 5b     % Bb minor
+
+
+!Part S
+
+1 Wp25 L0
+2 Wp50 L20  E0,25
+3 Wt75 L150 E0,25
+4 Wn   L40  E0,100
+5 Wn   L40  E0,100
+
+
+!Part A
+
+1 L30 E0,25
+
+1| b3q ' be bs c4s+ ' +s cs ce ' ce cs c |
+3| b2e b ' fe fs bs+ ' +s fs be ' fe fs f |
+4| x0q x2 x0 x2 |
+5| x5q |
+
+1| d4q ' de ds e4s+ ' +s es ee ' ee fe |
+3| b2e b ' fe fs bs+ ' +s fs be ' fe fs f |
+4| x0q x2 x0s x2e. x2q |
+
+1| b3q ' be bs fs+ ' +s fs fe ' fe fs f |
+3| b2e b ' fe fs bs+ ' +s fs be ' fe fs f |
+4| x0q x2 x0 x2 |
+
+1| a3q ' ae as bs+ ' +s bs be ' ae ae |
+3| a2e a ' ee es as+ ' +s es ae ' ee es e |
+4| x0q x2 x0s x2e. x2q |
+
+
+!Part B
+
+1 E0,60
+
+1| b3q. re bq. re |
+4| x0q x2 x0 x2 |
+5| x4s x4 x4 x4 ' x5q  ' x4s x4 x4 x4 ' x5q  |
+
+1| rw |
+4| x0q x2 x0s x2e. x2q |
+5| x5s x4 x4 x5 ' x4 x4 x5 x4 ' x4 x5 x4 x4 ' x5s x4 x5 x4 |
+
+1| b3q. re bq. re |
+4| x0q x2 x0 x2 |
+5| x4s x4 x4 x4 ' x5q  ' x4s x4 x4 x4 ' x5e x4t x4 x4 x4 |
+
+1| rw |
+4| x0q x2 x0s x2e. x2q |
+5| x5s x4 x4 x5 ' x4 x4 x5 x4 ' x4 x5 x4t x4 x4 x4 ' x5s x4 x5 x4 |
+
+1| b3q. re b4q. re |
+4| x0q x2 x0 x2 |
+5| x4s x4 x4 x4 ' x5q  ' x4s x4 x4 x4 ' x5q  |
+
+1| rw |
+4| x0q x2 x0s x2e. x2q |
+5| x5s x4 x4 x5 ' x4 x4 x5 x4 ' x4 x5 x4 x4 ' x5s x4 x5 x4 |
+
+1| b3q. re f4q. re |
+4| x0q x2 x0 x2 |
+5| x4s x4 x4 x4 ' x5q  ' x4s x4 x4 x4 ' x5e x4t x4 x4 x4 |
+
+1| E0,30 b3q f4 b3 b4 |
+4| x0q x2 x0s x2e. x2q |
+5| x5s x4 x4 x5 ' x4 x4 x5 x4 ' x4 x5 x4t x4 x4 x4 ' x5s x4 x5 x4 |

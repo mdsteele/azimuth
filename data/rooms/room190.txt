@@ -1,6 +1,6 @@
 @R z4 p0 k0 b8 d4 g0 n64 w118
   c(34263.24,1291.16,1.848536,0.012855)
-$s:mus7,test61,heqz,nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,nix10,nix13,activ12,activ11,gang11,addi3.14159,sang11,activ20;
+$s:mus5,test61,bnez/A,musf1,halt,A#nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,nix10,nix13,activ12,activ11,gang11,addi3.14159,sang11,activ20;
 !W1 d2 x-9892.44 y34108.90 a-2.858608 u0
 !W1 d33 x-9488.47 y34056.78 a0.276405 u0
 !W1 d33 x-9583.71 y34029.77 a0.276405 u0
