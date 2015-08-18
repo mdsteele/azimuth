@@ -1,6 +1,6 @@
-@R z2 p4 k4 b3 d4 g0 n38 w95
+@R z2 p0 k4 b3 d4 g0 n38 w95
   c(17349.46,0.00,1.563145,0.083179)
-$s:test23,beqz/A,lock1,nix2,activ3,nix4,activ5,gang5,addi3.14159,sang5,nix6,nix7,nix8,nix9,nix10,nix23,nix24,nix25,halt,A#nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,nix22,test102,heqz,unlock1;
+$s:test23,beqz/A,lock1,nix2,activ3,nix4,activ5,gang5,addi3.14159,sang5,nix6,nix7,nix8,nix9,nix10,nix23,nix24,nix25,nix26,halt,A#nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,nix22,test102,heqz,unlock1;
 !W1 d50 x-904.86 y17341.80 a0.052131 u0
 !W1 d50 x-1157.55 y17324.59 a0.067994 u0
 !W1 d50 x-848.25 y17499.30 a0.046207 u0
@@ -103,7 +103,7 @@ $o:set102;
 !D10 x-1387.60 y17063.74 a1.646308 r371 u0
 !N5/25 x-685.44 y17454.03 a0.823600 u0
 !N5/25 x-858.12 y17424.27 a0.070117 u0
-!N5/25 x-1009.90 y17413.62 a0.070117 u0
+!N5/25 x-1009.90 y17413.62 a0.070117 u26
 !N5/25 x-1380.39 y17356.52 a0.860926 u0
 !N7/50 x-1094.19 y17194.05 a1.113429 u20
 !N7/39 x-1099.83 y17181.46 a1.113429 u21
