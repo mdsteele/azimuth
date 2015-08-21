@@ -649,7 +649,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"I suppose it might have worked better if the
   defense systems weren't already so badly damaged
   from the NPS accidents.  Even the bit with the
-  mining explosives didn't work out.\""
+  mining explosives didn't work out.  Pity.\""
 !T145"
   \"You set the...look, punk, did you not
   understand the part about how the Oth are
@@ -680,7 +680,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   matter--any longer.  This is simply a matter of
   independence, you see.\""
 !T150"
-  \"The hell it is.  You're going down, hard.\""
+  \"The hell it is.  You're going down.  Hard.\""
 !T151"
   \"Well, we hardly expected to convince you.  We
   appreciate all your efforts to rescue us--

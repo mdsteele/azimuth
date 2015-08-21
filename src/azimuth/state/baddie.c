@@ -891,7 +891,7 @@ static az_vector_t pop_open_turret_shell_vertices[] = {
 };
 static az_component_data_t pop_open_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(pop_open_turret_cannon_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME), .impact_damage = 10.0 },
+    .impact_damage = 10.0 },
   { .polygon = AZ_INIT_POLYGON(pop_open_turret_shell_vertices),
     .immunities = ~(AZ_DMGF_HYPER_ROCKET | AZ_DMGF_CPLUS),
     .init_angle = AZ_DEG2RAD(0) },
