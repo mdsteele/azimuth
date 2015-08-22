@@ -787,6 +787,10 @@ static void projectile_special_logic(az_space_state_t *state,
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));
+      if (proj->age >= 0.25) {
+        az_init_projectile(proj, AZ_PROJ_OTH_SPRAY, proj->position,
+                           proj->angle, 0.2 * proj->power, proj->fired_by);
+      }
       break;
     case AZ_PROJ_OTH_MINIROCKET:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
