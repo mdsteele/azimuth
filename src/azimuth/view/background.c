@@ -117,6 +117,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_BROWN_TREE_TRUNKS] = {
     .parallax = 0.25, .repeat_style = POLAR,
     .repeat_horz = 200.0, .repeat_vert = 400.0
+  },
+  [AZ_BG_BLUE_BUBBLES] = {
+    .parallax = 0.35, .repeat_style = ABS_RECT,
+    .repeat_horz = 225.0, .repeat_vert = 300.0
   }
 };
 
@@ -331,6 +335,13 @@ static void draw_purple_bubble(double center_x, double center_y, double radius,
                                int slowdown, az_clock_t clock) {
   draw_bubble(center_x, center_y, radius, slowdown, clock,
               (az_color_t){40, 25, 51, 255}, (az_color_t){25, 0, 51, 255},
+              (az_color_t){0, 0, 51, 0});
+}
+
+static void draw_blue_bubble(double center_x, double center_y, double radius,
+                               int slowdown, az_clock_t clock) {
+  draw_bubble(center_x, center_y, radius, 2 * slowdown, clock,
+              (az_color_t){25, 40, 51, 255}, (az_color_t){0, 25, 51, 255},
               (az_color_t){0, 0, 51, 0});
 }
 
@@ -752,6 +763,17 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_tree_branch(  85, -380,   50, -385,   0, -305,   80, -345);
       // Mid-bottom trunk branches:
       draw_tree_branch(   0, -350,  -20, -320, -90, -320,  -45, -370);
+    } break;
+    case AZ_BG_BLUE_BUBBLES: {
+      glPushMatrix(); {
+        glScalef(1.5, 2, 1);
+        draw_blue_bubble(0, -90, 50, 6, clock);
+        draw_blue_bubble(-40, -25, 40, 5, clock);
+        draw_blue_bubble(30, -40, 35, 4, clock);
+        draw_blue_bubble(-55, -120, 32, 3, clock);
+        draw_blue_bubble(40, -130, 30, 2, clock);
+        draw_blue_bubble(63, -75, 27, 3, clock + 5);
+      } glPopMatrix();
     } break;
   }
 }
