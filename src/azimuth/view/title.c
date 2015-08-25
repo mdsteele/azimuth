@@ -299,6 +299,53 @@ static void draw_prefs_box(const az_title_state_t *state) {
 
 /*===========================================================================*/
 
+#define RECORDS_BOX_TOP 256
+#define RECORDS_BOX_WIDTH 544
+#define RECORDS_BOX_HEIGHT 140
+
+static const az_vector_t records_box_vertices[] = {
+  {0.5, 0.5}, {RECORDS_BOX_WIDTH - 0.5, 0.5},
+  {RECORDS_BOX_WIDTH - 0.5, RECORDS_BOX_HEIGHT - 0.5},
+  {0.5, RECORDS_BOX_HEIGHT - 0.5}
+};
+static const az_polygon_t records_box_polygon =
+  AZ_INIT_POLYGON(records_box_vertices);
+
+static void draw_records_box(const az_saved_games_t *saved_games) {
+  glPushMatrix(); {
+    glTranslated(0.5 * (AZ_SCREEN_WIDTH - RECORDS_BOX_WIDTH),
+                 RECORDS_BOX_TOP, 0);
+    glColor4f(0, 0, 0, 0.7); // black tint
+    do_polygon(GL_POLYGON, records_box_polygon);
+    glColor3f(0.75, 0.75, 0.75); // light gray
+    do_polygon(GL_LINE_LOOP, records_box_polygon);
+
+    glColor3f(1, 1, 1); // white
+    const int seconds_anyp = floor(saved_games->best_any_percent_time);
+    az_draw_printf(16, AZ_ALIGN_CENTER, RECORDS_BOX_WIDTH/2, 32,
+                   "Best game time: %d:%02d:%02d", seconds_anyp / 3600,
+                   (seconds_anyp / 60) % 60, seconds_anyp % 60);
+    az_draw_printf(8, AZ_ALIGN_LEFT, 32, 76, "Highest percentage: %d%%",
+                   saved_games->highest_percentage);
+    if (saved_games->highest_percentage >= 100) {
+      const int seconds_100p = floor(saved_games->best_100_percent_time);
+      az_draw_printf(8, AZ_ALIGN_LEFT, 24, 96,
+                     "Best 100%% game time: %d:%02d:%02d", seconds_100p / 3600,
+                     (seconds_100p / 60) % 60, seconds_100p % 60);
+    }
+    az_draw_printf(8, AZ_ALIGN_LEFT, 296, 76, "Lowest percentage: %d%%",
+                   saved_games->lowest_percentage);
+    if (saved_games->lowest_percentage <= 15) {
+      const int seconds_lowp = floor(saved_games->best_low_percent_time);
+      az_draw_printf(8, AZ_ALIGN_LEFT, 288, 96,
+                     "Best 15%% game time: %d:%02d:%02d", seconds_lowp / 3600,
+                     (seconds_lowp / 60) % 60, seconds_lowp % 60);
+    }
+  } glPopMatrix();
+}
+
+/*===========================================================================*/
+
 #define ABOUT_BOX_TOP 260
 #define ABOUT_BOX_WIDTH 512
 #define ABOUT_BOX_HEIGHT 146
@@ -465,9 +512,9 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
 
 /*===========================================================================*/
 
-#define BUTTON_WIDTH 100
+#define BUTTON_WIDTH 80
 #define BUTTON_HEIGHT 20
-#define BUTTON_SPACING 54
+#define BUTTON_SPACING 14
 
 static const az_vector_t bottom_button_vertices[] = {
   {BUTTON_WIDTH - 5.5, 0.5}, {BUTTON_WIDTH - 0.5, 0.5 * BUTTON_HEIGHT},
@@ -481,13 +528,17 @@ static const az_polygon_t bottom_button_polygon =
 
 static bool prefs_about_buttons_active(const az_title_state_t *state) {
   return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
-          state->mode == AZ_TMODE_ABOUT);
+          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT);
+}
+
+static bool records_button_visible(const az_title_state_t *state) {
+  return az_has_beaten_game(state->saved_games);
 }
 
 static bool quit_button_active(const az_title_state_t *state) {
   return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
-          state->mode == AZ_TMODE_ABOUT || state->mode == AZ_TMODE_PICK_KEY ||
-          state->mode == AZ_TMODE_ERASING);
+          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
+          state->mode == AZ_TMODE_PICK_KEY || state->mode == AZ_TMODE_ERASING);
 }
 
 static void draw_bottom_button(const az_button_t *button, bool active,
@@ -525,16 +576,19 @@ void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
   }
 
   const int bottom_buttons_left =
-    (AZ_SCREEN_WIDTH - 3 * BUTTON_WIDTH - 2 * BUTTON_SPACING) / 2;
+    (AZ_SCREEN_WIDTH - 5 * BUTTON_WIDTH - 4 * BUTTON_SPACING) / 2;
   const int bottom_buttons_top =
     SAVE_SLOTS_TOP + 2 * (SAVE_SLOT_HEIGHT + SAVE_SLOT_SPACING);
   az_init_button(&state->prefs_button, bottom_button_polygon,
                  bottom_buttons_left, bottom_buttons_top);
-  az_init_button(&state->about_button, bottom_button_polygon,
+  az_init_button(&state->records_button, bottom_button_polygon,
                  bottom_buttons_left + BUTTON_WIDTH + BUTTON_SPACING,
                  bottom_buttons_top);
-  az_init_button(&state->quit_button, bottom_button_polygon,
+  az_init_button(&state->about_button, bottom_button_polygon,
                  bottom_buttons_left + 2 * (BUTTON_WIDTH + BUTTON_SPACING),
+                 bottom_buttons_top);
+  az_init_button(&state->quit_button, bottom_button_polygon,
+                 bottom_buttons_left + 4 * (BUTTON_WIDTH + BUTTON_SPACING),
                  bottom_buttons_top);
 
   az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP,
@@ -569,6 +623,8 @@ void az_title_draw_screen(const az_title_state_t *state) {
   // Draw save slots:
   if (state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) {
     draw_prefs_box(state);
+  } else if (state->mode == AZ_TMODE_RECORDS) {
+    draw_records_box(state->saved_games);
   } else if (state->mode == AZ_TMODE_ABOUT) {
     draw_about_box();
   } else {
@@ -577,11 +633,15 @@ void az_title_draw_screen(const az_title_state_t *state) {
     }
   }
 
-  // Draw bottom three buttons:
+  // Draw bottom buttons:
   const bool prefs_and_about_active = prefs_about_buttons_active(state);
   draw_bottom_button(&state->prefs_button, prefs_and_about_active,
                      (state->mode == AZ_TMODE_PREFS ||
                       state->mode == AZ_TMODE_PICK_KEY ? "Done" : "Options"));
+  if (records_button_visible(state)) {
+    draw_bottom_button(&state->records_button, prefs_and_about_active,
+                       (state->mode == AZ_TMODE_RECORDS ? "Done" : "Records"));
+  }
   draw_bottom_button(&state->about_button, prefs_and_about_active,
                      (state->mode == AZ_TMODE_ABOUT ? "Done" : "About"));
   draw_bottom_button(&state->quit_button, quit_button_active(state), "Quit");
@@ -664,6 +724,10 @@ void az_tick_title_state(az_title_state_t *state, double time) {
   const bool prefs_and_about_active = prefs_about_buttons_active(state);
   az_tick_button(&state->prefs_button, 0, 0, prefs_and_about_active,
                  time, state->clock, &state->soundboard);
+  if (records_button_visible(state)) {
+    az_tick_button(&state->records_button, 0, 0, prefs_and_about_active,
+                   time, state->clock, &state->soundboard);
+  }
   az_tick_button(&state->about_button, 0, 0, prefs_and_about_active,
                  time, state->clock, &state->soundboard);
   az_tick_button(&state->quit_button, 0, 0, quit_button_active(state),
@@ -738,6 +802,11 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
     if (az_button_on_click(&state->prefs_button, x, y)) {
       state->mode = (state->mode == AZ_TMODE_PREFS ? AZ_TMODE_NORMAL :
                      AZ_TMODE_PREFS);
+    }
+    if (records_button_visible(state) &&
+        az_button_on_click(&state->records_button, x, y)) {
+      state->mode = (state->mode == AZ_TMODE_RECORDS ? AZ_TMODE_NORMAL :
+                     AZ_TMODE_RECORDS);
     }
     if (az_button_on_click(&state->about_button, x, y)) {
       state->mode = (state->mode == AZ_TMODE_ABOUT ? AZ_TMODE_NORMAL :

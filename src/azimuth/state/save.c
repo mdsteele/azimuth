@@ -38,6 +38,10 @@ void az_reset_saved_games(az_saved_games_t *games) {
   games->highest_percentage = games->lowest_percentage = -1;
 }
 
+bool az_has_beaten_game(const az_saved_games_t *games) {
+  return games->highest_percentage >= 0;
+}
+
 /*===========================================================================*/
 
 static bool parse_bitfield(FILE *file, uint64_t *array, int array_length) {

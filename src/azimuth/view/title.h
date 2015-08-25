@@ -47,6 +47,7 @@ typedef struct {
     AZ_TMODE_READY,
     AZ_TMODE_NORMAL,
     AZ_TMODE_PREFS,
+    AZ_TMODE_RECORDS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_ERASING,
     AZ_TMODE_PICK_KEY,
@@ -61,7 +62,7 @@ typedef struct {
   } mode_data;
 
   az_title_save_slot_t slots[AZ_NUM_SAVED_GAME_SLOTS];
-  az_button_t prefs_button, about_button, quit_button;
+  az_button_t prefs_button, records_button, about_button, quit_button;
   az_prefs_pane_t prefs_pane;
 } az_title_state_t;
 
