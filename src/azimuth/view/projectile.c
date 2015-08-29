@@ -549,6 +549,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2f(-3, -3);
       } glEnd();
       break;
+    case AZ_PROJ_STARBURST_BLAST: break; // invisible
     case AZ_PROJ_STINGER:
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0.3, 0.15, 0);

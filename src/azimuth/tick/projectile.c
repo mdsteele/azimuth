@@ -869,6 +869,17 @@ static void projectile_special_logic(az_space_state_t *state,
       proj->velocity =
         az_vadd(proj->velocity, az_vwithlen(proj->position, -600 * time));
       break;
+    case AZ_PROJ_STARBURST_BLAST:
+      az_shake_camera(&state->camera, 3.0, 3.0);
+      if (times_per_second(30, proj, time)) {
+        const az_vector_t real_position = proj->position;
+        const double spread = 20 + 200 * proj->age;
+        az_vpluseq(&proj->position, az_vwithlen(az_vrot90ccw(proj->velocity),
+                                                az_random(-spread, spread)));
+        on_projectile_impact(state, proj, proj->velocity);
+        proj->position = real_position;
+      }
+      break;
     case AZ_PROJ_TRINE_TORPEDO:
       assert(proj->fired_by != AZ_SHIP_UID);
       if (az_ship_is_decloaked(&state->ship) &&

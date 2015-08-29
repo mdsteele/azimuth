@@ -41,6 +41,27 @@
 #define FIRE_BEAM_BACKWARD_STATE 6
 #define PILLBOX_STATE 7
 #define PRISMATIC_STATE 8
+#define STARBURST_STATE 9
+
+/*===========================================================================*/
+
+static int get_primary_state(az_baddie_t *baddie) {
+  return baddie->state & 0xff;
+}
+
+static int get_secondary_state(az_baddie_t *baddie) {
+  return (baddie->state >> 8) & 0xff;
+}
+
+static void set_primary_state(az_baddie_t *baddie, int primary) {
+  assert(primary >= 0 && primary <= 0xff);
+  baddie->state = primary;
+}
+
+static void set_secondary_state(az_baddie_t *baddie, int secondary) {
+  assert(secondary >= 0 && secondary <= 0xff);
+  baddie->state = (baddie->state & 0xff) | (secondary << 8);
+}
 
 /*===========================================================================*/
 
@@ -79,10 +100,23 @@ static void adjust_to_sawblade_configuration(az_baddie_t *baddie,
   }
 }
 
+static void adjust_to_starburst_configuration(az_baddie_t *baddie,
+                                              double time) {
+  for (int i = 0; i < 8; ++i) {
+    const double goal_rho = (i % 2 == 0 ? 0 : 70);
+    const az_vector_t goal_pos =
+      az_vpolar(goal_rho, AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45));
+    move_component_towards(baddie, time, i, goal_pos, i * AZ_DEG2RAD(45));
+  }
+}
+
+/*===========================================================================*/
+
 static void start_charging_beam(az_space_state_t *state, az_baddie_t *baddie) {
-  baddie->state = (az_vdot(az_vsub(state->ship.position, baddie->position),
-                           az_vpolar(1.0, baddie->angle)) >= 0.0 ?
-                   CHARGE_BEAM_FORWARD_STATE : CHARGE_BEAM_BACKWARD_STATE);
+  set_primary_state(baddie,
+                    (az_vdot(az_vsub(state->ship.position, baddie->position),
+                             az_vpolar(1.0, baddie->angle)) >= 0.0 ?
+                     CHARGE_BEAM_FORWARD_STATE : CHARGE_BEAM_BACKWARD_STATE));
   baddie->cooldown = 1.0;
   az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
 }
@@ -140,6 +174,22 @@ static void pull_gravity_in_and_out(
 
 /*===========================================================================*/
 
+static void init_prismatic(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  set_primary_state(baddie, PRISMATIC_STATE);
+  baddie->param = 0.0;
+  baddie->cooldown = 2.0;
+}
+
+static void init_starburst(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  set_primary_state(baddie, STARBURST_STATE);
+  baddie->param = 0.0;
+  baddie->cooldown = 0.0;
+}
+
+/*===========================================================================*/
+
 static void charge_rainbow_beam(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     double angle_offset, int next_state) {
@@ -165,7 +215,7 @@ static void charge_rainbow_beam(
     }
   }
   if (baddie->cooldown <= 0.0) {
-    baddie->state = next_state;
+    set_primary_state(baddie, next_state);
     baddie->cooldown = 5.0;
   }
 }
@@ -234,7 +284,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
 
   if (baddie->cooldown <= 0.0) {
     if (baddie->health <= 0.9 * baddie->data->max_health) {
-      baddie->state = PILLBOX_STATE;
+      set_primary_state(baddie, PILLBOX_STATE);
       baddie->cooldown = 1.0;
     } else start_charging_beam(state, baddie);
   }
@@ -242,6 +292,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
 
 static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   adjust_to_pillbox_configuration(baddie, time);
   pull_gravity_in_and_out(state, baddie, time);
   baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
@@ -253,14 +304,14 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
                               100.0, angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
     if (baddie->health <= 0.8 * baddie->data->max_health) {
-      baddie->state = PRISMATIC_STATE;
-      baddie->cooldown = 2.0;
+      init_starburst(baddie);
     } else baddie->cooldown = 0.5;
   }
 }
 
 static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   adjust_to_sawblade_configuration(baddie, time);
   adjust_gravity(state, time, 400.0, false);
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
@@ -279,6 +330,63 @@ static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
+static void do_starburst(az_space_state_t *state, az_baddie_t *baddie,
+                         double time) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  adjust_to_starburst_configuration(baddie, time);
+  adjust_gravity(state, time, -400.0, false);
+  const double max_turn_rate = AZ_DEG2RAD(720);
+  const double turn_accel = AZ_DEG2RAD(200);
+  switch (get_secondary_state(baddie)) {
+    case 0:
+      // Accelerate spinning:
+      baddie->param = fmin(baddie->param + turn_accel * time, max_turn_rate);
+      baddie->angle = az_mod2pi(baddie->angle + baddie->param * time);
+      if (baddie->param >= max_turn_rate) {
+        set_secondary_state(baddie, 1);
+        baddie->cooldown = az_random(0.5, 2.0);
+      }
+      break;
+    case 1: {
+      // Wait until we're lined up with ship:
+      baddie->angle = az_mod2pi(baddie->angle + max_turn_rate * time);
+      if (baddie->cooldown <= 0.0) {
+        double angle_delta = 0.0;
+        if (az_ship_is_decloaked(&state->ship)) {
+          angle_delta =
+            az_mod2pi((az_vtheta(az_vsub(state->ship.position,
+                                         baddie->position)) -
+                       (baddie->angle + AZ_DEG2RAD(22.5))) * 4) * 0.25;
+        }
+        if (angle_delta <= AZ_DEG2RAD(8)) {
+          baddie->angle = az_mod2pi(baddie->angle + angle_delta);
+          set_secondary_state(baddie, 2);
+          baddie->cooldown = 0.1;
+        }
+      }
+    } break;
+    case 2:
+      // Fire starburst shots (after a momentary pause):
+      if (baddie->cooldown <= 0.0) {
+        for (int i = 0; i < 360; i += 90) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_STARBURST_BLAST,
+                                    112.0, AZ_DEG2RAD(22.5) + AZ_DEG2RAD(i),
+                                    0.0);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
+        set_secondary_state(baddie, 3);
+        baddie->cooldown = 0.5;
+      }
+      break;
+    case 3:
+      // Proceed to next state (after a brief pause):
+      if (baddie->cooldown <= 0.0) {
+        init_prismatic(baddie);
+      }
+      break;
+  }
+}
+
 void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
                              double time) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
@@ -292,14 +400,14 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       az_vpluseq(&state->ship.velocity, az_vmul(unit, 800.0));
     }
   }
-  switch (baddie->state) {
+  switch (get_primary_state(baddie)) {
     case INITIAL_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
       break;
     case START_DORMANCY_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
       baddie->cooldown = 10.0;
-      baddie->state = DORMANT_STATE;
+      set_primary_state(baddie, DORMANT_STATE);
       break;
     case DORMANT_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
@@ -326,8 +434,11 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
     case PRISMATIC_STATE:
       fire_prismatic_walls(state, baddie, time);
       break;
+    case STARBURST_STATE:
+      do_starburst(state, baddie, time);
+      break;
     default:
-      baddie->state = DORMANT_STATE;
+      set_primary_state(baddie, DORMANT_STATE);
       break;
   }
 }

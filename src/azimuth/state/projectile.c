@@ -559,6 +559,14 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 4.0,
     .impact_damage = 8.0
   },
+  [AZ_PROJ_STARBURST_BLAST] = {
+    .speed = 500.0,
+    .lifetime = 0.75,
+    .splash_damage = 80.0,
+    .splash_radius = 40.0,
+    .damage_kind = AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_FEW_SPECKS | AZ_PROJF_NO_HIT
+  },
   [AZ_PROJ_STINGER] = {
     .speed = 450.0,
     .lifetime = 2.0,
