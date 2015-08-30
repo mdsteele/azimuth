@@ -40,6 +40,7 @@
 #define PILLBOX_STATE 4
 #define PRISMATIC_STATE 5
 #define STARBURST_STATE 6
+#define RAINBOW_BEAM_WITH_MINES_STATE 7
 // Rainbow beam secondary states:
 #define BEAM_CHARGE_FORWARD 0
 #define BEAM_CHARGE_BACKWARD 1
@@ -169,14 +170,42 @@ static void pull_gravity_in_and_out(
 
 /*===========================================================================*/
 
-static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie) {
-  set_primary_state(baddie, RAINBOW_BEAM_STATE);
+static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
+                              bool lay_mines) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  set_primary_state(baddie, (lay_mines ? RAINBOW_BEAM_WITH_MINES_STATE :
+                             RAINBOW_BEAM_STATE));
   set_secondary_state(baddie,
                       (az_vdot(az_vsub(state->ship.position, baddie->position),
                                az_vpolar(1.0, baddie->angle)) >= 0.0 ?
                        BEAM_CHARGE_FORWARD : BEAM_CHARGE_BACKWARD));
   baddie->cooldown = 1.0;
   az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
+  if (lay_mines) {
+    for (int i = 0; i < 360; i += 45) {
+      const double abs_angle =
+        AZ_DEG2RAD(22.5) + AZ_DEG2RAD(i) + baddie->angle;
+      bool mine_exists = false;
+      AZ_ARRAY_LOOP(other, state->baddies) {
+        if (other->kind != AZ_BAD_PROXY_MINE) continue;
+        const double other_angle =
+          az_vtheta(az_vsub(other->position, baddie->position));
+        if (fabs(az_mod2pi(other_angle - abs_angle)) <= AZ_DEG2RAD(22)) {
+          mine_exists = true;
+          break;
+        }
+      }
+      if (!mine_exists) {
+        az_baddie_t *mine = az_add_baddie(
+            state, AZ_BAD_PROXY_MINE,
+            az_vadd(az_vpolar(100, abs_angle), baddie->position),
+            az_random(-AZ_PI, AZ_PI));
+        if (mine != NULL) {
+          mine->velocity = az_vpolar(az_random(400, 900), abs_angle);
+        }
+      }
+    }
+  }
 }
 
 static void init_prismatic(az_baddie_t *baddie) {
@@ -290,7 +319,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
 }
 
 static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
-                            double time) {
+                            double time, bool lay_mines) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   adjust_to_beam_configuration(baddie, time);
   spin_gravity_back_and_forth(state, baddie, time);
@@ -309,10 +338,10 @@ static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case BEAM_COOLDOWN:
       if (baddie->cooldown <= 0.0) {
-        if (baddie->health <= 0.9 * baddie->data->max_health) {
+        if (!lay_mines && baddie->health <= 0.9 * baddie->data->max_health) {
           set_primary_state(baddie, PILLBOX_STATE);
           baddie->cooldown = 1.0;
-        } else init_rainbow_beam(state, baddie);
+        } else init_rainbow_beam(state, baddie, lay_mines);
       }
       break;
   }
@@ -354,7 +383,9 @@ static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
                                 112.0, start_angle + AZ_DEG2RAD(i), 0.0);
     }
     az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_PIERCE);
-    baddie->cooldown = 1.0;
+    if (baddie->health <= 0.6 * baddie->data->max_health) {
+      init_rainbow_beam(state, baddie, true);
+    } else baddie->cooldown = 1.0;
   }
 }
 
@@ -386,7 +417,7 @@ static void do_starburst(az_space_state_t *state, az_baddie_t *baddie,
                                          baddie->position)) -
                        (baddie->angle + AZ_DEG2RAD(22.5))) * 4) * 0.25;
         }
-        if (angle_delta <= AZ_DEG2RAD(8)) {
+        if (fabs(angle_delta) <= AZ_DEG2RAD(8)) {
           baddie->angle = az_mod2pi(baddie->angle + angle_delta);
           set_secondary_state(baddie, 2);
           baddie->cooldown = 0.1;
@@ -440,11 +471,11 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
     case DORMANT_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
       if (baddie->cooldown <= 0.0) {
-        init_rainbow_beam(state, baddie);
+        init_rainbow_beam(state, baddie, false);
       }
       break;
     case RAINBOW_BEAM_STATE:
-      do_rainbow_beam(state, baddie, time);
+      do_rainbow_beam(state, baddie, time, false);
       break;
     case PILLBOX_STATE:
       fire_pillbox_rockets(state, baddie, time);
@@ -454,6 +485,9 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case STARBURST_STATE:
       do_starburst(state, baddie, time);
+      break;
+    case RAINBOW_BEAM_WITH_MINES_STATE:
+      do_rainbow_beam(state, baddie, time, true);
       break;
     default:
       set_primary_state(baddie, DORMANT_STATE);

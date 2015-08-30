@@ -612,6 +612,13 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_fast_bouncer(state, baddie, time);
       break;
     case AZ_BAD_PROXY_MINE:
+      if (az_vnorm(baddie->velocity) < 1.0) {
+        baddie->velocity = AZ_VZERO;
+      } else {
+        const double tracking_base = 0.03; // smaller = faster tracking
+        az_vpluseq(&baddie->velocity, az_vmul(baddie->velocity,
+                                              pow(tracking_base, time) - 1.0));
+      }
       baddie->angle = az_mod2pi(baddie->angle - AZ_DEG2RAD(120) * time);
       // State 0: Wait for ship.
       if (baddie->state == 0) {
