@@ -1,0 +1,89 @@
+@M "SABC|D"
+% Title: "High Ground"
+
+=tempo 125
+=key 0N     % A minor
+
+
+!Part S
+
+1 Wp25 L30  E0,25  D+20,30 V+1,100
+2 Wp50 L20  E0,25  D+20,30 V+1,100
+3 Wt25 L200 E0,50  D+10,30
+4 Wn   L50  E0,100
+5 Wn   L50  E0,100
+
+
+
+!Part A
+
+2| E0,0 a2w V+300,0.42 a2w+w V0,1 a4w |
+
+
+!Part B
+
+2| E0,50 a4w+w |
+3| a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+ | a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+5| x0q x0 x0 x0 |
+ | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 |
+
+
+!Part C
+
+2| rw | rw | rw | E300,0 a5w |
+3| a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+ | a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+5| x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+
+
+!Part D
+
+1| c4e+s a3s+ ' +e a3e ' g3e+s a3s+ ' +e a3e |
+ | c4e+s a3s+ ' +e a3e ' g3e+s g3s+ ' +e c4e |
+ | c4e+s a3s+ ' +e a3e ' g3e+s c4s+ ' +e c4e |
+ | f3e+s c4s+ ' +e c4e ' g3e+s g3s+ ' +e c4e |
+2| E0,50 a5w+ | +w | rw | rw |
+3| a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+ | a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+5| x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+
+1| c4e+s a3s+ ' +e a3e ' g3e+s a3s+ ' +e a3e |
+ | c4e+s a3s+ ' +e a3e ' c4e+s a3s+ ' +e a3e |
+ | c4e+s a3s+ ' +e a3e ' g3e+s c4s+ ' +e c4e |
+ | f3e+s c4s+ ' +e c4e ' g3e+s g3s+ ' +e c4e |
+2| rw | rw | E700,0 a5w+ | +w |
+3| a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+ | a2e c3 ' e c ' g2 b ' d3 b2 |
+ | f2e a ' c3 a2 ' g2 b ' d3 b2 |
+4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+ | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
+5| x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
+ | x0e a7 x0 a7 x0 a7 x0 a7 |
