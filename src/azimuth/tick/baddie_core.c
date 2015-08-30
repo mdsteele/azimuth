@@ -32,16 +32,20 @@
 
 /*===========================================================================*/
 
+// Primary states:
 #define INITIAL_STATE 0
 #define START_DORMANCY_STATE 1
 #define DORMANT_STATE 2
-#define CHARGE_BEAM_FORWARD_STATE 3
-#define CHARGE_BEAM_BACKWARD_STATE 4
-#define FIRE_BEAM_FORWARD_STATE 5
-#define FIRE_BEAM_BACKWARD_STATE 6
-#define PILLBOX_STATE 7
-#define PRISMATIC_STATE 8
-#define STARBURST_STATE 9
+#define RAINBOW_BEAM_STATE 3
+#define PILLBOX_STATE 4
+#define PRISMATIC_STATE 5
+#define STARBURST_STATE 6
+// Rainbow beam secondary states:
+#define BEAM_CHARGE_FORWARD 0
+#define BEAM_CHARGE_BACKWARD 1
+#define BEAM_FIRE_FORWARD 2
+#define BEAM_FIRE_BACKWARD 3
+#define BEAM_COOLDOWN 4
 
 /*===========================================================================*/
 
@@ -112,15 +116,6 @@ static void adjust_to_starburst_configuration(az_baddie_t *baddie,
 
 /*===========================================================================*/
 
-static void start_charging_beam(az_space_state_t *state, az_baddie_t *baddie) {
-  set_primary_state(baddie,
-                    (az_vdot(az_vsub(state->ship.position, baddie->position),
-                             az_vpolar(1.0, baddie->angle)) >= 0.0 ?
-                     CHARGE_BEAM_FORWARD_STATE : CHARGE_BEAM_BACKWARD_STATE));
-  baddie->cooldown = 1.0;
-  az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
-}
-
 // Turn the angle_offset side of the baddie towards the ship.
 static void turn_offset_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,
@@ -174,6 +169,16 @@ static void pull_gravity_in_and_out(
 
 /*===========================================================================*/
 
+static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie) {
+  set_primary_state(baddie, RAINBOW_BEAM_STATE);
+  set_secondary_state(baddie,
+                      (az_vdot(az_vsub(state->ship.position, baddie->position),
+                               az_vpolar(1.0, baddie->angle)) >= 0.0 ?
+                       BEAM_CHARGE_FORWARD : BEAM_CHARGE_BACKWARD));
+  baddie->cooldown = 1.0;
+  az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
+}
+
 static void init_prismatic(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   set_primary_state(baddie, PRISMATIC_STATE);
@@ -192,9 +197,7 @@ static void init_starburst(az_baddie_t *baddie) {
 
 static void charge_rainbow_beam(
     az_space_state_t *state, az_baddie_t *baddie, double time,
-    double angle_offset, int next_state) {
-  adjust_to_beam_configuration(baddie, time);
-  spin_gravity_back_and_forth(state, baddie, time);
+    double angle_offset, int next_secondary_state) {
   const double particle_lifetime = 0.5;
   const double particle_distance = 50.0;
   if (baddie->cooldown >= particle_lifetime) {
@@ -215,15 +218,13 @@ static void charge_rainbow_beam(
     }
   }
   if (baddie->cooldown <= 0.0) {
-    set_primary_state(baddie, next_state);
+    set_secondary_state(baddie, next_secondary_state);
     baddie->cooldown = 5.0;
   }
 }
 
 static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
                               double time, double angle_offset) {
-  adjust_to_beam_configuration(baddie, time);
-  spin_gravity_back_and_forth(state, baddie, time);
   turn_offset_towards_ship(state, baddie, time, angle_offset);
   if (baddie->param == 0.0 && baddie->cooldown < 4.5) {
     baddie->param = -copysign(1.0, az_mod2pi(
@@ -283,10 +284,37 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   az_loop_sound(&state->soundboard, AZ_SND_CORE_BEAM_FIRE);
 
   if (baddie->cooldown <= 0.0) {
-    if (baddie->health <= 0.9 * baddie->data->max_health) {
-      set_primary_state(baddie, PILLBOX_STATE);
-      baddie->cooldown = 1.0;
-    } else start_charging_beam(state, baddie);
+    set_secondary_state(baddie, BEAM_COOLDOWN);
+    baddie->cooldown = 0.5;
+  }
+}
+
+static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
+                            double time) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  adjust_to_beam_configuration(baddie, time);
+  spin_gravity_back_and_forth(state, baddie, time);
+  switch (get_secondary_state(baddie)) {
+    case BEAM_CHARGE_FORWARD:
+      charge_rainbow_beam(state, baddie, time, 0, BEAM_FIRE_FORWARD);
+      break;
+    case BEAM_CHARGE_BACKWARD:
+      charge_rainbow_beam(state, baddie, time, AZ_PI, BEAM_FIRE_BACKWARD);
+      break;
+    case BEAM_FIRE_FORWARD:
+      fire_rainbow_beam(state, baddie, time, 0);
+      break;
+    case BEAM_FIRE_BACKWARD:
+      fire_rainbow_beam(state, baddie, time, AZ_PI);
+      break;
+    case BEAM_COOLDOWN:
+      if (baddie->cooldown <= 0.0) {
+        if (baddie->health <= 0.9 * baddie->data->max_health) {
+          set_primary_state(baddie, PILLBOX_STATE);
+          baddie->cooldown = 1.0;
+        } else init_rainbow_beam(state, baddie);
+      }
+      break;
   }
 }
 
@@ -412,21 +440,11 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
     case DORMANT_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
       if (baddie->cooldown <= 0.0) {
-        start_charging_beam(state, baddie);
+        init_rainbow_beam(state, baddie);
       }
       break;
-    case CHARGE_BEAM_FORWARD_STATE:
-      charge_rainbow_beam(state, baddie, time, 0, FIRE_BEAM_FORWARD_STATE);
-      break;
-    case CHARGE_BEAM_BACKWARD_STATE:
-      charge_rainbow_beam(state, baddie, time, AZ_PI,
-                          FIRE_BEAM_BACKWARD_STATE);
-      break;
-    case FIRE_BEAM_FORWARD_STATE:
-      fire_rainbow_beam(state, baddie, time, 0);
-      break;
-    case FIRE_BEAM_BACKWARD_STATE:
-      fire_rainbow_beam(state, baddie, time, AZ_PI);
+    case RAINBOW_BEAM_STATE:
+      do_rainbow_beam(state, baddie, time);
       break;
     case PILLBOX_STATE:
       fire_pillbox_rockets(state, baddie, time);
