@@ -784,6 +784,19 @@ static void projectile_special_logic(az_space_state_t *state,
       proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
             proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
       break;
+    case AZ_PROJ_ORBITAL_TORPEDO:
+      az_vpluseq(&proj->velocity,
+                 az_vwithlen(proj->position,
+                             -500000.0 / az_vdot(proj->position,
+                                                 proj->position)));
+      if (times_per_second(15, proj, time)) {
+        leave_particle_trail(state, proj, AZ_PAR_EMBER,
+                             (az_color_t){255, 128, 0, 128}, 0.3, 15.0, 0.0);
+      }
+      if (proj->age >= proj->data->lifetime) {
+        on_projectile_hit_wall(state, proj, proj->velocity);
+      }
+      break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));

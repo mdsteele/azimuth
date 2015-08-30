@@ -41,6 +41,7 @@
 #define PRISMATIC_STATE 5
 #define STARBURST_STATE 6
 #define RAINBOW_BEAM_WITH_MINES_STATE 7
+#define BUZZSAW_STATE 8
 // Rainbow beam secondary states:
 #define BEAM_CHARGE_FORWARD 0
 #define BEAM_CHARGE_BACKWARD 1
@@ -182,6 +183,7 @@ static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   baddie->cooldown = 1.0;
   az_play_sound(&state->soundboard, AZ_SND_CORE_BEAM_CHARGE);
   if (lay_mines) {
+    baddie->param = 1.0;
     for (int i = 0; i < 360; i += 45) {
       const double abs_angle =
         AZ_DEG2RAD(22.5) + AZ_DEG2RAD(i) + baddie->angle;
@@ -206,6 +208,20 @@ static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
       }
     }
   }
+}
+
+static void init_buzzsaw(az_space_state_t *state, az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  set_primary_state(baddie, BUZZSAW_STATE);
+  baddie->param = 0.0;
+  baddie->cooldown = 2.0;
+}
+
+static void init_pillbox(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  set_primary_state(baddie, PILLBOX_STATE);
+  baddie->param = 1.0;
+  baddie->cooldown = 1.0;
 }
 
 static void init_prismatic(az_baddie_t *baddie) {
@@ -339,8 +355,7 @@ static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
     case BEAM_COOLDOWN:
       if (baddie->cooldown <= 0.0) {
         if (!lay_mines && baddie->health <= 0.9 * baddie->data->max_health) {
-          set_primary_state(baddie, PILLBOX_STATE);
-          baddie->cooldown = 1.0;
+          init_pillbox(baddie);
         } else init_rainbow_beam(state, baddie, lay_mines);
       }
       break;
@@ -361,7 +376,7 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
                               100.0, angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
     if (baddie->health <= 0.8 * baddie->data->max_health) {
-      init_starburst(baddie);
+      init_buzzsaw(state, baddie);
     } else baddie->cooldown = 0.5;
   }
 }
@@ -369,7 +384,7 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
 static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
                                  double time) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  adjust_to_sawblade_configuration(baddie, time);
+  adjust_to_pillbox_configuration(baddie, time);
   adjust_gravity(state, time, 400.0, false);
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
                                    AZ_DEG2RAD(22.5));
@@ -446,6 +461,26 @@ static void do_starburst(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
+static void do_buzzsaw(az_space_state_t *state, az_baddie_t *baddie,
+                       double time) {
+  assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  adjust_to_sawblade_configuration(baddie, time);
+  adjust_gravity(state, time, 400.0, false);
+  baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(60) * time);
+  if (baddie->cooldown <= 0.0) {
+    const int secondary = get_secondary_state(baddie);
+    az_fire_baddie_projectile(state, baddie, AZ_PROJ_ORBITAL_TORPEDO,
+                              120.0, AZ_DEG2RAD(45) * secondary,
+                              az_random(AZ_DEG2RAD(-80), AZ_DEG2RAD(-60)));
+    set_secondary_state(baddie, az_modulo(secondary - 3, 8));
+    if (baddie->health <= 0.7 * baddie->data->max_health) {
+      init_starburst(baddie);
+    } else baddie->cooldown = 0.5;
+  }
+}
+
+/*===========================================================================*/
+
 void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
                              double time) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
@@ -488,6 +523,9 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case RAINBOW_BEAM_WITH_MINES_STATE:
       do_rainbow_beam(state, baddie, time, true);
+      break;
+    case BUZZSAW_STATE:
+      do_buzzsaw(state, baddie, time);
       break;
     default:
       set_primary_state(baddie, DORMANT_STATE);

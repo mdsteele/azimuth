@@ -471,6 +471,18 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_BOMB,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_ORBITAL_TORPEDO] = {
+    .speed = 600.0,
+    .lifetime = 4.1,
+    .impact_damage = 20.0,
+    .splash_damage = 5.0,
+    .splash_radius = 25.0,
+    .impact_shake = 0.75,
+    .impact_sound = AZ_SND_EXPLODE_FIREBALL_SMALL,
+    .shrapnel_kind = AZ_PROJ_FIREBALL_SLOW,
+    .damage_kind = AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_TEMP_INVINC
+  },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,
