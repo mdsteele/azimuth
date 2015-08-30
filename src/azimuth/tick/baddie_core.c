@@ -42,6 +42,7 @@
 #define STARBURST_STATE 6
 #define RAINBOW_BEAM_WITH_MINES_STATE 7
 #define BUZZSAW_STATE 8
+#define REVERSE_BUZZSAW_STATE 9
 // Rainbow beam secondary states:
 #define BEAM_CHARGE_FORWARD 0
 #define BEAM_CHARGE_BACKWARD 1
@@ -97,11 +98,14 @@ static void adjust_to_pillbox_configuration(az_baddie_t *baddie, double time) {
   }
 }
 
-static void adjust_to_sawblade_configuration(az_baddie_t *baddie,
-                                             double time) {
+static void adjust_to_buzzsaw_configuration(az_baddie_t *baddie,
+                                            double time, bool reverse) {
+  const double theta_offset = (reverse ? AZ_DEG2RAD(45) : 0);
+  const double angle_offset = (reverse ? AZ_DEG2RAD(-85) : AZ_DEG2RAD(85));
   for (int i = 0; i < 8; ++i) {
-    const az_vector_t goal_position = az_vpolar(110, i * AZ_DEG2RAD(45));
-    const double goal_angle = az_mod2pi(AZ_DEG2RAD(85) + i * AZ_DEG2RAD(45));
+    const az_vector_t goal_position =
+      az_vpolar(110, theta_offset + i * AZ_DEG2RAD(45));
+    const double goal_angle = az_mod2pi(angle_offset + i * AZ_DEG2RAD(45));
     move_component_towards(baddie, time, i, goal_position, goal_angle);
   }
 }
@@ -210,9 +214,9 @@ static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
-static void init_buzzsaw(az_space_state_t *state, az_baddie_t *baddie) {
+static void init_buzzsaw(az_baddie_t *baddie, bool reverse) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  set_primary_state(baddie, BUZZSAW_STATE);
+  set_primary_state(baddie, (reverse ? REVERSE_BUZZSAW_STATE : BUZZSAW_STATE));
   baddie->param = 0.0;
   baddie->cooldown = 2.0;
 }
@@ -356,6 +360,9 @@ static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
       if (baddie->cooldown <= 0.0) {
         if (!lay_mines && baddie->health <= 0.9 * baddie->data->max_health) {
           init_pillbox(baddie);
+        } else if (lay_mines &&
+                   baddie->health <= 0.5 * baddie->data->max_health) {
+          init_buzzsaw(baddie, true);
         } else init_rainbow_beam(state, baddie, lay_mines);
       }
       break;
@@ -376,7 +383,7 @@ static void fire_pillbox_rockets(az_space_state_t *state, az_baddie_t *baddie,
                               100.0, angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
     if (baddie->health <= 0.8 * baddie->data->max_health) {
-      init_buzzsaw(state, baddie);
+      init_buzzsaw(baddie, false);
     } else baddie->cooldown = 0.5;
   }
 }
@@ -462,20 +469,24 @@ static void do_starburst(az_space_state_t *state, az_baddie_t *baddie,
 }
 
 static void do_buzzsaw(az_space_state_t *state, az_baddie_t *baddie,
-                       double time) {
+                       double time, double reverse) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  adjust_to_sawblade_configuration(baddie, time);
+  const double turn_rate = (reverse ? AZ_DEG2RAD(-90) : AZ_DEG2RAD(60));
+  adjust_to_buzzsaw_configuration(baddie, time, reverse);
   adjust_gravity(state, time, 400.0, false);
-  baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(60) * time);
+  baddie->angle = az_mod2pi(baddie->angle + turn_rate * time);
   if (baddie->cooldown <= 0.0) {
     const int secondary = get_secondary_state(baddie);
+    const double angle = (reverse ?
+                          az_random(AZ_DEG2RAD(60), AZ_DEG2RAD(80)) :
+                          az_random(AZ_DEG2RAD(-80), AZ_DEG2RAD(-60)));
     az_fire_baddie_projectile(state, baddie, AZ_PROJ_ORBITAL_TORPEDO,
-                              120.0, AZ_DEG2RAD(45) * secondary,
-                              az_random(AZ_DEG2RAD(-80), AZ_DEG2RAD(-60)));
+                              120.0, AZ_DEG2RAD(45) * secondary, angle);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_FIREBALL);
     set_secondary_state(baddie, az_modulo(secondary - 3, 8));
-    if (baddie->health <= 0.7 * baddie->data->max_health) {
+    if (!reverse && baddie->health <= 0.7 * baddie->data->max_health) {
       init_starburst(baddie);
-    } else baddie->cooldown = 0.5;
+    } else baddie->cooldown = az_random(1.0, 1.5) * (reverse ? 0.4 : 0.5);
   }
 }
 
@@ -525,7 +536,10 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       do_rainbow_beam(state, baddie, time, true);
       break;
     case BUZZSAW_STATE:
-      do_buzzsaw(state, baddie, time);
+      do_buzzsaw(state, baddie, time, false);
+      break;
+    case REVERSE_BUZZSAW_STATE:
+      do_buzzsaw(state, baddie, time, true);
       break;
     default:
       set_primary_state(baddie, DORMANT_STATE);
