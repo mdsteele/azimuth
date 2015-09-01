@@ -1,6 +1,6 @@
-@R z7 p4 b0 d8 g6 n31 w100
+@R z7 p4 k0 b0 d8 g6 n31 w100
   c(29683.14,2391.83,1.571355,0.000000)
-$s:test89,hnez,activ1,activ2,activ3,activ4,activ5,activ6;
+$s:msg241,test89,hnez,activ1,activ2,activ3,activ4,activ5,activ6;
 !W1 d51 x-218.02 y32254.33 a0.000559 u0
 !W1 d33 x-314.25 y32224.03 a1.571355 u0
 !W1 d98 x-286.25 y29496.25 a0.029644 u0
