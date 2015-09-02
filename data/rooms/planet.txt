@@ -1,5 +1,5 @@
-@P z8 r471 t243 s6
-$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,scene4,wait1.5,scene3,scene0;
+@P z8 r471 t245 s6
+$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -36,8 +36,8 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T8"
   Scanning records...
 
-  Of 473 registered colonists on Zenith, $Y214 human
-  and 91 trichord fatalities$W have been reported in
+  Of 473 registered colonists on Zenith, $Y214 Human
+  and 91 Trichord fatalities$W have been reported in
   the past 48 hours."
 !T9"
   \"Dammit!  ...But some of them are still alive?
@@ -97,8 +97,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   make it out clearly.  Moving to investigate,
   over.\""
 !T25"
-  \"Copy that, please stand by.  Hey there,
-  Hopper.\""
+  \"Copy that, Hopper, please stand by.\""
 !T26"
   \"Oh, hey there, G.  Didn't expect to hear you
   on this line.\""
@@ -109,32 +108,31 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   Lovelace system.  Sheesh, you're way out on the
   frontier, aren't you?\""
 !T28"
-  \"Aw, shiii...this doesn't look good.  Automated
-  last-ditch failsafe signal broadcast by the
-  colony's central computer.\""
+  \"Eeeesh...this doesn't look good.  It's an
+  automated, last-ditch failsafe signal broadcast
+  by the colony's central computer.\""
 !T29"
-  \"An automated failsafe.  Which means-\""
+  \"An automated failsafe.  Which means--\""
 !T30"
-  \"-that things are so botched up down there that
-  no one was around to manually send or even
-  confirm the broadcast.  ...Aaand the signal just
-  went dead.  Not even a carrier ping anymore.  So
-  their whole transmitter array must have gone
-  down.  What in the hell could...oh here, I've
-  got your...yeah, they're sending you in, all
-  right.\""
+  \"Which means no one down there had a chance to
+  manually send or even confirm the broadcast.
+  ...Aaand the signal just went dead.  Not even a
+  carrier ping anymore.  So the whole transmitter
+  array must have gone down?  What in the hell
+  could...oh here, I've got your...yeah, they're
+  sending you in, all right.\""
 !T31"
-  \"Roger that, G.  I'm priming the C-jump as we
-  speak; be there in six.\""
+  \"Roger that, G.  I'm already priming the C-jump
+  as we speak; be there in six.\""
 !T32"
   \"Listen, it looks like you're the only patrol
-  within a week of there right now, so it's all on
-  you.  Get in there fast, figure out what the
-  hell happened, rescue anyone who's still alive
-  and get them out safely.\""
+  within three days of there right now, so it's
+  all on you.  Get in there fast, figure out what
+  the hell happened, rescue anyone who's still
+  alive, and get them out safely.\""
 !T33"
   \"...hey, and make sure you get yourself out
-  safely too, Hopper!  Good luck.\""
+  safely too, Hopper!\""
 !T34"
   Use [$l] [$u] [$r] keys to fly."
 !T35"
@@ -659,7 +657,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
 !T146"
   \"Don't be silly.  The Oth are a tool; one that
   we have been working diligently to harness.
-  Well, some of us, anyway; but none of the humans
+  Well, some of us, anyway; but none of the Humans
   or the few Trichords who objected--once they saw
   what we were trying to accomplish--survived the
   retreat to the core, so that problem sort of
@@ -675,7 +673,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   \"The point, Major, is that the NPS catalysis
   engines have been very nearly perfected now.
   And with the might of the Oth behind us, the
-  Trichord Alliance won't need the humans--or any
+  Trichord Alliance won't need the Humans--or any
   of the rest of the Joint Federation for that
   matter--any longer.  This is simply a matter of
   independence, you see.\""
@@ -962,7 +960,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   It is sobering to think that in a way,
   this entire war was precipitated by my
   own actions: a routine rescue mission
-  that I carried out four years ago
+  that I carried out four years ago,
   while on patrol near the border of
   Human space."
 !T212"
@@ -1182,3 +1180,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,scene1,wait2,dlog,pt1,tt
   $RTHIS ROOM IS NOT DONE YET"
 !T242"
   $RTHIS BOSS IS NOT DONE YET"
+!T243"
+  $CFour years ago..."
+!T244"
+  $CSix hours later..."

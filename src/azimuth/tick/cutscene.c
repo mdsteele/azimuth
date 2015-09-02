@@ -40,6 +40,7 @@ static void next_scene(az_space_state_t *state, bool reset) {
     cutscene->step = 0;
   }
   cutscene->scene = cutscene->next;
+  cutscene->scene_text = cutscene->next_text;
   if (state->sync_vm.script != NULL) az_resume_script(state, &state->sync_vm);
 }
 
@@ -68,13 +69,18 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
   bool ready_for_next_scene = true;
   switch (cutscene->scene) {
     case AZ_SCENE_NOTHING:
+      assert(cutscene->scene_text == NULL);
       assert(cutscene->next == AZ_SCENE_NOTHING);
+      assert(cutscene->next_text == NULL);
       assert(cutscene->fade_alpha == 0.0);
       assert(cutscene->time == 0.0);
       assert(cutscene->param1 == 0.0);
       assert(cutscene->param2 == 0.0);
       assert(cutscene->step == 0);
       return;
+    case AZ_SCENE_TEXT:
+      assert(cutscene->scene_text != NULL);
+      break;
     case AZ_SCENE_CRUISING:
       if (cutscene->next == AZ_SCENE_MOVE_OUT) {
         next_scene(state, false);
@@ -82,6 +88,9 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       }
       break;
     case AZ_SCENE_MOVE_OUT:
+      if (cutscene->param1 == 0.0) {
+        az_play_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+      }
       cutscene->param1 = fmin(1.0, cutscene->param1 + time / 1.5);
       if (cutscene->param1 >= 0.5) {
         cutscene->param2 = fmin(1.0, cutscene->param2 + time / 1.5);
@@ -89,7 +98,10 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       ready_for_next_scene = (cutscene->param2 >= 1.0);
       break;
     case AZ_SCENE_ARRIVAL:
-      cutscene->param1 = fmin(1.0, cutscene->param1 + time / 5.0);
+      if (cutscene->param1 == 0.0) {
+        az_play_sound(&state->soundboard, AZ_SND_ENTER_ATMOSPHERE);
+      }
+      cutscene->param1 = fmin(1.0, cutscene->param1 + time / 7.0);
       ready_for_next_scene = (cutscene->param1 >= 1.0);
       break;
     case AZ_SCENE_ZENITH:
@@ -122,6 +134,8 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_HOMECOMING:
       // TODO: implement homecoming scene
+      break;
+    case AZ_SCENE_BLACK:
       break;
   }
   if (ready_for_next_scene && cutscene->next != cutscene->scene) {

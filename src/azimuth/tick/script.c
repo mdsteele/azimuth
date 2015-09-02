@@ -770,8 +770,24 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           SCRIPT_ERROR("invalid scene index");
         }
         state->cutscene.next = (az_scene_t)scene_index;
+        state->cutscene.next_text = NULL;
         if (state->cutscene.scene == AZ_SCENE_NOTHING) {
           state->cutscene.scene = state->cutscene.next;
+          state->cutscene.scene_text = state->cutscene.next_text;
+          state->cutscene.fade_alpha = 1.0;
+        } else SUSPEND(&state->sync_vm);
+      } break;
+      case AZ_OP_SCTXT: {
+        const int paragraph_index = (int)ins.immediate;
+        if (paragraph_index < 0 ||
+            paragraph_index >= state->planet->num_paragraphs) {
+          SCRIPT_ERROR("invalid paragraph index");
+        }
+        state->cutscene.next = AZ_SCENE_TEXT;
+        state->cutscene.next_text = state->planet->paragraphs[paragraph_index];
+        if (state->cutscene.scene == AZ_SCENE_NOTHING) {
+          state->cutscene.scene = state->cutscene.next;
+          state->cutscene.scene_text = state->cutscene.next_text;
           state->cutscene.fade_alpha = 1.0;
         } else SUSPEND(&state->sync_vm);
       } break;
@@ -983,6 +999,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
 
  halt:
   state->cutscene.next = AZ_SCENE_NOTHING;
+  state->cutscene.next_text = NULL;
   if (state->dialogue.step != AZ_DLS_INACTIVE) {
     state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
   }

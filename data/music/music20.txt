@@ -1,0 +1,41 @@
+@M "S a A=1c A=1c A=1c A=1c B=1c B=1c B=1c B=1c :a cC"
+
+=key 3b     % C minor
+=tempo 140
+
+
+!Part S
+
+1 Wp50 L30  E0,25
+2 Wp50 L10  E0,100
+3 Wt25 L100 E0,50
+4 Wn   L30  E0,100
+
+
+!Part A
+
+1| c3e c ' r c ' c r ' c c |
+3| E200,0 c2w |
+4| c4s r c4 r ' re c4s r ' c4s rs+e ' c4s r c r |
+
+3| E0,100 c2w |
+4| re c4s r ' c r c r ' c r c r ' c r c r |
+
+
+!Part B
+
+1| c3e c ' r c ' c r ' c c |
+2| rw |
+3| E200,0 c2w |
+4| c4s r c4 r ' re c4s r ' c4s rs+e ' c4s r c r |
+
+2| re c6e ' g c ' g a ' f g |
+3| E0,100 c2w |
+4| re c4s r ' c r c r ' c r c r ' c r c r |
+
+
+!Part C
+
+1| c3e c ' r c ' c r ' c E0,100 V-100,0.5 ce+ | +w |
+3| E200,0 c2w | E0,100 c2w |
+4| c4s r c4 r ' re c4s r ' c4s rs+e ' c4s r c r |

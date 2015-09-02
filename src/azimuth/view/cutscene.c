@@ -33,6 +33,7 @@
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/ship.h"
+#include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
@@ -270,9 +271,9 @@ static void draw_arrival_scene(
   az_draw_planet_starfield(clock);
   az_draw_zenith_planet(clock);
   glPushMatrix(); {
-    const az_vector_t ctrl0 = {700, 20}, ctrl1 = {600, 300};
-    const az_vector_t ctrl2 = {0, 520}, ctrl3 = {220, 290};
-    const double t = 1.0 - exp(-5.0 * cutscene->param1);
+    const az_vector_t ctrl0 = {700, 20}, ctrl1 = {500, 600};
+    const az_vector_t ctrl2 = {-100, 420}, ctrl3 = {220, 290};
+    const double t = 1.0 - exp(-7.0 * cutscene->param1);
     const double s = 1.0 - t;
     const az_vector_t pos =
       az_vadd(az_vadd(az_vmul(ctrl0, s*s*s),
@@ -285,7 +286,7 @@ static void draw_arrival_scene(
               az_vadd(az_vmul(ctrl2, 6*s*t - 3*t*t),
                       az_vmul(ctrl3, 3*t*t))));
     glTranslatef(pos.x, pos.y, 0);
-    const double scale = fmax(0.05, exp(1.5 - 8.0 * cutscene->param1));
+    const double scale = fmax(0.05, exp(1.5 - 12.0 * cutscene->param1));
     glScaled(scale, scale, 1);
     az_ship_t ship = {
       .position = {0, 0}, .angle = angle, .thrusters = AZ_THRUST_FORWARD
@@ -370,6 +371,12 @@ void az_draw_cutscene(const az_space_state_t *state) {
   assert(cutscene->scene != AZ_SCENE_NOTHING);
   switch (cutscene->scene) {
     case AZ_SCENE_NOTHING: AZ_ASSERT_UNREACHABLE();
+    case AZ_SCENE_TEXT:
+      assert(cutscene->scene_text != NULL);
+      az_draw_paragraph(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2,
+                        AZ_SCREEN_HEIGHT/2 - 8, 20, -1,
+                        state->prefs, cutscene->scene_text);
+      break;
     case AZ_SCENE_CRUISING:
       draw_cruising_scene(cutscene, state->clock);
       break;
@@ -386,6 +393,7 @@ void az_draw_cutscene(const az_space_state_t *state) {
       draw_escape_scene(cutscene, state->clock);
       break;
     case AZ_SCENE_HOMECOMING: break; // TODO
+    case AZ_SCENE_BLACK: break;
   }
   if (cutscene->fade_alpha > 0.0) tint_screen(0, cutscene->fade_alpha);
 }

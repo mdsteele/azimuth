@@ -227,6 +227,13 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_resonance = 0.664601, .hpf_cutoff = 0.0240503, .hpf_ramp = 0.01,
     .volume_adjust = -0.7,
   },
+  [AZ_SND_ENTER_ATMOSPHERE] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_attack = 0.275, .env_sustain = 0.225,
+    .env_punch = 0.075, .env_decay = 1.0,
+    .start_freq = 0.32, .freq_slide = -0.2, .repeat_speed = 0.755,
+    .phaser_offset = -0.31, .phaser_sweep = -0.04, .volume_adjust = -0.4
+  },
   [AZ_SND_ERUPTION] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_attack = 0.215, .env_decay = 0.55, .start_freq = 0.11,

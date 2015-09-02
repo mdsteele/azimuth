@@ -23,22 +23,27 @@
 
 /*===========================================================================*/
 
-// The number of different cutscenes there are, not counting AZ_SCENE_NOTHING:
-#define AZ_NUM_SCENES 6
+// The number of different cutscenes there are, not counting AZ_SCENE_NOTHING
+// and AZ_SCENE_TEXT:
+#define AZ_NUM_SCENES 7
 
 typedef enum {
+  AZ_SCENE_TEXT = -1,
   AZ_SCENE_NOTHING = 0,
   AZ_SCENE_CRUISING,
   AZ_SCENE_MOVE_OUT,
   AZ_SCENE_ARRIVAL,
   AZ_SCENE_ZENITH,
   AZ_SCENE_ESCAPE,
-  AZ_SCENE_HOMECOMING
+  AZ_SCENE_HOMECOMING,
+  AZ_SCENE_BLACK
 } az_scene_t;
 
 typedef struct {
   az_scene_t scene;
   az_scene_t next;
+  const char *scene_text;
+  const char *next_text;
   double fade_alpha; // 0.0 to 1.0
   double time;
   double param1, param2;
