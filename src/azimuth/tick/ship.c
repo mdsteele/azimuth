@@ -1154,6 +1154,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
 
+  if (controls->ordn_held && !ship->ordn_held) {
+    ship->ordn_held = true;
+    az_play_sound(&state->soundboard, AZ_SND_ORDN_ACTIVATE);
+  } else if (!controls->ordn_held && ship->ordn_held) {
+    ship->ordn_held = false;
+    az_play_sound(&state->soundboard, AZ_SND_ORDN_DEACTIVATE);
+  }
+
   // Cool down various ship systems.
   assert(ship->recharge_cooldown >= 0.0);
   ship->recharge_cooldown = fmax(0.0, ship->recharge_cooldown - time);

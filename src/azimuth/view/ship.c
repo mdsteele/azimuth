@@ -263,6 +263,28 @@ void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
         glVertex2f(-10, -12); glVertex2f(  6, -12);
       } glEnd();
       // Main body:
+      if (ship->ordn_held) {
+        if (ordnance == AZ_ORDN_ROCKETS) {
+          glBegin(GL_TRIANGLE_STRIP); {
+            glColor3f(0.15, 0.15, 0.15);
+            glVertex2f(20,  3); glVertex2f(15,  3);
+            glColor3f(0.65, 0.65, 0.65);
+            glVertex2f(20,  0); glVertex2f(15,  0);
+            glColor3f(0.15, 0.15, 0.15);
+            glVertex2f(20, -3); glVertex2f(15, -3);
+          } glEnd();
+        } else if (ordnance == AZ_ORDN_BOMBS) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5, 0.5, 0.5); glVertex2f(-14,  0);
+            glColor3f(0.15, 0.15, 0.15);
+            glVertex2f(-14,  3);
+            glColor3f(0.15, 0.15, 0.5);
+            glVertex2f(-17,  0);
+            glColor3f(0.15, 0.15, 0.15);
+            glVertex2f(-14, -3);
+          } glEnd();
+        }
+      }
       glBegin(GL_QUAD_STRIP); {
         glColor3f(0.25, 0.25, 0.25); // dark gray
         glVertex2f( 15,  4); glVertex2f(-14,  4);
@@ -273,12 +295,23 @@ void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
       } glEnd();
       // Windshield:
       glBegin(GL_TRIANGLE_STRIP); {
-        glColor3f(0, 0.5, 0.5); // dim cyan
+        az_color_t inner = {0, 255, 255, 255};
+        az_color_t outer = {0, 128, 128, 255};
+        if (ship->ordn_held) {
+          if (ordnance == AZ_ORDN_ROCKETS) {
+            inner = (az_color_t){255, 0, 128, 255};
+            outer = (az_color_t){128, 0, 64, 255};
+          } else if (ordnance == AZ_ORDN_BOMBS) {
+            inner = (az_color_t){64, 64, 255, 255};
+            outer = (az_color_t){32, 32, 128, 255};
+          }
+        }
+        az_gl_color(outer);
         glVertex2f(15,  2);
-        glColor3f(0, 1, 1); // cyan
+        az_gl_color(inner);
         glVertex2f(18,  0);
         glVertex2f(12,  0);
-        glColor3f(0, 0.5, 0.5); // dim cyan
+        az_gl_color(outer);
         glVertex2f(15, -2);
       } glEnd();
     }

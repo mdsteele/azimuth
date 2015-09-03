@@ -713,6 +713,18 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.08, .phaser_sweep = 0.62,
     .hpf_cutoff = 0.0775991, .hpf_ramp = -0.781411
   },
+  [AZ_SND_ORDN_ACTIVATE] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.1,
+    .start_freq = 0.3, .freq_slide = 0.6,
+    .lpf_cutoff = 0.735, .volume_adjust = -0.5
+  },
+  [AZ_SND_ORDN_DEACTIVATE] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.1,
+    .start_freq = 0.7, .freq_slide = -0.6,
+    .lpf_cutoff = 0.735, .volume_adjust = -0.5
+  },
   [AZ_SND_ORION_BOOSTER] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.338028, .env_punch = 0.4225352, .env_decay = 0.6,
