@@ -687,10 +687,10 @@ static void draw_upgrade_box_frame(double openness, double max_height) {
 }
 
 static void draw_upgrade_box_message(
-    const az_preferences_t *prefs, az_upgrade_t upgrade, double height,
-    az_clock_t clock) {
+    const az_preferences_t *prefs, const az_player_t *player,
+    az_upgrade_t upgrade, double height, az_clock_t clock) {
   const char *name = az_upgrade_name(upgrade);
-  const char *description = az_upgrade_description(upgrade);
+  const char *description = az_upgrade_description(upgrade, &player->upgrades);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
   glPushMatrix(); {
     glTranslated(AZ_SCREEN_WIDTH/2 + 0.5, top + 58.5, 0);
@@ -707,7 +707,8 @@ static void draw_upgrade_box(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_UPGRADE);
   const az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
   const double height =
-    (strchr(az_upgrade_description(mode_data->upgrade), '\n') ?
+    (strchr(az_upgrade_description(mode_data->upgrade,
+                                   &state->ship.player.upgrades), '\n') ?
      UPGRADE_BOX_HEIGHT_2 : UPGRADE_BOX_HEIGHT_1);
   switch (mode_data->step) {
     case AZ_UGS_OPEN:
@@ -715,8 +716,8 @@ static void draw_upgrade_box(const az_space_state_t *state) {
       break;
     case AZ_UGS_MESSAGE:
       draw_upgrade_box_frame(1.0, height);
-      draw_upgrade_box_message(state->prefs, mode_data->upgrade, height,
-                               state->clock);
+      draw_upgrade_box_message(state->prefs, &state->ship.player,
+                               mode_data->upgrade, height, state->clock);
       break;
     case AZ_UGS_CLOSE:
       draw_upgrade_box_frame(1.0 - mode_data->progress, height);

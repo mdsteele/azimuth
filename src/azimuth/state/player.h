@@ -87,7 +87,7 @@ typedef int az_zone_key_t;
 // This structure stores any and all information needed to store a saved game.
 typedef struct {
   // Bitmasks storing game progress:
-  uint64_t upgrades[(AZ_NUM_UPGRADES + 63) / 64];
+  az_upgrades_t upgrades;
   uint64_t rooms_visited[(AZ_MAX_NUM_ROOMS + 63) / 64];
   uint64_t zones_mapped[(AZ_MAX_NUM_ZONES + 63) / 64];
   uint64_t flags[(AZ_MAX_NUM_FLAGS + 63) / 64];

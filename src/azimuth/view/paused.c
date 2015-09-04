@@ -601,10 +601,14 @@ static void draw_upgrades(const az_paused_state_t *state) {
          "Powers your primary weapons and other ship systems, and\n"
          "is automatically refilled over time by your reactor." :
          state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
-         "Press [9] to select, hold [$o] and press [$f] to fire." :
+         (az_upgrades_have_any_bombs(&player->upgrades) ?
+          "Press [9] to select, hold down [$o] and press [$f] to fire." :
+          "Hold down [$o] and press [$f] to fire.") :
          state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?
-         "Press [0] to select, hold [$o] and press [$f] to drop." :
-         az_upgrade_description(state->hovered_upgrade)));
+         (az_upgrades_have_any_rockets(&player->upgrades) ?
+          "Press [0] to select, hold down [$o] and press [$f] to drop." :
+          "Hold down [$o] and press [$f] to drop.") :
+         az_upgrade_description(state->hovered_upgrade, &player->upgrades)));
   } else if (state->hovering == AZ_PAUSE_HOVER_SHIP) {
     const az_ship_t ship = { .position = {75, 411}, .angle = AZ_DEG2RAD(135) };
     az_draw_ship_body(&ship, state->clock);

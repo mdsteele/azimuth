@@ -70,10 +70,7 @@ static void clear_flag(uint64_t *array, unsigned int idx) {
 
 // Check whether the player has a particular upgrade yet.
 bool az_has_upgrade(const az_player_t *player, az_upgrade_t upgrade) {
-  const unsigned int idx = (unsigned int)upgrade;
-  assert(idx < AZ_NUM_UPGRADES);
-  assert(idx < 64 * AZ_ARRAY_SIZE(player->upgrades));
-  return test_flag(player->upgrades, idx);
+  return az_upgrades_have(&player->upgrades, upgrade);
 }
 
 // Give an upgrade to the player.
@@ -82,10 +79,7 @@ void az_give_upgrade(az_player_t *player, az_upgrade_t upgrade) {
   if (az_has_upgrade(player, upgrade)) return;
 
   // Record the upgrade as acquired.
-  const unsigned int idx = (unsigned int)upgrade;
-  assert(idx < AZ_NUM_UPGRADES);
-  assert(idx < 64 * AZ_ARRAY_SIZE(player->upgrades));
-  set_flag(player->upgrades, idx);
+  az_upgrades_add(&player->upgrades, upgrade);
 
   // For weapon upgrades, select the new weapon.  For capacity upgrades,
   // increase max capacity.

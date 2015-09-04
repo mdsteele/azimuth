@@ -70,7 +70,7 @@ static bool parse_saved_game(const az_planet_t *planet, FILE *file,
                              az_player_t *player) {
   az_init_player(player);
 
-  uint64_t upgrades[AZ_ARRAY_SIZE(player->upgrades)];
+  uint64_t upgrades[AZ_ARRAY_SIZE(player->upgrades.array)];
   READ_BITFIELD(" up", upgrades);
   READ_BITFIELD(" rv", player->rooms_visited);
   READ_BITFIELD(" zm", player->zones_mapped);
@@ -184,7 +184,7 @@ static bool write_games(const az_saved_games_t *games, FILE *file) {
     if (game->present) {
       const az_player_t *player = &game->player;
       if (fprintf(file, "!G") < 0) return false;
-      WRITE_BITFIELD("up", player->upgrades);
+      WRITE_BITFIELD("up", player->upgrades.array);
       WRITE_BITFIELD("rv", player->rooms_visited);
       WRITE_BITFIELD("zm", player->zones_mapped);
       WRITE_BITFIELD("fl", player->flags);

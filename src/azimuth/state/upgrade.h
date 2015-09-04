@@ -21,6 +21,9 @@
 #ifndef AZIMUTH_STATE_UPGRADE_H_
 #define AZIMUTH_STATE_UPGRADE_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /*===========================================================================*/
 
 #define AZ_ROCKETS_PER_AMMO_UPGRADE 5
@@ -161,14 +164,30 @@ typedef enum {
 #define AZ_UPG_CAPACITOR_MAX AZ_UPG_CAPACITOR_11
 #define AZ_UPG_SHIELD_BATTERY_MAX AZ_UPG_SHIELD_BATTERY_11
 
+typedef struct {
+  uint64_t array[(AZ_NUM_UPGRADES + 63) / 64];
+} az_upgrades_t;
+
 /*===========================================================================*/
 
 // Return the name of the upgrade as a NUL-terminted string.
 const char *az_upgrade_name(az_upgrade_t upgrade);
 
 // Return the description string for the upgrade, to be passed directly to
-// az_draw_paragraph.
-const char *az_upgrade_description(az_upgrade_t upgrade);
+// az_draw_paragraph.  The description may depend on what other upgrades have
+// been acquired.
+const char *az_upgrade_description(az_upgrade_t upgrade,
+                                   const az_upgrades_t *upgrades);
+
+/*===========================================================================*/
+
+void az_upgrades_add(az_upgrades_t *upgrades, az_upgrade_t upgrade);
+
+bool az_upgrades_have(const az_upgrades_t *upgrades, az_upgrade_t upgrade);
+
+bool az_upgrades_have_any_rockets(const az_upgrades_t *upgrades);
+
+bool az_upgrades_have_any_bombs(const az_upgrades_t *upgrades);
 
 /*===========================================================================*/
 

@@ -1156,10 +1156,14 @@ void az_tick_ship(az_space_state_t *state, double time) {
 
   if (controls->ordn_held && !ship->ordn_held) {
     ship->ordn_held = true;
-    az_play_sound(&state->soundboard, AZ_SND_ORDN_ACTIVATE);
+    if (player->ordnance != AZ_ORDN_NONE) {
+      az_play_sound(&state->soundboard, AZ_SND_ORDN_ACTIVATE);
+    }
   } else if (!controls->ordn_held && ship->ordn_held) {
     ship->ordn_held = false;
-    az_play_sound(&state->soundboard, AZ_SND_ORDN_DEACTIVATE);
+    if (player->ordnance != AZ_ORDN_NONE) {
+      az_play_sound(&state->soundboard, AZ_SND_ORDN_DEACTIVATE);
+    }
   }
 
   // Cool down various ship systems.

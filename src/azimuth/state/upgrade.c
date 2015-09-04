@@ -138,31 +138,70 @@ const char *az_upgrade_name(az_upgrade_t upgrade) {
 
 /*===========================================================================*/
 
-const char *az_upgrade_description(az_upgrade_t upgrade) {
+static bool has_multiple_guns(const az_upgrades_t *upgrades) {
+  bool has_guns = false;
+  for (int i = AZ_UPG_GUN_CHARGE; i <= AZ_UPG_GUN_BEAM; ++i) {
+    if (az_upgrades_have(upgrades, i)) {
+      if (has_guns) return true;
+      else has_guns = true;
+    }
+  }
+  return false;
+}
+
+static bool has_multiple_rocket_ammos(const az_upgrades_t *upgrades) {
+  bool has_rockets = false;
+  for (int i = AZ_UPG_ROCKET_AMMO_00; i <= AZ_UPG_ROCKET_AMMO_MAX; ++i) {
+    if (az_upgrades_have(upgrades, i)) {
+      if (has_rockets) return true;
+      else has_rockets = true;
+    }
+  }
+  return false;
+}
+
+static bool has_multiple_bomb_ammos(const az_upgrades_t *upgrades) {
+  bool has_bombs = false;
+  for (int i = AZ_UPG_BOMB_AMMO_00; i <= AZ_UPG_BOMB_AMMO_MAX; ++i) {
+    if (az_upgrades_have(upgrades, i)) {
+      if (has_bombs) return true;
+      else has_bombs = true;
+    }
+  }
+  return false;
+}
+
+const char *az_upgrade_description(az_upgrade_t upgrade,
+                                   const az_upgrades_t *upgrades) {
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
-      return ("Hold [$f] to charge, release to fire.\n"
-              "Charged shots can destroy certain walls.");
+      if (has_multiple_guns(upgrades)) {
+        return ("Press [1] to select, hold [$f] to charge, release to fire.\n"
+                "Charged shots can destroy certain walls.");
+      } else {
+        return ("Hold [$f] to charge, release to fire.\n"
+                "Charged shots can destroy certain walls.");
+      }
     case AZ_UPG_GUN_FREEZE:
-      return ("Shots can freeze enemies.\n"
+      return ("Fires shots that can freeze enemies.\n"
               "Press [2] to select, press [$f] to fire.");
     case AZ_UPG_GUN_TRIPLE:
       return ("Fires three shots at once.\n"
               "Press [3] to select, press [$f] to fire.");
     case AZ_UPG_GUN_HOMING:
-      return ("Shots will seek out enemies.\n"
+      return ("Fires shots that will seek out enemies.\n"
               "Press [4] to select, press [$f] to fire.");
     case AZ_UPG_GUN_PHASE:
-      return ("Shots will pass through walls.\n"
+      return ("Fires shots that can pass through walls.\n"
               "Press [5] to select, press [$f] to fire.");
     case AZ_UPG_GUN_BURST:
-      return ("Shots will explode into shrapnel on impact.\n"
+      return ("Fires shots that explode into shrapnel on impact.\n"
               "Press [6] to select, press [$f] to fire.");
     case AZ_UPG_GUN_PIERCE:
-      return ("Shots will pierce through multiple enemies.\n"
+      return ("Fires shots that can pierce through multiple enemies.\n"
               "Press [7] to select, press [$f] to fire.");
     case AZ_UPG_GUN_BEAM:
-      return ("Fires a continuous beam.\n"
+      return ("Fires a continuous beam of energy.\n"
               "Press [8] to select, press [$f] to fire.");
     case AZ_UPG_HYPER_ROCKETS:
       { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_HYPER_ROCKET == 3); }
@@ -204,20 +243,21 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
       return ("All damage taken is reduced by one fifth.\n"
               "Colliding with enemies will now damage them.");
     case AZ_UPG_FUSION_REACTOR:
-      return "Energy recharge rate is increased.";
+      return "Increases your energy recharge rate.";
     case AZ_UPG_QUANTUM_REACTOR:
-      return "Energy recharge rate is greatly increased.";
+      return "Greatly increases your energy recharge rate.";
     case AZ_UPG_TRACTOR_BEAM:
-      return "Hold [$t] to lock onto flashing tractor nodes.";
+      return "Hold down [$t] to lock onto flashing tractor nodes.";
     case AZ_UPG_TRACTOR_CLOAK:
       return ("Cloaks your ship after locking onto a tractor node for\n"
               "a few seconds.  Firing weapons disables the cloak.");
     case AZ_UPG_MAGNET_SWEEP:
-      return ("Pulls nearby shield and ammo pickups toward your ship.");
+      return ("Automatically pulls nearby shield and ammo pickups\n"
+              "toward your ship.");
     case AZ_UPG_INFRASCANNER:
       return "Improves your ship's sensors in low-visibility areas.";
     case AZ_UPG_MILLIWAVE_RADAR:
-      return ("Hold [$t] for a few seconds to scan for nearby\n"
+      return ("Hold down [$t] for a few seconds to scan for nearby\n"
               "upgrades and hidden passageways.");
     case AZ_UPG_ROCKET_AMMO_00:
     case AZ_UPG_ROCKET_AMMO_01:
@@ -250,8 +290,19 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_ROCKET_AMMO_28:
     case AZ_UPG_ROCKET_AMMO_29:
       { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_AMMO_UPGRADE == 5); }
-      return ("Maximum rockets increased by 5.\n"
-              "Press [9] to select, hold [$o] and press [$f] to fire.");
+      if (!az_upgrades_have_any_bombs(upgrades)) {
+        if (has_multiple_rocket_ammos(upgrades)) {
+          return ("Maximum rockets increased by 5.\n"
+                  "Hold down [$o] and press [$f] to fire.");
+        } else {
+          return "Hold down [$o] and press [$f] to fire.";
+        }
+      } else if (has_multiple_rocket_ammos(upgrades)) {
+        return ("Maximum rockets increased by 5.\n"
+                "Press [9] to select, hold down [$o] and press [$f] to fire.");
+      } else {
+        return "Press [9] to select, hold down [$o] and press [$f] to fire.";
+      }
     case AZ_UPG_BOMB_AMMO_00:
     case AZ_UPG_BOMB_AMMO_01:
     case AZ_UPG_BOMB_AMMO_02:
@@ -273,8 +324,19 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
     case AZ_UPG_BOMB_AMMO_18:
     case AZ_UPG_BOMB_AMMO_19:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_AMMO_UPGRADE == 3); }
-      return ("Maximum bombs increased by 3.\n"
-              "Press [0] to select, hold [$o] and press [$f] to drop.");
+      if (!az_upgrades_have_any_rockets(upgrades)) {
+        if (has_multiple_bomb_ammos(upgrades)) {
+          return ("Maximum bombs increased by 3.\n"
+                  "Hold down [$o] and press [$f] to drop.");
+        } else {
+          return "Hold down [$o] and press [$f] to drop.";
+        }
+      } else if (has_multiple_bomb_ammos(upgrades)) {
+        return ("Maximum bombs increased by 3.\n"
+                "Press [0] to select, hold down [$o] and press [$f] to drop.");
+      } else {
+        return "Press [0] to select, hold down [$o] and press [$f] to drop.";
+      }
     case AZ_UPG_CAPACITOR_00:
     case AZ_UPG_CAPACITOR_01:
     case AZ_UPG_CAPACITOR_02:
@@ -305,6 +367,36 @@ const char *az_upgrade_description(az_upgrade_t upgrade) {
       return "Maximum shields increased by 25.";
   }
   AZ_ASSERT_UNREACHABLE();
+}
+
+/*===========================================================================*/
+
+void az_upgrades_add(az_upgrades_t *upgrades, az_upgrade_t upgrade) {
+  const unsigned int idx = upgrade;
+  assert(idx < AZ_NUM_UPGRADES);
+  assert(idx < 64 * AZ_ARRAY_SIZE(upgrades->array));
+  upgrades->array[idx >> 6] |= (UINT64_C(1) << (idx & 0x3f));
+}
+
+bool az_upgrades_have(const az_upgrades_t *upgrades, az_upgrade_t upgrade) {
+  const unsigned int idx = upgrade;
+  assert(idx < AZ_NUM_UPGRADES);
+  assert(idx < 64 * AZ_ARRAY_SIZE(upgrades->array));
+  return (upgrades->array[idx >> 6] & (UINT64_C(1) << (idx & 0x3f))) != 0;
+}
+
+bool az_upgrades_have_any_rockets(const az_upgrades_t *upgrades) {
+  for (int i = AZ_UPG_ROCKET_AMMO_00; i <= AZ_UPG_ROCKET_AMMO_MAX; ++i) {
+    if (az_upgrades_have(upgrades, i)) return true;
+  }
+  return false;
+}
+
+bool az_upgrades_have_any_bombs(const az_upgrades_t *upgrades) {
+  for (int i = AZ_UPG_BOMB_AMMO_00; i <= AZ_UPG_BOMB_AMMO_MAX; ++i) {
+    if (az_upgrades_have(upgrades, i)) return true;
+  }
+  return false;
 }
 
 /*===========================================================================*/
