@@ -1,6 +1,6 @@
 @R z0 p0 k3 b0 d1 g3 n38 w31
   c(47487.82,0.00,1.589086,0.002693)
-$s:msg2;
+$s:msg2,test1,hnez,dark0.5,A#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/A;
 !W1 d46 x-1309.85 y47551.04 a-3.113799 u0
 !W1 d46 x-1308.40 y47501.14 a-3.114756 u0
 !W1 d46 x-1302.93 y47351.50 a-3.113799 u0

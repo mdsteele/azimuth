@@ -245,7 +245,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
   int total_steps = 0;
   while (vm->pc < vm->script->num_instructions) {
     if (++total_steps > AZ_MAX_SCRIPT_STEPS) SCRIPT_ERROR("ran for too long");
-    az_instruction_t ins = vm->script->instructions[vm->pc];
+    const az_instruction_t ins = vm->script->instructions[vm->pc];
     switch (ins.opcode) {
       case AZ_OP_NOP: break;
       // Stack manipulation:
@@ -921,12 +921,17 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       } break;
       // Timers:
       case AZ_OP_WAIT:
-        if (ins.immediate > 0.0) {
+      case AZ_OP_WAITS: {
+        double wait_duration;
+        if (ins.opcode == AZ_OP_WAITS) {
+          STACK_POP(&wait_duration);
+        } else wait_duration = ins.immediate;
+        if (wait_duration > 0.0) {
           if (state->cutscene.scene != AZ_SCENE_NOTHING ||
               state->dialogue.step != AZ_DLS_INACTIVE ||
               state->monologue.step != AZ_MLS_INACTIVE) {
             state->sync_timer.is_active = true;
-            state->sync_timer.time_remaining = ins.immediate;
+            state->sync_timer.time_remaining = wait_duration;
             if (state->dialogue.step != AZ_DLS_INACTIVE) {
               state->dialogue.step = AZ_DLS_BLANK;
               state->dialogue.paragraph = NULL;
@@ -943,12 +948,12 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           }
           AZ_ARRAY_LOOP(timer, state->timers) {
             if (timer->vm.script != NULL) continue;
-            timer->time_remaining = ins.immediate;
+            timer->time_remaining = wait_duration;
             SUSPEND(&timer->vm);
           }
           SCRIPT_ERROR("too many timers");
         }
-        break;
+      } break;
       case AZ_OP_DOOM:
         if (state->dialogue.step != AZ_DLS_INACTIVE) {
           SCRIPT_ERROR("can't DOOM during dialogue");

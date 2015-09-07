@@ -1,5 +1,6 @@
 @R z0 p0 k3 b4 d2 g0 n6 w43
   c(47107.70,718.01,1.516134,0.000000)
+$s:test1,hnez,dark0.5,A#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/A;
 !W1 d1 x2385.79 y47158.10 a3.086956 u0
 !W1 d1 x2780.20 y47136.53 a3.086956 u0
 !W1 d1 x2680.35 y47141.99 a3.086956 u0

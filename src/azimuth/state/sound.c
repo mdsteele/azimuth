@@ -680,6 +680,18 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.781690120697, .lpf_ramp = -0.464788734913,
     .lpf_resonance = 0.274647891521
   },
+  [AZ_SND_LIGHTS_FLICKER] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_decay = 0.115, .start_freq = 0.825, .freq_slide = -0.3,
+    .phaser_offset = -0.7, .phaser_sweep = -0.04, .volume_adjust = -0.5
+  },
+  [AZ_SND_LIGHTS_ON] = {
+    .wave_kind = AZ_TRIANGLE_WAVE,
+    .env_sustain = 0.128036, .env_decay = 0.835,
+    .start_freq = 0.145, .freq_slide = 0.05,
+    .arp_mod = 0.4, .arp_speed = 0.53,
+    .phaser_offset = -0.52, .phaser_sweep = -0.31
+  },
   [AZ_SND_MENU_HOVER] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_attack = 0.0891609, .env_sustain = 0.155,

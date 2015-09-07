@@ -144,7 +144,8 @@ typedef enum {
   AZ_OP_MUSF, // set music flag to i
   AZ_OP_SND, // play sound i
   // Timers:
-  AZ_OP_WAIT, // suspend script; add timer to resume script after i seconds
+  AZ_OP_WAIT, // suspend script; add timer to resume after i seconds
+  AZ_OP_WAITS, // pop top, suspend script; add timer to resume after a seconds
   AZ_OP_DOOM, // suspend script; set global countdown for i seconds
   AZ_OP_SAFE, // cancel global countdown
   // Control flow:
