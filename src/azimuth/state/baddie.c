@@ -58,7 +58,7 @@ static az_component_data_t crawling_turret_components[] = {
 };
 static az_component_data_t beam_turret_components[] = {
   { .polygon = AZ_INIT_POLYGON(turret_cannon_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM | AZ_DMGF_FLAME),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
     .impact_damage = 15.0 }
 };
 static az_component_data_t rocket_turret_components[] = {
@@ -1253,8 +1253,7 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = AZ_PUPF_ALL, .color = {80, 160, 120, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .death_sound = AZ_SND_KILL_TURRET,
     .main_body = { .polygon = AZ_INIT_POLYGON(turret_vertices),
-                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_BEAM |
-                                  AZ_DMGF_FLAME),
+                   .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_FLAME),
                    .impact_damage = 10.0 },
     DECL_COMPONENTS(beam_turret_components)
   },

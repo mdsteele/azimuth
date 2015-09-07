@@ -22,6 +22,7 @@
 #define AZIMUTH_VIEW_UTIL_H_
 
 #include "azimuth/util/color.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -37,6 +38,9 @@ void az_gl_translated(az_vector_t v);
 
 // Place a GL vertex at the given position.
 void az_gl_vertex(az_vector_t v);
+
+void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin, double angle,
+                    double length);
 
 /*===========================================================================*/
 

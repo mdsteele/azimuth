@@ -26,6 +26,7 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/random.h"
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
@@ -35,6 +36,21 @@ static az_color_t color3(float r, float g, float b) {
 }
 
 /*===========================================================================*/
+
+static void draw_turret_cracks(const az_baddie_t *baddie, double length) {
+  for (int i = 0; i < 3; ++i) {
+    const double angle = AZ_DEG2RAD(-90) + i * AZ_DEG2RAD(120);
+    az_random_seed_t seed = {1 + 4987298743 * baddie->uid, 1 + 373984471 * i};
+    az_draw_cracks(&seed, az_vpolar(-15, angle), angle,
+                   length * (1 - 0.33 * i));
+  }
+}
+
+static void draw_normal_turret_cracks(const az_baddie_t *baddie) {
+  const double hurt =
+    (baddie->data->max_health - baddie->health) / baddie->data->max_health;
+  draw_turret_cracks(baddie, 5.0 * hurt);
+}
 
 static void draw_crawling_turret_legs(float flare, float frozen,
                                       az_clock_t clock) {
@@ -100,6 +116,10 @@ static void draw_turret(const az_baddie_t *baddie,
       az_gl_color(gun_edge);
       glVertex2f( 0, -5); glVertex2f(30, -5);
     } glEnd();
+    const double hurt =
+      (baddie->data->max_health - baddie->health) / baddie->data->max_health;
+    az_random_seed_t seed = {1, 1};
+    az_draw_cracks(&seed, (az_vector_t){30, 0}, AZ_PI, 2.0 * hurt);
   } glPopMatrix();
   draw_turret_body_center(baddie, mid_edge, near_edge, center);
 }
@@ -124,6 +144,7 @@ void az_draw_bad_normal_turret(
                      0.6 - 0.3 * flare + 0.4 * frozen),
               color3(0.25 + 0.25 * flare, 0.25, 0.25 + 0.25 * frozen),
               color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_armored_turret(
@@ -145,6 +166,7 @@ void az_draw_bad_armored_turret(
                      0.6 - 0.3 * flare + 0.4 * frozen),
               color3(0.2 + 0.25 * flare, 0.2, 0.25 + 0.25 * frozen),
               color3(0.6 + 0.25 * flare, 0.6, 0.75 + 0.25 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_beam_turret(
@@ -166,6 +188,7 @@ void az_draw_bad_beam_turret(
                      0.5 - 0.3 * flare + 0.4 * frozen),
               color3(0.2 + 0.25 * flare, 0.25, 0.2 + 0.25 * frozen),
               color3(0.6 + 0.25 * flare, 0.75, 0.6 + 0.25 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_broken_turret(
@@ -187,6 +210,9 @@ void az_draw_bad_broken_turret(
                      0.50 - 0.30 * flare + 0.40 * frozen),
               color3(0.30 + 0.25 * flare, 0.25, 0.20 + 0.25 * frozen),
               color3(0.75 + 0.25 * flare, 0.75, 0.75 + 0.25 * frozen));
+  const double hurt =
+    (baddie->data->max_health - baddie->health) / baddie->data->max_health;
+  draw_turret_cracks(baddie, 3.0 + 3.0 * hurt);
 }
 
 void az_draw_bad_heavy_turret(
@@ -228,6 +254,7 @@ void az_draw_bad_heavy_turret(
     }
   } glPopMatrix();
   draw_turret_body_center(baddie, mid_edge, near_edge, center);
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_rocket_turret(
@@ -249,6 +276,7 @@ void az_draw_bad_rocket_turret(
                      0.4 - 0.3 * flare + 0.4 * frozen),
               color3(0.2 + 0.25 * flare, 0.15, 0.15 + 0.25 * frozen),
               color3(0.65 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_crawling_turret(
@@ -274,6 +302,7 @@ void az_draw_bad_crawling_mortar(
                      0.4 - 0.3 * flare + 0.4 * frozen),
               color3(0.1 + 0.25 * flare, 0.1, 0.1 + 0.25 * frozen),
               color3(0.5 + 0.25 * flare, 0.5, 0.5 + 0.25 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_security_drone(
@@ -325,6 +354,7 @@ void az_draw_bad_security_drone(
       color3(0.6 + 0.4 * flare - 0.3 * frozen,
              0.6 - 0.3 * flare - 0.3 * frozen,
              0.6 - 0.3 * flare + 0.4 * frozen));
+  draw_normal_turret_cracks(baddie);
 }
 
 void az_draw_bad_pop_open_turret(

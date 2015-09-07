@@ -19,6 +19,8 @@
 
 #include "azimuth/view/util.h"
 
+#include <math.h>
+
 #include <GL/gl.h>
 
 #include "azimuth/util/color.h"
@@ -40,6 +42,38 @@ void az_gl_translated(az_vector_t v) {
 
 void az_gl_vertex(az_vector_t v) {
   glVertex2d(v.x, v.y);
+}
+
+void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin, double angle,
+                    double length) {
+  if (length <= 0.0) return;
+  glColor4f(0, 0, 0, 0.25);
+  glBegin(GL_LINES); {
+    az_gl_vertex(origin);
+    az_vpluseq(&origin,
+               az_vpolar((4.0 + az_rand_sdouble(seed)) * fmin(1, length),
+                         angle + az_rand_sdouble(seed) * AZ_DEG2RAD(40)));
+    az_gl_vertex(origin);
+    length -= 1.0;
+    int sign = az_rand_udouble(seed) < 0.5 ? -1 : 1;
+    while (length > 0.0) {
+      double angle_diverge =
+        sign * (AZ_DEG2RAD(45) + az_rand_sdouble(seed) * AZ_DEG2RAD(30));
+      az_gl_vertex(origin);
+      az_gl_vertex(az_vadd(origin, az_vpolar((4.0 + az_rand_sdouble(seed)) *
+                                             cbrt(length),
+                                             angle + angle_diverge)));
+      angle_diverge -=
+        sign * (AZ_DEG2RAD(90) + az_rand_sdouble(seed) * AZ_DEG2RAD(30));
+      az_gl_vertex(origin);
+      az_vpluseq(&origin, az_vpolar((4.0 + az_rand_sdouble(seed)) *
+                                    fmin(1, length),
+                                    angle + angle_diverge));
+      az_gl_vertex(origin);
+      length -= 1.0;
+      sign = -sign;
+    }
+  } glEnd();
 }
 
 /*===========================================================================*/

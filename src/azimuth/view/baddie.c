@@ -141,7 +141,7 @@ static void draw_spiner(
   }
 }
 
-static void draw_box(bool armored, float flare) {
+static void draw_box(const az_baddie_t *baddie, bool armored, float flare) {
   glBegin(GL_QUADS); {
     if (armored) glColor3f(0.45, 0.45 - 0.3 * flare, 0.65 - 0.3 * flare);
     else glColor3f(0.65, 0.65 - 0.3 * flare, 0.65 - 0.3 * flare); // light gray
@@ -174,6 +174,13 @@ static void draw_box(bool armored, float flare) {
     glVertex2f(-10, -7); glVertex2f(-16,  -8); glVertex2f(-11, -13);
     glVertex2f( 10, -7); glVertex2f( 11, -13); glVertex2f( 16,  -8);
   } glEnd();
+  const double hurt =
+    (baddie->data->max_health - baddie->health) / baddie->data->max_health;
+  for (int i = 0; i < 2; ++i) {
+    const double angle = AZ_DEG2RAD(180) * i;
+    az_random_seed_t seed = {1 + 472019387 * baddie->uid, 1 + 2185827049 * i};
+    az_draw_cracks(&seed, az_vpolar(-16, angle), angle, 4.0 * hurt);
+  }
 }
 
 static void draw_mine_arms(GLfloat length, float flare, float frozen) {
@@ -244,11 +251,11 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_BOX:
       assert(frozen == 0.0);
-      draw_box(false, flare);
+      draw_box(baddie, false, flare);
       break;
     case AZ_BAD_ARMORED_BOX:
       assert(frozen == 0.0);
-      draw_box(true, flare);
+      draw_box(baddie, true, flare);
       break;
     case AZ_BAD_CLAM:
       az_draw_bad_clam(baddie, frozen, clock);
