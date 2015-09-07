@@ -1,89 +1,478 @@
-@M "SABC|D"
+@M "S =0a WXxX=1xYZ:t aA|tABCDEFGHIJKLMNOPQ"
 % Title: "High Ground"
 
 =tempo 125
-=key 0N     % A minor
+=key 3#     % F# minor
 
 
 !Part S
 
-1 Wp25 L30  E0,25  D+20,30 V+1,100
-2 Wp50 L20  E0,25  D+20,30 V+1,100
-3 Wt25 L200 E0,50  D+10,30
-4 Wn   L50  E0,100
+1 Wp25 L40  E0,25  D+20,30 V+1,100
+2 Wt50 L75  E0,25  D+10,40
+3 Wt25 L250 E0,50  D+10,30
+4 Wn   L40  E0,100
 5 Wn   L50  E0,100
 
+
+!Part W
+
+5| Wt25 L250 D+5,30 V+2,50 E300,0 a1w E0,0 |
+
+!Part X
+
+4| x0e x0 |
+5| a1w |
+
+!Part Y
+
+4| x0e x0 rq x0e x0 rq |
+ | x1e x1 rq x1e x1 rq |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+% | x0e x0 ' x0 x0 ' x0 x0 ' x0 x0 |
+% | x0e x0 ' x0 x0 ' x0 x0 ' x0 x0 |
+% | x0e x0 ' x0 x0 ' x0 x0 ' x0 x0 |
+5| E0,0 V+300,0.42 a1w+w V+1,50 a3w+w |
+
+!Part Z
+
+2| f4e a ' c5 a4 ' e g ' b g |
+ | d4e f ' a  f  ' e g ' b g |
+4| x1q ' x1 ' x1 ' x1 |
+ | x1q ' x1 ' x1 ' x1 |
+5| E0,75 a3w+w Wn L50 E0,100 V0,0 |
 
 
 !Part A
 
-2| E0,0 a2w V+300,0.42 a2w+w V0,1 a4w |
+2| f4e a ' c5 a4 ' e g ' b g |
+ | d4e f ' a  f  ' e g ' b g |
+4| x1q ' x1 ' x1 ' x1 |
+ | x1q ' x1 ' x1 ' x1 |
 
 
 !Part B
 
-2| E0,50 a4w+w |
-3| a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
- | a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
-5| x0q x0 x0 x0 |
- | x0q x0 x0 x0 |
- | x0q x0 x0 x0 |
- | x0q x0 x0 x0 |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
 
 
 !Part C
 
-2| rw | rw | rw | E300,0 a5w |
-3| a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
- | a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
-4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
-5| x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
+1| rw |
+ | E400,0 a5w E0,25 |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5|  L5 f4s  L6 f  L7 f  L8 f '  L9 f L10 f L11 f L12 f '
+ ' L13 f4s L14 f L15 f L16 f ' L17 f L18 f L19 f L20 f |
+ | L21 f4s L22 f L23 f L24 f ' L25 f L26 f L27 f L28 f '
+ ' L29 f4s L30 f L31 f L32 f ' L33 f L34 f L35 f L36 f |
 
 
 !Part D
 
-1| c4e+s a3s+ ' +e a3e ' g3e+s a3s+ ' +e a3e |
- | c4e+s a3s+ ' +e a3e ' g3e+s g3s+ ' +e c4e |
- | c4e+s a3s+ ' +e a3e ' g3e+s c4s+ ' +e c4e |
- | f3e+s c4s+ ' +e c4e ' g3e+s g3s+ ' +e c4e |
-2| E0,50 a5w+ | +w | rw | rw |
-3| a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
- | a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
-4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
-5| x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s e3s+ ' +e a3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s e3s+ ' +e a3e |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| Wp25 L40 D+20,30 V+1,100 E0,100 a5w Wn E0,100 |
 
-1| c4e+s a3s+ ' +e a3e ' g3e+s a3s+ ' +e a3e |
- | c4e+s a3s+ ' +e a3e ' c4e+s a3s+ ' +e a3e |
- | c4e+s a3s+ ' +e a3e ' g3e+s c4s+ ' +e c4e |
- | f3e+s c4s+ ' +e c4e ' g3e+s g3s+ ' +e c4e |
-2| rw | rw | E700,0 a5w+ | +w |
-3| a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
- | a2e c3 ' e c ' g2 b ' d3 b2 |
- | f2e a ' c3 a2 ' g2 b ' d3 b2 |
-4| x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
- | x4e x4s x4 ' x6 x6 x4e ' x4e x4s x4 ' x6 x6 x4e |
-5| x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
- | x0e a7 x0 a7 x0 a7 x0 a7 |
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s e3s+ ' +e a3e |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part E
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s E0,0 a3s+ ' +e E0,25 b3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s E0,0 a3s+ ' +e E0,25 g3e |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s E0,0 a3s+ ' +e E0,25 b3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s E0,0 a3s+ ' +e f3e E0,25 |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part F
+
+1| E0,100 f3q rh. | rw | rw |
+ | E400,0 a5w E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| rw | rw |
+ |  L5 f4s  L6 f  L7 f  L8 f '  L9 f L10 f L11 f L12 f '
+ ' L13 f4s L14 f L15 f L16 f ' L17 f L18 f L19 f L20 f |
+ | L21 f4s L22 f L23 f L24 f ' L25 f L26 f L27 f L28 f '
+ ' L29 f4s L30 f L31 f L32 f ' L33 f L34 f L35 f L36 f |
+
+
+!Part G
+
+2 Wt15 L40 E0,0 V+1,60
+
+1| a3e+s f3s+ ' +e f3e ' E0,5 e3e+s E0,25 f3s+ ' +e re |
+ | a3e+s f3s+ ' +e f3e ' a3e+s E0,0 a3s+ ' +e E0,25 b3e |
+ | a3e+s f3s+ ' +e f3e ' E0,5 e3e+s E0,25 a3s+ ' +e re |
+ | E0,5 d3e+s E0,25 a3s+ ' +e re ' E0,5 e3e+s E0,25 a3s+ ' +e re |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| Wp25 L40 D+20,30 V+1,100 E0,100 a5w Wn E0,100 |
+
+1| a3e+s f3s+ ' +e f3e ' E0,5 e3e+s E0,25 f3s+ ' +e re |
+ | a3e+s f3s+ ' +e f3e ' a3e+s E0,0 a3s+ ' +e E0,25 b3e |
+ | a3e+s f3s+ ' +e f3e ' E0,5 e3e+s E0,25 a3s+ ' +e re |
+ | E0,5 d3e+s E0,25 a3s+ ' +e re ' E0,5 e3e+s E0,25 a3s+ ' +e re |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+2 Wt50 L75 E0,25 V0,0
+
+
+!Part H
+
+2 Wt15 L40 E0,0 V+1,60
+
+1| a3e+s f3s+ ' +e f3e ' E0,5 e3e+s f3s+ ' +e e3e |
+ | d3e+s e3s+ ' +e d3e ' e3e+s f3s+ ' +e g3e E0,25 |
+ | a3e+s f3s+ ' +e f3e ' E0,5 a3e+s b3s+ ' +e c4e |
+ | d4e+s c4s+ ' +e a3e ' b3e+s a3s+ ' +e g3e E0,25 |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+1| a3e+s f3s+ ' +e f3e ' E0,5 e3e+s f3s+ ' +e e3e |
+ | d3e+s e3s+ ' +e d3e ' e3e+s f3s+ ' +e g3e E0,25 |
+ | a3e+s f3s+ ' +e f3e ' E0,5 a3e+s b3s+ ' +e c4e |
+ | d4e+s c4s+ ' +e d4e ' e4e+s f4s+ ' +e g4e E0,25 |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+2 Wt50 L75 E0,25 V0,0
+
+
+!Part I
+
+1 T+12
+2 Wt15 L40 E0,0 V+1,60
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s e3s+ ' +e a3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s e3s+ ' +e a3e |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| rw | rw | rw | rw |
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s a3s+ ' +e f3e |
+2| f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+ | f4e as a ' c5e a4 ' e gs g ' be g |
+ | d4e fs f ' ae  f  ' e gs g ' be g |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5|  L5 f4s f  L6 f f '  L7 f f  L8 f f '  L9 f f L10 f f ' L11 f f L12 f f |
+ | L13 f4s f L14 f f ' L15 f f L16 f f ' L17 f f L18 f f ' L19 f f L20 f f |
+ | L21 f4s f L22 f f ' L23 f f L24 f f ' L25 f f L26 f f ' L27 f f L28 f f |
+ | L29 f4s f L30 f f ' L31 f f L32 f f ' L33 f f L34 f f ' L35 f f L36 f f |
+
+2 Wt50 L75 E0,25 V0,0
+
+
+!Part J
+
+1| E0,100 f4w E0,25 |
+2| x1q |
+3| f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s e2s+ ' +e e2e |
+ | f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s rs ' g2e+s rs |
+4| rw | rw | rw | rw |
+5| Wp25 L40 D+20,30 V+1,100 E0,100 f5w Wn E0,100 |
+
+3| f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s e2s+ ' +e e2e |
+ | f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s rs ' e2e+s rs |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part K
+
+2| f4e a4 ' c5 f4 ' a4 c5 ' e4 g4 |
+ | b4e d4 ' f4 a4 ' e4 g4 ' b4 g4 |
+ | f4e a4 ' c5 e4 ' g4 b4 ' e4 g4 |
+ | b4e d4 ' f4 a4 ' e4 g4 ' b4 g4 |
+3| f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s e2s+ ' +e e2e |
+ | f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s rs ' a2e+s rs |
+4| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+
+
+!Part L
+
+1| rw | rw | rw |
+ | E400,0 a5w E0,25 |
+2| f4e a4 ' c5 f4 ' a4 c5 ' e4 g4 |
+ | b4e d4 ' f4 a4 ' e4 g4 ' b4 g4 |
+ | f4e a4 ' c5 e4 ' g4 b4 ' d4 f4 |
+ | a4e d4 ' f4 a4 ' e4 g4 ' b4 g4 |
+3| f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s e2s+ ' +e e2e |
+ | f2e+s f2s+ ' +e a2e ' g2e+s e2s+ ' +e e2e |
+ | d2e+s d2s+ ' +e d2e ' e2e+s a2s+ ' +e f2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| rw | rw |
+ |  L5 f4s  L6 f  L7 f  L8 f ' L20 c5e c5e '
+ ' L13 f4s L14 f L15 f L16 f ' L30 c5e c5e |
+ | L21 f4s L22 f L23 f L24 f ' L25 f L26 f L27 f L28 f '
+ ' L29 f4s L30 f L31 f L32 f ' L33 f L34 f L35 f L36 f |
+
+
+!Part M
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s e3s+ ' +e a3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s e3s+ ' +e a3e |
+2| Wp25 L40 D+20,30 V+1,100 E0,100 f4w Wt50 L75 D+10,40 V0,0 E0,0 |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5| Wp25 L40 D+20,30 V+1,100 E0,100 a5w Wn E0,100 |
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s E0,0 a3s+ ' +e E0,25 g3e |
+2| E0,0 f3h e3h |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part N
+
+1| a3e+s f3s+ ' +e f3e+ ' +q  ' re re |
+ | a3e+s f3s+ ' +e f3e+ ' +q+ ' +e re |
+ | a3e+s f3s+ ' +e f3e+ ' +q  ' re re |
+ | a3e+s f3s+ ' +e f3e ' a3e+s a3s+ ' +e b3e |
+2| E0,0 f3h e3h |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+1| a3e+s f3s+ ' +e f3e+ ' +q  ' re re |
+ | a3e+s f3s+ ' +e f3e ' e3q+ ' +e re |
+ | a3e+s f3s+ ' +e f3e+ ' +q  ' re f3e |
+ | f3e+s e3s+ ' +e e3e ' e3e+s a3s+ ' +e g3e |
+2| E0,0 f3h e3h |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part O
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s e3s+ ' +e a3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s e3s+ ' +e a3e |
+2| E0,0 f3h e3h |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+
+
+!Part P
+
+1| a3e+s f3s+ ' +e f3e ' e3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' a3e+s f3s+ ' +e f3e |
+ | a3e+s f3s+ ' +e f3e ' e3e+s a3s+ ' +e a3e |
+ | d3e+s a3s+ ' +e a3e ' e3e+s a3s+ ' +e f3e |
+2| E0,0 f3h e3h |
+ | d3h e3h |
+ | f3h e3h |
+ | d3h e3h E0,25 |
+3| f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | f2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+ | d2e+s a2s+ ' +e a2e ' e2e+s a2s+ ' +e a2e |
+4| x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+ | x1e f6s f6 ' x1e f6s rs ' x1e f6s f6 ' x1e f6s rs |
+5|  L5 f4s f  L6 f f '  L7 f f  L8 f f '  L9 f f L10 f f ' L11 f f L12 f f |
+ | L13 f4s f L14 f f ' L15 f f L16 f f ' L17 f f L18 f f ' L19 f f L20 f f |
+ | L21 f4s f L22 f f ' L23 f f L24 f f ' L25 f f L26 f f ' L27 f f L28 f f |
+ | L29 f4s f L30 f f ' L31 f f L32 f f ' L33 f f L34 f f ' L35 f f L36 f f |
+
+
+!Part Q
+
+1| E0,100 f3w E0,25 |
+2| f4e a ' c5 a4 ' e g ' b g |
+ | d4e f ' a  f  ' e g ' b g |
+4| x1q ' x1 ' x1 ' x1 |
+ | x1q ' x1 ' x1 ' x1 |
+5| Wp25 L40 D+20,30 V+1,100 E0,100 a4w Wn E0,100 |
