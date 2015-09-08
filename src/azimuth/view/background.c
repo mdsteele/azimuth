@@ -52,7 +52,7 @@ static const az_background_data_t background_datas[] = {
   },
   [AZ_BG_GREEN_HEX_TRELLIS] = {
     .parallax = 0.2, .repeat_style = ABS_RECT,
-    .repeat_horz = 180.0, .repeat_vert = 104.0
+    .repeat_horz = 180.0, .repeat_vert = 208.0
   },
   [AZ_BG_YELLOW_PANELLING] = {
     .parallax = 0.2, .repeat_style = POLAR,
@@ -221,6 +221,51 @@ static void draw_rock_wall(az_color_t color1, az_color_t color2,
   } glPopMatrix();
 }
 
+static void draw_hex_trellis(void) {
+  const az_color_t color1 = {32, 48, 32, 255};
+  const az_color_t color2 = {24, 24, 24, 255};
+  const float thick1 = 3.0f;
+  const float thick2 = thick1 * (0.25 + 0.5 * sqrt(3));
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1); glVertex2f(-45 - thick2, 0);
+    az_gl_color(color2); glVertex2f(-45 + thick2, 0);
+    az_gl_color(color1); glVertex2f(-60 - thick2, -26);
+    az_gl_color(color2); glVertex2f(-60 + thick2, -26);
+    az_gl_color(color1); glVertex2f(-30 - thick2, -78);
+    az_gl_color(color2); glVertex2f(-30 + thick2, -78);
+    az_gl_color(color1); glVertex2f(-45 - thick2, -104);
+    az_gl_color(color2); glVertex2f(-45 + thick2, -104);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1); glVertex2f(45 - thick2, 0);
+    az_gl_color(color2); glVertex2f(45 + thick2, 0);
+    az_gl_color(color1); glVertex2f(60 - thick2, -26);
+    az_gl_color(color2); glVertex2f(60 + thick2, -26);
+    az_gl_color(color1); glVertex2f(30 - thick2, -78);
+    az_gl_color(color2); glVertex2f(30 + thick2, -78);
+    az_gl_color(color1); glVertex2f(45 - thick2, -104);
+    az_gl_color(color2); glVertex2f(45 + thick2, -104);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1);
+    glVertex2f(-90, -26 + thick1); glVertex2f(-61, -26 + thick1);
+    az_gl_color(color2);
+    glVertex2f(-90, -26 - thick1); glVertex2f(-61, -26 - thick1);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1);
+    glVertex2f(90, -26 + thick1); glVertex2f(61, -26 + thick1);
+    az_gl_color(color2);
+    glVertex2f(90, -26 - thick1); glVertex2f(61, -26 - thick1);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    az_gl_color(color1);
+    glVertex2f(-29, -78 + thick1); glVertex2f(29, -78 + thick1);
+    az_gl_color(color2);
+    glVertex2f(-29, -78 - thick1); glVertex2f(29, -78 - thick1);
+  } glEnd();
+}
+
 static void draw_girders(az_color_t color1, az_color_t color2,
                          az_color_t color3, float bottom) {
   for (int sign = -1; sign <= 1; sign += 2) {
@@ -336,6 +381,13 @@ static void draw_purple_bubble(double center_x, double center_y, double radius,
   draw_bubble(center_x, center_y, radius, slowdown, clock,
               (az_color_t){40, 25, 51, 255}, (az_color_t){25, 0, 51, 255},
               (az_color_t){0, 0, 51, 0});
+}
+
+static void draw_brown_bubble(double center_x, double center_y, double radius,
+                               int slowdown, az_clock_t clock) {
+  draw_bubble(center_x, center_y, radius, 2 * slowdown, clock,
+              (az_color_t){40, 30, 10, 255}, (az_color_t){40, 15, 0, 255},
+              (az_color_t){40, 0, 0, 0});
 }
 
 static void draw_blue_bubble(double center_x, double center_y, double radius,
@@ -467,48 +519,22 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_rock_wall(color1, color2, 200, 200);
     } break;
     case AZ_BG_GREEN_HEX_TRELLIS: {
-      const az_color_t color1 = {32, 48, 32, 255};
-      const az_color_t color2 = {24, 24, 24, 255};
-      const float thick1 = 3.0f;
-      const float thick2 = thick1 * (0.25 + 0.5 * sqrt(3));
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(color1); glVertex2f(-45 - thick2, 0);
-        az_gl_color(color2); glVertex2f(-45 + thick2, 0);
-        az_gl_color(color1); glVertex2f(-60 - thick2, -26);
-        az_gl_color(color2); glVertex2f(-60 + thick2, -26);
-        az_gl_color(color1); glVertex2f(-30 - thick2, -78);
-        az_gl_color(color2); glVertex2f(-30 + thick2, -78);
-        az_gl_color(color1); glVertex2f(-45 - thick2, -104);
-        az_gl_color(color2); glVertex2f(-45 + thick2, -104);
-      } glEnd();
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(color1); glVertex2f(45 - thick2, 0);
-        az_gl_color(color2); glVertex2f(45 + thick2, 0);
-        az_gl_color(color1); glVertex2f(60 - thick2, -26);
-        az_gl_color(color2); glVertex2f(60 + thick2, -26);
-        az_gl_color(color1); glVertex2f(30 - thick2, -78);
-        az_gl_color(color2); glVertex2f(30 + thick2, -78);
-        az_gl_color(color1); glVertex2f(45 - thick2, -104);
-        az_gl_color(color2); glVertex2f(45 + thick2, -104);
-      } glEnd();
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(color1);
-        glVertex2f(-90, -26 + thick1); glVertex2f(-61, -26 + thick1);
-        az_gl_color(color2);
-        glVertex2f(-90, -26 - thick1); glVertex2f(-61, -26 - thick1);
-      } glEnd();
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(color1);
-        glVertex2f(90, -26 + thick1); glVertex2f(61, -26 + thick1);
-        az_gl_color(color2);
-        glVertex2f(90, -26 - thick1); glVertex2f(61, -26 - thick1);
-      } glEnd();
-      glBegin(GL_TRIANGLE_STRIP); {
-        az_gl_color(color1);
-        glVertex2f(-29, -78 + thick1); glVertex2f(29, -78 + thick1);
-        az_gl_color(color2);
-        glVertex2f(-29, -78 - thick1); glVertex2f(29, -78 - thick1);
-      } glEnd();
+      glPushMatrix(); {
+        glScalef(140.0f / 300.0f, 180.0f / 300.0f, 1.0f);
+        glScalef(2, 2, 1);
+        draw_brown_bubble(0, -160, 35, 4, clock + 5);
+        draw_brown_bubble(0, -90, 50, 6, clock);
+        draw_brown_bubble(-40, -25, 40, 5, clock);
+        draw_brown_bubble(30, -40, 35, 4, clock);
+        draw_brown_bubble(-55, -120, 32, 3, clock);
+        draw_brown_bubble(40, -130, 30, 2, clock);
+        draw_brown_bubble(63, -75, 27, 3, clock + 5);
+      } glPopMatrix();
+      glPushMatrix(); {
+        draw_hex_trellis();
+        glTranslatef(0.0f, -104.0f, 0.0f);
+        draw_hex_trellis();
+      } glPopMatrix();
     } break;
     case AZ_BG_YELLOW_PANELLING: {
       const az_color_t color1 = {60, 45, 30, 255};
