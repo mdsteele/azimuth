@@ -528,7 +528,7 @@ static const az_proj_data_t proj_data[] = {
   },
   [AZ_PROJ_PRISMATIC_WALL] = {
     .speed = 350.0,
-    .lifetime = 1.125,
+    .lifetime = 1.265,
     .splash_damage = 60.0,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
@@ -633,8 +633,8 @@ void az_init_projectile(az_projectile_t *proj, az_proj_kind_t kind,
 void az_get_prismatic_wall_vertices(const az_projectile_t *proj,
                                     az_vector_t vertices[4]) {
   assert(proj->kind == AZ_PROJ_PRISMATIC_WALL);
-  const double origin = 112.0;
-  const double max_length = 75.0;
+  const double origin = 90.0;
+  const double max_length = 100.0;
   const double rear_length = fmin(max_length, proj->age * proj->data->speed);
   const double front_length =
     fmin(0, (proj->data->lifetime - proj->age) * proj->data->speed -

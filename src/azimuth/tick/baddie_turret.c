@@ -85,7 +85,7 @@ void az_tick_bad_beam_turret(
   const az_vector_t beam_start =
     az_vadd(baddie->position, az_vpolar(30, beam_theta));
   az_impact_t impact;
-  az_ray_impact(state, beam_start, az_vpolar(1000, beam_theta),
+  az_ray_impact(state, beam_start, az_vpolar(10000, beam_theta),
                 (baddie->cooldown > 0.0 || az_ship_is_decloaked(&state->ship) ?
                  AZ_IMPF_NONE : AZ_IMPF_SHIP), baddie->uid, &impact);
   // If beam is still turned on, fire:

@@ -21,6 +21,8 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/sound.h"
@@ -46,12 +48,20 @@
 #define STARBURST_1_STATE 10
 #define STARBURST_2_STATE 11
 #define STARBURST_3_STATE 12
+
 // Rainbow beam secondary states:
 #define BEAM_CHARGE_FORWARD 0
 #define BEAM_CHARGE_BACKWARD 1
 #define BEAM_FIRE_FORWARD 2
 #define BEAM_FIRE_BACKWARD 3
 #define BEAM_COOLDOWN 4
+
+// Warning time, in seconds, to give before firing a prismatic wall:
+#define PRISMATIC_CHARGE_TIME 0.75
+// Time, in seconds, to spend pumping before firing a prismatic wall:
+#define PRISMATIC_PUMP_TIME 0.05
+// Distance, in pixels that barriers are pumped:
+#define PRISMATIC_PUMP_DIST 60.0
 
 /*===========================================================================*/
 
@@ -62,16 +72,43 @@ static const struct {
   [DORMANT_STATE]        = { .next = RAINBOW_BEAM_1_STATE, .frac = 1 },
   [RAINBOW_BEAM_1_STATE] = { .next = PILLBOX_1_STATE,      .frac = 0.9 },
   [PILLBOX_1_STATE]      = { .next = BUZZSAW_1_STATE,      .frac = 0.775 },
-  [BUZZSAW_1_STATE]      = { .next = STARBURST_1_STATE,    .frac = 0.65 },
+  [BUZZSAW_1_STATE]      = { .next = STARBURST_1_STATE,    .frac = 0.6 },
   [STARBURST_1_STATE]    = { .next = PRISMATIC_1_STATE,    .frac = 1 },
   [PRISMATIC_1_STATE]    = { .next = RAINBOW_BEAM_2_STATE, .frac = 0.5 },
   [RAINBOW_BEAM_2_STATE] = { .next = BUZZSAW_2_STATE,      .frac = 0.4 },
-  [BUZZSAW_2_STATE]      = { .next = STARBURST_2_STATE,    .frac = 0.275 },
+  [BUZZSAW_2_STATE]      = { .next = STARBURST_2_STATE,    .frac = 0.225 },
   [STARBURST_2_STATE]    = { .next = PILLBOX_2_STATE,      .frac = 1 },
-  [PILLBOX_2_STATE]      = { .next = STARBURST_3_STATE,    .frac = 0.15 },
+  [PILLBOX_2_STATE]      = { .next = STARBURST_3_STATE,    .frac = 0.1 },
   [STARBURST_3_STATE]    = { .next = PRISMATIC_2_STATE,    .frac = 1 },
   [PRISMATIC_2_STATE]    = { .next = PRISMATIC_2_STATE,    .frac = 0 }
 };
+
+#define MAX_PRISMATIC_PATTERN_LENGTH 8
+#define NUM_PRISMATIC_PATTERNS 8
+static const uint8_t prismatic_1_patterns[][MAX_PRISMATIC_PATTERN_LENGTH] = {
+  {0x11, 0x22, 0x44, 0x88, 0x11, 0x22, 0x44, 0x88},
+  {0x88, 0x44, 0x22, 0x11, 0x88, 0x44, 0x22, 0x11},
+  {0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA},
+  {0x22, 0x44, 0x88, 0x11, 0x88, 0x44, 0x22, 0x11},
+  {0x33, 0xCC, 0x33, 0xCC, 0x33, 0xCC},
+  {0x77, 0xBB, 0xDD, 0xEE},
+  {0x22, 0x11, 0x88, 0x44, 0x88, 0x11, 0x22, 0x44},
+  {0xEE, 0xDD, 0xBB, 0x77},
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(prismatic_1_patterns) ==
+                 NUM_PRISMATIC_PATTERNS);
+static const uint8_t prismatic_2_patterns[][MAX_PRISMATIC_PATTERN_LENGTH] = {
+  {0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA},
+  {0x33, 0x11, 0x99, 0x88, 0xCC, 0x44, 0x66, 0x22},
+  {0x22, 0x66, 0x44, 0xCC, 0x88, 0x99, 0x11, 0x33},
+  {0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA},
+  {0x77, 0xBB, 0xDD, 0xEE, 0x77, 0xBB, 0xDD, 0xEE},
+  {0x33, 0xCC, 0x33, 0xCC, 0x33, 0xCC},
+  {0xEE, 0xDD, 0xBB, 0x77, 0xEE, 0xDD, 0xBB, 0x77},
+  {0x66, 0x99, 0x66, 0x99, 0x66, 0x99},
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(prismatic_2_patterns) ==
+                 NUM_PRISMATIC_PATTERNS);
 
 /*===========================================================================*/
 
@@ -113,6 +150,12 @@ static void move_component_towards(az_baddie_t *baddie, double time, int idx,
                         30.0 * time));
   component->angle = az_angle_towards(component->angle, AZ_DEG2RAD(45) * time,
                                       goal_angle);
+}
+
+static void adjust_to_closed_configuration(az_baddie_t *baddie, double time) {
+  for (int i = 0; i < 8; ++i) {
+    move_component_towards(baddie, time, i, AZ_VZERO, i * AZ_DEG2RAD(45));
+  }
 }
 
 static void adjust_to_beam_configuration(az_baddie_t *baddie, double time) {
@@ -264,7 +307,7 @@ static void init_prismatic(az_baddie_t *baddie, bool super) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   set_primary_state(baddie, (super ? PRISMATIC_2_STATE : PRISMATIC_1_STATE));
   baddie->param = 0.0;
-  baddie->cooldown = 2.0;
+  baddie->cooldown = 3.0;
 }
 
 static void init_starburst(az_baddie_t *baddie, int num_blasts) {
@@ -503,26 +546,76 @@ static void do_pillbox_2(az_space_state_t *state, az_baddie_t *baddie,
   }
 }
 
-static void fire_prismatic_walls(az_space_state_t *state, az_baddie_t *baddie,
-                                 double time) {
+static bool advance_prismatic(az_space_state_t *state, az_baddie_t *baddie,
+                              bool super) {
+  const int pattern_index =
+    get_secondary_state(baddie) % NUM_PRISMATIC_PATTERNS;
+  const int mask_index = get_tertiary_state(baddie);
+  const uint8_t mask = (mask_index >= MAX_PRISMATIC_PATTERN_LENGTH ? 0 :
+                        (super ? prismatic_2_patterns :
+                         prismatic_1_patterns)[pattern_index][mask_index]);
+  if (mask == 0) return (baddie->cooldown <= 0.0);
+  if (baddie->param == 0.0 && baddie->cooldown <= PRISMATIC_CHARGE_TIME) {
+    baddie->param = 1.0;
+    baddie->param = 1.0;
+    for (int i = 0; i < 8; ++i) {
+      if (!(mask & (1 << i))) continue;
+      const double angle =
+        baddie->angle + AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45);
+      const az_vector_t base = az_vpolar(90.0, angle);
+      const az_vector_t perp = az_vpolar(7.0, angle + AZ_HALF_PI);
+      for (int j = 0; j < 12; ++j) {
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_EMBER;
+          particle->color = az_hsva_color(j * AZ_DEG2RAD(60), 0.5, 1.0, 0.75);
+          particle->position = az_vadd(base, az_vmul(perp, j - 5.5));
+          particle->velocity = AZ_VZERO;
+          particle->angle = angle;
+          particle->lifetime = PRISMATIC_CHARGE_TIME - PRISMATIC_PUMP_TIME;
+          particle->param1 = 20.0;
+        }
+      }
+    }
+    az_play_sound(&state->soundboard, AZ_SND_PRISMATIC_CHARGE);
+  }
+  if (baddie->cooldown <= PRISMATIC_PUMP_TIME) {
+    for (int i = 0; i < 8; ++i) {
+      if (!(mask & (1 << i))) continue;
+      baddie->components[i].position =
+        az_vpolar(PRISMATIC_PUMP_DIST *
+                  (1.0 - baddie->cooldown / PRISMATIC_PUMP_TIME),
+                  AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45));
+    }
+  }
+  if (baddie->cooldown <= 0.0) {
+    baddie->param = 0.0;
+    int num_walls = 0;
+    for (int i = 0; i < 8; ++i) {
+      if (!(mask & (1 << i))) continue;
+      az_fire_baddie_projectile(state, baddie, AZ_PROJ_PRISMATIC_WALL, 90.0,
+                                AZ_DEG2RAD(22.5) + i * AZ_DEG2RAD(45), 0.0);
+      ++num_walls;
+    }
+    az_play_sound(&state->soundboard, AZ_SND_PRISMATIC_FIRE);
+    set_tertiary_state(baddie, mask_index + 1);
+    baddie->cooldown = (super ? 1.0 : 0.4 * num_walls);
+  }
+  return false;
+}
+
+static void do_prismatic(az_space_state_t *state, az_baddie_t *baddie,
+                         double time, bool super) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  adjust_to_pillbox_configuration(baddie, time);
-  adjust_gravity(state, time, 400.0, false);
+  adjust_to_closed_configuration(baddie, time);
+  adjust_gravity(state, time, 300.0, false);
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
                                    AZ_DEG2RAD(22.5));
-  if (baddie->cooldown <= 0.0) {
-    double start_angle = AZ_DEG2RAD(22.5) + AZ_DEG2RAD(45) *
-      round((az_vtheta(az_vsub(state->ship.position, baddie->position)) -
-             (baddie->angle + AZ_DEG2RAD(22.5))) / AZ_DEG2RAD(45));
-    if (az_randint(0, 4) == 0) start_angle += AZ_DEG2RAD(45);
-    for (int i = 0; i < 360; i += 90) {
-      az_fire_baddie_projectile(state, baddie, AZ_PROJ_PRISMATIC_WALL,
-                                112.0, start_angle + AZ_DEG2RAD(i), 0.0);
-    }
-    az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_PIERCE);
-    if (!try_transition(state, baddie)) {
-      baddie->cooldown = 1.0;
-    }
+  const bool pattern_done = advance_prismatic(state, baddie, super);
+  if (pattern_done && !try_transition(state, baddie)) {
+    set_secondary_state(baddie, ((get_secondary_state(baddie) + 1) %
+                                 NUM_PRISMATIC_PATTERNS));
+    baddie->cooldown = 2.5;
   }
 }
 
@@ -658,8 +751,10 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       do_buzzsaw(state, baddie, time, true);
       break;
     case PRISMATIC_1_STATE:
+      do_prismatic(state, baddie, time, false);
+      break;
     case PRISMATIC_2_STATE:
-      fire_prismatic_walls(state, baddie, time);
+      do_prismatic(state, baddie, time, true);
       break;
     case STARBURST_1_STATE:
     case STARBURST_2_STATE:
