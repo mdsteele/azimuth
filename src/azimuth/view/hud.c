@@ -238,6 +238,19 @@ static void draw_minimap_rooms(const az_space_state_t *state) {
   const double camera_theta = az_vtheta(state->camera.center);
   const double camera_theta_span = (camera_rho <= camera_radius ? AZ_TWO_PI :
                                     2.0 * asin(camera_radius / camera_rho));
+  // Draw planet surface:
+  if (camera_rho + camera_radius >= AZ_PLANETOID_RADIUS &&
+      camera_rho - camera_radius <= AZ_PLANETOID_RADIUS) {
+    glBegin(GL_LINE_STRIP); {
+      glColor3f(1, 1, 0);
+      const double step = AZ_DEG2RAD(0.5);
+      for (double theta = camera_theta - 0.5 * camera_theta_span,
+                  limit = camera_theta + 0.5 * camera_theta_span + step;
+           theta < limit; theta += step) {
+        az_gl_vertex(az_vpolar(AZ_PLANETOID_RADIUS, theta));
+      }
+    } glEnd();
+  }
   // Draw explored rooms:
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
