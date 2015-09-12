@@ -77,6 +77,17 @@ static az_vector_t get_room_center(const az_room_t *room) {
           AZ_VZERO : az_bounds_center(bounds));
 }
 
+// Return the minimap screen coordinates for a given absolute position.
+static az_vector_t minimap_position(const az_paused_state_t *state,
+                                    az_vector_t pos) {
+  pos.y -= state->scroll_y;
+  pos.x /= MINIMAP_ZOOM;
+  pos.y /= MINIMAP_ZOOM;
+  pos.x += AZ_SCREEN_WIDTH/2;
+  pos.y = AZ_SCREEN_HEIGHT/2 - pos.y;
+  return pos;
+}
+
 /*===========================================================================*/
 // Drawing minimap:
 
@@ -96,25 +107,43 @@ static void draw_map_marker(const az_room_t *room, az_clock_t clock) {
   } glPopMatrix();
 }
 
-static void begin_map_label(az_color_t color, const az_room_t *room) {
-  const az_vector_t center = get_room_center(room);
-  glPushMatrix();
-  glTranslated(center.x, center.y, 0);
-  glScalef(MINIMAP_ZOOM, MINIMAP_ZOOM, 0);
-  az_gl_color(color);
-  glBegin(GL_QUADS); {
-    glVertex2f(4, 4); glVertex2f(-4, 4); glVertex2f(-4, -4); glVertex2f(4, -4);
-  } glEnd();
-  glColor3f(0, 0, 0);
-  glBegin(GL_LINE_STRIP);
+static void draw_room_label(az_vector_t center, int num_vertices,
+                            const float vertices[]) {
+  glPushMatrix(); {
+    glTranslatef((int)center.x + 0.5f, (int)center.y + 0.5f, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      glVertex2f(4, 4); glVertex2f(-4, 4);
+      glVertex2f(-4, -4); glVertex2f(4, -4);
+    } glEnd();
+    glColor3f(0, 0, 0);
+    glBegin(GL_LINE_STRIP); {
+      for (int i = 0; i < num_vertices; ++i) {
+        glVertex2f(vertices[2 * i], vertices[2 * i + 1]);
+      }
+    } glEnd();
+  } glPopMatrix();
 }
 
-static void end_map_label(void) {
-  glEnd();
-  glPopMatrix();
+static void draw_save_label(az_vector_t center) {
+  const float vertices[12] = {2, -2, -2, -2, -2, 0, 2, 0, 2, 2, -2, 2};
+  glColor3f(0.5, 1, 0.5);
+  draw_room_label(center, 6, vertices);
 }
 
-static void draw_minimap_rooms(const az_paused_state_t *state) {
+static void draw_comm_label(az_vector_t center) {
+  const float vertices[12] = {2, -2, -1, -2, -2, -1, -2, 1, -1, 2, 2, 2};
+  glColor3f(0.5, 0.5, 1);
+  draw_room_label(center, 6, vertices);
+}
+
+static void draw_refill_label(az_vector_t center) {
+  const float vertices[12] = {-2, 2.5, -2, -2, 2, -2, 2, 0, -2, 0, 2.5, 2.5};
+  glColor3f(1, 1, 0.5);
+  draw_room_label(center, 6, vertices);
+}
+
+static void draw_minimap_rooms(const az_paused_state_t *state,
+                               az_room_flags_t *room_flags_out) {
   // Draw planet surface outline:
   glColor3f(1, 1, 0); // yellow
   glBegin(GL_LINE_STRIP); {
@@ -134,39 +163,14 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
     const bool visited = az_test_room_visited(player, i);
     if (!visited && !test_room_mapped(player, room)) continue;
     az_draw_minimap_room(planet, room, visited, false);
+    *room_flags_out |= room->properties & AZ_ROOMF_WITH_SAVE;
+    if (visited) {
+      *room_flags_out |= room->properties & (AZ_ROOMF_WITH_COMM |
+                                             AZ_ROOMF_WITH_REFILL);
+    }
   }
 
   if (state->current_drawer != AZ_PAUSE_DRAWER_MAP) return;
-
-  // Draw map labels:
-  for (int i = 0; i < planet->num_rooms; ++i) {
-    const az_room_t *room = &planet->rooms[i];
-    const bool visited = az_test_room_visited(player, i);
-    if (!visited && !test_room_mapped(player, room)) continue;
-
-    // Draw a console label (if any).  We mark all save rooms on the map, but
-    // only mark refill/comm rooms if we've actually visited them.
-    if (az_clock_mod(2, 30, state->clock) == 0) {
-      if (room->properties & AZ_ROOMF_WITH_SAVE) {
-        begin_map_label((az_color_t){128, 255, 128, 255}, room); {
-          glVertex2f(2, 2); glVertex2f(-2, 2); glVertex2f(-2, 0);
-          glVertex2f(2, 0); glVertex2f(2, -2); glVertex2f(-2, -2);
-        } end_map_label();
-      } else if (visited) {
-        if (room->properties & AZ_ROOMF_WITH_REFILL) {
-          begin_map_label((az_color_t){255, 255, 128, 255}, room); {
-            glVertex2f(-2, -2); glVertex2f(-2, 2); glVertex2f(2, 2);
-            glVertex2f(2, 0); glVertex2f(-2, 0); glVertex2f(2, -2);
-          } end_map_label();
-        } else if (room->properties & AZ_ROOMF_WITH_COMM) {
-          begin_map_label((az_color_t){128, 128, 255, 255}, room); {
-            glVertex2f(2, 2); glVertex2f(-2, 2);
-            glVertex2f(-2, -2); glVertex2f(2, -2);
-          } end_map_label();
-        }
-      }
-    }
-  }
 
   // Draw map markers:
   for (int i = 0; i < planet->num_rooms; ++i) {
@@ -181,24 +185,74 @@ static void draw_minimap_rooms(const az_paused_state_t *state) {
       }
     }
   }
+}
 
-  // Draw a marker for the current ship position:
-  if (az_clock_mod(2, 12, state->clock) == 0) {
-    glPushMatrix(); {
-      glTranslated(ship->position.x, ship->position.y, 0);
-      glRotated(AZ_RAD2DEG(ship->angle), 0, 0, 1);
-      glBegin(GL_LINE_LOOP); {
-        glColor3f(0, 1, 1);
-        glVertex2f(700, 0); glVertex2f(100, 100);
-        glVertex2f(0, 700); glVertex2f(-100, 100);
-        glVertex2f(-700, 0); glVertex2f(-100, -100);
-        glVertex2f(0, -700); glVertex2f(100, -100);
-      } glEnd();
-    } glPopMatrix();
+static void draw_minimap_room_labels(const az_paused_state_t *state) {
+  const az_planet_t *planet = state->planet;
+  const az_ship_t *ship = state->ship;
+  const az_player_t *player = &ship->player;
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    const az_room_t *room = &planet->rooms[i];
+    const bool visited = az_test_room_visited(player, i);
+    if (!visited && !test_room_mapped(player, room)) continue;
+    if (room->properties & AZ_ROOMF_WITH_SAVE) {
+      draw_save_label(minimap_position(state, get_room_center(room)));
+    } else if (visited) {
+      if (room->properties & AZ_ROOMF_WITH_REFILL) {
+        draw_refill_label(minimap_position(state, get_room_center(room)));
+      } else if (room->properties & AZ_ROOMF_WITH_COMM) {
+        draw_comm_label(minimap_position(state, get_room_center(room)));
+      }
+    }
   }
 }
 
+static void draw_minimap_ship_label(const az_paused_state_t *state) {
+  const az_vector_t center = minimap_position(state, state->ship->position);
+  glPushMatrix(); {
+    glTranslatef((int)center.x, (int)center.y, 0);
+    glRotatef(-90 * round(state->ship->angle / AZ_HALF_PI), 0, 0, 1);
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.75, 0.75, 0.75);
+      glVertex2f(-6, -6); glVertex2f(1, -6);
+      glVertex2f(-7, -2); glVertex2f(7, -2);
+      glVertex2f(-7,  0); glVertex2f(9,  0);
+      glVertex2f(-7,  2); glVertex2f(7,  2);
+      glVertex2f(-6,  6); glVertex2f(1,  6);
+    } glEnd();
+    // Struts:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.25, 0.25, 0.25);
+      glVertex2f(-4, -4); glVertex2f( 0, -4);
+      glVertex2f(-4,  4); glVertex2f( 0,  4);
+    } glEnd();
+    // Port engine:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(-5, -5); glVertex2f(1, -5);
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(-6, -3); glVertex2f(2, -3);
+    } glEnd();
+    // Starboard engine:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(-6,  3); glVertex2f(2,  3);
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(-5,  5); glVertex2f(1,  5);
+    } glEnd();
+    // Main body:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(-6, -2); glVertex2f(6, -2);
+      glColor3f(0.50, 0.50, 0.50); glVertex2f(-6,  0); glVertex2f(8,  0);
+      glColor3f(0.25, 0.25, 0.25); glVertex2f(-6,  2); glVertex2f(6,  2);
+    } glEnd();
+    // Windshield:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0, 0.50, 0.50); glVertex2f(5,  1);
+      glColor3f(0, 0.75, 0.75); glVertex2f(7,  0); glVertex2f(4, 0);
+      glColor3f(0, 0.50, 0.50); glVertex2f(5, -1);
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_minimap(const az_paused_state_t *state) {
+  az_room_flags_t room_flags_union = 0;
   glEnable(GL_SCISSOR_TEST); {
     glScissor(30, 50, 580, 400);
     glPushMatrix(); {
@@ -211,8 +265,14 @@ static void draw_minimap(const az_paused_state_t *state) {
       // Move the screen to the camera pose.
       glTranslated(0, -state->scroll_y, 0);
       // Draw what the camera sees.
-      draw_minimap_rooms(state);
+      draw_minimap_rooms(state, &room_flags_union);
     } glPopMatrix();
+    if (az_clock_mod(2, 30, state->clock) == 0) {
+      draw_minimap_room_labels(state);
+    }
+    if (az_clock_mod(2, 12, state->clock) == 0) {
+      draw_minimap_ship_label(state);
+    }
   } glDisable(GL_SCISSOR_TEST);
 
   glColor3f(0.75, 0.75, 0.75);
@@ -251,6 +311,22 @@ static void draw_minimap(const az_paused_state_t *state) {
     else az_gl_color(normal);
     az_draw_printf(8, AZ_ALIGN_CENTER, 78, 393, "[%s]",
                    az_key_name(state->prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]));
+  }
+
+  if (room_flags_union & AZ_ROOMF_WITH_SAVE) {
+    draw_save_label((az_vector_t){541, 370});
+    glColor3f(0.75, 0.75, 0.75);
+    az_draw_string(8, AZ_ALIGN_LEFT, 550, 367, "Save");
+  }
+  if (room_flags_union & AZ_ROOMF_WITH_COMM) {
+    draw_comm_label((az_vector_t){541, 383});
+    glColor3f(0.75, 0.75, 0.75);
+    az_draw_string(8, AZ_ALIGN_LEFT, 550, 380, "Comm");
+  }
+  if (room_flags_union & AZ_ROOMF_WITH_REFILL) {
+    draw_refill_label((az_vector_t){541, 396});
+    glColor3f(0.75, 0.75, 0.75);
+    az_draw_string(8, AZ_ALIGN_LEFT, 550, 393, "Repair");
   }
 }
 
@@ -771,7 +847,7 @@ void az_paused_draw_screen(const az_paused_state_t *state) {
   az_draw_cursor();
   if (state->do_quit) {
     glColor4f(0, 0, 0, state->quitting_fade_alpha);
-    glBegin(GL_QUADS); {
+    glBegin(GL_TRIANGLE_FAN); {
       glVertex2i(0, 0);
       glVertex2i(AZ_SCREEN_WIDTH, 0);
       glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
