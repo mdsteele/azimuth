@@ -20,6 +20,7 @@
 #include "azimuth/control/title.h"
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include "azimuth/control/util.h"
 #include "azimuth/gui/audio.h"
@@ -40,9 +41,13 @@ static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
 
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs) {
+    az_preferences_t *prefs, bool skip_intro) {
   static az_title_state_t state;
   az_init_title_state(&state, planet, saved_games, prefs);
+  if (skip_intro) {
+    az_title_skip_intro(&state);
+    state.mode = AZ_TMODE_NORMAL;
+  }
 
   bool prefs_changed = false;
 

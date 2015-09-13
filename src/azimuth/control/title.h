@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_CONTROL_TITLE_H_
 #define AZIMUTH_CONTROL_TITLE_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/planet.h"
 #include "azimuth/state/save.h"
 #include "azimuth/util/prefs.h"
@@ -34,7 +36,7 @@ typedef struct {
 
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs);
+    az_preferences_t *prefs, bool skip_intro);
 
 /*===========================================================================*/
 
