@@ -1,4 +1,4 @@
-@M "S =1faA=1fBA=1fCA=1fBD=1gC=2a:y fF:m gG:m yY |mM"
+@M "S =1faA=1fBA=1fCA=1fBD=1gC=2a:y fF:m gG:m yY |mMOMPT"
 % Title: "Birth of a Planet"
 
 =tempo 80
@@ -112,8 +112,70 @@
 3| g2q g b2 b |
 4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ds c d c |
 
+!Part O
+
 2| c4h. re c4s d |
 5| c5w |
 1| g3w |
-3| c3w |
+3| c2w |
+4| c3q ' ce ds c ' c3e dt c d c ' ds c dt c d c |
+
+!Part P
+
+2| c4h. re f4s g |
+5| c5w |
+1| g3w |
+3| c2w |
+4| c3q ' ce ds c ' c3e dt c d c ' ds c dt c d c |
+
+
+
+!Part T
+
+2| a4q. bs a gq e |
+5| E0,10 c5e g4 ' c5 g4 ' b4e f ' b f |
+1| f3h e3h |
+3| f2q f e2 e |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| d4q. es d ce g3 c4 fs g |
+5| g5e d ' g d ' e5q ' E0,50 c |
+1| b2h c3h |
+3| b1q b c2 c |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ce c |
+
+2| a4q. es f gq a |
+5| E0,10 c5e g4 ' c5 g4 ' d5e b4 ' e5 c |
+1| f3h e3h |
+3| f2q f e2 e |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| g4h. re fs g |
+5| E0,50 d5h b4q d5 |
+1| b2w |
+3| b1q b b b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ds c d c |
+
+2| a4q. bs c5 dq e |
+5| E0,10 e5e c ' e f ' g e ' a c6 |
+1| f3h g3h |
+3| f2q f g2 g |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' c3q |
+
+2| d5q. es d ce g4 c5 cs d |
+5| d6e f5 ' d6 f5 ' c6q ' E0,50 g5 |
+1| b3h c4h |
+3| b2q b c3q c |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ce c |
+
+2| e5q. fs e dq b4 |
+5| E0,10 c6e g5 ' c6 g5 ' b5e d6 ' b5 d6 |
+1| g3h b3h |
+3| g2q g b2 b |
+4| c3e dt c d c ' ce ds c ' c3e dt c d c ' ds c d c |
+
+2| c5h. re c4s d |
+5| E0,50 c6w |
+1| g3w |
+3| c2w |
 4| c3q ' ce ds c ' c3e dt c d c ' ds c dt c d c |
