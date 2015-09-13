@@ -1,4 +1,4 @@
-@M "S|AABAABB"
+@M "SX|ABCDB"
 
 =tempo 130
 =key 3b     % C minor
@@ -6,22 +6,84 @@
 
 !Part S
 
-1 Wt50 L150  E0,25
-2 Wp25 L25  E0,25
-3 Wt50 L120 E0,25
+1 Wt50 L150 E0,25  D20,40
+2 Wp25 L25  E0,25  D5,60
+3 Wt75 L120 E0,25  D5,40
 4 Wn   L25  E0,100
 5 Wn   L40  E0,100
 
 
+!Part X
+
+1| E0,0 g5t a g a g a g a ' g a g a g a g a '
+ ' g5t a g a g a g a ' g a g a g a g a |
+ | E0,15 V2,60 g5w V0,0 E0,25 |
+2| E0,0 g4t a g a g a g a ' g a g a g a g a '
+ ' g4t a g a g a g a ' g a g a g a g a |
+ | E0,15 V2,60 g4h+e+s rs ' V0,0 gs f e d E0,25 |
+
+
 !Part A
 
+3| rw | rw | rw | rw |
 2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+3| E75,50 re c5q. ' re cq. | re cq. re cq. |
+ | re c5q. re cq. | re cq. re cq. E0,25 |
+2|     c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
 5| x0q x0 x0 x0 | x0q x0 x0 x0 |
  | x0q x0 x0 x0 | x0q x0 x0 x0 |
 
 
 !Part B
+
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4e |
+1| g4s ge ge fs ge ' as ae ae gs ae |
+ | g4s ge ge fs ge ' fe es d ee ds c |
+ | c4s ge ge fs ge ' c4s ae ae gs ae |
+ | g4s ge ge fs ge ' aq g |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+ | x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d b3e c4q c c c |
+1| g4s ge ge fs ge ' as ae ae gs ae |
+ | g4s ge ge fs ge ' fe es d ee ds c |
+ | c4s ee ee ds ee ' dq b3 |
+ | c4q c ' c c |
+5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+ | x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+
+!Part C
+
+1| rw | rw | rw | rw |
+3| rw | rw | rw | rw |
+2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4 |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+1| rw | rw |
+ | E0,0 g4t a g a g a g a ' g a g a g a g a '
+ ' g4t a g a g a g a ' g a g a g a g a |
+ | E0,15 V2,60 g4w V0,0 E0,25 |
+3| E75,50 re c5q. ' re cq. | re cq. re cq. |
+ | re c5q. re cq. | re cq. re cq. E0,25 |
+2|     c4q e d P+0.25 db c P0 b3 bN c4 |
+ |     c4q e d P+0.25 db c P0 b3 bN c4e |
+5| x0q x0 x0 x0 | x0q x0 x0 x0 |
+ | x0q x0 x0 x0 | x0q x0 x0 x0 |
+
+
+!Part D
+
+1 T+12 L100
 
 2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
@@ -42,3 +104,5 @@
 1| c4s ee ee ds ee ' dq b3 |
  | c4q c ' c c |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
+
+1 L150
