@@ -54,6 +54,7 @@ typedef struct {
   } hovering;
   az_upgrade_t hovered_upgrade;
   az_prefs_pane_t prefs_pane;
+  az_button_t options_drawer_handle, upgrade_drawer_handle;
   az_button_t quit_button;
   bool confirming_quit, do_quit;
   az_button_t confirm_button, cancel_button;

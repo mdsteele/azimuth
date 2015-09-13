@@ -53,6 +53,11 @@ static void do_button_polygon(GLenum mode, const az_button_t *button) {
   } glEnd();
 }
 
+void az_draw_borderless_button(const az_button_t *button) {
+  glColor4f(0.525, 0.75, 0.75, 0.5 * button->hover_pulse);
+  do_button_polygon(GL_TRIANGLE_FAN, button);
+}
+
 void az_draw_standard_button(const az_button_t *button) {
   glColor4f(0.7 * button->hover_pulse, button->hover_pulse,
             button->hover_pulse, 0.7);

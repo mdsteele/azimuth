@@ -37,6 +37,7 @@ typedef struct {
 
 void az_init_button(az_button_t *button, az_polygon_t polygon, int x, int y);
 
+void az_draw_borderless_button(const az_button_t *button);
 void az_draw_standard_button(const az_button_t *button);
 void az_draw_dangerous_button(const az_button_t *button);
 

@@ -439,6 +439,19 @@ static void draw_schematic_line(az_clock_t clock, const az_vector_t *vertices,
 
 #define UPGRADE_DRAWER_SLIDE_DISTANCE 410
 
+static const az_vector_t upgrade_drawer_vertices[] = {
+  {12.5, 480.5}, {12.5, 20.5}, {22.5, 10.5}, {202.5, 10.5}, {206.5, 14.5},
+  {421.5, 14.5}, {432.5, 3.5}, {627.5, 3.5}, {627.5, 480.5}
+};
+
+#define UPGRADE_DRAWER_HANDLE_TOP 3
+#define UPGRADE_DRAWER_HANDLE_LEFT 0
+static const az_vector_t upgrade_drawer_handle_vertices[] = {
+  {627.5, 19.5}, {627.5, 0.5}, {432.5, 0.5}, {421.5, 11.5}, {429.5, 19.5}
+};
+static const az_polygon_t upgrade_drawer_handle_polygon =
+  AZ_INIT_POLYGON(upgrade_drawer_handle_vertices);
+
 #define GUN_BOX_WIDTH 60
 #define UPG_BOX_WIDTH 150
 #define UPG_BOX_HEIGHT 15
@@ -507,11 +520,6 @@ static int round_towards_middle(double amount, double maximum) {
   return (int)(amount - offset) + offset;
 }
 
-static const az_vector_t upgrade_drawer_vertices[] = {
-  {12.5, 480.5}, {12.5, 20.5}, {22.5, 10.5}, {202.5, 10.5}, {206.5, 14.5},
-  {421.5, 14.5}, {432.5, 3.5}, {627.5, 3.5}, {627.5, 480.5}
-};
-
 static void draw_upgrades(const az_paused_state_t *state) {
   const az_player_t *player = &state->ship->player;
 
@@ -524,6 +532,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
     AZ_ARRAY_LOOP(vertex, upgrade_drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
 
+  az_draw_borderless_button(&state->upgrade_drawer_handle);
   if (az_clock_mod(2, 40, state->clock)) glColor3f(0.5, 1, 0.5);
   else glColor3f(0, 1, 0);
   if (state->current_drawer == AZ_PAUSE_DRAWER_UPGRADES) {
@@ -711,6 +720,14 @@ static const az_vector_t options_drawer_vertices[] = {
   {627.5, OPTIONS_DRAWER_SLIDE_DISTANCE - 1.5}, {627.5, -0.5}
 };
 
+#define OPTIONS_DRAWER_HANDLE_TOP (OPTIONS_DRAWER_SLIDE_DISTANCE - 2)
+#define OPTIONS_DRAWER_HANDLE_LEFT 0
+static const az_vector_t options_drawer_handle_vertices[] = {
+  {12.5, 0.5}, {12.5, 20.5}, {194.5, 20.5}, {204.4, 10.5}, {194.5, 0.5}
+};
+static const az_polygon_t options_drawer_handle_polygon =
+  AZ_INIT_POLYGON(options_drawer_handle_vertices);
+
 #define PREFS_BOX_TOP 30
 #define PREFS_BOX_LEFT ((AZ_SCREEN_WIDTH - AZ_PREFS_BOX_WIDTH) / 2)
 #define PREFS_BOX_MARGIN 5
@@ -746,14 +763,15 @@ static void draw_prefs(const az_paused_state_t *state) {
     AZ_ARRAY_LOOP(vertex, options_drawer_vertices) az_gl_vertex(*vertex);
   } glEnd();
 
+  az_draw_borderless_button(&state->options_drawer_handle);
   if (az_clock_mod(2, 40, state->clock)) glColor3f(0.5, 1, 0.5);
   else glColor3f(0, 1, 0);
   if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS) {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 4,
+    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 5,
                    "\x11 MAP [%s] \x11",
                    az_key_name(state->prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]));
   } else {
-    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 4,
+    az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 5,
                    "\x12 OPTIONS [%s] \x12",
                    az_key_name(state->prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]));
   }
@@ -821,6 +839,11 @@ void az_init_paused_state(
   state->scroll_y = fmin(fmax(y_min, current_y), SCROLL_Y_MAX);
   state->scroll_y_min = y_min;
   az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP, prefs);
+  az_init_button(&state->options_drawer_handle, options_drawer_handle_polygon,
+                 OPTIONS_DRAWER_HANDLE_LEFT, OPTIONS_DRAWER_HANDLE_TOP);
+  az_init_button(&state->upgrade_drawer_handle,
+                 upgrade_drawer_handle_polygon,
+                 UPGRADE_DRAWER_HANDLE_LEFT, UPGRADE_DRAWER_HANDLE_TOP);
   az_init_button(&state->quit_button, quit_button_polygon,
                  QUIT_BUTTON_LEFT, QUIT_BUTTON_TOP);
   az_init_button(&state->confirm_button, quit_button_polygon,
@@ -908,6 +931,12 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
       fmin(fmax(state->scroll_y_min, state->scroll_y), SCROLL_Y_MAX);
   }
 
+  az_tick_button(&state->options_drawer_handle, 0,
+                 -OPTIONS_DRAWER_SLIDE_DISTANCE * (1.0 + state->drawer_slide),
+                 true, time, state->clock, &state->soundboard);
+  az_tick_button(&state->upgrade_drawer_handle, 0,
+                 UPGRADE_DRAWER_SLIDE_DISTANCE * (1.0 - state->drawer_slide),
+                 true, time, state->clock, &state->soundboard);
   const bool options_active =
     state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
     state->drawer_slide == -1.0 && !state->do_quit;
@@ -966,8 +995,20 @@ void az_paused_on_hover(az_paused_state_t *state, int x, int y) {
 
 void az_paused_on_click(az_paused_state_t *state, int x, int y) {
   if (state->do_quit) return;
-  if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
-      state->drawer_slide == -1.0) {
+  if (az_button_on_click(&state->options_drawer_handle, x, y +
+                         OPTIONS_DRAWER_SLIDE_DISTANCE *
+                         (1.0 + state->drawer_slide))) {
+    state->current_drawer =
+      (state->current_drawer != AZ_PAUSE_DRAWER_OPTIONS ?
+       AZ_PAUSE_DRAWER_OPTIONS : AZ_PAUSE_DRAWER_MAP);
+  } else if (az_button_on_click(&state->upgrade_drawer_handle, x, y -
+                                UPGRADE_DRAWER_SLIDE_DISTANCE *
+                                (1.0 - state->drawer_slide))) {
+    state->current_drawer =
+      (state->current_drawer != AZ_PAUSE_DRAWER_UPGRADES ?
+       AZ_PAUSE_DRAWER_UPGRADES : AZ_PAUSE_DRAWER_MAP);
+  } else if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
+             state->drawer_slide == -1.0) {
     if (state->confirming_quit) {
       if (az_button_on_click(&state->confirm_button, x, y)) {
         state->do_quit = true;
