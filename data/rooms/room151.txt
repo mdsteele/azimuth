@@ -1,4 +1,4 @@
-@R z7 p0 k0 b7 d2 g1 n58 w165
+@R z7 p0 k21 b7 d2 g1 n58 w165
   c(3485.52,2222.99,0.333728,0.000000)
 $s:dark0.3,gpos21,vnorm,gpos20,vnorm,sub,A#dup,gpos,vnorm,gpos20,vnorm,sub,swap,div,muli0.5,isub0.8,darks,wait0.1,jump/A;
 !W1 d79 x3423.34 y830.74 a-0.451670 u0

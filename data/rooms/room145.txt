@@ -1,4 +1,4 @@
-@R z7 p0 k0 b2 d2 g0 n31 w28
+@R z7 p0 k20 b2 d2 g0 n31 w28
   c(7122.25,522.88,0.930301,0.000000)
 $s:test128,bnez/A,mus1,jump/B,A#mus8,B#test4,beqz/@,unlock1;
 !W1 d1 x4218.50 y6029.84 a-0.639934 u0

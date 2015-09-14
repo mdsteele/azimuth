@@ -121,6 +121,14 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_BLUE_BUBBLES] = {
     .parallax = 0.35, .repeat_style = ABS_RECT,
     .repeat_horz = 225.0, .repeat_vert = 300.0
+  },
+  [AZ_BG_GREEN_PANELLING] = {
+    .parallax = 0.2, .repeat_style = ROOM_RECT,
+    .repeat_horz = 400.0, .repeat_vert = 400.0
+  },
+  [AZ_BG_TRIANGLE_STRUTS] = {
+    .parallax = 0.45, .repeat_style = ABS_RECT,
+    .repeat_horz = 150.0, .repeat_vert = 260.0
   }
 };
 
@@ -507,6 +515,22 @@ static void draw_tree_branch(
   } glEnd();
 }
 
+static void draw_blinkenlight(GLfloat center_x, GLfloat center_y, bool lit) {
+  glPushMatrix(); {
+    glTranslatef(center_x, center_y, 0);
+    glBegin(GL_TRIANGLE_FAN); {
+      if (lit) glColor4f(0.30, 0.30, 0.15, 0.9);
+      else glColor4f(0.15, 0.15, 0.15, 0.9);
+      glVertex2f(0, 0);
+      if (lit) glColor4f(0.30, 0.30, 0.15, 0);
+      else glColor4f(0.15, 0.15, 0.15, 0);
+      for (int i = 0; i <= 360; i += 45) {
+        glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
@@ -800,6 +824,127 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
         draw_blue_bubble(40, -130, 30, 2, clock);
         draw_blue_bubble(63, -75, 27, 3, clock + 5);
       } glPopMatrix();
+    } break;
+    case AZ_BG_GREEN_PANELLING: {
+      const az_color_t color1 = {30, 60, 45, 255};
+      const az_color_t color2 = {10, 30, 20, 255};
+      const float horz = 40;
+      const float vert = 50;
+      draw_panel(color2, color1, -5 * horz, -4 * vert, -1 * horz, 0);
+      draw_panel(color2, color1, -1 * horz, -4 * vert,  1 * horz, 0);
+      draw_panel(color2, color1, -5 * horz, -6 * vert,  1 * horz, -4 * vert);
+      draw_panel(color2, color1,  1 * horz, -2 * vert,  5 * horz, 0);
+      draw_panel(color2, color1,  1 * horz, -6 * vert,  5 * horz, -2 * vert);
+      draw_panel(color2, color1, -5 * horz, -8 * vert, -3 * horz, -6 * vert);
+      draw_panel(color2, color1, -3 * horz, -8 * vert,  5 * horz, -6 * vert);
+    } break;
+    case AZ_BG_TRIANGLE_STRUTS: {
+      const az_color_t color1 = {20, 30, 40, 255};
+      const az_color_t color2 = {10, 15, 20, 255};
+      const int phase = az_clock_mod(4, 20, clock);
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-75,    0);
+        az_gl_color(color2); glVertex2f(-63,   -7);
+        az_gl_color(color1); glVertex2f( 75,    0);
+        az_gl_color(color2); glVertex2f( 63,   -7);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f(  0, -116);
+        az_gl_color(color1); glVertex2f(-75,    0);
+        az_gl_color(color2); glVertex2f(-63,   -7);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-75, -260);
+        az_gl_color(color2); glVertex2f(-63, -253);
+        az_gl_color(color1); glVertex2f( 75, -260);
+        az_gl_color(color2); glVertex2f( 63, -253);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f(  0, -144);
+        az_gl_color(color1); glVertex2f(-75, -260);
+        az_gl_color(color2); glVertex2f(-63, -253);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-75, -130);
+        az_gl_color(color2); glVertex2f(-75, -123);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f(-12, -123);
+        az_gl_color(color1); glVertex2f(-75,    0);
+        az_gl_color(color2); glVertex2f(-75,  -14);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f( 75, -130);
+        az_gl_color(color2); glVertex2f( 75, -123);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f( 12, -123);
+        az_gl_color(color1); glVertex2f( 75,    0);
+        az_gl_color(color2); glVertex2f( 75,  -14);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f(-75, -130);
+        az_gl_color(color2); glVertex2f(-75, -137);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f(-12, -137);
+        az_gl_color(color1); glVertex2f(-75, -260);
+        az_gl_color(color2); glVertex2f(-75, -246);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color1); glVertex2f( 75, -130);
+        az_gl_color(color2); glVertex2f( 75, -137);
+        az_gl_color(color1); glVertex2f(  0, -130);
+        az_gl_color(color2); glVertex2f( 12, -137);
+        az_gl_color(color1); glVertex2f( 75, -260);
+        az_gl_color(color2); glVertex2f( 75, -246);
+      } glEnd();
+
+      draw_blinkenlight(-55.5,   -4, phase == 0);
+      draw_blinkenlight(-55.5, -256, phase == 0);
+      draw_blinkenlight(-18.5,   -4, phase == 1);
+      draw_blinkenlight(-18.5, -256, phase == 1);
+      draw_blinkenlight( 18.5,   -4, phase == 2);
+      draw_blinkenlight( 18.5, -256, phase == 2);
+      draw_blinkenlight( 55.5,   -4, phase == 3);
+      draw_blinkenlight( 55.5, -256, phase == 3);
+      draw_blinkenlight( 18.5, -126, phase == 0);
+      draw_blinkenlight( 18.5, -134, phase == 0);
+      draw_blinkenlight( 55.5, -126, phase == 1);
+      draw_blinkenlight( 55.5, -134, phase == 1);
+      draw_blinkenlight(-55.5, -126, phase == 2);
+      draw_blinkenlight(-55.5, -134, phase == 2);
+      draw_blinkenlight(-18.5, -126, phase == 3);
+      draw_blinkenlight(-18.5, -134, phase == 3);
+
+      draw_blinkenlight(-62.3,  -14.0, phase == 3);
+      draw_blinkenlight(-69.2,  -18.0, phase == 3);
+      draw_blinkenlight(-43.8,  -46.1, phase == 2);
+      draw_blinkenlight(-50.7,  -50.1, phase == 2);
+      draw_blinkenlight(-25.3,  -78.1, phase == 1);
+      draw_blinkenlight(-32.2,  -82.1, phase == 1);
+      draw_blinkenlight( -6.8, -110.2, phase == 0);
+      draw_blinkenlight(-13.7, -114.2, phase == 0);
+      draw_blinkenlight( 11.7, -142.2, phase == 3);
+      draw_blinkenlight(  4.8, -146.2, phase == 3);
+      draw_blinkenlight( 30.2, -174.2, phase == 2);
+      draw_blinkenlight( 23.3, -178.2, phase == 2);
+      draw_blinkenlight( 48.7, -206.3, phase == 1);
+      draw_blinkenlight( 41.8, -210.3, phase == 1);
+      draw_blinkenlight( 67.2, -238.3, phase == 0);
+      draw_blinkenlight( 60.3, -242.3, phase == 0);
+
+      draw_blinkenlight( 62.3,  -14.0, phase == 0);
+      draw_blinkenlight( 69.2,  -18.0, phase == 0);
+      draw_blinkenlight( 43.8,  -46.1, phase == 1);
+      draw_blinkenlight( 50.7,  -50.1, phase == 1);
+      draw_blinkenlight( 25.3,  -78.1, phase == 2);
+      draw_blinkenlight( 32.2,  -82.1, phase == 2);
+      draw_blinkenlight(  6.8, -110.2, phase == 3);
+      draw_blinkenlight( 13.7, -114.2, phase == 3);
+      draw_blinkenlight(-11.7, -142.2, phase == 0);
+      draw_blinkenlight( -4.8, -146.2, phase == 0);
+      draw_blinkenlight(-30.2, -174.2, phase == 1);
+      draw_blinkenlight(-23.3, -178.2, phase == 1);
+      draw_blinkenlight(-48.7, -206.3, phase == 2);
+      draw_blinkenlight(-41.8, -210.3, phase == 2);
+      draw_blinkenlight(-67.2, -238.3, phase == 3);
+      draw_blinkenlight(-60.3, -242.3, phase == 3);
     } break;
   }
 }

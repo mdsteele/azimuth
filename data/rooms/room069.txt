@@ -1,4 +1,4 @@
-@R z0 p0 b4 d3 g8 n5 w51
+@R z0 p0 k20 b4 d3 g8 n5 w51
   c(48073.43,721.28,1.392334,0.018148)
 $s:msg18,test6,heqz,unlock2,activ3,activ4,activ5,activ6;
 !W1 d34 x7531.36 y48132.75 a1.415317 u0
