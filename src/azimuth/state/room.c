@@ -97,19 +97,14 @@ static void parse_room_header(az_load_room_t *loader) {
     if (marker_flag < 0 || marker_flag >= AZ_MAX_NUM_FLAGS) FAIL();
     loader->room->marker_flag = (az_flag_t)marker_flag;
   }
-  // TODO: Once all rooms have explicit backgrounds, clean this up.
-  int background_index = 0;
-  READ(" ");
-  const char ch = fgetc(loader->file);
-  ungetc(ch, loader->file);
-  if (ch == 'k') READ("k%d", &background_index);
-  if (background_index < 0 || background_index >= AZ_NUM_BG_PATTERNS) FAIL();
-  loader->room->background_pattern = (az_background_pattern_t)background_index;
+  int background_index;
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
   double min_r, r_span, min_theta, theta_span;
-  READ(" b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n",
+  READ(" k%d b%d d%d g%d n%d w%d\n  c(%lf,%lf,%lf,%lf)\n", &background_index,
        &num_baddies, &num_doors, &num_gravfields, &num_nodes, &num_walls,
        &min_r, &r_span, &min_theta, &theta_span);
+  if (background_index < 0 || background_index >= AZ_NUM_BG_PATTERNS) FAIL();
+  loader->room->background_pattern = (az_background_pattern_t)background_index;
   if (zone_index < 0 || zone_index >= AZ_MAX_NUM_ZONES) FAIL();
   loader->room->zone_key = (az_zone_key_t)zone_index;
   loader->room->properties = (az_room_flags_t)properties;
