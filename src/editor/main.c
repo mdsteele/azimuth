@@ -1618,9 +1618,13 @@ static void event_loop(void) {
               if (event.key.command && event.key.shift) do_flip_room_horz();
               else if (event.key.shift) do_toggle_property(AZ_ROOMF_HEATED);
               break;
+            case AZ_KEY_J:
+              if (event.key.command) {
+                do_change_background_pattern(event.key.shift ? -1 : 1);
+              }
+              break;
             case AZ_KEY_K:
               if (event.key.command) begin_set_marker_flag();
-              else do_change_background_pattern(event.key.shift ? -1 : 1);
               break;
             case AZ_KEY_L: do_rotate_align(event.key.shift); break;
             case AZ_KEY_M:
