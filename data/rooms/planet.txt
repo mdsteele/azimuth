@@ -748,8 +748,8 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   need to get to the surface airlock immediately
   and escape.\""
 !T167"
-  \"You want me to get to the surface, in six
-  minutes, from $/the center of the planet$|!?\""
+  \"You want me to get to the surface, in $/six
+  minutes$|, from $/the center of the planet$|!?\""
 !T168"
   \"There's no time, Hopper, GO!\""
 !T169"
@@ -909,14 +909,14 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T201"
   \"Excellent.  Where are they?\""
 !T202"
-  They have sealed themselves in at the $Avery
+  They have sealed themselves in at the $Yvery
   center of the planetoid$W.  I have access to only
   very limited sensors nearby there; I am not sure
   how many are down there or what they're doing.
   I'm definitely reading Trichord life-signs; I am
   not sure about Humans.  But whoever is there
   seems to be safe for the time being.  I am
-  uploading $Amap data$W to your ship now."
+  uploading $ACore map data$W to your ship."
 !T203"
   \"All right.  I'll get down there, and we can
   finish this.\""
