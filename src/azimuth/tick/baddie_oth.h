@@ -55,4 +55,9 @@ void az_tick_bad_oth_snapdragon(
 
 /*===========================================================================*/
 
+void az_tick_bad_reflection(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
+/*===========================================================================*/
+
 #endif // AZIMUTH_TICK_BADDIE_OTH_H_

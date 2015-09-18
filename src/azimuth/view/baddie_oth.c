@@ -29,6 +29,7 @@
 #include "azimuth/util/bezier.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/view/particle.h"
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
@@ -348,6 +349,67 @@ void az_draw_bad_oth_snapdragon(
   draw_tendrils(baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_snapdragon_triangles,
            AZ_ARRAY_SIZE(oth_snapdragon_triangles));
+}
+
+void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_REFLECTION);
+  if (baddie->param < 0.0) return;
+  glPushMatrix(); {
+    az_gl_translated(baddie->components[0].position);
+    az_gl_rotated(baddie->components[0].angle);
+    const GLfloat alpha = 0.2;
+    // Struts:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f(-7,  7); glVertex2f( 1,  7);
+      glVertex2f(-7,  4); glVertex2f( 1,  4);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f(-7, -4); glVertex2f( 1, -4);
+      glVertex2f(-7, -7); glVertex2f( 1, -7);
+    } glEnd();
+    // Port engine:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f(-10, 12); glVertex2f(6, 12);
+      glColor4f(0.75, 0.75, 0.75, alpha);
+      glVertex2f(-11,  7); glVertex2f(8, 7);
+    } glEnd();
+    // Starboard engine:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0.75, 0.75, 0.75, alpha);
+      glVertex2f(-11,  -7); glVertex2f(8,  -7);
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f(-10, -12); glVertex2f(6, -12);
+    } glEnd();
+    // Main body:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f( 15,  4); glVertex2f(-14,  4);
+      glColor4f(0.75, 0.75, 0.75, alpha);
+      glVertex2f( 20,  0); glVertex2f(-14,  0);
+      glColor4f(0.25, 0.25, 0.25, alpha);
+      glVertex2f( 15, -4); glVertex2f(-14, -4);
+    } glEnd();
+    // Windshield:
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(0, 0.5, 0.5, alpha); glVertex2f(15,  2);
+      glColor4f(0, 1.0, 1.0, alpha); glVertex2f(18,  0); glVertex2f(12, 0);
+      glColor4f(0, 0.5, 0.5, alpha); glVertex2f(15, -2);
+    } glEnd();
+    if (baddie->state != 0) {
+      const double nps_lifetime = 3.0;
+      az_particle_t particle = {
+        .kind = AZ_PAR_NPS_PORTAL,
+        .color = {128, 64, 255, 255},
+        .age = 0.5 * nps_lifetime * baddie->param,
+        .lifetime = nps_lifetime,
+        .param1 = 50.0 * sqrt(nps_lifetime)
+      };
+      az_draw_particle(&particle, clock);
+    }
+  } glPopMatrix();
 }
 
 /*===========================================================================*/

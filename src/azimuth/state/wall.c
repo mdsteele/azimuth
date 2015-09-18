@@ -381,6 +381,13 @@ static const az_vector_t wall_vertices_157[] = {
   {115, 0}, {110, 9}, {100, 10}, {62, 26}, {32, 26}, {4, 34},
   {-22, 31}, {-46, 30}, {-80, 22}, {-100, 10}, {-110, 8}
 };
+static const az_vector_t wall_vertices_161[] = {
+  {101, -168}, {157, -112}, {157, 112}, {101, 168}, {-157, 168}, {-157, -168}
+};
+static const az_vector_t wall_vertices_162[] = {
+  {101, -168}, {157, -112}, {157, 112}, {101, 168},
+  {-180, 168}, {-236, 112}, {-236, -112}, {-180, -168}
+};
 
 /*===========================================================================*/
 
@@ -1500,6 +1507,19 @@ static az_wall_data_t wall_datas[] = {
     .color1 = {24, 12, 0, 255}, .color2 = {24, 12, 0, 255},
     .elasticity = 0.25, .impact_damage_coeff = 2.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // High Energy Lab windows:
+  [161] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 18.0,
+    .color1 = {255, 255, 255, 64}, .color2 = {64, 64, 16, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_161)
+  },
+  [162] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 18.0,
+    .color1 = {255, 255, 255, 64}, .color2 = {64, 64, 16, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_162)
   },
 };
 

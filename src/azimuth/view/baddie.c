@@ -812,6 +812,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_RED_ATOM:
       az_draw_bad_red_atom(baddie, frozen, clock);
       break;
+    case AZ_BAD_REFLECTION:
+      az_draw_bad_reflection(baddie, clock);
+      break;
   }
 }
 

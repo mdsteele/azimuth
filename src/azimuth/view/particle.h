@@ -21,9 +21,13 @@
 #ifndef AZIMUTH_VIEW_PARTICLE_H_
 #define AZIMUTH_VIEW_PARTICLE_H_
 
+#include "azimuth/state/particle.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
+
+void az_draw_particle(const az_particle_t *particle, az_clock_t clock);
 
 void az_draw_particles(const az_space_state_t *state);
 

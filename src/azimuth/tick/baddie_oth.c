@@ -551,4 +551,50 @@ void az_tick_bad_oth_gunship(
   tick_tendrils(state, baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle, time);
 }
 
+void az_tick_bad_reflection(az_space_state_t *state, az_baddie_t *baddie,
+                            double time) {
+  assert(baddie->kind == AZ_BAD_REFLECTION);
+  if (baddie->state == 0 && !az_ship_is_alive(&state->ship)) {
+    baddie->param = -1.0;
+    return;
+  }
+  const az_vector_t rel_pos =
+    az_vrotate(az_vsub(state->ship.position, baddie->position),
+               -baddie->angle);
+  const double rel_angle = az_mod2pi(state->ship.angle - baddie->angle);
+  baddie->components[0].position = (az_vector_t){rel_pos.x, -rel_pos.y};
+  baddie->components[0].angle = -rel_angle;
+  if (baddie->state == 0) {
+    baddie->param = 0.0;
+  } else {
+    const double nps_lifetime = 3.0;
+    if (baddie->param == 0.0) {
+      state->camera.wobble_goal = 0.5 * nps_lifetime;
+      az_play_sound(&state->soundboard, AZ_SND_NPS_PORTAL);
+    }
+    baddie->param = fmin(1.0, baddie->param + time / (0.5 * nps_lifetime));
+    if (baddie->param >= 1.0) {
+      const az_vector_t abs_position =
+        az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
+                baddie->position);
+      const double abs_angle =
+        az_vtheta(az_vsub(state->ship.position, abs_position));
+      az_particle_t *particle;
+      if (az_insert_particle(state, &particle)) {
+        particle->kind = AZ_PAR_NPS_PORTAL;
+        particle->color = (az_color_t){128, 64, 255, 255};
+        particle->position = abs_position;
+        particle->velocity = AZ_VZERO;
+        particle->angle = 0.0;
+        particle->age = 0.5 * nps_lifetime;
+        particle->lifetime = nps_lifetime;
+        particle->param1 = 50.0 * sqrt(nps_lifetime);
+      }
+      const az_script_t *script = baddie->on_kill;
+      az_init_baddie(baddie, AZ_BAD_OTH_GUNSHIP, abs_position, abs_angle);
+      baddie->on_kill = script;
+    }
+  }
+}
+
 /*===========================================================================*/

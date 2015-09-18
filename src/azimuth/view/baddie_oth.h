@@ -49,4 +49,8 @@ void az_draw_bad_oth_snapdragon(
 
 /*===========================================================================*/
 
+void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock);
+
+/*===========================================================================*/
+
 #endif // AZIMUTH_VIEW_BADDIE_OTH_H_

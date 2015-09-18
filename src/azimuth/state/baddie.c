@@ -1456,6 +1456,7 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_OTH_GUNSHIP] = {
     .max_health = 250.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .hurt_sound = AZ_SND_HURT_OTH,
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
@@ -1920,6 +1921,12 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 12.0, .impact_damage = 25.0,
                    .immunities = AZ_DMGF_FLAME },
     DECL_COMPONENTS(red_atom_components)
+  },
+  [AZ_BAD_REFLECTION] = {
+    .max_health = 1000000.0,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INCORPOREAL |
+                          AZ_BADF_NO_HOMING),
+    .main_body = { .bounding_radius = 20.0 }
   }
 };
 

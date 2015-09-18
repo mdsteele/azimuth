@@ -52,6 +52,8 @@ static const int wall_data_indices[] = {
   101, 102, 139, 140, 141, // blue
   32, 34, 33, 48, 63, // yellow
   38, 40, 39, 49, 64, // red
+  // High Energy Lab windows:
+  161, 162,
   // Brown/gray rocks:
   5, 11, 12, 13, 14, 41, // boulders
   36, 37, // stalactites
@@ -227,6 +229,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_WYRM_EGG,
   AZ_BAD_WYRMLING,
   AZ_BAD_OTH_GUNSHIP,
+  AZ_BAD_REFLECTION,
   AZ_BAD_FORCEFIEND,
   AZ_BAD_FORCE_EGG,
   AZ_BAD_KILOFUGE,

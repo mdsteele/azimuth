@@ -54,7 +54,7 @@ static void draw_bolt_glowball(az_color_t color, double cx, az_clock_t clock) {
 
 /*===========================================================================*/
 
-static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
+void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
   assert(particle->kind != AZ_PAR_NOTHING);
   assert(particle->age <= particle->lifetime);
   switch (particle->kind) {
@@ -306,7 +306,7 @@ void az_draw_particles(const az_space_state_t *state) {
     glPushMatrix(); {
       az_gl_translated(particle->position);
       az_gl_rotated(particle->angle);
-      draw_particle(particle, state->clock);
+      az_draw_particle(particle, state->clock);
     } glPopMatrix();
   }
 }

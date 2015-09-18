@@ -423,6 +423,13 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.305, .lpf_ramp = -0.324387, .lpf_resonance = -0.124724,
     .hpf_cutoff = 0.00798911, .hpf_ramp = -0.0795003
   },
+  [AZ_SND_GLASS_BREAK] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.213974, .env_punch = 0.365633, .env_decay = 0.8,
+    .start_freq = 0.765, .vibrato_depth = 0.76, .vibrato_speed = 0.455,
+    .arp_mod = 0.83, .arp_speed = 0.846137, .repeat_speed = 0.305,
+    .phaser_offset = -0.01, .phaser_sweep = 0.01
+  },
   [AZ_SND_HEAT_DAMAGE] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.605633795261, .freq_slide = 0.591549277306,
