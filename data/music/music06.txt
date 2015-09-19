@@ -1,8 +1,7 @@
 @M "S|ABB"
 
 =tempo 150
-=key 2#        % Music below is in B minor
-=transpose -4  % Transpose down to G minor
+=key 2b     % G minor
 
 !Part S
 
@@ -13,43 +12,41 @@
 
 !Part A
 
-1| b3q. f4q. b3e c4 | d4q. ae+h |
+1| g3q. d4q. g3e a3 | b3q. f4e+h |
 2| rw | rw |
-4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b6s re. |
+4| g6s re. g6s re. g6s re. g6s re. | g6s re. g6s re. g6s re. g6s re. |
 
-1| g4e d f c e c g c | f4e c e c d b3 c4 a#3 |
+1| e4e b3 d4 a3 c4 a3 e4 a3 | d4e a3 c4 a3 b3 g3 a3 gb3 |
 2| rw | rw |
-4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b5s b b6e |
+4| g6s re. g6s re. g6s re. g6s re. | g6s re. g6s re. g6s re. g5s g g6e |
 
-1| b3q. f4q. b3e c4 | d4q. ae+h |
-2| rq f3e d4e+e ee d e | a3q fe ee+q de c |
-4| b6s re. b6s re. b6s re. b6s re. | b6s re. b6s re. b6s re. b6s re. |
+1| g3q. d4q. g3e a3 | b3q. f4e+h |
+2| rq d3e b3e+e c4e b3 c4 | f3q de ce+q b2e a |
+4| g6s re. g6s re. g6s re. g6s re. | g6s re. g6s re. g6s re. g6s re. |
 
-1| g4e d f c e c g c | f4w |
-2| d3q e f g | f3w |
-4| b6s re. b6s re. b6s re. b6s re. |
- | b6s re. b6s re. L15 b3s b L20 b b L25 b b L30 b b |
+1| e4e b3 d4 a3 c4 a3 e4 a3 | d4w |
+2| b2q c3 d e | d3w |
+4| g6s re. g6s re. g6s re. g6s re. |
+ | g6s re. g6s re. L15 g3s g L20 g g L25 g g L30 g g |
 
 !Part B
 
-1 T+12
+1| g4q ' b4e g4 ' a4 g4 ' f g4e+ | +e d4e ' b4e f4 ' a4 g4 ' fq |
+2| g4e d ' b4q  ' f4e g ' a4 g4  | d4e ge+' +q     ' ce d ' e f |
+3| g3q. d4q. g3e f | g3q. d4q. g3e f |
+4| L45 g6q L30 g2e re g1e re g2s g ge | g2e re g2e re g1e re g2s g ge |
 
-1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +e f3e ' d4e a3 ' c4 b3 ' aq |
-2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
-3| b3q. f4q. b3e a | b3q. f4q. b3e a |
-4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+1| g4q ' b4e g4 ' a4 g4 ' f E0,50 g4e+ | +e f4e+e e4e+e E0,15 b4e ' b a |
+2| g4e d ' b4q  ' f4e g ' a4 g4  | d4e ge+' +q     ' ce d ' e f |
+3| e3q. b3q. e3e f | d3q. a3q. d3e f |
+4| L45 g6q L30 g2e re g1e re g2s g ge | g2e re g2e re g1e re g2s g ge |
 
-1| b3q ' d4e b3 ' c4 b3 ' a E0,50 b3e+ | +e a3e+e g3e+e E0,15 d4e ' d c |
-2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
-3| g3q. d4q. g3e a | f3q. c4q. f3e a |
-4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+1| g4q ' b4e g4 ' a4 g4 ' f g4e+ | +e d4e ' b4e f4 ' a4 g4 ' fq |
+2| g4e d ' b4q  ' f4e g ' a4 g4  | d4e ge+' +q     ' ce d ' e f |
+3| g3q. d4q. g3e f | g3q. d4q. g3e f |
+4| L45 g6q L30 g2e re g1e re g2s g ge | g2e re g2e re g1e re g2s g ge |
 
-1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +e f3e ' d4e a3 ' c4 b3 ' aq |
-2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
-3| b3q. f4q. b3e a | b3q. f4q. b3e a |
-4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
-
-1| b3q ' d4e b3 ' c4 b3 ' a b3e+ | +h rh |
-2| b4e f ' d5q  ' a4e b ' c5 b4  | f4e be+' +q     ' ee f ' g a |
-3| g3q. d4q. g3e a | f3q. c4q. fe a3 |
-4| L45 b6q L30 b2e re b1e re b2s b be | b2e re b2e re b1e re b2s b be |
+1| g4q ' b4e g4 ' a4 g4 ' f g4e+ | +h rh |
+2| g4e d ' b4q  ' f4e g ' a4 g4  | d4e ge+' +q     ' ce d ' e f |
+3| e3q. b3q. e3e f | d3q. a3q. de f3 |
+4| L45 g6q L30 g2e re g1e re g2s g ge | g2e re g2e re g1e re g2s g ge |
