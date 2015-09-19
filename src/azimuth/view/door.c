@@ -174,6 +174,38 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
       }
     } glEnd();
   }
+
+  if (door->lockedness > 0.0) {
+    glPushMatrix(); {
+      glTranslated(-12 * (1.0 - pow(door->lockedness, 4)), 0, 0);
+      for (int i = 0; i < 2; ++i) {
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(0.5, 0.5, 0.5); glVertex2f(30, 6);
+          glColor3f(0.35, 0.35, 0.35); glVertex2f(30, 31);
+          glVertex2f(42, 27); glVertex2f(42, 10);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          glColor4f(0, 0, 0, 0.5);
+          glVertex2f(33, 10); glVertex2f(33, 27);
+          glVertex2f(40, 12); glVertex2f(40, 25);
+        } glEnd();
+        glBegin(GL_TRIANGLES); {
+          glColor4f(1, 1, 0, 0.5);
+          if (i == 0) {
+            glVertex2f(34, 26); glVertex2f(34, 22); glVertex2f(39, 24.5);
+            glVertex2f(34, 17); glVertex2f(34, 13.5); glVertex2f(39, 15);
+            glVertex2f(34, 17); glVertex2f(39, 19); glVertex2f(39, 15);
+          } else {
+            glVertex2f(34, 11); glVertex2f(34, 15); glVertex2f(39, 12.5);
+            glVertex2f(34, 20); glVertex2f(34, 23.5); glVertex2f(39, 22);
+            glVertex2f(34, 20); glVertex2f(39, 18); glVertex2f(39, 22);
+          }
+        } glEnd();
+        glScalef(1, -1, 1);
+      }
+    } glPopMatrix();
+  }
+
   draw_door_pipe(1);
 }
 

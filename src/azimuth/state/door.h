@@ -63,6 +63,7 @@ typedef struct {
   az_room_key_t destination;
   bool is_open; // is the door open/opening, or is it closed/closing
   double openness; // 0.0 = fully closed, 1.0 = fully open
+  double lockedness; // 0.0 = fully unlocked, 1.0 = fully locked
 } az_door_t;
 
 extern const double AZ_DOOR_BOUNDING_RADIUS;

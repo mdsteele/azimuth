@@ -434,7 +434,8 @@ static void draw_room(az_editor_state_t *state, az_editor_room_t *room) {
       .position = editor_door->spec.position,
       .angle = editor_door->spec.angle,
       .is_open = (editor_door->spec.kind == AZ_DOOR_ALWAYS_OPEN),
-      .openness = (editor_door->spec.kind == AZ_DOOR_ALWAYS_OPEN ? 1.0 : 0.0)
+      .openness = (editor_door->spec.kind == AZ_DOOR_ALWAYS_OPEN ? 1.0 : 0.0),
+      .lockedness = (editor_door->spec.kind == AZ_DOOR_LOCKED ? 1.0 : 0.0)
     };
     az_draw_door(&real_door, state->clock);
     glPushMatrix(); {

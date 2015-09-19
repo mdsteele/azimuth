@@ -65,6 +65,11 @@ static void tick_door(az_space_state_t *state, az_door_t *door, double time) {
       door->openness = old_openness;
     }
   }
+  if (door->kind == AZ_DOOR_LOCKED && !door->is_open) {
+    door->lockedness = fmin(1.0, door->lockedness + delta);
+  } else {
+    door->lockedness = fmax(0.0, door->lockedness - delta);
+  }
 }
 
 void az_tick_doors(az_space_state_t *state, double time) {

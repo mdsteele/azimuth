@@ -94,6 +94,7 @@ void az_enter_room(az_space_state_t *state, const az_room_t *room) {
         door->is_open = (spec->kind == AZ_DOOR_PASSAGE ||
                          spec->kind == AZ_DOOR_ALWAYS_OPEN);
         door->openness = (door->is_open ? 1.0 : 0.0);
+        door->lockedness = (spec->kind == AZ_DOOR_LOCKED ? 1.0 : 0.0);
         break;
       }
     }

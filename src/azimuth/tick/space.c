@@ -323,6 +323,7 @@ static void tick_doorway_mode(az_space_state_t *state, double time) {
             assert(exit->openness == 1.0);
           } else {
             exit->openness = 1.0;
+            exit->lockedness = 0.0;
             exit->is_open = false;
           }
           mode_data->exit.kind = exit->kind;
