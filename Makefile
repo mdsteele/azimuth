@@ -33,7 +33,7 @@ ALL_TARGETS = $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
 
 CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
          -Wmissing-field-initializers -Wold-style-definition -Wshadow \
-         -Wsign-compare -Wstrict-prototypes -Wundef
+         -Wsign-compare -Wstrict-prototypes -Wundef -Wno-unused-local-typedef
 
 ifeq "$(BUILDTYPE)" "debug"
   CFLAGS += -O1 -g
