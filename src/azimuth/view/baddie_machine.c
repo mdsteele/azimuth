@@ -295,7 +295,7 @@ void az_draw_bad_death_ray(
   assert(baddie->kind == AZ_BAD_DEATH_RAY);
   assert(frozen == 0.0f);
   const float flare = baddie->armor_flare;
-  draw_ray(baddie, clock, baddie->state == 1 ||
+  draw_ray(baddie, clock, baddie->cooldown > 0.0 ||
            (baddie->state == 0 && az_clock_mod(2, 10, clock)),
            color3(0.2 + 0.25 * flare, 0.2, 0.1),
            color3(0.3 + 0.25 * flare, 0.3, 0.2),
