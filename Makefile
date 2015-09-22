@@ -37,12 +37,10 @@ CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
 
 ifeq "$(BUILDTYPE)" "debug"
   CFLAGS += -O1 -g
-else
-ifeq "$(BUILDTYPE)" "release"
+else ifeq "$(BUILDTYPE)" "release"
   CFLAGS += -O2
 else
   $(error BUILDTYPE must be 'debug' or 'release')
-endif
 endif
 
 # Use clang if it's available, otherwise use gcc.
@@ -58,17 +56,21 @@ ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx
   # Use the SDL framework if it's installed.  Otherwise, look to see if SDL has
   # been installed via MacPorts.  Otherwise, give up.
-  ifeq "$(shell test -d /Library/Frameworks/SDL.framework -o \
-                     -d ~/Library/Frameworks/SDL.framework -o \
-                     -d /Network/Library/Frameworks/SDL.framework \
-	        && echo ok)" "ok"
-    SDL_LIBFLAGS = -framework SDL
-  else
-  ifeq "$(shell test -f /opt/local/lib/libSDL.a && echo ok)" "ok"
+  ifeq "$(shell test -d /Library/Frameworks/SDL.framework && echo ok)" "ok"
+    SDL_FRAMEWORK_PATH = /Library/Frameworks/SDL.framework
+  else ifeq "$(shell test -d ~/Library/Frameworks/SDL.framework \
+	             && echo ok)" "ok"
+    SDL_FRAMEWORK_PATH = ~/Library/Frameworks/SDL.framework
+  else ifeq "$(shell test -d /Network/Library/Frameworks/SDL.framework \
+	             && echo ok)" "ok"
+    SDL_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL.framework
+  endif
+  ifdef SDL_FRAMEWORK_PATH
+    SDL_LIBFLAGS = -framework SDL -rpath @executable_path/../Frameworks
+  else ifeq "$(shell test -f /opt/local/lib/libSDL.a && echo ok)" "ok"
     SDL_LIBFLAGS = -I/opt/local/include -L/opt/local/lib -lSDL
   else
     $(error SDL does not seem to be installed)
-  endif
   endif
   MAIN_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS) -framework OpenGL
   TEST_LIBFLAGS =
@@ -261,6 +263,14 @@ MACOSX_APP_FILES := $(MACOSX_APPDIR)/Info.plist \
     $(MACOSX_APPDIR)/MacOS/azimuth \
     $(MACOSX_APPDIR)/Resources/application.icns \
     $(patsubst $(DATADIR)/%,$(MACOSX_APPDIR)/Resources/%,$(RESOURCE_FILES))
+
+ifdef SDL_FRAMEWORK_PATH
+MACOSX_APP_FILES += $(MACOSX_APPDIR)/Frameworks/SDL.framework
+$(MACOSX_APPDIR)/Frameworks/SDL.framework: $(SDL_FRAMEWORK_PATH)
+	@echo "Copying $<"
+	@mkdir -p $(@D)
+	@cp -R $< $@
+endif
 
 .PHONY: macosx_app
 macosx_app: $(MACOSX_APP_FILES)
