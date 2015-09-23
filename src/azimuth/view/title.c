@@ -33,6 +33,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/version.h"
 #include "azimuth/view/cursor.h"
 #include "azimuth/view/cutscene.h"
 #include "azimuth/view/string.h"
@@ -382,6 +383,8 @@ static void draw_about_box(void) {
     for (int i = 0; i < AZ_ARRAY_SIZE(about_box_lines); ++i) {
       az_draw_string(8, AZ_ALIGN_LEFT, 8, 8 + 15 * i, about_box_lines[i]);
     }
+    az_draw_string(8, AZ_ALIGN_RIGHT, ABOUT_BOX_WIDTH - 8,
+                   ABOUT_BOX_HEIGHT - 16, AZ_VERSION_STRING);
   } glPopMatrix();
 }
 

@@ -38,7 +38,7 @@ CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
 ifeq "$(BUILDTYPE)" "debug"
   CFLAGS += -O1 -g
 else ifeq "$(BUILDTYPE)" "release"
-  CFLAGS += -O2
+  CFLAGS += -O2 -DNDEBUG
 else
   $(error BUILDTYPE must be 'debug' or 'release')
 endif
@@ -222,7 +222,7 @@ $(OBJDIR)/azimuth/gui/%.o: $(SRCDIR)/azimuth/gui/%.c \
 
 $(OBJDIR)/azimuth/view/%.o: $(SRCDIR)/azimuth/view/%.c \
     $(AZ_UTIL_HEADERS) $(AZ_STATE_HEADERS) $(AZ_GUI_HEADERS) \
-    $(AZ_VIEW_HEADERS)
+    $(AZ_VIEW_HEADERS) $(SRCDIR)/azimuth/version.h
 	$(compile-c99)
 
 $(OBJDIR)/azimuth/control/%.o: $(SRCDIR)/azimuth/control/%.c \
@@ -275,8 +275,14 @@ endif
 .PHONY: macosx_app
 macosx_app: $(MACOSX_APP_FILES)
 
-$(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist
-	$(copy-file)
+$(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist $(SRCDIR)/azimuth/version.h
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@sed "s/%AZ_VERSION_NUMBER/$(shell \
+	      sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$$/\1/p' \
+	          $(SRCDIR)/azimuth/version.h | \
+	      paste -s -d. -)/g" < \
+	    $(DATADIR)/Info.plist > $@
 
 $(MACOSX_APPDIR)/MacOS/azimuth: $(BINDIR)/azimuth
 	$(copy-file)
