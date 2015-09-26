@@ -997,29 +997,35 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
   if (state->do_quit) return;
   if (az_button_on_click(&state->options_drawer_handle, x, y +
                          OPTIONS_DRAWER_SLIDE_DISTANCE *
-                         (1.0 + state->drawer_slide))) {
+                         (1.0 + state->drawer_slide),
+                         &state->soundboard)) {
     state->current_drawer =
       (state->current_drawer != AZ_PAUSE_DRAWER_OPTIONS ?
        AZ_PAUSE_DRAWER_OPTIONS : AZ_PAUSE_DRAWER_MAP);
   } else if (az_button_on_click(&state->upgrade_drawer_handle, x, y -
                                 UPGRADE_DRAWER_SLIDE_DISTANCE *
-                                (1.0 - state->drawer_slide))) {
+                                (1.0 - state->drawer_slide),
+                                &state->soundboard)) {
     state->current_drawer =
       (state->current_drawer != AZ_PAUSE_DRAWER_UPGRADES ?
        AZ_PAUSE_DRAWER_UPGRADES : AZ_PAUSE_DRAWER_MAP);
   } else if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS &&
              state->drawer_slide == -1.0) {
     if (state->confirming_quit) {
-      if (az_button_on_click(&state->confirm_button, x, y)) {
+      if (az_button_on_click(&state->confirm_button, x, y,
+                             &state->soundboard)) {
         state->do_quit = true;
         az_stop_music(&state->soundboard, QUIT_FADE_TIME);
       }
-      if (az_button_on_click(&state->cancel_button, x, y)) {
+      if (az_button_on_click(&state->cancel_button, x, y,
+                             &state->soundboard)) {
         state->confirming_quit = false;
       }
     } else {
-      az_prefs_pane_on_click(&state->prefs_pane, x, y);
-      if (az_button_on_click(&state->quit_button, x, y)) {
+      az_prefs_pane_on_click(&state->prefs_pane, x, y,
+                             &state->soundboard);
+      if (az_button_on_click(&state->quit_button, x, y,
+                             &state->soundboard)) {
         state->confirming_quit = true;
       }
     }

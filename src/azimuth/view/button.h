@@ -48,11 +48,12 @@ void az_tick_button(az_button_t *button, int xoff, int yoff, bool is_active,
 
 // Call when the mouse button clicks the given position; returns true if the
 // button was clicked.
-bool az_button_on_click(az_button_t *button, int x, int y);
+bool az_button_on_click(az_button_t *button, int x, int y,
+                        az_soundboard_t *soundboard);
 
 // Sets the button's hover_pulse as if it had been clicked.  Useful for when
 // the button is activated via a hotkey.
-void az_press_button(az_button_t *button);
+void az_press_button(az_button_t *button, az_soundboard_t *soundboard);
 
 /*===========================================================================*/
 

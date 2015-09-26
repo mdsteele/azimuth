@@ -44,10 +44,16 @@ void az_gl_vertex(az_vector_t v) {
   glVertex2d(v.x, v.y);
 }
 
-void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin, double angle,
-                    double length) {
+void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin,
+                    double angle, double length) {
+  az_draw_cracks_with_color(seed, origin, angle, length,
+                            (az_color_t){0, 0, 0, 64});
+}
+
+void az_draw_cracks_with_color(az_random_seed_t *seed, az_vector_t origin,
+                               double angle, double length, az_color_t color) {
   if (length <= 0.0) return;
-  glColor4f(0, 0, 0, 0.25);
+  az_gl_color(color);
   glBegin(GL_LINES); {
     az_gl_vertex(origin);
     az_vpluseq(&origin,

@@ -159,14 +159,14 @@ void az_tick_gameover_state(az_gameover_state_t *state, double time) {
 
 void az_gameover_on_click(az_gameover_state_t *state, int x, int y) {
   if (!buttons_are_active(state)) return;
-  if (az_button_on_click(&state->retry_button, x, y)) {
+  if (az_button_on_click(&state->retry_button, x, y, &state->soundboard)) {
     state->mode = AZ_GMODE_RETRYING;
     az_stop_music(&state->soundboard, FADE_TIME);
   }
-  if (az_button_on_click(&state->return_button, x, y)) {
+  if (az_button_on_click(&state->return_button, x, y, &state->soundboard)) {
     state->mode = AZ_GMODE_RETURNING;
   }
-  if (az_button_on_click(&state->quit_button, x, y)) {
+  if (az_button_on_click(&state->quit_button, x, y, &state->soundboard)) {
     state->mode = AZ_GMODE_QUITTING;
     az_stop_music(&state->soundboard, FADE_TIME);
   }

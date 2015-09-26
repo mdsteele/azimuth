@@ -142,6 +142,8 @@ static void draw_magbeest_legs_base(const az_baddie_t *baddie) {
 void az_draw_bad_magbeest_head(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
   const float flare = baddie->armor_flare;
+  const double hurt =
+    (baddie->data->max_health - baddie->health) / baddie->data->max_health;
   // Pistons:
   for (int i = 0; i < 10; ++i) {
     const az_component_t *component = &baddie->components[i];
@@ -174,10 +176,10 @@ void az_draw_bad_magbeest_head(const az_baddie_t *baddie, az_clock_t clock) {
     const az_component_t *eye = &baddie->components[10];
     assert(!az_vnonzero(eye->position));
     az_gl_rotated(eye->angle);
+    const double radius = baddie->data->components[10].bounding_radius;
     glBegin(GL_TRIANGLE_FAN); {
       glColor3f(0.25f + 0.75f * flare, 0.25f, 0.25f); glVertex2f(0, 0);
       glColor3f(0.07f + 0.3f * flare, 0.07f, 0.07f);
-      const double radius = baddie->data->components[10].bounding_radius;
       for (int i = 0; i <= 360; i += 20) {
         glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
       }
@@ -188,6 +190,20 @@ void az_draw_bad_magbeest_head(const az_baddie_t *baddie, az_clock_t clock) {
         glVertex2d(15 + 4 * cos(AZ_DEG2RAD(i)), 6 * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
+    const az_color_t cracks_color = {128, 64, 0, 64};
+    for (int i = 0; i < 4; ++i) {
+      const double angle = -AZ_DEG2RAD(50) + i * AZ_DEG2RAD(80) +
+        i * i * AZ_DEG2RAD(2);
+      az_random_seed_t seed = {1, 1 + 373984471 * i};
+      az_draw_cracks_with_color(&seed, az_vpolar(-radius, angle), angle,
+                                6 * hurt * (1 - 0.25 * i), cracks_color);
+    }
+    for (int i = 0; i < 3; ++i) {
+      const double angle = AZ_DEG2RAD(85) - i * AZ_DEG2RAD(92);
+      az_random_seed_t seed = {1, 1 + 373984471 * (i + 4)};
+      az_draw_cracks_with_color(&seed, az_vpolar(-radius, angle), angle,
+                                fmax(0, 3 * (hurt - 0.25)), cracks_color);
+    }
   } glPopMatrix();
 }
 
@@ -344,6 +360,13 @@ void az_draw_bad_magma_bomb(const az_baddie_t *baddie, az_clock_t clock) {
     else glColor3f(0.3, 0.1, 0.1);
     glVertex2f(0, -radius);
   } glEnd();
+  const double hurt =
+    (baddie->data->max_health - baddie->health) / baddie->data->max_health;
+  for (int i = 0; i < 2; ++i) {
+    const double angle = i * AZ_DEG2RAD(180);
+    az_random_seed_t seed = {1 + 4987298743 * baddie->uid, 1 + 373984471 * i};
+    az_draw_cracks(&seed, az_vpolar(-radius, angle), angle, 4 * hurt);
+  }
 }
 
 void az_draw_bad_scrap_metal(const az_baddie_t *baddie) {

@@ -110,16 +110,19 @@ void az_tick_button(az_button_t *button, int xoff, int yoff, bool is_active,
   }
 }
 
-bool az_button_on_click(az_button_t *button, int x, int y) {
+bool az_button_on_click(az_button_t *button, int x, int y,
+                        az_soundboard_t *soundboard) {
   if (az_polygon_contains(button->polygon,
                           (az_vector_t){x - button->x, y - button->y})) {
     button->hover_pulse = HOVER_PULSE_CLICK;
+    az_play_sound(soundboard, AZ_SND_MENU_CLICK);
     return true;
   } else return false;
 }
 
-void az_press_button(az_button_t *button) {
+void az_press_button(az_button_t *button, az_soundboard_t *soundboard) {
   button->hover_pulse = HOVER_PULSE_CLICK;
+  az_play_sound(soundboard, AZ_SND_MENU_CLICK);
 }
 
 /*===========================================================================*/

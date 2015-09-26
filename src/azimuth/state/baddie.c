@@ -1846,7 +1846,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MAGBEEST_HEAD] = {
     .max_health = 500.0, .overall_bounding_radius = 500.0,
     .color = {128, 128, 128, 255}, .hurt_sound = AZ_SND_HURT_TURRET,
-    .static_properties = AZ_BADF_DRAW_BG,
+    .armor_sound = AZ_SND_HIT_ARMOR, .static_properties = AZ_BADF_DRAW_BG,
     .potential_pickups = ~AZ_PUPF_NOTHING,
     .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_head_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
@@ -1857,6 +1857,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MAGBEEST_LEGS_L] = {
     .max_health = 1000000.0, .overall_bounding_radius = 500.0,
     .color = {128, 128, 128, 255}, .death_style = AZ_DEATH_SHARDS,
+    .armor_sound = AZ_SND_HIT_ARMOR,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
     .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_l_base_vertices),
@@ -1866,6 +1867,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MAGBEEST_LEGS_R] = {
     .max_health = 1000000.0, .overall_bounding_radius = 500.0,
     .color = {128, 128, 128, 255}, .death_style = AZ_DEATH_SHARDS,
+    .armor_sound = AZ_SND_HIT_ARMOR,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
                           AZ_BADF_NO_HOMING),
     .main_body = { .polygon = AZ_INIT_POLYGON(magbeest_legs_r_base_vertices),

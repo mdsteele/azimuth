@@ -250,34 +250,41 @@ void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
 
 /*===========================================================================*/
 
-static void slider_on_click(az_prefs_slider_t *slider, int x, int y) {
-  if (az_button_on_click(&slider->handle, x - slider->x, y - slider->y)) {
+static void slider_on_click(az_prefs_slider_t *slider, int x, int y,
+                            az_soundboard_t *soundboard) {
+  if (az_button_on_click(&slider->handle, x - slider->x, y - slider->y,
+                         soundboard)) {
     slider->grabbed = true;
   }
 }
 
-static void checkbox_on_click(az_prefs_checkbox_t *checkbox, int x, int y) {
-  if (az_button_on_click(&checkbox->button, x, y)) {
+static void checkbox_on_click(az_prefs_checkbox_t *checkbox, int x, int y,
+                              az_soundboard_t *soundboard) {
+  if (az_button_on_click(&checkbox->button, x, y, soundboard)) {
     checkbox->checked = !checkbox->checked;
   }
 }
 
-void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y) {
+void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
+                            az_soundboard_t *soundboard) {
   const int rel_x = abs_x - pane->x, rel_y = abs_y - pane->y;
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    if (az_button_on_click(&pane->pickers[i].button, rel_x, rel_y)) {
+    if (az_button_on_click(&pane->pickers[i].button, rel_x, rel_y,
+                           soundboard)) {
       pane->selected_key_picker_index = i;
     }
   }
   if (pane->selected_key_picker_index < 0) {
-    slider_on_click(&pane->music_slider, rel_x, rel_y);
-    slider_on_click(&pane->sound_slider, rel_x, rel_y);
-    checkbox_on_click(&pane->speedrun_timer_checkbox, rel_x, rel_y);
-    checkbox_on_click(&pane->fullscreen_checkbox, rel_x, rel_y);
+    slider_on_click(&pane->music_slider, rel_x, rel_y, soundboard);
+    slider_on_click(&pane->sound_slider, rel_x, rel_y, soundboard);
+    checkbox_on_click(&pane->speedrun_timer_checkbox, rel_x, rel_y,
+                      soundboard);
+    checkbox_on_click(&pane->fullscreen_checkbox, rel_x, rel_y, soundboard);
   }
 }
 
-void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id) {
+void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
+                           az_soundboard_t *soundboard) {
   const int picker_index = pane->selected_key_picker_index;
   if (picker_index < 0 || picker_index >= AZ_PREFS_NUM_KEYS) return;
   az_prefs_key_picker_t *picker = &pane->pickers[picker_index];
@@ -292,6 +299,7 @@ void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id) {
     }
     picker->key = key_id;
   }
+  az_play_sound(soundboard, AZ_SND_MENU_CLICK);
 }
 
 /*===========================================================================*/

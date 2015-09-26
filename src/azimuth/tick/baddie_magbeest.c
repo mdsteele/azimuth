@@ -122,6 +122,16 @@ static void shuffle_marker_positions(
 
 /*===========================================================================*/
 
+static void on_leg_stomp(az_space_state_t *state) {
+  az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_LEG_STOMP);
+  az_shake_camera(&state->camera, 0.0, 2.0);
+}
+
+static void on_tunnelling(az_space_state_t *state) {
+  az_loop_sound(&state->soundboard, AZ_SND_MAGBEEST_TUNNELLING);
+  az_shake_camera(&state->camera, 0.0, 1.0);
+}
+
 static az_baddie_t *lookup_legs(az_space_state_t *state, az_baddie_t *baddie,
                                 int cargo_index) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
@@ -168,8 +178,7 @@ static void arrange_head_piston(az_baddie_t *baddie, int piston_index,
 static void head_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
                              double delta) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_HEAD);
-  // TODO: Loop a sound while shaking the room
-  az_shake_camera(&state->camera, 0.0, 1.0);
+  on_tunnelling(state);
   const az_vector_t abs_foot_0_pos =
     az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
             baddie->position);
@@ -233,7 +242,7 @@ static void legs_pop_up_down(az_space_state_t *state, az_baddie_t *baddie,
                              double baseline, double delta) {
   assert(baddie->kind == AZ_BAD_MAGBEEST_LEGS_L ||
          baddie->kind == AZ_BAD_MAGBEEST_LEGS_R);
-  az_shake_camera(&state->camera, 0.0, 1.0);
+  on_tunnelling(state);
   az_vpluseq(&baddie->position, az_vwithlen(baddie->position, delta));
   const double feet_rho = 0.5 * (az_vnorm(baddie->position) - baseline) +
     baseline - 0.505 * LEGS_POPUP_DIST;
@@ -531,7 +540,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
       move_spider_legs(state, baddie, legs_l, legs_r, 0, 150, -1, time);
       if (baddie->param >= 1.0) {
-        // TODO: Make a sound for the feet landing on the wall
+        on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
@@ -539,6 +548,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
       move_spider_legs(state, baddie, legs_l, legs_r, 1, -100, -1, time);
       if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
@@ -546,6 +556,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
       move_spider_legs(state, baddie, legs_l, legs_r, 0, 100, 1, time);
       if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
@@ -553,6 +564,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
       move_spider_legs(state, baddie, legs_l, legs_r, 1, -150, 1, time);
       if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
       }
     } break;
@@ -606,6 +618,12 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
             baddie->position);
   // Fusion beam:
   if (baddie->state == MAGNET_FUSION_BEAM_CHARGE_STATE) {
+    const double threshold = 0.75 * MAGNET_FUSION_BEAM_CHARGE_TIME;
+    if (baddie->cooldown > threshold) {
+      az_loop_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET);
+    } else if (baddie->cooldown + time > threshold) {
+      az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET_CHARGE);
+    }
     const double factor = baddie->cooldown / MAGNET_FUSION_BEAM_CHARGE_TIME;
     // Aim the magnet at the ship:
     if (az_ship_is_decloaked(&state->ship)) {
@@ -678,7 +696,7 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
         fmax(max_scrap_dist, az_vdist(scrap->position,
                                       magnet_abs_collect_pos));
     }
-    az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
+    az_loop_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET);
     // Apply force to ship:
     if (az_ship_is_alive(&state->ship)) {
       const az_vector_t delta =

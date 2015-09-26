@@ -753,7 +753,7 @@ void az_title_skip_intro(az_title_state_t *state) {
 
 void az_title_start_game(az_title_state_t *state, int slot_index) {
   assert(state->mode == AZ_TMODE_NORMAL);
-  az_press_button(&state->slots[slot_index].main);
+  az_press_button(&state->slots[slot_index].main, &state->soundboard);
   state->mode = AZ_TMODE_STARTING;
   state->mode_data.starting.progress = 0.0;
   state->mode_data.starting.slot_index = slot_index;
@@ -766,11 +766,13 @@ static void save_slot_on_click(az_title_state_t *state, int index,
                                int x, int y) {
   az_title_save_slot_t *slot = &state->slots[index];
   if (state->mode == AZ_TMODE_NORMAL) {
-    if (az_button_on_click(&slot->main, x - slot->x, y - slot->y)) {
+    if (az_button_on_click(&slot->main, x - slot->x, y - slot->y,
+                           &state->soundboard)) {
       az_title_start_game(state, index);
     }
     if (state->saved_games->games[index].present) {
-      if (az_button_on_click(&slot->erase, x - slot->x, y - slot->y)) {
+      if (az_button_on_click(&slot->erase, x - slot->x, y - slot->y,
+                             &state->soundboard)) {
         state->mode = AZ_TMODE_ERASING;
         state->mode_data.erasing.slot_index = index;
         state->mode_data.erasing.do_erase = false;
@@ -778,10 +780,12 @@ static void save_slot_on_click(az_title_state_t *state, int index,
     }
   } else if (state->mode == AZ_TMODE_ERASING &&
              state->mode_data.erasing.slot_index == index) {
-    if (az_button_on_click(&slot->confirm, x - slot->x, y - slot->y)) {
+    if (az_button_on_click(&slot->confirm, x - slot->x, y - slot->y,
+                           &state->soundboard)) {
       state->mode_data.erasing.do_erase = true;
     }
-    if (az_button_on_click(&slot->cancel, x - slot->x, y - slot->y)) {
+    if (az_button_on_click(&slot->cancel, x - slot->x, y - slot->y,
+                           &state->soundboard)) {
       state->mode = AZ_TMODE_NORMAL;
     }
   }
@@ -802,28 +806,28 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
   }
 
   if (prefs_about_buttons_active(state)) {
-    if (az_button_on_click(&state->prefs_button, x, y)) {
+    if (az_button_on_click(&state->prefs_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_PREFS ? AZ_TMODE_NORMAL :
                      AZ_TMODE_PREFS);
     }
     if (records_button_visible(state) &&
-        az_button_on_click(&state->records_button, x, y)) {
+        az_button_on_click(&state->records_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_RECORDS ? AZ_TMODE_NORMAL :
                      AZ_TMODE_RECORDS);
     }
-    if (az_button_on_click(&state->about_button, x, y)) {
+    if (az_button_on_click(&state->about_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_ABOUT ? AZ_TMODE_NORMAL :
                      AZ_TMODE_ABOUT);
     }
   }
 
   if (quit_button_active(state) &&
-      az_button_on_click(&state->quit_button, x, y)) {
+      az_button_on_click(&state->quit_button, x, y, &state->soundboard)) {
     state->mode = AZ_TMODE_QUITTING;
   }
 
   if (state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) {
-    az_prefs_pane_on_click(&state->prefs_pane, x, y);
+    az_prefs_pane_on_click(&state->prefs_pane, x, y, &state->soundboard);
     if (state->prefs_pane.selected_key_picker_index >= 0) {
       state->mode = AZ_TMODE_PICK_KEY;
     }

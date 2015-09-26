@@ -41,6 +41,8 @@ void az_gl_vertex(az_vector_t v);
 
 void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin, double angle,
                     double length);
+void az_draw_cracks_with_color(az_random_seed_t *seed, az_vector_t origin,
+                               double angle, double length, az_color_t color);
 
 /*===========================================================================*/
 

@@ -66,9 +66,11 @@ void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
                         az_clock_t clock, az_soundboard_t *soundboard);
 
 // Call when the mouse button clicks the given position.
-void az_prefs_pane_on_click(az_prefs_pane_t *pane, int x, int y);
+void az_prefs_pane_on_click(az_prefs_pane_t *pane, int x, int y,
+                            az_soundboard_t *soundboard);
 
-void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id);
+void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
+                           az_soundboard_t *soundboard);
 
 /*===========================================================================*/
 

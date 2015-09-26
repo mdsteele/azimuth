@@ -57,7 +57,8 @@ az_paused_action_t az_paused_event_loop(
         case AZ_EVENT_KEY_DOWN:
           if (state.do_quit) break;
           if (state.prefs_pane.selected_key_picker_index >= 0) {
-            az_prefs_try_pick_key(&state.prefs_pane, event.key.id);
+            az_prefs_try_pick_key(&state.prefs_pane, event.key.id,
+                                  &state.soundboard);
             break;
           }
           switch (event.key.id) {

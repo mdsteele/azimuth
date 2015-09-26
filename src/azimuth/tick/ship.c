@@ -1105,8 +1105,9 @@ static void apply_orion_booster(az_space_state_t *state, double time) {
   }
 }
 
-static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
+static void apply_ship_thrusters(az_space_state_t *state, bool is_in_water,
                                  bool is_in_lava, double time) {
+  az_ship_t *ship = &state->ship;
   const az_player_t *player = &ship->player;
   const az_controls_t *controls = &ship->controls;
   const bool dynamic = az_has_upgrade(player, AZ_UPG_DYNAMIC_ARMOR);
@@ -1135,12 +1136,14 @@ static void apply_ship_thrusters(az_ship_t *ship, bool is_in_water,
   if (controls->up_held && !controls->down_held) {
     az_vpluseq(&ship->velocity, az_vpolar(impulse, ship->angle));
     ship->thrusters = AZ_THRUST_FORWARD;
+    az_loop_sound(&state->soundboard, AZ_SND_THRUST);
   }
   // Retro thrusters:
   else if (controls->down_held && !controls->up_held &&
       az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
     az_vpluseq(&ship->velocity, az_vpolar(-0.8 * impulse, ship->angle));
     ship->thrusters = AZ_THRUST_REVERSE;
+    az_loop_sound(&state->soundboard, AZ_SND_THRUST);
   } else ship->thrusters = AZ_THRUST_NONE;
 }
 
@@ -1391,7 +1394,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   apply_gravity_to_ship(state, time, &is_in_water, &is_in_lava);
   apply_cplus_drive(state, is_in_water, is_in_lava, time);
   apply_orion_booster(state, time);
-  apply_ship_thrusters(ship, is_in_water, is_in_lava, time);
+  apply_ship_thrusters(state, is_in_water, is_in_lava, time);
   apply_drag_to_ship(ship, is_in_water, is_in_lava, time);
 
   // Activate tractor beam if necessary:

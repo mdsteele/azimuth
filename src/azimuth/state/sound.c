@@ -320,9 +320,8 @@ static az_sound_spec_t sound_specs[] = {
   [AZ_SND_FIRE_GUN_FREEZE] = {
     .wave_kind = AZ_WOBBLE_WAVE,
     .env_sustain = 0.13848, .env_punch = 0.12036, .env_decay = 0.21536,
-    .start_freq = 0.9788732, .freq_limit = 0.32917, .freq_slide = -0.22554,
-    .square_duty = 0.46895, .duty_sweep = 0.1842,
-    .hpf_cutoff = 0.007470001
+    .start_freq = 0.9, .freq_limit = 0.32917, .freq_slide = -0.22554,
+    .phaser_offset = -0.5, .hpf_cutoff = 0.007470001
   },
   [AZ_SND_FIRE_GUN_NORMAL] = {
     .wave_kind = AZ_SINE_WAVE,
@@ -439,11 +438,8 @@ static az_sound_spec_t sound_specs[] = {
   },
   [AZ_SND_HIT_ARMOR] = {
     .wave_kind = AZ_WOBBLE_WAVE,
-    .env_punch = 0.582436, .env_decay = 0.19,
-    .start_freq = 0.444068, .freq_slide = 0.413595, .freq_delta_slide = 0.1825,
-    .vibrato_depth = 0.0289551, .vibrato_speed = 0.97779,
-    .arp_mod = 0.427531, .arp_speed = 0.260546,
-    .repeat_speed = 0.99, .lpf_resonance = -0.550973
+    .env_sustain = 0.3, .start_freq = 0.86, .phaser_offset = -0.65,
+    .lpf_cutoff = 0.75, .lpf_ramp = -0.66, .lpf_resonance = 0.5
   },
   [AZ_SND_HIT_WALL] = {
     .wave_kind = AZ_NOISE_WAVE,
@@ -699,6 +695,42 @@ static az_sound_spec_t sound_specs[] = {
     .arp_mod = 0.4, .arp_speed = 0.53,
     .phaser_offset = -0.52, .phaser_sweep = -0.31
   },
+  [AZ_SND_MAGBEEST_LEG_STOMP] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.4, .start_freq = 0.06,
+    .vibrato_depth = 0.15, .vibrato_speed = 0.115,
+    .phaser_offset = 0.7, .phaser_sweep = -0.37,
+    .lpf_cutoff = 0.75, .lpf_ramp = -0.66, .lpf_resonance = 0.5,
+    .volume_adjust = 0.75
+  },
+  [AZ_SND_MAGBEEST_MAGNET] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.5, .start_freq = 0.2,
+    .vibrato_depth = 0.23, .vibrato_speed = 0.39, .phaser_offset = 0.71
+  },
+  [AZ_SND_MAGBEEST_MAGNET_CHARGE] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.975, .env_decay = 0.3,
+    .start_freq = 0.2, .freq_slide = 0.13,
+    .vibrato_depth = 0.23, .vibrato_speed = 0.65, .phaser_offset = 0.71
+  },
+  [AZ_SND_MAGBEEST_TUNNELLING] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.25, .start_freq = 0.1,
+    .vibrato_depth = 0.645, .vibrato_speed = 0.58,
+    .phaser_offset = -0.65, .lpf_cutoff = 0.8, .volume_adjust = -0.5
+  },
+  [AZ_SND_MENU_CLICK] = {
+    .wave_kind = AZ_TRIANGLE_WAVE,
+    .env_attack = 0.0891609, .env_sustain = 0.155,
+    .env_punch = 0.0656827, .env_decay = 0.23,
+    .start_freq = 0.19, .freq_slide = 0.00708617,
+    .freq_delta_slide = -0.0759178,
+    .vibrato_depth = 0.00914664, .vibrato_speed = 0.881547,
+    .arp_mod = -0.67998, .arp_speed = 0.284788, .repeat_speed = 0.431267,
+    .phaser_offset = -0.0525242, .phaser_sweep = -0.0142853,
+    .lpf_cutoff = 0.103765, .lpf_ramp = 0.240105, .lpf_resonance = 0.173952,
+  },
   [AZ_SND_MENU_HOVER] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_attack = 0.0891609, .env_sustain = 0.155,
@@ -709,7 +741,6 @@ static az_sound_spec_t sound_specs[] = {
     .arp_mod = -0.67998, .arp_speed = 0.284788, .repeat_speed = 0.431267,
     .phaser_offset = -0.0525242, .phaser_sweep = -0.0142853,
     .lpf_cutoff = 0.103765, .lpf_ramp = 0.240105, .lpf_resonance = 0.173952,
-    .hpf_cutoff = 0.00253164, .hpf_ramp = 0.000209616
   },
   [AZ_SND_METAL_CLINK] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
@@ -840,6 +871,12 @@ static az_sound_spec_t sound_specs[] = {
     .wave_kind = AZ_WOBBLE_WAVE,
     .env_sustain = 0.03, .env_punch = 0.4, .env_decay = 0.7,
     .start_freq = 0.4, .arp_mod = 0.5, .arp_speed = 0.56, .repeat_speed = 0.3
+  },
+  [AZ_SND_THRUST] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.245, .start_freq = 0.3,
+    .vibrato_depth = 0.1, .vibrato_speed = 0.605,
+    .phaser_offset = 0.2, .volume_adjust = -0.98
   },
   [AZ_SND_TRACTOR_BEAM] = {
     .wave_kind = AZ_WOBBLE_WAVE, .env_sustain = 1.0, .start_freq = 0.18,

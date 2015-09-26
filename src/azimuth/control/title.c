@@ -75,7 +75,8 @@ az_title_action_t az_title_event_loop(
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
           if (state.mode == AZ_TMODE_PICK_KEY) {
-            az_prefs_try_pick_key(&state.prefs_pane, event.key.id);
+            az_prefs_try_pick_key(&state.prefs_pane, event.key.id,
+                                  &state.soundboard);
             state.mode = AZ_TMODE_PREFS;
           } else if (state.mode == AZ_TMODE_INTRO) {
             if (event.key.id == AZ_KEY_ESCAPE ||
