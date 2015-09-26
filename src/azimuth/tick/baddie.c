@@ -816,12 +816,26 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
+  const az_vector_t position_delta =
+    az_vsub(baddie->position, old_baddie_position);
   if (baddie->kind != AZ_BAD_NOTHING &&
       az_baddie_has_flag(baddie, AZ_BADF_CARRIES_CARGO)) {
     az_move_baddie_cargo(
-        state, baddie,
-        az_vsub(baddie->position, old_baddie_position),
+        state, baddie, position_delta,
         az_mod2pi(baddie->angle - old_baddie_angle));
+  }
+
+  // If we're entering or exiting a body of water, make a splash.
+  AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+    if (!az_is_liquid(gravfield->kind)) continue;
+    az_vector_t position, normal;
+    if (az_ray_hits_liquid_surface(gravfield, old_baddie_position,
+                                   position_delta, &position, &normal)) {
+      az_add_sploosh(state, gravfield, position, normal,
+                     az_vdiv(position_delta, time),
+                     baddie->data->main_body.bounding_radius);
+      az_play_sound(&state->soundboard, AZ_SND_SPLASH);
+    }
   }
 }
 

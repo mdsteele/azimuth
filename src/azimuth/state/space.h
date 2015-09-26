@@ -202,6 +202,10 @@ void az_add_beam(az_space_state_t *state, az_color_t color, az_vector_t start,
 void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
                   az_vector_t position, az_vector_t velocity);
 
+void az_add_sploosh(az_space_state_t *state, const az_gravfield_t *gravfield,
+                    az_vector_t position, az_vector_t normal,
+                    az_vector_t velocity, double radius);
+
 // Add a new projectile object and return a pointer to it, or return NULL if
 // the projectile array is full.
 az_projectile_t *az_add_projectile(

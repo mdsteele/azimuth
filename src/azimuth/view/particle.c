@@ -272,13 +272,14 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
         with_color_alpha(particle->color, 0);
         const GLfloat height =
           particle->param1 * sin(AZ_PI * particle->age / particle->lifetime);
-        glVertex2f(0, 14);
-        glVertex2f(0.3f * height, 7);
+        const GLfloat semiwidth = particle->param2;
+        glVertex2f(0, semiwidth);
+        glVertex2f(0.3f * height, 0.5f * semiwidth);
         glVertex2f(height, 0);
-        glVertex2f(0.3f * height, -7);
-        glVertex2f(0, -14);
+        glVertex2f(0.3f * height, -0.5f * semiwidth);
+        glVertex2f(0, -semiwidth);
         glVertex2f(-0.05f * height, 0);
-        glVertex2f(0, 14);
+        glVertex2f(0, semiwidth);
       } glEnd();
       break;
     case AZ_PAR_TRAIL: {

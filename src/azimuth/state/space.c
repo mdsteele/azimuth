@@ -20,6 +20,7 @@
 #include "azimuth/state/space.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/state/room.h"
@@ -243,6 +244,33 @@ void az_add_speck(az_space_state_t *state, az_color_t color, double lifetime,
     }
   }
   AZ_WARNING_ONCE("Failed to add speck; array is full.\n");
+}
+
+void az_add_sploosh(az_space_state_t *state, const az_gravfield_t *gravfield,
+                    az_vector_t position, az_vector_t normal,
+                    az_vector_t velocity, double radius) {
+  if (az_vdot(normal, az_vpolar(1, gravfield->angle)) < 0) {
+    normal = az_vneg(normal);
+  }
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_SPLOOSH;
+    particle->position = position;
+    particle->angle = az_vtheta(normal);
+    particle->velocity = AZ_VZERO;
+    particle->param1 =
+      4.0 * sqrt(fabs(az_vdot(velocity, az_vunit(normal))));
+    particle->param2 = radius;
+    particle->lifetime = 0.1 * sqrt(particle->param1);
+    if (gravfield->kind == AZ_GRAV_WATER) {
+      particle->color = (az_color_t){167, 205, 255, 192};
+    } else {
+      assert(gravfield->kind == AZ_GRAV_LAVA);
+      particle->color = (az_color_t){255, 205, 167, 192};
+      particle->param1 *= 0.5;
+      particle->lifetime *= 1.5;
+    }
+  }
 }
 
 az_projectile_t *az_add_projectile(
