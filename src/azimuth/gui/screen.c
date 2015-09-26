@@ -59,7 +59,7 @@ void az_register_gl_init_func(az_init_func_t func) {
 void az_init_gui(bool fullscreen, bool enable_audio) {
   assert(!sdl_initialized);
   if (SDL_Init(SDL_INIT_VIDEO | (enable_audio ? SDL_INIT_AUDIO : 0)) != 0) {
-    AZ_FATAL("SDL_Init failed.\n");
+    AZ_FATAL("SDL_Init failed: %s\n", SDL_GetError());
   }
   atexit(SDL_Quit);
   if (enable_audio) {
@@ -102,7 +102,7 @@ void az_set_fullscreen(bool fullscreen) {
   }
   if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, VIDEO_DEPTH,
                         VIDEO_FLAGS | (fullscreen ? SDL_FULLSCREEN : 0))) {
-    AZ_FATAL("SDL_SetVideoMode failed.\n");
+    AZ_FATAL("SDL_SetVideoMode failed: %s\n", SDL_GetError());
   }
   if (display_initialized) {
     SDL_WarpMouse(x, y);

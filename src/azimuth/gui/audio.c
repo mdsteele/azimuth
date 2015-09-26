@@ -237,7 +237,7 @@ void az_init_audio(void) {
     .callback = &audio_callback
   };
   if (SDL_OpenAudio(&audio_spec, NULL) != 0) {
-    AZ_FATAL("SDL_OpenAudio failed.\n");
+    AZ_FATAL("SDL_OpenAudio failed: %s\n", SDL_GetError());
   }
 
   atexit(SDL_CloseAudio);
