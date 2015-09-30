@@ -54,7 +54,7 @@ void az_tick_bad_turret(
          baddie->kind == AZ_BAD_ARMORED_TURRET);
   aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(120));
   // Fire:
-  if (baddie->cooldown <= 0.0 &&
+  if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 400) &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
                            AZ_DEG2RAD(6)) &&
       az_can_see_ship(state, baddie)) {
@@ -142,7 +142,7 @@ void az_tick_bad_broken_turret(
            baddie->angle :
          baddie->components[0].angle + aim * 2 * time))));
     // Fire:
-    if (baddie->cooldown <= 0.0 &&
+    if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 300) &&
         az_ship_within_angle(state, baddie, baddie->components[0].angle,
                              AZ_DEG2RAD(6)) &&
         az_can_see_ship(state, baddie)) {
@@ -177,6 +177,7 @@ void az_tick_bad_heavy_turret(
   aim_towards_ship(state, baddie, time, AZ_DEG2RAD(57), AZ_DEG2RAD(120));
   // State 0: cooling off for next salvo:
   if (baddie->state == 0 && baddie->cooldown <= 0.0 &&
+      az_ship_in_range(state, baddie, 500) &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
                            AZ_DEG2RAD(6)) &&
       az_can_see_ship(state, baddie)) {
@@ -224,7 +225,7 @@ void az_tick_bad_crawling_turret(
   az_crawl_around(state, baddie, time, (baddie->state != 0), 1.0, 20.0, 100.0);
   aim_towards_ship(state, baddie, time, AZ_DEG2RAD(85), AZ_DEG2RAD(100));
   // Fire:
-  if (baddie->cooldown <= 0.0 &&
+  if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 400) &&
       az_ship_within_angle(state, baddie, baddie->components[0].angle,
                            AZ_DEG2RAD(6)) &&
       az_can_see_ship(state, baddie)) {
