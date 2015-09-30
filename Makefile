@@ -38,7 +38,10 @@ CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
 ifeq "$(BUILDTYPE)" "debug"
   CFLAGS += -O1 -g
 else ifeq "$(BUILDTYPE)" "release"
-  CFLAGS += -O2 -DNDEBUG
+  # For release builds, disable asserts, but don't warn about e.g. static
+  # functions or local variables that are only used for asserts, and which
+  # therefore become unused when asserts are disabled.
+  CFLAGS += -O2 -DNDEBUG -Wno-unused-function -Wno-unused-variable
 else
   $(error BUILDTYPE must be 'debug' or 'release')
 endif
