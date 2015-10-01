@@ -25,7 +25,7 @@
 
 #define AZ_VERSION_MAJOR 0
 #define AZ_VERSION_MINOR 1
-#define AZ_VERSION_PATCH 1
+#define AZ_VERSION_PATCH 2
 
 /*===========================================================================*/
 
