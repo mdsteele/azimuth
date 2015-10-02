@@ -157,38 +157,31 @@ static void draw_door_pipe(GLfloat alpha, az_color_t light_color,
 }
 
 static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
-  az_color_t color1 = AZ_WHITE, color2 = AZ_WHITE;
+  az_color_t color1 = AZ_WHITE;
   switch (door->kind) {
     case AZ_DOOR_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_DOOR_UNLOCKED:
       if (az_clock_mod(2, 4, clock)) {
         color1 = (az_color_t){192, 192, 64, 255};
-        color2 = (az_color_t){128, 128, 48, 255};
         break;
       } // else fallthrough
     case AZ_DOOR_NORMAL:
       color1 = (az_color_t){192, 192, 192, 255};
-      color2 = (az_color_t){128, 128, 128, 255};
       break;
     case AZ_DOOR_LOCKED:
       color1 = (az_color_t){80, 80, 80, 255};
-      color2 = (az_color_t){48, 48, 48, 255};
       break;
     case AZ_DOOR_ROCKET:
-      color1 = (az_color_t){192, 0, 0, 255};
-      color2 = (az_color_t){96, 0, 0, 255};
+      color1 = (az_color_t){192, 32, 0, 255};
       break;
     case AZ_DOOR_HYPER_ROCKET:
-      color1 = (az_color_t){255, 0, 128, 255};
-      color2 = (az_color_t){128, 0, 64, 255};
+      color1 = (az_color_t){255, 32, 192, 255};
       break;
     case AZ_DOOR_BOMB:
-      color1 = (az_color_t){24, 24, 192, 255};
-      color2 = (az_color_t){12, 12, 96, 255};
+      color1 = (az_color_t){24, 48, 192, 255};
       break;
     case AZ_DOOR_MEGA_BOMB:
-      color1 = (az_color_t){0, 128, 255, 255};
-      color2 = (az_color_t){0, 80, 160, 255};
+      color1 = (az_color_t){0, 192, 255, 255};
       break;
     case AZ_DOOR_PASSAGE:
       draw_passage();
@@ -203,6 +196,14 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     case AZ_DOOR_BOSS:
       break;
   }
+  az_color_t color2 = color1;
+  color2.r *= 0.8f;
+  color2.g *= 0.8f;
+  color2.b *= 0.8f;
+  az_color_t color3 = color1;
+  color3.r *= 0.4f;
+  color3.g *= 0.4f;
+  color3.b *= 0.4f;
 
   if (door->kind == AZ_DOOR_BOSS) {
     glBegin(GL_QUADS); {
@@ -212,23 +213,27 @@ static void draw_door_internal(const az_door_t *door, az_clock_t clock) {
     } glEnd();
   } else if (door->openness < 1.0) {
     assert(door->kind != AZ_DOOR_ALWAYS_OPEN);
-    glBegin(GL_QUADS); {
-      const GLfloat x1 = 30.0;
-      const GLfloat x2 = 40.0 - 10.0 * door->openness;
+    const GLfloat x1 = 30.0;
+    const GLfloat x2 = 40.0 - 10.0 * door->openness;
+    glBegin(GL_TRIANGLE_STRIP); {
       az_gl_color(color1);
       glVertex2f(x1, 20);
       glVertex2f(x1, -20);
-      glVertex2f(x2, -10);
+      az_gl_color(color2);
       glVertex2f(x2, 10);
-      for (int i = -1; i <= 1; i += 2) {
-        az_gl_color(color2);
-        glVertex2f(x2, i * 35);
+      glVertex2f(x2, -10);
+    } glEnd();
+    for (int i = -1; i <= 1; i += 2) {
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(color3);
         glVertex2f(x1, i * 50);
+        glVertex2f(x2, i * 35);
         az_gl_color(color1);
         glVertex2f(x1, i * (20 + 10.0 * door->openness));
+        az_gl_color(color2);
         glVertex2f(x2, i * (10.0 + 25.0 * door->openness));
-      }
-    } glEnd();
+      } glEnd();
+    }
   }
 
   if (door->lockedness > 0.0) {
