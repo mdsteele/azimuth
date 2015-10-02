@@ -135,7 +135,7 @@ void az_draw_bad_mosquito(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
   glPushMatrix(); {
-    glScalef(0.5, 0.5, 1);
+    glScalef(0.7, 0.7, 1);
     draw_zipper_antennae(color3(0.5, 0.25, 0.25));
     draw_zipper_body(color3(1 - frozen, 0.5 - 0.5 * flare, frozen),
                      color3(1 - frozen, 0.25, frozen),

@@ -349,7 +349,7 @@ static const az_vector_t beam_wall_vertices[] = {
   {-52, -15}, {52, -15}, {52, -10}, {50, -10}, {50, 10}, {52, 10}
 };
 
-static const az_vector_t mosquito_vertices[] = {
+static const az_vector_t gnat_vertices[] = {
   {10, 2}, {7.5, 4}, {5, 4.66}, {-5, 2.66}, {-7.5, 1.33},
   {-7.5, -1.33}, {-5, -2.66}, {5, -4.66}, {7.5, -4}, {10, -2}
 };
@@ -1060,7 +1060,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(turret_components)
   },
   [AZ_BAD_ZIPPER] = {
-    .max_health = 20.0, .color = {0, 255, 0, 255},
+    .max_health = 12.0, .color = {0, 255, 0, 255},
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = AZ_PUPF_ALL, .static_properties = AZ_BADF_BOUNCE_PERP,
@@ -1075,7 +1075,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 15.0, .impact_damage = 10.0 }
   },
   [AZ_BAD_ATOM] = {
-    .max_health = 15.0, .overall_bounding_radius = 40.0,
+    .max_health = 8.0, .overall_bounding_radius = 40.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {64, 192, 64, 255},
     .death_sound = AZ_SND_KILL_ATOM,
     .main_body = { .bounding_radius = 10.0, .impact_damage = 10.0 },
@@ -1345,8 +1345,8 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .static_properties = AZ_BADF_KAMIKAZE,
-    .main_body = { .polygon = AZ_INIT_POLYGON(mosquito_vertices),
-                   .impact_damage = 6.0 }
+    .main_body = { .polygon = AZ_INIT_POLYGON(mini_zipper_vertices),
+                   .impact_damage = 4.0 }
   },
   [AZ_BAD_ARMORED_ZIPPER] = {
     .max_health = 24.0, .color = {128, 160, 128, 255},
@@ -1807,7 +1807,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .static_properties = AZ_BADF_KAMIKAZE,
-    .main_body = { .polygon = AZ_INIT_POLYGON(mosquito_vertices),
+    .main_body = { .polygon = AZ_INIT_POLYGON(gnat_vertices),
                    .impact_damage = 6.0 }
   },
   [AZ_BAD_CREEPY_EYE] = {
