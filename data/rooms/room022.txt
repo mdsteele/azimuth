@@ -1,6 +1,6 @@
 @R z0 p0 k3 b3 d4 g0 n24 w74
   c(46631.50,1355.00,1.638229,0.000000)
-$s:test23,beqz/A,lock1,halt,A#dark0.5,B#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/B;
+$s:test23,beqz/A,lock1,halt,A#test1,hnez,dark0.5,B#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/B;
 !W1 d0 x-3473.62 y46769.90 a-3.067449 u0
 !W1 d33 x-3036.06 y48051.96 a1.632621 u0
 !W1 d21 x-3511.88 y47667.71 a0.067419 u0
