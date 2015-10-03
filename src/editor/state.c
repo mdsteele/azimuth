@@ -262,6 +262,7 @@ static az_doodad_kind_t doodad_kinds[] = {
   AZ_DOOD_NUCLEAR_BOMB,
   AZ_DOOD_WARNING_LIGHT,
   // Tubes and windows:
+  AZ_DOOD_RED_TUBE_INSIDE_DARK,
   AZ_DOOD_RED_TUBE_INSIDE,
   AZ_DOOD_RED_TUBE_WINDOW,
   AZ_DOOD_RED_TUBE_BROKEN_WINDOW,

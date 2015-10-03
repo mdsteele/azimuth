@@ -1,6 +1,6 @@
-@R z4 p0 k19 b8 d4 g0 n64 w118
+@R z4 p0 k19 b8 d4 g0 n70 w118
   c(34263.24,1291.16,1.848536,0.012855)
-$s:mus5,test61,bnez/A,musf1,halt,A#nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,nix10,nix13,activ12,activ11,gang11,addi3.14159,sang11,activ20;
+$s:mus5,test61,bnez/A,musf1,halt,A#nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,nix10,nix13,nix14,nix15,activ12,activ11,gang11,addi3.14159,sang11,activ20;
 !W1 d2 x-9892.44 y34108.90 a-2.858608 u0
 !W1 d33 x-9488.47 y34056.78 a0.276405 u0
 !W1 d33 x-9583.71 y34029.77 a0.276405 u0
@@ -187,8 +187,14 @@ $s:mus5,test61,bnez/A,musf1,halt,A#nix1,nix2,nix3,nix4,nix5,nix6,nix7,nix8,nix9,
 !N7/156 x-9545.34 y32848.89 a-0.305604 u0
 !N7/156 x-9567.00 y32873.51 a-0.863600 u0
 !N7/156 x-9627.53 y32828.85 a0.754404 u0
+!N5/25 x-10067.68 y33097.68 a0.290653 u0
+!N5/25 x-9331.23 y33312.03 a0.273094 u0
+!N5/25 x-9785.08 y33181.58 a0.284223 u14
+!N5/25 x-9607.38 y33233.50 a0.284223 u15
+!N5/25 x-9447.18 y33279.55 a0.273094 u0
+!N5/25 x-9982.79 y33123.08 a0.290653 u0
 !B31 x-9241.03 y33025.60 a-1.297609 u20
-$k:test61,hnez,snd2,wait1,gpos10,boom,shake10,kill1,kill2,nix3,kill4,nix5,kill6,nix7,kill8,kill9,kill10,kill13,activ12,activ11,gang11,addi3.14159,sang11,set61;
+$k:test61,hnez,snd2,wait1,gpos10,boom,shake10,kill1,kill2,nix3,kill4,nix5,kill6,nix7,kill8,kill9,kill10,kill13,nix14,nix15,activ12,activ11,gang11,addi3.14159,sang11,set61;
 !B66 x-9499.82 y33584.42 a-0.502621 u0
 !B66 x-10106.82 y33571.74 a-1.278375 u0
 !B62 x-9313.77 y32951.58 a0.276633 u0
