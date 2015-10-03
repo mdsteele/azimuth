@@ -112,6 +112,26 @@ static const az_vector_t oth_crawler_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_crawler_triangles) % 3 == 0);
 
+static const az_vector_t oth_minicrab_triangles[] = {
+  // Body:
+  {0, 0}, {15, 9}, {0, 14},
+  {15, -9}, {15, 9}, {0, 0},
+  {0, -14}, {15, -9}, {0, 0},
+  {-15, 7}, {0, 0}, {0, 14},
+  {0, 0}, {-15, 7}, {-15, -7},
+  {0, -14}, {0, 0}, {-15, -7},
+  // Fangs:
+  {25, 3}, {15, 9}, {15, 4},
+  {15, -9}, {25, -3}, {15, -4},
+  // Legs:
+  {-15, 7}, {-15, 0}, {-29, 9},
+  {-15, 0}, {-29, -9}, {-15, -7},
+  // Arms:
+  {15, 9}, {0, 14}, {30, 17},
+  {15, -9}, {0, -14}, {30, -17},
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_minicrab_triangles) % 3 == 0);
+
 static const az_vector_t oth_orb_triangles[] = {
   {0, 0}, {20, 0}, {14.1, 14.1},
   {0, 0}, {14.1, 14.1}, {0, 20},
@@ -324,6 +344,14 @@ void az_draw_bad_oth_gunship(
   draw_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
            AZ_ARRAY_SIZE(oth_gunship_triangles));
+}
+
+void az_draw_bad_oth_minicrab(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_MINICRAB);
+  draw_tendrils(baddie, &AZ_OTH_MINICRAB_TENDRILS, clock);
+  draw_oth(baddie, frozen, clock, oth_minicrab_triangles,
+           AZ_ARRAY_SIZE(oth_minicrab_triangles));
 }
 
 void az_draw_bad_oth_orb(

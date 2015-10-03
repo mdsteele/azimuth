@@ -38,6 +38,7 @@ extern const az_oth_tendrils_data_t AZ_OTH_BRAWLER_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_CRAB_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_CRAWLER_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_GUNSHIP_TENDRILS;
+extern const az_oth_tendrils_data_t AZ_OTH_MINICRAB_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_ORB_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_RAZOR_TENDRILS;
 extern const az_oth_tendrils_data_t AZ_OTH_SNAPDRAGON_TENDRILS;

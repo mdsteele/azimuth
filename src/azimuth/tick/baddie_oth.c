@@ -204,6 +204,24 @@ void az_tick_bad_oth_crawler(
   tick_tendrils(state, baddie, &AZ_OTH_CRAWLER_TENDRILS, old_angle, time);
 }
 
+void az_tick_bad_oth_minicrab(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_OTH_MINICRAB);
+  const double old_angle = baddie->angle;
+  az_fly_towards_ship(state, baddie, time,
+                      4.0, 120.0, 200.0, 100.0, 100.0, 100.0);
+  if (baddie->cooldown <= 0.0 &&
+      az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(6)) &&
+      az_can_see_ship(state, baddie)) {
+    if (az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_MINIROCKET,
+                                  15.0, 0.0, 0.0) != NULL) {
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+      baddie->cooldown = 2.5;
+    }
+  }
+  tick_tendrils(state, baddie, &AZ_OTH_MINICRAB_TENDRILS, old_angle, time);
+}
+
 void az_tick_bad_oth_orb_1(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_ORB_1);

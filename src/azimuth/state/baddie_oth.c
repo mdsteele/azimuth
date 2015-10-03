@@ -81,6 +81,19 @@ const az_oth_tendrils_data_t AZ_OTH_GUNSHIP_TENDRILS = {
 
 /*===========================================================================*/
 
+static const az_vector_t minicrab_tendril_bases[] = {
+  {-10, -5}, {-10, 0}, {-10, 5}
+};
+const az_oth_tendrils_data_t AZ_OTH_MINICRAB_TENDRILS = {
+  .tracking_base = 0.05,
+  .length = 40.0,
+  .semithick = 3.0,
+  .drift = 10.0,
+  DECL_TENDRIL_BASES(minicrab_tendril_bases)
+};
+
+/*===========================================================================*/
+
 static const az_vector_t orb_tendril_bases[] = {
   {-10, 0}, {5, -8.660254037844386}, {5, 8.660254037844386}
 };

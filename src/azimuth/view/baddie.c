@@ -815,6 +815,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_REFLECTION:
       az_draw_bad_reflection(baddie, clock);
       break;
+    case AZ_BAD_OTH_MINICRAB:
+      az_draw_bad_oth_minicrab(baddie, frozen, clock);
+      break;
   }
 }
 

@@ -38,6 +38,9 @@ void az_draw_bad_oth_crawler(
 void az_draw_bad_oth_gunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_oth_minicrab(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 void az_draw_bad_oth_orb(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 

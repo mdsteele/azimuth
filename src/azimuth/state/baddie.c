@@ -294,6 +294,11 @@ static const az_vector_t oth_crab_vertices[] = {
   {15, 10}, {24, 17}, {41, 12}, {22, 25}, {5, 16.66}
 };
 
+static const az_vector_t oth_minicrab_vertices[] = {
+  {0, 14}, {-15, 7}, {-29, 9}, {-15, 0}, {-29, -9}, {-15, -7}, {0, -14},
+  {30, -17}, {15, -9}, {15, 9}, {30, 17}
+};
+
 static const az_vector_t gun_sensor_casing_vertices[] = {
   {5, 5}, {10, 17}, {10, 20}, {-20, 20},
   {-20, -20}, {10, -20}, {10, -17}, {5, -5}
@@ -1929,6 +1934,13 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INCORPOREAL |
                           AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 20.0 }
+  },
+  [AZ_BAD_OTH_MINICRAB] = {
+    .max_health = 30.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
+    .death_style = AZ_DEATH_OTH,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_minicrab_vertices),
+                   .impact_damage = 15.0 }
   }
 };
 
