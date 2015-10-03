@@ -1,4 +1,5 @@
 Next flag: 137
+Unused: 17
 
 Bosses
 ======
@@ -66,7 +67,6 @@ Doors
 13: Opened pink door between Colony rooms 125 and 128
 15: Opened pink door between Filimun room 47 and Nandiar room 48
 16: Opened pink door between Filimun room 43 and Nandiar room 44
-17: Opened blue door between Filimun rooms 110 and 117
 18: Opened pink door between Colony rooms 137 and 165
 21: Opened blue door between Nandiar rooms 140 and 211
 24: Opened pink door bewteen Colony rooms 156 and 302
