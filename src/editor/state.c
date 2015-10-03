@@ -508,7 +508,7 @@ static void summarize_scenario(const az_planet_t *planet) {
   }
   if (linebreak) { printf("\n"); linebreak = false; }
   // Print rooms numbers and destinations of doors that don't have a legitimate
-  // matching exit door:
+  // matching exit door; also, print ordnance doors that don't set a flag:
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
     const az_room_t *room = &planet->rooms[room_index];
     for (int i = 0; i < room->num_doors; ++i) {
@@ -532,6 +532,26 @@ static void summarize_scenario(const az_planet_t *planet) {
         }
         if (!has_exit) {
           printf("\x1b[31m%d -> %d\x1b[m\n", room_index, door->destination);
+          linebreak = true;
+        }
+      }
+      if (door->kind == AZ_DOOR_ROCKET || door->kind == AZ_DOOR_HYPER_ROCKET ||
+          door->kind == AZ_DOOR_BOMB || door->kind == AZ_DOOR_MEGA_BOMB) {
+        if (door->uuid_slot == 0) {
+          printf("\x1b[31mRoom %d: door kind %d without UUID\x1b[m\n",
+                 room_index, door->kind);
+          linebreak = true;
+        }
+        bool found_set = false;
+        if (door->on_open != NULL) {
+          for (int j = 0; j < door->on_open->num_instructions; ++j) {
+            const az_instruction_t ins = door->on_open->instructions[j];
+            if (ins.opcode == AZ_OP_SET) found_set = true;
+          }
+        }
+        if (!found_set) {
+          printf("\x1b[31mRoom %d: Door kind %d doesn't set flag\x1b[m\n",
+                 room_index, door->kind);
           linebreak = true;
         }
       }
