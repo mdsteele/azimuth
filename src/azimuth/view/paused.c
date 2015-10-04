@@ -687,11 +687,13 @@ static void draw_upgrades(const az_paused_state_t *state) {
          "is automatically refilled over time by your reactor." :
          state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
          (az_upgrades_have_any_bombs(&player->upgrades) ?
-          "Press [9] to select, hold down [$o] and press [$f] to fire." :
+          "Press [9] to select rockets, then hold down [$o] and\n"
+          "press [$f] to fire." :
           "Hold down [$o] and press [$f] to fire.") :
          state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?
          (az_upgrades_have_any_rockets(&player->upgrades) ?
-          "Press [0] to select, hold down [$o] and press [$f] to drop." :
+          "Press [0] to select bombs, then hold down [$o] and\n"
+          "press [$f] to drop." :
           "Hold down [$o] and press [$f] to drop.") :
          az_upgrade_description(state->hovered_upgrade, &player->upgrades)));
   } else if (state->hovering == AZ_PAUSE_HOVER_SHIP) {
@@ -703,6 +705,10 @@ static void draw_upgrades(const az_paused_state_t *state) {
         8, AZ_ALIGN_LEFT, 106, 409, 16, -1, state->prefs,
         "Fast, maneuverable, and highly adaptable, the Cobolt Mark IX\n"
         "is the mainstay of the UHP's Interstellar Patrol Force.");
+  } else {
+    az_draw_paragraph(
+        8, AZ_ALIGN_LEFT, 106, 409, 16, -1, state->prefs,
+        "Hover mouse cursor over any ship system for more info.");
   }
 }
 

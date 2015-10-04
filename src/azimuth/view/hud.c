@@ -91,6 +91,14 @@ static void tint_hud_rect(GLfloat width, GLfloat height) {
   } glEnd();
 }
 
+static int count_linebreaks(const char *str) {
+  int count = 0;
+  for (const char *ch = str; *ch != '\0'; ++ch) {
+    if (*ch == '\n') ++count;
+  }
+  return count;
+}
+
 /*===========================================================================*/
 
 #define HUD_MARGIN 2
@@ -686,8 +694,8 @@ void az_draw_monologue(const az_space_state_t *state) {
 /*===========================================================================*/
 
 #define UPGRADE_BOX_WIDTH 500
-#define UPGRADE_BOX_HEIGHT_1 110
-#define UPGRADE_BOX_HEIGHT_2 130
+#define UPGRADE_BOX_BASE_HEIGHT 110
+#define UPGRADE_BOX_EXTRA_HEIGHT_PER_LINEBREAK 20
 
 static void draw_upgrade_box_frame(double openness, double max_height) {
   assert(openness >= 0.0);
@@ -719,10 +727,10 @@ static void draw_upgrade_box_message(
 static void draw_upgrade_box(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_UPGRADE);
   const az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
-  const double height =
-    (strchr(az_upgrade_description(mode_data->upgrade,
-                                   &state->ship.player.upgrades), '\n') ?
-     UPGRADE_BOX_HEIGHT_2 : UPGRADE_BOX_HEIGHT_1);
+  const double height = UPGRADE_BOX_BASE_HEIGHT +
+    UPGRADE_BOX_EXTRA_HEIGHT_PER_LINEBREAK *
+    count_linebreaks(az_upgrade_description(mode_data->upgrade,
+                                            &state->ship.player.upgrades));
   switch (mode_data->step) {
     case AZ_UGS_OPEN:
       draw_upgrade_box_frame(mode_data->progress, height);

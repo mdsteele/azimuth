@@ -299,9 +299,11 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
         }
       } else if (has_multiple_rocket_ammos(upgrades)) {
         return ("Maximum rockets increased by 5.\n"
-                "Press [9] to select, hold down [$o] and press [$f] to fire.");
+                "Use [9] and [0] to switch bewteen rockets and bombs.\n"
+                "Select rockets, then hold down [$o] and press [$f] to fire.");
       } else {
-        return "Press [9] to select, hold down [$o] and press [$f] to fire.";
+        return ("Use [9] and [0] to switch bewteen rockets and bombs.\n"
+                "Select rockets, then hold down [$o] and press [$f] to fire.");
       }
     case AZ_UPG_BOMB_AMMO_00:
     case AZ_UPG_BOMB_AMMO_01:
@@ -333,9 +335,11 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
         }
       } else if (has_multiple_bomb_ammos(upgrades)) {
         return ("Maximum bombs increased by 3.\n"
-                "Press [0] to select, hold down [$o] and press [$f] to drop.");
+                "Use [9] and [0] to switch bewteen rockets and bombs.\n"
+                "Select bombs, then hold down [$o] and press [$f] to drop.");
       } else {
-        return "Press [0] to select, hold down [$o] and press [$f] to drop.";
+        return ("Use [9] and [0] to switch bewteen rockets and bombs.\n"
+                "Select bombs, then hold down [$o] and press [$f] to drop.");
       }
     case AZ_UPG_CAPACITOR_00:
     case AZ_UPG_CAPACITOR_01:
