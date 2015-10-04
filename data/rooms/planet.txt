@@ -195,8 +195,11 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   \"Computer, I still haven't found any trace of
   the survivors, just wildlife and automated
   systems.  And whatever the hell those glowing
-  things are.  Is anyone still alive?  Where'd
-  they all go?\""
+  rainbow things are that keep popping out of
+  those weird portals.\"
+
+  \"Is anyone here still alive?  Where'd they all
+  go?\""
 !T47"
   It seems that most of the colonists have
   relocated deeper down into the planetoid.  They
@@ -450,7 +453,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   going further down to look for them.\"
 
   \"Meanwhile, any chance you could tell me what
-  those rainbow things are that keep coming
+  those rainbow things are, that keep coming
   through those weird portals and trying to kill
   me?\""
 !T106"
@@ -691,7 +694,9 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   Emergency access to central network node has
   been unlocked.
 
-  Initiating connection..."
+  Initiating connection.
+
+  >>><"
 !T154"
   \"Huh?  What are you blathering about, machine?\""
 !T155"
