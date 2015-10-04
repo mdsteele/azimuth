@@ -660,7 +660,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
   }
 
   glColor3f(1, 1, 0.5);
-  draw_bezel_box(8, 40, 370, AZ_SCREEN_WIDTH - 80, 82);
+  draw_bezel_box(8, 40, 370, AZ_SCREEN_WIDTH - 80, 90);
   if (state->hovering == AZ_PAUSE_HOVER_UPGRADE) {
     glPushMatrix(); {
       glTranslatef(73.5, 410.5, 0);
