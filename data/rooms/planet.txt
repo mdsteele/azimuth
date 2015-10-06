@@ -1,4 +1,4 @@
-@P z8 r474 t245 s6
+@P z8 r474 t255 s6
 $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -1189,3 +1189,76 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   $CFour years ago..."
 !T244"
   $CSix hours later..."
+!T245"
+  Accessing node.  Integrating database.
+
+  LOG($GINFO$W): Experimental reactor test cycle is
+  now 99% complete.
+
+  >>><"
+!T246"
+  \"Hmm, $/this$| computer again.\"
+
+  \"Do you remember anything about Azimuth yet?
+  About what happened here?\""
+!T247"
+  Query 'Azimuth'...$_20
+  No new results found.$_10
+
+  Query 'what happened here'...$_10
+  Accessing recorded message, dated approximately
+  four months ago:
+
+  [$_04=$_04=$_04=$_04=$_04=$_04=$_04=$_04] (ready)"
+!T248"
+  \"Begin personal log entry: Rakif Vkati.\"
+
+  \"We had a serious incident today with one of the
+  NPS labs that we found in northern Voquan.  The
+  two Human operators assigned to that station
+  had both reported auditory hallucinations since
+  starting their NPS duty rotation, but they were
+  cleared for duty yesterday.\""
+!T249"
+  \"It seems that while one of them was operating
+  that NPS engine, the parameters kept drifting
+  toward the values that Azimuth told us to avoid;
+  the operator reported that the more she tried to
+  pull away from those coordinates, the harder it
+  became for her to think straight.  In her mental
+  confusion, she eventually allowed the engine to
+  settle on those coordinates.\""
+!T250"
+  \"According to her report, when that occurred,
+  she experienced 'an instant of mental clarity,'
+  and saw in the portal a flashing, rainbow-like
+  light.  That image, coupled with her sudden
+  realization of what had happened, startled her
+  so much that she reflexively hit the emergency
+  power-cut.\""
+!T251"
+  \"Well, it seems that Azimuth was right about the
+  dangers of shutting down those portals abruptly,
+  because the resulting explosion blew up half the
+  lab.  It is incredible that the Human survived.
+  Had the engine been running at full power, that
+  whole region probably would have collapsed.
+  Obviously, we will need to enact additional
+  safety proceedures if we are to--\""
+!T252"
+  $Y<EOF>$W Remaining message data has been deleted.
+
+  >>><"
+!T253"
+  \"I wonder if this fragment of Azimuth's mind is
+  ever going to regain its self-awareness, like
+  the other two have.  It keeps connecting to new
+  database nodes, but it never seems to get
+  anywhere.\"
+
+  \"I wonder what it's looking for...\""
+!T254"
+  LOG($GINFO$W): Experimental reactor test cycle is
+  now 100% complete.  Shutting down reactor.
+
+  >>><"
