@@ -18,51 +18,20 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_TICK_BADDIE_OTH_H_
-#define AZIMUTH_TICK_BADDIE_OTH_H_
+#ifndef AZIMUTH_TICK_BADDIE_OTH_GUNSHIP_H_
+#define AZIMUTH_TICK_BADDIE_OTH_GUNSHIP_H_
 
 #include "azimuth/state/baddie.h"
-#include "azimuth/state/baddie_oth.h"
 #include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_tick_oth_tendrils(az_space_state_t *state, az_baddie_t *baddie,
-                          const az_oth_tendrils_data_t *tendrils,
-                          double old_angle, double time);
-
-/*===========================================================================*/
-
-void az_tick_bad_oth_brawler(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_crab_1(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_crab_2(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_crawler(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
 void az_tick_bad_oth_gunship(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
-void az_tick_bad_oth_minicrab(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_orb_1(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_orb_2(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_razor(
-    az_space_state_t *state, az_baddie_t *baddie, double time);
-
-void az_tick_bad_oth_snapdragon(
+void az_tick_bad_reflection(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_TICK_BADDIE_OTH_H_
+#endif // AZIMUTH_TICK_BADDIE_OTH_GUNSHIP_H_

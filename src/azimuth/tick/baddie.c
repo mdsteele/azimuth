@@ -38,6 +38,7 @@
 #include "azimuth/tick/baddie_myco.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
+#include "azimuth/tick/baddie_oth_gunship.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_vehicle.h"
