@@ -85,13 +85,14 @@ void draw_base(const az_baddie_t *baddie, az_color_t center_color,
 
 void draw_core(const az_baddie_t *baddie, float flare, float frozen) {
   glBegin(GL_TRIANGLE_FAN); {
-    glColor3f(0.75 - 0.75 * frozen, 0.25 + 0.5 * flare, 0.5); // reddish
-    glVertex2d(0.5 * baddie->data->main_body.bounding_radius, 0);
-    glColor3f(0.25 - 0.25 * frozen, 0.5 * flare,
-              0.25 * frozen + 0.5 * flare); // dark red
-    const double radius = baddie->data->main_body.bounding_radius;
-    for (int i = 0; i <= 360; i += 15) {
-      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+    glColor3f(0.75f + 0.25f * flare - 0.75f * frozen, 0.25f + 0.35f * frozen,
+              0.5f - 0.2f * flare + 0.5f * frozen);
+    glVertex2f(0, 0);
+    glColor3f(0.25f + 0.1f * flare - 0.25f * frozen,
+              0.2f * flare + 0.4f * frozen, 0.5f * frozen);
+    const az_polygon_t polygon = baddie->data->main_body.polygon;
+    for (int j = 0; j < polygon.num_vertices; ++j) {
+      az_gl_vertex(polygon.vertices[j]);
     }
   } glEnd();
 }

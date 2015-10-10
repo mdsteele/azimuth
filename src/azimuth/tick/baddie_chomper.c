@@ -81,11 +81,11 @@ static void move_head(
   realign_segments(baddie, 3, scale,
                    head_pos, head_angle, base_pos, base_angle);
   // Open/close the jaws.
-  const double max_angle = AZ_DEG2RAD(40);
+  const double max_angle = AZ_DEG2RAD(55);
   const double old_angle = baddie->components[1].angle;
   const double new_angle =
     (open_jaws ? fmin(max_angle, old_angle + 2.0 * time) :
-     fmax(0.0, old_angle - 4.0 * time));
+     fmax(0.0, old_angle - 5.0 * time));
   baddie->components[1].angle = new_angle;
   baddie->components[2].angle = -new_angle;
 }

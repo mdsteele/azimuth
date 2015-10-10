@@ -316,6 +316,12 @@ bool az_try_damage_baddie(
   if (damage_amount <= 0.0) return false;
   if (az_baddie_has_flag(baddie, AZ_BADF_INVINCIBLE)) return false;
 
+  // Baddies with the VULNERABLE flag take double damage to the main body.
+  if (az_baddie_has_flag(baddie, AZ_BADF_VULNERABLE) &&
+      component == &baddie->data->main_body) {
+    damage_amount *= 2;
+  }
+
   // Determine if the baddie is susceptible to this kind of damage; if so,
   // damage the baddie.
   bool damage_was_dealt = false;

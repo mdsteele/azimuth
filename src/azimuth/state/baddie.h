@@ -171,7 +171,7 @@ typedef struct {
 } az_component_data_t;
 
 // Bitset of flags dictating special baddie behavior:
-typedef uint_fast8_t az_baddie_flags_t;
+typedef uint_fast16_t az_baddie_flags_t;
 // BOUNCE_PERP: when bouncing, pretend normal is perpendicular to velocity
 #define AZ_BADF_BOUNCE_PERP    ((az_baddie_flags_t)(1u << 0))
 // CARRIES_CARGO: objects in cargo_uuids are moved along with the baddie
@@ -190,6 +190,8 @@ typedef uint_fast8_t az_baddie_flags_t;
 #define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 7))
 // NO_HOMING: all homing weapons ignore this baddie
 #define AZ_BADF_NO_HOMING (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ)
+// VULNERABLE: main body takes double damage (compared to components)
+#define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 8))
 
 typedef struct {
   double overall_bounding_radius;
