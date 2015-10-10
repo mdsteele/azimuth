@@ -28,7 +28,7 @@
 /*===========================================================================*/
 
 // How long it takes a wall's flare to die down, in seconds:
-#define AZ_WALL_FLARE_TIME 0.3
+#define AZ_WALL_FLARE_TIME 0.4
 
 void az_tick_walls(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(wall, state->walls) {

@@ -496,13 +496,13 @@ void az_draw_wall(const az_wall_t *wall, az_clock_t clock) {
           glColor4f(0.5, 0, 0, 0.75 * wall->flare);
           break;
         case AZ_WALL_DESTRUCTIBLE_HYPER_ROCKET:
-          glColor4f(0.5, 0, 0.5, 0.75 * wall->flare);
+          glColor4f(0.75, 0, 0.65, 0.75 * wall->flare);
           break;
         case AZ_WALL_DESTRUCTIBLE_BOMB:
           glColor4f(0, 0, 0.5, 0.75 * wall->flare);
           break;
         case AZ_WALL_DESTRUCTIBLE_MEGA_BOMB:
-          glColor4f(0, 0.5, 0.5, 0.75 * wall->flare);
+          glColor4f(0, 0.65, 0.75, 0.75 * wall->flare);
           break;
         case AZ_WALL_DESTRUCTIBLE_CPLUS:
           glColor4f(0, 0.5, 0, 0.75 * wall->flare);
