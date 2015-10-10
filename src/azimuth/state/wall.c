@@ -430,7 +430,7 @@ static az_wall_data_t wall_datas[] = {
   // Gray/brown boulder:
   [5] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 25.0,
-    .color1 = {96, 80, 64, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {96, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_5)
   },
@@ -472,14 +472,14 @@ static az_wall_data_t wall_datas[] = {
   // Small gray/brown boulder:
   [11] = {
     .style = AZ_WSTY_TRIFAN, .bezel = 900.0,
-    .color1 = {90, 80, 70, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {90, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_11)
   },
   // Gray/brown rock wall:
   [12] = {
     .style = AZ_WSTY_BEZEL_21, .bezel = 25.0,
-    .color1 = {90, 80, 80, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {90, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_12)
   },
@@ -493,7 +493,7 @@ static az_wall_data_t wall_datas[] = {
   // Long gray/brown rock wall:
   [14] = {
     .style = AZ_WSTY_BEZEL_21, .bezel = 25.0,
-    .color1 = {90, 80, 80, 255}, .color2 = {48, 32, 16, 255},
+    .color1 = {90, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 4.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_14)
   },
@@ -633,14 +633,14 @@ static az_wall_data_t wall_datas[] = {
   // Small brown stalactite:
   [36] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 1000.0,
-    .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
+    .color1 = {96, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_18)
   },
   // Large brown stalactite:
   [37] = {
     .style = AZ_WSTY_BEZEL_ALT_21, .bezel = 20.0,
-    .color1 = {90, 80, 80, 255}, .color2 = {40, 32, 24, 255},
+    .color1 = {96, 80, 68, 255}, .color2 = {48, 32, 16, 255},
     .elasticity = 0.25, .impact_damage_coeff = 6.0,
     .polygon = AZ_INIT_POLYGON(wall_vertices_37)
   },
