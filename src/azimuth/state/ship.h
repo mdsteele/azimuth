@@ -76,6 +76,12 @@ typedef struct {
     bool active;
     double charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   } tractor_cloak;
+  struct {
+    bool enabled;
+    int8_t thrust; // 1 for forward, -1 for reverse, 0 for none
+    bool cplus; // true if C-plus should be engaged
+    double goal_angle;
+  } autopilot;
 } az_ship_t;
 
 extern const az_polygon_t AZ_SHIP_POLYGON;

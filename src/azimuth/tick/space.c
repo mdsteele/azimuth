@@ -66,12 +66,14 @@ void az_after_entering_room(az_space_state_t *state) {
   const az_room_t *room =
     &state->planet->rooms[state->ship.player.current_room];
   state->camera.quake_vert = 0.0;
+  state->camera.r_max_override = 0.0;
   // Run the room script (if any).
   az_run_script(state, room->on_start);
   state->darkness = state->dark_goal;
   // Clamp the camera to be within the current room's camera bounds.
-  state->camera.center =
-    az_clamp_to_bounds(&room->camera_bounds, state->ship.position);
+  state->camera.center = az_clamp_to_bounds_with_override(
+      &room->camera_bounds, state->ship.position,
+      state->camera.r_max_override);
 }
 
 /*===========================================================================*/
@@ -708,7 +710,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
   } else assert(state->dialogue.paragraph == NULL);
 
   // Advance the speedrun timer.
-  if (state->mode != AZ_MODE_UPGRADE) {
+  if (state->mode != AZ_MODE_UPGRADE && !state->ship.autopilot.enabled) {
     state->ship.player.total_time += time;
   }
 

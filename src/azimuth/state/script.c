@@ -95,6 +95,10 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_DEACT:  return "deact";
     case AZ_OP_GVEL:   return "gvel";
     case AZ_OP_SVEL:   return "svel";
+    case AZ_OP_AUTOP:  return "autop";
+    case AZ_OP_TURN:   return "turn";
+    case AZ_OP_THRUST: return "thrust";
+    case AZ_OP_CPLUS:  return "cplus";
     case AZ_OP_BAD:    return "bad";
     case AZ_OP_SBADK:  return "sbadk";
     case AZ_OP_BOSS:   return "boss";
@@ -105,6 +109,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_GSTR:   return "gstr";
     case AZ_OP_SSTR:   return "sstr";
     case AZ_OP_GCAM:   return "gcam";
+    case AZ_OP_RCAM:   return "rcam";
     case AZ_OP_DARK:   return "dark";
     case AZ_OP_DARKS:  return "darks";
     case AZ_OP_BLINK:  return "blink";
@@ -189,7 +194,9 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_GE:
     case AZ_OP_GVEL:
     case AZ_OP_SVEL:
+    case AZ_OP_TURN:
     case AZ_OP_GCAM:
+    case AZ_OP_RCAM:
     case AZ_OP_DARKS:
     case AZ_OP_BOOM:
     case AZ_OP_NUKE:
@@ -247,6 +254,9 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_HAS:
     case AZ_OP_MAP:
     case AZ_OP_NIX:
+    case AZ_OP_AUTOP:
+    case AZ_OP_THRUST:
+    case AZ_OP_CPLUS:
     case AZ_OP_SBADK:
     case AZ_OP_BOSS:
     case AZ_OP_OPEN:

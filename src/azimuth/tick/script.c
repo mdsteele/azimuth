@@ -548,6 +548,35 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         STACK_POP(&new_velocity.x, &new_velocity.y);
         state->ship.velocity = new_velocity;
       } break;
+      case AZ_OP_AUTOP: {
+        if (ins.immediate) {
+          state->ship.autopilot.enabled = true;
+          state->ship.autopilot.thrust = 0;
+          state->ship.autopilot.cplus = false;
+          state->ship.autopilot.goal_angle = state->ship.angle;
+        } else {
+          state->ship.autopilot.enabled = false;
+        }
+      } break;
+      case AZ_OP_TURN: {
+        double goal_angle;
+        STACK_POP(&goal_angle);
+        if (state->ship.autopilot.enabled) {
+          state->ship.autopilot.goal_angle = az_mod2pi(goal_angle);
+        }
+      } break;
+      case AZ_OP_THRUST: {
+        if (state->ship.autopilot.enabled) {
+          if (ins.immediate > 0) state->ship.autopilot.thrust = 1;
+          else if (ins.immediate < 0) state->ship.autopilot.thrust = -1;
+          else state->ship.autopilot.thrust = 0;
+        }
+      } break;
+      case AZ_OP_CPLUS: {
+        if (state->ship.autopilot.enabled) {
+          state->ship.autopilot.cplus = (bool)ins.immediate;
+        }
+      } break;
       // Baddies:
       case AZ_OP_BAD: {
         const int slot = (int)ins.immediate;
@@ -680,6 +709,11 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       case AZ_OP_GCAM:
         STACK_PUSH(state->camera.center.x, state->camera.center.y);
         break;
+      case AZ_OP_RCAM: {
+        double value;
+        STACK_POP(&value);
+        state->camera.r_max_override = value;
+      } break;
       case AZ_OP_DARK:
         state->dark_goal = fmin(fmax(0.0, ins.immediate), 1.0);
         break;

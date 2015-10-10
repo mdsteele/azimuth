@@ -98,6 +98,10 @@ typedef enum {
   // Ship:
   AZ_OP_GVEL, // push (x, y) velocity of ship
   AZ_OP_SVEL, // pop top two, set velocity of ship to (a, b)
+  AZ_OP_AUTOP, // enable (if i != 0) or disable (if i == 0) autopilot mode
+  AZ_OP_TURN, // pop top, set autopilot goal angle to a
+  AZ_OP_THRUST, // set autopilot engine thrust to sign(i)
+  AZ_OP_CPLUS, // engage autopilot C-plus drive
   // Baddies:
   AZ_OP_BAD, // pop top four, add baddie of kind a, at (b, c), with angle d
   AZ_OP_SBADK, // pop top, transform baddie i to kind a
@@ -112,6 +116,7 @@ typedef enum {
   AZ_OP_SSTR, // pop top, set strength of gravfield i to a
   // Camera:
   AZ_OP_GCAM, // push (x, y) position of camera center
+  AZ_OP_RCAM, // pop top, set camera r_max_override to a
   AZ_OP_DARK, // set room darkness goal to i
   AZ_OP_DARKS, // pop top, set room darkness goal to a
   AZ_OP_BLINK, // set room darkness (not goal) to i

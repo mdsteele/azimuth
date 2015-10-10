@@ -1,6 +1,6 @@
-@R z0 p0 k3 b0 d3 g3 n14 w49
+@R z0 p0 k3 b0 d3 g5 n16 w49
   c(49278.36,568.86,1.570993,0.000000)
-$s:test23,beqz/A,msg14,activ1,activ2,halt,A#test19,beqz/B,msg14,halt,B#activ1,activ2,set19,mus1,msg14,gpos3,spos,gang3,sang,push600,gang,vpolar,svel,wait0.5,close1,wait0.25,close2,gvel,vmuli0.5,svel;
+$s:test23,beqz/A,msg14,activ1,activ2,gpos7,vnorm,rcam,halt,A#test19,beqz/B,msg14,halt,B#mus1,activ1,activ2,activ4,gpos9,spos,gang9,sang,push800,gang,vpolar,svel,gpos3,vnorm,rcam,autop1,thrust1;
 !W1 d5 x-286.00 y49830.01 a-1.569412 u0
 !W1 d13 x-335.93 y49737.33 a1.051880 u0
 !W1 d12 x283.44 y49794.68 a1.562568 u0
@@ -54,13 +54,16 @@ $s:test23,beqz/A,msg14,activ1,activ2,halt,A#test19,beqz/B,msg14,halt,B#activ1,ac
 $o:set20;
 !D8 x-3.11 y49937.71 a-1.570642 r6 u1
 !D8 x-3.18 y49892.56 a-1.570642 r6 u2
-!G1 x-9.77 y49582.60 a1.570691 s0.00 o0.00 f300.00 r300.00 l60.00 u4
+!G1 x-9.77 y49582.60 a1.570993 s0.00 o0.00 f300.00 r300.00 l60.00 u4
 $e:test23,hnez,test20,hnez,msg34,wait10,deact4;
 !G1 x-9.82 y49157.60 a1.570996 s0.00 o0.00 f300.00 r300.00 l100.00 u5
 $e:test23,hnez,test20,hnez,msg35,wait10,deact5;
 !G1 x-2.84 y50020.79 a1.570853 s0.00 o0.00 f100.00 r100.00 l60.00 u6
-$e:test23,heqz,safe,push200,gang6,vpolar,gvel,vadd,svel,close2,wait0.25,close1,wait1,fado,scene4,wait1.5,scene5,mus17,scene1,wait1,mlog,tm213,tm214,tm215,tm216,mend,wait2,vict;
-!N8/0 x-4.85 y50110.52 a-1.570640 u3
+$e:test23,heqz,safe,autop1,gang6,turn,thrust1,close2,wait0.25,close1,cplus1,push20,A#gpos8,gpos,vsub,vtheta,turn,wait0.1,subi1,dup,bnez/A,pop;
+!G1 x-10.39 y53259.34 a1.570853 s0.00 o0.00 f330.00 r330.00 l100.00 u8
+$e:test23,heqz,fado,scene4,wait1.5,scene5,mus17,scene1,wait1,mlog,tm213,tm214,tm215,tm216,mend,wait2,vict;
+!G1 x-9.79 y49793.00 a1.570993 s0.00 o0.00 f300.00 r300.00 l60.00 u0
+$e:test23,hnez,test19,hnez,set19,msg14,close1,thrust0,gang4,turn,wait0.25,close2,wait0.4,thrust1,wait0.45,thrust0,wait0.75,push0,rcam,autop0,wait1.5,deact4;
 !N7/9 x175.01 y49487.57 a-0.788233 u0
 !N7/9 x253.79 y49408.35 a-0.788233 u0
 !N7/9 x-199.06 y49488.63 a0.787766 u0
@@ -74,3 +77,6 @@ $e:test23,heqz,safe,push200,gang6,vpolar,gvel,vadd,svel,close2,wait0.25,close1,w
 !N5/19 x88.73 y49807.03 a1.646680 u0
 !N5/19 x87.19 y49836.20 a1.598894 u0
 !N5/19 x86.90 y49866.08 a1.569064 u0
+!N8/0 x-10.34 y52567.61 a-1.570600 u7
+!N8/0 x-10.00 y50818.79 a-1.570600 u3
+!N8/0 x-10.07 y51159.79 a-1.570600 u9

@@ -41,6 +41,8 @@ az_vector_t az_bounds_center(const az_camera_bounds_t *bounds);
 // Clamp a vector to be within the given camera bounds.
 az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
                                az_vector_t vec);
+az_vector_t az_clamp_to_bounds_with_override(
+    const az_camera_bounds_t *bounds, az_vector_t vec, double r_max_override);
 
 // Determine whether a position can be seen based on the given camera bounds.
 // This function is conservative in that it may return false for certain
@@ -61,6 +63,8 @@ typedef struct {
   double wobble_intensity;
   double wobble_goal;
   double wobble_theta;
+  // Effective camera bounds r_max is the greater of the actual r_max and this:
+  double r_max_override;
 } az_camera_t;
 
 az_vector_t az_camera_shake_offset(const az_camera_t *camera,

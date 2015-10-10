@@ -299,6 +299,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     assert(ship->tractor_cloak.charge == 0.0);
     induce_temp_invincibility = true;
     ship->cplus.state = AZ_CPLUS_INACTIVE;
+    ship->autopilot.cplus = false;
     rel_velocity = az_vsub(rel_velocity, ship->velocity);
     ship->velocity = az_vmul(ship->velocity, 0.3);
     az_vpluseq(&rel_velocity, ship->velocity);
@@ -951,7 +952,10 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       // If we stop thrusting, or if we're not going forward fast enough,
       // reset the charge on the C-plus drive.
       static const double min_cplus_charge_speed = 300.0; // pixels/second
-      if (controls->down_held || !controls->up_held ||
+      if ((ship->autopilot.enabled ?
+           (ship->autopilot.thrust <= 0 ||
+            (ship->autopilot.cplus && ship->cplus.charge == 1.0)):
+           (controls->down_held || !controls->up_held)) ||
           az_vdot(ship->velocity, az_vpolar(1, ship->angle)) <
           min_cplus_charge_speed) {
         if (ship->cplus.charge == 1.0) {
@@ -1008,8 +1012,10 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
         // If the player presses the Up key twice within AZ_DOUBLE_TAP_TIME,
         // put the C-plus drive into the ACTIVE state.
         ship->cplus.tap_time = fmax(0.0, ship->cplus.tap_time - time);
-        if (controls->up_pressed) {
-          if (ship->cplus.tap_time > 0.0) {
+        if (ship->autopilot.enabled ? ship->autopilot.cplus :
+            controls->up_pressed) {
+          if (ship->autopilot.enabled ? ship->autopilot.cplus :
+              ship->cplus.tap_time > 0.0) {
             disable_ship_tractor_cloak(state);
             ship->cplus.state = AZ_CPLUS_ACTIVE;
             ship->cplus.charge = 0.0;
@@ -1030,7 +1036,8 @@ static void apply_cplus_drive(az_space_state_t *state, bool is_in_water,
       // Drain energy while the C-plus drive is active.  If we stop thrusting
       // or if we run out of energy, deactivate the C-plus drive.
       const double energy_cost = AZ_CPLUS_POWER_COST * time;
-      if (controls->down_held || !try_use_energy(ship, energy_cost, true)) {
+      if (ship->autopilot.enabled ? !ship->autopilot.cplus :
+          controls->down_held || !try_use_energy(ship, energy_cost, true)) {
         ship->cplus.state = AZ_CPLUS_INACTIVE;
         az_reset_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
       } else {
@@ -1103,24 +1110,27 @@ static void apply_ship_thrusters(az_space_state_t *state, bool is_in_water,
     (ship->cplus.state == AZ_CPLUS_ACTIVE ? AZ_DEG2RAD(60) :
      AZ_SHIP_TURN_RATE *
      ((is_in_water || is_in_lava) && !dynamic ? 0.6 : 1.0));
-  // Turning left:
-  if (controls->left_held && !controls->right_held) {
+  // Turning:
+  if (ship->autopilot.enabled) {
+    ship->angle = az_angle_towards(ship->angle, turn_rate * time,
+                                   ship->autopilot.goal_angle);
+  } else if (controls->left_held && !controls->right_held) {
     ship->angle = az_mod2pi(ship->angle + turn_rate * time);
-  }
-  // Turning right:
-  if (controls->right_held && !controls->left_held) {
+  } else if (controls->right_held && !controls->left_held) {
     ship->angle = az_mod2pi(ship->angle - turn_rate * time);
   }
   if (ship->cplus.state == AZ_CPLUS_ACTIVE) return;
   // Forward thrust:
-  if (controls->up_held && !controls->down_held) {
+  if (ship->autopilot.enabled ? ship->autopilot.thrust > 0 :
+      controls->up_held && !controls->down_held) {
     az_vpluseq(&ship->velocity, az_vpolar(impulse, ship->angle));
     ship->thrusters = AZ_THRUST_FORWARD;
     az_loop_sound(&state->soundboard, AZ_SND_THRUST);
   }
   // Retro thrusters:
-  else if (controls->down_held && !controls->up_held &&
-      az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
+  else if (ship->autopilot.enabled ? ship->autopilot.thrust < 0 :
+           controls->down_held && !controls->up_held &&
+           az_has_upgrade(player, AZ_UPG_RETRO_THRUSTERS)) {
     az_vpluseq(&ship->velocity, az_vpolar(-0.8 * impulse, ship->angle));
     ship->thrusters = AZ_THRUST_REVERSE;
     az_loop_sound(&state->soundboard, AZ_SND_THRUST);
@@ -1136,6 +1146,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   assert(az_ship_is_alive(ship));
   az_player_t *player = &ship->player;
   az_controls_t *controls = &ship->controls;
+  if (ship->autopilot.enabled) AZ_ZERO_OBJECT(controls);
 
   if (controls->ordn_held && !ship->ordn_held) {
     ship->ordn_held = true;

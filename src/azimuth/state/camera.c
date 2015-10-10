@@ -34,8 +34,13 @@ az_vector_t az_bounds_center(const az_camera_bounds_t *bounds) {
 
 az_vector_t az_clamp_to_bounds(const az_camera_bounds_t *bounds,
                                az_vector_t vec) {
+  return az_clamp_to_bounds_with_override(bounds, vec, 0);
+}
+
+az_vector_t az_clamp_to_bounds_with_override(
+    const az_camera_bounds_t *bounds, az_vector_t vec, double r_max_override) {
   const double r = fmin(fmax(bounds->min_r, az_vnorm(vec)),
-                        bounds->min_r + bounds->r_span);
+                        fmax(bounds->min_r + bounds->r_span, r_max_override));
   const double half_span = 0.5 * bounds->theta_span;
   const double mid_theta = bounds->min_theta + half_span;
   const double theta = mid_theta +
