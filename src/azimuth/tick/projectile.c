@@ -797,6 +797,22 @@ static void projectile_special_logic(az_space_state_t *state,
         on_projectile_hit_wall(state, proj, proj->velocity);
       }
       break;
+    case AZ_PROJ_OTH_BARRAGE:
+      for (int i = 0; i < 4; ++i) {
+        const double threshold = 0.33 * proj->data->lifetime * i;
+        if (proj->age > threshold && proj->age - time <= threshold) {
+          const double offset = 35 * i;
+          for (int j = (i == 0); j <= 1; ++j) {
+            az_add_projectile(
+                state, AZ_PROJ_OTH_ROCKET,
+                az_vadd(proj->position, az_vpolar((j ? offset : -offset),
+                                                  proj->angle + AZ_HALF_PI)),
+                proj->angle, proj->power, proj->fired_by);
+          }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        }
+      }
+      break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));

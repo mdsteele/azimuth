@@ -495,6 +495,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_NUCLEAR_EXPLOSION: break; // invisible
+    case AZ_PROJ_OTH_BARRAGE: break; // invisible
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
       break;

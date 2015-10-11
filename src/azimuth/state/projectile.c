@@ -483,6 +483,10 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_ROCKET,
     .properties = AZ_PROJF_TEMP_INVINC
   },
+  [AZ_PROJ_OTH_BARRAGE] = {
+    .lifetime = 0.27,
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
+  },
   [AZ_PROJ_OTH_BULLET] = {
     .speed = 600.0,
     .lifetime = 2.0,
