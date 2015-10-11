@@ -344,6 +344,14 @@ void az_draw_bad_oth_gunship(
   draw_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
            AZ_ARRAY_SIZE(oth_gunship_triangles));
+  if (baddie->state == 4) {
+    glColor4f(0, 1, 0, (az_clock_mod(2, 3, clock) ? 0.25 : 0.5));
+    glBegin(GL_POLYGON); {
+      for (int i = 0; i < AZ_SHIP_POLYGON.num_vertices; ++i) {
+        az_gl_vertex(AZ_SHIP_POLYGON.vertices[i]);
+      }
+    } glEnd();
+  }
 }
 
 void az_draw_bad_oth_minicrab(

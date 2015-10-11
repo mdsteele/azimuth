@@ -298,10 +298,11 @@ void az_tick_bad_oth_gunship(
         fly_towards(state, baddie, time, state->ship.position);
       }
     } break;
-    case CPLUS_ACTIVE_STATE:
+    case CPLUS_ACTIVE_STATE: {
       baddie->temp_properties |= AZ_BADF_QUAD_IMPACT;
       if (fabs(az_mod2pi(az_vtheta(baddie->velocity) -
                          baddie->angle)) > AZ_DEG2RAD(5)) {
+        az_play_sound(&state->soundboard, AZ_SND_CPLUS_IMPACT);
         begin_dogfight(baddie);
       } else {
         az_particle_t *particle;
@@ -315,7 +316,7 @@ void az_tick_bad_oth_gunship(
           particle->param1 = 16;
         }
       }
-      break;
+    } break;
     case DOGFIGHT_STATE: {
       set_tractor_node(baddie, NULL);
       fly_towards_ship(state, baddie, time);
