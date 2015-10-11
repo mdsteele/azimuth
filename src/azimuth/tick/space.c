@@ -70,6 +70,9 @@ void az_after_entering_room(az_space_state_t *state) {
   // Run the room script (if any).
   az_run_script(state, room->on_start);
   state->darkness = state->dark_goal;
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind == AZ_DOOR_LOCKED) door->lockedness = 1.0 - door->openness;
+  }
   // Clamp the camera to be within the current room's camera bounds.
   state->camera.center = az_clamp_to_bounds_with_override(
       &room->camera_bounds, state->ship.position,
