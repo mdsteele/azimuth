@@ -190,8 +190,10 @@ typedef uint_fast16_t az_baddie_flags_t;
 #define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 7))
 // NO_HOMING: all homing weapons ignore this baddie
 #define AZ_BADF_NO_HOMING (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ)
+// QUAD_IMPACT: impact damage is quadrupled
+#define AZ_BADF_QUAD_IMPACT    ((az_baddie_flags_t)(1u << 8))
 // VULNERABLE: main body takes double damage (compared to components)
-#define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 8))
+#define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 9))
 
 typedef struct {
   double overall_bounding_radius;

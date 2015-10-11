@@ -1466,7 +1466,7 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
-                   .impact_damage = 5.0 }
+                   .impact_damage = 10.0 }
   },
   [AZ_BAD_FIREBALL_MINE] = {
     .max_health = 20.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,

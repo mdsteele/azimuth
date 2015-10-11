@@ -284,8 +284,7 @@ void az_tick_bad_oth_gunship(
       }
     } break;
     case CPLUS_ACTIVE_STATE:
-      // TODO: Getting hit by the Oth Gunship when it is dashing should hurt a
-      // lot more than normal.
+      baddie->temp_properties |= AZ_BADF_QUAD_IMPACT;
       if (fabs(az_mod2pi(az_vtheta(baddie->velocity) -
                          baddie->angle)) > AZ_DEG2RAD(5)) {
         begin_dogfight(baddie);

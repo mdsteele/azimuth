@@ -209,6 +209,9 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         if (baddie->frozen == 0.0) {
           ship->tractor_beam.active = false;
           damage = component->impact_damage;
+          if (az_baddie_has_flag(baddie, AZ_BADF_QUAD_IMPACT)) {
+            damage *= 4;
+          }
           if (damage > 0.0 ||
               az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS - 0.75,
                                        old_position, NULL)) {
