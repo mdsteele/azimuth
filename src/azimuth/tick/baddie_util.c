@@ -67,7 +67,6 @@ double az_baddie_dist_to_wall(
   return az_vdist(baddie->position, impact.position);
 }
 
-
 bool az_baddie_has_clear_path_to_position(
     az_space_state_t *state, az_baddie_t *baddie, az_vector_t position) {
   az_impact_t impact;

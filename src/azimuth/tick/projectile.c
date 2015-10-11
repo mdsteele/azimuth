@@ -813,8 +813,9 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.5, 9.0, AZ_DEG2RAD(720));
       break;
+    case AZ_PROJ_OTH_BULLET:
     case AZ_PROJ_OTH_SPRAY:
-      if (az_clock_mod(2, 1, state->clock)) {
+      if (times_per_second(30, proj, time)) {
         leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                              0.1, 5.0, AZ_DEG2RAD(360));
       }

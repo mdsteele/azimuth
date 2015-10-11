@@ -212,11 +212,13 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
       glBegin(GL_TRIANGLES); {
         const double radius =
           particle->param1 * (1.0 - particle->age / particle->lifetime);
+        const az_color_t color = particle->color;
         for (int i = 0; i < 3; ++i) {
           const az_clock_t clk = clock + 2 * i;
-          glColor3f((az_clock_mod(6, 1, clk)     < 3 ? 1.0f : 0.25f),
-                    (az_clock_mod(6, 1, clk + 2) < 3 ? 1.0f : 0.25f),
-                    (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f));
+          glColor4ub((az_clock_mod(6, 1, clk)     < 3 ? color.r : color.r / 4),
+                     (az_clock_mod(6, 1, clk + 2) < 3 ? color.g : color.g / 4),
+                     (az_clock_mod(6, 1, clk + 4) < 3 ? color.b : color.b / 4),
+                     color.a);
           glVertex2d(radius * cos(AZ_DEG2RAD(i * 120)),
                      radius * sin(AZ_DEG2RAD(i * 120)));
         }

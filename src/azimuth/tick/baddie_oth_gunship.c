@@ -33,8 +33,48 @@
 
 /*===========================================================================*/
 
+// Primary states:
+#define INITIAL_STATE 0
+#define RETREAT_STATE 1
+#define LOCK_ON_TRACTOR_STATE 2
+#define SPIN_UP_CPLUS_STATE 3
+#define CPLUS_READY_STATE 4
+#define CPLUS_ACTIVE_STATE 5
+#define DOGFIGHT_STATE 6
+
+// Engine constants:
+#define TURN_RATE (AZ_DEG2RAD(285))
+#define MAX_SPEED 300.0
+#define FORWARD_ACCEL 300.0
+
+// C-plus constants:
+#define CPLUS_SPEED 1000.0
+#define CPLUS_DECAY_TIME 3.5
+
+/*===========================================================================*/
+
+static int get_primary_state(az_baddie_t *baddie) {
+  return baddie->state & 0xff;
+}
+
+static int get_secondary_state(az_baddie_t *baddie) {
+  return (baddie->state >> 8) & 0xff;
+}
+
+static void set_primary_state(az_baddie_t *baddie, int primary) {
+  assert(primary >= 0 && primary <= 0xff);
+  baddie->state = primary;
+}
+
+static void set_secondary_state(az_baddie_t *baddie, int secondary) {
+  assert(secondary >= 0 && secondary <= 0xff);
+  baddie->state = (baddie->state & 0xff) | (secondary << 8);
+}
+
+/*===========================================================================*/
+
 #define TRACTOR_MIN_LENGTH 100.0
-#define TRACTOR_MAX_LENGTH 200.0
+#define TRACTOR_MAX_LENGTH 150.0
 #define TRACTOR_COMPONENT_INDEX 6
 
 static bool tractor_locked_on(
@@ -65,15 +105,26 @@ static void set_tractor_node(az_baddie_t *baddie, const az_node_t *node) {
   baddie->components[TRACTOR_COMPONENT_INDEX].angle = tractor_length;
 }
 
-static void try_lock_on_tractor(az_space_state_t *state, az_baddie_t *baddie) {
-  if (tractor_locked_on(baddie, NULL, NULL)) return;
-  AZ_ARRAY_LOOP(node, state->nodes) {
-    if (node->kind != AZ_NODE_TRACTOR) continue;
-    const double dist = az_vdist(baddie->position, node->position);
-    if (dist < TRACTOR_MIN_LENGTH || dist > TRACTOR_MAX_LENGTH) continue;
-    set_tractor_node(baddie, node);
-    break;
-  }
+/*===========================================================================*/
+
+void fly_towards(az_space_state_t *state, az_baddie_t *baddie, double time,
+                 az_vector_t goal) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  az_fly_towards_position(state, baddie, time, goal, 5.0, 300, 300, 200, 100);
+}
+
+void begin_retreat(az_baddie_t *baddie, double hurt) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  set_primary_state(baddie, RETREAT_STATE);
+  set_secondary_state(baddie, 1 + (int)(hurt * 8));
+  baddie->cooldown = 0.5;
+}
+
+void begin_dogfight(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  set_primary_state(baddie, DOGFIGHT_STATE);
+  set_secondary_state(baddie, az_randint(20, 40));
+  baddie->cooldown = 0.2;
 }
 
 /*===========================================================================*/
@@ -97,14 +148,28 @@ void az_tick_bad_oth_gunship(
     az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
   }
 
-  switch (baddie->state) {
-    // State 0: Intro.
-    case 0:
-      baddie->cooldown = 10.0;
-      baddie->state = 3; // TODO
+  switch (get_primary_state(baddie)) {
+    case INITIAL_STATE:
+      baddie->cooldown = CPLUS_DECAY_TIME;
+      set_primary_state(baddie, CPLUS_READY_STATE);
       break;
-    // State 1: Flee from ship.
-    case 1: {
+    case RETREAT_STATE: {
+      const int secondary = get_secondary_state(baddie);
+      // Drop Oth Razors behind us as we flee.
+      if (secondary > 0 && baddie->cooldown <= 0.0) {
+        // TODO: These razors help the player more than hinder; do something
+        // more dangerous here, maybe?
+        az_baddie_t *razor = az_add_baddie(
+            state, AZ_BAD_OTH_RAZOR, baddie->position, baddie->angle + AZ_PI);
+        if (razor == NULL) {
+          set_secondary_state(baddie, 0);
+          baddie->cooldown = 5.0;
+        } else {
+          az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
+          set_secondary_state(baddie, secondary - 1);
+          baddie->cooldown = (secondary > 1 ? 0.5 : 5.0);
+        }
+      }
       // Out of all marker nodes the Oth Gunship can see, pick the one farthest
       // from the ship.
       double best_dist = 0.0;
@@ -120,137 +185,159 @@ void az_tick_bad_oth_gunship(
           }
         }
       }
-      // If we've reached the target position (or if the cooldown expires), go
-      // to state 2.  Otherwise, fly towards the target position.
-      if (baddie->cooldown <= 0.0 ||
+      // If we've reached the target position (or if the cooldown expires),
+      // change states.  Otherwise, fly towards the target position.
+      if ((secondary == 0 && baddie->cooldown <= 0.0) ||
           az_vwithin(baddie->position, target, 50.0)) {
-        if (!az_ship_in_range(state, baddie, 800)) {
-          baddie->cooldown = 3.0;
-          baddie->state = 3;
-        } else baddie->state = 2;
+        baddie->cooldown = 0.0;
+        if (!az_ship_in_range(state, baddie, 500)) {
+          set_primary_state(baddie, LOCK_ON_TRACTOR_STATE);
+        } else begin_dogfight(baddie);
       } else {
         az_fly_towards_position(state, baddie, time, target,
-                                5.0, 300, 300, 200, 100);
+                                TURN_RATE, MAX_SPEED, FORWARD_ACCEL, 200, 100);
       }
     } break;
-    // State 2: Pursue the ship.
-    case 2: {
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (az_ship_in_range(state, baddie, 300)) {
-        baddie->state = 5;
-      }
-    } break;
-    // State 3: Line up for C-plus dash.
-    case 3: {
-      baddie->velocity = AZ_VZERO;
-      az_vector_t rel_impact;
-      if (az_lead_target(az_vsub(state->ship.position, baddie->position),
-                         state->ship.velocity, 1000.0, &rel_impact)) {
-        const double goal_theta = az_vtheta(rel_impact);
-        baddie->angle =
-          az_angle_towards(baddie->angle, AZ_DEG2RAD(360) * time, goal_theta);
-        if (fabs(az_mod2pi(baddie->angle - goal_theta)) <= AZ_DEG2RAD(1) &&
-            az_baddie_has_clear_path_to_position(
-                state, baddie, az_vadd(baddie->position, rel_impact))) {
-          baddie->velocity = az_vpolar(1000.0, baddie->angle);
-          baddie->state = 4;
-          break;
+    case LOCK_ON_TRACTOR_STATE: {
+      az_node_t *nearest = NULL;
+      double best_dist = INFINITY;
+      AZ_ARRAY_LOOP(node, state->nodes) {
+        if (node->kind != AZ_NODE_TRACTOR) continue;
+        const double dist = az_vdist(baddie->position, node->position);
+        if (dist >= TRACTOR_MIN_LENGTH && dist < best_dist) {
+          nearest = node;
+          best_dist = dist;
         }
       }
-      if (baddie->cooldown <= 0.0) baddie->state = 2;
+      if (nearest == NULL) {
+        begin_dogfight(baddie);
+        break;
+      }
+      if (best_dist <= TRACTOR_MAX_LENGTH) {
+        set_tractor_node(baddie, nearest);
+        set_primary_state(baddie, SPIN_UP_CPLUS_STATE);
+        baddie->cooldown = 4.0;
+      } else fly_towards(state, baddie, time, nearest->position);
     } break;
-    // State 4: Use C-plus drive.
-    case 4:
+    case SPIN_UP_CPLUS_STATE: {
+      az_vector_t tractor_pos;
+      if (tractor_locked_on(baddie, &tractor_pos, NULL)) {
+        const az_vector_t forward = az_vpolar(1, baddie->angle);
+        const az_vector_t axis = az_vsub(baddie->position, tractor_pos);
+        const az_vector_t projected = az_vflatten(forward, axis);
+        const double goal_theta = az_vtheta(projected);
+        baddie->angle =
+          az_angle_towards(baddie->angle, TURN_RATE * time, goal_theta);
+        baddie->velocity = az_vflatten(az_vcaplen(az_vadd(
+            baddie->velocity, az_vpolar(FORWARD_ACCEL * time, baddie->angle)),
+                                                  500.0), axis);
+        if (baddie->cooldown <= 2.0) {
+          az_particle_t *particle;
+          for (int offset = -30; offset <= 30; offset += 60) {
+            if (az_insert_particle(state, &particle)) {
+              particle->kind = AZ_PAR_OTH_FRAGMENT;
+              particle->color = (az_color_t){192, 192, 192,
+                  255 * (0.25 + 0.25 * (2.0 - baddie->cooldown))};
+              particle->position =
+                az_vadd(baddie->position,
+                        az_vpolar(-17.0, baddie->angle + AZ_DEG2RAD(offset)));
+              particle->velocity = AZ_VZERO;
+              particle->lifetime = 0.5;
+              particle->param1 = 8.0;
+            }
+          }
+        }
+        if (baddie->cooldown <= 0.0) {
+          az_play_sound(&state->soundboard, AZ_SND_CPLUS_CHARGED);
+          set_tractor_node(baddie, NULL);
+          set_primary_state(baddie, CPLUS_READY_STATE);
+          baddie->cooldown = CPLUS_DECAY_TIME;
+        }
+      } else begin_dogfight(baddie);
+    } break;
+    case CPLUS_READY_STATE: {
+      if (baddie->cooldown <= 0.0) {
+        begin_dogfight(baddie);
+        break;
+      }
+      az_loop_sound(&state->soundboard, AZ_SND_CPLUS_READY);
+      az_vector_t rel_impact;
+      if (az_lead_target(az_vsub(state->ship.position, baddie->position),
+                         az_vsub(state->ship.velocity, baddie->velocity),
+                         CPLUS_SPEED, &rel_impact)) {
+        const double goal_theta = az_vtheta(rel_impact);
+        baddie->angle =
+          az_angle_towards(baddie->angle, TURN_RATE * time, goal_theta);
+        const az_vector_t goal_pos = az_vadd(baddie->position, rel_impact);
+        if (fabs(az_mod2pi(baddie->angle - goal_theta)) <= AZ_DEG2RAD(1) &&
+            az_baddie_has_clear_path_to_position(state, baddie, goal_pos)) {
+          baddie->velocity = az_vpolar(CPLUS_SPEED, baddie->angle);
+          set_primary_state(baddie, CPLUS_ACTIVE_STATE);
+          // TODO: Fix this sound; either use persisted sounds so that we can
+          // cut it short, or use an alternate, shorter sound.
+          az_play_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
+        } else {
+          fly_towards(state, baddie, time, goal_pos);
+        }
+      } else {
+        fly_towards(state, baddie, time, state->ship.position);
+      }
+    } break;
+    case CPLUS_ACTIVE_STATE:
+      // TODO: Getting hit by the Oth Gunship when it is dashing should hurt a
+      // lot more than normal.
       if (fabs(az_mod2pi(az_vtheta(baddie->velocity) -
                          baddie->angle)) > AZ_DEG2RAD(5)) {
-        baddie->state = 1;
+        begin_dogfight(baddie);
       } else {
-        // TODO: do another az_lead_target, and steer towards new position
         az_particle_t *particle;
         if (az_insert_particle(state, &particle)) {
-          particle->kind = AZ_PAR_EMBER;
-          particle->color = (az_color_t){64, 255, 64, 255};
+          particle->kind = AZ_PAR_OTH_FRAGMENT;
+          particle->color = (az_color_t){192, 255, 192, 255};
           particle->position =
             az_vadd(baddie->position, az_vpolar(-15.0, baddie->angle));
           particle->velocity = AZ_VZERO;
           particle->lifetime = 0.3;
-          particle->param1 = 20;
+          particle->param1 = 16;
         }
       }
       break;
-    // State 5: Dogfight.
-    case 5: {
-      try_lock_on_tractor(state, baddie); // TODO
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
+    case DOGFIGHT_STATE: {
+      set_tractor_node(baddie, NULL);
+      az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
+                          FORWARD_ACCEL, 200, 200, 100);
       if (baddie->cooldown <= 0.0 &&
           az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
           az_can_see_ship(state, baddie)) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_GUN_NORMAL,
-                                  20.0, 0.0, 0.0);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
-        baddie->cooldown = 0.1;
-        if (az_random(0, 1) < 0.1) {
-          set_tractor_node(baddie, NULL);
-          baddie->state = 6 + az_randint(0, az_imin(3, (int)(4.0 * hurt)));
+        int secondary = get_secondary_state(baddie);
+        if (hurt >= 0.25 && secondary < 10 &&
+            !az_ship_in_range(state, baddie, 150)) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                    20.0, 0.0, 0.0);
+          secondary = 0;
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        } else {
+          if (hurt >= 0.75) {
+            for (int i = -1; i <= 1; ++i) {
+              az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
+                                        20.0, 0.0, AZ_DEG2RAD(10) * i);
+            }
+          } else {
+            az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
+                                      20.0, 0.0, 0.0);
+          }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+        }
+        baddie->cooldown = 0.2;
+        if (secondary > 0) {
+          set_secondary_state(baddie, secondary - 1);
+        } else {
+          begin_retreat(baddie, hurt);
         }
       }
     } break;
-    // State 6: Fire a charged triple shot.
-    case 6:
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (baddie->cooldown <= 0.0 &&
-          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
-          az_can_see_ship(state, baddie)) {
-        for (int i = -1; i <= 1; ++i) {
-          az_fire_baddie_projectile(state, baddie, AZ_PROJ_GUN_CHARGED_TRIPLE,
-                                    20.0, 0.0, i * AZ_DEG2RAD(10));
-        }
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
-        baddie->cooldown = 6.0;
-        baddie->state = 1;
-      }
-      break;
-    // State 7: Fire a hyper rocket.
-    case 7:
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (baddie->cooldown <= 0.0 &&
-          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
-          az_can_see_ship(state, baddie)) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_HYPER_ROCKET,
-                                  20.0, 0.0, 0.0);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_HYPER_ROCKET);
-        baddie->cooldown = 6.0;
-        baddie->state = 1;
-      }
-      break;
-    // State 8: Fire a charged homing shot.
-    case 8:
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
-        for (int i = 0; i < 4; ++i) {
-          az_fire_baddie_projectile(
-              state, baddie, AZ_PROJ_GUN_CHARGED_HOMING,
-              20.0, 0.0, AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
-        }
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
-        baddie->cooldown = 6.0;
-        baddie->state = 1;
-      }
-      break;
-    // State 9: Fire a missile barrage.
-    case 9:
-      az_fly_towards_ship(state, baddie, time, 5.0, 300, 300, 200, 200, 100);
-      if (baddie->cooldown <= 0.0 &&
-          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(8)) &&
-          az_can_see_ship(state, baddie)) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_MISSILE_BARRAGE,
-                                  20.0, 0.0, 0.0);
-        baddie->cooldown = 6.0;
-        baddie->state = 1;
-      }
-      break;
     default:
-      baddie->state = 0;
+      begin_dogfight(baddie);
       break;
   }
   az_tick_oth_tendrils(state, baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle,
