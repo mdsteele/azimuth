@@ -42,6 +42,7 @@
 #define CPLUS_ACTIVE_STATE 5
 #define DOGFIGHT_STATE 6
 #define BARRAGE_STATE 7
+#define CRAZY_STATE 8
 
 // Engine constants:
 #define TURN_RATE (AZ_DEG2RAD(285))
@@ -108,6 +109,7 @@ static void set_tractor_node(az_baddie_t *baddie, const az_node_t *node) {
 
 /*===========================================================================*/
 
+// Fly towards the goal position, getting as close as possible.
 void fly_towards(az_space_state_t *state, az_baddie_t *baddie, double time,
                  az_vector_t goal) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
@@ -115,6 +117,7 @@ void fly_towards(az_space_state_t *state, az_baddie_t *baddie, double time,
                           FORWARD_ACCEL, 200, 100);
 }
 
+// Fly towards the ship, but try not to be too close.
 void fly_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
                       double time) {
   az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
@@ -155,6 +158,9 @@ void az_tick_bad_oth_gunship(
         az_vsub(baddie->position, tractor_position));
     az_loop_sound(&state->soundboard, AZ_SND_TRACTOR_BEAM);
   }
+
+  // When very low on health, go crazy:
+  if (hurt >= 0.92) set_primary_state(baddie, CRAZY_STATE);
 
   switch (get_primary_state(baddie)) {
     case INITIAL_STATE:
@@ -369,6 +375,16 @@ void az_tick_bad_oth_gunship(
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BARRAGE,
                                   20.0, 0.0, 0.0);
         begin_retreat(baddie, hurt);
+      }
+    } break;
+    case CRAZY_STATE: {
+      set_tractor_node(baddie, NULL);
+      fly_towards(state, baddie, time, state->ship.position);
+      if (baddie->cooldown <= 0.0) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                  20.0, 0.0, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        baddie->cooldown = 0.75;
       }
     } break;
     default:
