@@ -341,6 +341,27 @@ void az_draw_bad_oth_gunship(
       } glEnd();
     } glPopMatrix();
   }
+  if (baddie->state == 7) {
+    glPushMatrix(); {
+      const GLfloat scale = 1.0 - 0.5 * baddie->cooldown;
+      glTranslatef(20, 0, 0);
+      glScalef(scale, scale, 1);
+      int offset = 6 * az_clock_mod(60, 1, clock);
+      for (int j = 0; j < 2; ++j) {
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor4f(1, 1, 0.75, 0.5);
+          glVertex2f(0, 0);
+          glColor4f(1, 1, 1, 0);
+          for (int i = 0; i <= 8; ++i) {
+            const double radius = (i % 2 ? 4 : 20);
+            const double theta = AZ_DEG2RAD(45 * i + offset) - baddie->angle;
+            glVertex2d(radius * cos(theta), radius * sin(theta));
+          }
+        } glEnd();
+        offset *= -2;
+      }
+    } glPopMatrix();
+  }
   draw_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
            AZ_ARRAY_SIZE(oth_gunship_triangles));
