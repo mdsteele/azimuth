@@ -159,9 +159,9 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_PROJ_GUN_CHARGED_HOMING:
-      glBegin(GL_TRIANGLES); {
-        glColor3f(0, 0.25, 1);
-        glVertex2f(8, 0); glVertex2f(-8, 4); glVertex2f(-8, -4);
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.25, 0.5, 1); glVertex2f(-4, 0); glColor3f(0, 0.25, 0.5);
+        glVertex2f(-4, 4); glVertex2f(4, 0); glVertex2f(-4, -4);
       } glEnd();
       break;
     case AZ_PROJ_GUN_HOMING_PHASE:
