@@ -118,7 +118,7 @@ node [shape=ellipse, height=0.4, fixedsize=false];
 "Enter Central Nandiar" -> "Retro Thrusters";
 "Enter Central Nandiar" -> "S2";
 "Enter Central Nandiar" -> "C2";
-"Enter Central Nandiar" -> "Homing Gun";
+"Dynamic Armor" -> "Homing Gun";
 "Enter Central Nandiar" -> "Thermal Armor" [style=dotted];
 "Hyper Rockets" -> "Infrascanner";
 "Tractor Beam" -> "S4";
