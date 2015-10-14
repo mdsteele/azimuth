@@ -445,6 +445,79 @@ void test_circle_hits_circle(void) {
   EXPECT_VAPPROX(((az_vector_t){1, 0}), az_vunit(normal));
 }
 
+void test_circle_hits_arc(void) {
+  az_vector_t pos = nix, normal = nix;
+
+  // Check az_circle_hits_arc works with NULLs for point_out and normal_out:
+  EXPECT_TRUE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(120),
+      1, (az_vector_t){9, -1}, (az_vector_t){-4, 0}, NULL, NULL));
+
+  // Circle passes from outside of arc circle to inside:
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(120),
+      1, (az_vector_t){9, -1}, (az_vector_t){-4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){8, -1}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Circle passes from outside of arc circle to inside but misses arc:
+  pos = normal = nix;
+  EXPECT_FALSE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(45), AZ_DEG2RAD(270),
+      1, (az_vector_t){9, -1}, (az_vector_t){-4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Circle passes from inside of arc circle to outside:
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(120),
+      1, (az_vector_t){5, -1}, (az_vector_t){4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){6, -1}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Circle passes from inside of arc circle to outside but misses arc:
+  pos = normal = nix;
+  EXPECT_FALSE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(45), AZ_DEG2RAD(270),
+      1, (az_vector_t){5, -1}, (az_vector_t){4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Circle starts in contact from outside of arc:
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(120),
+      1, (az_vector_t){7.5, -1}, (az_vector_t){4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){7.5, -1}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){1, 0}), az_vunit(normal));
+
+  // Circle starts in contact from outside of arc circle, but misses arc:
+  pos = normal = nix;
+  EXPECT_FALSE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(45), AZ_DEG2RAD(270),
+      1, (az_vector_t){7.5, -1}, (az_vector_t){4, 0}, &pos, &normal));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, normal);
+
+  // Circle starts in contact from inside of arc:
+  pos = normal = nix;
+  EXPECT_TRUE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(-60), AZ_DEG2RAD(120),
+      1, (az_vector_t){6.5, -1}, (az_vector_t){-1, 0}, &pos, &normal));
+  EXPECT_VAPPROX(((az_vector_t){6.5, -1}), pos);
+  EXPECT_VAPPROX(az_vunit((az_vector_t){-1, 0}), az_vunit(normal));
+
+  // Circle starts in contact from inside of arc circle, but misses arc:
+  pos = normal = nix;
+  EXPECT_FALSE(az_circle_hits_arc(
+      3, (az_vector_t){4, -1}, AZ_DEG2RAD(45), AZ_DEG2RAD(270),
+      1, (az_vector_t){6.5, -1}, (az_vector_t){-1, 0}, &pos, &normal));
+  EXPECT_VAPPROX(nix, pos);
+  EXPECT_VAPPROX(nix, normal);
+}
+
 void test_circle_hits_line(void) {
   az_vector_t pos = nix, normal = nix;
 

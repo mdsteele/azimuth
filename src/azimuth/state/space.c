@@ -427,6 +427,18 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
       }
     }
   }
+  // Liquids:
+  if (skip_types & AZ_IMPF_NOT_LIQUID) {
+    AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+      if (!az_is_liquid(gravfield->kind)) continue;
+      if (az_ray_hits_liquid_surface(gravfield, start, delta, position,
+                                     normal)) {
+        impact_out->type = AZ_IMP_LIQUID_SURFACE;
+        impact_out->target.gravfield = gravfield;
+        delta = az_vsub(*position, start);
+      }
+    }
+  }
   // Ship:
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&
       az_ship_is_alive(&state->ship)) {
@@ -496,6 +508,18 @@ void az_circle_impact(az_space_state_t *state, double radius,
                                       position_out, normal_out)) {
         impact_out->type = AZ_IMP_DOOR_OUTSIDE;
         impact_out->target.door = door;
+        delta = az_vsub(*position_out, start);
+      }
+    }
+  }
+  // Liquids:
+  if (skip_types & AZ_IMPF_NOT_LIQUID) {
+    AZ_ARRAY_LOOP(gravfield, state->gravfields) {
+      if (!az_is_liquid(gravfield->kind)) continue;
+      if (az_circle_hits_liquid_surface(gravfield, radius, start, delta,
+                                        position_out, normal_out)) {
+        impact_out->type = AZ_IMP_LIQUID_SURFACE;
+        impact_out->target.gravfield = gravfield;
         delta = az_vsub(*position_out, start);
       }
     }
@@ -573,6 +597,10 @@ void az_arc_circle_impact(
         impact_out->target.door = door;
       }
     }
+  }
+  // Liquids:
+  if (skip_types & AZ_IMPF_NOT_LIQUID) {
+    AZ_FATAL("liquid surfaces not supported for arc circle impacts.\n");
   }
   // Ship:
   if (!(skip_types & AZ_IMPF_SHIP) && skip_uid != AZ_SHIP_UID &&

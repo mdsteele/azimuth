@@ -1161,7 +1161,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 8.0, .color = {255, 64, 0, 255},
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
-    .death_style = AZ_DEATH_EMBERS,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_WATER_BOUNCE,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 8.0 }
   },
@@ -1183,7 +1183,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_HORNET] = {
     .max_health = 8.0, .color = {192, 192, 0, 255},
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
-    .death_style = AZ_DEATH_EMBERS,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_WATER_BOUNCE,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 5.0 }
@@ -1241,7 +1241,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 5.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {0, 128, 0, 255},
     .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
-    .death_style = AZ_DEATH_EMBERS,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_WATER_BOUNCE,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .impact_damage = 8.0 }
   },
@@ -1349,7 +1349,7 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .static_properties = AZ_BADF_KAMIKAZE,
+    .static_properties = (AZ_BADF_KAMIKAZE | AZ_BADF_WATER_BOUNCE),
     .main_body = { .polygon = AZ_INIT_POLYGON(mini_zipper_vertices),
                    .impact_damage = 4.0 }
   },
@@ -1587,7 +1587,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 10.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {105, 0, 192, 255},
     .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
-    .death_style = AZ_DEATH_EMBERS,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_WATER_BOUNCE,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .impact_damage = 8.0 }
   },
@@ -1595,6 +1595,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 20.0, .color = {128, 255, 0, 255},
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .death_style = AZ_DEATH_EMBERS, .potential_pickups = AZ_PUPF_ALL,
+    .static_properties = AZ_BADF_WATER_BOUNCE,
     .main_body = { .polygon = AZ_INIT_POLYGON(dragonfly_vertices),
                    .impact_damage = 12.0 }
   },
@@ -1657,7 +1658,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 10.0, .overall_bounding_radius = 45.0,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {230, 0, 105, 255},
     .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
-    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
+    .death_style = AZ_DEATH_EMBERS,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_WATER_BOUNCE),
     .main_body = { .polygon = AZ_INIT_POLYGON(small_fish_head_vertices),
                    .impact_damage = 15.0 },
     DECL_COMPONENTS(small_fish_components)
@@ -1779,7 +1781,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 15.0, .overall_bounding_radius = 60.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {140, 0, 0, 255},
     .hurt_sound = AZ_SND_HURT_SWOOPER, .death_sound = AZ_SND_KILL_SWOOPER,
-    .death_style = AZ_DEATH_EMBERS,
+    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_WATER_BOUNCE,
     .main_body = { .polygon = AZ_INIT_POLYGON(swooper_vertices),
                    .immunities = AZ_DMGF_FLAME, .impact_damage = 8.0 },
     DECL_COMPONENTS(demon_swooper_components)
@@ -1816,7 +1818,7 @@ static az_baddie_data_t baddie_datas[] = {
     .hurt_sound = AZ_SND_HURT_ZIPPER, .death_sound = AZ_SND_KILL_DRAGONFLY,
     .death_style = AZ_DEATH_EMBERS,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
-    .static_properties = AZ_BADF_KAMIKAZE,
+    .static_properties = (AZ_BADF_KAMIKAZE | AZ_BADF_WATER_BOUNCE),
     .main_body = { .polygon = AZ_INIT_POLYGON(gnat_vertices),
                    .impact_damage = 6.0 }
   },
@@ -1903,7 +1905,8 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 20.0, .overall_bounding_radius = 90.0,
     .potential_pickups = AZ_PUPF_ALL, .color = {230, 0, 105, 255},
     .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
-    .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
+    .death_style = AZ_DEATH_EMBERS,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_WATER_BOUNCE),
     .main_body = { .polygon = AZ_INIT_POLYGON(large_fish_head_vertices),
                    .impact_damage = 20.0 },
     DECL_COMPONENTS(large_fish_components)

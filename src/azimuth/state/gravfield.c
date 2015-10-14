@@ -127,28 +127,49 @@ bool az_point_within_gravfield(const az_gravfield_t *gravfield,
   }
 }
 
-bool az_ray_hits_liquid_surface(
-    const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
-    az_vector_t *point_out, az_vector_t *normal_out) {
+static void get_liquid_surface_arc(
+    const az_gravfield_t *gravfield, double *arc_radius_out,
+    az_vector_t *arc_center_out, double *min_theta_out,
+    double *theta_span_out) {
   assert(az_is_liquid(gravfield->kind));
   assert(az_is_trapezoidal(gravfield->kind));
   const double semilength = gravfield->size.trapezoid.semilength;
   const double front_offset = gravfield->size.trapezoid.front_offset;
   const double front_semiwidth = gravfield->size.trapezoid.front_semiwidth;
   const double position_norm = az_vnorm(gravfield->position);
-  const double arc_radius =
+  *arc_radius_out =
     hypot(fmax(front_offset + front_semiwidth, front_offset - front_semiwidth),
           position_norm + semilength);
-  const az_vector_t arc_center =
+  *arc_center_out =
     az_vsub(gravfield->position, az_vpolar(position_norm, gravfield->angle));
   const double theta1 = atan2(front_offset - front_semiwidth,
                               position_norm + semilength);
   const double theta2 = atan2(front_offset + front_semiwidth,
                               position_norm + semilength);
-  const double min_theta = az_mod2pi(theta1 + gravfield->angle);
-  const double theta_span = az_mod2pi_nonneg(theta2 - theta1);
+  *min_theta_out = az_mod2pi(theta1 + gravfield->angle);
+  *theta_span_out = az_mod2pi_nonneg(theta2 - theta1);
+}
+
+bool az_ray_hits_liquid_surface(
+    const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  double arc_radius, min_theta, theta_span;
+  az_vector_t arc_center;
+  get_liquid_surface_arc(gravfield, &arc_radius, &arc_center, &min_theta,
+                         &theta_span);
   return az_ray_hits_arc(arc_radius, arc_center, min_theta, theta_span,
                          start, delta, point_out, normal_out);
+}
+
+bool az_circle_hits_liquid_surface(
+    const az_gravfield_t *gravfield, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *point_out, az_vector_t *normal_out) {
+  double arc_radius, min_theta, theta_span;
+  az_vector_t arc_center;
+  get_liquid_surface_arc(gravfield, &arc_radius, &arc_center, &min_theta,
+                         &theta_span);
+  return az_circle_hits_arc(arc_radius, arc_center, min_theta, theta_span,
+                            radius, start, delta, point_out, normal_out);
 }
 
 /*===========================================================================*/

@@ -150,10 +150,14 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
   const double old_baddie_angle = baddie->angle;
   bool bounced = false;
   if (az_vnonzero(baddie->velocity)) {
+    az_impact_flags_t skip_types = AZ_IMPF_BADDIE | AZ_IMPF_SHIP;
+    if (az_baddie_has_flag(baddie, AZ_BADF_WATER_BOUNCE)) {
+      skip_types |= AZ_IMPF_NOT_LIQUID;
+    }
     az_impact_t impact;
     az_circle_impact(state, baddie->data->main_body.bounding_radius,
                      baddie->position, az_vmul(baddie->velocity, time),
-                     (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+                     skip_types, baddie->uid, &impact);
     baddie->position = impact.position;
     if (impact.type != AZ_IMP_NOTHING) {
       // Baddies with the BOUNCE_PERP flag always bounce perfectly backwards

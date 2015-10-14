@@ -88,6 +88,10 @@ bool az_ray_hits_liquid_surface(
     const az_gravfield_t *gravfield, az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out);
 
+bool az_circle_hits_liquid_surface(
+    const az_gravfield_t *gravfield, double radius, az_vector_t start,
+    az_vector_t delta, az_vector_t *point_out, az_vector_t *normal_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_GRAVFIELD_H_

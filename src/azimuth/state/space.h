@@ -246,15 +246,19 @@ typedef enum {
   AZ_IMP_BADDIE,
   AZ_IMP_DOOR_INSIDE,
   AZ_IMP_DOOR_OUTSIDE,
+  AZ_IMP_LIQUID_SURFACE,
   AZ_IMP_SHIP,
   AZ_IMP_WALL
 } az_impact_type_t;
 
+// Flags for which impact types to skip; liquid surface impacts are skipped by
+// default, unless AZ_IMPF_NOT_LIQUID is included.
 typedef uint_fast8_t az_impact_flags_t;
 #define AZ_IMPF_NONE         ((az_impact_flags_t)0)
 #define AZ_IMPF_BADDIE       ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
 #define AZ_IMPF_DOOR_INSIDE  ((az_impact_flags_t)(1u << AZ_IMP_DOOR_INSIDE))
 #define AZ_IMPF_DOOR_OUTSIDE ((az_impact_flags_t)(1u << AZ_IMP_DOOR_OUTSIDE))
+#define AZ_IMPF_NOT_LIQUID   ((az_impact_flags_t)(1u << AZ_IMP_LIQUID_SURFACE))
 #define AZ_IMPF_SHIP         ((az_impact_flags_t)(1u << AZ_IMP_SHIP))
 #define AZ_IMPF_WALL         ((az_impact_flags_t)(1u << AZ_IMP_WALL))
 
@@ -268,6 +272,7 @@ typedef struct {
       const az_component_data_t *component;
     } baddie;
     az_door_t *door;
+    az_gravfield_t *gravfield;
     az_wall_t *wall;
   } target;
   double angle; // only used for the az_arc_*_impact functions

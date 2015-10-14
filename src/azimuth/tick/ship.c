@@ -275,6 +275,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     case AZ_IMP_DOOR_OUTSIDE:
       elasticity = AZ_DOOR_ELASTICITY;
       break;
+    case AZ_IMP_LIQUID_SURFACE: AZ_ASSERT_UNREACHABLE();
     case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
     case AZ_IMP_WALL:
       assert(impact->target.wall->kind != AZ_WALL_NOTHING);
@@ -568,6 +569,7 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       case AZ_IMP_DOOR_OUTSIDE:
         az_try_open_door(state, impact.target.door, damage_kind);
         break;
+      case AZ_IMP_LIQUID_SURFACE: AZ_ASSERT_UNREACHABLE();
       case AZ_IMP_SHIP: AZ_ASSERT_UNREACHABLE();
       case AZ_IMP_WALL: break;
     }

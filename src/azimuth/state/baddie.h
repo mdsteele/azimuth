@@ -194,6 +194,8 @@ typedef uint_fast16_t az_baddie_flags_t;
 #define AZ_BADF_QUAD_IMPACT    ((az_baddie_flags_t)(1u << 8))
 // VULNERABLE: main body takes double damage (compared to components)
 #define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 9))
+// WATER_BOUNCE: baddie bounces off of liquid surfaces
+#define AZ_BADF_WATER_BOUNCE   ((az_baddie_flags_t)(1u << 10))
 
 typedef struct {
   double overall_bounding_radius;

@@ -196,6 +196,7 @@ bool az_ray_hits_arc(
     double radius, az_vector_t center, double min_theta, double theta_span,
     az_vector_t start, az_vector_t delta,
     az_vector_t *point_out, az_vector_t *normal_out) {
+  assert(radius >= 0.0);
   assert(theta_span >= 0.0);
   az_vector_t point;
   if (!ray_hits_hollow_circle(radius, center, start, delta, &point)) {
@@ -299,6 +300,36 @@ bool az_circle_hits_circle(
   assert(mradius >= 0.0);
   return az_ray_hits_circle(sradius + mradius, center, start, delta,
                             pos_out, normal_out);
+}
+
+bool az_circle_hits_arc(
+    double aradius, az_vector_t center, double min_theta, double theta_span,
+    double mradius, az_vector_t start, az_vector_t delta,
+    az_vector_t *point_out, az_vector_t *normal_out) {
+  assert(aradius >= 0.0);
+  assert(theta_span >= 0.0);
+  assert(mradius >= 0.0);
+  az_vector_t point;
+  if (!az_vwithin(start, center, aradius + mradius)) {
+    if (!ray_hits_hollow_circle(aradius + mradius, center, start, delta,
+                                &point)) {
+      return false;
+    }
+  } else if (aradius > mradius &&
+             az_vwithin(start, center, aradius - mradius)) {
+    if (!ray_hits_hollow_circle(aradius - mradius, center, start, delta,
+                                &point)) {
+      return false;
+    }
+  } else point = start;
+  const double impact_theta = az_vtheta(az_vsub(point, center));
+  if (az_mod2pi_nonneg(impact_theta - min_theta) > theta_span) return false;
+  if (point_out != NULL) *point_out = point;
+  if (normal_out != NULL) {
+    *normal_out = (az_vwithin(point, center, aradius) ?
+                   az_vsub(center, point) : az_vsub(point, center));
+  }
+  return true;
 }
 
 bool az_circle_hits_line(az_vector_t p1, az_vector_t p2, double radius,
