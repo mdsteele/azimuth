@@ -77,7 +77,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_FREEZE_HOMING] = {
     .speed = 500.0,
     .lifetime = 3.0,
-    .impact_damage = 0.5,
+    .impact_damage = 1.0,
     .homing_rate = AZ_DEG2RAD(200),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE
   },
