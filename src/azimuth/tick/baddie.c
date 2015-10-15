@@ -338,7 +338,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_OTH_SNAPDRAGON:
       az_tick_bad_oth_snapdragon(state, baddie, time);
       break;
-    case AZ_BAD_OTH_RAZOR:
+    case AZ_BAD_OTH_RAZOR_1:
+    case AZ_BAD_OTH_RAZOR_2:
       az_tick_bad_oth_razor(state, baddie, time);
       break;
     case AZ_BAD_SECURITY_DRONE:

@@ -362,8 +362,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_OTH_SNAPDRAGON:
       az_draw_bad_oth_snapdragon(baddie, frozen, clock);
       break;
-    case AZ_BAD_OTH_RAZOR:
-      az_draw_bad_oth_razor(baddie, frozen, clock);
+    case AZ_BAD_OTH_RAZOR_1:
+      az_draw_bad_oth_razor_1(baddie, frozen, clock);
       break;
     case AZ_BAD_GUN_SENSOR:
       az_draw_bad_gun_sensor(baddie, frozen, clock);
@@ -817,6 +817,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       break;
     case AZ_BAD_OTH_MINICRAB:
       az_draw_bad_oth_minicrab(baddie, frozen, clock);
+      break;
+    case AZ_BAD_OTH_RAZOR_2:
+      az_draw_bad_oth_razor_2(baddie, frozen, clock);
       break;
   }
 }

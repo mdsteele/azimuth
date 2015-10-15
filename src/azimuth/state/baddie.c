@@ -1221,7 +1221,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_WYRMLING] = {
     .max_health = 0.1, .overall_bounding_radius = 30.0,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {192, 255, 128, 255},
+    .potential_pickups = ~(AZ_PUPF_MEDIUM_SHIELDS | AZ_PUPF_LARGE_SHIELDS),
+    .color = {192, 255, 128, 255},
     .death_sound = AZ_SND_KILL_SWOOPER, .death_style = AZ_DEATH_EMBERS,
     .main_body = { .bounding_radius = 5.0, .impact_damage = 3.0,
                    .immunities = AZ_DMGF_FREEZE },
@@ -1282,7 +1283,7 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) }
   },
-  [AZ_BAD_OTH_RAZOR] = {
+  [AZ_BAD_OTH_RAZOR_1] = {
     .max_health = 0.1, .color = {255, 255, 255, 255},
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .potential_pickups = AZ_PUPF_SMALL_SHIELDS,
@@ -1721,7 +1722,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_FORCELING] = {
     .max_health = 0.75, .overall_bounding_radius = 22.5,
-    .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS, .color = {204, 25, 76, 255},
+    .potential_pickups = ~(AZ_PUPF_MEDIUM_SHIELDS | AZ_PUPF_LARGE_SHIELDS),
+    .color = {204, 25, 76, 255},
     .hurt_sound = AZ_SND_HURT_FISH, .death_sound = AZ_SND_KILL_FISH,
     .death_style = AZ_DEATH_EMBERS, .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .polygon = AZ_INIT_POLYGON(forceling_head_vertices),
@@ -1949,6 +1951,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_minicrab_vertices),
                    .impact_damage = 15.0 }
+  },
+  [AZ_BAD_OTH_RAZOR_2] = {
+    .max_health = 0.1, .color = {255, 255, 255, 255},
+    .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
+    .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
+    .static_properties = AZ_BADF_KAMIKAZE,
+    .main_body = { .bounding_radius = 15.0, .impact_damage = 7.0 }
   }
 };
 

@@ -259,7 +259,8 @@ void az_tick_bad_oth_orb_2(
 
 void az_tick_bad_oth_razor(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
-  assert(baddie->kind == AZ_BAD_OTH_RAZOR);
+  assert(baddie->kind == AZ_BAD_OTH_RAZOR_1 ||
+         baddie->kind == AZ_BAD_OTH_RAZOR_2);
   const double old_angle = baddie->angle;
   if (baddie->state == 0) {
     baddie->velocity = az_vpolar(az_random(300, 500), baddie->angle);
@@ -320,7 +321,7 @@ void az_tick_bad_oth_snapdragon(
       case 5:
         for (int i = -1; i <= 1; ++i) {
           az_baddie_t *razor = az_add_baddie(
-              state, AZ_BAD_OTH_RAZOR, baddie->position,
+              state, AZ_BAD_OTH_RAZOR_1, baddie->position,
               baddie->angle + AZ_PI + i * AZ_DEG2RAD(45));
           if (razor == NULL) break;
         }
@@ -332,7 +333,7 @@ void az_tick_bad_oth_snapdragon(
       case 8:
         for (int i = 0; i < 4; ++i) {
           az_baddie_t *razor = az_add_baddie(
-              state, AZ_BAD_OTH_RAZOR, baddie->position,
+              state, AZ_BAD_OTH_RAZOR_1, baddie->position,
               baddie->angle + AZ_DEG2RAD(45) + i * AZ_DEG2RAD(90));
           if (razor != NULL) razor->state = 1;
           else break;

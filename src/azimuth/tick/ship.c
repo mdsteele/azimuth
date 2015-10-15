@@ -211,6 +211,18 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
           damage = component->impact_damage;
           if (az_baddie_has_flag(baddie, AZ_BADF_QUAD_IMPACT)) {
             damage *= 4;
+            az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
+            az_particle_t *particle;
+            if (az_insert_particle(state, &particle)) {
+              particle->kind = AZ_PAR_BOOM;
+              particle->color = (az_color_t){0, 255, 0, 255};
+              particle->position =
+                az_vsub(ship->position,
+                        az_vwithlen(impact->normal, AZ_SHIP_DEFLECTOR_RADIUS));
+              particle->velocity = AZ_VZERO;
+              particle->lifetime = 0.4;
+              particle->param1 = 40.0;
+            }
           }
           if (damage > 0.0 ||
               az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS - 0.75,

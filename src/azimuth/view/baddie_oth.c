@@ -178,12 +178,20 @@ static const az_vector_t oth_snapdragon_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_snapdragon_triangles) % 3 == 0);
 
-static const az_vector_t oth_razor_triangles[] = {
+static const az_vector_t oth_razor_1_triangles[] = {
   {18, 0}, {2.25, 3.89712}, {2.25, -3.89712},
   {-9, 15.58845}, {-4.5, 0}, {2.25, 3.89712},
   {-9, -15.58845}, {2.25, -3.89712}, {-4.5, 0}
 };
-AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_triangles) % 3 == 0);
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_1_triangles) % 3 == 0);
+
+static const az_vector_t oth_razor_2_triangles[] = {
+  {18, 0}, {3, 3}, {3, -3},
+  {0, 18}, {-3, 3}, {3, 3},
+  {-18, 0}, {-3, -3}, {-3, 3},
+  {0, -18}, {3, -3}, {-3, -3},
+};
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_razor_2_triangles) % 3 == 0);
 
 static const az_vector_t oth_gunship_triangles[] = {
   // Main body:
@@ -225,7 +233,8 @@ static void draw_oth(
     glPushMatrix(); {
       az_gl_translated(center);
       if (spin) {
-        glRotated((baddie->kind == AZ_BAD_OTH_RAZOR ?
+        glRotated((baddie->kind == AZ_BAD_OTH_RAZOR_1 ||
+                   baddie->kind == AZ_BAD_OTH_RAZOR_2 ?
                    (baddie->state % 2 ? 6 : -6) : 1) *
                   az_clock_mod(360, 1, clock) -
                   AZ_RAD2DEG(baddie->angle * 8), 0, 0, 1);
@@ -392,12 +401,20 @@ void az_draw_bad_oth_orb(
            AZ_ARRAY_SIZE(oth_orb_triangles));
 }
 
-void az_draw_bad_oth_razor(
+void az_draw_bad_oth_razor_1(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
-  assert(baddie->kind == AZ_BAD_OTH_RAZOR);
+  assert(baddie->kind == AZ_BAD_OTH_RAZOR_1);
   draw_tendrils(baddie, &AZ_OTH_RAZOR_TENDRILS, clock);
-  draw_oth(baddie, frozen, clock, oth_razor_triangles,
-           AZ_ARRAY_SIZE(oth_razor_triangles));
+  draw_oth(baddie, frozen, clock, oth_razor_1_triangles,
+           AZ_ARRAY_SIZE(oth_razor_1_triangles));
+}
+
+void az_draw_bad_oth_razor_2(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_RAZOR_2);
+  draw_tendrils(baddie, &AZ_OTH_RAZOR_TENDRILS, clock);
+  draw_oth(baddie, frozen, clock, oth_razor_2_triangles,
+           AZ_ARRAY_SIZE(oth_razor_2_triangles));
 }
 
 void az_draw_bad_oth_snapdragon(

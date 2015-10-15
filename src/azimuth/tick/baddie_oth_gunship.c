@@ -171,18 +171,13 @@ void az_tick_bad_oth_gunship(
       const int secondary = get_secondary_state(baddie);
       // Drop Oth Razors behind us as we flee.
       if (secondary > 0 && baddie->cooldown <= 0.0) {
-        // TODO: These razors help the player more than hinder; do something
-        // more dangerous here, maybe?
-        az_baddie_t *razor = az_add_baddie(
-            state, AZ_BAD_OTH_RAZOR, baddie->position, baddie->angle + AZ_PI);
-        if (razor == NULL) {
-          set_secondary_state(baddie, 0);
-          baddie->cooldown = 5.0;
-        } else {
-          az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
-          set_secondary_state(baddie, secondary - 1);
-          baddie->cooldown = (secondary > 1 ? 0.5 : 5.0);
+        for (int i = -1; i <= 1; i += 2) {
+          az_add_baddie(state, AZ_BAD_OTH_RAZOR_2, baddie->position,
+                        baddie->angle + AZ_PI + i * AZ_DEG2RAD(30));
         }
+        az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
+        set_secondary_state(baddie, secondary - 1);
+        baddie->cooldown = (secondary > 1 ? 0.5 : 5.0);
       }
       // Out of all marker nodes the Oth Gunship can see, pick the one farthest
       // from the ship.
@@ -353,6 +348,11 @@ void az_tick_bad_oth_gunship(
               az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
                                         20.0, 0.0, AZ_DEG2RAD(10) * i);
             }
+          } else if (hurt >= 0.3) {
+            for (int i = -1; i <= 1; i += 2) {
+              az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
+                                        20.0, 0.0, AZ_DEG2RAD(5) * i);
+            }
           } else {
             az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
                                       20.0, 0.0, 0.0);
@@ -381,9 +381,12 @@ void az_tick_bad_oth_gunship(
       set_tractor_node(baddie, NULL);
       fly_towards(state, baddie, time, state->ship.position);
       if (baddie->cooldown <= 0.0) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
-                                  20.0, 0.0, 0.0);
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        az_projectile_t *proj = az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_OTH_ROCKET, 20.0, 0.0, 0.0);
+        if (proj != NULL) {
+          proj->power = 0.5;
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        }
         baddie->cooldown = 0.75;
       }
     } break;

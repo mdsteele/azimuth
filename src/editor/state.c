@@ -215,7 +215,8 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_SPARK,
   AZ_BAD_ERUPTION,
   // Oth:
-  AZ_BAD_OTH_RAZOR,
+  AZ_BAD_OTH_RAZOR_1,
+  AZ_BAD_OTH_RAZOR_2,
   AZ_BAD_OTH_MINICRAB,
   AZ_BAD_OTH_CRAB_1,
   AZ_BAD_OTH_ORB_1,

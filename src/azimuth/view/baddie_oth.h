@@ -44,7 +44,10 @@ void az_draw_bad_oth_minicrab(
 void az_draw_bad_oth_orb(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
-void az_draw_bad_oth_razor(
+void az_draw_bad_oth_razor_1(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
+void az_draw_bad_oth_razor_2(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
 void az_draw_bad_oth_snapdragon(
