@@ -582,12 +582,12 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T127"
   No, not exactly.  Not like you are, anyway.
 
-  I am merely a remnant.  A piece."
+  I am only a remnant.  A piece."
 !T128"
   \"A piece of what?\""
 !T129"
   Of the $GSapiAI$W that used to operate this colony's
-  systems, before its mind was shattered."
+  systems, before it was destroyed."
 !T130"
   \"There was a fourth SapiAI?!  $/Here?!$|\""
 !T131"
