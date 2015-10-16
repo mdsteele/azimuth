@@ -16,7 +16,7 @@
 
 !Part A
 
-4| L5 ct L10 c L15 c L20 c ' L25 c L30 c L35 c L40 c |
+4| L5 c4t L10 c L15 c L20 c ' L25 c L30 c L35 c L40 c |
 
 
 !Part B

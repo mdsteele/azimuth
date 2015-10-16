@@ -1,7 +1,9 @@
 @M "SX|ABCDB"
+% Title: "Fight or Flight"
 
 =tempo 130
 =key 3b     % C minor
+=loudness 1.2
 
 
 !Part S
@@ -9,7 +11,7 @@
 1 Wt50 L150 E0,25  D20,40
 2 Wp25 L25  E0,25  D5,60
 3 Wt75 L120 E0,25  D5,40
-4 Wn   L25  E0,100
+4 Wn   L30  E0,75
 5 Wn   L40  E0,100
 
 
@@ -21,6 +23,9 @@
 2| E0,0 g4t a g a g a g a ' g a g a g a g a '
  ' g4t a g a g a g a ' g a g a g a g a |
  | E0,15 V2,60 g4h+e+s rs ' V0,0 gs f e d E0,25 |
+4| L12 c3t c c c L15 c c c c ' L18 c c c c L21 c c c c '
+ ' L24 c3t c c c L27 c c c c ' L30 c c c c c c c c |
+ | L30 c3e c ' cs ce cs+ ' +s cs ce ' cs cb c cb |
 
 
 !Part A
@@ -28,6 +33,10 @@
 3| rw | rw | rw | rw |
 2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4 |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
 5| x0q x0 x0 x0 | x0q x0 x0 x0 |
  | x0q x0 x0 x0 | x0q x0 x0 x0 |
 
@@ -35,6 +44,10 @@
  | re c5q. re cq. | re cq. re cq. E0,25 |
 2|     c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c ' cs ce cs+ ' +s cs ce ' cs cb c cb |
 5| x0q x0 x0 x0 | x0q x0 x0 x0 |
  | x0q x0 x0 x0 | x0q x0 x0 x0 |
 
@@ -47,6 +60,10 @@
  | g4s ge ge fs ge ' fe es d ee ds c |
  | c4s ge ge fs ge ' c4s ae ae gs ae |
  | g4s ge ge fs ge ' aq g |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3e. rs ' c3e. rs |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
  | x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
@@ -56,6 +73,10 @@
  | g4s ge ge fs ge ' fe es d ee ds c |
  | c4s ee ee ds ee ' dq b3 |
  | c4q c ' c c |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e. rs ' c3e. rs ' c3e. rs ' cs cb c cb |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
  | x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
@@ -66,6 +87,10 @@
 3| rw | rw | rw | rw |
 2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4 |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
 5| x0q x0 x0 x0 | x0q x0 x0 x0 |
  | x0q x0 x0 x0 | x0q x0 x0 x0 |
 
@@ -77,6 +102,10 @@
  | re c5q. re cq. | re cq. re cq. E0,25 |
 2|     c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
+4| c3e c7e ' c3s cb c7e ' c3e c7e ' c3s cb c7e |
+ | c3e c7e ' c3s cb c7e ' c3e c7e ' c3s cb c7e |
+ | c3e c7e ' c3s cb c7e ' c3e c7e ' c3s cb c cb |
+ | c3e c ' cs ce cs+ ' +s cs ce ' cs cb c cb |
 5| x0q x0 x0 x0 | x0q x0 x0 x0 |
  | x0q x0 x0 x0 | x0q x0 x0 x0 |
 
@@ -89,20 +118,28 @@
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
 1| g4s ge ge fs ge ' as ae ae gs ae |
  | g4s ge ge fs ge ' fe es d ee ds c |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
 2| c4e c4q e d P+0.25 db c P0 b3 bN c4 |
  |     c4q e d P+0.25 db c P0 b3 bN c4e |
 1| c4s ge ge fs ge ' c4s ae ae gs ae |
  | g4s ge ge fs ge ' aq g |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3e. rs ' c3e. rs |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
 1| g4s ge ge fs ge ' as ae ae gs ae |
  | g4s ge ge fs ge ' fe es d ee ds c |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
 1| c4s ee ee ds ee ' dq b3 |
  | c4q c ' c c |
+4| c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
+ | c3e c7 ' c3 c7 ' c3 c7 ' c3 c7 |
 5| x0q x0 ' x0 x0 | x0q x0 ' x0 x0 |
 
 1 L150
