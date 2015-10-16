@@ -1264,20 +1264,23 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(beam_turret_components)
   },
   [AZ_BAD_OTH_CRAB_1] = {
-    .max_health = 50.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .max_health = 50.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
                    .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_ORB_1] = {
-    .max_health = 30.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .max_health = 30.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .death_style = AZ_DEATH_OTH,
     .main_body = { .bounding_radius = 19.0, .impact_damage = 20.0 }
   },
   [AZ_BAD_OTH_SNAPDRAGON] = {
-    .max_health = 60.0, .death_style = AZ_DEATH_OTH,
+    .max_health = 60.0,  .color = {255, 255, 255, 255},
+    .death_style = AZ_DEATH_OTH,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .main_body = { .bounding_radius = 30.0, .impact_damage = 6.0,
@@ -1441,7 +1444,8 @@ static az_baddie_data_t baddie_datas[] = {
                    .impact_damage = 10.0 }
   },
   [AZ_BAD_OTH_CRAB_2] = {
-    .max_health = 60.0, .potential_pickups = AZ_PUPF_LARGE_SHIELDS,
+    .max_health = 60.0, .color = {255, 255, 255, 255},
+    .potential_pickups = AZ_PUPF_LARGE_SHIELDS,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_crab_vertices),
@@ -1462,12 +1466,11 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = ~AZ_DMGF_CPLUS }
   },
   [AZ_BAD_OTH_GUNSHIP] = {
-    .max_health = 250.0, .potential_pickups = ~AZ_PUPF_NOTHING,
-    .hurt_sound = AZ_SND_HURT_OTH,
+    .max_health = 250.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING, .hurt_sound = AZ_SND_HURT_OTH,
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
-                   .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS),
-                   .impact_damage = 10.0 }
+                   .immunities = AZ_DMGF_FREEZE, .impact_damage = 10.0 }
   },
   [AZ_BAD_FIREBALL_MINE] = {
     .max_health = 20.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
@@ -1553,7 +1556,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(crawling_mortar_components)
   },
   [AZ_BAD_OTH_ORB_2] = {
-    .max_health = 50.0,
+    .max_health = 50.0, .color = {255, 255, 255, 255},
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_SMALL_SHIELDS),
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .death_style = AZ_DEATH_OTH,
@@ -1897,9 +1900,9 @@ static az_baddie_data_t baddie_datas[] = {
                                   AZ_DMGF_FLAME) },
   },
   [AZ_BAD_OTH_BRAWLER] = {
-    .max_health = 90.0, .potential_pickups = AZ_PUPF_LARGE_SHIELDS,
+    .max_health = 90.0, .color = {255, 255, 255, 255},
+    .potential_pickups = AZ_PUPF_LARGE_SHIELDS, .death_style = AZ_DEATH_OTH,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
-    .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_brawler_vertices),
                    .impact_damage = 20.0 }
   },
@@ -1946,7 +1949,8 @@ static az_baddie_data_t baddie_datas[] = {
     .main_body = { .bounding_radius = 20.0 }
   },
   [AZ_BAD_OTH_MINICRAB] = {
-    .max_health = 30.0, .potential_pickups = ~AZ_PUPF_NOTHING,
+    .max_health = 30.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING,
     .hurt_sound = AZ_SND_HURT_OTH, .death_sound = AZ_SND_KILL_OTH,
     .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_minicrab_vertices),

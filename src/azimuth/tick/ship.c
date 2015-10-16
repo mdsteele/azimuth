@@ -157,6 +157,21 @@ static void disable_ship_tractor_cloak(az_space_state_t *state) {
 /*===========================================================================*/
 // Impacts:
 
+static void add_cplus_boom(az_space_state_t *state,
+                           const az_impact_t *impact) {
+  az_particle_t *particle;
+  if (az_insert_particle(state, &particle)) {
+    particle->kind = AZ_PAR_BOOM;
+    particle->color = (az_color_t){0, 255, 0, 255};
+    particle->position =
+      az_vsub(impact->position,
+              az_vwithlen(impact->normal, AZ_SHIP_DEFLECTOR_RADIUS));
+    particle->velocity = AZ_VZERO;
+    particle->lifetime = 0.4;
+    particle->param1 = 40.0;
+  }
+}
+
 static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
                            const az_node_t *tractor_node) {
   az_ship_t *ship = &state->ship;
@@ -196,11 +211,15 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
         // If the ship is in C-plus mode, we will kill the baddie outright and
         // keep going without taking damage (unless the baddie is immune to
         // C-plus damage).
-        if (ship->cplus.state == AZ_CPLUS_ACTIVE &&
-            az_try_damage_baddie(state, baddie, component, AZ_DMGF_CPLUS,
-                                 baddie->data->max_health)) {
-          assert(baddie->kind == AZ_BAD_NOTHING);
-          return;
+        if (ship->cplus.state == AZ_CPLUS_ACTIVE) {
+          const double cplus_damage =
+            (baddie->kind == AZ_BAD_OTH_GUNSHIP ? 20 : 50);
+          if (az_try_damage_baddie(state, baddie, component, AZ_DMGF_CPLUS,
+                                   cplus_damage)) {
+            add_cplus_boom(state, impact);
+            if (baddie->kind == AZ_BAD_NOTHING) return;
+            else az_play_sound(&state->soundboard, baddie->data->hurt_sound);
+          }
         }
         // We didn't kill the baddie yet, so we're going to bounce off of it
         // and possibly take damage.
@@ -211,18 +230,8 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
           damage = component->impact_damage;
           if (az_baddie_has_flag(baddie, AZ_BADF_QUAD_IMPACT)) {
             damage *= 4;
+            add_cplus_boom(state, impact);
             az_play_sound(&state->soundboard, AZ_SND_EXPLODE_HYPER_ROCKET);
-            az_particle_t *particle;
-            if (az_insert_particle(state, &particle)) {
-              particle->kind = AZ_PAR_BOOM;
-              particle->color = (az_color_t){0, 255, 0, 255};
-              particle->position =
-                az_vsub(ship->position,
-                        az_vwithlen(impact->normal, AZ_SHIP_DEFLECTOR_RADIUS));
-              particle->velocity = AZ_VZERO;
-              particle->lifetime = 0.4;
-              particle->param1 = 40.0;
-            }
           }
           if (damage > 0.0 ||
               az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS - 0.75,
