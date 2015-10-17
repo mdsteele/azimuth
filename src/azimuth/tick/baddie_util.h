@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_TICK_BADDIE_UTIL_H_
 #define AZIMUTH_TICK_BADDIE_UTIL_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
@@ -76,8 +78,9 @@ void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
 // Move in a wiggling, snake-like motion towards the given destination.
 // Components from first_tail_component on up will trail behind.
 void az_snake_towards(
-    az_baddie_t *baddie, double time, int first_tail_component,
-    double speed, double wiggle, az_vector_t destination);
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    int first_tail_component, double speed, double wiggle,
+    az_vector_t destination, bool ignore_walls);
 
 void az_drift_towards_ship(
     az_space_state_t *state, az_baddie_t *baddie, double time,

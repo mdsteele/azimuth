@@ -54,8 +54,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   }
   // State 0: Chase ship and fire homing torpedoes.
   if (baddie->state == 0) {
-    az_snake_towards(baddie, time, 8, 130 + 130 * hurt, 150,
-                     state->ship.position);
+    az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 150,
+                     state->ship.position, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
       if (az_random(0, 1) < 0.5) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
@@ -97,8 +97,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     const double dt = 150.0 / r;
     const az_vector_t dest = az_vpolar(r, bounds->min_theta +
         (baddie->state == 1 ? bounds->theta_span + dt : -dt));
-    az_snake_towards(baddie, time, 8, 200 + 150 * hurt,
-                     150 + 150 * hurt, dest);
+    az_snake_towards(state, baddie, time, 8, 200 + 150 * hurt,
+                     150 + 150 * hurt, dest, true);
     if (az_ship_is_alive(&state->ship) &&
         az_vwithin(baddie->position, dest, 100.0)) {
       baddie->state = 3;
@@ -209,21 +209,20 @@ void az_tick_bad_force_egg(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_forceling(az_space_state_t *state, az_baddie_t *baddie,
                            double time) {
   assert(baddie->kind == AZ_BAD_FORCELING);
-  az_snake_towards(baddie, time, 0, 100.0, 150.0,
+  az_snake_towards(state, baddie, time, 0, 100.0, 150.0,
                    az_vadd(az_vpolar(150, state->ship.angle +
                                      baddie->state * AZ_DEG2RAD(90)),
-                           state->ship.position));
+                           state->ship.position), true);
 }
 
 static void tick_fish(az_space_state_t *state, az_baddie_t *baddie,
                       double chase_range, double chase_speed,
                       double roam_speed, double wiggle, double time) {
-  // TODO(mdsteele): Prevent fish from leaving water.
   // If the ship is nearby and visible, chase it.
   if (az_ship_in_range(state, baddie, chase_range) &&
       az_can_see_ship(state, baddie)) {
-    az_snake_towards(baddie, time, 0, chase_speed, wiggle,
-                     state->ship.position);
+    az_snake_towards(state, baddie, time, 0, chase_speed, wiggle,
+                     state->ship.position, false);
   } else {
     // Otherwise, we'll head in one of eight directions, determined by the
     // baddie's current state.
@@ -235,21 +234,12 @@ static void tick_fish(az_space_state_t *state, az_baddie_t *baddie,
     // Check if we're about to hit a wall.
     const double dist =
       az_baddie_dist_to_wall(state, baddie, 100.0, rel_angle);
-    const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
-    // If we've somehow ended up within a wall (or nearly so) or outside
-    // the room, head back to the ship position to try to fix it.
-    if (dist < 1.0 || !az_position_visible(bounds, baddie->position)) {
-      az_snake_towards(baddie, time, 0, roam_speed, wiggle,
-                       state->ship.position);
-      baddie->state = az_randint(0, 7);
-    } else {
-      // Otherwise head towards our current destination.
-      az_snake_towards(baddie, time, 0, roam_speed, wiggle, dest);
-      // If we're getting near a wall ahead, turn back.
-      if (dist <= 90.0) {
-        const int shift = (az_randint(0, 1) ? 3 : -3);
-        baddie->state = az_modulo(baddie->state + shift, 8);
-      }
+    // Head towards our current destination.
+    az_snake_towards(state, baddie, time, 0, roam_speed, wiggle, dest, false);
+    // If we're getting near a wall ahead, turn back.
+    if (dist <= 90.0) {
+      const int shift = (az_randint(0, 1) ? 3 : -3);
+      baddie->state = az_modulo(baddie->state + shift, 8);
     }
   }
 }

@@ -169,8 +169,8 @@ void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
     }
   } else baddie->state = ROCKWYRM_STATE_NORMAL;
   // Chase ship; get slightly slower as we get hurt.
-  az_snake_towards(baddie, time, 2, 130.0 - 10.0 * hurt, 50.0,
-                   state->ship.position);
+  az_snake_towards(state, baddie, time, 2, 130.0 - 10.0 * hurt, 50.0,
+                   state->ship.position, true);
 }
 
 /*===========================================================================*/
@@ -203,7 +203,8 @@ void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
 
 void az_tick_bad_wyrmling(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
-  az_snake_towards(baddie, time, 0, 180.0, 120.0, state->ship.position);
+  az_snake_towards(state, baddie, time, 0, 180.0, 120.0, state->ship.position,
+                   true);
 }
 
 /*===========================================================================*/

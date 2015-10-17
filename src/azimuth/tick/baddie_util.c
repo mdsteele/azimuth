@@ -30,6 +30,16 @@
 
 /*===========================================================================*/
 
+static az_impact_flags_t non_wall_types(const az_baddie_t *baddie) {
+  az_impact_flags_t skip_types = AZ_IMPF_BADDIE | AZ_IMPF_SHIP;
+  if (az_baddie_has_flag(baddie, AZ_BADF_WATER_BOUNCE)) {
+    skip_types |= AZ_IMPF_NOT_LIQUID;
+  }
+  return skip_types;
+}
+
+/*===========================================================================*/
+
 bool az_ship_in_range(
     const az_space_state_t *state, const az_baddie_t *baddie, double range) {
   return (az_ship_is_decloaked(&state->ship) &&
@@ -50,7 +60,8 @@ bool az_can_see_ship(az_space_state_t *state, const az_baddie_t *baddie) {
   az_impact_t impact;
   az_ray_impact(state, baddie->position,
                 az_vsub(state->ship.position, baddie->position),
-                AZ_IMPF_BADDIE, baddie->uid, &impact);
+                (non_wall_types(baddie) & ~AZ_IMPF_SHIP),
+                baddie->uid, &impact);
   return (impact.type == AZ_IMP_SHIP);
 }
 
@@ -63,7 +74,7 @@ double az_baddie_dist_to_wall(
   az_circle_impact(
       state, baddie->data->overall_bounding_radius, baddie->position,
       az_vpolar(max_dist, baddie->angle + relative_angle),
-      (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+      non_wall_types(baddie), baddie->uid, &impact);
   return az_vdist(baddie->position, impact.position);
 }
 
@@ -72,7 +83,7 @@ bool az_baddie_has_clear_path_to_position(
   az_impact_t impact;
   az_circle_impact(state, baddie->data->main_body.bounding_radius,
                    baddie->position, az_vsub(position, baddie->position),
-                   (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
+                   non_wall_types(baddie), baddie->uid, &impact);
   return (impact.type == AZ_IMP_NOTHING);
 }
 
@@ -135,21 +146,38 @@ void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
 }
 
 void az_snake_towards(
-    az_baddie_t *baddie, double time, int first_tail_component,
-    double speed, double wiggle, az_vector_t destination) {
+    az_space_state_t *state, az_baddie_t *baddie, double time,
+    int first_tail_component, double speed, double wiggle,
+    az_vector_t destination, bool ignore_walls) {
   if (baddie->param == 0.0) baddie->param = az_random(-AZ_PI, AZ_PI);
   const az_vector_t old_position = baddie->position;
   const double old_angle = baddie->angle;
-  const double dest_theta = az_vtheta(az_vsub(destination, baddie->position));
+  const double dest_theta = az_vtheta(az_vsub(destination, old_position));
   const az_vector_t goal =
     az_vadd(destination,
             az_vpolar(wiggle * sin(baddie->param), dest_theta + AZ_HALF_PI));
   const double new_angle = az_angle_towards(
-      baddie->angle, AZ_PI * time,
-      az_vtheta(az_vsub(goal, baddie->position)));
-  baddie->position =
-    az_vadd(baddie->position, az_vpolar(speed * time, new_angle));
+      old_angle, AZ_PI * time,
+      az_vtheta(az_vsub(goal, old_position)));
+  const az_vector_t delta = az_vpolar(speed * time, new_angle);
   baddie->angle = new_angle;
+  if (ignore_walls) {
+    baddie->position = az_vadd(old_position, delta);
+  } else {
+    az_impact_t impact;
+    az_circle_impact(state, baddie->data->main_body.bounding_radius,
+                     old_position, delta, non_wall_types(baddie), baddie->uid,
+                     &impact);
+    baddie->position = impact.position;
+    if (impact.type != AZ_IMP_NOTHING) {
+      // Push the baddie slightly away from the impact point (so that we're
+      // hopefully no longer in contact with the object we hit).
+      az_vpluseq(&baddie->position, az_vwithlen(impact.normal, 0.5));
+      // Bounce the baddie off the object.
+      const double normal_theta = az_vtheta(impact.normal);
+      baddie->angle = az_mod2pi(2.0 * normal_theta - baddie->angle + AZ_PI);
+    }
+  }
   az_trail_tail_behind(baddie, first_tail_component, old_position, old_angle);
   baddie->param = AZ_TWO_PI + az_mod2pi(baddie->param + AZ_TWO_PI * time);
 }
