@@ -480,4 +480,26 @@ void az_destroy_room(az_room_t *room) {
   AZ_ZERO_OBJECT(room);
 }
 
+az_vector_t az_room_center(const az_room_t *room) {
+  const az_camera_bounds_t *bounds = &room->camera_bounds;
+  return (bounds->theta_span >= 6.28 && bounds->min_r < AZ_SCREEN_HEIGHT ?
+          AZ_VZERO : az_bounds_center(bounds));
+}
+
+bool az_test_room_mapped(const az_player_t *player, az_room_key_t room_key,
+                         const az_room_t *room) {
+  return (az_test_room_visited(player, room_key) ||
+          (!(room->properties & AZ_ROOMF_UNMAPPED) &&
+           az_test_zone_mapped(player, room->zone_key)));
+}
+
+bool az_should_mark_room(const az_player_t *player, az_room_key_t room_key,
+                         const az_room_t *room) {
+  return (((room->properties & AZ_ROOMF_MARK_IF_SET) &&
+           az_test_flag(player, room->marker_flag)) ||
+          ((room->properties & AZ_ROOMF_MARK_IF_CLR) &&
+           !az_test_flag(player, room->marker_flag) &&
+           az_test_room_mapped(player, room_key, room)));
+}
+
 /*===========================================================================*/

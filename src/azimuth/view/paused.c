@@ -38,7 +38,7 @@
 #include "azimuth/util/vector.h"
 #include "azimuth/view/button.h"
 #include "azimuth/view/cursor.h"
-#include "azimuth/view/hud.h"
+#include "azimuth/view/minimap.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/prefs.h"
 #include "azimuth/view/ship.h"
@@ -65,18 +65,6 @@ static void draw_bezel_box(double bezel, double x, double y,
 #define SCROLL_Y_MAX (AZ_PLANETOID_RADIUS - 180 * MINIMAP_ZOOM)
 #define SCROLL_SPEED (AZ_PLANETOID_RADIUS)
 
-static bool test_room_mapped(const az_player_t *player,
-                             const az_room_t *room) {
-  return (!(room->properties & AZ_ROOMF_UNMAPPED) &&
-          az_test_zone_mapped(player, room->zone_key));
-}
-
-static az_vector_t get_room_center(const az_room_t *room) {
-  const az_camera_bounds_t *bounds = &room->camera_bounds;
-  return (bounds->theta_span >= 6.28 && bounds->min_r < AZ_SCREEN_HEIGHT ?
-          AZ_VZERO : az_bounds_center(bounds));
-}
-
 // Return the minimap screen coordinates for a given absolute position.
 static az_vector_t minimap_position(const az_paused_state_t *state,
                                     az_vector_t pos) {
@@ -88,59 +76,13 @@ static az_vector_t minimap_position(const az_paused_state_t *state,
   return pos;
 }
 
+static az_vector_t minimap_room_center(const az_paused_state_t *state,
+                                       const az_room_t *room) {
+  return minimap_position(state, az_room_center(room));
+}
+
 /*===========================================================================*/
 // Drawing minimap:
-
-static void draw_map_marker(const az_room_t *room, az_clock_t clock) {
-  const az_vector_t center = get_room_center(room);
-  glPushMatrix(); {
-    glTranslated(center.x, center.y, 0);
-    glRotatef(3 * az_clock_mod(120, 1, clock), 0, 0, 1);
-    glScalef(MINIMAP_ZOOM, MINIMAP_ZOOM, 0);
-    for (int i = 0; i < 4; ++i) {
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor3f(1, 0, 0); glVertex2f(4, 0); glColor3f(1, 1, 1);
-        glVertex2f(5, -4); glVertex2f(1, 0); glVertex2f(5, 4);
-      } glEnd();
-      glRotated(90, 0, 0, 1);
-    }
-  } glPopMatrix();
-}
-
-static void draw_room_label(az_vector_t center, int num_vertices,
-                            const float vertices[]) {
-  glPushMatrix(); {
-    glTranslatef((int)center.x + 0.5f, (int)center.y + 0.5f, 0);
-    glBegin(GL_TRIANGLE_FAN); {
-      glVertex2f(4, 4); glVertex2f(-4, 4);
-      glVertex2f(-4, -4); glVertex2f(4, -4);
-    } glEnd();
-    glColor3f(0, 0, 0);
-    glBegin(GL_LINE_STRIP); {
-      for (int i = 0; i < num_vertices; ++i) {
-        glVertex2f(vertices[2 * i], vertices[2 * i + 1]);
-      }
-    } glEnd();
-  } glPopMatrix();
-}
-
-static void draw_save_label(az_vector_t center) {
-  const float vertices[12] = {2, -2, -2, -2, -2, 0, 2, 0, 2, 2, -2, 2};
-  glColor3f(0.5, 1, 0.5);
-  draw_room_label(center, 6, vertices);
-}
-
-static void draw_comm_label(az_vector_t center) {
-  const float vertices[12] = {2, -2, -1, -2, -2, -1, -2, 1, -1, 2, 2, 2};
-  glColor3f(0.5, 0.5, 1);
-  draw_room_label(center, 6, vertices);
-}
-
-static void draw_refill_label(az_vector_t center) {
-  const float vertices[12] = {-2, 2.5, -2, -2, 2, -2, 2, 0, -2, 0, 2.5, 2.5};
-  glColor3f(1, 1, 0.5);
-  draw_room_label(center, 6, vertices);
-}
 
 static void draw_minimap_rooms(const az_paused_state_t *state,
                                az_room_flags_t *room_flags_out) {
@@ -160,8 +102,8 @@ static void draw_minimap_rooms(const az_paused_state_t *state,
   // Draw rooms that are mapped or explored:
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
+    if (!az_test_room_mapped(player, i, room)) continue;
     const bool visited = az_test_room_visited(player, i);
-    if (!visited && !test_room_mapped(player, room)) continue;
     az_draw_minimap_room(planet, room, visited, false);
     *room_flags_out |= room->properties & AZ_ROOMF_WITH_SAVE;
     if (visited) {
@@ -169,39 +111,32 @@ static void draw_minimap_rooms(const az_paused_state_t *state,
                                              AZ_ROOMF_WITH_REFILL);
     }
   }
+}
 
-  if (state->current_drawer != AZ_PAUSE_DRAWER_MAP) return;
-
-  // Draw map markers:
+static void draw_map_markers(const az_paused_state_t *state) {
+  const az_planet_t *planet = state->planet;
+  const az_player_t *player = &state->ship->player;
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
-    if ((room->properties & AZ_ROOMF_MARK_IF_SET) &&
-        az_test_flag(player, room->marker_flag)) {
-      draw_map_marker(room, state->clock);
-    } else if ((room->properties & AZ_ROOMF_MARK_IF_CLR) &&
-               !az_test_flag(player, room->marker_flag)) {
-      if (az_test_room_visited(player, i) || test_room_mapped(player, room)) {
-        draw_map_marker(room, state->clock);
-      }
+    if (az_should_mark_room(player, i, room)) {
+      az_draw_map_marker(minimap_room_center(state, room), state->clock);
     }
   }
 }
 
 static void draw_minimap_room_labels(const az_paused_state_t *state) {
   const az_planet_t *planet = state->planet;
-  const az_ship_t *ship = state->ship;
-  const az_player_t *player = &ship->player;
+  const az_player_t *player = &state->ship->player;
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
-    const bool visited = az_test_room_visited(player, i);
-    if (!visited && !test_room_mapped(player, room)) continue;
+    if (!az_test_room_mapped(player, i, room)) continue;
     if (room->properties & AZ_ROOMF_WITH_SAVE) {
-      draw_save_label(minimap_position(state, get_room_center(room)));
-    } else if (visited) {
+      az_draw_save_room_label(minimap_room_center(state, room));
+    } else if (az_test_room_visited(player, i)) {
       if (room->properties & AZ_ROOMF_WITH_REFILL) {
-        draw_refill_label(minimap_position(state, get_room_center(room)));
+        az_draw_refill_room_label(minimap_room_center(state, room));
       } else if (room->properties & AZ_ROOMF_WITH_COMM) {
-        draw_comm_label(minimap_position(state, get_room_center(room)));
+        az_draw_comm_room_label(minimap_room_center(state, room));
       }
     }
   }
@@ -267,11 +202,14 @@ static void draw_minimap(const az_paused_state_t *state) {
       // Draw what the camera sees.
       draw_minimap_rooms(state, &room_flags_union);
     } glPopMatrix();
-    if (az_clock_mod(2, 30, state->clock) == 0) {
-      draw_minimap_room_labels(state);
-    }
-    if (az_clock_mod(2, 12, state->clock) == 0) {
-      draw_minimap_ship_label(state);
+    if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
+      draw_map_markers(state);
+      if (az_clock_mod(2, 30, state->clock) == 0) {
+        draw_minimap_room_labels(state);
+      }
+      if (az_clock_mod(2, 12, state->clock) == 0) {
+        draw_minimap_ship_label(state);
+      }
     }
   } glDisable(GL_SCISSOR_TEST);
 
@@ -314,17 +252,17 @@ static void draw_minimap(const az_paused_state_t *state) {
   }
 
   if (room_flags_union & AZ_ROOMF_WITH_SAVE) {
-    draw_save_label((az_vector_t){541, 370});
+    az_draw_save_room_label((az_vector_t){541, 370});
     glColor3f(0.75, 0.75, 0.75);
     az_draw_string(8, AZ_ALIGN_LEFT, 550, 367, "Save");
   }
   if (room_flags_union & AZ_ROOMF_WITH_COMM) {
-    draw_comm_label((az_vector_t){541, 383});
+    az_draw_comm_room_label((az_vector_t){541, 383});
     glColor3f(0.75, 0.75, 0.75);
     az_draw_string(8, AZ_ALIGN_LEFT, 550, 380, "Comm");
   }
   if (room_flags_union & AZ_ROOMF_WITH_REFILL) {
-    draw_refill_label((az_vector_t){541, 396});
+    az_draw_refill_room_label((az_vector_t){541, 396});
     glColor3f(0.75, 0.75, 0.75);
     az_draw_string(8, AZ_ALIGN_LEFT, 550, 393, "Repair");
   }
@@ -834,14 +772,14 @@ void az_init_paused_state(
   double y_min = SCROLL_Y_MAX;
   for (int i = 0; i < planet->num_rooms; ++i) {
     const az_room_t *room = &planet->rooms[i];
-    if (test_room_mapped(player, room) || az_test_room_visited(player, i)) {
-      y_min = fmin(y_min, get_room_center(room).y + 140 * MINIMAP_ZOOM);
+    if (az_test_room_mapped(player, i, room)) {
+      y_min = fmin(y_min, az_room_center(room).y + 140 * MINIMAP_ZOOM);
     }
   }
   const az_room_key_t current_room_key = player->current_room;
   assert(current_room_key < planet->num_rooms);
   const az_room_t *current_room = &planet->rooms[current_room_key];
-  const double current_y = get_room_center(current_room).y;
+  const double current_y = az_room_center(current_room).y;
   state->scroll_y = fmin(fmax(y_min, current_y), SCROLL_Y_MAX);
   state->scroll_y_min = y_min;
   az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP, prefs);

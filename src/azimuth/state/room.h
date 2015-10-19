@@ -139,6 +139,17 @@ bool az_save_room_to_path(const az_room_t *room, const char *filepath);
 // Delete the data arrays owned by a room (but not the room object itself).
 void az_destroy_room(az_room_t *room);
 
+// Get the position that is (roughly) the center of the room.
+az_vector_t az_room_center(const az_room_t *room);
+
+// Return true if the room should be displayed on the minimap.
+bool az_test_room_mapped(const az_player_t *player, az_room_key_t room_key,
+                         const az_room_t *room);
+
+// Return true if the room should have a map marker on the minimap.
+bool az_should_mark_room(const az_player_t *player, az_room_key_t room_key,
+                         const az_room_t *room);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_ROOM_H_

@@ -18,23 +18,27 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_HUD_H_
-#define AZIMUTH_VIEW_HUD_H_
+#ifndef AZIMUTH_VIEW_MINIMAP_H_
+#define AZIMUTH_VIEW_MINIMAP_H_
 
 #include <stdbool.h>
 
 #include "azimuth/state/planet.h"
 #include "azimuth/state/room.h"
-#include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
+#include "azimuth/util/vector.h"
 
 /*===========================================================================*/
 
-void az_draw_dialogue(const az_space_state_t *state);
+void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
+                          bool visited, bool blink);
 
-void az_draw_monologue(const az_space_state_t *state);
+void az_draw_map_marker(az_vector_t center, az_clock_t clock);
 
-void az_draw_hud(az_space_state_t *state);
+void az_draw_save_room_label(az_vector_t center);
+void az_draw_comm_room_label(az_vector_t center);
+void az_draw_refill_room_label(az_vector_t center);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_HUD_H_
+#endif // AZIMUTH_VIEW_MINIMAP_H_

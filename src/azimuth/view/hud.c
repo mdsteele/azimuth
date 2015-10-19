@@ -35,6 +35,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/view/dialog.h"
+#include "azimuth/view/minimap.h"
 #include "azimuth/view/node.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
@@ -160,81 +161,36 @@ static void draw_hud_shields_energy(const az_player_t *player,
 }
 
 /*===========================================================================*/
-
-void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
-                          bool visited, bool blink) {
-  const az_camera_bounds_t *bounds = &room->camera_bounds;
-  const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
-  const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
-  const double min_theta = bounds->min_theta;
-  const double max_theta = min_theta + bounds->theta_span;
-  const az_vector_t offset1 =
-    az_vpolar(AZ_SCREEN_WIDTH/2, min_theta - AZ_HALF_PI);
-  const az_vector_t offset2 =
-    az_vpolar(AZ_SCREEN_WIDTH/2, max_theta + AZ_HALF_PI);
-  const double step = fmax(AZ_DEG2RAD(0.1), bounds->theta_span * 0.05);
-
-  // Fill room with color:
-  const az_color_t zone_color = planet->zones[room->zone_key].color;
-  if (blink) {
-    glColor3f(0.75, 0.75, 0.75);
-  } else if (!visited) {
-    glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
-  } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
-  if (bounds->theta_span >= 6.28) {
-    glBegin(GL_POLYGON); {
-      for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-    } glEnd();
-  } else {
-    glBegin(GL_QUAD_STRIP); {
-      glVertex2d(min_r * cos(min_theta) + offset1.x,
-                 min_r * sin(min_theta) + offset1.y);
-      glVertex2d(max_r * cos(min_theta) + offset1.x,
-                 max_r * sin(min_theta) + offset1.y);
-      for (double theta = min_theta; theta <= max_theta; theta += step) {
-        glVertex2d(min_r * cos(theta), min_r * sin(theta));
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-      glVertex2d(min_r * cos(max_theta) + offset2.x,
-                 min_r * sin(max_theta) + offset2.y);
-      glVertex2d(max_r * cos(max_theta) + offset2.x,
-                 max_r * sin(max_theta) + offset2.y);
-    } glEnd();
-  }
-
-  // Draw outline:
-  glColor3f(0.9, 0.9, 0.9); // white
-  glBegin(GL_LINE_LOOP); {
-    if (bounds->theta_span >= 6.28) {
-      for (double theta = 0.0; theta < AZ_TWO_PI; theta += step) {
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-    } else {
-      glVertex2d(min_r * cos(min_theta) + offset1.x,
-                 min_r * sin(min_theta) + offset1.y);
-      glVertex2d(max_r * cos(min_theta) + offset1.x,
-                 max_r * sin(min_theta) + offset1.y);
-      for (double theta = min_theta; theta <= max_theta; theta += step) {
-        glVertex2d(max_r * cos(theta), max_r * sin(theta));
-      }
-      glVertex2d(max_r * cos(max_theta) + offset2.x,
-                 max_r * sin(max_theta) + offset2.y);
-      glVertex2d(min_r * cos(max_theta) + offset2.x,
-                 min_r * sin(max_theta) + offset2.y);
-      for (double theta = max_theta; theta >= min_theta; theta -= step) {
-        glVertex2d(min_r * cos(theta), min_r * sin(theta));
-      }
-    } glEnd();
-  }
-}
+// Minimap geometry:
 
 #define MINIMAP_ZOOM 100.0
 #define MINIMAP_WIDTH 44
 #define MINIMAP_HEIGHT 44
 #define MINIMAP_TOP 3
 #define MINIMAP_LEFT (AZ_SCREEN_WIDTH - MINIMAP_WIDTH - 3)
+
+// Return the minimap screen coordinates for a given absolute position.
+static az_vector_t minimap_position(const az_space_state_t *state,
+                                    az_vector_t pos) {
+  pos = az_vrotate(pos, AZ_HALF_PI - az_vtheta(state->camera.center));
+  pos.y -= az_vnorm(state->camera.center);
+  pos.x /= MINIMAP_ZOOM;
+  pos.y /= MINIMAP_ZOOM;
+  pos.x += MINIMAP_LEFT + MINIMAP_WIDTH/2;
+  pos.y = MINIMAP_TOP + MINIMAP_HEIGHT/2 - pos.y;
+  // Shift very slightly, to avoid edge effects in 1x1 rooms:
+  pos.x += 0.01;
+  pos.y += 0.01;
+  return pos;
+}
+
+static az_vector_t minimap_room_center(const az_space_state_t *state,
+                                       const az_room_t *room) {
+  return minimap_position(state, az_room_center(room));
+}
+
+/*===========================================================================*/
+// Drawing minimap:
 
 static void draw_minimap_rooms(const az_space_state_t *state) {
   const az_planet_t *planet = state->planet;
@@ -264,10 +220,7 @@ static void draw_minimap_rooms(const az_space_state_t *state) {
     const az_room_t *room = &planet->rooms[i];
 
     // If the room isn't on our map yet, don't draw it.
-    const bool visited = az_test_room_visited(player, i);
-    const bool mapped = !(room->properties & AZ_ROOMF_UNMAPPED) &&
-      az_test_zone_mapped(player, room->zone_key);
-    if (!visited && !mapped) continue;
+    if (!az_test_room_mapped(player, i, room)) continue;
     const az_camera_bounds_t *bounds = &room->camera_bounds;
 
     // If the room is definitely not within the rectangle of the minimap view,
@@ -283,8 +236,38 @@ static void draw_minimap_rooms(const az_space_state_t *state) {
                          (bounds->min_theta - 0.5 * extra_theta_span)) >
         bounds->theta_span + extra_theta_span) continue;
 
+    const bool visited = az_test_room_visited(player, i);
     az_draw_minimap_room(planet, room, visited, i == player->current_room &&
                          az_clock_mod(2, 15, state->clock));
+  }
+}
+
+static void draw_map_markers(const az_space_state_t *state) {
+  const az_planet_t *planet = state->planet;
+  const az_player_t *player = &state->ship.player;
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    const az_room_t *room = &planet->rooms[i];
+    if (az_should_mark_room(player, i, room)) {
+      az_draw_map_marker(minimap_room_center(state, room), state->clock);
+    }
+  }
+}
+
+static void draw_minimap_room_labels(const az_space_state_t *state) {
+  const az_planet_t *planet = state->planet;
+  const az_player_t *player = &state->ship.player;
+  for (int i = 0; i < planet->num_rooms; ++i) {
+    const az_room_t *room = &planet->rooms[i];
+    if (!az_test_room_mapped(player, i, room)) continue;
+    if (room->properties & AZ_ROOMF_WITH_SAVE) {
+      az_draw_save_room_label(minimap_room_center(state, room));
+    } else if (az_test_room_visited(player, i)) {
+      if (room->properties & AZ_ROOMF_WITH_REFILL) {
+        az_draw_refill_room_label(minimap_room_center(state, room));
+      } else if (room->properties & AZ_ROOMF_WITH_COMM) {
+        az_draw_comm_room_label(minimap_room_center(state, room));
+      }
+    }
   }
 }
 
@@ -309,6 +292,10 @@ static void draw_minimap(const az_space_state_t *state) {
       // Draw what the camera sees.
       draw_minimap_rooms(state);
     } glPopMatrix();
+    draw_map_markers(state);
+    if (az_clock_mod(2, 30, state->clock) == 0) {
+      draw_minimap_room_labels(state);
+    }
   } glDisable(GL_SCISSOR_TEST);
 }
 
