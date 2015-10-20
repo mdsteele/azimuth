@@ -1,4 +1,4 @@
-@R z0 p0 k3 b0 d3 g5 n16 w49
+@R z0 p0 k22 b0 d3 g5 n16 w49
   c(49278.36,568.86,1.570993,0.000000)
 $s:test23,beqz/A,msg14,activ1,activ2,gpos7,vnorm,rcam,halt,A#test19,beqz/B,msg14,halt,B#mus1,activ1,activ2,activ4,gpos9,spos,gang9,sang,push800,gang,vpolar,svel,gpos3,vnorm,rcam,autop1,thrust1;
 !W1 d5 x-286.00 y49830.01 a-1.569412 u0

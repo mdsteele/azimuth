@@ -129,6 +129,10 @@ static const az_background_data_t background_datas[] = {
   [AZ_BG_TRIANGLE_STRUTS] = {
     .parallax = 0.45, .repeat_style = ABS_RECT,
     .repeat_horz = 150.0, .repeat_vert = 260.0
+  },
+  [AZ_BG_STARRY_NIGHT] = {
+    .parallax = 0.3, .repeat_style = ABS_RECT,
+    .repeat_horz = 300.0, .repeat_vert = 300.0
   }
 };
 
@@ -534,7 +538,6 @@ static void draw_blinkenlight(GLfloat center_x, GLfloat center_y, bool lit) {
 // Draw one patch of the background pattern.  It should cover the rect from
 // <-repeat_horz/2, 0.0> to <repeat_horz/2, -repeat_vert>.
 static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
-  const float bottom = -background_datas[pattern].repeat_vert;
   switch (pattern) {
     case AZ_BG_SOLID_BLACK: break;
     case AZ_BG_BROWN_ROCK_WALL: {
@@ -561,6 +564,7 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       } glPopMatrix();
     } break;
     case AZ_BG_YELLOW_PANELLING: {
+      const int bottom = -background_datas[pattern].repeat_vert;
       const az_color_t color1 = {60, 45, 30, 255};
       const az_color_t color2 = {30, 20, 10, 255};
       const az_color_t color3 = {40, 35, 20, 255};
@@ -597,6 +601,7 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color1 = {40, 20, 0, 255};
       const az_color_t color2 = {30, 15, 0, 255};
       const az_color_t color3 = {25, 12, 0, 255};
+      const float bottom = -background_datas[pattern].repeat_vert;
       draw_girders(color1, color2, color3, bottom);
     } break;
     case AZ_BG_GREEN_ROCK_WALL: {
@@ -611,6 +616,7 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       const az_color_t color3 = {25, 30, 0, 255};
       const az_color_t color4 = {15, 20, 0, 255};
       const az_color_t color5 = {10, 15, 0, 255};
+      const float bottom = -background_datas[pattern].repeat_vert;
       draw_girders(color3, color4, color5, bottom);
     } break;
     case AZ_BG_GRAY_STONE_BRICKS: {
@@ -945,6 +951,33 @@ static void draw_bg_patch(az_background_pattern_t pattern, az_clock_t clock) {
       draw_blinkenlight(-41.8, -210.3, phase == 2);
       draw_blinkenlight(-67.2, -238.3, phase == 3);
       draw_blinkenlight(-60.3, -242.3, phase == 3);
+    } break;
+    case AZ_BG_STARRY_NIGHT: {
+      const int star_spacing = 50;
+      const int semi_width = 0.5 * background_datas[pattern].repeat_horz;
+      const int bottom = -background_datas[pattern].repeat_vert;
+      az_random_seed_t seed = {1, 1};
+      int clock_offset = 0;
+      for (int xoff = -semi_width; xoff < semi_width; xoff += star_spacing) {
+        for (int yoff = 0; yoff > bottom; yoff -= star_spacing) {
+          const double twinkle =
+            0.5 + 0.05 * az_clock_zigzag(10, 4, clock + clock_offset);
+          const double size = 2 + 4 * az_rand_udouble(&seed);
+          const double cx = xoff + star_spacing * az_rand_udouble(&seed);
+          const double cy = yoff + star_spacing * az_rand_udouble(&seed);
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.5, 0.5, 0.5);
+            glVertex2d(cx, cy);
+            glColor3f(0.1, 0.1, 0.1);
+            for (int i = 0; i <= 360; i += 45) {
+              const double rho = size * (i % 2 == 0 ? twinkle : 0.3);
+              glVertex2d(cx + rho * cos(AZ_DEG2RAD(i)),
+                         cy + rho * sin(AZ_DEG2RAD(i)));
+            }
+          } glEnd();
+          clock_offset += 17;
+        }
+      }
     } break;
   }
 }
