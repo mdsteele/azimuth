@@ -45,9 +45,9 @@
 // How long after using energy we are unable to recharge, in seconds:
 #define AZ_RECHARGE_COOLDOWN_TIME 0.5
 // The time needed to charge the CHARGE gun, in seconds:
-#define AZ_CHARGE_GUN_CHARGING_TIME 0.6
+#define AZ_CHARGE_GUN_CHARGING_TIME 1.66666666666666666
 // The time needed to charge up hyper/mega ordnance, in seconds:
-#define AZ_ORDN_CHARGING_TIME 0.6
+#define AZ_ORDN_CHARGING_TIME 1.66666666666666666
 // How much damage triple-gun projectiles do compared to normal ones:
 #define AZ_TRIPLE_DAMAGE_MULT 0.8
 // How much damage the BEAM gun normally deals per second:
@@ -92,15 +92,15 @@ static bool can_change_mode(const az_space_state_t *state) {
 }
 
 static bool try_use_energy(az_ship_t *ship, double energy, bool exhaust) {
-  if (ship->player.energy < energy) {
-    if (exhaust) ship->player.energy = 0.0;
-    return false;
-  }
-  ship->player.energy -= energy;
+  const bool has_enough = (ship->player.energy >= energy);
+  if (has_enough) ship->player.energy -= energy;
+  else if (exhaust) ship->player.energy = 0.0;
   assert(ship->player.energy >= 0.0);
-  ship->recharge_cooldown =
-    fmax(ship->recharge_cooldown, AZ_RECHARGE_COOLDOWN_TIME);
-  return true;
+  if (has_enough || exhaust) {
+    ship->recharge_cooldown =
+      fmax(ship->recharge_cooldown, AZ_RECHARGE_COOLDOWN_TIME);
+  }
+  return has_enough;
 }
 
 static void recharge_ship_energy(az_player_t *player, double time) {
@@ -633,7 +633,7 @@ static void charge_weapons(az_space_state_t *state, double time) {
       disable_ship_tractor_cloak(state);
       if (ship->gun_charge < 1.0) {
         ship->gun_charge = fmin(1.0, ship->gun_charge +
-                                AZ_CHARGE_GUN_CHARGING_TIME * time);
+                                time / AZ_CHARGE_GUN_CHARGING_TIME);
         az_persist_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
       } else {
         az_loop_sound(&state->soundboard, AZ_SND_CHARGED_GUN);
@@ -656,7 +656,7 @@ static void charge_weapons(az_space_state_t *state, double time) {
       disable_ship_tractor_cloak(state);
       if (ship->ordn_charge < 1.0) {
         ship->ordn_charge = fmin(1.0, ship->ordn_charge +
-                                 AZ_ORDN_CHARGING_TIME * time);
+                                 time / AZ_ORDN_CHARGING_TIME);
         az_persist_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
       } else {
         az_loop_sound(&state->soundboard, AZ_SND_CHARGED_ORDNANCE);
@@ -768,6 +768,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
       }
       // Otherwise, fire a charged shot (no rockets).
       else {
+        if (player->gun2 != AZ_GUN_BEAM) try_use_energy(ship, 50, true);
         switch (player->gun2) {
           case AZ_GUN_NONE:
             fire_gun_single(state, 0.0, AZ_PROJ_GUN_CHARGED_NORMAL,
@@ -1214,8 +1215,7 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // beam gun, or (4) charging the gun.
   if (ship->cplus.state != AZ_CPLUS_ACTIVE && ship->recharge_cooldown <= 0.0 &&
       !(controls->fire_held &&
-        (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM ||
-         (player->gun1 == AZ_GUN_CHARGE && ship->gun_charge < 1.0)))) {
+        (player->gun1 == AZ_GUN_BEAM || player->gun2 == AZ_GUN_BEAM))) {
     recharge_ship_energy(player, time);
   }
 
