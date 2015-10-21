@@ -40,6 +40,7 @@
 static const int wall_data_indices[] = {
   // Colony walls:
   0, 2, 1, 21,
+  163, 164, 165, 166,
   // Green metal:
   28, 29, 30,
   // Girders:

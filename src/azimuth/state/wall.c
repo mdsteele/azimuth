@@ -1521,6 +1521,34 @@ static az_wall_data_t wall_datas[] = {
     .elasticity = 0.4,
     .polygon = AZ_INIT_POLYGON(wall_vertices_162)
   },
+  // Yellow rectangle block:
+  [163] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {176, 176, 112, 255}, .color2 = {60, 48, 32, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_0)
+  },
+  // Yellow angle block:
+  [164] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {176, 176, 112, 255}, .color2 = {60, 48, 32, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_2)
+  },
+  // Large blue square block:
+  [165] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {112, 128, 128, 255}, .color2 = {32, 48, 64, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_1)
+  },
+  // Huge blue rectangular block:
+  [166] = {
+    .style = AZ_WSTY_BEZEL_21, .bezel = 10.0,
+    .color1 = {112, 128, 128, 255}, .color2 = {32, 48, 64, 255},
+    .elasticity = 0.4,
+    .polygon = AZ_INIT_POLYGON(wall_vertices_21)
+  },
 };
 
 /*===========================================================================*/
