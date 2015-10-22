@@ -764,7 +764,6 @@ static void fire_weapons(az_space_state_t *state, double time) {
                              AZ_SND_CHARGED_MISSILE_BEAM, 0);
             break;
         }
-        ship->ordn_charge = 0.0;
       }
       // Otherwise, fire a charged shot (no rockets).
       else {
@@ -807,9 +806,13 @@ static void fire_weapons(az_space_state_t *state, double time) {
             break;
         }
       }
+    } else if (ship->gun_charge > 1/3.) {
+      controls->fire_pressed = true;
     }
     ship->gun_charge = 0.0;
-    return;
+    az_reset_sound(&state->soundboard, AZ_SND_CHARGING_GUN);
+    ship->ordn_charge = 0.0;
+    az_reset_sound(&state->soundboard, AZ_SND_CHARGING_ORDNANCE);
   }
 
   // If we're not firing a charged shot, just fire a normal shot.
