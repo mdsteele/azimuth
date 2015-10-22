@@ -745,9 +745,8 @@ static void projectile_special_logic(az_space_state_t *state,
       proj->angle = az_mod2pi(proj->angle + AZ_DEG2RAD(360) * time);
       break;
     case AZ_PROJ_GRAVITY_TORPEDO:
-      leave_missile_trail(state, proj, time, (az_color_t){64, 64, 192, 255});
-      proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
-            proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+      leave_particle_trail(state, proj, AZ_PAR_EXPLOSION,
+                           (az_color_t){128, 128, 255, 255}, 0.5, 5, 0);
       break;
     case AZ_PROJ_GRAVITY_TORPEDO_WELL:
       assert(proj->fired_by != AZ_SHIP_UID);

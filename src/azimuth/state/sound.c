@@ -295,6 +295,13 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.24889, .lpf_ramp = -0.700087, .lpf_resonance = 0.381467,
     .hpf_cutoff = 0.000101726, .hpf_ramp = 0.198532
   },
+  [AZ_SND_FIRE_GRAVITY_TORPEDO] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.3, .env_punch = 0.485, .env_decay = 0.7,
+    .start_freq = 0.33, .vibrato_depth = 0.165, .vibrato_speed = 0.645,
+    .arp_mod = 0.45, .arp_speed = 0.545, .duty_sweep = 0.05,
+    .phaser_offset = -0.88, .phaser_sweep = 0.1, .volume_adjust = 0.25
+  },
   [AZ_SND_FIRE_GUN_CHARGED_BEAM] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
     .env_sustain = 0.36394, .env_decay = 0.274647891521,

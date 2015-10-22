@@ -384,10 +384,9 @@ static const az_proj_data_t proj_data[] = {
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GRAVITY_TORPEDO] = {
-    .speed = 300.0,
+    .speed = 600.0,
     .lifetime = 6.0,
     .impact_damage = 3.0,
-    .homing_rate = AZ_DEG2RAD(150),
     .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_GRAVITY_TORPEDO_WELL] = {

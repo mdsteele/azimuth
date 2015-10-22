@@ -56,7 +56,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   if (baddie->state == 0) {
     az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 150,
                      state->ship.position, true);
-    if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
+    if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie) &&
+        az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20))) {
       if (az_random(0, 1) < 0.5) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
                                   20, 0, 0);
@@ -76,8 +77,11 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
           }
         }
         if (!any_gravity_torps) {
-          az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
-                                    20, 0, 0);
+          for (int i = -1; i <= 1; ++i) {
+            az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
+                                      20, 0, i * AZ_DEG2RAD(20));
+          }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_GRAVITY_TORPEDO);
         }
       }
       int num_eggs = 0;
