@@ -356,7 +356,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_sound = AZ_SND_EXPLODE_FIREBALL_SMALL,
     .shrapnel_kind = AZ_PROJ_FIREBALL_SLOW,
     .damage_kind = AZ_DMGF_FLAME,
-    .properties = AZ_PROJF_TEMP_INVINC
+    .properties = AZ_PROJF_BOSS_EXPIRE | AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_ERUPTION] = {
     .speed = 800.0,
@@ -387,7 +387,8 @@ static const az_proj_data_t proj_data[] = {
     .speed = 300.0,
     .lifetime = 6.0,
     .impact_damage = 3.0,
-    .homing_rate = AZ_DEG2RAD(150)
+    .homing_rate = AZ_DEG2RAD(150),
+    .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_GRAVITY_TORPEDO_WELL] = {
     .lifetime = 3.0,
@@ -412,7 +413,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 1.5,
     .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
     .damage_kind = AZ_DMGF_FREEZE | AZ_DMGF_BOMB,
-    .properties = AZ_PROJF_TEMP_INVINC
+    .properties = AZ_PROJF_BOSS_EXPIRE | AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_LASER_PULSE] = {
     .speed = 600.0,
@@ -461,7 +462,8 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 5.0,
     .splash_damage = 5.0,
     .splash_radius = 40.0,
-    .impact_shake = 0.5
+    .impact_shake = 0.5,
+    .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_NUCLEAR_EXPLOSION] = {
     .splash_damage = 50.0,
@@ -481,7 +483,7 @@ static const az_proj_data_t proj_data[] = {
     .impact_sound = AZ_SND_EXPLODE_FIREBALL_SMALL,
     .shrapnel_kind = AZ_PROJ_FIREBALL_SLOW,
     .damage_kind = AZ_DMGF_ROCKET,
-    .properties = AZ_PROJF_TEMP_INVINC
+    .properties = AZ_PROJF_BOSS_EXPIRE | AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_OTH_BARRAGE] = {
     .lifetime = 0.27,
@@ -573,7 +575,8 @@ static const az_proj_data_t proj_data[] = {
     .impact_damage = 5.0,
     .splash_damage = 5.0,
     .splash_radius = 30.0,
-    .impact_shake = 0.5
+    .impact_shake = 0.5,
+    .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_SPINE] = {
     .speed = 200.0,
@@ -597,7 +600,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 400.0,
     .lifetime = 6.0,
     .homing_rate = AZ_DEG2RAD(200),
-    .properties = AZ_PROJF_NO_HIT
+    .properties = AZ_PROJF_BOSS_EXPIRE | AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_TRINE_TORPEDO_EXPANDER] = {
     .speed = 200.0,
@@ -607,7 +610,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 30.0,
     .impact_shake = 0.75,
     .impact_sound = AZ_SND_EXPLODE_FIREBALL_SMALL,
-    .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME
+    .damage_kind = AZ_DMGF_ROCKET | AZ_DMGF_FLAME,
+    .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_TRINE_TORPEDO_FIREBALL] = {
     .speed = 800.0,

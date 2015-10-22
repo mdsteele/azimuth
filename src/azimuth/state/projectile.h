@@ -118,18 +118,20 @@ typedef enum {
 
 // Bitset of flags dictating special projectile behavior:
 typedef uint_fast8_t az_proj_flags_t;
+// BOSS_EXPIRE: expire projectile when boss dies
+#define AZ_PROJF_BOSS_EXPIRE   ((az_proj_flags_t)(1u << 0))
 // FAST_SHRAPNEL: shrapnel speed is not randomized, but goes at full speed
-#define AZ_PROJF_FAST_SHRAPNEL ((az_proj_flags_t)(1u << 0))
+#define AZ_PROJF_FAST_SHRAPNEL ((az_proj_flags_t)(1u << 1))
 // FEW_SPECKS: projectile produces fewer specks on impact than normal
-#define AZ_PROJF_FEW_SPECKS    ((az_proj_flags_t)(1u << 1))
+#define AZ_PROJF_FEW_SPECKS    ((az_proj_flags_t)(1u << 2))
 // NO_HIT: projectile never impacts anything (just goes until it expires)
-#define AZ_PROJF_NO_HIT        ((az_proj_flags_t)(1u << 2))
+#define AZ_PROJF_NO_HIT        ((az_proj_flags_t)(1u << 3))
 // PHASED: projectile passes through walls
-#define AZ_PROJF_PHASED        ((az_proj_flags_t)(1u << 3))
+#define AZ_PROJF_PHASED        ((az_proj_flags_t)(1u << 4))
 // PIERCING: projectile pierces through multiple targets
-#define AZ_PROJF_PIERCING      ((az_proj_flags_t)(1u << 4))
+#define AZ_PROJF_PIERCING      ((az_proj_flags_t)(1u << 5))
 // TEMP_INVINC: makes ship temp invincible on a direct impact
-#define AZ_PROJF_TEMP_INVINC   ((az_proj_flags_t)(1u << 5))
+#define AZ_PROJF_TEMP_INVINC   ((az_proj_flags_t)(1u << 6))
 
 typedef struct {
   double speed;
