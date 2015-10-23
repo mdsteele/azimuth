@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_script_scan);
   RUN_TEST(test_select_gun);
   RUN_TEST(test_signmod);
+  RUN_TEST(test_sound_volume);
   RUN_TEST(test_strdup);
   RUN_TEST(test_strprintf);
   RUN_TEST(test_transition_color);

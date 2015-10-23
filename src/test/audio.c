@@ -43,11 +43,11 @@ void test_create_sound_data(void) {
 void test_persist_sound(void) {
   az_soundboard_t soundboard = { .num_persists = 0 };
   const az_sound_data_t sound1, sound2, sound3, sound4;
-  az_persist_sound_data(&soundboard, &sound1);
+  az_persist_sound_data(&soundboard, &sound1, 1);
   az_reset_sound_data(&soundboard, &sound2);
   az_hold_sound_data(&soundboard, &sound3);
-  az_persist_sound_data(&soundboard, &sound2);
-  az_loop_sound_data(&soundboard, &sound4);
+  az_persist_sound_data(&soundboard, &sound2, 1);
+  az_loop_sound_data(&soundboard, &sound4, 1);
   EXPECT_INT_EQ(4, soundboard.num_persists);
 
   EXPECT_TRUE(soundboard.persists[0].sound_data == &sound1);
@@ -69,6 +69,60 @@ void test_persist_sound(void) {
   EXPECT_TRUE(soundboard.persists[3].play);
   EXPECT_TRUE(soundboard.persists[3].loop);
   EXPECT_FALSE(soundboard.persists[3].reset);
+}
+
+void test_sound_volume(void) {
+  az_soundboard_t soundboard = { .num_oneshots = 0, .num_persists = 0 };
+  const az_sound_data_t sound1, sound2, sound3, sound4;
+
+  // Perform a sequence of operations with persisted sounds, and make sure the
+  // volumes come out right.
+  az_loop_sound_data(&soundboard, &sound1, 0.5);
+  EXPECT_INT_EQ(1, soundboard.num_persists);
+  EXPECT_TRUE(soundboard.persists[0].sound_data == &sound1);
+  EXPECT_APPROX(0.5, soundboard.persists[0].volume);
+
+  az_loop_sound_data(&soundboard, &sound1, 0.25);
+  EXPECT_INT_EQ(1, soundboard.num_persists);
+  EXPECT_TRUE(soundboard.persists[0].sound_data == &sound1);
+  EXPECT_APPROX(0.5, soundboard.persists[0].volume);
+
+  az_loop_sound_data(&soundboard, &sound1, 0.75);
+  EXPECT_INT_EQ(1, soundboard.num_persists);
+  EXPECT_TRUE(soundboard.persists[0].sound_data == &sound1);
+  EXPECT_APPROX(0.75, soundboard.persists[0].volume);
+
+  az_loop_sound_data(&soundboard, &sound2, 1.0);
+  EXPECT_INT_EQ(2, soundboard.num_persists);
+  EXPECT_TRUE(soundboard.persists[0].sound_data == &sound1);
+  EXPECT_APPROX(0.75, soundboard.persists[0].volume);
+  EXPECT_TRUE(soundboard.persists[1].sound_data == &sound2);
+  EXPECT_APPROX(1.0, soundboard.persists[1].volume);
+
+  // Now test out oneshot sounds as well.
+  az_play_sound_data(&soundboard, &sound3, 0.625);
+  EXPECT_INT_EQ(1, soundboard.num_oneshots);
+  EXPECT_TRUE(soundboard.oneshots[0].sound_data == &sound3);
+  EXPECT_APPROX(0.625, soundboard.oneshots[0].volume);
+
+  az_play_sound_data(&soundboard, &sound3, 0.5);
+  EXPECT_INT_EQ(1, soundboard.num_oneshots);
+  EXPECT_TRUE(soundboard.oneshots[0].sound_data == &sound3);
+  EXPECT_APPROX(0.625, soundboard.oneshots[0].volume);
+
+  az_play_sound_data(&soundboard, &sound4, 0.5);
+  EXPECT_INT_EQ(2, soundboard.num_oneshots);
+  EXPECT_TRUE(soundboard.oneshots[0].sound_data == &sound3);
+  EXPECT_APPROX(0.625, soundboard.oneshots[0].volume);
+  EXPECT_TRUE(soundboard.oneshots[1].sound_data == &sound4);
+  EXPECT_APPROX(0.5, soundboard.oneshots[1].volume);
+
+  az_play_sound_data(&soundboard, &sound3, 1);
+  EXPECT_INT_EQ(2, soundboard.num_oneshots);
+  EXPECT_TRUE(soundboard.oneshots[0].sound_data == &sound3);
+  EXPECT_APPROX(1, soundboard.oneshots[0].volume);
+  EXPECT_TRUE(soundboard.oneshots[1].sound_data == &sound4);
+  EXPECT_APPROX(0.5, soundboard.oneshots[1].volume);
 }
 
 #define PARSE_MUSIC_FROM_STRING(music_string, music) do { \

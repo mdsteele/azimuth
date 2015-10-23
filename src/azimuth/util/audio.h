@@ -38,10 +38,14 @@ typedef struct {
   const az_music_t *next_music;
   double music_fade_out_seconds;
   int num_oneshots;
-  const az_sound_data_t *oneshots[10];
+  struct {
+    const az_sound_data_t *sound_data;
+    float volume; // 0 to 1
+  } oneshots[10];
   int num_persists;
   struct {
     const az_sound_data_t *sound_data;
+    float volume; // 0 to 1
     bool play;
     bool loop;
     bool reset;
@@ -60,14 +64,14 @@ void az_change_music_flag(az_soundboard_t *soundboard, int flag);
 // Indicate that we should play the given sound (once).  The sound will not
 // loop, and cannot be cancelled or paused once started.
 void az_play_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data);
+                        const az_sound_data_t *sound_data, float volume);
 
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
 // same sound, otherwise the sound will stop.  As long as we keep calling this
 // function, the sound will continue to loop.
 void az_loop_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data);
+                        const az_sound_data_t *sound_data, float volume);
 
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
@@ -75,7 +79,7 @@ void az_loop_sound_data(az_soundboard_t *soundboard,
 // and won't restart until we either stop calling this function for at least
 // one frame before calling it again, or we call az_reset_sound.
 void az_persist_sound_data(az_soundboard_t *soundboard,
-                           const az_sound_data_t *sound_data);
+                           const az_sound_data_t *sound_data, float volume);
 
 // Indicate that, if the given persisted or looped sound is currently playing,
 // we should pause it for this frame.  To keep the sound from resetting, we

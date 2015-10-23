@@ -67,6 +67,7 @@ static int next_music_flag = 0;
 static struct {
   const az_sound_data_t *data;
   size_t sample_index;
+  int volume; // 0 to MAX_VOLUME
   bool loop, persisted, paused, finished;
 } active_sounds[MAX_SIMULTANEOUS_SOUNDS];
 
@@ -95,7 +96,8 @@ static void audio_callback(void *userdata, Uint8 *bytes, int numbytes) {
       }
       assert(sound->data->num_samples > 0);
       assert(sound->sample_index < sound->data->num_samples);
-      sound_sample += sound->data->samples[sound->sample_index];
+      sound_sample += (sound->data->samples[sound->sample_index] *
+                       sound->volume) >> VOLUME_SHIFT;
       ++sound->sample_index;
       if (sound->sample_index >= sound->data->num_samples) {
         if (sound->loop) {
@@ -175,6 +177,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       if (!soundboard->persists[i].reset) {
         reset = false;
         already_active[i] = true;
+        sound->volume = soundboard->persists[i].volume * MAX_VOLUME;
         sound->paused = !soundboard->persists[i].play;
       }
       break;
@@ -193,6 +196,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       if (sound->data != NULL) continue;
       sound->data = soundboard->persists[i].sound_data;
       sound->sample_index = 0;
+      sound->volume = soundboard->persists[i].volume * MAX_VOLUME;
       sound->loop = soundboard->persists[i].loop;
       sound->persisted = true;
       sound->paused = false;
@@ -204,12 +208,13 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
 
   // Third, start playing any new one-shot sounds.
   for (int i = 0; i < soundboard->num_oneshots; ++i) {
-    if (soundboard->oneshots[i]->num_samples == 0) continue;
+    if (soundboard->oneshots[i].sound_data->num_samples == 0) continue;
     bool success = false;
     AZ_ARRAY_LOOP(sound, active_sounds) {
       if (sound->data != NULL) continue;
-      sound->data = soundboard->oneshots[i];
+      sound->data = soundboard->oneshots[i].sound_data;
       sound->sample_index = 0;
+      sound->volume = soundboard->oneshots[i].volume * MAX_VOLUME;
       sound->loop = false;
       sound->persisted = false;
       sound->paused = false;

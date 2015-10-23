@@ -40,8 +40,7 @@ static az_sound_spec_t sound_specs[] = {
   [AZ_SND_BEAM_FREEZE] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_sustain = 1.0, .start_freq = 0.3943662,
-    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253,
-    .square_duty = 0.35298
+    .vibrato_depth = 0.1056338, .vibrato_speed = 0.57042253
   },
   [AZ_SND_BEAM_NORMAL] = {
     .wave_kind = AZ_SQUARE_WAVE,
@@ -955,15 +954,20 @@ void az_init_sound_datas(void) {
 /*===========================================================================*/
 
 void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {
-  az_play_sound_data(soundboard, sound_data_for_key(sound_key));
+  az_play_sound_data(soundboard, sound_data_for_key(sound_key), 1);
 }
 
 void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {
-  az_loop_sound_data(soundboard, sound_data_for_key(sound_key));
+  az_loop_sound_data(soundboard, sound_data_for_key(sound_key), 1);
+}
+
+void az_loop_sound_with_volume(
+    az_soundboard_t *soundboard, az_sound_key_t sound_key, float volume) {
+  az_loop_sound_data(soundboard, sound_data_for_key(sound_key), volume);
 }
 
 void az_persist_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {
-  az_persist_sound_data(soundboard, sound_data_for_key(sound_key));
+  az_persist_sound_data(soundboard, sound_data_for_key(sound_key), 1);
 }
 
 void az_hold_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {

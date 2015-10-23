@@ -76,6 +76,11 @@ void az_track_camera_towards(az_camera_t *camera, az_vector_t goal,
 // Apply shake to the camera.
 void az_shake_camera(az_camera_t *camera, double horz, double vert);
 
+// Determine if a ray, travelling delta from start, will intersect the
+// rectangular view of the camera.
+bool az_ray_intersects_camera_rectangle(
+    const az_camera_t *camera, az_vector_t start, az_vector_t delta);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_STATE_CAMERA_H_

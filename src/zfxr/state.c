@@ -43,7 +43,7 @@ void az_tick_zfxr_state(az_zfxr_state_t *state, double time) {
     if (state->ready_to_play) {
       az_destroy_sound_data(&state->sound_data);
       az_create_sound_data(&state->sound_spec, &state->sound_data);
-      az_persist_sound_data(&state->soundboard, &state->sound_data);
+      az_persist_sound_data(&state->soundboard, &state->sound_data, 1);
       state->request_play = false;
       state->ready_to_play = false;
     } else {
@@ -51,7 +51,7 @@ void az_tick_zfxr_state(az_zfxr_state_t *state, double time) {
       state->ready_to_play = true;
     }
   } else {
-    az_persist_sound_data(&state->soundboard, &state->sound_data);
+    az_persist_sound_data(&state->soundboard, &state->sound_data, 1);
   }
 }
 

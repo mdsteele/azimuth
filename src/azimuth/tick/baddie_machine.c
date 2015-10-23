@@ -134,6 +134,7 @@ void az_tick_bad_heat_ray(
       az_impact_t impact;
       az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
                     AZ_IMPF_NONE, baddie->uid, &impact);
+      const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
       if (impact.type == AZ_IMP_BADDIE) {
         if (impact.target.baddie.baddie->kind == AZ_BAD_BEAM_WALL) {
           beam_damage /= 6;
@@ -153,7 +154,12 @@ void az_tick_bad_heat_ray(
                    az_vpolar(az_random(20.0, 70.0),
                              az_vtheta(impact.normal) +
                              az_random(-AZ_HALF_PI, AZ_HALF_PI)));
-      az_loop_sound(&state->soundboard, AZ_SND_BEAM_FREEZE);
+      if (az_ray_intersects_camera_rectangle(&state->camera, beam_start,
+                                             beam_delta)) {
+        az_loop_sound(&state->soundboard, AZ_SND_BEAM_FREEZE);
+      } else {
+        az_loop_sound_with_volume(&state->soundboard, AZ_SND_BEAM_FREEZE, 0.4);
+      }
     } else {
       baddie->state = 1;
       baddie->cooldown = az_random(0.5, 3.0);

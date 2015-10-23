@@ -23,6 +23,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -98,6 +99,20 @@ void az_track_camera_towards(az_camera_t *camera, az_vector_t towards,
 void az_shake_camera(az_camera_t *camera, double horz, double vert) {
   camera->shake_horz = fmax(camera->shake_horz, horz);
   camera->shake_vert = fmax(camera->shake_vert, vert);
+}
+
+bool az_ray_intersects_camera_rectangle(
+    const az_camera_t *camera, az_vector_t start, az_vector_t delta) {
+  az_vector_t vertices[4] = {
+    {AZ_SCREEN_HEIGHT/2, AZ_SCREEN_WIDTH/2},
+    {-AZ_SCREEN_HEIGHT/2, AZ_SCREEN_WIDTH/2},
+    {-AZ_SCREEN_HEIGHT/2, -AZ_SCREEN_WIDTH/2},
+    {AZ_SCREEN_HEIGHT/2, -AZ_SCREEN_WIDTH/2}
+  };
+  const az_polygon_t polygon = AZ_INIT_POLYGON(vertices);
+  return az_ray_hits_polygon_trans(polygon, camera->center,
+                                   az_vtheta(camera->center), start, delta,
+                                   NULL, NULL);
 }
 
 /*===========================================================================*/

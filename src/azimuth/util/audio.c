@@ -20,6 +20,7 @@
 #include "azimuth/util/audio.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 
 #include "azimuth/util/misc.h"
@@ -45,21 +46,28 @@ void az_change_music_flag(az_soundboard_t *soundboard, int flag) {
 }
 
 void az_play_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data) {
+                        const az_sound_data_t *sound_data, float volume) {
+  assert(volume >= 0.0f && volume <= 1.0f);
   if (sound_data == NULL) return;
   if (soundboard->num_oneshots < AZ_ARRAY_SIZE(soundboard->oneshots)) {
     // Don't start the same sound more than once in the same frame.
     for (int i = 0; i < soundboard->num_oneshots; ++i) {
-      if (soundboard->oneshots[i] == sound_data) return;
+      if (soundboard->oneshots[i].sound_data == sound_data) {
+        soundboard->oneshots[i].volume =
+          fmax(volume, soundboard->oneshots[i].volume);
+        return;
+      }
     }
-    soundboard->oneshots[soundboard->num_oneshots] = sound_data;
+    soundboard->oneshots[soundboard->num_oneshots].sound_data = sound_data;
+    soundboard->oneshots[soundboard->num_oneshots].volume = volume;
     ++soundboard->num_oneshots;
   }
 }
 
 static void persist_sound_internal(
     az_soundboard_t *soundboard, const az_sound_data_t *sound_data,
-    bool play, bool loop, bool reset) {
+    float volume, bool play, bool loop, bool reset) {
+  assert(volume >= 0.0f && volume <= 1.0f);
   if (sound_data == NULL) return;
   int index;
   for (index = 0; index < soundboard->num_persists; ++index) {
@@ -75,29 +83,31 @@ static void persist_sound_internal(
   soundboard->persists[index].sound_data = sound_data;
  merge:
   assert(soundboard->persists[index].sound_data == sound_data);
+  soundboard->persists[index].volume =
+    fmax(volume, soundboard->persists[index].volume);
   soundboard->persists[index].play |= play;
   soundboard->persists[index].loop |= loop;
   soundboard->persists[index].reset |= reset;
 }
 
 void az_loop_sound_data(az_soundboard_t *soundboard,
-                        const az_sound_data_t *sound_data) {
-  persist_sound_internal(soundboard, sound_data, true, true, false);
+                        const az_sound_data_t *sound_data, float volume) {
+  persist_sound_internal(soundboard, sound_data, volume, true, true, false);
 }
 
 void az_persist_sound_data(az_soundboard_t *soundboard,
-                           const az_sound_data_t *sound_data) {
-  persist_sound_internal(soundboard, sound_data, true, false, false);
+                           const az_sound_data_t *sound_data, float volume) {
+  persist_sound_internal(soundboard, sound_data, volume, true, false, false);
 }
 
 void az_hold_sound_data(az_soundboard_t *soundboard,
                         const az_sound_data_t *sound_data) {
-  persist_sound_internal(soundboard, sound_data, false, false, false);
+  persist_sound_internal(soundboard, sound_data, 0, false, false, false);
 }
 
 void az_reset_sound_data(az_soundboard_t *soundboard,
                          const az_sound_data_t *sound_data) {
-  persist_sound_internal(soundboard, sound_data, false, false, true);
+  persist_sound_internal(soundboard, sound_data, 0, false, false, true);
 }
 
 /*===========================================================================*/
