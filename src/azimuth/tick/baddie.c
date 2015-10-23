@@ -718,8 +718,18 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         baddie->cooldown = az_random(1, 2);
         baddie->state = 1;
       } else if (baddie->cooldown <= 0.0) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_ERUPTION, 0, 0, 0);
-        az_play_sound(&state->soundboard, AZ_SND_ERUPTION);
+        const az_projectile_t *proj =
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_ERUPTION, 0, 0, 0);
+        if (proj != NULL) {
+          if (az_ray_intersects_camera_rectangle(
+                  &state->camera, baddie->position,
+                  az_vmul(proj->velocity, proj->data->lifetime))) {
+            az_play_sound(&state->soundboard, AZ_SND_ERUPTION);
+          } else {
+            az_play_sound_with_volume(&state->soundboard, AZ_SND_ERUPTION,
+                                      0.27);
+          }
+        }
         baddie->state = 0;
       }
       break;

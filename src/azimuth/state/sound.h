@@ -160,6 +160,9 @@ void az_init_sound_datas(void);
 // loop, and cannot be cancelled or paused once started.
 void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound);
 
+void az_play_sound_with_volume(
+    az_soundboard_t *soundboard, az_sound_key_t sound, float volume);
+
 // Indicate that we should start playing, or continue to play, the given sound.
 // To keep the sound going, we must call this function every frame with the
 // same sound, otherwise the sound will stop.  As long as we keep calling this

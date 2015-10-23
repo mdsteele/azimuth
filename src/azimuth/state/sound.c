@@ -957,6 +957,11 @@ void az_play_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {
   az_play_sound_data(soundboard, sound_data_for_key(sound_key), 1);
 }
 
+void az_play_sound_with_volume(
+    az_soundboard_t *soundboard, az_sound_key_t sound_key, float volume) {
+  az_play_sound_data(soundboard, sound_data_for_key(sound_key), volume);
+}
+
 void az_loop_sound(az_soundboard_t *soundboard, az_sound_key_t sound_key) {
   az_loop_sound_data(soundboard, sound_data_for_key(sound_key), 1);
 }
