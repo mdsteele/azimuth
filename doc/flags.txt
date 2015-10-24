@@ -1,4 +1,4 @@
-Next flag: 140
+Next flag: 141
 
 Bosses
 ======
@@ -160,3 +160,4 @@ Misc
 128: Core music changed
 138: Opened one-way gate in Filimun room 110
 139: Opened one-way gate in Nandiar room 192
+140: Opened one-way gate in Barrag room 281
