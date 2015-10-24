@@ -504,6 +504,15 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
                        radius * sin(AZ_DEG2RAD(i)));
           }
         } glEnd();
+        const double hurt = (baddie->data->max_health - baddie->health) /
+          baddie->data->max_health;
+        for (int i = 0; i < 5; ++i) {
+          const double angle = AZ_DEG2RAD(20) + i * AZ_DEG2RAD(72);
+          az_random_seed_t seed = {1 + 4987298743 * baddie->uid,
+                                   1 + 373984471 * i};
+          az_draw_cracks(&seed, az_vpolar(-radius, angle), angle,
+                         5 * hurt * (1.5 - 0.33 * ((3 * i) % 5)));
+        }
         for (int i = 0; i < 10; ++i) {
           glBegin(GL_TRIANGLE_FAN); {
             glColor3f(0.4f + 0.3f * blink, 0.4f, 0.4f);

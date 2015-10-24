@@ -1473,7 +1473,7 @@ static az_baddie_data_t baddie_datas[] = {
                    .immunities = AZ_DMGF_FREEZE, .impact_damage = 10.0 }
   },
   [AZ_BAD_FIREBALL_MINE] = {
-    .max_health = 20.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
+    .max_health = 12.0, .potential_pickups = ~AZ_PUPF_LARGE_SHIELDS,
     .static_properties = AZ_BADF_DRAW_BG, .color = {128, 128, 128, 255},
     .hurt_sound = AZ_SND_HURT_TURRET, .armor_sound = AZ_SND_HIT_ARMOR,
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
