@@ -119,11 +119,9 @@ static const az_vector_t clam_shell2_vertices[] = {
 };
 static az_component_data_t clam_components[] = {
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell1_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET |
-                   AZ_DMGF_BEAM | AZ_DMGF_FLAME), .impact_damage = 10.0 },
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 },
   { .init_position = {-4, 0}, .polygon = AZ_INIT_POLYGON(clam_shell2_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET |
-                   AZ_DMGF_BEAM | AZ_DMGF_FLAME), .impact_damage = 10.0 }
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED), .impact_damage = 10.0 }
 };
 
 static const az_vector_t nightbug_vertices[] = {
@@ -1112,8 +1110,9 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_CLAM] = {
     .max_health = 6.0, .overall_bounding_radius = 31.5,
     .potential_pickups = AZ_PUPF_ALL, .color = {128, 0, 255, 255},
-    .death_sound = AZ_SND_KILL_TURRET,
-    .main_body = { .bounding_radius = 8.0, .impact_damage = 10.0 },
+    .hurt_sound = AZ_SND_HURT_FISH, .armor_sound = AZ_SND_HIT_ARMOR,
+    .death_sound = AZ_SND_KILL_TURRET, .static_properties = AZ_BADF_VULNERABLE,
+    .main_body = { .bounding_radius = 10.0, .impact_damage = 10.0 },
     DECL_COMPONENTS(clam_components)
   },
   [AZ_BAD_NIGHTBUG] = {
