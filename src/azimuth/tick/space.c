@@ -708,6 +708,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
 
   // If we're in dialogue, advance the dialogue and then stop.
   if (state->dialogue.step != AZ_DLS_INACTIVE) {
+    az_tick_doors(state, time);
     tick_dialogue(state, time);
     return;
   } else assert(state->dialogue.paragraph == NULL);
