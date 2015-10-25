@@ -44,6 +44,8 @@
 
 // How long after using energy we are unable to recharge, in seconds:
 #define AZ_RECHARGE_COOLDOWN_TIME 0.5
+// Min delay between firing ordnance rounds, in seconds:
+#define AZ_ORDN_COOLDOWN_TIME 0.25
 // The time needed to charge the CHARGE gun, in seconds:
 #define AZ_CHARGE_GUN_CHARGING_TIME 1.66666666666666666
 // The time needed to charge up hyper/mega ordnance, in seconds:
@@ -449,6 +451,7 @@ static void fire_ordn_multi(
     state->ship.velocity =
       az_vadd(state->ship.velocity, az_vpolar(-recoil, state->ship.angle));
   }
+  state->ship.ordn_cooldown = AZ_ORDN_COOLDOWN_TIME;
 }
 
 // Fire a single ordnance projectile (applying the ordnance power bonus).
@@ -686,7 +689,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           fire_ordn_single(state, AZ_PROJ_HYPER_ROCKET, true,
                            AZ_SND_FIRE_HYPER_ROCKET, 100);
         } else {
-          if (player->rockets <= 0) return;
+          if (player->rockets <= 0 || ship->ordn_cooldown > 0.0) return;
           --player->rockets;
           fire_ordn_single(state, AZ_PROJ_ROCKET, true,
                            AZ_SND_FIRE_ROCKET, 20);
@@ -702,7 +705,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
           fire_ordn_single(state, AZ_PROJ_MEGA_BOMB, false,
                            AZ_SND_BLINK_MEGA_BOMB, 0);
         } else {
-          if (player->bombs <= 0) return;
+          if (player->bombs <= 0 || ship->ordn_cooldown > 0.0) return;
           --player->bombs;
           fire_ordn_single(state, AZ_PROJ_BOMB, false, AZ_SND_DROP_BOMB, 0);
         }
@@ -1193,6 +1196,8 @@ void az_tick_ship(az_space_state_t *state, double time) {
   // Cool down various ship systems.
   assert(ship->recharge_cooldown >= 0.0);
   ship->recharge_cooldown = fmax(0.0, ship->recharge_cooldown - time);
+  assert(ship->ordn_cooldown >= 0.0);
+  ship->ordn_cooldown = fmax(0.0, ship->ordn_cooldown - time);
   assert(ship->shield_flare >= 0.0);
   assert(ship->shield_flare <= 1.0);
   ship->shield_flare =

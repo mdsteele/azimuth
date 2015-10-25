@@ -49,6 +49,7 @@ typedef struct {
   double recharge_cooldown; // seconds until energy recharge can resume
   double gun_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
   double ordn_charge; // from 0.0 (uncharged) to 1.0 (fully charged)
+  double ordn_cooldown; // seconds until you can shoot ordnance again
   bool ordn_held;
   double shield_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
   double reactive_flare; // from 0.0 (nothing) to 1.0 (was just now hit)
