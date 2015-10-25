@@ -602,8 +602,8 @@ static const az_proj_data_t proj_data[] = {
     .properties = AZ_PROJF_BOSS_EXPIRE | AZ_PROJF_NO_HIT
   },
   [AZ_PROJ_TRINE_TORPEDO_EXPANDER] = {
-    .speed = 200.0,
-    .lifetime = 1.0,
+    .speed = 125.0,
+    .lifetime = 1.6,
     .impact_damage = 2.5,
     .splash_damage = 2.5,
     .splash_radius = 30.0,

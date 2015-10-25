@@ -922,7 +922,7 @@ static void projectile_special_logic(az_space_state_t *state,
           az_projectile_t *expander = az_add_projectile(
               state, AZ_PROJ_TRINE_TORPEDO_EXPANDER, position,
               base_angle + i * AZ_DEG2RAD(120), power, fired_by);
-          if (expander != NULL) expander->age += 0.1 * i;
+          if (expander != NULL) expander->age += 0.4 * i;
         }
       } else {
         leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
@@ -944,10 +944,15 @@ static void projectile_special_logic(az_space_state_t *state,
         az_add_projectile(state, AZ_PROJ_TRINE_TORPEDO_FIREBALL, position,
                           goal_angle, power, fired_by);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+      } else if (proj->data->lifetime - proj->age < 0.5) {
+        proj->velocity = AZ_VZERO;
       } else {
-        leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
         proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
               proj->data->speed * cos(7.0 * proj->age)}, proj->angle);
+        if (times_per_second(15, proj, time)) {
+          leave_particle_trail(state, proj, AZ_PAR_EXPLOSION,
+                               (az_color_t){192, 64, 64, 128}, 1.0, 5.0, 0.0);
+        }
       }
       break;
     case AZ_PROJ_TRINE_TORPEDO_FIREBALL:

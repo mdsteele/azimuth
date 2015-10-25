@@ -570,9 +570,17 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
     case AZ_PROJ_TRINE_TORPEDO_FIREBALL:
       draw_spark(proj->age, 10.0, (az_color_t){255, 128, 0, 0});
       break;
-    case AZ_PROJ_TRINE_TORPEDO_EXPANDER:
-      draw_spark(proj->age, 8.0, (az_color_t){255, 128, 0, 0});
-      break;
+    case AZ_PROJ_TRINE_TORPEDO_EXPANDER: {
+      az_color_t color = {255, 128, 0, 0};
+      double radius = 8.0;
+      if (proj->data->lifetime - proj->age < 0.5) {
+        radius = 10.0;
+        if (az_clock_mod(2, 4, clock) == 0) {
+          color = (az_color_t){0, 255, 255, 0};
+        }
+      }
+      draw_spark(proj->age, radius, color);
+    } break;
   }
 }
 
