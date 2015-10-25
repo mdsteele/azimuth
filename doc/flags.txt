@@ -1,4 +1,4 @@
-Next flag: 141
+Next flag: 142
 
 Bosses
 ======
@@ -126,6 +126,7 @@ Doors
 135: Opened red door between Colony room 78 and Filimun room 129
 136: Opened pink door between Colony rooms 68 and 69
 137: Opened red door between Barrag rooms 247 and 248
+141: Opened pink door between Voquan room 351 and Barrag room 475
 
 Boss Doors
 ==========
