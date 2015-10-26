@@ -156,6 +156,7 @@ static void release_gnat_swarm(az_space_state_t *state, az_baddie_t *baddie) {
                     az_vadd(start_position, az_vpolar(10.0, angle)), angle);
     if (gnat == NULL) break;
   }
+  az_play_sound(&state->soundboard, AZ_SND_WINGS_FLAPPING);
 }
 
 static void choose_next_state(
@@ -204,6 +205,7 @@ static void choose_next_state(
                        state->ship.velocity, 400.0, &rel_impact)) {
       az_fire_baddie_projectile(state, baddie, AZ_PROJ_ICE_TORPEDO, 150.0, 0.0,
                                 az_vtheta(rel_impact) - baddie->angle);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_ICE_TORPEDO);
     }
   }
 }

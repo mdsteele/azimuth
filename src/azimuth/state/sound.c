@@ -376,6 +376,12 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.2, .vibrato_depth = 0.5, .vibrato_speed = 0.75,
     .repeat_speed = 0.55, .phaser_offset = 0.25, .phaser_sweep = -0.25
   },
+  [AZ_SND_FIRE_ICE_TORPEDO] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.085, .env_decay = 0.695,
+    .start_freq = 0.25, .freq_slide = -0.19,
+    .phaser_offset = 0.72, .phaser_sweep = -0.11, .lpf_cutoff = 0.25
+  },
   [AZ_SND_FIRE_LASER_PULSE] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.11852, .env_punch = 0.132, .env_decay = 0.183098584414,
@@ -919,6 +925,14 @@ static az_sound_spec_t sound_specs[] = {
     .repeat_speed = 0.930951, .phaser_sweep = -0.00171322,
     .lpf_cutoff = 0.896005, .lpf_ramp = 0.657195, .lpf_resonance = 0.402098,
     .hpf_cutoff = 0.0432724, .hpf_ramp = 0.0389865
+  },
+  [AZ_SND_WINGS_FLAPPING] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_attack = 0.24, .env_decay = 0.57,
+    .freq_slide = 0.68, .freq_delta_slide = 0.95,
+    .vibrato_depth = 0.84, .vibrato_speed = 0.495,
+    .arp_mod = 0.32, .arp_speed = 0.16, .repeat_speed = 0.54,
+    .lpf_cutoff = 0.78, .lpf_ramp = 0.17
   },
 };
 
