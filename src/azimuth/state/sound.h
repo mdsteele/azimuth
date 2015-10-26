@@ -27,7 +27,7 @@
 /*===========================================================================*/
 
 // The number of different sound keys there are, not counting AZ_SND_NOTHING:
-#define AZ_NUM_SOUND_KEYS 117
+#define AZ_NUM_SOUND_KEYS 118
 
 typedef enum {
   AZ_SND_NOTHING = 0,
@@ -76,6 +76,7 @@ typedef enum {
   AZ_SND_EXPLODE_ROCKET,
   AZ_SND_EXPLODE_SHIP,
   AZ_SND_FIRE_FIREBALL,
+  AZ_SND_FIRE_FORCE_WAVE,
   AZ_SND_FIRE_GRAVITY_TORPEDO,
   AZ_SND_FIRE_GUN_CHARGED_BEAM,
   AZ_SND_FIRE_GUN_CHARGED_FREEZE,

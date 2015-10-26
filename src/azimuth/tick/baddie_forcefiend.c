@@ -150,6 +150,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(60))) {
       az_fire_baddie_projectile(state, baddie, AZ_PROJ_FORCE_WAVE, 0, 0,
                                 az_random(-1.3, 1.3));
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_FORCE_WAVE);
       baddie->cooldown = 0.3;
       const int remaining = get_secondary_state(baddie) - 1;
       if (remaining > 0) set_secondary_state(baddie, remaining);
