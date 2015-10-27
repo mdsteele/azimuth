@@ -173,15 +173,9 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   // Move arms to fit claws:
   for (int i = 2; i <= 5; i += 3) {
     const az_vector_t wrist = baddie->components[i+2].position;
-    const double dist = az_vnorm(wrist);
-    static const double upper = 40, lower = 34;
-    const double cosine = (upper*upper + dist*dist - lower*lower) /
-      (2.0 * upper * dist);
-    const double gamma = acos(fmin(fmax(-1, cosine), 1));
-    const double theta = az_vtheta(wrist) +
-      ((i % 2) ^ (wrist.x < 0) ? -gamma : gamma);
-    const az_vector_t elbow = az_vpolar(upper, theta);
-    baddie->components[i].angle = az_mod2pi(theta);
+    const az_vector_t elbow = az_find_knee(
+        AZ_VZERO, wrist, 40, 34, (az_vector_t){0, (i % 2 ? -1 : 1)});
+    baddie->components[i].angle = az_vtheta(elbow);
     baddie->components[i+1].position = elbow;
     baddie->components[i+1].angle = az_vtheta(az_vsub(wrist, elbow));
   }
