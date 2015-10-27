@@ -37,6 +37,8 @@
 #define SEEK_LEFT_STATE 1
 #define SEEK_RIGHT_STATE 2
 #define FORCE_FLURRY_STATE 3
+#define CLAW_SWIPE_STATE 4
+#define CLAW_UNSWIPE_STATE 5
 
 /*===========================================================================*/
 
@@ -59,6 +61,21 @@ static void set_secondary_state(az_baddie_t *baddie, int secondary) {
 }
 
 /*===========================================================================*/
+
+static void angle_towards(double *angle, double delta, double goal,
+                          double origin) {
+  double rel_angle = az_mod2pi(*angle - origin);
+  const double rel_goal = az_mod2pi(goal - origin);
+  if (rel_angle < rel_goal) rel_angle = fmin(rel_goal, rel_angle + delta);
+  else if (rel_angle > rel_goal) rel_angle = fmax(rel_goal, rel_angle - delta);
+  *angle = az_mod2pi(origin + rel_angle);
+}
+
+static void position_towards(az_vector_t *position, double delta,
+                             az_vector_t goal) {
+  if (az_vwithin(*position, goal, delta)) *position = goal;
+  else az_vpluseq(position, az_vwithlen(az_vsub(goal, *position), delta));
+}
 
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time) {
@@ -83,7 +100,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   // CHASE_STATE: Chase ship and fire homing torpedoes.
   const int primary = get_primary_state(baddie);
   if (primary == CHASE_STATE) {
-    az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 150,
+    az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 60,
                      state->ship.position, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie) &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20))) {
@@ -156,20 +173,58 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       if (remaining > 0) set_secondary_state(baddie, remaining);
       else set_primary_state(baddie, CHASE_STATE);
     }
-    if (!az_ship_is_decloaked(&state->ship) ||
-        az_vwithin(state->ship.position, baddie->position, 150.0)) {
+    if (az_ship_is_decloaked(&state->ship) &&
+        az_vwithin(state->ship.position, baddie->position, 120.0)) {
+      set_primary_state(baddie, CLAW_SWIPE_STATE);
+      baddie->param = 0.0;
+    }
+  }
+  // CLAW_SWIPE/UNSWIPE_STATE: Swipe at ship with claws.
+  else if (primary == CLAW_SWIPE_STATE) {
+    baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
+        az_vtheta(az_vsub(state->ship.position, baddie->position)));
+    baddie->param = fmin(1.0, baddie->param + time / 0.4);
+    if (baddie->param >= 1.0) {
+      set_primary_state(baddie, CLAW_UNSWIPE_STATE);
+    }
+  } else if (primary == CLAW_UNSWIPE_STATE) {
+    baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
+        az_vtheta(az_vsub(state->ship.position, baddie->position)));
+    baddie->param = fmax(0.0, baddie->param - time / 0.5);
+    if (baddie->param <= 0.0) {
       set_primary_state(baddie, CHASE_STATE);
     }
   }
   // Move claws:
-  // TODO: When ship gets in front of Forcefiend, swipe with one of the claws.
   const double offset = baddie->components[9].position.y;
-  baddie->components[4].position = (az_vector_t){-54 + 0.02 * offset*offset,
-      34.64 + (offset < 0 ? 0.5 * offset : offset)};
-  baddie->components[7].position = (az_vector_t){-54 + 0.02 * offset*offset,
-      -34.64 + (offset > 0 ? 0.5 * offset : offset)};
-  baddie->components[4].angle = baddie->components[7].angle =
+  az_vector_t left_claw_goal_position =
+    {-54 + 0.02 * offset * offset,
+     34.64 + (offset < 0 ? 0.5 * offset : offset)};
+  az_vector_t right_claw_goal_position =
+    {-54 + 0.02 * offset * offset,
+     -34.64 + (offset > 0 ? 0.5 * offset : offset)};
+  double left_claw_goal_angle =
     az_mod2pi(baddie->components[9].angle + AZ_PI);
+  double right_claw_goal_angle = left_claw_goal_angle;
+  if (primary == CLAW_SWIPE_STATE || primary == CLAW_UNSWIPE_STATE) {
+    const double swipe_theta = AZ_DEG2RAD(220) * baddie->param;
+    az_vpluseq(&left_claw_goal_position, (az_vector_t){
+        60 - 60 * cos(swipe_theta), 50 * sin(swipe_theta)});
+    az_vpluseq(&right_claw_goal_position, (az_vector_t){
+        60 - 60 * cos(swipe_theta), -50 * sin(swipe_theta)});
+    left_claw_goal_angle = AZ_DEG2RAD(180) - AZ_DEG2RAD(250) * baddie->param;
+    right_claw_goal_angle = AZ_DEG2RAD(180) + AZ_DEG2RAD(250) * baddie->param;
+  }
+  const double claw_position_delta = 350 * time;
+  position_towards(&baddie->components[4].position, claw_position_delta,
+                   az_vcaplen(left_claw_goal_position, 74));
+  position_towards(&baddie->components[7].position, claw_position_delta,
+                   az_vcaplen(right_claw_goal_position, 74));
+  const double claw_angle_delta = AZ_DEG2RAD(720) * time;
+  angle_towards(&baddie->components[4].angle, claw_angle_delta,
+                left_claw_goal_angle, AZ_DEG2RAD(90));
+  angle_towards(&baddie->components[7].angle, claw_angle_delta,
+                right_claw_goal_angle, AZ_DEG2RAD(-90));
   // Move arms to fit claws:
   for (int i = 2; i <= 5; i += 3) {
     const az_vector_t wrist = baddie->components[i+2].position;
