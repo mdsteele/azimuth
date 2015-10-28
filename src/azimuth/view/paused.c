@@ -58,6 +58,99 @@ static void draw_bezel_box(double bezel, double x, double y,
   } glEnd();
 }
 
+static void draw_weapon_box(double x, double y, double w, double h,
+                            int digit, bool has, bool selected, bool label) {
+  assert(digit >= 0 && digit <= 9);
+  assert(has || !selected);
+  if (has && label) {
+    glPushMatrix(); {
+      glTranslated(x + 2.5, y + 5.5, 0);
+      glColor3f(0.5, 1, 0.5);
+      switch (digit) {
+        case 0:
+          glBegin(GL_LINE_LOOP); {
+            glVertex2f(0, 0); glVertex2f(2, 0); glVertex2f(2, 4);
+            glVertex2f(0, 4);
+          } glEnd();
+          break;
+        case 1:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(0, 1); glVertex2f(1, 0); glVertex2f(1, 4);
+          } glEnd();
+          glBegin(GL_LINES); {
+            glVertex2f(-0.5, 4); glVertex2f(2.5, 4);
+          } glEnd();
+          break;
+        case 2:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(-0.5, 0); glVertex2f(2, 0); glVertex2f(2, 2);
+            glVertex2f(0, 2); glVertex2f(0, 4); glVertex2f(2.5, 4);
+          } glEnd();
+          break;
+        case 3:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(-0.5, 0); glVertex2f(2, 0); glVertex2f(2, 4);
+            glVertex2f(-0.5, 4);
+          } glEnd();
+          glBegin(GL_LINES); {
+            glVertex2f(0, 2); glVertex2f(2, 2);
+          } glEnd();
+          break;
+        case 4:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(0, -0.5); glVertex2f(0, 2); glVertex2f(2, 2);
+          } glEnd();
+          glBegin(GL_LINES); {
+            glVertex2f(2, -0.5); glVertex2f(2, 4.5);
+          } glEnd();
+          break;
+        case 5:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(2.5, 0); glVertex2f(0, 0); glVertex2f(0, 2);
+            glVertex2f(2, 2); glVertex2f(2, 4); glVertex2f(-0.5, 4);
+          } glEnd();
+          break;
+        case 6:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(2.5, 0); glVertex2f(0, 0); glVertex2f(0, 4);
+            glVertex2f(2, 4); glVertex2f(2, 2); glVertex2f(0, 2);
+          } glEnd();
+          break;
+        case 7:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(-0.5, 0); glVertex2f(2, 0); glVertex2f(1, 4);
+          } glEnd();
+          break;
+        case 8:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(0, 2); glVertex2f(0, 4); glVertex2f(2, 4);
+            glVertex2f(2, 0); glVertex2f(0, 0); glVertex2f(0, 2);
+            glVertex2f(2, 2);
+          } glEnd();
+          break;
+        case 9:
+          glBegin(GL_LINE_STRIP); {
+            glVertex2f(-0.5, 4); glVertex2f(2, 4); glVertex2f(2, 0);
+            glVertex2f(0, 0); glVertex2f(0, 2); glVertex2f(2, 2);
+          } glEnd();
+          break;
+      }
+    } glPopMatrix();
+    glBegin(GL_LINE_STRIP); {
+      if (selected) glColor3f(0.5, 0.5, 0.5);
+      else glColor3f(0.5, 0, 0.5);
+      glVertex2d(x + 4.5, y + 0.5);
+      glVertex2d(x + 6.5, y + 2.5);
+      glVertex2d(x + 6.5, y + h - 2.5);
+      glVertex2d(x + 4.5, y + h - 0.5);
+    } glEnd();
+  }
+  if (selected) glColor3f(1, 1, 1);
+  else if (has) glColor3f(1, 0, 1);
+  else glColor3f(0.5, 0, 0.5);
+  draw_bezel_box(2, x, y, w, h);
+}
+
 /*===========================================================================*/
 // Minimap geometry:
 
@@ -390,7 +483,7 @@ static const az_vector_t upgrade_drawer_handle_vertices[] = {
 static const az_polygon_t upgrade_drawer_handle_polygon =
   AZ_INIT_POLYGON(upgrade_drawer_handle_vertices);
 
-#define GUN_BOX_WIDTH 60
+#define GUN_BOX_WIDTH 64
 #define UPG_BOX_WIDTH 150
 #define UPG_BOX_HEIGHT 15
 
@@ -403,14 +496,14 @@ static const az_polygon_t upgrade_drawer_handle_polygon =
 #define BOMBS_BOX_TOP 46
 
 static const az_vector_t upgrade_toplefts[] = {
-  [AZ_UPG_GUN_CHARGE] = {191, 26},
-  [AZ_UPG_GUN_FREEZE] = {257, 26},
-  [AZ_UPG_GUN_TRIPLE] = {323, 26},
-  [AZ_UPG_GUN_HOMING] = {389, 26},
-  [AZ_UPG_GUN_PHASE] = {191, 46},
-  [AZ_UPG_GUN_BURST] = {257, 46},
-  [AZ_UPG_GUN_PIERCE] = {323, 46},
-  [AZ_UPG_GUN_BEAM] = {389, 46},
+  [AZ_UPG_GUN_CHARGE] = {185, 26},
+  [AZ_UPG_GUN_FREEZE] = {254, 26},
+  [AZ_UPG_GUN_TRIPLE] = {322, 26},
+  [AZ_UPG_GUN_HOMING] = {391, 26},
+  [AZ_UPG_GUN_PHASE]  = {185, 46},
+  [AZ_UPG_GUN_BURST]  = {254, 46},
+  [AZ_UPG_GUN_PIERCE] = {322, 46},
+  [AZ_UPG_GUN_BEAM]   = {391, 46},
   [AZ_UPG_HYPER_ROCKETS] = {466, 86},
   [AZ_UPG_MEGA_BOMBS] = {466, 106},
   [AZ_UPG_HIGH_EXPLOSIVES] = {466, 126},
@@ -430,13 +523,6 @@ static const az_vector_t upgrade_toplefts[] = {
   [AZ_UPG_INFRASCANNER] = {466, 266},
   [AZ_UPG_MILLIWAVE_RADAR] = {466, 286}
 };
-
-static void set_weapon_box_color(bool has, bool selected) {
-  assert(has || !selected);
-  if (selected) glColor3f(1, 1, 1);
-  else if (has) glColor3f(1, 0, 1);
-  else glColor3f(0.5, 0, 0.5);
-}
 
 static void draw_upg_box(const az_player_t *player, az_upgrade_t upgrade,
                          bool *has_upgrade_out) {
@@ -495,34 +581,36 @@ static void draw_upgrades(const az_paused_state_t *state) {
                  round_towards_middle(player->energy, player->max_energy),
                  (int)player->max_energy);
 
-  bool has_guns = false;
+  int num_guns = 0;
+  for (int i = 0; i < 8; ++i) {
+    if (az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) ++num_guns;
+  }
   for (int i = 0; i < 8; ++i) {
     const az_gun_t gun = AZ_GUN_CHARGE + i;
     const az_upgrade_t upgrade = AZ_UPG_GUN_CHARGE + i;
     const az_vector_t topleft = upgrade_toplefts[upgrade];
     const bool has_gun = az_has_upgrade(player, upgrade);
-    set_weapon_box_color(has_gun, player->gun1 == gun || player->gun2 == gun);
-    draw_bezel_box(2, topleft.x, topleft.y, GUN_BOX_WIDTH, UPG_BOX_HEIGHT);
+    draw_weapon_box(topleft.x, topleft.y, GUN_BOX_WIDTH, UPG_BOX_HEIGHT, i + 1,
+                    has_gun, player->gun1 == gun || player->gun2 == gun,
+                    num_guns > 2);
     if (has_gun) {
-      az_draw_string(8, AZ_ALIGN_CENTER, topleft.x + GUN_BOX_WIDTH/2,
+      az_draw_string(8, AZ_ALIGN_CENTER,
+                     topleft.x + GUN_BOX_WIDTH/2 + (num_guns > 2 ? 1 : 0),
                      topleft.y + 4, az_gun_name(gun));
-      has_guns = true;
     }
   }
 
-  set_weapon_box_color(player->max_rockets > 0,
-                       player->ordnance == AZ_ORDN_ROCKETS);
-  draw_bezel_box(2, ORDN_BOX_LEFT, ROCKETS_BOX_TOP,
-                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  draw_weapon_box(ORDN_BOX_LEFT, ROCKETS_BOX_TOP, UPG_BOX_WIDTH,
+                  UPG_BOX_HEIGHT, 9, player->max_rockets > 0,
+                  player->ordnance == AZ_ORDN_ROCKETS, player->max_bombs > 0);
   if (player->max_rockets > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, ORDN_BOX_LEFT + UPG_BOX_WIDTH/2,
                    ROCKETS_BOX_TOP + 4, "ROCKETS:%3d/%-3d",
                    player->rockets, player->max_rockets);
   }
-  set_weapon_box_color(player->max_bombs > 0,
-                       player->ordnance == AZ_ORDN_BOMBS);
-  draw_bezel_box(2, ORDN_BOX_LEFT, BOMBS_BOX_TOP,
-                 UPG_BOX_WIDTH, UPG_BOX_HEIGHT);
+  draw_weapon_box(ORDN_BOX_LEFT, BOMBS_BOX_TOP, UPG_BOX_WIDTH,
+                  UPG_BOX_HEIGHT, 0, player->max_bombs > 0,
+                  player->ordnance == AZ_ORDN_BOMBS, player->max_rockets > 0);
   if (player->max_bombs > 0) {
     az_draw_printf(8, AZ_ALIGN_CENTER, ORDN_BOX_LEFT + UPG_BOX_WIDTH/2,
                    BOMBS_BOX_TOP + 4, "  BOMBS:%3d/%-3d",
@@ -538,7 +626,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
     draw_ship_schematic();
   } glPopMatrix();
 
-  if (has_guns) {
+  if (num_guns > 0) {
     draw_schematic_line(state->clock, gun_line_vertices,
                         AZ_ARRAY_SIZE(gun_line_vertices));
   }
