@@ -174,8 +174,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_CHARGE:
       if (has_more_than_two_guns(upgrades)) {
         return ("Press [1] to select, hold [$f] to charge, release to fire.\n"
-                "Charged shots can destroy certain walls.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Charged shots can destroy certain walls.");
       } else {
         return ("Hold [$f] to charge, release to fire.\n"
                 "Charged shots can destroy certain walls.");
@@ -183,8 +182,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_FREEZE:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires shots that can freeze enemies.\n"
-                "Press [2] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [2] to select, press [$f] to fire.");
       } else {
         return ("Fires shots that can freeze enemies.\n"
                 "Press [$f] to fire.");
@@ -192,8 +190,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_TRIPLE:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires three shots at once.\n"
-                "Press [3] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [3] to select, press [$f] to fire.");
       } else {
         return ("Fires three shots at once.\n"
                 "Press [$f] to fire.");
@@ -201,8 +198,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_HOMING:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires shots that will seek out enemies.\n"
-                "Press [4] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [4] to select, press [$f] to fire.");
       } else {
         return ("Fires shots that will seek out enemies.\n"
                 "Press [$f] to fire.");
@@ -210,8 +206,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_PHASE:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires shots that can pass through walls.\n"
-                "Press [5] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [5] to select, press [$f] to fire.");
       } else {
         return ("Fires shots that can pass through walls.\n"
                 "Press [$f] to fire.");
@@ -219,8 +214,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_BURST:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires shots that explode into shrapnel on impact.\n"
-                "Press [6] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [6] to select, press [$f] to fire.");
       } else {
         return ("Fires shots that explode into shrapnel on impact.\n"
                 "Press [$f] to fire.");
@@ -228,8 +222,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_PIERCE:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires shots that can pierce through multiple enemies.\n"
-                "Press [7] to select, press [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [7] to select, press [$f] to fire.");
       } else {
         return ("Fires shots that can pierce through multiple enemies.\n"
                 "Press [$f] to fire.");
@@ -237,8 +230,7 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
     case AZ_UPG_GUN_BEAM:
       if (has_more_than_two_guns(upgrades)) {
         return ("Fires a continuous beam of energy.\n"
-                "Press [8] to select, hold [$f] to fire.\n"
-                "(Use the [1-8] keys to select up to two guns at once.)");
+                "Press [8] to select, hold [$f] to fire.");
       } else {
         return ("Fires a continuous beam of energy.\n"
                 "Hold [$f] to fire.");

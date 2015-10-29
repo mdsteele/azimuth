@@ -86,4 +86,9 @@ const char *az_key_name(az_key_id_t key) {
   AZ_ASSERT_UNREACHABLE();
 }
 
+bool az_is_number_key(az_key_id_t key) {
+  AZ_STATIC_ASSERT(AZ_KEY_0 < AZ_KEY_1 && AZ_KEY_1 < AZ_KEY_9);
+  return key >= AZ_KEY_0 && key <= AZ_KEY_9;
+}
+
 /*===========================================================================*/

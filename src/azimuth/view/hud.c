@@ -696,7 +696,8 @@ static void draw_upgrade_box_frame(double openness, double max_height) {
 
 static void draw_upgrade_box_message(
     const az_preferences_t *prefs, const az_player_t *player,
-    az_upgrade_t upgrade, double height, az_clock_t clock) {
+    az_upgrade_t upgrade, double height, int gun_instructions_top,
+    az_clock_t clock) {
   const char *name = az_upgrade_name(upgrade);
   const char *description = az_upgrade_description(upgrade, &player->upgrades);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
@@ -709,15 +710,54 @@ static void draw_upgrade_box_message(
   az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 18, name);
   az_draw_paragraph(8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 86, 20, -1,
                     prefs, description);
+  if (gun_instructions_top > 0) {
+    az_draw_paragraph(
+        8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + gun_instructions_top + 14,
+        20, -1, prefs,
+        "You can switch guns at any time using the number keys,\n"
+        "as shown below.  Combine up to two guns at once.");
+    for (int i = 0; i < 8; ++i) {
+      if (!az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) continue;
+      const az_gun_t gun = AZ_GUN_CHARGE + i;
+      if (gun == player->gun1 || gun == player->gun2) glColor3f(0.25, 1, 0.25);
+      else glColor3f(0.25, 0.25, 0.25);
+      az_draw_printf(8, AZ_ALIGN_LEFT, AZ_SCREEN_WIDTH/2 - 192 + 96 * (i % 4),
+                     top + gun_instructions_top + 60 + 20 * (i / 4), "[%d] %s",
+                     i + 1, az_gun_name(gun));
+    }
+    glBegin(GL_LINES); {
+      glColor3f(0, 0.5, 0);
+      const GLfloat y = top + gun_instructions_top - 0.5;
+      glVertex2f(AZ_SCREEN_WIDTH/2 - UPGRADE_BOX_WIDTH/2, y);
+      glVertex2f(AZ_SCREEN_WIDTH/2 + UPGRADE_BOX_WIDTH/2, y);
+    } glEnd();
+  }
 }
 
 static void draw_upgrade_box(const az_space_state_t *state) {
   assert(state->mode == AZ_MODE_UPGRADE);
   const az_upgrade_mode_data_t *mode_data = &state->upgrade_mode;
-  const double height = UPGRADE_BOX_BASE_HEIGHT +
+  double height = UPGRADE_BOX_BASE_HEIGHT +
     UPGRADE_BOX_EXTRA_HEIGHT_PER_LINEBREAK *
     count_linebreaks(az_upgrade_description(mode_data->upgrade,
                                             &state->ship.player.upgrades));
+  int gun_instructions_top = 0;
+  if (mode_data->upgrade >= AZ_UPG_GUN_CHARGE &&
+      mode_data->upgrade <= AZ_UPG_GUN_BEAM) {
+    int num_guns = 0;
+    bool lower_guns = false;
+    for (int i = 0; i < 8; ++i) {
+      if (az_has_upgrade(&state->ship.player, AZ_UPG_GUN_CHARGE + i)) {
+        ++num_guns;
+        if (i >= 4) lower_guns = true;
+      }
+    }
+    if (num_guns > 2) {
+      gun_instructions_top = height;
+      height += 80;
+      if (lower_guns) height += 20;
+    }
+  }
   switch (mode_data->step) {
     case AZ_UGS_OPEN:
       draw_upgrade_box_frame(mode_data->progress, height);
@@ -725,7 +765,8 @@ static void draw_upgrade_box(const az_space_state_t *state) {
     case AZ_UGS_MESSAGE:
       draw_upgrade_box_frame(1.0, height);
       draw_upgrade_box_message(state->prefs, &state->ship.player,
-                               mode_data->upgrade, height, state->clock);
+                               mode_data->upgrade, height,
+                               gun_instructions_top, state->clock);
       break;
     case AZ_UGS_CLOSE:
       draw_upgrade_box_frame(1.0 - mode_data->progress, height);

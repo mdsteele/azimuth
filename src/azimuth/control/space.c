@@ -202,7 +202,8 @@ az_space_action_t az_space_event_loop(
               az_resume_script(&state, &state.sync_vm);
             }
             break;
-          } else if (state.mode == AZ_MODE_UPGRADE) {
+          } else if (state.mode == AZ_MODE_UPGRADE &&
+                     !az_is_number_key(event.key.id)) {
             if (state.upgrade_mode.step == AZ_UGS_MESSAGE) {
               state.upgrade_mode.step = AZ_UGS_CLOSE;
               state.upgrade_mode.progress = 0.0;
