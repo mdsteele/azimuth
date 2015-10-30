@@ -28,6 +28,9 @@
 
 void az_tick_bad_oth_gunship(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_oth_gunship_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind);
 
 void az_tick_bad_reflection(
     az_space_state_t *state, az_baddie_t *baddie, double time);

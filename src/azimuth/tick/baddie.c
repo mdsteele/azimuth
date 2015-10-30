@@ -871,6 +871,9 @@ void az_tick_baddies(az_space_state_t *state, double time) {
 void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
                           double amount, az_damage_flags_t damage_kind) {
   switch (baddie->kind) {
+    case AZ_BAD_OTH_GUNSHIP:
+      az_on_oth_gunship_damaged(state, baddie, amount, damage_kind);
+      break;
     case AZ_BAD_KILOFUGE:
       az_on_kilofuge_damaged(state, baddie, amount, damage_kind);
       break;

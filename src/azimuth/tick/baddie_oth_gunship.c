@@ -51,6 +51,7 @@
 
 // C-plus constants:
 #define CPLUS_SPEED 1000.0
+#define CPLUS_CHARGE_UP_TIME 4.0
 #define CPLUS_DECAY_TIME 3.5
 
 /*===========================================================================*/
@@ -160,7 +161,7 @@ void az_tick_bad_oth_gunship(
   }
 
   // When very low on health, go crazy:
-  if (hurt >= 0.92) set_primary_state(baddie, CRAZY_STATE);
+  if (hurt >= 0.95) set_primary_state(baddie, CRAZY_STATE);
 
   switch (get_primary_state(baddie)) {
     case INITIAL_STATE:
@@ -233,7 +234,7 @@ void az_tick_bad_oth_gunship(
       if (best_dist <= TRACTOR_MAX_LENGTH) {
         set_tractor_node(baddie, nearest);
         set_primary_state(baddie, SPIN_UP_CPLUS_STATE);
-        baddie->cooldown = 4.0;
+        baddie->cooldown = CPLUS_CHARGE_UP_TIME;
       } else fly_towards(state, baddie, time, nearest->position);
     } break;
     case SPIN_UP_CPLUS_STATE: {
@@ -396,6 +397,28 @@ void az_tick_bad_oth_gunship(
   }
   az_tick_oth_tendrils(state, baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle,
                        time);
+}
+
+void az_on_oth_gunship_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  if (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) {
+    set_tractor_node(baddie, NULL);
+    const int primary = get_primary_state(baddie);
+    if (primary == SPIN_UP_CPLUS_STATE) {
+      begin_dogfight(baddie);
+    } else if (primary == DOGFIGHT_STATE) {
+      const int secondary = get_secondary_state(baddie);
+      if (secondary >= 5) {
+        set_secondary_state(baddie, secondary - 2);
+      }
+    }
+    double theta =
+      az_vtheta(az_vrot90ccw(az_vsub(baddie->position, state->ship.position)));
+    if (az_randint(0, 1)) theta = -theta;
+    az_vpluseq(&baddie->velocity, az_vpolar(250, theta));
+  }
 }
 
 /*===========================================================================*/
