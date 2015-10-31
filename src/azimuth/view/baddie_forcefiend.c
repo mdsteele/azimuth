@@ -149,16 +149,13 @@ void az_draw_bad_forcefiend(const az_baddie_t *baddie) {
   // Pincers:
   draw_forcefiend_bone(baddie, 0, 0);
   draw_forcefiend_bone(baddie, 1, 0);
-  // Claws:
-  draw_forcefiend_bone(baddie, 4, 0);
-  draw_forcefiend_bone(baddie, 7, 0);
   // Lower arms:
   for (int i = 3; i <= 6; i += 3) {
     const az_component_t *component = &baddie->components[i];
     glPushMatrix(); {
       az_gl_translated(component->position);
       az_gl_rotated(component->angle);
-      draw_forcefiend_arm(baddie->data->components[i].polygon, inner, outer);
+      draw_forcefiend_arm(baddie->data->components[i].polygon, midst, outer);
     } glPopMatrix();
   }
   // Upper arms:
@@ -167,9 +164,16 @@ void az_draw_bad_forcefiend(const az_baddie_t *baddie) {
     glPushMatrix(); {
       az_gl_translated(component->position);
       az_gl_rotated(component->angle);
-      draw_forcefiend_arm(baddie->data->components[i].polygon, inner, outer);
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(outer); glVertex2f(0,  9); glVertex2f(40,  4);
+        az_gl_color(midst); glVertex2f(0,  0); glVertex2f(40,  0);
+        az_gl_color(outer); glVertex2f(0, -9); glVertex2f(40, -4);
+      } glEnd();
     } glPopMatrix();
   }
+  // Claws:
+  draw_forcefiend_bone(baddie, 4, 0);
+  draw_forcefiend_bone(baddie, 7, 0);
   // Body:
   const az_component_t *segment1 = &baddie->components[8];
   const az_component_t *segment2 = &baddie->components[9];

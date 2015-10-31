@@ -366,18 +366,19 @@ static const az_vector_t forcefiend_right_pincer_vertices[] = {
   {-7, -7}, {0, -9}, {14, -8}, {22, -4}
 };
 static const az_vector_t forcefiend_upper_arm_vertices[] = {
-  {0, 9}, {0, -9}, {40, -4}, {42, 0}, {40, 4}
+  {0, 9}, {0, -9}, {40, -4}, {40, 4}
 };
 static const az_vector_t forcefiend_lower_arm_vertices[] = {
-  {0, 4}, {-4, 0}, {0, -4}, {34, -3}, {36, 0}, {34, 3}
+  {0, 4}, {-2, 3.4641}, {-3.4641, 2}, {-4, 0}, {-3.4641, -2}, {-2, -3.4641},
+  {0, -4}, {34, -3}, {36, 0}, {34, 3}
 };
 static const az_vector_t forcefiend_left_claw_vertices[] = {
-  {40, -1.5}, {20, -2}, {5, -3}, {-4, -4}, {-7, -2},
-  {-5,  3}, {0,  4}, {18,  4}, {30,  2}
+  {40, -1.5}, {20, -2}, {5, -3}, {-3, -4}, {-6, -2},
+  {-4,  3}, {0,  4}, {18,  4}, {30,  2}
 };
 static const az_vector_t forcefiend_right_claw_vertices[] = {
-  {40,  1.5}, {20,  2}, {5,  3}, {-4,  4}, {-7,  2},
-  {-5, -3}, {0, -4}, {18, -4}, {30, -2}
+  {40,  1.5}, {20,  2}, {5,  3}, {-3,  4}, {-6,  2},
+  {-4, -3}, {0, -4}, {18, -4}, {30, -2}
 };
 static const az_vector_t forcefiend_segment0_vertices[] = {
   {7, -15}, {15, -12}, {23, 0}, {15, 12}, {7, 15},
