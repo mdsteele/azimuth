@@ -77,10 +77,34 @@ static void position_towards(az_vector_t *position, double delta,
   else az_vpluseq(position, az_vwithlen(az_vsub(goal, *position), delta));
 }
 
+static int get_num_eggs(const az_space_state_t *state) {
+  int num_eggs = 0;
+  AZ_ARRAY_LOOP(other, state->baddies) {
+    if (other->kind == AZ_BAD_FORCE_EGG) ++num_eggs;
+  }
+  return num_eggs;
+}
+
+static void begin_chase(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_FORCEFIEND);
+  set_primary_state(baddie, CHASE_STATE);
+  set_secondary_state(baddie, az_randint(0, 3));
+  baddie->cooldown = 0.75;
+}
+
+static void begin_seek(const az_space_state_t *state, az_baddie_t *baddie) {
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  if (az_mod2pi(az_vtheta(state->ship.position) -
+                (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
+    set_primary_state(baddie, SEEK_LEFT_STATE);
+  } else set_primary_state(baddie, SEEK_RIGHT_STATE);
+}
+
+/*===========================================================================*/
+
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
-  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   // Open/close jaws:
   const double jaw_angle =
@@ -91,11 +115,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       baddie->components[1].angle, AZ_DEG2RAD(90) * time, -jaw_angle);
   // If the ship is destroyed or we run it over, move away from it.
   if (!az_ship_is_decloaked(&state->ship) ||
-      az_vwithin(baddie->position, state->ship.position, 30.0)) {
-    if (az_mod2pi(az_vtheta(state->ship.position) -
-                  (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
-      set_primary_state(baddie, SEEK_LEFT_STATE);
-    } else set_primary_state(baddie, SEEK_RIGHT_STATE);
+      az_vwithin(baddie->position, state->ship.position, 60.0)) {
+    begin_seek(state, baddie);
   }
   // CHASE_STATE: Chase ship and fire homing torpedoes.
   const int primary = get_primary_state(baddie);
@@ -104,16 +125,11 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                      state->ship.position, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie) &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20))) {
-      if (az_random(0, 1) < 0.5) {
+      const int secondary = get_secondary_state(baddie);
+      if (secondary == 3) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
-                                  20, 0, 0);
-        if (az_random(0, 1) < 0.5) {
-          if (az_mod2pi(az_vtheta(state->ship.position) -
-                        (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
-            set_primary_state(baddie, SEEK_LEFT_STATE);
-          } else set_primary_state(baddie, SEEK_RIGHT_STATE);
-        }
-      } else {
+                                  23, 0, 0);
+      } else if (secondary == 1) {
         bool any_gravity_torps = false;
         AZ_ARRAY_LOOP(proj, state->projectiles) {
           if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO ||
@@ -125,37 +141,39 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         if (!any_gravity_torps) {
           for (int i = -1; i <= 1; ++i) {
             az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
-                                      20, 0, i * AZ_DEG2RAD(20));
+                                      23, 0, i * AZ_DEG2RAD(20));
           }
           az_play_sound(&state->soundboard, AZ_SND_FIRE_GRAVITY_TORPEDO);
         }
       }
-      int num_eggs = 0;
-      AZ_ARRAY_LOOP(other, state->baddies) {
-        if (other->kind == AZ_BAD_FORCE_EGG) ++num_eggs;
-      }
-      if (num_eggs < 8) {
+      if (get_num_eggs(state) < az_randint(4, 8)) {
         az_add_baddie(state, AZ_BAD_FORCE_EGG,
                       baddie->position, baddie->angle);
-      }
-      baddie->cooldown = 2.0 - 0.8 * hurt;
+        set_secondary_state(baddie, az_modulo(secondary + 1, 4));
+        baddie->cooldown = 2.0 - 0.8 * hurt;
+      } else begin_seek(state, baddie);
     }
   }
   // SEEK_LEFT/RIGHT_STATE: Seek to left/right side of room.
   else if (primary == SEEK_LEFT_STATE || primary == SEEK_RIGHT_STATE) {
+    const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
     const double r = bounds->min_r + 0.5 * bounds->r_span;
     const double dt = 150.0 / r;
     const az_vector_t dest = az_vpolar(r, bounds->min_theta +
         (primary == SEEK_LEFT_STATE ? bounds->theta_span + dt : -dt));
-    az_snake_towards(state, baddie, time, 8, 200 + 150 * hurt,
+    az_snake_towards(state, baddie, time, 8, 250 + 100 * hurt,
                      150 + 150 * hurt, dest, true);
     if (az_ship_is_alive(&state->ship) &&
         az_vwithin(baddie->position, dest, 100.0)) {
-      set_primary_state(baddie, FORCE_FLURRY_STATE);
-      set_secondary_state(baddie, az_randint(10, 15));
-      if (hurt > 0.5) {
-        az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
-                                  20, 0, 0);
+      if (get_num_eggs(state) >= 3) {
+        set_primary_state(baddie, FORCE_FLURRY_STATE);
+        set_secondary_state(baddie, az_randint(10, 15));
+        if (hurt > 0.5) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
+                                    23, 0, 0);
+        }
+      } else {
+        begin_chase(baddie);
       }
     }
   }
@@ -175,7 +193,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       baddie->cooldown = 0.4 - 0.1 * hurt;
       const int remaining = get_secondary_state(baddie) - 1;
       if (remaining > 0) set_secondary_state(baddie, remaining);
-      else set_primary_state(baddie, CHASE_STATE);
+      else begin_chase(baddie);
     }
     if (az_ship_is_decloaked(&state->ship) &&
         az_vwithin(state->ship.position, baddie->position, 120.0)) {
@@ -196,7 +214,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         az_vtheta(az_vsub(state->ship.position, baddie->position)));
     baddie->param = fmax(0.0, baddie->param - time / 0.5);
     if (baddie->param <= 0.0) {
-      set_primary_state(baddie, CHASE_STATE);
+      begin_chase(baddie);
     }
   }
   // Move claws:
