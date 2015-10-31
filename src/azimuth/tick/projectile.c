@@ -732,7 +732,8 @@ static void projectile_special_logic(az_space_state_t *state,
         if (az_circle_touches_polygon_trans(
                 polygon, proj->position, proj->angle, 1,
                 state->ship.position)) {
-          az_vpluseq(&state->ship.velocity, az_vmul(proj->velocity, 5 * time));
+          az_vpluseq(&state->ship.velocity,
+                     az_vmul(proj->velocity, 5 * time * proj->power));
         }
       }
     } break;
