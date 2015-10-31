@@ -19,6 +19,7 @@
 
 #include "azimuth/tick/baddie_util.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -113,7 +114,9 @@ void az_crawl_around(
 }
 
 void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
-                          az_vector_t old_position, double old_angle) {
+                          double max_bend_angle, az_vector_t old_position,
+                          double old_angle) {
+  assert(max_bend_angle >= 0.0);
   const double dtheta = az_mod2pi(baddie->angle - old_angle);
   const az_vector_t reldelta =
     az_vrotate(az_vsub(baddie->position, old_position), -old_angle);
@@ -135,11 +138,22 @@ void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
       az_vadd(prev_new_pos, az_vpolar(-staple_dist_to_prev, prev_new_angle));
     const double staple_dist_to_this = init_dist - staple_dist_to_prev;
     // Yank this component to the staple point.
-    prev_new_pos = component->position =
+    component->position =
       az_vadd(staple_pos, az_vwithlen(az_vsub(component->position, staple_pos),
                                       staple_dist_to_this));
-    prev_new_angle = component->angle =
-      az_vtheta(az_vsub(staple_pos, component->position));
+    component->angle = az_vtheta(az_vsub(staple_pos, component->position));
+    // Make sure the component isn't bending too much.
+    const double bend_angle = az_mod2pi(component->angle - prev_new_angle);
+    if (fabs(bend_angle) > max_bend_angle) {
+      const double extra_bend =
+        bend_angle - copysign(max_bend_angle, bend_angle);
+      component->position = az_vadd(az_vrotate(az_vsub(
+          component->position, staple_pos), -extra_bend), staple_pos);
+      component->angle = az_mod2pi(component->angle - extra_bend);
+    }
+    // Prepare for the next loop iteration.
+    prev_new_pos = component->position;
+    prev_new_angle = component->angle;
     prev_init_pos = data->init_position;
     prev_radius = data->bounding_radius;
   }
@@ -178,7 +192,8 @@ void az_snake_towards(
       baddie->angle = az_mod2pi(2.0 * normal_theta - baddie->angle + AZ_PI);
     }
   }
-  az_trail_tail_behind(baddie, first_tail_component, old_position, old_angle);
+  az_trail_tail_behind(baddie, first_tail_component, AZ_PI, old_position,
+                       old_angle);
   baddie->param = AZ_TWO_PI + az_mod2pi(baddie->param + AZ_TWO_PI * time);
 }
 

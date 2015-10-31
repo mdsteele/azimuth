@@ -103,12 +103,22 @@ static void begin_chase(az_baddie_t *baddie) {
 }
 
 static void begin_flee(const az_space_state_t *state, az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_FORCEFIEND);
   const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   if (az_mod2pi(az_vtheta(state->ship.position) -
                 (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
     set_primary_state(baddie, FLEE_LEFT_STATE);
   } else set_primary_state(baddie, FLEE_RIGHT_STATE);
   baddie->cooldown = 0.75;
+}
+
+static void turn_in_place_towards(az_baddie_t *baddie, double goal_theta,
+                                  double time) {
+  assert(baddie->kind == AZ_BAD_FORCEFIEND);
+  const double old_angle = baddie->angle;
+  baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
+                                   goal_theta);
+  az_trail_tail_behind(baddie, 8, AZ_DEG2RAD(30), baddie->position, old_angle);
 }
 
 /*===========================================================================*/
@@ -124,13 +134,12 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       baddie->components[0].angle, AZ_DEG2RAD(90) * time, jaw_angle);
   baddie->components[1].angle = az_angle_towards(
       baddie->components[1].angle, AZ_DEG2RAD(90) * time, -jaw_angle);
-  // If the ship is destroyed or we run it over, move away from it.
-  if (!az_ship_is_decloaked(&state->ship) ||
-      az_vwithin(baddie->position, state->ship.position, 60.0)) {
+  // If the ship is destroyed, move away from it.
+  if (!az_ship_is_alive(&state->ship)) {
     begin_flee(state, baddie);
   }
-  // CHASE_STATE: Chase ship and fire homing torpedoes.
   const int primary = get_primary_state(baddie);
+  // CHASE_STATE: Chase ship and fire homing torpedoes.
   if (primary == CHASE_STATE) {
     az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 60,
                      state->ship.position, true);
@@ -156,6 +165,10 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         set_secondary_state(baddie, az_modulo(secondary + 1, 4));
         baddie->cooldown = 2.0 - 0.8 * hurt;
       } else begin_flee(state, baddie);
+    }
+    // If we run over the ship, move away from it.
+    if (az_vwithin(baddie->position, state->ship.position, 60.0)) {
+      begin_flee(state, baddie);
     }
   }
   // FLEE_LEFT/RIGHT_STATE: Flee to left/right side of room.
@@ -212,8 +225,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     const double max_abs_angle = az_mod2pi(forward_theta + half_angle_span);
     const double theta_to_ship =
       az_vtheta(az_vsub(state->ship.position, baddie->position));
-    baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
-                                     theta_to_ship);
+    turn_in_place_towards(baddie, theta_to_ship, time);
     if (baddie->cooldown <= 0.0 &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(60))) {
       const double min_rel_angle = az_mod2pi(min_abs_angle - baddie->angle);
@@ -244,8 +256,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   }
   // CLAW_SWIPE/UNSWIPE_STATE: Swipe at ship with claws.
   else if (primary == CLAW_SWIPE_STATE) {
-    baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
-        az_vtheta(az_vsub(state->ship.position, baddie->position)));
+    turn_in_place_towards(baddie, az_vtheta(az_vsub(state->ship.position,
+                                                    baddie->position)), time);
     baddie->param = fmin(1.0, baddie->param + time / 0.4);
     if (baddie->param >= 1.0) {
       set_primary_state(baddie, CLAW_UNSWIPE_STATE);

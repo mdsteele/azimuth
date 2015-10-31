@@ -73,7 +73,8 @@ void az_crawl_around(
     bool rightwards, double turn_rate, double max_speed, double accel);
 
 void az_trail_tail_behind(az_baddie_t *baddie, int first_tail_component,
-                          az_vector_t old_position, double old_angle);
+                          double max_bend_angle, az_vector_t old_position,
+                          double old_angle);
 
 // Move in a wiggling, snake-like motion towards the given destination.
 // Components from first_tail_component on up will trail behind.

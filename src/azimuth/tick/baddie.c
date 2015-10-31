@@ -775,7 +775,8 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
         } else baddie->param = 0.0;
         if (baddie->param <= 0.0) baddie->state = 0;
       } else baddie->state = 0;
-      az_trail_tail_behind(baddie, 0, old_baddie_position, old_baddie_angle);
+      az_trail_tail_behind(baddie, 0, AZ_PI, old_baddie_position,
+                           old_baddie_angle);
       break;
     case AZ_BAD_FIRE_CHOMPER:
       az_tick_bad_fire_chomper(state, baddie, time);
