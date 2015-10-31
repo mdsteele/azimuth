@@ -179,13 +179,28 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   }
   // FORCE_FLURRY_STATE: Shoot a flurry of force waves.
   else if (primary == FORCE_FLURRY_STATE) {
+    const double center_theta =
+      az_vtheta(az_bounds_center(az_current_camera_bounds(state)));
+    const double baddie_theta = az_vtheta(baddie->position);
+    const double forward_theta = baddie_theta +
+      (az_mod2pi(baddie_theta - center_theta) > 0 ? -AZ_HALF_PI : AZ_HALF_PI);
+    const double half_angle_span = AZ_DEG2RAD(85);
+    const double min_abs_angle = az_mod2pi(forward_theta - half_angle_span);
+    const double max_abs_angle = az_mod2pi(forward_theta + half_angle_span);
+    const double theta_to_ship =
+      az_vtheta(az_vsub(state->ship.position, baddie->position));
     baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
-        az_vtheta(az_vsub(state->ship.position, baddie->position)));
+                                     theta_to_ship);
     if (baddie->cooldown <= 0.0 &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(60))) {
+      const double min_rel_angle = az_mod2pi(min_abs_angle - baddie->angle);
+      const double max_rel_angle = az_mod2pi(max_abs_angle - baddie->angle);
+      const double rel_angle = az_random(
+          fmin(fmax(min_rel_angle, -1.3), max_rel_angle),
+          fmin(fmax(min_rel_angle,  1.3), max_rel_angle));
       az_projectile_t *force_wave =
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_FORCE_WAVE, 0, 0,
-                                  az_random(-1.3, 1.3));
+                                  rel_angle);
       if (force_wave != NULL) {
         force_wave->power = 0.9 + 0.1 * hurt;
         az_play_sound(&state->soundboard, AZ_SND_FIRE_FORCE_WAVE);
@@ -199,6 +214,9 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         az_vwithin(state->ship.position, baddie->position, 120.0)) {
       set_primary_state(baddie, CLAW_SWIPE_STATE);
       baddie->param = 0.0;
+    } else if (az_mod2pi_nonneg(theta_to_ship - min_abs_angle) >
+               2 * half_angle_span) {
+      begin_chase(baddie);
     }
   }
   // CLAW_SWIPE/UNSWIPE_STATE: Swipe at ship with claws.
