@@ -85,6 +85,16 @@ static int get_num_eggs(const az_space_state_t *state) {
   return num_eggs;
 }
 
+static bool there_are_no_gravity_torps(const az_space_state_t *state) {
+  AZ_ARRAY_LOOP(proj, state->projectiles) {
+    if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO ||
+        proj->kind == AZ_PROJ_GRAVITY_TORPEDO_WELL) {
+      return false;
+    }
+  }
+  return true;
+}
+
 static void begin_chase(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
   set_primary_state(baddie, CHASE_STATE);
@@ -98,6 +108,7 @@ static void begin_seek(const az_space_state_t *state, az_baddie_t *baddie) {
                 (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
     set_primary_state(baddie, SEEK_LEFT_STATE);
   } else set_primary_state(baddie, SEEK_RIGHT_STATE);
+  baddie->cooldown = 0.75;
 }
 
 /*===========================================================================*/
@@ -130,15 +141,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
                                   23, 0, 0);
       } else if (secondary == 1) {
-        bool any_gravity_torps = false;
-        AZ_ARRAY_LOOP(proj, state->projectiles) {
-          if (proj->kind == AZ_PROJ_GRAVITY_TORPEDO ||
-              proj->kind == AZ_PROJ_GRAVITY_TORPEDO_WELL) {
-            any_gravity_torps = true;
-            break;
-          }
-        }
-        if (!any_gravity_torps) {
+        if (there_are_no_gravity_torps(state)) {
           for (int i = -1; i <= 1; ++i) {
             az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO,
                                       23, 0, i * AZ_DEG2RAD(20));
@@ -163,15 +166,33 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
         (primary == SEEK_LEFT_STATE ? bounds->theta_span + dt : -dt));
     az_snake_towards(state, baddie, time, 8, 250 + 100 * hurt,
                      150 + 150 * hurt, dest, true);
+    if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
+      az_vector_t rel_impact;
+      if (get_secondary_state(baddie) == 0 &&
+          there_are_no_gravity_torps(state) &&
+          az_lead_target(az_vsub(state->ship.position, baddie->position),
+                         state->ship.velocity, 600.0, &rel_impact)) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_GRAVITY_TORPEDO, 0, 0,
+                                  az_vtheta(rel_impact) - baddie->angle);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GRAVITY_TORPEDO);
+        set_secondary_state(baddie, 1);
+      }
+      if (get_num_eggs(state) < 4) {
+        az_add_baddie(state, AZ_BAD_FORCE_EGG,
+                      baddie->position, baddie->angle);
+      }
+      baddie->cooldown = 2.0 - 0.8 * hurt;
+    }
     if (az_ship_is_alive(&state->ship) &&
         az_vwithin(baddie->position, dest, 100.0)) {
+      if (hurt > 0.5) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
+                                  23, 0, 0);
+      }
       if (get_num_eggs(state) >= 3) {
         set_primary_state(baddie, FORCE_FLURRY_STATE);
         set_secondary_state(baddie, az_randint(10, 15));
-        if (hurt > 0.5) {
-          az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
-                                    23, 0, 0);
-        }
+        baddie->cooldown = 0.0;
       } else {
         begin_chase(baddie);
       }
