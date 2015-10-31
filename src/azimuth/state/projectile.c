@@ -386,6 +386,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GRAVITY_TORPEDO] = {
     .speed = 600.0,
     .lifetime = 6.0,
+    .impact_sound = AZ_SND_GRAVITY_TORPEDO_IMPACT,
     .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_GRAVITY_TORPEDO_WELL] = {

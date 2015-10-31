@@ -34,8 +34,8 @@
 
 // Primary states:
 #define CHASE_STATE 0
-#define SEEK_LEFT_STATE 1
-#define SEEK_RIGHT_STATE 2
+#define FLEE_LEFT_STATE 1
+#define FLEE_RIGHT_STATE 2
 #define FORCE_FLURRY_STATE 3
 #define CLAW_SWIPE_STATE 4
 #define CLAW_UNSWIPE_STATE 5
@@ -102,12 +102,12 @@ static void begin_chase(az_baddie_t *baddie) {
   baddie->cooldown = 0.75;
 }
 
-static void begin_seek(const az_space_state_t *state, az_baddie_t *baddie) {
+static void begin_flee(const az_space_state_t *state, az_baddie_t *baddie) {
   const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
   if (az_mod2pi(az_vtheta(state->ship.position) -
                 (bounds->min_theta + 0.5 * bounds->theta_span)) < 0) {
-    set_primary_state(baddie, SEEK_LEFT_STATE);
-  } else set_primary_state(baddie, SEEK_RIGHT_STATE);
+    set_primary_state(baddie, FLEE_LEFT_STATE);
+  } else set_primary_state(baddie, FLEE_RIGHT_STATE);
   baddie->cooldown = 0.75;
 }
 
@@ -127,7 +127,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   // If the ship is destroyed or we run it over, move away from it.
   if (!az_ship_is_decloaked(&state->ship) ||
       az_vwithin(baddie->position, state->ship.position, 60.0)) {
-    begin_seek(state, baddie);
+    begin_flee(state, baddie);
   }
   // CHASE_STATE: Chase ship and fire homing torpedoes.
   const int primary = get_primary_state(baddie);
@@ -140,6 +140,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       if (secondary == 3) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
                                   23, 0, 0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_TRINE_TORPEDO);
       } else if (secondary == 1) {
         if (there_are_no_gravity_torps(state)) {
           for (int i = -1; i <= 1; ++i) {
@@ -154,16 +155,16 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                       baddie->position, baddie->angle);
         set_secondary_state(baddie, az_modulo(secondary + 1, 4));
         baddie->cooldown = 2.0 - 0.8 * hurt;
-      } else begin_seek(state, baddie);
+      } else begin_flee(state, baddie);
     }
   }
-  // SEEK_LEFT/RIGHT_STATE: Seek to left/right side of room.
-  else if (primary == SEEK_LEFT_STATE || primary == SEEK_RIGHT_STATE) {
+  // FLEE_LEFT/RIGHT_STATE: Flee to left/right side of room.
+  else if (primary == FLEE_LEFT_STATE || primary == FLEE_RIGHT_STATE) {
     const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
     const double r = bounds->min_r + 0.5 * bounds->r_span;
     const double dt = 150.0 / r;
     const az_vector_t dest = az_vpolar(r, bounds->min_theta +
-        (primary == SEEK_LEFT_STATE ? bounds->theta_span + dt : -dt));
+        (primary == FLEE_LEFT_STATE ? bounds->theta_span + dt : -dt));
     az_snake_towards(state, baddie, time, 8, 250 + 100 * hurt,
                      150 + 150 * hurt, dest, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
@@ -188,6 +189,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
       if (hurt > 0.5) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_TRINE_TORPEDO,
                                   23, 0, 0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_TRINE_TORPEDO);
       }
       if (get_num_eggs(state) >= 3) {
         set_primary_state(baddie, FORCE_FLURRY_STATE);

@@ -239,6 +239,13 @@ static az_sound_spec_t sound_specs[] = {
     .vibrato_depth = 0.15, .vibrato_speed = 0.57, .repeat_speed = 0.23027,
     .phaser_offset = -0.3, .phaser_sweep = 0.59, .lpf_cutoff = 0.85
   },
+  [AZ_SND_EXPAND_TRINE_TORPEDO] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.005, .env_decay = 0.63,
+    .start_freq = 0.33, .freq_slide = 0.12, .freq_delta_slide = 0.05,
+    .vibrato_depth = 0.115, .vibrato_speed = 0.595,
+    .phaser_offset = 0.79, .phaser_sweep = -0.22, .volume_adjust = 0.5
+  },
   [AZ_SND_EXPLODE_BOMB] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.32941, .env_punch = 0.572, .env_decay = 0.23305,
@@ -432,6 +439,11 @@ static az_sound_spec_t sound_specs[] = {
     .env_sustain = 0.2112676, .env_punch = 0.2112676, .env_decay = 0.28873238,
     .start_freq = 0.3653719, .freq_slide = 0.49295771122
   },
+  [AZ_SND_FIRE_TRINE_TORPEDO] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.345, .env_decay = 0.75, .start_freq = 0.23,
+    .vibrato_depth = 0.2353, .vibrato_speed = 0.483778, .volume_adjust = -0.5
+  },
   [AZ_SND_FREEZE_BADDIE] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_attack = 0.175, .env_decay = 0.405,
@@ -447,6 +459,11 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.765, .vibrato_depth = 0.76, .vibrato_speed = 0.455,
     .arp_mod = 0.83, .arp_speed = 0.846137, .repeat_speed = 0.305,
     .phaser_offset = -0.01, .phaser_sweep = 0.01
+  },
+  [AZ_SND_GRAVITY_TORPEDO_IMPACT] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_decay = 0.47, .start_freq = 0.12, .freq_slide = -0.07,
+    .phaser_offset = 0.65, .phaser_sweep = -0.17, .volume_adjust = 1.0
   },
   [AZ_SND_HEAT_DAMAGE] = {
     .wave_kind = AZ_NOISE_WAVE,

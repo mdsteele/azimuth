@@ -925,6 +925,7 @@ static void projectile_special_logic(az_space_state_t *state,
               base_angle + i * AZ_DEG2RAD(120), power, fired_by);
           if (expander != NULL) expander->age += 0.4 * i;
         }
+        az_play_sound(&state->soundboard, AZ_SND_EXPAND_TRINE_TORPEDO);
       } else {
         leave_missile_trail(state, proj, time, (az_color_t){192, 64, 64, 255});
         proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
