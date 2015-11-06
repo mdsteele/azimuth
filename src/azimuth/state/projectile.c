@@ -38,6 +38,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 800.0,
     .lifetime = 2.0,
     .impact_damage = 8.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = AZ_DEG2RAD(40),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
@@ -51,6 +52,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 850.0,
     .lifetime = 2.0,
     .impact_damage = 8.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = AZ_DEG2RAD(40),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_FREEZE
   },
@@ -58,6 +60,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 800.0,
     .lifetime = 2.0,
     .impact_damage = 6.5,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = 0, // unlike normal charged shots, these don't home at all
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
@@ -71,6 +74,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 500.0,
     .lifetime = 5.0,
     .impact_damage = 2.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = AZ_DEG2RAD(360),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
   },
@@ -91,6 +95,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 800.0,
     .lifetime = 3.0,
     .impact_damage = 12.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = AZ_DEG2RAD(20),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
     .properties = AZ_PROJF_PHASED
@@ -120,12 +125,14 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 1.5,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL
   },
   [AZ_PROJ_GUN_CHARGED_BURST] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 1.75,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_SHRAPNEL,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED
   },
@@ -133,6 +140,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 1.5,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_FREEZE_SHRAPNEL,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE
   },
@@ -140,6 +148,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 1.5,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_HOMING_SHRAPNEL,
     .properties = AZ_PROJF_FAST_SHRAPNEL
   },
@@ -147,6 +156,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 2.0,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_PHASE_SHRAPNEL,
     .properties = AZ_PROJF_FAST_SHRAPNEL
   },
@@ -154,6 +164,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 900.0,
     .lifetime = 2.0,
     .impact_damage = 3.0,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_GUN_PIERCE_SHRAPNEL,
     .properties = AZ_PROJF_FAST_SHRAPNEL
   },
@@ -198,6 +209,7 @@ static const az_proj_data_t proj_data[] = {
     .speed = 800.0,
     .lifetime = 3.0,
     .impact_damage = 15.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
     .homing_rate = AZ_DEG2RAD(60),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
@@ -548,7 +560,7 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 5.0,
     .impact_damage = 15.0,
     .impact_shake = 1.0,
-    .impact_sound = AZ_SND_EXPLODE_ROCKET,
+    .impact_sound = AZ_SND_SHRAPNEL_BURST,
     .shrapnel_kind = AZ_PROJ_SCRAP_SHRAPNEL,
     .properties = AZ_PROJF_FEW_SPECKS
   },

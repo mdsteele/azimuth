@@ -144,7 +144,22 @@ static void on_projectile_impact(az_space_state_t *state,
   if (splash || !few_specks) {
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
-      if (proj->data->damage_kind & AZ_DMGF_FREEZE) {
+      particle->position = proj->position;
+      particle->velocity = AZ_VZERO;
+      particle->angle = proj->angle;
+      particle->param1 = (splash ? radius : 10.0);
+      if ((proj->data->damage_kind & AZ_DMGF_CHARGED) && !splash) {
+        particle->kind = AZ_PAR_CHARGED_BOOM;
+        if (proj->data->damage_kind & AZ_DMGF_FREEZE) {
+          speck_color = (az_color_t){128, 224, 255, 255};
+        } else if (proj->data->damage_kind & AZ_DMGF_PIERCE) {
+          speck_color = (az_color_t){255, 128, 255, 255};
+        }
+        particle->color = speck_color;
+        particle->lifetime = 0.5;
+        particle->param1 = 12 + proj->data->impact_damage * proj->power;
+        particle->param2 = 4.0;
+      } else if (proj->data->damage_kind & AZ_DMGF_FREEZE) {
         speck_color = (az_color_t){192, 224, 255, 255};
         if (splash) {
           particle->kind = AZ_PAR_ICE_BOOM;
@@ -169,10 +184,6 @@ static void on_projectile_impact(az_space_state_t *state,
         particle->color = AZ_WHITE;
         particle->lifetime = 0.3;
       }
-      particle->position = proj->position;
-      particle->velocity = AZ_VZERO;
-      particle->angle = proj->angle;
-      particle->param1 = (splash ? radius : 10.0);
     }
   }
   if (few_specks) {

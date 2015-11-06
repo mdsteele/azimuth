@@ -32,6 +32,8 @@ typedef enum {
   AZ_PAR_BOOM,
   // BEAM: A beam.  param1=length, param2=width/2
   AZ_PAR_BEAM,
+  // CHARGED_BOOM: Charged shot boom.  param1=major_radius, param2=minor_radius
+  AZ_PAR_CHARGED_BOOM,
   // EMBER: A shrinking glowball.  param1=radius
   AZ_PAR_EMBER,
   // EXPLOSION: An explosion from ordnance.  param1=radius

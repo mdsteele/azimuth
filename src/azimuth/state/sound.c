@@ -590,6 +590,12 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.466273, .lpf_ramp = 0.176426, .lpf_resonance = 0.367827,
     .hpf_cutoff = 0.0446594, .volume_adjust = -0.5
   },
+  [AZ_SND_IMPACT_CHARGED_SHOT] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.201129, .env_decay = 0.22,
+    .start_freq = 0.25, .freq_slide = -0.22,
+    .vibrato_depth = 0.215, .vibrato_speed = 0.57, .phaser_sweep = -0.25
+  },
   [AZ_SND_KILL_ATOM] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.211267605424, .env_punch = 0.405718,
@@ -882,6 +888,11 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = -0.31, .phaser_sweep = -0.2,
     .lpf_cutoff = 0.472522, .lpf_ramp = 0.12, .lpf_resonance = -0.77,
     .hpf_ramp = 0.00133439
+  },
+  [AZ_SND_SHRAPNEL_BURST] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.015, .env_punch = 0.22, .env_decay = 0.29,
+    .start_freq = 0.62, .phaser_offset = -0.31, .volume_adjust = -0.75
   },
   [AZ_SND_SONIC_SCREECH] = {
     .wave_kind = AZ_SAWTOOTH_WAVE,
