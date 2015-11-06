@@ -474,6 +474,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 40.0,
     .impact_shake = 0.5,
+    .impact_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_NUCLEAR_EXPLOSION] = {
@@ -587,6 +588,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 5.0,
     .splash_radius = 30.0,
     .impact_shake = 0.5,
+    .impact_sound = AZ_SND_KILL_TURRET,
     .properties = AZ_PROJF_BOSS_EXPIRE
   },
   [AZ_PROJ_SPINE] = {

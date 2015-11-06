@@ -146,6 +146,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
                 state, baddie, AZ_PROJ_SPIKED_VINE_SEED,
                 20, AZ_DEG2RAD(i), 0);
           }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_SEED_MULTI);
         }
         // If we've spawned enough nightbugs, start phasing out.
         else if (num_baddies_of_kind(state, AZ_BAD_NIGHTBUG) >=
@@ -164,6 +165,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
         else {
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_NIGHTSEED,
                                     45, 0, 0);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_SEED_SINGLE);
           baddie->cooldown = 0.5;
         }
       }

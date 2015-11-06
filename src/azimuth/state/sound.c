@@ -434,6 +434,19 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = -0.09300001, .phaser_sweep = -0.19305,
     .volume_adjust = -0.42592590332
   },
+  [AZ_SND_FIRE_SEED_MULTI] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.11, .env_decay = 0.4,
+    .start_freq = 0.24, .freq_slide = 0.14, .freq_delta_slide = -0.28,
+    .repeat_speed = 0.495, .phaser_offset = -0.46, .phaser_sweep = -0.221755,
+    .volume_adjust = 0.9
+  },
+  [AZ_SND_FIRE_SEED_SINGLE] = {
+    .wave_kind = AZ_WOBBLE_WAVE,
+    .env_sustain = 0.11, .env_decay = 0.345,
+    .start_freq = 0.24, .freq_slide = 0.14, .freq_delta_slide = -0.28,
+    .phaser_offset = -0.46, .phaser_sweep = -0.221755, .volume_adjust = 0.9
+  },
   [AZ_SND_FIRE_STINGER] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.2112676, .env_punch = 0.2112676, .env_decay = 0.28873238,
