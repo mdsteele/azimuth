@@ -38,6 +38,15 @@
 
 /*===========================================================================*/
 
+static az_color_t scale_color(float r, float g, float b, az_color_t color) {
+  color.r *= r;
+  color.g *= g;
+  color.b *= b;
+  return color;
+}
+
+/*===========================================================================*/
+
 static void draw_moving_stars_layer(
     double spacing, double scale, double speed, double total_time,
     GLfloat alpha) {
@@ -240,6 +249,47 @@ static void tint_screen(GLfloat gray, GLfloat alpha) {
   } glEnd();
 }
 
+static void draw_sapiai_planet_atmosphere(
+    double planet_radius, double atmosphere_thickness,
+    az_color_t atmosphere_color) {
+  az_color_t outer_color = atmosphere_color;
+  outer_color.a = 0;
+  const double outer_radius = planet_radius + atmosphere_thickness;
+  glBegin(GL_TRIANGLE_STRIP); {
+    for (int i = 0; i <= 360; i += 3) {
+      az_gl_color(atmosphere_color);
+      glVertex2d(planet_radius * cos(AZ_DEG2RAD(i)),
+                 planet_radius * sin(AZ_DEG2RAD(i)));
+      az_gl_color(outer_color);
+      glVertex2d(outer_radius * cos(AZ_DEG2RAD(i)),
+                 outer_radius * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+}
+
+static void draw_gas_planet_stripe(
+    double radius, int min_angle, int max_angle,
+    az_color_t min_color, az_color_t max_color) {
+  assert(max_angle > min_angle);
+  for (int sign = -1; sign <= 1; sign += 2) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = min_angle; i <= max_angle; ++i) {
+        const double transition =
+          (double)(i - min_angle) / (double)(max_angle - min_angle);
+        const az_color_t base_color =
+          az_transition_color(min_color, max_color, transition);
+        const float factor = (float)i / 90.0f;
+        az_gl_color(scale_color(0.5f, 0.35f, 0.5f, base_color));
+        glVertex2d(sign * radius * cos(AZ_DEG2RAD(i)),
+                   -radius * sin(AZ_DEG2RAD(i)));
+        az_gl_color(scale_color(1.0f - factor * 0.5f, 1.0f - factor * 0.65f,
+                                1.0f - factor * 0.5f, base_color));
+        glVertex2d(0, -radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  }
+}
+
 /*===========================================================================*/
 
 static void draw_cruising_scene(
@@ -364,6 +414,77 @@ static void draw_escape_scene(
   }
 }
 
+static void draw_sapiais_scene(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_SAPIAIS);
+  az_draw_planet_starfield(clock);
+  const double glow = 0.02 * az_clock_zigzag(50, 1, clock);
+  // Sun:
+  const az_vector_t sun_position = {500, 50};
+  glPushMatrix(); {
+    az_gl_translated(sun_position);
+    const double radius1 = 10;
+    const double radius2 = 40;
+    const double radius3 = 300 + 10 * glow;
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(1, 1, 1); glVertex2d(0, 0);
+      for (int i = 0; i <= 360; i += 3) {
+        glVertex2d(radius1 * cos(AZ_DEG2RAD(i)), radius1 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = 0; i <= 360; i += 3) {
+        glColor3f(1, 1, 1);
+        glVertex2d(radius1 * cos(AZ_DEG2RAD(i)), radius1 * sin(AZ_DEG2RAD(i)));
+        glColor4f(1, 1, 1, 0.7);
+        glVertex2d(radius2 * cos(AZ_DEG2RAD(i)), radius2 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = 0; i <= 360; i += 3) {
+        glColor4f(1, 1, 1, 0.7);
+        glVertex2d(radius2 * cos(AZ_DEG2RAD(i)), radius2 * sin(AZ_DEG2RAD(i)));
+        glColor4f(1, 1, 1, 0);
+        glVertex2d(radius3 * cos(AZ_DEG2RAD(i)), radius3 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+  // Small planet:
+  const az_vector_t small_planet_position = {200, 150};
+  glPushMatrix(); {
+    az_gl_translated(small_planet_position);
+    const double radius = 80;
+    glBegin(GL_TRIANGLE_FAN); {
+      glColor3f(0.5, 0.5, 0.55); glVertex2d(40, -40);
+      glColor3f(0.3, 0.3, 0.35);
+      for (int i = 0; i <= 360; i += 3) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    draw_sapiai_planet_atmosphere(radius, 10 + 5 * glow,
+                                  (az_color_t){192, 192, 255, 128});
+  } glPopMatrix();
+  // Large planet:
+  const az_vector_t large_planet_position = {570, 600};
+  glPushMatrix(); {
+    az_gl_translated(large_planet_position);
+    const double radius = 300;
+    draw_sapiai_planet_atmosphere(radius, 30 + 10 * glow,
+                                  (az_color_t){255, 192, 192, 128});
+    az_gl_rotated(az_vtheta(az_vsub(sun_position, large_planet_position)) +
+                  AZ_HALF_PI);
+    az_color_t stripe1 = {212, 212, 148, 255};
+    az_color_t stripe2 = {212, 148, 148, 255};
+    az_color_t stripe3 = {148, 148,  84, 255};
+    az_color_t stripe4 = {148, 148, 148, 255};
+    draw_gas_planet_stripe(radius, 20, 30, stripe1, stripe2);
+    draw_gas_planet_stripe(radius, 30, 40, stripe2, stripe3);
+    draw_gas_planet_stripe(radius, 40, 50, stripe3, stripe2);
+    draw_gas_planet_stripe(radius, 50, 60, stripe2, stripe4);
+    draw_gas_planet_stripe(radius, 60, 90, stripe4, stripe1);
+  } glPopMatrix();
+}
+
 /*===========================================================================*/
 
 void az_draw_cutscene(const az_space_state_t *state) {
@@ -394,6 +515,9 @@ void az_draw_cutscene(const az_space_state_t *state) {
       break;
     case AZ_SCENE_HOMECOMING: break; // TODO
     case AZ_SCENE_BLACK: break;
+    case AZ_SCENE_SAPIAIS:
+      draw_sapiais_scene(cutscene, state->clock);
+      break;
   }
   if (cutscene->fade_alpha > 0.0) tint_screen(0, cutscene->fade_alpha);
 }

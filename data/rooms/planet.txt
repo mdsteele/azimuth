@@ -554,7 +554,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T122"
   Apparently, all this time, there was a
   fourth one of these irreplacable
-  beings right here on Zenith.
+  beings right here on Zenith.$_06
 
   But something already destroyed it.$_15
 

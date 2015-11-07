@@ -137,6 +137,8 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_BLACK:
       break;
+    case AZ_SCENE_SAPIAIS:
+      break;
   }
   if (ready_for_next_scene && cutscene->next != cutscene->scene) {
     fade_to_next_scene(state, time);
