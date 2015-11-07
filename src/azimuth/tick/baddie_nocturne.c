@@ -83,10 +83,26 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
       AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ;
   }
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+
+  // Wiggle legs:
+  const double front_leg_angle = AZ_DEG2RAD(40) +
+    AZ_DEG2RAD(5) * sin(9.0 * state->ship.player.total_time);
+  baddie->components[4].angle = az_angle_towards(
+      baddie->components[4].angle, AZ_DEG2RAD(90) * time, front_leg_angle);
+  baddie->components[5].angle = az_angle_towards(
+      baddie->components[5].angle, AZ_DEG2RAD(90) * time, -front_leg_angle);
+  const double rear_leg_angle = AZ_DEG2RAD(135) +
+    AZ_DEG2RAD(5) * sin(9.0 * state->ship.player.total_time);
+  baddie->components[6].angle = az_angle_towards(
+      baddie->components[6].angle, AZ_DEG2RAD(90) * time, rear_leg_angle);
+  baddie->components[7].angle = az_angle_towards(
+      baddie->components[7].angle, AZ_DEG2RAD(90) * time, -rear_leg_angle);
+
   switch (baddie->state) {
     case PHASED_OUT_STATE:
       assert(baddie->param == 0.0);
       assert(az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL));
+      baddie->velocity = AZ_VZERO;
       if (num_baddies_of_kind(state, AZ_BAD_NIGHTBUG) >
           MAX_MINIONS_TO_PHASE_IN) {
         baddie->cooldown = 1.5;
@@ -130,10 +146,8 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
       baddie->param = fmin(1.0, baddie->param + time / PHASE_IN_TIME);
       // Fly around:
       if (az_ship_is_decloaked(&state->ship)) {
-        // TODO: Actually fly around; don't just turn towards ship.
-        baddie->angle = az_angle_towards(
-            baddie->angle, AZ_DEG2RAD(60) * time,
-            az_vtheta(az_vsub(state->ship.position, baddie->position)));
+        az_fly_towards_position(state, baddie, time, state->ship.position,
+                                AZ_DEG2RAD(60), 15, 7, 10, 100);
       }
       if (baddie->param == 1.0 && baddie->cooldown <= 0.0) {
         // If there aren't enough spiked vines, make more.
