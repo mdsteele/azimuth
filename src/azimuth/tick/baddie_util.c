@@ -90,23 +90,40 @@ bool az_baddie_has_clear_path_to_position(
 
 /*===========================================================================*/
 
+static void crawl_impact(
+    az_space_state_t *state, az_baddie_t *baddie, az_vector_t unit,
+    double distance, az_impact_t *impact) {
+  az_circle_impact(
+      state, baddie->data->main_body.bounding_radius, baddie->position,
+      az_vmul(unit, distance), (AZ_IMPF_BADDIE | AZ_IMPF_SHIP),
+      baddie->uid, impact);
+}
+
 void az_crawl_around(
     az_space_state_t *state, az_baddie_t *baddie, double time,
     bool rightwards, double turn_rate, double max_speed, double accel) {
-  // Adjust velocity in crawling direction.
-  const az_vector_t unit =
+  az_impact_t impact;
+  az_vector_t unit =
     az_vpolar(1.0, baddie->angle + AZ_DEG2RAD(rightwards ? -115 : 115));
+  crawl_impact(state, baddie, unit, 20, &impact);
+  if (impact.type == AZ_IMP_NOTHING) {
+    accel = 300;
+    max_speed = 1000;
+    unit = az_vpolar(1.0, baddie->angle + AZ_PI);
+    crawl_impact(state, baddie, unit, 50, &impact);
+    if (impact.type == AZ_IMP_NOTHING) {
+      unit = az_vwithlen(baddie->position, -1);
+      crawl_impact(state, baddie, unit, 10000, &impact);
+      impact.normal = az_vneg(unit);
+    }
+  }
+  // Adjust velocity in crawling direction.
   az_vpluseq(&baddie->velocity, az_vmul(unit, accel * time));
   const double drag_coeff = accel / (max_speed * max_speed);
   const az_vector_t drag_force =
     az_vmul(baddie->velocity, -drag_coeff * az_vnorm(baddie->velocity));
   az_vpluseq(&baddie->velocity, az_vmul(drag_force, time));
   // Rotate to point away from wall.
-  az_impact_t impact;
-  az_circle_impact(
-      state, baddie->data->main_body.bounding_radius, baddie->position,
-      az_vmul(unit, 100000.0), (AZ_IMPF_BADDIE | AZ_IMPF_SHIP),
-      baddie->uid, &impact);
   if (impact.type != AZ_IMP_NOTHING) {
     baddie->angle = az_angle_towards(baddie->angle, turn_rate * time,
                                      az_vtheta(impact.normal));
