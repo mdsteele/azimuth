@@ -387,7 +387,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_FIREBALL_SLOW] = {
     .speed = 260.0,
     .lifetime = 2.0,
-    .impact_damage = 10.0,
+    .impact_damage = 6.5,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FLAME
   },
   [AZ_PROJ_FORCE_WAVE] = {
@@ -464,7 +464,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_NIGHTBLADE] = {
     .speed = 300.0,
     .lifetime = 2.0,
-    .impact_damage = 5.0,
+    .impact_damage = 3.0,
     .homing_rate = AZ_DEG2RAD(20)
   },
   [AZ_PROJ_NIGHTSEED] = {
