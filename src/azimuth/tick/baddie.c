@@ -39,6 +39,7 @@
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
 #include "azimuth/tick/baddie_oth_gunship.h"
+#include "azimuth/tick/baddie_oth_sgs.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_vehicle.h"
@@ -832,6 +833,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_OTH_MINICRAB:
       az_tick_bad_oth_minicrab(state, baddie, time);
+      break;
+    case AZ_BAD_OTH_SUPERGUNSHIP:
+      az_tick_bad_oth_supergunship(state, baddie, time);
       break;
   }
 

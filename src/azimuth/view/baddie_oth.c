@@ -221,7 +221,8 @@ static void draw_oth(
   assert(baddie->kind != AZ_BAD_NOTHING);
   assert(num_vertices % 3 == 0);
   const int num_triangles = num_vertices / 3;
-  const bool spin = (baddie->kind != AZ_BAD_OTH_GUNSHIP);
+  const bool spin = (baddie->kind != AZ_BAD_OTH_GUNSHIP &&
+                     baddie->kind != AZ_BAD_OTH_SUPERGUNSHIP);
 
   const double hurt_ratio = 1.0 - baddie->health / baddie->data->max_health;
   const GLfloat flare = fmax(baddie->armor_flare, 0.5 * hurt_ratio);
@@ -423,6 +424,14 @@ void az_draw_bad_oth_snapdragon(
   draw_tendrils(baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_snapdragon_triangles,
            AZ_ARRAY_SIZE(oth_snapdragon_triangles));
+}
+
+void az_draw_bad_oth_supergunship(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  draw_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, clock);
+  draw_oth(baddie, frozen, clock, oth_gunship_triangles,
+           AZ_ARRAY_SIZE(oth_gunship_triangles));
 }
 
 void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {

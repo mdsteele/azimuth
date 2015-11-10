@@ -17,49 +17,27 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_VIEW_BADDIE_OTH_H_
-#define AZIMUTH_VIEW_BADDIE_OTH_H_
+#include "azimuth/tick/baddie_oth_sgs.h"
+
+#include <assert.h>
 
 #include "azimuth/state/baddie.h"
-#include "azimuth/util/clock.h"
+#include "azimuth/state/baddie_oth.h"
+#include "azimuth/state/space.h"
+#include "azimuth/tick/baddie_oth.h"
+#include "azimuth/tick/baddie_util.h"
 
 /*===========================================================================*/
 
-void az_draw_bad_oth_brawler(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_crab(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_crawler(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_gunship(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_minicrab(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_orb(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_razor_1(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_razor_2(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_snapdragon(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_supergunship(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_tick_bad_oth_supergunship(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  const double old_angle = baddie->angle;
+  az_fly_towards_ship(state, baddie, time,
+                      5.0, 300.0, 300.0, 200.0, 0.0, 100.0);
+  // TODO: implement Oth Supergunship
+  az_tick_oth_tendrils(state, baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
+                       time);
+}
 
 /*===========================================================================*/
-
-void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock);
-
-/*===========================================================================*/
-
-#endif // AZIMUTH_VIEW_BADDIE_OTH_H_

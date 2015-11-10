@@ -18,48 +18,17 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_BADDIE_OTH_H_
-#define AZIMUTH_VIEW_BADDIE_OTH_H_
+#ifndef AZIMUTH_TICK_BADDIE_OTH_SGS_H_
+#define AZIMUTH_TICK_BADDIE_OTH_SGS_H_
 
 #include "azimuth/state/baddie.h"
-#include "azimuth/util/clock.h"
+#include "azimuth/state/space.h"
 
 /*===========================================================================*/
 
-void az_draw_bad_oth_brawler(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_crab(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_crawler(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_gunship(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_minicrab(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_orb(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_razor_1(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_razor_2(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_snapdragon(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
-
-void az_draw_bad_oth_supergunship(
-    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+void az_tick_bad_oth_supergunship(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
 
 /*===========================================================================*/
 
-void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock);
-
-/*===========================================================================*/
-
-#endif // AZIMUTH_VIEW_BADDIE_OTH_H_
+#endif // AZIMUTH_TICK_BADDIE_OTH_SGS_H_

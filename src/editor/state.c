@@ -244,6 +244,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_MAGBEEST_LEGS_R,
   AZ_BAD_MAGMA_BOMB,
   AZ_BAD_SCRAP_METAL,
+  AZ_BAD_OTH_SUPERGUNSHIP,
   AZ_BAD_ZENITH_CORE,
   AZ_BAD_POP_OPEN_TURRET,
 };

@@ -132,3 +132,16 @@ const az_oth_tendrils_data_t AZ_OTH_SNAPDRAGON_TENDRILS = {
 };
 
 /*===========================================================================*/
+
+static const az_vector_t supergunship_tendril_bases[] = {
+  {-6, -7}, {-8, -5}, {-10, 0}, {-8, 5}, {-6, 7}
+};
+const az_oth_tendrils_data_t AZ_OTH_SUPERGUNSHIP_TENDRILS = {
+  .tracking_base = 0.002,
+  .length = 50.0,
+  .semithick = 4.0,
+  .drift = 10.0,
+  DECL_TENDRIL_BASES(supergunship_tendril_bases)
+};
+
+/*===========================================================================*/

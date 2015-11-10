@@ -1962,6 +1962,13 @@ static az_baddie_data_t baddie_datas[] = {
     .potential_pickups = ~(AZ_PUPF_NOTHING | AZ_PUPF_LARGE_SHIELDS),
     .static_properties = AZ_BADF_KAMIKAZE,
     .main_body = { .bounding_radius = 15.0, .impact_damage = 7.0 }
+  },
+  [AZ_BAD_OTH_SUPERGUNSHIP] = {
+    .max_health = 500.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING, .hurt_sound = AZ_SND_HURT_OTH,
+    .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
+                   .immunities = AZ_DMGF_FREEZE, .impact_damage = 15.0 }
   }
 };
 
