@@ -1182,7 +1182,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   \"...I'm kind of armed to the friggin' teeth.
   I'm $/pretty sure$| I can handle it.\""
 !T241"
-  $RTHIS ROOM IS NOT DONE YET"
+  <unused>"
 !T242"
   $RTHIS BOSS IS NOT DONE YET"
 !T243"

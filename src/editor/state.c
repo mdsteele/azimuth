@@ -637,17 +637,7 @@ static void summarize_scenario(const az_planet_t *planet) {
       const az_room_t *room = &planet->rooms[room_index];
       if (room->zone_key != (az_zone_key_t)zone_index) continue;
       ++num_rooms;
-      bool found_msg241 = false;
-      if (room->on_start != NULL) {
-        for (int i = 0; i < room->on_start->num_instructions; ++i) {
-          const az_instruction_t ins = room->on_start->instructions[i];
-          if (ins.opcode == AZ_OP_MSG && ins.immediate == 241) {
-            found_msg241 = true;
-            break;
-          }
-        }
-      }
-      if (room->num_walls >= 8 && !found_msg241) {
+      if (room->num_walls >= 8) {
         ++num_pop_rooms;
         ++total_pop_rooms;
       }
