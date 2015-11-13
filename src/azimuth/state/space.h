@@ -154,6 +154,7 @@ typedef struct {
   struct { bool is_active; double time_remaining; } sync_timer;
   az_upgrade_mode_data_t upgrade_mode;
   az_script_vm_t sync_vm; // VM for storing synchronously-suspended scripts
+  double console_help_message_cooldown;
   bool intro; // true if we just started the game
   bool victory; // true if we just won the game
 

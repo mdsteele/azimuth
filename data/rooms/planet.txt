@@ -84,8 +84,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T21"
   Heated Reservoir"
 !T22"
-  Press [$t] to save
-  while near a save point."
+  <unused 22>"
 !T23"
   Hydroponics Lab"
 !T24"
@@ -611,7 +610,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   $CCnidam$W region; I've marked the top of the
   shaft on your map."
 !T135"
-  Press [$t] to use the console."
+  <unused 135>"
 !T136"
   Hothouse"
 !T137"
@@ -1182,7 +1181,7 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
   \"...I'm kind of armed to the friggin' teeth.
   I'm $/pretty sure$| I can handle it.\""
 !T241"
-  <unused>"
+  <unused 241>"
 !T242"
   $RTHIS BOSS IS NOT DONE YET"
 !T243"

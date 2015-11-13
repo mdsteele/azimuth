@@ -67,6 +67,7 @@ void az_after_entering_room(az_space_state_t *state) {
     &state->planet->rooms[state->ship.player.current_room];
   state->camera.quake_vert = 0.0;
   state->camera.r_max_override = 0.0;
+  state->console_help_message_cooldown = 0.0;
   // Run the room script (if any).
   az_run_script(state, room->on_start);
   state->darkness = state->dark_goal;
@@ -585,6 +586,30 @@ static void tick_message(az_message_t *message, double time) {
   }
 }
 
+static void tick_console_help(az_space_state_t *state, double time) {
+  state->console_help_message_cooldown =
+    fmax(0.0, state->console_help_message_cooldown - time);
+  if (state->console_help_message_cooldown <= 0.0) {
+    AZ_ARRAY_LOOP(node, state->nodes) {
+      if (node->kind != AZ_NODE_CONSOLE) continue;
+      if (node->status != AZ_NS_READY) continue;
+      switch (node->subkind.console) {
+        case AZ_CONS_COMM:
+          az_set_message(state, "Press [$t] to use the console.");
+          break;
+        case AZ_CONS_REFILL:
+          az_set_message(state, "Press [$t] to refill shields/ammo.");
+          break;
+        case AZ_CONS_SAVE:
+          az_set_message(state, "Press [$t] to use the save point.");
+          break;
+      }
+      state->console_help_message_cooldown = 10.0;
+      break;
+    }
+  }
+}
+
 // If the global countdown timer is active, count it down.
 static void tick_countdown(az_countdown_t *countdown, double time) {
   if (!countdown->is_active) return;
@@ -741,6 +766,7 @@ void az_tick_space_state(az_space_state_t *state, double time) {
       az_tick_nodes(state, time);
       break;
     case AZ_MODE_NORMAL:
+      tick_console_help(state, time);
       tick_all_objects(state, time);
       az_tick_timers(state, time);
       check_countdown(state, time);

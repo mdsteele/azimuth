@@ -80,6 +80,7 @@ static void begin_saved_game(
     az_enter_room(&state, &planet->rooms[state.ship.player.current_room]);
     position_ship_at_save_point_if_any();
     az_after_entering_room(&state);
+    state.console_help_message_cooldown = 10.0;
   } else {
     // Begin new game:
     az_init_player(&state.ship.player);

@@ -1,4 +1,5 @@
 Next flag: 142
+Unused: 0
 
 Bosses
 ======
@@ -140,7 +141,6 @@ Boss Doors
 
 Misc
 ====
-0: Used one of the first two save points (Colony rooms 10 and 25)
 5: Passed through Colony room 7, disable pausing tutorial
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 8: Reversed grav-corridor in Colony room 24
