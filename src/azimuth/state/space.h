@@ -214,10 +214,12 @@ az_projectile_t *az_add_projectile(
     double angle, double power, az_uid_t fired_by);
 
 // Add a pickup of a randomly chosen kind, among those kinds allowed by the
-// potential_pickups argument.
-void az_add_random_pickup(az_space_state_t *state,
-                          az_pickup_flags_t potential_pickups,
-                          az_vector_t position);
+// potential_pickups argument, and return a pointer to it.  Returns NULL if no
+// pickup was placed, either because AZ_PUPF_NOTHING was selected, or if the
+// position would be inside a wall, or if the pickup array is full.
+az_pickup_t *az_add_random_pickup(az_space_state_t *state,
+                                  az_pickup_flags_t potential_pickups,
+                                  az_vector_t position);
 
 // Gets the camera bounds for the current room.
 const az_camera_bounds_t *az_current_camera_bounds(

@@ -67,7 +67,7 @@ typedef enum {
 typedef struct {
   az_pickup_kind_t kind; // if AZ_PUP_NOTHING, this pickup is not present
   az_vector_t position;
-  double age; // seconds
+  double time_remaining; // seconds
 } az_pickup_t;
 
 /*===========================================================================*/

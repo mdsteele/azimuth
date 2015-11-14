@@ -32,7 +32,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
   az_player_t *player = &ship->player;
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) continue;
-    pickup->age += time;
+    pickup->time_remaining -= time;
     if (az_ship_is_alive(ship) &&
         az_vwithin(pickup->position, ship->position,
                    AZ_PICKUP_COLLECT_RANGE)) {
@@ -65,7 +65,7 @@ void az_tick_pickups(az_space_state_t *state, double time) {
           break;
       }
       pickup->kind = AZ_PUP_NOTHING;
-    } else if (pickup->age >= AZ_PICKUP_MAX_AGE) {
+    } else if (pickup->time_remaining <= 0.0) {
       pickup->kind = AZ_PUP_NOTHING;
     } else if (az_ship_is_alive(ship)) {
       const double attract_range =

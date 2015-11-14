@@ -107,9 +107,13 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
         mode_data->step = AZ_BDS_FADE;
         mode_data->progress = 0.0;
         for (int i = 0; i < 20; ++i) {
-          az_add_random_pickup(state, mode_data->boss.data->potential_pickups,
-                               az_vadd(mode_data->boss.position,
-                                       az_random_point_in_circle(100.0)));
+          az_pickup_t *pickup = az_add_random_pickup(
+              state, mode_data->boss.data->potential_pickups,
+              az_vadd(mode_data->boss.position,
+                      az_random_point_in_circle(100.0)));
+          if (pickup != NULL) {
+            pickup->time_remaining = 1e9;
+          }
         }
         AZ_ARRAY_LOOP(uuid, mode_data->boss.cargo_uuids) {
           az_object_t object;

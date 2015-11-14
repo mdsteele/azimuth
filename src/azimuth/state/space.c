@@ -287,26 +287,27 @@ az_projectile_t *az_add_projectile(
   return NULL;
 }
 
-void az_add_random_pickup(az_space_state_t *state,
-                          az_pickup_flags_t potential_pickups,
-                          az_vector_t position) {
+az_pickup_t *az_add_random_pickup(az_space_state_t *state,
+                                  az_pickup_flags_t potential_pickups,
+                                  az_vector_t position) {
   az_impact_t impact;
   az_circle_impact(state, 3.0, position, AZ_VZERO,
                    (AZ_IMPF_SHIP | AZ_IMPF_BADDIE), AZ_NULL_UID, &impact);
-  if (impact.type != AZ_IMP_NOTHING) return;
+  if (impact.type != AZ_IMP_NOTHING) return NULL;
   const az_pickup_kind_t kind =
     az_choose_random_pickup_kind(&state->ship.player, potential_pickups);
-  if (kind == AZ_PUP_NOTHING) return;
+  if (kind == AZ_PUP_NOTHING) return NULL;
   AZ_ARRAY_LOOP(pickup, state->pickups) {
     if (pickup->kind == AZ_PUP_NOTHING) {
       pickup->kind = kind;
       pickup->position = position;
-      pickup->age = 0.0;
-      return;
+      pickup->time_remaining = AZ_PICKUP_MAX_AGE;
+      return pickup;
     }
   }
   AZ_WARNING_ONCE("Failed to add pickup (kind=%d); array is full.\n",
                   (int)kind);
+  return NULL;
 }
 
 /*===========================================================================*/
