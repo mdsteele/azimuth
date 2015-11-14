@@ -250,16 +250,16 @@ static void tint_screen(GLfloat gray, GLfloat alpha) {
 }
 
 static void draw_sapiai_planet_atmosphere(
-    double planet_radius, double atmosphere_thickness,
+    double surface_radius, double atmosphere_thickness,
     az_color_t atmosphere_color) {
   az_color_t outer_color = atmosphere_color;
   outer_color.a = 0;
-  const double outer_radius = planet_radius + atmosphere_thickness;
+  const double outer_radius = surface_radius + atmosphere_thickness;
   glBegin(GL_TRIANGLE_STRIP); {
     for (int i = 0; i <= 360; i += 3) {
       az_gl_color(atmosphere_color);
-      glVertex2d(planet_radius * cos(AZ_DEG2RAD(i)),
-                 planet_radius * sin(AZ_DEG2RAD(i)));
+      glVertex2d(surface_radius * cos(AZ_DEG2RAD(i)),
+                 surface_radius * sin(AZ_DEG2RAD(i)));
       az_gl_color(outer_color);
       glVertex2d(outer_radius * cos(AZ_DEG2RAD(i)),
                  outer_radius * sin(AZ_DEG2RAD(i)));
