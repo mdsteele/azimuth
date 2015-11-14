@@ -837,6 +837,9 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_OTH_SUPERGUNSHIP:
       az_tick_bad_oth_supergunship(state, baddie, time);
       break;
+    case AZ_BAD_OTH_DECOY:
+      az_tick_bad_oth_decoy(state, baddie, time);
+      break;
   }
 
   // Move cargo with the baddie (unless the baddie killed itself).
@@ -890,6 +893,9 @@ void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
       break;
     case AZ_BAD_CRAB_CRAWLER:
       az_on_crab_crawler_damaged(state, baddie, amount, damage_kind);
+      break;
+    case AZ_BAD_OTH_SUPERGUNSHIP:
+      az_on_oth_supergunship_damaged(state, baddie, amount, damage_kind);
       break;
     default: break;
   }

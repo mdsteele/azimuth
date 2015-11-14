@@ -831,6 +831,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_oth_razor_2(baddie, frozen, clock);
       break;
     case AZ_BAD_OTH_SUPERGUNSHIP:
+    case AZ_BAD_OTH_DECOY:
       az_draw_bad_oth_supergunship(baddie, frozen, clock);
       break;
   }

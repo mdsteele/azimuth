@@ -28,6 +28,12 @@
 
 void az_tick_bad_oth_supergunship(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_oth_supergunship_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind);
+
+void az_tick_bad_oth_decoy(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
 
 /*===========================================================================*/
 

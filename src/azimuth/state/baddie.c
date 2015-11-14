@@ -1969,6 +1969,13 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
                    .immunities = AZ_DMGF_FREEZE, .impact_damage = 15.0 }
+  },
+  [AZ_BAD_OTH_DECOY] = {
+    .max_health = 25.0, .color = {255, 255, 255, 255},
+    .potential_pickups = ~AZ_PUPF_NOTHING, .hurt_sound = AZ_SND_HURT_OTH,
+    .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
+    .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
+                   .impact_damage = 15.0 }
   }
 };
 
