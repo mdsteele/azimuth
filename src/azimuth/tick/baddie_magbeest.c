@@ -38,17 +38,19 @@
 /*===========================================================================*/
 
 // Head states:
-#define HEAD_POPDOWN_STATE 0
-#define HEAD_POPUP_STATE 1
-#define HEAD_LASER_SEEK_STATE 2
-#define HEAD_WAITING_STATE 3
-#define HEAD_QUICK_POPUP_STATE 4
-#define HEAD_QUICK_POPDOWN_STATE 5
-#define HEAD_CEILING_SPIDER_MOVE_BODY_STATE 6
-#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE 7
-#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE 8
-#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE 9
-#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE 10
+#define HEAD_INIT_STATE 0
+#define HEAD_DORMANT_STATE 1
+#define HEAD_POPDOWN_STATE 2
+#define HEAD_POPUP_STATE 3
+#define HEAD_LASER_SEEK_STATE 4
+#define HEAD_WAITING_STATE 5
+#define HEAD_QUICK_POPUP_STATE 6
+#define HEAD_QUICK_POPDOWN_STATE 7
+#define HEAD_CEILING_SPIDER_MOVE_BODY_STATE 8
+#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE 9
+#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE 10
+#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE 11
+#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE 12
 // Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
@@ -383,6 +385,20 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
   const double head_top =
     az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
   switch (baddie->state) {
+    case HEAD_INIT_STATE:
+      baddie->state = HEAD_DORMANT_STATE;
+      baddie->cooldown = 1.0;
+      break;
+    case HEAD_DORMANT_STATE:
+      if (baddie->cooldown <= 0.0) {
+        az_vector_t marker_positions[4];
+        sort_marker_positions(state, marker_positions,
+                              AZ_ARRAY_SIZE(marker_positions));
+        baddie->state = HEAD_POPUP_STATE;
+        baddie->cooldown = 3.5;
+        init_head_popup(baddie, marker_positions[1]);
+      }
+      break;
     case HEAD_POPDOWN_STATE:
       turn_eye_towards(state, baddie, az_vmul(baddie->position, 2), time);
       if (head_top > baseline) {
