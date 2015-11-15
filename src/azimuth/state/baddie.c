@@ -251,18 +251,17 @@ static const az_vector_t demon_swooper_stinger_vertices[] = {
   {5, -2}, {7, 0}, {5, 2}, {1, 2}, {1, 4}, {-7, 0}, {1, -4}, {1, -2}
 };
 static az_component_data_t demon_swooper_components[] = {
-  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-17, 0} },
-  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-23, 0} },
-  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-29, 0} },
-  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-35, 0} },
-  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-41, 0} },
+#define TAIL_SEGMENT(x) \
+  { .polygon = AZ_INIT_POLYGON(demon_swooper_tail_segment_vertices), \
+    .immunities = AZ_DMGF_FLAME, .impact_damage = 8.0, \
+    .init_position = {(x), 0} }
+
+  TAIL_SEGMENT(-17), TAIL_SEGMENT(-23), TAIL_SEGMENT(-29), TAIL_SEGMENT(-35),
+  TAIL_SEGMENT(-41),
+#undef TAIL_SEGMENT
   { .polygon = AZ_INIT_POLYGON(demon_swooper_stinger_vertices),
-    .immunities = AZ_DMGF_FLAME, .init_position = {-49, 0} },
+    .immunities = AZ_DMGF_FLAME, .impact_damage = 8.0,
+    .init_position = {-49, 0} }
 };
 
 static const az_vector_t ice_crawler_body_vertices[] = {
