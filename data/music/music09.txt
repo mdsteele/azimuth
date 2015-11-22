@@ -1,4 +1,4 @@
-@M "S AAbB=1b GG|KKJJLL"
+@M "S AAbB=1b CCDDEE|FFGGEEYGGEEYFFZZ"
 
 =key 2#     % B minor
 =tempo 140
@@ -6,9 +6,9 @@
 
 !Part S
 
-1 Wp50 L30  E0,0
+1 Wp50 L30  E0,0   D+15,30
 2 Wp25 L30  E0,25
-3 Wt25 L200 E0,15
+3 Wt25 L200 E0,15  D+10,60
 4 Wn   L30  E0,100
 5 Wn   L70  E0,100
 
@@ -23,7 +23,7 @@
 
 
 
-!Part G
+!Part C
 
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
 5| x1q x7q ' x1q x7q |
@@ -38,7 +38,7 @@
 5| x1q x7q ' x1q x7q |
 
 
-!Part K
+!Part D
 
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
 5| x1q ' x7q ' x1q ' x7q |
@@ -53,7 +53,7 @@
 5| x1q x7e3 x1q3 ' x1 x1 x1 |
 
 
-!Part J
+!Part E
 
 1| b4e3 g f ' b4e3 g f ' b4e3 g f ' b4e3 g f |
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
@@ -72,7 +72,19 @@
 5| x1q x7e3 x1q3 ' x1 x1 x1 |
 
 
-!Part L
+!Part Y
+
+1| g5q3 e a g f e |
+ | f5q3 d g f e d |
+ | e5q3 d b4 c5 e g |
+ | f5w |
+5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+
+
+!Part F
 
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
 5| x1q x1 x1 x1 |
@@ -85,3 +97,41 @@
 
 3| d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
 5| x1q x1 x1 x1 |
+
+
+!Part G
+
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+5| x1q x1 x1 x1 |
+
+3| b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+5| x1q x1 x1 x1 |
+
+3| e3q3 f3e re b2e re3 be ' be3 b b |
+5| x1q x1 x1 x1 |
+
+3| a2q3 f3 fN ' e d# d |
+5| x1q x1e3 x1q3 ' x1 x1 x1 |
+
+
+!Part Z
+
+1| b4e3 f d ' b f d ' b f d ' b f d |
+ | a4e3 f d ' a f d ' c5 a4 e ' c5 a4 e |
+ | d5e3 b4 f ' d5 b4 f ' d5 b4 f ' d5 b4 f |
+ | c5e3 a4 e ' c5 a4 e ' a#4 f e ' a#4 f e |
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | a2q3 fe3 ' aq3 fe3 ' c3q3 a2e3 ' c3q3 a2e3 |
+ | d3q3 b2e3 ' d3q3 b2e3 ' d3q3 b2e3 ' d3q3 b2e3 |
+ | c3q3 a2e3 ' c3q3 a2e3 ' a#2q3 fe3 ' a#2q3 fe3 |
+5| x1q x1 x1 x1 | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 | x1q x1 x1 x1 |
+
+1| b4e3 f d ' b f d ' f4 d b3 ' f4 d b3 |
+ | d4e3 b3 f ' d4 b3 f ' c4 a3 e ' c4 a3 e |
+ | b3q3 b4 a# ' f d5 c |
+ | a4q3 d5 c ' d c a#4 |
+3| b2q3 fe3 ' bq3 d3e3 ' f2q3 de3 ' f2q3 de3 |
+3| b2q3 fe3 ' bq3 fe3 ' c3q3 a2e3 ' c3q3 a2e3 |
+5| x1q x1 x1 x1 | x1q x1 x1 x1 |
+ | x1q x1e3 x1q3 ' x1 x1 x1 | x1q3 x1 x1 ' x1e3 x1 x1 x1 x1 x1 |
