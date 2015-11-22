@@ -38,19 +38,32 @@
 /*===========================================================================*/
 
 // Head states:
-#define HEAD_INIT_STATE 0
-#define HEAD_DORMANT_STATE 1
-#define HEAD_POPDOWN_STATE 2
-#define HEAD_POPUP_STATE 3
-#define HEAD_LASER_SEEK_STATE 4
-#define HEAD_WAITING_STATE 5
-#define HEAD_QUICK_POPUP_STATE 6
-#define HEAD_QUICK_POPDOWN_STATE 7
-#define HEAD_CEILING_SPIDER_MOVE_BODY_STATE 8
-#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE 9
-#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE 10
-#define HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE 11
-#define HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE 12
+enum {
+  HEAD_INIT_STATE = 0,
+  HEAD_DORMANT_STATE,
+  HEAD_POPDOWN_STATE,
+  HEAD_POPUP_STATE,
+  HEAD_LASER_SEEK_STATE,
+  HEAD_WAITING_STATE,
+  HEAD_QUICK_POPUP_STATE,
+  HEAD_QUICK_POPDOWN_STATE,
+  HEAD_SPIDER_POPUP_STATE,
+  HEAD_SPIDER_PLANT_LEG_0_STATE,
+  HEAD_SPIDER_PLANT_LEG_1_STATE,
+  HEAD_SPIDER_PLANT_LEG_2_STATE,
+  HEAD_SPIDER_PLANT_LEG_3_STATE,
+  HEAD_WALL_SPIDER_MOVE_BODY_STATE,
+  HEAD_WALL_SPIDER_MOVE_EVEN_LEGS_UP_STATE,
+  HEAD_WALL_SPIDER_MOVE_ODD_LEGS_UP_STATE,
+  HEAD_CORNER_SPIDER_MOVE_BODY_STATE,
+  HEAD_CORNER_SPIDER_MOVE_EVEN_LEGS_UP_STATE,
+  HEAD_CORNER_SPIDER_MOVE_ODD_LEGS_UP_STATE,
+  HEAD_CEILING_SPIDER_MOVE_BODY_STATE,
+  HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE,
+  HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE,
+  HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE,
+  HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE
+};
 // Shared legs states:
 #define LEGS_POPDOWN_STATE 0
 #define LEGS_POPUP_STATE 1
@@ -77,12 +90,20 @@
 #define LEGS_POPUP_DIST 320
 // How long it takes the fusion beam to fire, in seconds:
 #define MAGNET_FUSION_BEAM_CHARGE_TIME 3.0
+// How long it takes to shift a leg when beginning spider mode:
+#define SPIDER_PLANT_LEG_TIME 0.5
 // How long it takes to shift a pair of legs when in spider mode:
 #define SPIDER_MOVE_LEGS_TIME 0.5
 // How fast a spider foot can move, in pixels/second:
 #define SPIDER_FOOT_SPEED 300
 // How fast the spider body can move, in pixels/second:
 #define SPIDER_BODY_SPEED 75
+
+typedef enum {
+  WALL_SPIDER,
+  CORNER_SPIDER,
+  CEILING_SPIDER
+} az_spider_mode_t;
 
 /*===========================================================================*/
 
@@ -120,6 +141,14 @@ static void shuffle_marker_positions(
     positions_out[i] = positions_out[j];
     positions_out[j] = tmp;
   }
+}
+
+static az_vector_t raycast(az_space_state_t *state, az_vector_t start,
+                           double theta) {
+  az_impact_t impact;
+  az_ray_impact(state, start, az_vpolar(10000, theta),
+                (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), AZ_NULL_UID, &impact);
+  return impact.position;
 }
 
 /*===========================================================================*/
@@ -294,14 +323,17 @@ static void arrange_spider_leg(az_baddie_t *legs_l, az_baddie_t *legs_r,
   }
 }
 
-static void move_spider_foot_towards(az_baddie_t *legs_l, az_baddie_t *legs_r,
-                                     int leg_index, az_vector_t goal,
-                                     double time) {
+static void move_spider_foot_towards(
+    az_baddie_t *head, az_baddie_t *legs_l, az_baddie_t *legs_r, int leg_index,
+    az_vector_t goal, double time) {
+  assert(head->kind == AZ_BAD_MAGBEEST_HEAD);
+  assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
+  assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
   const az_vector_t old_position =
     get_abs_foot_position(legs_l, legs_r, leg_index);
-  const az_vector_t new_position =
-    az_vadd(old_position, az_vcaplen(az_vsub(goal, old_position),
-                                     SPIDER_FOOT_SPEED * time));
+  const az_vector_t new_position = az_vadd(old_position, az_vcaplen(
+      az_vsub(goal, old_position),
+      SPIDER_FOOT_SPEED * time * (head->param > 0.5 ? 2 : 1)));
   arrange_spider_leg(legs_l, legs_r, leg_index, new_position);
 }
 
@@ -330,40 +362,131 @@ static void shift_spider_body(az_baddie_t *head, az_baddie_t *legs_l,
   }
 }
 
-static az_vector_t ceiling_spider_foot_goal(az_space_state_t *state,
-                                            az_vector_t rough_goal) {
-  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
-  const az_vector_t start =
-    az_vcaplen(rough_goal, bounds->min_r + bounds->r_span);
-  az_impact_t impact;
-  az_ray_impact(state, start, az_vwithlen(start, 1000),
-                (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), AZ_NULL_UID, &impact);
-  return impact.position;
+static az_vector_t spider_foot_goal(
+    az_space_state_t *state, double up_theta, az_vector_t rough_goal) {
+  return raycast(state, az_vsub(rough_goal, az_vpolar(150, up_theta)),
+                 up_theta);
 }
 
 static void move_spider_legs(
     az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
     az_baddie_t *legs_r, int parity, double goal_offset, int horz_sign,
-    double time) {
+    az_spider_mode_t mode, double time) {
   assert(head->kind == AZ_BAD_MAGBEEST_HEAD);
   assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
   assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
   assert(parity == 0 || parity == 1);
-  const az_vector_t unit_down = az_vunit(az_vneg(head->position));
-  const az_vector_t unit_left = az_vunit(az_vrot90ccw(head->position));
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  const double up_theta =
+    (mode == WALL_SPIDER ? bounds->min_theta - AZ_DEG2RAD(90) :
+     mode == CORNER_SPIDER ? bounds->min_theta - AZ_DEG2RAD(45) :
+     az_vtheta(head->position));
+  const az_vector_t unit_down = az_vpolar(1, up_theta + AZ_PI);
+  const az_vector_t unit_left = az_vneg(az_vrot90ccw(unit_down));
   const double horz = copysign(50.0, horz_sign) * (1.0 - head->param);
   const double vert = (60.0 / AZ_PI) * atan(0.15 * fabs(horz));
   for (int leg_index = parity; leg_index < 4; leg_index += 2) {
     const az_vector_t other_foot_pos =
       get_abs_foot_position(legs_l, legs_r, leg_index ^ 1);
+    const az_vector_t rough_goal =
+      az_vadd(other_foot_pos, az_vmul(unit_left, goal_offset));
     const az_vector_t final_goal =
-      ceiling_spider_foot_goal(state,
-                               az_vadd(other_foot_pos,
-                                       az_vmul(unit_left, goal_offset)));
+      spider_foot_goal(state, (mode != CEILING_SPIDER ? up_theta :
+                               az_vtheta(rough_goal)),
+                       rough_goal);
     const az_vector_t current_goal =
       az_vadd(final_goal, az_vadd(az_vmul(unit_left, horz),
                                   az_vmul(unit_down, vert)));
-    move_spider_foot_towards(legs_l, legs_r, leg_index, current_goal, time);
+    move_spider_foot_towards(head, legs_l, legs_r, leg_index, current_goal,
+                             time);
+  }
+}
+
+static void move_wall_spider_legs(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r, int parity, double goal_offset, int horz_sign,
+    double time) {
+  move_spider_legs(state, head, legs_l, legs_r, parity, goal_offset, horz_sign,
+                   WALL_SPIDER, time);
+}
+
+static void move_corn_spider_legs(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r, int parity, double goal_offset, int horz_sign,
+    double time) {
+  move_spider_legs(state, head, legs_l, legs_r, parity, goal_offset, horz_sign,
+                   CORNER_SPIDER, time);
+}
+
+static void move_ceil_spider_legs(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r, int parity, double goal_offset, int horz_sign,
+    double time) {
+  move_spider_legs(state, head, legs_l, legs_r, parity, goal_offset, horz_sign,
+                   CEILING_SPIDER, time);
+}
+
+/*===========================================================================*/
+
+static void prepare_to_spider_popup(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r) {
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  az_vector_t marker_positions[4];
+  sort_marker_positions(state, marker_positions,
+                        AZ_ARRAY_SIZE(marker_positions));
+
+  head->position = az_vsub(marker_positions[3],
+                           az_vwithlen(marker_positions[3], 135));
+  head->angle = az_mod2pi(bounds->min_theta - AZ_DEG2RAD(45));
+  head->state = HEAD_SPIDER_POPUP_STATE;
+  arrange_head_piston(head, 0, az_vadd(head->position,
+      az_vpolar(70, bounds->min_theta - AZ_DEG2RAD(45))));
+  arrange_head_piston(head, 1, az_vadd(head->position,
+      az_vpolar(70, bounds->min_theta - AZ_DEG2RAD(135))));
+
+  legs_l->angle = az_mod2pi(bounds->min_theta + AZ_DEG2RAD(45));
+  legs_l->position = az_vsub(head->position, az_vpolar(50, legs_l->angle));
+  legs_l->state = MAGNET_RECOVER_STATE;
+  legs_l->param2 = 1;
+
+  legs_r->angle = az_mod2pi(bounds->min_theta + AZ_DEG2RAD(135));
+  legs_r->position = az_vsub(head->position, az_vpolar(50, legs_r->angle));
+  legs_r->state = GATLING_STOP_FIRING_STATE;
+  legs_r->param2 = 1;
+
+  // Arrange legs_l legs, ready to pop up.
+  arrange_leg(legs_l, 0, az_vadd(legs_l->position,
+      az_vpolar(50, legs_l->angle - AZ_DEG2RAD(135))), legs_l->angle);
+  arrange_leg(legs_l, 1, az_vadd(legs_l->position,
+      az_vpolar(50, legs_l->angle + AZ_DEG2RAD(135))), legs_l->angle);
+  // Arrange legs_r legs, folded up.  Note intentional use of legs_l->angle
+  // here for knee direction, to be consistent with spider mode.
+  arrange_leg(legs_r, 0, az_vadd(legs_r->position,
+      az_vpolar(100, legs_r->angle - AZ_DEG2RAD(180))), legs_l->angle);
+  arrange_leg(legs_r, 1, az_vadd(legs_r->position,
+      az_vpolar(90, legs_r->angle - AZ_DEG2RAD(110))), legs_l->angle);
+}
+
+static void plant_spider_leg(
+    az_space_state_t *state, az_baddie_t *head, az_baddie_t *legs_l,
+    az_baddie_t *legs_r, int leg_index, double vert_offset, int next_state,
+    double time) {
+  const az_camera_bounds_t *bounds = az_current_camera_bounds(state);
+  head->param = fmin(1.0, head->param + time / SPIDER_PLANT_LEG_TIME);
+  const az_vector_t unit_up = az_vpolar(1, bounds->min_theta);
+  const double theta_right = bounds->min_theta - AZ_HALF_PI;
+  const az_vector_t final_goal =
+    raycast(state, az_vadd(head->position,
+                           az_vmul(unit_up, vert_offset)), theta_right);
+  const az_vector_t current_goal =
+    az_vsub(final_goal, az_vpolar(50 * (1 - head->param), theta_right));
+  move_spider_foot_towards(head, legs_l, legs_r, leg_index,
+                           current_goal, time);
+  if (head->param >= 1.0) {
+    on_leg_stomp(state);
+    head->state = next_state;
+    head->param = 0.0;
   }
 }
 
@@ -482,42 +605,118 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
           init_head_popup(baddie, marker_positions[new_index]);
           baddie->state = HEAD_QUICK_POPUP_STATE;
         } else {
-          // TODO: Better transition to ceiling spider mode
-          const double up_theta = bounds->min_theta + 0.3 * bounds->theta_span;
-          baddie->position =
-            az_vpolar(bounds->min_r + bounds->r_span + 50, up_theta);
-          baddie->angle = up_theta + AZ_DEG2RAD(45);
-          baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
-          baddie->cooldown = 3.0;
-          legs_l->position = az_vadd(baddie->position,
-                                     az_vpolar(50, up_theta - AZ_DEG2RAD(45)));
-          legs_l->angle = az_mod2pi(up_theta + AZ_DEG2RAD(135));
-          legs_l->state = MAGNET_RECOVER_STATE;
-          legs_l->param2 = 1;
-          legs_r->position = az_vadd(baddie->position,
-                                     az_vpolar(50, up_theta + AZ_DEG2RAD(45)));
-          legs_r->angle = az_mod2pi(up_theta - AZ_DEG2RAD(135));
-          legs_r->state = GATLING_STOP_FIRING_STATE;
-          legs_r->param2 = 1;
-          arrange_head_piston(baddie, 0, az_vadd(baddie->position,
-              az_vpolar(70, up_theta - AZ_DEG2RAD(45))));
-          arrange_head_piston(baddie, 1, az_vadd(baddie->position,
-              az_vpolar(70, up_theta + AZ_DEG2RAD(45))));
-          const az_vector_t ceiling =
-            az_vadd(baddie->position, az_vpolar(140, up_theta));
-          const az_vector_t side_unit =
-            az_vpolar(1, up_theta - AZ_DEG2RAD(90));
-          arrange_spider_leg(legs_l, legs_r, 0, ceiling_spider_foot_goal(
-              state, az_vadd(ceiling, az_vmul(side_unit, -200))));
-          arrange_spider_leg(legs_l, legs_r, 1, ceiling_spider_foot_goal(
-              state, az_vadd(ceiling, az_vmul(side_unit, -100))));
-          arrange_spider_leg(legs_l, legs_r, 2, ceiling_spider_foot_goal(
-              state, az_vadd(ceiling, az_vmul(side_unit,  100))));
-          arrange_spider_leg(legs_l, legs_r, 3, ceiling_spider_foot_goal(
-              state, az_vadd(ceiling, az_vmul(side_unit,  200))));
+          prepare_to_spider_popup(state, baddie, legs_l, legs_r);
         }
       }
       break;
+    case HEAD_SPIDER_POPUP_STATE: {
+      const az_vector_t old_legs_l_pos = legs_l->position;
+      const double base_top =
+        az_vnorm(legs_l->position) + legs_l->data->main_body.bounding_radius;
+      if (base_top < baseline + LEGS_POPUP_DIST - 40) {
+        legs_pop_up_down(state, legs_l, baseline, LEGS_POP_SPEED * time);
+        const az_vector_t legs_l_delta =
+          az_vsub(legs_l->position, old_legs_l_pos);
+        az_vpluseq(&baddie->position, legs_l_delta);
+        az_vpluseq(&legs_r->position, legs_l_delta);
+      } else {
+        baddie->state = HEAD_SPIDER_PLANT_LEG_0_STATE;
+        baddie->param = 0.0;
+      }
+    } break;
+    case HEAD_SPIDER_PLANT_LEG_0_STATE:
+      plant_spider_leg(state, baddie, legs_l, legs_r, 0, 200,
+                       HEAD_SPIDER_PLANT_LEG_1_STATE, time);
+      break;
+    case HEAD_SPIDER_PLANT_LEG_1_STATE:
+      plant_spider_leg(state, baddie, legs_l, legs_r, 1, 100,
+                       HEAD_SPIDER_PLANT_LEG_2_STATE, time);
+      break;
+    case HEAD_SPIDER_PLANT_LEG_2_STATE:
+      plant_spider_leg(state, baddie, legs_l, legs_r, 2, -100,
+                       HEAD_SPIDER_PLANT_LEG_3_STATE, time);
+      break;
+    case HEAD_SPIDER_PLANT_LEG_3_STATE:
+      plant_spider_leg(state, baddie, legs_l, legs_r, 3, -200,
+                       HEAD_WALL_SPIDER_MOVE_BODY_STATE, time);
+      break;
+    case HEAD_WALL_SPIDER_MOVE_BODY_STATE: {
+      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
+      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
+      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
+      const az_vector_t goal =
+        az_vadd(az_vmul(az_vadd(foot_0_pos, foot_3_pos), 0.5),
+                az_vwithlen(az_vrot90ccw(az_vsub(foot_0_pos, foot_3_pos)),
+                            140));
+      shift_spider_body(baddie, legs_l, legs_r,
+                        az_vcaplen(az_vsub(goal, baddie->position),
+                                   SPIDER_BODY_SPEED * time));
+      if (az_vwithin(baddie->position, goal, 1)) {
+        baddie->param = 0.0;
+        if (az_vnorm(get_abs_foot_position(legs_l, legs_r, 1)) >
+            bounds->min_r + bounds->r_span + 25) {
+          baddie->state = HEAD_CORNER_SPIDER_MOVE_EVEN_LEGS_UP_STATE;
+        } else if (az_vwithin(foot_2_pos, foot_3_pos, 120)) {
+          baddie->state = HEAD_WALL_SPIDER_MOVE_EVEN_LEGS_UP_STATE;
+        } else {
+          baddie->state = HEAD_WALL_SPIDER_MOVE_ODD_LEGS_UP_STATE;
+        }
+      }
+    } break;
+    case HEAD_WALL_SPIDER_MOVE_EVEN_LEGS_UP_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      move_wall_spider_legs(state, baddie, legs_l, legs_r, 0, 150, -1, time);
+      if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
+        baddie->state = HEAD_WALL_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_WALL_SPIDER_MOVE_ODD_LEGS_UP_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      move_wall_spider_legs(state, baddie, legs_l, legs_r, 1, -100, -1, time);
+      if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
+        baddie->state = HEAD_WALL_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_CORNER_SPIDER_MOVE_BODY_STATE: {
+      const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
+      const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
+      const az_vector_t foot_3_pos = get_abs_foot_position(legs_l, legs_r, 3);
+      const az_vector_t goal =
+        az_vadd(az_vmul(az_vadd(foot_0_pos, foot_3_pos), 0.5),
+                az_vwithlen(az_vrot90ccw(az_vsub(foot_0_pos, foot_3_pos)),
+                            100));
+      shift_spider_body(baddie, legs_l, legs_r,
+                        az_vcaplen(az_vsub(goal, baddie->position),
+                                   SPIDER_BODY_SPEED * time));
+      if (az_vwithin(baddie->position, goal, 1)) {
+        baddie->param = 0.0;
+        if (az_vnorm(foot_3_pos) > bounds->min_r + bounds->r_span + 120) {
+          baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
+        } else if (az_vwithin(foot_2_pos, foot_3_pos, 120)) {
+          baddie->state = HEAD_CORNER_SPIDER_MOVE_EVEN_LEGS_UP_STATE;
+        } else {
+          baddie->state = HEAD_CORNER_SPIDER_MOVE_ODD_LEGS_UP_STATE;
+        }
+      }
+    } break;
+    case HEAD_CORNER_SPIDER_MOVE_EVEN_LEGS_UP_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      move_corn_spider_legs(state, baddie, legs_l, legs_r, 0, 157, -1, time);
+      if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
+        baddie->state = HEAD_CORNER_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
+    case HEAD_CORNER_SPIDER_MOVE_ODD_LEGS_UP_STATE: {
+      baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
+      move_corn_spider_legs(state, baddie, legs_l, legs_r, 1, -71, -1, time);
+      if (baddie->param >= 1.0) {
+        on_leg_stomp(state);
+        baddie->state = HEAD_CORNER_SPIDER_MOVE_BODY_STATE;
+      }
+    } break;
     case HEAD_CEILING_SPIDER_MOVE_BODY_STATE: {
       const az_vector_t foot_0_pos = get_abs_foot_position(legs_l, legs_r, 0);
       const az_vector_t foot_2_pos = get_abs_foot_position(legs_l, legs_r, 2);
@@ -554,7 +753,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
     } break;
     case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_LEFT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      move_spider_legs(state, baddie, legs_l, legs_r, 0, 150, -1, time);
+      move_ceil_spider_legs(state, baddie, legs_l, legs_r, 0, 150, -1, time);
       if (baddie->param >= 1.0) {
         on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
@@ -562,7 +761,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
     } break;
     case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_LEFT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      move_spider_legs(state, baddie, legs_l, legs_r, 1, -100, -1, time);
+      move_ceil_spider_legs(state, baddie, legs_l, legs_r, 1, -100, -1, time);
       if (baddie->param >= 1.0) {
         on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
@@ -570,7 +769,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
     } break;
     case HEAD_CEILING_SPIDER_MOVE_EVEN_LEGS_RIGHT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      move_spider_legs(state, baddie, legs_l, legs_r, 0, 100, 1, time);
+      move_ceil_spider_legs(state, baddie, legs_l, legs_r, 0, 100, 1, time);
       if (baddie->param >= 1.0) {
         on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
@@ -578,7 +777,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
     } break;
     case HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE: {
       baddie->param = fmin(1.0, baddie->param + time / SPIDER_MOVE_LEGS_TIME);
-      move_spider_legs(state, baddie, legs_l, legs_r, 1, -150, 1, time);
+      move_ceil_spider_legs(state, baddie, legs_l, legs_r, 1, -150, 1, time);
       if (baddie->param >= 1.0) {
         on_leg_stomp(state);
         baddie->state = HEAD_CEILING_SPIDER_MOVE_BODY_STATE;
