@@ -31,6 +31,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/view/doodad.h"
 #include "azimuth/view/string.h"
+#include "azimuth/view/util.h"
 #include "azimuth/view/wall.h"
 
 /*===========================================================================*/
@@ -408,7 +409,7 @@ void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
         glColor3f((frame == 3), 1, (frame == 3));
         glVertex2d(-8, 9); glVertex2d(-12, 9);
         glColor4f(0, 1, 0, 0.125);
-        glVertex2d(-5, -11); glVertex2d(-2, -11);
+        glVertex2d(-5, -12); glVertex2d(-2, -12);
       } glEnd();
       break;
     case AZ_UPG_GUN_HOMING:
@@ -452,24 +453,29 @@ void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       } glEnd();
       break;
     case AZ_UPG_GUN_BURST:
-      glColor3f(1, 0.8, 0.75);
-      glBegin(GL_QUADS); {
-        for (int i = 10; i < 370; i += 45) {
+      for (int i = 10; i < 370; i += 45) {
+        glBegin(GL_TRIANGLE_FAN); {
           const az_vector_t vec = az_vpolar(1 + 3 * frame, AZ_DEG2RAD(i));
+          glColor3f(1, 0.8, 0.75);
+          az_gl_vertex(vec);
+          glColor3f(0.5, 0.4, 0.37);
           glVertex2d(vec.x + 2, vec.y); glVertex2d(vec.x, vec.y + 2);
           glVertex2d(vec.x - 2, vec.y); glVertex2d(vec.x, vec.y - 2);
-        }
-      } glEnd();
+          glVertex2d(vec.x + 2, vec.y);
+        } glEnd();
+      }
       glPushMatrix(); {
         glRotatef(45 * frame, 0, 0, 1);
-        glBegin(GL_QUADS); {
-          glColor3f(0.75, 0.5, 0.25); // brown
-          glVertex2f( 2.6, -4); glVertex2f( 6.6, 0); glVertex2f( 2.6,  4);
-          glColor3f(0.5, 0.25, 0); // dark brown
-          glVertex2f(-1.3, 0); glVertex2f( 1.3, 0);
-          glColor3f(0.75, 0.5, 0.25); // brown
-          glVertex2f(-2.6,  4); glVertex2f(-6.6, 0); glVertex2f(-2.6, -4);
-        } glEnd();
+        for (int sign = -1; sign <= 1; sign += 2) {
+          glBegin(GL_TRIANGLE_FAN); {
+            glColor3f(0.75, 0.5, 0.25); // brown
+            glVertex2f( sign * 2.7, 0);
+            glColor3f(0.5, 0.25, 0); // dark brown
+            glVertex2f(-sign * 1.3, 0); glVertex2f(sign * 2.6, -4);
+            glVertex2f( sign * 6.6, 0); glVertex2f(sign * 2.6,  4);
+            glVertex2f(-sign * 1.3, 0);
+          } glEnd();
+        }
       } glPopMatrix();
       break;
     case AZ_UPG_GUN_PIERCE: {
