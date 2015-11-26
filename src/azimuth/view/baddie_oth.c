@@ -215,8 +215,8 @@ static const az_vector_t oth_gunship_triangles[] = {
 };
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(oth_gunship_triangles) % 3 == 0);
 
-static void draw_oth(
-    const az_baddie_t *baddie, GLfloat frozen, az_clock_t clock,
+static void draw_oth_with_alpha(
+    const az_baddie_t *baddie, GLfloat frozen, GLfloat alpha, az_clock_t clock,
     const az_vector_t *vertices, int num_vertices) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   assert(num_vertices % 3 == 0);
@@ -227,6 +227,7 @@ static void draw_oth(
 
   const double hurt_ratio = 1.0 - baddie->health / baddie->data->max_health;
   const GLfloat flare = fmax(baddie->armor_flare, 0.5 * hurt_ratio);
+  alpha = fmaxf(alpha, 0.33f * flare);
 
   for (int i = 0; i < num_triangles; ++i) {
     const az_vector_t *vs = vertices + i * 3;
@@ -247,8 +248,8 @@ static void draw_oth(
           const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 1.0f : 0.25f);
           const GLfloat g = (az_clock_mod(6, 2, clk + 2) < 3 ? 1.0f : 0.25f);
           const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 1.0f : 0.25f);
-          glColor3f(r + flare * (1.0f - r), (1.0f - 0.5f * flare) * g,
-                    (1.0f - flare) * b + frozen * (1.0f - b));
+          glColor4f(r + flare * (1.0f - r), (1.0f - 0.5f * flare) * g,
+                    (1.0f - flare) * b + frozen * (1.0f - b), alpha);
           az_gl_vertex(az_vsub(vs[j], center));
         }
       } glEnd();
@@ -256,17 +257,24 @@ static void draw_oth(
   }
 }
 
-static void next_tendril_color(int *color_index, az_clock_t clock) {
+static void draw_oth(
+    const az_baddie_t *baddie, GLfloat frozen, az_clock_t clock,
+    const az_vector_t *vertices, int num_vertices) {
+  draw_oth_with_alpha(baddie, frozen, 1.0f, clock, vertices, num_vertices);
+}
+
+static void next_tendril_color(int *color_index, GLfloat alpha,
+                               az_clock_t clock) {
   const az_clock_t clk = clock + 2 * (*color_index++ % 3);
   const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 0.75f : 0.25f);
   const GLfloat g = (az_clock_mod(6, 2, clk + 2) < 3 ? 0.75f : 0.25f);
   const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 0.75f : 0.25f);
-  glColor4f(r, g, b, 0.5f);
+  glColor4f(r, g, b, 0.5f * alpha);
 }
 
-static void draw_tendrils(const az_baddie_t *baddie,
-                          const az_oth_tendrils_data_t *tendrils,
-                          az_clock_t clock) {
+static void draw_tendrils_with_alpha(const az_baddie_t *baddie,
+                                     const az_oth_tendrils_data_t *tendrils,
+                                     GLfloat alpha, az_clock_t clock) {
   assert(tendrils->num_tendrils <= AZ_MAX_BADDIE_COMPONENTS);
   for (int i = 0; i < tendrils->num_tendrils; ++i) {
     const az_component_t *tip =
@@ -285,12 +293,52 @@ static void draw_tendrils(const az_baddie_t *baddie,
             base, ctrl1, ctrl2, tip->position, t);
         const az_vector_t perp =
           az_vpolar(tendrils->semithick * (1.0 - t), angle + AZ_HALF_PI);
-        next_tendril_color(&color_index, clock);
+        next_tendril_color(&color_index, alpha, clock);
         az_gl_vertex(az_vadd(point, perp));
-        next_tendril_color(&color_index, clock);
+        next_tendril_color(&color_index, alpha, clock);
         az_gl_vertex(az_vsub(point, perp));
       }
     } glEnd();
+  }
+}
+
+static void draw_tendrils(const az_baddie_t *baddie,
+                          const az_oth_tendrils_data_t *tendrils,
+                          az_clock_t clock) {
+  draw_tendrils_with_alpha(baddie, tendrils, 1.0f, clock);
+}
+
+static void draw_tractor_beam(const az_baddie_t *baddie,
+                              az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP ||
+         baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  const az_component_t *tractor_component = &baddie->components[6];
+  if (tractor_component->angle != 0) {
+    const az_vector_t start = tractor_component->position;
+    const az_vector_t delta = az_vsub(baddie->position, start);
+    const double dist = az_vnorm(delta);
+    const double thick = 4;
+    const float redblue = az_clock_mod(2, 2, clock) == 0 ? 1.0 : 0.0;
+    glPushMatrix(); {
+      az_gl_rotated(-baddie->angle);
+      az_gl_translated(az_vneg(delta));
+      az_gl_rotated(az_vtheta(delta));
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(redblue, 1, redblue, 0.5); glVertex2d(0, 0);
+        glColor4f(redblue, 1, redblue, 0);
+        for (int i = 90; i <= 270; i += 20) {
+          glVertex2d(thick * cos(AZ_DEG2RAD(i)), thick * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor4f(redblue, 1, redblue, 0);
+        glVertex2d(0,  thick); glVertex2d(dist,  thick);
+        glColor4f(redblue, 1, redblue, 0.5);
+        glVertex2d(0,      0); glVertex2d(dist,      0);
+        glColor4f(redblue, 1, redblue, 0);
+        glVertex2d(0, -thick); glVertex2d(dist, -thick);
+      } glEnd();
+    } glPopMatrix();
   }
 }
 
@@ -324,34 +372,7 @@ void az_draw_bad_oth_crawler(
 void az_draw_bad_oth_gunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
-  const az_component_t *tractor_component = &baddie->components[6];
-  if (tractor_component->angle != 0) {
-    const az_vector_t start = tractor_component->position;
-    const az_vector_t delta = az_vsub(baddie->position, start);
-    const double dist = az_vnorm(delta);
-    const double thick = 4;
-    const float redblue = az_clock_mod(2, 2, clock) == 0 ? 1.0 : 0.0;
-    glPushMatrix(); {
-      az_gl_rotated(-baddie->angle);
-      az_gl_translated(az_vneg(delta));
-      az_gl_rotated(az_vtheta(delta));
-      glBegin(GL_TRIANGLE_FAN); {
-        glColor4f(redblue, 1, redblue, 0.5); glVertex2d(0, 0);
-        glColor4f(redblue, 1, redblue, 0);
-        for (int i = 90; i <= 270; i += 20) {
-          glVertex2d(thick * cos(AZ_DEG2RAD(i)), thick * sin(AZ_DEG2RAD(i)));
-        }
-      } glEnd();
-      glBegin(GL_TRIANGLE_STRIP); {
-        glColor4f(redblue, 1, redblue, 0);
-        glVertex2d(0,  thick); glVertex2d(dist,  thick);
-        glColor4f(redblue, 1, redblue, 0.5);
-        glVertex2d(0,      0); glVertex2d(dist,      0);
-        glColor4f(redblue, 1, redblue, 0);
-        glVertex2d(0, -thick); glVertex2d(dist, -thick);
-      } glEnd();
-    } glPopMatrix();
-  }
+  draw_tractor_beam(baddie, clock);
   if (baddie->state == 7) {
     glPushMatrix(); {
       const GLfloat scale = 1.0 - 0.5 * baddie->cooldown;
@@ -431,9 +452,15 @@ void az_draw_bad_oth_supergunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP ||
          baddie->kind == AZ_BAD_OTH_DECOY);
-  draw_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, clock);
-  draw_oth(baddie, frozen, clock, oth_gunship_triangles,
-           AZ_ARRAY_SIZE(oth_gunship_triangles));
+  GLfloat alpha = 1.0f;
+  if (baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP) {
+    draw_tractor_beam(baddie, clock);
+    alpha = cbrt(1 - fmin(1, baddie->param));
+  }
+  draw_tendrils_with_alpha(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, alpha,
+                           clock);
+  draw_oth_with_alpha(baddie, frozen, alpha, clock, oth_gunship_triangles,
+                      AZ_ARRAY_SIZE(oth_gunship_triangles));
 }
 
 void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
