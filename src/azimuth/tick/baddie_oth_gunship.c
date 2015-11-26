@@ -111,28 +111,28 @@ static void set_tractor_node(az_baddie_t *baddie, const az_node_t *node) {
 /*===========================================================================*/
 
 // Fly towards the goal position, getting as close as possible.
-void fly_towards(az_space_state_t *state, az_baddie_t *baddie, double time,
-                 az_vector_t goal) {
+static void fly_towards(az_space_state_t *state, az_baddie_t *baddie,
+                        double time, az_vector_t goal) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   az_fly_towards_position(state, baddie, time, goal, TURN_RATE, MAX_SPEED,
                           FORWARD_ACCEL, 200, 100);
 }
 
 // Fly towards the ship, but try not to be too close.
-void fly_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
-                      double time) {
+static void fly_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
+                             double time) {
   az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
                       FORWARD_ACCEL, 200, 200, 100);
 }
 
-void begin_retreat(az_baddie_t *baddie, double hurt) {
+static void begin_retreat(az_baddie_t *baddie, double hurt) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   set_primary_state(baddie, RETREAT_STATE);
   set_secondary_state(baddie, 1 + (int)(hurt * 8));
   baddie->cooldown = 0.5;
 }
 
-void begin_dogfight(az_baddie_t *baddie) {
+static void begin_dogfight(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   set_primary_state(baddie, DOGFIGHT_STATE);
   set_secondary_state(baddie, az_randint(20, 40));
