@@ -1298,6 +1298,7 @@ static az_baddie_data_t baddie_datas[] = {
     .static_properties = AZ_BADF_DRAW_BG,
     .main_body = { .bounding_radius = 15.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
+                                  AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB |
                                   AZ_DMGF_REACTIVE) },
     DECL_COMPONENTS(gun_sensor_components)
   },

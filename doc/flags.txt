@@ -1,5 +1,4 @@
-Next flag: 142
-Unused: 0
+Next flag: 147
 
 Bosses
 ======
@@ -141,6 +140,7 @@ Boss Doors
 
 Misc
 ====
+0: Opened one-way gate in Voquan room 359
 5: Passed through Colony room 7, disable pausing tutorial
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 8: Reversed grav-corridor in Colony room 24
@@ -162,3 +162,8 @@ Misc
 138: Opened one-way gate in Filimun room 110
 139: Opened one-way gate in Nandiar room 192
 140: Opened one-way gate in Barrag room 281
+142: Opened one-way gate in Cnidam room 261
+143: Opened one-way gate in Barrag room 269
+144: Opened one-way gate in Cnidam room 397
+145: Opened one-way gate in Sarvari room 460
+146: Opened one-way gate in Voquan room 391
