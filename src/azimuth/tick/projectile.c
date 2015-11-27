@@ -663,43 +663,60 @@ static void projectile_special_logic(az_space_state_t *state,
       proj->angle = az_mod2pi(proj->angle + 1.5 * time);
       break;
     case AZ_PROJ_ORION_BOMB:
+    case AZ_PROJ_OTH_ORION_BOMB:
       if (proj->age >= proj->data->lifetime) {
-        az_projectile_t *blast = az_add_projectile(
-            state, AZ_PROJ_ORION_BLAST, proj->position, proj->angle,
-            proj->power, proj->fired_by);
-        if (blast != NULL) {
-          blast->velocity = az_vmul(az_vsub(
+        az_projectile_t *boom = az_add_projectile(
+            state, (proj->kind == AZ_PROJ_ORION_BOMB ? AZ_PROJ_ORION_BOOM :
+                    AZ_PROJ_OTH_ORION_BOOM),
+            proj->position, proj->angle, proj->power, proj->fired_by);
+        if (boom != NULL) {
+          boom->velocity = az_vmul(az_vsub(
               proj->velocity, az_vpolar(proj->data->speed, proj->angle)), 0.5);
         }
         on_projectile_hit_wall(state, proj, AZ_VZERO);
       }
       break;
-    case AZ_PROJ_ORION_BLAST:
-      {
-        const double factor = proj->age / proj->data->lifetime;
-        const double radius = proj->data->splash_radius * factor * factor;
+    case AZ_PROJ_ORION_BOOM:
+    case AZ_PROJ_OTH_ORION_BOOM: {
+      const double factor = proj->age / proj->data->lifetime;
+      const double radius = proj->data->splash_radius * factor * factor;
+      const double damage = (proj->data->splash_damage * proj->power *
+                             (time / proj->data->lifetime));
+      const double impulse = (500 + 5000 * factor * factor) * time;
+      if (proj->fired_by == AZ_SHIP_UID) {
         // Propel the ship away from the blast:
         if (az_ship_is_alive(&state->ship) &&
             az_vwithin(state->ship.position, proj->position, radius)) {
-          az_vpluseq(&state->ship.velocity, az_vwithlen(
-              az_vsub(state->ship.position, proj->position),
-              (500 + 5000 * factor * factor) * time));
+          az_vpluseq(&state->ship.velocity, az_vpolar(-impulse, proj->angle));
         }
-        // Damage enemies within the blast (over the lifetime of the blast):
-        AZ_ARRAY_LOOP(baddie, state->baddies) {
-          if (baddie->kind == AZ_BAD_NOTHING) continue;
-          if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
+      } else {
+        // Damage the ship and push it away from the blast:
+        if (az_ship_is_alive(&state->ship) &&
+            az_vwithin(state->ship.position, proj->position, 0.8 * radius)) {
+          az_vpluseq(&state->ship.velocity, az_vwithlen(
+              az_vsub(state->ship.position, proj->position), impulse));
+          az_damage_ship(state, damage, false);
+        }
+      }
+      AZ_ARRAY_LOOP(baddie, state->baddies) {
+        if (baddie->kind == AZ_BAD_NOTHING) continue;
+        if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
+        if (proj->fired_by == baddie->uid) {
+          // Propel the baddie away from the blast:
+          if (az_circle_touches_baddie(baddie, radius, proj->position, NULL)) {
+            az_vpluseq(&baddie->velocity, az_vpolar(-impulse, proj->angle));
+          }
+        } else {
+          // Damage the baddie:
           const az_component_data_t *component;
           if (az_circle_touches_baddie(baddie, 0.8 * radius, proj->position,
                                        &component)) {
             az_try_damage_baddie(state, baddie, component,
-                                 proj->data->damage_kind,
-                                 proj->data->splash_damage * proj->power *
-                                 (time / proj->data->lifetime));
+                                 proj->data->damage_kind, damage);
           }
         }
       }
-      break;
+    } break;
     case AZ_PROJ_BOUNCING_FIREBALL:
       if (times_per_second(15, proj, time)) {
         leave_particle_trail(state, proj, AZ_PAR_EMBER,

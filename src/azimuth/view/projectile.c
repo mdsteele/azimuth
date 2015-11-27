@@ -365,7 +365,7 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         }
       } glEnd();
       break;
-    case AZ_PROJ_ORION_BLAST:
+    case AZ_PROJ_ORION_BOOM:
       glBegin(GL_QUAD_STRIP); {
         const double factor = proj->age / proj->data->lifetime;
         const double outer = proj->data->splash_radius * factor * factor;
@@ -501,6 +501,28 @@ static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       break;
     case AZ_PROJ_OTH_MINIROCKET:
       draw_oth_projectile(proj, 6.0, clock);
+      break;
+    case AZ_PROJ_OTH_ORION_BOMB:
+      draw_oth_projectile(proj, 6.0, clock);
+      break;
+    case AZ_PROJ_OTH_ORION_BOOM:
+      glBegin(GL_QUAD_STRIP); {
+        const double factor = proj->age / proj->data->lifetime;
+        const double outer = proj->data->splash_radius * factor * factor;
+        const double inner = fmax(0.0, outer - 100 * (1.0 - factor));
+        for (int i = 0; i <= 360; i += 10) {
+          glColor4f((az_clock_mod(6, 1, clock)     < 3 ? 1.0f : 0.5f),
+                    (az_clock_mod(6, 1, clock + 2) < 3 ? 1.0f : 0.5f),
+                    (az_clock_mod(6, 1, clock + 4) < 3 ? 1.0f : 0.5f), 0.7f);
+          glVertex2d(outer * cos(AZ_DEG2RAD(i)),
+                     0.7 * outer * sin(AZ_DEG2RAD(i)));
+          glColor4f((az_clock_mod(6, 1, clock)     < 3 ? 0.75f : 0.25f),
+                    (az_clock_mod(6, 1, clock + 2) < 3 ? 0.75f : 0.25f),
+                    (az_clock_mod(6, 1, clock + 4) < 3 ? 0.75f : 0.25f), 0.3f);
+          glVertex2d(inner * cos(AZ_DEG2RAD(i)),
+                     0.7 * inner * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
       break;
     case AZ_PROJ_OTH_ROCKET:
       draw_oth_projectile(proj, 9.0, clock);

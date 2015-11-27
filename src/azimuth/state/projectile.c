@@ -351,7 +351,7 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 20.0,
     .properties = AZ_PROJF_NO_HIT
   },
-  [AZ_PROJ_ORION_BLAST] = {
+  [AZ_PROJ_ORION_BOOM] = {
     .lifetime = 0.8,
     .splash_damage = 15.0,
     .splash_radius = 300.0,
@@ -521,6 +521,19 @@ static const az_proj_data_t proj_data[] = {
     .impact_shake = 1.0,
     .impact_sound = AZ_SND_EXPLODE_ROCKET,
     .damage_kind = AZ_DMGF_ROCKET
+  },
+  [AZ_PROJ_OTH_ORION_BOMB] = {
+    .speed = 500.0,
+    .lifetime = 0.08,
+    .splash_damage = 10.0,
+    .splash_radius = 20.0,
+    .properties = AZ_PROJF_NO_HIT
+  },
+  [AZ_PROJ_OTH_ORION_BOOM] = {
+    .lifetime = 0.8,
+    .splash_damage = 15.0,
+    .splash_radius = 300.0,
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_OTH_ROCKET] = {
     .speed = 1200.0,

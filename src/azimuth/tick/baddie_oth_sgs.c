@@ -203,6 +203,20 @@ void az_tick_bad_oth_supergunship(
       }
     } break;
     case RETREAT_STATE: {
+      if (get_secondary_state(baddie) == 0 &&
+          az_ship_in_range(state, baddie, 200) &&
+          az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(60)) &&
+          az_baddie_has_clear_path_to_position(state, baddie,
+              az_vadd(baddie->position, az_vpolar(500, baddie->angle)))) {
+        az_projectile_t *proj = az_fire_baddie_projectile(
+            state, baddie, AZ_PROJ_OTH_ORION_BOMB,
+            baddie->data->main_body.bounding_radius, AZ_PI, 0);
+        if (proj != NULL) {
+          az_vpluseq(&proj->velocity, baddie->velocity);
+          az_play_sound(&state->soundboard, AZ_SND_ORION_BOOSTER);
+        }
+        set_secondary_state(baddie, 1);
+      }
       // Out of all marker nodes we can see, pick the one farthest from the
       // ship.
       double best_dist = 0.0;
