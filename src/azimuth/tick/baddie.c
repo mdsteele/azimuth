@@ -40,6 +40,7 @@
 #include "azimuth/tick/baddie_oth.h"
 #include "azimuth/tick/baddie_oth_gunship.h"
 #include "azimuth/tick/baddie_oth_sgs.h"
+#include "azimuth/tick/baddie_spiner.h"
 #include "azimuth/tick/baddie_turret.h"
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_vehicle.h"
@@ -198,17 +199,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_atom(state, baddie, time);
       break;
     case AZ_BAD_SPINER:
-      az_drift_towards_ship(state, baddie, time, 40, 10, 100);
-      baddie->angle = az_mod2pi(baddie->angle + 0.4 * time);
-      if (baddie->cooldown <= 0.0 && az_ship_in_range(state, baddie, 200) &&
-          az_can_see_ship(state, baddie)) {
-        for (int i = 0; i < 360; i += 45) {
-          az_fire_baddie_projectile(
-              state, baddie, AZ_PROJ_SPINE,
-              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
-        }
-        baddie->cooldown = 2.0;
-      }
+      az_tick_bad_spiner(state, baddie, time);
       break;
     case AZ_BAD_BOX: break; // Do nothing.
     case AZ_BAD_ARMORED_BOX: break; // Do nothing.
@@ -238,18 +229,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       } else baddie->state = 0;
       break;
     case AZ_BAD_SPINE_MINE:
-      az_drift_towards_ship(state, baddie, time, 20, 20, 20);
-      baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
-      if (az_ship_in_range(state, baddie, 150) &&
-          az_can_see_ship(state, baddie)) {
-        for (int i = 0; i < 360; i += 20) {
-          az_fire_baddie_projectile(state, baddie, AZ_PROJ_SPINE,
-              baddie->data->main_body.bounding_radius,
-              AZ_DEG2RAD(i) + az_random(AZ_DEG2RAD(-10), AZ_DEG2RAD(10)), 0.0);
-        }
-        az_play_sound(&state->soundboard, AZ_SND_KILL_BOUNCER);
-        baddie->kind = AZ_BAD_NOTHING;
-      }
+      az_tick_bad_spine_mine(state, baddie, time);
       break;
     case AZ_BAD_BROKEN_TURRET:
       az_tick_bad_broken_turret(state, baddie, time);
@@ -408,8 +388,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_copter_vert(state, baddie, time);
       break;
     case AZ_BAD_URCHIN:
-      az_drift_towards_ship(state, baddie, time, 250, 300, 500);
-      baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(50) * time);
+      az_tick_bad_urchin(state, baddie, time);
       break;
     case AZ_BAD_BOSS_DOOR:
       az_tick_bad_boss_door(state, baddie, time);
@@ -537,29 +516,7 @@ static void tick_baddie(az_space_state_t *state, az_baddie_t *baddie,
       az_tick_bad_fire_zipper(state, baddie, bounced);
       break;
     case AZ_BAD_SUPER_SPINER:
-      az_drift_towards_ship(state, baddie, time, 50, 20, 100);
-      baddie->angle = az_mod2pi(baddie->angle - 0.5 * time);
-      if (baddie->cooldown <= 0.0 &&
-          az_ship_in_range(state, baddie, 200) &&
-          az_can_see_ship(state, baddie)) {
-        for (int i = 0; i < 360; i += 45) {
-          az_fire_baddie_projectile(
-              state, baddie, AZ_PROJ_SPINE,
-              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
-        }
-        baddie->cooldown = 1.0;
-        baddie->state = 1;
-      }
-      if (baddie->state == 1 && baddie->cooldown <= 0.75) {
-        for (int i = 0; i < 360; i += 45) {
-          az_fire_baddie_projectile(
-              state, baddie, AZ_PROJ_SPINE,
-              baddie->data->main_body.bounding_radius,
-              AZ_DEG2RAD(i + 22.5), 0.0);
-        }
-        baddie->cooldown = 1.0;
-        baddie->state = 0;
-      }
+      az_tick_bad_super_spiner(state, baddie, time);
       break;
     case AZ_BAD_HEAVY_TURRET:
       az_tick_bad_heavy_turret(state, baddie, time);
@@ -905,11 +862,7 @@ void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
                          az_vector_t position, double angle) {
   switch (kind) {
     case AZ_BAD_SUPER_SPINER:
-      for (int i = 0; i < 3; ++i) {
-        const double theta = angle + i * AZ_DEG2RAD(120);
-        az_add_baddie(state, AZ_BAD_URCHIN,
-                      az_vadd(position, az_vpolar(10, theta)), theta);
-      }
+      az_on_super_spiner_killed(state, position, angle);
       break;
     case AZ_BAD_JUNGLE_CRAWLER:
       az_on_jungle_crawler_killed(state, position, angle);

@@ -42,6 +42,7 @@
 #include "azimuth/view/baddie_myco.h"
 #include "azimuth/view/baddie_night.h"
 #include "azimuth/view/baddie_oth.h"
+#include "azimuth/view/baddie_spiner.h"
 #include "azimuth/view/baddie_swooper.h"
 #include "azimuth/view/baddie_turret.h"
 #include "azimuth/view/baddie_vehicle.h"
@@ -50,10 +51,6 @@
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 #if 0
 static void draw_component_outline(const az_component_data_t *component) {
@@ -90,56 +87,6 @@ static void draw_baddie_outline(const az_baddie_t *baddie, float frozen,
   }
 }
 #endif
-
-static void draw_spiner_spine(float flare, float frozen) {
-  glBegin(GL_TRIANGLE_STRIP); {
-    glColor4f(0.5f * flare, 0.3, 0, 0);
-    glVertex2f(-3, 3);
-    glColor3f(0.6f + 0.4f * flare, 0.7, 0.6);
-    glVertex2f(5, 0);
-    glColor3f(0.6f + 0.4f * flare, 0.7, frozen);
-    glVertex2f(-5, 0);
-    glColor4f(0, 0.3, 0, 0);
-    glVertex2f(-3, -3);
-  } glEnd();
-}
-
-static void draw_spiner(
-    az_color_t inner, az_color_t outer, const az_baddie_t *baddie,
-    float flare, float frozen, az_clock_t clock) {
-  if (baddie->cooldown < 1.0) {
-    for (int i = 0; i < 360; i += 45) {
-      glPushMatrix(); {
-        glRotated(i, 0, 0, 1);
-        glTranslated(18.0 - 8.0 * baddie->cooldown, 0, 0);
-        draw_spiner_spine(0, frozen);
-      } glPopMatrix();
-    }
-  }
-  glBegin(GL_TRIANGLE_FAN); {
-    az_gl_color(inner); glVertex2f(-2, 2); az_gl_color(outer);
-    for (int i = 0; i <= 360; i += 15) {
-      double radius = baddie->data->main_body.bounding_radius +
-        0.2 * az_clock_zigzag(10, 3, clock) - 1.0;
-      if (i % 45 == 0) radius -= 2.0;
-      glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
-    }
-  } glEnd();
-  for (int i = 0; i < 360; i += 45) {
-    glPushMatrix(); {
-      glRotated(i + 22.5, 0, 0, 1);
-      glTranslated(16 + 0.5 * az_clock_zigzag(6, 5, clock), 0, 0);
-      draw_spiner_spine(0, frozen);
-    } glPopMatrix();
-  }
-  for (int i = 0; i < 360; i += 45) {
-    glPushMatrix(); {
-      glRotated(i + 11.25, 0, 0, 1);
-      glTranslated(8 + 0.5 * az_clock_zigzag(6, 7, clock), 0, 0);
-      draw_spiner_spine(0, frozen);
-    } glPopMatrix();
-  }
-}
 
 static void draw_box(const az_baddie_t *baddie, bool armored, float flare) {
   glBegin(GL_QUADS); {
@@ -245,9 +192,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_atom(baddie, frozen, clock);
       break;
     case AZ_BAD_SPINER:
-      draw_spiner(color3(1 - frozen, 1 - 0.5 * flare, frozen),
-                  color3(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
-                  baddie, flare, frozen, clock);
+      az_draw_bad_spiner(baddie, frozen, clock);
       break;
     case AZ_BAD_BOX:
       assert(frozen == 0.0);
@@ -264,21 +209,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_nightbug(baddie, frozen, clock);
       break;
     case AZ_BAD_SPINE_MINE:
-    case AZ_BAD_URCHIN:
-      for (int i = 0; i < 18; ++i) {
-        glPushMatrix(); {
-          glRotated(i * 20, 0, 0, 1);
-          glTranslated(7.5 + 0.5 * az_clock_zigzag(6, 3, clock + i * 7), 0, 0);
-          draw_spiner_spine(flare, frozen);
-        } glPopMatrix();
-      }
-      for (int i = 0; i < 9; ++i) {
-        glPushMatrix(); {
-          glRotated(i * 40 + 30, 0, 0, 1);
-          glTranslated(4 + 0.5 * az_clock_zigzag(7, 3, clock - i * 13), 0, 0);
-          draw_spiner_spine(flare, frozen);
-        } glPopMatrix();
-      }
+      az_draw_bad_spine_mine(baddie, frozen, clock);
       break;
     case AZ_BAD_BROKEN_TURRET:
       az_draw_bad_broken_turret(baddie, frozen, clock);
@@ -470,6 +401,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_COPTER_VERT:
       az_draw_bad_copter(baddie, frozen, clock);
       break;
+    case AZ_BAD_URCHIN:
+      az_draw_bad_urchin(baddie, frozen, clock);
+      break;
     case AZ_BAD_BOSS_DOOR:
       az_draw_bad_boss_door(baddie, frozen, clock);
       break;
@@ -657,10 +591,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_bad_fire_zipper(baddie, frozen, clock);
       break;
     case AZ_BAD_SUPER_SPINER:
-      draw_spiner(color3(0.5 + 0.5 * flare - 0.5 * frozen, 0.25 + 0.5 * frozen,
-                         1 - 0.75 * flare),
-                  color3(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
-                  baddie, flare, frozen, clock);
+      az_draw_bad_super_spiner(baddie, frozen, clock);
       break;
     case AZ_BAD_HEAVY_TURRET:
       az_draw_bad_heavy_turret(baddie, frozen, clock);
