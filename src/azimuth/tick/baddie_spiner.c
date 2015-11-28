@@ -60,6 +60,7 @@ void az_tick_bad_spiner(
           state, baddie, AZ_PROJ_SPINE,
           baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
     }
+    az_play_sound(&state->soundboard, AZ_SND_SHRAPNEL_BURST);
     baddie->cooldown = 2.0;
   }
 }
@@ -77,6 +78,7 @@ void az_tick_bad_super_spiner(
           state, baddie, AZ_PROJ_SPINE,
           baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0.0);
     }
+    az_play_sound(&state->soundboard, AZ_SND_SHRAPNEL_BURST);
     baddie->cooldown = 1.0;
     baddie->state = 1;
   }
@@ -86,6 +88,7 @@ void az_tick_bad_super_spiner(
           state, baddie, AZ_PROJ_SPINE,
           baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i + 22.5), 0.0);
     }
+    az_play_sound(&state->soundboard, AZ_SND_SHRAPNEL_BURST);
     baddie->cooldown = 1.0;
     baddie->state = 0;
   }
@@ -95,8 +98,10 @@ void az_on_super_spiner_killed(az_space_state_t *state, az_vector_t position,
                                double angle) {
   for (int i = 0; i < 3; ++i) {
     const double theta = angle + i * AZ_DEG2RAD(120);
-    az_add_baddie(state, AZ_BAD_URCHIN,
-                  az_vadd(position, az_vpolar(10, theta)), theta);
+    az_baddie_t *urchin =
+      az_add_baddie(state, AZ_BAD_URCHIN,
+                    az_vadd(position, az_vpolar(10, theta)), theta);
+    if (urchin != NULL) urchin->velocity = az_vpolar(175, theta);
   }
 }
 
