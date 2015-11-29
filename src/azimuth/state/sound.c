@@ -37,6 +37,13 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.32, .lpf_resonance = -0.43,
     .hpf_cutoff = 0.3, .hpf_ramp = -0.000113648
   },
+  [AZ_SND_AZIMUTH_AWAKEN] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_sustain = 0.555, .env_decay = 0.92,
+    .start_freq = 0.855, .freq_slide = 0.13, .freq_delta_slide = -0.31,
+    .square_duty = 0.245, .repeat_speed = 0.155,
+    .phaser_offset = -0.74, .phaser_sweep = 0.25
+  },
   [AZ_SND_BEAM_FREEZE] = {
     .wave_kind = AZ_TRIANGLE_WAVE,
     .env_sustain = 1.0, .start_freq = 0.3943662,

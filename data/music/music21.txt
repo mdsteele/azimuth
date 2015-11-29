@@ -1,0 +1,31 @@
+@M "S|A"
+% Title: "Requiem for a Planet"
+
+=key 2#     % B minor
+=tempo 50
+
+
+!Part S
+
+1 Wp25 L30  E0,25
+2 Wp25 L20  E0,25
+3 Wt25 L200 E15,15
+
+
+!Part A
+
+1| b4e bs b ' be d5 ' ce a4e ' aq |
+2| f3h a3h |
+3| b2w |
+
+1| g4e gs g ' ge d5 ' c d ' a4q |
+2| d3h e3h |
+3| g2w |
+
+1| b4e bs b ' be d5 ' ce a4e ' aq |
+2| f3h a3h |
+3| b2w |
+
+1| f5q e d c |
+2| d4q a3 f a |
+3| f2h a2 |

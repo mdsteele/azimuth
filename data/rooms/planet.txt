@@ -711,27 +711,27 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 
   Merging sapience clusters..."
 !T158"
-  \"...I am alive.\""
+  $X99ffff\".$_10.$_10.$_20I am alive.\""
 !T159"
   \"Azimuth!?\""
 !T160"
-  \"Hopper...\"$_21
+  $X99ffff\"Hopper...\"$_21
 
   \"...thank you.\"$_06
 
   \"For everything.\""
 !T161"
-  \"You need to get out of here, Major.  Now that
+  $X99ffff\"You need to get out of here, Major.  Now that
   no one who still wanted peace is left here, I am
   able--and forced--to take the last resort.  I am
   going to completely obliterate the NPS network.\"
 
-  \"We have to cut the Oth off from this universe
+  \"We have to cut Oth off from this universe
   forever.\""
 !T162"
   \"No you don't, you little--\""
 !T163"
-  \"Silence, Rakif Vkati.  I knew about your
+  $X99ffff\"Silence, Rakif Vkati.  I knew about your
   plans the whole time, and I gave you many
   opportunities to cease them.\"
 
@@ -740,22 +740,22 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T164"
   \"Azimuth, wait.  What are you planning to do?\""
 !T165"
-  \"I'm sorry, Hopper, but I've already done it.\"
+  $X99ffff\"I'm sorry, Hopper, but I've already done it.\"
 
-  \"Even now the Oth are preparing to come through
-  in force, so we simply don't have any more time
-  to lose.\""
+  \"Even now, Oth is preparing to come through in
+  force, so we simply don't have any more time to
+  lose.\""
 !T166"
-  \"I've started a chain reaction in the NPS grid.
-  In about six minutes this entire planetoid is
+  $X99ffff\"I've started a chain reaction in the NPS grid.
+  In about $Rsix minutes$X99ffff this entire planetoid is
   going to go up in smoke, and me with it.  You
-  need to get to the surface airlock immediately
+  need to $Rget to the surface airlock immediately$X99ffff
   and escape.\""
 !T167"
-  \"You want me to get to the surface, in $/six
+  \"Wait, you want me to get to the surface, in $/six
   minutes$|, from $/the center of the planet$|!?\""
 !T168"
-  \"There's no time, Hopper, GO!\""
+  $X99ffff\"There's no time, Hopper, GO!\""
 !T169"
   Experimental Reactor Core"
 !T170"
