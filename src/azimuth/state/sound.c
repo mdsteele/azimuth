@@ -758,6 +758,10 @@ static az_sound_spec_t sound_specs[] = {
     .lpf_cutoff = 0.75, .lpf_ramp = -0.66, .lpf_resonance = 0.5,
     .volume_adjust = 0.75
   },
+  [AZ_SND_MAGBEEST_MAGMA_BOMB] = {
+    .wave_kind = AZ_SINE_WAVE,
+    .env_sustain = 0.0463, .env_decay = 0.175, .start_freq = 0.469
+  },
   [AZ_SND_MAGBEEST_MAGNET] = {
     .wave_kind = AZ_WOBBLE_WAVE,
     .env_sustain = 0.5, .start_freq = 0.2,

@@ -811,6 +811,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
         bomb->velocity = az_vadd(az_vwithlen(delta, 400.0),
                                  az_vwithlen(baddie->position,
                                              0.4 * az_vnorm(delta)));
+        az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGMA_BOMB);
       }
     }
   }
@@ -1128,6 +1129,10 @@ void az_tick_bad_magma_bomb(az_space_state_t *state, az_baddie_t *baddie,
       }
     }
     az_kill_baddie(state, baddie);
+  } else if (baddie->cooldown <= 1.5 &&
+             ceil(2 * baddie->cooldown) <
+             ceil(2 * (baddie->cooldown + time))) {
+    az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGMA_BOMB);
   }
 }
 
