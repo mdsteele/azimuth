@@ -847,6 +847,20 @@ void az_draw_doodad(az_doodad_kind_t doodad_kind, az_clock_t clock) {
         glVertex2f(-110, -70); glVertex2f(110, -70);
       } glEnd();
       break;
+    case AZ_DOOD_BIG_TUBE_INSIDE:
+      glBegin(GL_QUAD_STRIP); {
+        glColor3f(0.3, 0.3, 0.3);
+        glVertex2f(-150,  205); glVertex2f(150,  205);
+        glColor3f(0.2, 0.2, 0.15);
+        glVertex2f(-150,  150); glVertex2f(150,  150);
+        glColor3f(0.15, 0.15, 0.1);
+        glVertex2f(-150,    0); glVertex2f(150,    0);
+        glColor3f(0.2, 0.2, 0.15);
+        glVertex2f(-150, -150); glVertex2f(150, -145);
+        glColor3f(0.3, 0.3, 0.3);
+        glVertex2f(-100, -205); glVertex2f(150, -205);
+      } glEnd();
+      break;
   }
 }
 

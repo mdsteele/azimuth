@@ -1,10 +1,11 @@
-@R z0 p0 k22 b0 d3 g5 n16 w49
+@R z0 p0 k22 b0 d3 g5 n26 w50
   c(49278.36,568.86,1.570993,0.000000)
 $s:test23,beqz/A,msg14,activ1,activ2,gpos7,vnorm,rcam,halt,A#test19,beqz/B,msg14,halt,B#mus1,activ1,activ2,activ4,gpos9,spos,gang9,sang,push800,gang,vpolar,svel,gpos3,vnorm,rcam,autop1,thrust1;
-!W1 d5 x-286.00 y49830.01 a-1.569412 u0
-!W1 d13 x-335.93 y49737.33 a1.051880 u0
+!W1 d11 x-343.45 y49628.18 a0.008009 u0
+!W1 d5 x-282.00 y49832.02 a-1.569412 u0
+!W1 d13 x-321.93 y49735.36 a1.051880 u0
 !W1 d12 x283.44 y49794.68 a1.562568 u0
-!W1 d5 x287.68 y49727.02 a2.088634 u0
+!W1 d5 x286.68 y49728.02 a2.088634 u0
 !W2 d10 x-211.25 y49289.67 a-3.140248 u0
 !W2 d10 x212.77 y49229.85 a0.002398 u0
 !W1 d45 x300.69 y49992.78 a-0.002411 u0
@@ -64,6 +65,16 @@ $e:test23,heqz,safe,autop1,gang6,turn,thrust1,close2,wait0.25,close1,cplus1,push
 $e:test23,heqz,fado,scene4,wait1.5,scene5,mus17,scene1,wait1,mlog,tm213,tm214,tm215,tm216,mend,wait2,vict;
 !G1 x-9.79 y49793.00 a1.570993 s0.00 o0.00 f300.00 r300.00 l60.00 u0
 $e:test23,hnez,test19,hnez,set19,msg14,close1,thrust0,gang4,turn,wait0.25,close2,wait0.4,thrust1,wait0.45,thrust0,wait0.75,push0,rcam,autop0,wait1.5,deact4;
+!N7/166 x249.07 y49068.87 a1.570993 u0
+!N7/166 x249.02 y49317.86 a1.570993 u0
+!N7/166 x248.97 y49567.25 a1.570993 u0
+!N7/166 x-254.65 y49072.74 a1.570993 u0
+!N7/166 x-254.70 y49320.74 a1.570993 u0
+!N7/166 x-254.75 y49569.74 a1.570993 u0
+!N5/27 x-2.65 y49077.79 a-1.570600 u0
+!N5/27 x-2.70 y49320.79 a-1.570600 u0
+!N5/27 x-2.75 y49570.79 a-1.570600 u0
+!N5/27 x-2.80 y49821.79 a-1.570600 u0
 !N7/9 x175.01 y49487.57 a-0.788233 u0
 !N7/9 x253.79 y49408.35 a-0.788233 u0
 !N7/9 x-199.06 y49488.63 a0.787766 u0

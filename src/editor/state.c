@@ -272,6 +272,7 @@ static az_doodad_kind_t doodad_kinds[] = {
   AZ_DOOD_RED_TUBE_BROKEN_WINDOW,
   AZ_DOOD_RED_TUBE_WINDOW_BEND,
   AZ_DOOD_YELLOW_TUBE_INSIDE,
+  AZ_DOOD_BIG_TUBE_INSIDE,
   AZ_DOOD_OCTO_WINDOW,
   // Drills and chains:
   AZ_DOOD_DRILL_TIP,
