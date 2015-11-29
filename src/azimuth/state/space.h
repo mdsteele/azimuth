@@ -73,6 +73,7 @@ typedef struct {
   enum { AZ_BDS_SHAKE, AZ_BDS_BOOM, AZ_BDS_FADE } step;
   double progress;
   az_baddie_t boss;
+  az_baddie_t legs[2];
 } az_boss_death_mode_data_t;
 
 typedef struct {

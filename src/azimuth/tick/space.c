@@ -121,6 +121,7 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
             az_kill_object(state, &object);
           }
         }
+        AZ_ARRAY_LOOP(baddie, mode_data->legs) baddie->kind = AZ_BAD_NOTHING;
         mode_data->boss.kind = AZ_BAD_NOTHING;
         az_run_script(state, mode_data->boss.on_kill);
       }

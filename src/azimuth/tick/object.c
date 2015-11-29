@@ -371,6 +371,20 @@ bool az_try_damage_baddie(
         .step = AZ_BDS_SHAKE, .progress = 0.0, .boss = *baddie
       };
       baddie->kind = AZ_BAD_NOTHING;
+      // The Magbeest boss needs special handling so that we draw the legs in
+      // boss death mode.
+      if (state->boss_death_mode.boss.kind == AZ_BAD_MAGBEEST_HEAD) {
+        AZ_ARRAY_LOOP(legs, state->baddies) {
+          if (legs->kind == AZ_BAD_MAGBEEST_LEGS_L) {
+            legs->state = 0;
+            state->boss_death_mode.legs[0] = *legs;
+            legs->kind = AZ_BAD_NOTHING;
+          } else if (legs->kind == AZ_BAD_MAGBEEST_LEGS_R) {
+            state->boss_death_mode.legs[1] = *legs;
+            legs->kind = AZ_BAD_NOTHING;
+          }
+        }
+      }
       // When a boss dies, kill all other baddies in the room, except for
       // baddies that are _permanently_ incorporeal.  Also expire certain kinds
       // of projectiles.

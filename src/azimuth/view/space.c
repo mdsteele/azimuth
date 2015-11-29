@@ -205,9 +205,13 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_tractor_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
-  if (state->mode == AZ_MODE_BOSS_DEATH &&
-      state->boss_death_mode.boss.kind != AZ_BAD_NOTHING) {
-    az_draw_baddie(&state->boss_death_mode.boss, state->clock);
+  if (state->mode == AZ_MODE_BOSS_DEATH) {
+    if (state->boss_death_mode.boss.kind != AZ_BAD_NOTHING) {
+      az_draw_baddie(&state->boss_death_mode.boss, state->clock);
+    }
+    AZ_ARRAY_LOOP(baddie, state->boss_death_mode.legs) {
+      if (baddie->kind != AZ_BAD_NOTHING) az_draw_baddie(baddie, state->clock);
+    }
   }
   az_draw_foreground_baddies(state);
   az_draw_ship(state);
