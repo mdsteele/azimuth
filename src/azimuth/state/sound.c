@@ -949,6 +949,16 @@ static az_sound_spec_t sound_specs[] = {
     .vibrato_depth = 0.1, .vibrato_speed = 0.605,
     .phaser_offset = 0.2, .volume_adjust = -0.98
   },
+  [AZ_SND_TONGUE_SHOOT] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_sustain = 0.098, .env_decay = 0.445,
+    .start_freq = 0.15, .freq_slide = -0.11, .freq_delta_slide = 0.25
+  },
+  [AZ_SND_TONGUE_STICK] = {
+    .wave_kind = AZ_SAWTOOTH_WAVE,
+    .env_sustain = 0.098, .env_decay = 0.2,
+    .start_freq = 0.19, .freq_slide = -0.19
+  },
   [AZ_SND_TRACTOR_BEAM] = {
     .wave_kind = AZ_WOBBLE_WAVE, .env_sustain = 1.0, .start_freq = 0.18,
     .vibrato_depth = 0.2, .vibrato_speed = 0.3, .volume_adjust = -0.4

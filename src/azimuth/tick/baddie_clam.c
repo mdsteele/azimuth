@@ -90,7 +90,7 @@ void az_tick_bad_grabber_plant(
                          tongue_speed, &rel_impact)) {
         tongue->position = AZ_VZERO;
         tongue->angle = az_mod2pi(az_vtheta(rel_impact) - baddie->angle);
-        // TODO: Play sound for shooting tongue
+        az_play_sound(&state->soundboard, AZ_SND_TONGUE_SHOOT);
         baddie->state = 1;
       }
     } else open_jaws = false;
@@ -110,7 +110,7 @@ void az_tick_bad_grabber_plant(
       az_vrotate(az_vsub(impact.position, baddie->position),
                  -baddie->angle);
     if (impact.type == AZ_IMP_SHIP) {
-      // TODO: Play sound for tongue impact
+        az_play_sound(&state->soundboard, AZ_SND_TONGUE_STICK);
       baddie->state = 2;
       baddie->cooldown = tongue_max_pull_time;
     } else if (impact.type != AZ_IMP_NOTHING ||
