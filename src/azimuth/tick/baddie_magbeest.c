@@ -47,6 +47,7 @@ enum {
   HEAD_WAITING_STATE,
   HEAD_QUICK_POPUP_STATE,
   HEAD_QUICK_POPDOWN_STATE,
+  HEAD_SPIDER_WAIT_TO_POPUP_STATE,
   HEAD_SPIDER_POPUP_STATE,
   HEAD_SPIDER_PLANT_LEG_0_STATE,
   HEAD_SPIDER_PLANT_LEG_1_STATE,
@@ -65,18 +66,19 @@ enum {
   HEAD_CEILING_SPIDER_MOVE_ODD_LEGS_RIGHT_STATE
 };
 // Shared legs states:
-#define LEGS_POPDOWN_STATE 0
-#define LEGS_POPUP_STATE 1
+#define LEGS_DORMANT_STATE 0
+#define LEGS_POPDOWN_STATE 1
+#define LEGS_POPUP_STATE 2
 // Legs-L states:
-#define MAGNET_COOLDOWN_STATE 2
-#define MAGNET_RECOVER_STATE 3
-#define MAGNET_FUSION_BEAM_CHARGE_STATE 4
-#define MAGNET_FINISH_ATTRACT_STATE 5
+#define MAGNET_COOLDOWN_STATE 3
+#define MAGNET_RECOVER_STATE 4
+#define MAGNET_FUSION_BEAM_CHARGE_STATE 5
+#define MAGNET_FINISH_ATTRACT_STATE 6
 #define MAGNET_MEDIUM_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 10)
 #define MAGNET_START_SPAWN_STATE (MAGNET_FINISH_ATTRACT_STATE + 20)
 // Legs-R states:
-#define GATLING_COOLDOWN_STATE 2
-#define GATLING_STOP_FIRING_STATE 3
+#define GATLING_COOLDOWN_STATE 3
+#define GATLING_STOP_FIRING_STATE 4
 #define GATLING_MID_FIRING_STATE (GATLING_STOP_FIRING_STATE + 14)
 #define GATLING_START_FIRING_STATE (GATLING_STOP_FIRING_STATE + 28)
 
@@ -439,7 +441,7 @@ static void prepare_to_spider_popup(
   head->position = az_vsub(marker_positions[3],
                            az_vwithlen(marker_positions[3], 135));
   head->angle = az_mod2pi(bounds->min_theta - AZ_DEG2RAD(45));
-  head->state = HEAD_SPIDER_POPUP_STATE;
+  head->state = HEAD_SPIDER_WAIT_TO_POPUP_STATE;
   arrange_head_piston(head, 0, az_vadd(head->position,
       az_vpolar(70, bounds->min_theta - AZ_DEG2RAD(45))));
   arrange_head_piston(head, 1, az_vadd(head->position,
@@ -447,12 +449,12 @@ static void prepare_to_spider_popup(
 
   legs_l->angle = az_mod2pi(bounds->min_theta + AZ_DEG2RAD(45));
   legs_l->position = az_vsub(head->position, az_vpolar(50, legs_l->angle));
-  legs_l->state = MAGNET_RECOVER_STATE;
+  legs_l->state = LEGS_DORMANT_STATE;
   legs_l->param2 = 1;
 
   legs_r->angle = az_mod2pi(bounds->min_theta + AZ_DEG2RAD(135));
   legs_r->position = az_vsub(head->position, az_vpolar(50, legs_r->angle));
-  legs_r->state = GATLING_STOP_FIRING_STATE;
+  legs_r->state = LEGS_DORMANT_STATE;
   legs_r->param2 = 1;
 
   // Arrange legs_l legs, ready to pop up.
@@ -609,6 +611,15 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
         }
       }
       break;
+    case HEAD_SPIDER_WAIT_TO_POPUP_STATE: {
+      const az_vector_t target =
+        az_vwithlen(baddie->position, bounds->min_r + 0.5 * bounds->r_span);
+      if (az_vwithin(state->ship.position, target, 320)) {
+        baddie->state = HEAD_SPIDER_POPUP_STATE;
+        legs_l->state = MAGNET_RECOVER_STATE;
+        legs_r->state = GATLING_STOP_FIRING_STATE;
+      }
+    } break;
     case HEAD_SPIDER_POPUP_STATE: {
       const az_vector_t old_legs_l_pos = legs_l->position;
       const double base_top =
@@ -953,6 +964,8 @@ void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,
   const double base_top =
     az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
   switch (baddie->state) {
+    case LEGS_DORMANT_STATE:
+      break;
     case LEGS_POPDOWN_STATE:
       if (base_top > baseline) {
         legs_pop_up_down(state, baddie, baseline, -LEGS_POP_SPEED * time);
@@ -1046,6 +1059,8 @@ void az_tick_bad_magbeest_legs_r(az_space_state_t *state, az_baddie_t *baddie,
   const double base_top =
     az_vnorm(baddie->position) + baddie->data->main_body.bounding_radius;
   switch (baddie->state) {
+    case LEGS_DORMANT_STATE:
+      break;
     case LEGS_POPDOWN_STATE:
       if (base_top > baseline) {
         legs_pop_up_down(state, baddie, baseline, -LEGS_POP_SPEED * time);

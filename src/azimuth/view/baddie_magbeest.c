@@ -33,6 +33,8 @@
 
 /*===========================================================================*/
 
+#define MAGNET_FUSION_BEAM_CHARGE_STATE 5
+
 // Comparison function for use with qsort.  Sorts doubles by their cosines.
 static int compare_cosines(const void *v1, const void *v2) {
   const double c1 = cos(*(double*)v1);
@@ -222,8 +224,10 @@ void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
     az_gl_translated(magnet->position);
     az_gl_rotated(magnet->angle);
     // Magnetic field:
-    if (baddie->state >= 4 && az_clock_mod(2, 2, clock)) {
-      const float scale = (baddie->state == 4 ? baddie->cooldown / 3.0 : 1.0);
+    if (baddie->state >= MAGNET_FUSION_BEAM_CHARGE_STATE &&
+        az_clock_mod(2, 2, clock)) {
+      const float scale = (baddie->state == MAGNET_FUSION_BEAM_CHARGE_STATE ?
+                           baddie->cooldown / 3.0 : 1.0);
       glBegin(GL_TRIANGLE_FAN); {
         glColor4f(1.0f - scale, 0.5f * scale, scale, 0.15);
         glVertex2f(25, 0); glVertex2f(25, 15 * scale);
