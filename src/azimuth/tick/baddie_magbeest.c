@@ -533,7 +533,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       }
       if (baddie->cooldown <= 0.0) {
         az_vector_t marker_positions[4];
-        if (hurt >= 0.5) {
+        if (hurt >= 1/3.) {
           sort_marker_positions(state, marker_positions,
                                 AZ_ARRAY_SIZE(marker_positions));
           baddie->state = HEAD_QUICK_POPUP_STATE;
@@ -544,7 +544,7 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
           baddie->cooldown = 3.5;
           // Position legs:
           if (hurt > 0.0) {
-            const bool both = hurt >= 0.25;
+            const bool both = hurt >= 1/6.;
             const bool left = both || az_randint(0, 1) != 0;
             const bool right = both || !left;
             if (left) init_legs_popup(legs_l, marker_positions[1]);

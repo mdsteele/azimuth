@@ -1861,7 +1861,7 @@ static az_baddie_data_t baddie_datas[] = {
     DECL_COMPONENTS(spiked_vine_components)
   },
   [AZ_BAD_MAGBEEST_HEAD] = {
-    .max_health = 500.0, .overall_bounding_radius = 500.0,
+    .max_health = 750.0, .overall_bounding_radius = 500.0,
     .color = {128, 128, 128, 255}, .hurt_sound = AZ_SND_HURT_TURRET,
     .armor_sound = AZ_SND_HIT_ARMOR, .static_properties = AZ_BADF_DRAW_BG,
     .potential_pickups = ~AZ_PUPF_NOTHING,
