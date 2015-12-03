@@ -771,8 +771,8 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
 void az_draw_baddie(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind != AZ_BAD_NOTHING);
   glPushMatrix(); {
-    glTranslated(baddie->position.x, baddie->position.y, 0);
-    glRotated(AZ_RAD2DEG(baddie->angle), 0, 0, 1);
+    az_gl_translated(baddie->position);
+    az_gl_rotated(baddie->angle);
     draw_baddie_internal(baddie, clock);
   } glPopMatrix();
 }

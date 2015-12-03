@@ -98,7 +98,7 @@ static void draw_spark(double age, double radius, az_color_t color) {
   } glEnd();
 }
 
-static void draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
+void az_draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
   switch (proj->kind) {
     case AZ_PROJ_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_PROJ_GUN_NORMAL:
@@ -610,9 +610,9 @@ void az_draw_projectiles(const az_space_state_t *state) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind == AZ_PROJ_NOTHING) continue;
     glPushMatrix(); {
-      glTranslated(proj->position.x, proj->position.y, 0);
-      glRotated(AZ_RAD2DEG(proj->angle), 0, 0, 1);
-      draw_projectile(proj, state->clock);
+      az_gl_translated(proj->position);
+      az_gl_rotated(proj->angle);
+      az_draw_projectile(proj, state->clock);
     } glPopMatrix();
   }
 }

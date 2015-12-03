@@ -27,9 +27,9 @@
 
 /*===========================================================================*/
 
-void az_tick_oth_tendrils(az_space_state_t *state, az_baddie_t *baddie,
+void az_tick_oth_tendrils(az_baddie_t *baddie,
                           const az_oth_tendrils_data_t *tendrils,
-                          double old_angle, double time);
+                          double old_angle, double time, double total_time);
 
 /*===========================================================================*/
 

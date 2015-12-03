@@ -253,8 +253,8 @@ void az_tick_bad_oth_supergunship(
       break;
   }
 
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_on_oth_supergunship_damaged(
@@ -298,8 +298,8 @@ void az_tick_bad_oth_decoy(
     az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
     baddie->cooldown = 0.2;
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 /*===========================================================================*/

@@ -21,9 +21,13 @@
 #ifndef AZIMUTH_VIEW_PROJECTILE_H_
 #define AZIMUTH_VIEW_PROJECTILE_H_
 
+#include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
+#include "azimuth/util/clock.h"
 
 /*===========================================================================*/
+
+void az_draw_projectile(const az_projectile_t *proj, az_clock_t clock);
 
 void az_draw_projectiles(const az_space_state_t *state);
 

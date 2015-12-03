@@ -25,6 +25,8 @@
 
 /*===========================================================================*/
 
+void az_tick_particle(az_particle_t *particle, double time);
+
 void az_tick_particles(az_space_state_t *state, double time);
 
 /*===========================================================================*/

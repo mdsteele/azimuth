@@ -395,8 +395,8 @@ void az_tick_bad_oth_gunship(
       begin_dogfight(baddie);
       break;
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_on_oth_gunship_damaged(

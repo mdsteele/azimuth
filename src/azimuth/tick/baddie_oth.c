@@ -33,9 +33,9 @@
 
 /*===========================================================================*/
 
-void az_tick_oth_tendrils(az_space_state_t *state, az_baddie_t *baddie,
+void az_tick_oth_tendrils(az_baddie_t *baddie,
                           const az_oth_tendrils_data_t *tendrils,
-                          double old_angle, double time) {
+                          double old_angle, double time, double total_time) {
   assert(tendrils->num_tendrils <= AZ_MAX_BADDIE_COMPONENTS);
   const double dtheta = baddie->angle - old_angle;
   for (int i = 0; i < tendrils->num_tendrils; ++i) {
@@ -48,8 +48,8 @@ void az_tick_oth_tendrils(az_space_state_t *state, az_baddie_t *baddie,
     const az_vector_t base = tendrils->tendril_bases[i];
     const az_vector_t goal_pos =
       az_vadd(az_vwithlen(base, az_vnorm(base) + tendrils->length),
-              az_vpolar(tendrils->drift, AZ_DEG2RAD(120) * i +
-                        AZ_DEG2RAD(120) * state->ship.player.total_time));
+              az_vpolar(tendrils->drift,
+                        AZ_DEG2RAD(120) * i + AZ_DEG2RAD(120) * total_time));
     const double goal_angle = az_vtheta(goal_pos);
     const double tracking_factor = 1.0 - pow(tendrils->tracking_base, time);
     az_vpluseq(&tip->position, az_vmul(az_vsub(goal_pos, tip->position),
@@ -136,8 +136,8 @@ void az_tick_bad_oth_brawler(
     az_fly_towards_ship(state, baddie, time,
                         turn_rate, 300.0, 100.0, 20.0, 100.0, 100.0);
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_BRAWLER_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_BRAWLER_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_crab_1(
@@ -155,7 +155,8 @@ void az_tick_bad_oth_crab_1(
       baddie->cooldown = 2.0;
     }
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_crab_2(
@@ -183,7 +184,8 @@ void az_tick_bad_oth_crab_2(
     az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
     baddie->param = 0.9;
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_CRAB_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_crawler(
@@ -202,8 +204,8 @@ void az_tick_bad_oth_crawler(
       baddie->cooldown = az_random(1.0, 2.0);
     }
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_CRAWLER_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_CRAWLER_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_minicrab(
@@ -221,8 +223,8 @@ void az_tick_bad_oth_minicrab(
       baddie->cooldown = 2.5;
     }
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_MINICRAB_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_MINICRAB_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_orb_1(
@@ -239,7 +241,8 @@ void az_tick_bad_oth_orb_1(
     az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
     baddie->cooldown = 2.0;
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_orb_2(
@@ -254,7 +257,8 @@ void az_tick_bad_oth_orb_2(
                               az_random(-AZ_PI, AZ_PI), 0.0);
     baddie->cooldown = 0.1;
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_ORB_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 void az_tick_bad_oth_razor(
@@ -276,7 +280,8 @@ void az_tick_bad_oth_razor(
   } else baddie->state = 0;
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(180) * time,
                                    az_vtheta(baddie->velocity));
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_RAZOR_TENDRILS, old_angle, time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_RAZOR_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 /*===========================================================================*/
@@ -347,8 +352,8 @@ void az_tick_bad_oth_snapdragon(
         break;
     }
   }
-  az_tick_oth_tendrils(state, baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, old_angle,
-                       time);
+  az_tick_oth_tendrils(baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, old_angle, time,
+                       state->ship.player.total_time);
 }
 
 /*===========================================================================*/

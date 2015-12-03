@@ -17,28 +17,58 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/tick/particle.h"
+#include "azimuth/state/victory.h"
 
+#include "azimuth/state/baddie.h"
 #include "azimuth/state/particle.h"
-#include "azimuth/state/space.h"
+#include "azimuth/state/projectile.h"
+#include "azimuth/util/audio.h"
+#include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
 
 /*===========================================================================*/
 
-void az_tick_particle(az_particle_t *particle, double time) {
-  if (particle->kind == AZ_PAR_NOTHING) return;
-  particle->age += time;
-  if (particle->age > particle->lifetime) {
-    particle->kind = AZ_PAR_NOTHING;
-    return;
+void az_victory_add_baddie(az_victory_state_t *state, az_baddie_kind_t kind,
+                           az_vector_t position, double angle) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind != AZ_BAD_NOTHING) continue;
+    az_init_baddie(baddie, kind, position, angle);
+    break;
   }
-  az_vpluseq(&particle->position, az_vmul(particle->velocity, time));
 }
 
-void az_tick_particles(az_space_state_t *state, double time) {
+void az_victory_add_particle(
+    az_victory_state_t *state, az_particle_kind_t kind, az_color_t color,
+    az_vector_t position, az_vector_t velocity, double angle, double lifetime,
+    double param1, double param2) {
   AZ_ARRAY_LOOP(particle, state->particles) {
-    az_tick_particle(particle, time);
+    if (particle->kind != AZ_PAR_NOTHING) continue;
+    particle->kind = kind;
+    particle->color = color;
+    particle->position = position;
+    particle->velocity = velocity;
+    particle->angle = angle;
+    particle->age = 0.0;
+    particle->lifetime = lifetime;
+    particle->param1 = param1;
+    particle->param2 = param2;
+    break;
   }
+}
+
+void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
+                               az_vector_t position, double angle) {
+  AZ_ARRAY_LOOP(proj, state->projectiles) {
+    if (proj->kind != AZ_PROJ_NOTHING) continue;
+    az_init_projectile(proj, kind, position, angle, 1.0, AZ_NULL_UID);
+    break;
+  }
+}
+
+void az_victory_clear_objects(az_victory_state_t *state) {
+  AZ_ARRAY_LOOP(baddie, state->baddies) baddie->kind = AZ_BAD_NOTHING;
+  AZ_ARRAY_LOOP(particle, state->particles) particle->kind = AZ_PAR_NOTHING;
+  AZ_ARRAY_LOOP(proj, state->projectiles) proj->kind = AZ_PROJ_NOTHING;
 }
 
 /*===========================================================================*/

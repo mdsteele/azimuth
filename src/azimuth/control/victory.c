@@ -28,6 +28,8 @@
 #include "azimuth/state/music.h"
 #include "azimuth/state/player.h"
 #include "azimuth/state/upgrade.h"
+#include "azimuth/state/victory.h"
+#include "azimuth/tick/victory.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/view/victory.h"
 

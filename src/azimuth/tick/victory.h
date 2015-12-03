@@ -18,15 +18,15 @@
 =============================================================================*/
 
 #pragma once
-#ifndef AZIMUTH_VIEW_VICTORY_H_
-#define AZIMUTH_VIEW_VICTORY_H_
+#ifndef AZIMUTH_TICK_VICTORY_H_
+#define AZIMUTH_TICK_VICTORY_H_
 
 #include "azimuth/state/victory.h"
 
 /*===========================================================================*/
 
-void az_victory_draw_screen(const az_victory_state_t *state);
+void az_tick_victory_state(az_victory_state_t *state, double time);
 
 /*===========================================================================*/
 
-#endif // AZIMUTH_VIEW_VICTORY_H_
+#endif // AZIMUTH_TICK_VICTORY_H_
