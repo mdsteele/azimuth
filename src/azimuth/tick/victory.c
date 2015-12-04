@@ -19,11 +19,14 @@
 
 #include "azimuth/tick/victory.h"
 
+#include <math.h>
+
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/baddie_oth.h"
 #include "azimuth/state/victory.h"
 #include "azimuth/tick/baddie_oth.h"
 #include "azimuth/tick/baddie_util.h"
+#include "azimuth/tick/baddie_wyrm.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
@@ -67,11 +70,37 @@ static void tick_baddies(az_victory_state_t *state, double time) {
                              state->step_timer);
       } break;
       case AZ_BAD_ROCKWYRM: {
-        // TODO: Open jaws and shoot
+        az_rockwyrm_move_jaws(baddie, time, (baddie->state != 0));
         const az_vector_t goal = az_vadd((az_vector_t){-360, -180},
                                          az_vmul((az_vector_t){208, 120},
                                                  state->step_timer));
         az_snake_towards(NULL, baddie, time, 2, 240.0, 50.0, goal, true);
+      } break;
+      case AZ_BAD_OTH_GUNSHIP: {
+        az_vector_t goal = {360, 100};
+        if (baddie->state == 1) goal = (az_vector_t){200, 95};
+        fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 300, 300, 200);
+        az_tick_oth_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle,
+                             time, state->step_timer);
+      } break;
+      case AZ_BAD_FORCEFIEND: {
+        const az_vector_t goal = az_vadd((az_vector_t){360, -150},
+                                         az_vmul((az_vector_t){-300, 100},
+                                                 state->step_timer));
+        az_snake_towards(NULL, baddie, time, 8, 250, 150, goal, true);
+        // TODO: move arms
+      } break;
+      case AZ_BAD_NOCTURNE: {
+        if (baddie->state == 0) {
+          baddie->param = fmin(1.0, baddie->param + time / 1.2);
+          const az_vector_t goal = {100, 100 - 25 * state->step_timer};
+          fly_towards(baddie, goal, time, AZ_DEG2RAD(60), 15, 7, 10);
+        } else {
+          baddie->param = fmax(0.0, baddie->param - time / 0.8);
+        }
+      } break;
+      case AZ_BAD_ZENITH_CORE: {
+        baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
       } break;
       default: break;
     }
@@ -88,9 +117,22 @@ static void tick_particles(az_victory_state_t *state, double time) {
 
 /*===========================================================================*/
 
+static bool times_per_second(double per_second, const az_projectile_t *proj,
+                             double time) {
+  return (ceil(per_second * proj->age) >
+          ceil(per_second * (proj->age - time)));
+}
+
 static void projectile_special_logic(
     az_victory_state_t *state, az_projectile_t *proj, double time) {
   switch (proj->kind) {
+    case AZ_PROJ_BOUNCING_FIREBALL:
+      if (times_per_second(15, proj, time)) {
+        az_victory_add_particle(
+            state, AZ_PAR_EMBER, (az_color_t){255, 128, 0, 128},
+            proj->position, AZ_VZERO, proj->angle, 0.3, 15.0, 0.0);
+      }
+      break;
     case AZ_PROJ_OTH_ROCKET:
       az_victory_add_particle(state, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                               proj->position, AZ_VZERO, proj->angle, 0.5,
@@ -164,19 +206,55 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       if (timer_at(state, 0.1, time)) {
         az_init_baddie(boss, AZ_BAD_ROCKWYRM,
                        (az_vector_t){-360, -180}, AZ_DEG2RAD(30));
+        boss->param = AZ_HALF_PI;
+      }
+      if (timer_at(state, 1.3, time)) boss->state = 1;
+      if (timer_at(state, 1.8, time)) {
+        for (int i = -2; i <= 2; ++i) {
+          const double radius = boss->data->main_body.bounding_radius;
+          const double theta = boss->angle + i * AZ_DEG2RAD(10);
+          az_victory_add_projectile(
+              state, AZ_PROJ_STINGER,
+              az_vadd(boss->position, az_vpolar(radius, theta)), theta);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
+        boss->state = 0;
       }
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_GUNSHIP: {
+      if (timer_at(state, 0.5, time)) {
+        az_init_baddie(boss, AZ_BAD_OTH_GUNSHIP,
+                       (az_vector_t){-360, 75}, AZ_DEG2RAD(0));
+      }
+      if (timer_at(state, 1.2, time)) boss->state = 1;
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_FORCEFIEND: {
+      if (timer_at(state, 0.5, time)) {
+        az_init_baddie(boss, AZ_BAD_FORCEFIEND,
+                       (az_vector_t){360, -150}, AZ_DEG2RAD(150));
+      }
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_KILOFUGE: {
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_NOCTURNE: {
+      if (timer_at(state, 0.5, time)) {
+        az_init_baddie(boss, AZ_BAD_NOCTURNE,
+                       (az_vector_t){-100, 50}, AZ_DEG2RAD(60));
+      }
+      if (timer_at(state, 4.0, time)) {
+        boss->state = 1;
+        for (int i = 0; i < 360; i += 36) {
+          const double theta = boss->angle + AZ_DEG2RAD(i);
+          az_victory_add_projectile(
+              state, AZ_PROJ_BOUNCING_FIREBALL,
+              az_vadd(boss->position, az_vpolar(20, theta)), theta);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_EXPLODE_FIREBALL_LARGE);
+      }
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_MAGBEEST: {
@@ -186,6 +264,9 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_CORE: {
+      if (timer_at(state, 0.1, time)) {
+        az_init_baddie(boss, AZ_BAD_ZENITH_CORE, AZ_VZERO, 0);
+      }
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_DONE: break;

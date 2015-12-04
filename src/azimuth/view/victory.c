@@ -45,7 +45,7 @@ static const struct {
 } TITLES[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 250, .y = 100,
    .title = "Extradimensional Fingers", .name = "OTH SNAPDRAGON"},
-  {.step = AZ_VS_ROCKWYRM, .x = 390, .y = 330,
+  {.step = AZ_VS_ROCKWYRM, .x = 390, .y = 350,
    .title = "Colossal Armored Annelid", .name = "ROCKWYRM"},
   {.step = AZ_VS_GUNSHIP, .x = 250, .y = 310,
    .title = "Extradimensional Mimic", .name = "OTH GUNSHIP"},
@@ -53,13 +53,13 @@ static const struct {
    .title = "Hydrokinetic Leviathan", .name = "FORCEFIEND"},
   {.step = AZ_VS_KILOFUGE, .x = 250, .y = 100,
    .title = "Behemoth Arachnid", .name = "KILOFUGE"},
-  {.step = AZ_VS_NOCTURNE, .x = 390, .y = 310,
+  {.step = AZ_VS_NOCTURNE, .x = 390, .y = 340,
    .title = "Invisible Brood Lord", .name = "NOCTURNE"},
   {.step = AZ_VS_MAGBEEST, .x = 250, .y = 310,
    .title = "Electromagnetic Harvester", .name = "MAGBEEST"},
   {.step = AZ_VS_SUPERGUNSHIP, .x = 390, .y = 100,
    .title = "Extradimensional Nemesis", .name = "OTH SUPERGUNSHIP"},
-  {.step = AZ_VS_CORE, .x = 320, .y = 360,
+  {.step = AZ_VS_CORE, .x = 320, .y = 380,
    .title = "Heart of the Planet", .name = "ZENITH CORE"},
 };
 
@@ -69,8 +69,22 @@ static const struct {
 } CREDITS[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 150, .y = 360,
    .heading = "BETA TESTERS", .name1 = "Lorem Ipsum", .name2 = "Jane Doe"},
-  {.step = AZ_VS_ROCKWYRM, .x = 180, .y = 80,
+  {.step = AZ_VS_ROCKWYRM, .x = 180, .y = 120,
    .heading = "BETA TESTERS", .name1 = "Alan Smithee", .name2 = "Anony Moose"},
+  {.step = AZ_VS_GUNSHIP, .x = 150, .y = 130,
+   .heading = "BETA TESTERS", .name1 = "Some One", .name2 = "Know Body"},
+  {.step = AZ_VS_FORCEFIEND, .x = 120, .y = 380,
+   .heading = "BETA TESTERS", .name1 = "Set Us", .name2 = "Up The Bomb"},
+  {.step = AZ_VS_KILOFUGE, .x = 150, .y = 380,
+   .heading = "BETA TESTERS", .name1 = "Dolor Sit Amet", .name2 = "Whatever"},
+  {.step = AZ_VS_NOCTURNE, .x = 480, .y = 80,
+   .heading = "BETA TESTERS", .name1 = "Temporary", .name2 = "Fake Names"},
+  {.step = AZ_VS_MAGBEEST, .x = 550, .y = 315,
+   .heading = "BETA TESTERS", .name1 = "Put Something", .name2 = "Real Here"},
+  {.step = AZ_VS_SUPERGUNSHIP, .x = 450, .y = 380,
+   .heading = "BETA TESTERS", .name1 = "Eventually", .name2 = "Anyway"},
+  {.step = AZ_VS_CORE, .x = 320, .y = 60,
+   .heading = "SPECIAL THANKS", .name1 = "Someone Special", .name2 = ""},
 };
 
 static void draw_baddies(const az_victory_state_t *state, bool background) {

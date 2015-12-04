@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_TICK_BADDIE_WYRM_H_
 #define AZIMUTH_TICK_BADDIE_WYRM_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
 
@@ -28,6 +30,7 @@
 
 void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
+void az_rockwyrm_move_jaws(az_baddie_t *baddie, double time, bool open);
 
 void az_tick_bad_wyrm_egg(az_space_state_t *state, az_baddie_t *baddie,
                           double time);

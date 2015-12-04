@@ -42,13 +42,9 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
-                          double time) {
+void az_rockwyrm_move_jaws(az_baddie_t *baddie, double time, bool open) {
   assert(baddie->kind == AZ_BAD_ROCKWYRM);
-  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
-  // Open/close jaws:
-  if (baddie->state == ROCKWYRM_STATE_SCREAM ||
-      (baddie->cooldown < 0.5 && baddie->state != ROCKWYRM_STATE_EGGS)) {
+  if (open) {
     const double limit = AZ_DEG2RAD(45);
     const double delta = AZ_DEG2RAD(180) * time;
     baddie->components[0].angle =
@@ -62,6 +58,17 @@ void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
     baddie->components[1].angle =
       fmin(0, baddie->components[1].angle + delta);
   }
+}
+
+void az_tick_bad_rockwyrm(az_space_state_t *state, az_baddie_t *baddie,
+                          double time) {
+  assert(baddie->kind == AZ_BAD_ROCKWYRM);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  // Open/close jaws:
+  az_rockwyrm_move_jaws(baddie, time,
+                        (baddie->state == ROCKWYRM_STATE_SCREAM ||
+                         (baddie->cooldown < 0.5 &&
+                          baddie->state != ROCKWYRM_STATE_EGGS)));
   // State NORMAL: Shoot a spread of bullets:
   if (baddie->state == ROCKWYRM_STATE_NORMAL) {
     if (baddie->cooldown <= 0.0 &&
