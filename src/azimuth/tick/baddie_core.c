@@ -152,13 +152,15 @@ static void move_component_towards(az_baddie_t *baddie, double time, int idx,
                                       goal_angle);
 }
 
-static void adjust_to_closed_configuration(az_baddie_t *baddie, double time) {
+void az_zenith_core_adjust_to_closed_configuration(
+    az_baddie_t *baddie, double time) {
   for (int i = 0; i < 8; ++i) {
     move_component_towards(baddie, time, i, AZ_VZERO, i * AZ_DEG2RAD(45));
   }
 }
 
-static void adjust_to_beam_configuration(az_baddie_t *baddie, double time) {
+void az_zenith_core_adjust_to_beam_configuration(
+    az_baddie_t *baddie, double time) {
   for (int i = 0; i < 8; ++i) {
     const az_vector_t goal = {0, (i < 4 ? 20 : -20)};
     move_component_towards(baddie, time, i, goal, i * AZ_DEG2RAD(45));
@@ -464,7 +466,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
 static void do_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
                             double time, bool lay_mines) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  adjust_to_beam_configuration(baddie, time);
+  az_zenith_core_adjust_to_beam_configuration(baddie, time);
   spin_gravity_back_and_forth(state, baddie, time);
   switch (get_secondary_state(baddie)) {
     case BEAM_CHARGE_FORWARD:
@@ -607,7 +609,7 @@ static bool advance_prismatic(az_space_state_t *state, az_baddie_t *baddie,
 static void do_prismatic(az_space_state_t *state, az_baddie_t *baddie,
                          double time, bool super) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
-  adjust_to_closed_configuration(baddie, time);
+  az_zenith_core_adjust_to_closed_configuration(baddie, time);
   adjust_gravity(state, time, 300.0, false);
   baddie->angle = az_angle_towards(baddie->angle, AZ_DEG2RAD(90) * time,
                                    AZ_DEG2RAD(22.5));

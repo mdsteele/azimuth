@@ -123,6 +123,47 @@ static void turn_in_place_towards(az_baddie_t *baddie, double goal_theta,
 
 /*===========================================================================*/
 
+void az_forcefiend_move_claws(az_baddie_t *baddie, bool swipe, double time) {
+  const double offset = baddie->components[9].position.y;
+  az_vector_t left_claw_goal_position =
+    {-54 + 0.02 * offset * offset,
+     34.64 + (offset < 0 ? 0.5 * offset : offset)};
+  az_vector_t right_claw_goal_position =
+    {-54 + 0.02 * offset * offset,
+     -34.64 + (offset > 0 ? 0.5 * offset : offset)};
+  double left_claw_goal_angle =
+    az_mod2pi(baddie->components[9].angle + AZ_PI);
+  double right_claw_goal_angle = left_claw_goal_angle;
+  if (swipe) {
+    const double swipe_theta = AZ_DEG2RAD(220) * baddie->param;
+    az_vpluseq(&left_claw_goal_position, (az_vector_t){
+        60 - 60 * cos(swipe_theta), 50 * sin(swipe_theta)});
+    az_vpluseq(&right_claw_goal_position, (az_vector_t){
+        60 - 60 * cos(swipe_theta), -50 * sin(swipe_theta)});
+    left_claw_goal_angle = AZ_DEG2RAD(180) - AZ_DEG2RAD(250) * baddie->param;
+    right_claw_goal_angle = AZ_DEG2RAD(180) + AZ_DEG2RAD(250) * baddie->param;
+  }
+  const double claw_position_delta = 350 * time;
+  position_towards(&baddie->components[4].position, claw_position_delta,
+                   az_vcaplen(left_claw_goal_position, 74));
+  position_towards(&baddie->components[7].position, claw_position_delta,
+                   az_vcaplen(right_claw_goal_position, 74));
+  const double claw_angle_delta = AZ_DEG2RAD(720) * time;
+  angle_towards(&baddie->components[4].angle, claw_angle_delta,
+                left_claw_goal_angle, AZ_DEG2RAD(90));
+  angle_towards(&baddie->components[7].angle, claw_angle_delta,
+                right_claw_goal_angle, AZ_DEG2RAD(-90));
+  // Move arms to fit claws:
+  for (int i = 2; i <= 5; i += 3) {
+    const az_vector_t wrist = baddie->components[i+2].position;
+    const az_vector_t elbow = az_find_knee(
+        AZ_VZERO, wrist, 40, 34, (az_vector_t){0, (i % 2 ? -1 : 1)});
+    baddie->components[i].angle = az_vtheta(elbow);
+    baddie->components[i+1].position = elbow;
+    baddie->components[i+1].angle = az_vtheta(az_vsub(wrist, elbow));
+  }
+}
+
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
@@ -271,44 +312,8 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     }
   }
   // Move claws:
-  const double offset = baddie->components[9].position.y;
-  az_vector_t left_claw_goal_position =
-    {-54 + 0.02 * offset * offset,
-     34.64 + (offset < 0 ? 0.5 * offset : offset)};
-  az_vector_t right_claw_goal_position =
-    {-54 + 0.02 * offset * offset,
-     -34.64 + (offset > 0 ? 0.5 * offset : offset)};
-  double left_claw_goal_angle =
-    az_mod2pi(baddie->components[9].angle + AZ_PI);
-  double right_claw_goal_angle = left_claw_goal_angle;
-  if (primary == CLAW_SWIPE_STATE || primary == CLAW_UNSWIPE_STATE) {
-    const double swipe_theta = AZ_DEG2RAD(220) * baddie->param;
-    az_vpluseq(&left_claw_goal_position, (az_vector_t){
-        60 - 60 * cos(swipe_theta), 50 * sin(swipe_theta)});
-    az_vpluseq(&right_claw_goal_position, (az_vector_t){
-        60 - 60 * cos(swipe_theta), -50 * sin(swipe_theta)});
-    left_claw_goal_angle = AZ_DEG2RAD(180) - AZ_DEG2RAD(250) * baddie->param;
-    right_claw_goal_angle = AZ_DEG2RAD(180) + AZ_DEG2RAD(250) * baddie->param;
-  }
-  const double claw_position_delta = 350 * time;
-  position_towards(&baddie->components[4].position, claw_position_delta,
-                   az_vcaplen(left_claw_goal_position, 74));
-  position_towards(&baddie->components[7].position, claw_position_delta,
-                   az_vcaplen(right_claw_goal_position, 74));
-  const double claw_angle_delta = AZ_DEG2RAD(720) * time;
-  angle_towards(&baddie->components[4].angle, claw_angle_delta,
-                left_claw_goal_angle, AZ_DEG2RAD(90));
-  angle_towards(&baddie->components[7].angle, claw_angle_delta,
-                right_claw_goal_angle, AZ_DEG2RAD(-90));
-  // Move arms to fit claws:
-  for (int i = 2; i <= 5; i += 3) {
-    const az_vector_t wrist = baddie->components[i+2].position;
-    const az_vector_t elbow = az_find_knee(
-        AZ_VZERO, wrist, 40, 34, (az_vector_t){0, (i % 2 ? -1 : 1)});
-    baddie->components[i].angle = az_vtheta(elbow);
-    baddie->components[i+1].position = elbow;
-    baddie->components[i+1].angle = az_vtheta(az_vsub(wrist, elbow));
-  }
+  az_forcefiend_move_claws(baddie, (primary == CLAW_SWIPE_STATE ||
+                                    primary == CLAW_UNSWIPE_STATE), time);
 }
 
 /*===========================================================================*/

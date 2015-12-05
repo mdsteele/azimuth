@@ -87,6 +87,16 @@ static const struct {
    .heading = "SPECIAL THANKS", .name1 = "Someone Special", .name2 = ""},
 };
 
+static void tint_screen(az_color_t color) {
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(color);
+    glVertex2i(0, 0);
+    glVertex2i(AZ_SCREEN_WIDTH, 0);
+    glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
+    glVertex2i(0, AZ_SCREEN_HEIGHT);
+  } glEnd();
+}
+
 static void draw_baddies(const az_victory_state_t *state, bool background) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) continue;
@@ -144,6 +154,12 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
     draw_baddies(state, false); // foreground
     draw_particles(state);
   } glPopMatrix();
+
+  if ((state->step == AZ_VS_CORE || state->step == AZ_VS_CORE + 1) &&
+      state->step_timer <= 0.75) {
+    tint_screen((az_color_t){255, 255, 255,
+                             255 * (1 - state->step_timer / 0.75)});
+  }
 
   AZ_ARRAY_LOOP(title, TITLES) {
     if (state->step != title->step) continue;

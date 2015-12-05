@@ -73,6 +73,22 @@ static bool spot_is_clear(az_space_state_t *state, az_vector_t position) {
 
 /*===========================================================================*/
 
+void az_nocturne_wiggle_legs(az_baddie_t *baddie, double time,
+                             double total_time) {
+  const double front_leg_angle = AZ_DEG2RAD(40) +
+    AZ_DEG2RAD(5) * sin(9.0 * total_time);
+  baddie->components[4].angle = az_angle_towards(
+      baddie->components[4].angle, AZ_DEG2RAD(90) * time, front_leg_angle);
+  baddie->components[5].angle = az_angle_towards(
+      baddie->components[5].angle, AZ_DEG2RAD(90) * time, -front_leg_angle);
+  const double rear_leg_angle = AZ_DEG2RAD(135) +
+    AZ_DEG2RAD(5) * sin(9.0 * total_time);
+  baddie->components[6].angle = az_angle_towards(
+      baddie->components[6].angle, AZ_DEG2RAD(90) * time, rear_leg_angle);
+  baddie->components[7].angle = az_angle_towards(
+      baddie->components[7].angle, AZ_DEG2RAD(90) * time, -rear_leg_angle);
+}
+
 void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   assert(baddie->kind == AZ_BAD_NOCTURNE);
@@ -84,19 +100,7 @@ void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
   }
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
 
-  // Wiggle legs:
-  const double front_leg_angle = AZ_DEG2RAD(40) +
-    AZ_DEG2RAD(5) * sin(9.0 * state->ship.player.total_time);
-  baddie->components[4].angle = az_angle_towards(
-      baddie->components[4].angle, AZ_DEG2RAD(90) * time, front_leg_angle);
-  baddie->components[5].angle = az_angle_towards(
-      baddie->components[5].angle, AZ_DEG2RAD(90) * time, -front_leg_angle);
-  const double rear_leg_angle = AZ_DEG2RAD(135) +
-    AZ_DEG2RAD(5) * sin(9.0 * state->ship.player.total_time);
-  baddie->components[6].angle = az_angle_towards(
-      baddie->components[6].angle, AZ_DEG2RAD(90) * time, rear_leg_angle);
-  baddie->components[7].angle = az_angle_towards(
-      baddie->components[7].angle, AZ_DEG2RAD(90) * time, -rear_leg_angle);
+  az_nocturne_wiggle_legs(baddie, time, state->ship.player.total_time);
 
   switch (baddie->state) {
     case PHASED_OUT_STATE:

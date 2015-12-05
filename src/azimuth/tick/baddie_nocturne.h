@@ -28,6 +28,8 @@
 
 void az_tick_bad_nocturne(az_space_state_t *state, az_baddie_t *baddie,
                           double time);
+void az_nocturne_wiggle_legs(az_baddie_t *baddie, double time,
+                             double total_time);
 
 /*===========================================================================*/
 

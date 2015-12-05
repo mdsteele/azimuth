@@ -26,8 +26,12 @@
 
 /*===========================================================================*/
 
-void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
-                             double time);
+void az_tick_bad_zenith_core(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_zenith_core_adjust_to_closed_configuration(
+    az_baddie_t *baddie, double time);
+void az_zenith_core_adjust_to_beam_configuration(
+    az_baddie_t *baddie, double time);
 
 /*===========================================================================*/
 
