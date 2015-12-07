@@ -139,6 +139,21 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_SAPIAIS:
       break;
+    case AZ_SCENE_UHP_SHIPS:
+      ready_for_next_scene = false;
+      switch (cutscene->step) {
+        case 0: progress_step(cutscene,  3.0, time); break;
+        case 1: progress_step(cutscene, 15.0, time); break;
+        case 2: progress_step(cutscene,  2.0, time); break;
+        case 3: progress_step(cutscene,  2.0, time); break;
+        case 4: progress_step(cutscene,  2.0, time); break;
+        case 5: progress_step(cutscene,  5.0, time); break;
+        case 6:
+          cutscene->param2 += time / 10.0;
+          ready_for_next_scene = (cutscene->param2 >= 1.0);
+          break;
+      }
+      break;
   }
   if (ready_for_next_scene && cutscene->next != cutscene->scene) {
     fade_to_next_scene(state, time);

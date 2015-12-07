@@ -153,7 +153,7 @@ void az_draw_ship_body(const az_ship_t *ship, az_clock_t clock) {
                az_clock_mod(4, 1, clock) != 0) {
       // Exhaust:
       if (ship->thrusters != AZ_THRUST_NONE) {
-        const double zig = az_clock_zigzag(10, 1, clock);
+        const float zig = az_clock_zigzag(10, 1, clock);
         // For forward thrusters:
         if (ship->thrusters == AZ_THRUST_FORWARD) {
           // From port engine:

@@ -1,5 +1,5 @@
 @P z8 r479 t255 s6
-$s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,scene0;
+$s:mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -1187,7 +1187,9 @@ $s:mus17,scene4,wait3,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scen
 !T243"
   $CFour years ago..."
 !T244"
-  $CSix hours later..."
+  $CZenith Colony
+
+  six hours later"
 !T245"
   Accessing node.  Integrating database.
 

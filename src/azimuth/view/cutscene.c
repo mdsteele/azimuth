@@ -485,6 +485,219 @@ static void draw_sapiais_scene(
   } glPopMatrix();
 }
 
+static void draw_uhp_cruiser_front_half(bool lit, double door_openness) {
+  // Dorsal fin:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.15, 0.15, 0.15); glVertex2f(-135,  90); glVertex2f( 10,  90);
+    glColor3f(0.23, 0.23, 0.23); glVertex2f(-130,  60); glVertex2f( 40,  60);
+  } glEnd();
+  // Fighter bay:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor4f(0.3, 1, 1, 0.3); glVertex2f(80, -65); glVertex2f(160, -63);
+    glColor4f(0.3, 1, 1, 0.0); glVertex2f(80, -70); glVertex2f(160, -68);
+  } glEnd();
+  glPushMatrix(); {
+    glTranslatef(-40 * door_openness, 0, 0);
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.23, 0.23, 0.23); glVertex2f(65, -60); glVertex2f(120, -59);
+      glColor3f(0.20, 0.20, 0.20); glVertex2f(70, -70); glVertex2f(120, -69);
+    } glEnd();
+  } glPopMatrix();
+  glPushMatrix(); {
+    glTranslatef(40 * door_openness, 0, 0);
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor3f(0.23, 0.23, 0.23); glVertex2f(120, -59); glVertex2f(175, -58);
+      glColor3f(0.20, 0.20, 0.20); glVertex2f(120, -69); glVertex2f(170, -68);
+    } glEnd();
+  } glPopMatrix();
+  // Body:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-25,  60); glVertex2f( 80,  60);
+    glColor3f(0.50, 0.50, 0.50); glVertex2f(  0,  30); glVertex2f(210,  30);
+    glColor3f(0.70, 0.70, 0.70); glVertex2f(-60, -30); glVertex2f(300, -30);
+    glColor3f(0.40, 0.40, 0.40); glVertex2f(-50, -60); glVertex2f(295, -60);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-75, -68); glVertex2f(-50, -70);
+  } glEnd();
+  // Windows:
+  glBegin(GL_TRIANGLES); {
+    if (lit) glColor3f(0, 0.65, 0.65);
+    else glColor3f(0, 0.325, 0.325);
+    glVertex2f(213, 22); glVertex2f(209, 14); glVertex2f(246, 0);
+    if (lit) glColor3f(0, 0.6, 0.6);
+    else glColor3f(0, 0.3, 0.3);
+    glVertex2f(155, 37); glVertex2f(208, 25); glVertex2f(203, 17);
+    if (lit) glColor3f(0, 0.5, 0.5);
+    else glColor3f(0, 0.25, 0.25);
+    glVertex2f(80, 55); glVertex2f(90, 40); glVertex2f(145, 40);
+    glVertex2f(70, 55); glVertex2f(80, 40); glVertex2f(50, 40);
+    glVertex2f(60, 55); glVertex2f(40, 40); glVertex2f(35, 55);
+    glVertex2f(27, 55); glVertex2f(32, 40); glVertex2f(15, 40);
+  } glEnd();
+}
+
+static void draw_uhp_cruiser_rear_half(bool exhaust, az_clock_t clock) {
+  // Rear exhaust:
+  if (exhaust) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      const float zig = az_clock_zigzag(10, 2, clock);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-275, 20);
+      glColor4f(1, 0.75, 0, 0.9); glVertex2f(-275, 0);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-330 - zig, 0);
+                                  glVertex2f(-275, -20);
+    } glEnd();
+    glBegin(GL_TRIANGLE_STRIP); {
+      const float zig = az_clock_zigzag(10, 2, clock);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-280, -10);
+      glColor4f(1, 0.75, 0, 0.9); glVertex2f(-280, -30);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-345 - zig, -30);
+                                  glVertex2f(-280, -50);
+    } glEnd();
+  }
+  // Rear engines:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.20, 0.20, 0.20); glVertex2f(-275,  20); glVertex2f(-250,  20);
+    glColor3f(0.35, 0.35, 0.35); glVertex2f(-275,   0); glVertex2f(-250,   0);
+    glColor3f(0.15, 0.15, 0.15); glVertex2f(-275, -20); glVertex2f(-250, -20);
+  } glEnd();
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.20, 0.20, 0.20); glVertex2f(-280, -10); glVertex2f(-250, -10);
+    glColor3f(0.35, 0.35, 0.35); glVertex2f(-280, -30); glVertex2f(-250, -30);
+    glColor3f(0.15, 0.15, 0.15); glVertex2f(-280, -50); glVertex2f(-250, -50);
+  } glEnd();
+  // Body:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-150,  60); glVertex2f(-25,  60);
+    glColor3f(0.50, 0.50, 0.50); glVertex2f(-250,  30); glVertex2f(  0,  30);
+    glColor3f(0.70, 0.70, 0.70); glVertex2f(-250, -30); glVertex2f(-60, -30);
+    glColor3f(0.40, 0.40, 0.40); glVertex2f(-250, -60); glVertex2f(-50, -60);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-100, -68); glVertex2f(-75, -70);
+  } glEnd();
+  // Text:
+  glPushMatrix(); {
+    glScalef(1.5, -1, 1);
+    glColor4f(0, 0.25, 0.25, 0.3);
+    az_draw_string(5, AZ_ALIGN_LEFT, -110, -10, "UNITED HUMAN PLANETS");
+    az_draw_string(7, AZ_ALIGN_LEFT, -110, 10, "HLS ARTEMIS");
+    az_draw_string(7, AZ_ALIGN_LEFT, -105.5, 10.5, "...");
+  } glPopMatrix();
+  // Side exhaust:
+  if (exhaust) {
+    glBegin(GL_TRIANGLE_STRIP); {
+      const float zig = az_clock_zigzag(10, 2, clock);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-150, -52);
+      glColor4f(1, 0.75, 0, 0.9); glVertex2f(-150, -65);
+      glColor4f(1, 0.25, 0, 0.0); glVertex2f(-220 - zig, -65);
+                                  glVertex2f(-150, -78);
+    } glEnd();
+  }
+  // Side engine:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.35, 0.35, 0.35); glVertex2f(-110, -40); glVertex2f(-30, -40);
+    glColor3f(0.50, 0.50, 0.50); glVertex2f(-150, -50); glVertex2f(  0, -50);
+    glColor3f(0.75, 0.75, 0.75); glVertex2f(-150, -65); glVertex2f(  0, -65);
+    glColor3f(0.40, 0.40, 0.40); glVertex2f(-150, -80); glVertex2f(  0, -80);
+    glColor3f(0.20, 0.20, 0.20); glVertex2f(-110, -90); glVertex2f(-30, -90);
+  } glEnd();
+}
+
+static void draw_uhp_cruiser(double door_openness, az_clock_t clock) {
+  draw_uhp_cruiser_front_half(true, door_openness);
+  draw_uhp_cruiser_rear_half(true, clock);
+}
+
+static void draw_uhp_fighter(az_clock_t clock) {
+  // Body:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-15,  4); glVertex2f( 8,  4);
+    glColor3f(0.70, 0.70, 0.70); glVertex2f(-15, -1); glVertex2f(20, -1);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-15, -5); glVertex2f(11, -5);
+  } glEnd();
+  // Tail:
+  glBegin(GL_TRIANGLE_FAN); {
+    glColor3f(0.70, 0.70, 0.70); glVertex2f(-15, -1);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-15,  4); glVertex2f(-20,  2);
+    glColor3f(0.70, 0.70, 0.70); glVertex2f(-20, -1);
+    glColor3f(0.25, 0.25, 0.25); glVertex2f(-20, -4); glVertex2f(-15, -5);
+  } glEnd();
+  // Windshield:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0, 1, 1); glVertex2f(17, 0);
+    glColor3f(0, 0.5, 0.5); glVertex2f(8, 4); glVertex2f(12, -1);
+  } glEnd();
+  // Side exhaust:
+  glBegin(GL_TRIANGLE_STRIP); {
+    const float zig = az_clock_zigzag(10, 1, clock);
+    glColor4f(1, 0.50, 0, 0.0); glVertex2f(-16, 0);
+    glColor4f(1, 0.75, 0, 0.9); glVertex2f(-16, -4);
+    glColor4f(1, 0.50, 0, 0.0); glVertex2f(-30 - zig, -4); glVertex2f(-16, -8);
+  } glEnd();
+  // Side engine:
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor3f(0.30, 0.30, 0.30); glVertex2f(-12,  0); glVertex2f(-2,  0);
+    glColor3f(0.50, 0.50, 0.50); glVertex2f(-16, -1); glVertex2f( 2, -1);
+    glColor3f(0.75, 0.75, 0.75); glVertex2f(-16, -4); glVertex2f( 2, -4);
+    glColor3f(0.40, 0.40, 0.40); glVertex2f(-16, -7); glVertex2f( 2, -7);
+    glColor3f(0.20, 0.20, 0.20); glVertex2f(-12, -8); glVertex2f(-2, -8);
+  } glEnd();
+}
+
+static void draw_uhp_ships_scene(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_UHP_SHIPS);
+  glPushMatrix(); {
+    glScalef(-1, 1, 1);
+    glTranslatef(-AZ_SCREEN_WIDTH, 0, 0);
+    draw_moving_starfield(cutscene->time, (cutscene->step < 6 ? 0.6 : 0.2));
+  } glPopMatrix();
+  glPushMatrix(); {
+    glScalef(1, -1, 1);
+    glTranslatef(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+    const float factor =
+      (cutscene->step < 5 ? 1 : cutscene->step > 5 ? 0.5 :
+       1 - 0.5 * cutscene->param1 * cutscene->param1 *
+       (3 - 2 * cutscene->param1));
+    glScalef(factor, factor, 1);
+    // Fighters:
+    glPushMatrix(); {
+      glTranslatef(200, -150, 0);
+      draw_uhp_fighter(clock);
+    } glPopMatrix();
+    glPushMatrix(); {
+      glTranslatef(150, -140, 0);
+      draw_uhp_fighter(clock);
+    } glPopMatrix();
+    // Crusier:
+    if (cutscene->step > 0) {
+      glPushMatrix(); {
+        glTranslatef((cutscene->step > 1 ? 0 :
+                      -650 * pow(1 - cutscene->param1, 1.5)),
+                     8 * sin(cutscene->time), 0);
+        if (cutscene->step < 6) {
+          const float door_openness =
+            (cutscene->step == 2 ? cutscene->param1 :
+             cutscene->step == 3 ? 1 :
+             cutscene->step == 4 ? 1 - cutscene->param1 : 0);
+          draw_uhp_cruiser(door_openness, clock);
+        } else {
+          const double param = 1 - pow(0.1, cutscene->param2);
+          const float horz_drift = 300 * sqrt(param);
+          const float vert_drift = 200 * sin(AZ_HALF_PI * param);
+          glPushMatrix(); {
+            glTranslatef(horz_drift, vert_drift, 0);
+            az_gl_rotated(-AZ_DEG2RAD(70) * param);
+            draw_uhp_cruiser_front_half(false, 0);
+          } glPopMatrix();
+          glPushMatrix(); {
+            glTranslatef(-horz_drift, vert_drift, 0);
+            az_gl_rotated(AZ_DEG2RAD(110) * param);
+            draw_uhp_cruiser_rear_half(false, clock);
+          } glPopMatrix();
+        }
+      } glPopMatrix();
+    }
+  } glPopMatrix();
+}
+
 /*===========================================================================*/
 
 void az_draw_cutscene(const az_space_state_t *state) {
@@ -517,6 +730,9 @@ void az_draw_cutscene(const az_space_state_t *state) {
     case AZ_SCENE_BLACK: break;
     case AZ_SCENE_SAPIAIS:
       draw_sapiais_scene(cutscene, state->clock);
+      break;
+    case AZ_SCENE_UHP_SHIPS:
+      draw_uhp_ships_scene(cutscene, state->clock);
       break;
   }
   if (cutscene->fade_alpha > 0.0) tint_screen(0, cutscene->fade_alpha);
