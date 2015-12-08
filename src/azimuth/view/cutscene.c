@@ -32,6 +32,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/particle.h"
 #include "azimuth/view/ship.h"
 #include "azimuth/view/string.h"
 #include "azimuth/view/util.h"
@@ -287,6 +288,31 @@ static void draw_gas_planet_stripe(
         glVertex2d(0, -radius * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
+  }
+}
+
+/*===========================================================================*/
+
+static void draw_particle(const az_particle_t *particle, az_clock_t clock) {
+  if (particle->kind == AZ_PAR_NOTHING) return;
+  glPushMatrix(); {
+    az_gl_translated(particle->position);
+    az_gl_rotated(particle->angle);
+    az_draw_particle(particle, clock);
+  } glPopMatrix();
+}
+
+static void draw_bg_particles(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  AZ_ARRAY_LOOP(particle, cutscene->bg_particles) {
+    draw_particle(particle, clock);
+  }
+}
+
+static void draw_fg_particles(
+    const az_cutscene_state_t *cutscene, az_clock_t clock) {
+  AZ_ARRAY_LOOP(particle, cutscene->fg_particles) {
+    draw_particle(particle, clock);
   }
 }
 
@@ -657,6 +683,7 @@ static void draw_uhp_ships_scene(
        1 - 0.5 * cutscene->param1 * cutscene->param1 *
        (3 - 2 * cutscene->param1));
     glScalef(factor, factor, 1);
+    draw_bg_particles(cutscene, clock);
     // Fighters:
     glPushMatrix(); {
       glTranslatef(200, -150, 0);
@@ -695,6 +722,7 @@ static void draw_uhp_ships_scene(
         }
       } glPopMatrix();
     }
+    draw_fg_particles(cutscene, clock);
   } glPopMatrix();
 }
 

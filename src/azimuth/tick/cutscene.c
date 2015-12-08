@@ -24,6 +24,7 @@
 
 #include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
+#include "azimuth/tick/particle.h"
 #include "azimuth/tick/script.h"
 
 /*===========================================================================*/
@@ -54,18 +55,44 @@ static void fade_in(az_cutscene_state_t *cutscene, double time) {
   cutscene->fade_alpha = fmax(0.0, cutscene->fade_alpha - time / FADE_TIME);
 }
 
-static void progress_step(az_cutscene_state_t *cutscene, double time_for_step,
+static bool progress_step(az_cutscene_state_t *cutscene, double time_for_step,
                           double time) {
   cutscene->param1 = fmin(1.0, cutscene->param1 + time / time_for_step);
   if (cutscene->param1 >= 1.0) {
     cutscene->param1 = 0.0;
     ++cutscene->step;
+    return true;
+  } else return false;
+}
+
+static void tick_particles(az_cutscene_state_t *cutscene, double time) {
+  AZ_ARRAY_LOOP(particle, cutscene->fg_particles) {
+    az_tick_particle(particle, time);
+  }
+  AZ_ARRAY_LOOP(particle, cutscene->bg_particles) {
+    az_tick_particle(particle, time);
   }
 }
 
+/*===========================================================================*/
+
+static void add_laser(az_cutscene_state_t *cutscene, bool foreground,
+                      double size, double y_pos, double speed) {
+  az_cutscene_add_particle(
+      cutscene, foreground, AZ_PAR_BEAM, (az_color_t){255, 128, 128, 255},
+      (az_vector_t){(speed > 0 ? -700 - size : 700 + size), y_pos},
+      (az_vector_t){speed, 0}, (speed > 0 ? 0 : AZ_PI),
+      (size + 1400) / speed, size, 0.05 * size);
+}
+
+/*===========================================================================*/
+
 void az_tick_cutscene(az_space_state_t *state, double time) {
   az_cutscene_state_t *cutscene = &state->cutscene;
-  if (cutscene->scene != AZ_SCENE_NOTHING) cutscene->time += time;
+  if (cutscene->scene != AZ_SCENE_NOTHING) {
+    cutscene->time += time;
+    tick_particles(cutscene, time);
+  }
   bool ready_for_next_scene = true;
   switch (cutscene->scene) {
     case AZ_SCENE_NOTHING:
@@ -142,12 +169,29 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
     case AZ_SCENE_UHP_SHIPS:
       ready_for_next_scene = false;
       switch (cutscene->step) {
-        case 0: progress_step(cutscene,  3.0, time); break;
-        case 1: progress_step(cutscene, 15.0, time); break;
+        case 0:
+          if (progress_step(cutscene,  3.0, time)) {
+            add_laser(cutscene, true, 100, 50, 1200);
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_PIERCE);
+          }
+          break;
+        case 1:
+          if (progress_step(cutscene, 15.0, time)) {
+            add_laser(cutscene, false, 60, -125, 1200);
+            az_play_sound_with_volume(&state->soundboard,
+                                      AZ_SND_FIRE_GUN_PIERCE, 0.5);
+          } break;
         case 2: progress_step(cutscene,  2.0, time); break;
         case 3: progress_step(cutscene,  2.0, time); break;
         case 4: progress_step(cutscene,  2.0, time); break;
-        case 5: progress_step(cutscene,  5.0, time); break;
+        case 5:
+          if (progress_step(cutscene,  5.0, time)) {
+            az_cutscene_add_particle(cutscene, true, AZ_PAR_EXPLOSION,
+                                     (az_color_t){255, 233, 211, 192},
+                                     AZ_VZERO, AZ_VZERO, 0, 0.9, 200, 0);
+            az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
+          }
+          break;
         case 6:
           cutscene->param2 += time / 10.0;
           ready_for_next_scene = (cutscene->param2 >= 1.0);

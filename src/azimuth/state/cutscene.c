@@ -17,52 +17,42 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_STATE_CUTSCENE_H_
-#define AZIMUTH_STATE_CUTSCENE_H_
+#include "azimuth/state/cutscene.h"
 
 #include "azimuth/state/particle.h"
-#include "azimuth/util/color.h"
-#include "azimuth/util/vector.h"
+#include "azimuth/util/misc.h"
 
 /*===========================================================================*/
-
-// The number of different cutscenes there are, not counting AZ_SCENE_NOTHING
-// and AZ_SCENE_TEXT:
-#define AZ_NUM_SCENES 9
-
-typedef enum {
-  AZ_SCENE_TEXT = -1,
-  AZ_SCENE_NOTHING = 0,
-  AZ_SCENE_CRUISING,
-  AZ_SCENE_MOVE_OUT,
-  AZ_SCENE_ARRIVAL,
-  AZ_SCENE_ZENITH,
-  AZ_SCENE_ESCAPE,
-  AZ_SCENE_HOMECOMING,
-  AZ_SCENE_BLACK,
-  AZ_SCENE_SAPIAIS,
-  AZ_SCENE_UHP_SHIPS,
-} az_scene_t;
-
-typedef struct {
-  az_scene_t scene;
-  az_scene_t next;
-  const char *scene_text;
-  const char *next_text;
-  double fade_alpha; // 0.0 to 1.0
-  double time;
-  double param1, param2;
-  int step;
-  az_particle_t fg_particles[20];
-  az_particle_t bg_particles[20];
-} az_cutscene_state_t;
 
 void az_cutscene_add_particle(
     az_cutscene_state_t *cutscene, bool foreground, az_particle_kind_t kind,
     az_color_t color, az_vector_t position, az_vector_t velocity, double angle,
-    double lifetime, double param1, double param2);
+    double lifetime, double param1, double param2) {
+  az_particle_t *particle = NULL;
+  if (foreground) {
+    AZ_ARRAY_LOOP(par, cutscene->fg_particles) {
+      if (par->kind != AZ_PAR_NOTHING) continue;
+      particle = par;
+      break;
+    }
+  } else {
+    AZ_ARRAY_LOOP(par, cutscene->bg_particles) {
+      if (par->kind != AZ_PAR_NOTHING) continue;
+      particle = par;
+      break;
+    }
+  }
+  if (particle != NULL) {
+    particle->kind = kind;
+    particle->color = color;
+    particle->position = position;
+    particle->velocity = velocity;
+    particle->angle = angle;
+    particle->age = 0.0;
+    particle->lifetime = lifetime;
+    particle->param1 = param1;
+    particle->param2 = param2;
+  }
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_STATE_CUTSCENE_H_
