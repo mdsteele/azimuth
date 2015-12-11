@@ -488,6 +488,19 @@ static void do_rotate_align(bool to_camera) {
   }
 }
 
+static void do_center_camera(void) {
+  az_editor_room_t *room = get_current_room();
+  az_vector_t sum = {0, 0};
+  int count = 0;
+  AZ_EDITOR_OBJECT_LOOP(object, room) {
+    if (!*object.selected) continue;
+    az_vpluseq(&sum, *object.position);
+    ++count;
+  }
+  if (count <= 0) return;
+  state.camera = az_vdiv(sum, count);
+}
+
 static void do_set_camera_bounds(int x, int y) {
   az_editor_room_t *room = get_current_room();
   az_camera_bounds_t *bounds = &room->camera_bounds;
@@ -1626,7 +1639,10 @@ static void event_loop(void) {
             case AZ_KEY_K:
               if (event.key.command) begin_set_marker_flag();
               break;
-            case AZ_KEY_L: do_rotate_align(event.key.shift); break;
+            case AZ_KEY_L:
+              if (event.key.command) do_center_camera();
+              else do_rotate_align(event.key.shift);
+              break;
             case AZ_KEY_M:
               if (event.key.command && event.key.shift) {
                 state.tool = AZ_TOOL_MASS_MOVE;
