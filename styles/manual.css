@@ -1,0 +1,43 @@
+dt {
+  clear: both;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 15px 0 5px;
+}
+
+h2 {
+  clear: both;
+}
+
+img.baddie, img.door, img.switch, img.upgrade {
+  border: 1px solid #333;
+  float: left;
+  height: 64px;
+  margin: 5px 10px 15px 0;
+  width: 64px;
+}
+img.door {
+  height: 64px;
+  width: 48px;
+}
+img.switch {
+  float: none;
+  margin: 0px 10px;
+}
+img.upgrade {
+  height: 48px;
+  width: 48px;
+}
+
+nav.toc {
+  margin: 0 0 30px;
+  overflow: hidden;
+}
+nav.toc > ul {
+  -moz-column-gap: 20px;
+  -moz-column-width: 150px;
+  -webkit-column-gap: 20px;
+  -webkit-column-width: 150px;
+  column-gap: 20px;
+  column-width: 150px;
+}

@@ -1,0 +1,555 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <title>Azimuth</title>
+  <link rel="stylesheet" href="styles/common.css">
+  <link rel="stylesheet" href="styles/manual.css">
+</head>
+<body>
+  <header>
+    <h1><img src="images/title.png" alt="Azimuth"></h1>
+    <nav>
+      <a href="index.html">About</a>
+      <a href="download.html">Download</a>
+      <a href="manual.html" class="selected">Manual</a>
+      <a href="https://github.com/mdsteele/azimuth/">GitHub</a>
+    </nav>
+  </header>
+  <section>
+  <nav class="toc">
+    <ul class="toc">
+      <li><a href="#story">Story</a>
+      <li><a href="#controls">Controls</a>
+      <li><a href="#doors">Doors</a>
+      <li><a href="#switches">Switches</a>
+      <li><a href="#enemies">Enemies</a>
+      <li><a href="#bosses">Tips for bosses</a>
+      <li><a href="#gun_upgrades">Gun Upgrades</a>
+      <li><a href="#ordnance_upgrades">Ordnance Upgrades</a>
+      <li><a href="#shield_upgrades">Shield Upgrades</a>
+      <li><a href="#energy_upgrades">Energy Upgrades</a>
+      <li><a href="#engine_upgrades">Engine Upgrades</a>
+      <li><a href="#utility_upgrades">Utility Upgrades</a>
+      <li><a href="#sensor_upgrades">Sensor Upgrades</a>
+      <li><a href="#license">License</a>
+    </ul>
+  </nav>
+  </section>
+  <section id="story">
+    <h2>The Story So Far...</h2>
+    <img class="floatright" src="images/screenshot1.png">
+    <p>
+      You are Major Shawna &ldquo;Hopper&rdquo; Jemison, a pilot in the
+      Interstellar Patrol Force for the United Human Planets.  Four the past
+      four years, the once-peaceful Joint Federation of Sentient Races (of
+      which the Humans were one of five member species, in addition to the
+      three SapiAIs) has been embroiled in civil war, with no end in sight.
+    </p>
+    <p>
+      Four years ago, just before the dawn of the war, you were on patrol near
+      the border separating Human space from that of the Trichords (a fellow
+      member species of the JFSR), when you received an automated distress call
+      from a remote research colony on the planetoid Zenith, home to hundreds
+      of Human and Trichord scientists.  As you set course for Zenith to assist
+      them, the signal suddenly went dead.  Whatever was happening down there,
+      something had just destroyed their transmitter array--a bad sign.
+    </p>
+    <p>
+      The game begins as you arrive at the colony to find it badly damaged and
+      apparently abandoned.  You must explore Zenith to find and rescue the
+      colonists, to determine what disaster took place here, and to discover
+      the secret that would soon start a galactic civil war...
+    </p>
+  </section>
+  <section id="controls">
+    <h2>Controls</h2>
+    <img class="floatright" src="images/screenshot2.png">
+    <p>
+      Azimuth is primarily played with the keyboard; you will use the mouse on
+      the title screen and pause screen, but not during gameplay.  There is no
+      special support for gamepads, but any input device that emulates a
+      keyboard should work fine.
+    </p>
+    <p>
+      The default controls are listed below; you can customize these controls
+      from the title screen or pause screen by clicking on the
+      &ldquo;Options&rdquo; button on either screen.  From there, click the key
+      name you want to change, then press the new key you'd like to use.
+    </p>
+    <dl>
+      <dt>Up Arrow: Thrust</dt>
+      <dd>Hold this key to accelerate your ship forwards.</dd>
+      <dt>Down Arrow: Reverse</dt>
+      <dd>Once you get the <a href="#engine_upgrades">Retro Thrusters</a>
+        upgrade, you can hold this key to accelerate your ship
+        backwards.</dd>
+      <dt>Right Arrow: Turn right</dt>
+      <dd>Hold this key to rotate your ship to the right (clockwise).</dd>
+      <dt>Left Arrow: Turn left</dt>
+      <dd>Hold this key to rotate your ship to the left
+        (counterclockwise).</dd>
+      <dt>C: Fire</dt>
+      <dd>Press this key to fire whatever weapon you have selected.  Once you
+        get the <a href="#gun_upgrades">Charge Gun</a> upgrade and have it
+        selected, you can hold this key down to charge up your gun, then
+        release it to fire.</dd>
+      <dt>X: Ordnance</dt>
+      <dd>Once you have <a href="#ordnance_upgrades">rockets or bombs</a>, if
+        you're holding down this key when you press the fire key, you'll fire
+        rockets/bombs instead of your main guns.</dd>
+      <dt>Z: Utility</dt>
+      <dd>Press this key while near a save point, recharge station, or comm
+        console to use it.  Once you get the
+        <a href="#utility_upgrades">Tractor Beam</a> and/or
+        <a href="#sensor_upgrades">Milliwave Radar</a> upgrades, you can hold
+        this key down to activate those items as well.</dd>
+      <dt>Escape: Pause</dt>
+      <dd>Press this key to pause or unpause the game.</dd>
+    </dl>
+    To select different weapons (once you acquire several different weapon
+    upgrades), you can either pause the game and click on the weapon name(s) to
+    select them, or you can use the number keys to select them at any time (1
+    through 8 to switch guns, 9 and 0 to switch ordnance).
+  </section>
+  <section id="doors">
+    <h2>Doors</h2>
+    <p>
+      Different rooms in the colony are typically separated by doors, which can
+      be opened by shooting them.  Some heavier blast doors will require more
+      powerful weaponry to break open.
+    </p>
+    <dl>
+      <dt>White Doors</dt><img class="door" src="images/whitedoor.png">
+      <dd>These doors can be opened with regular shots from your main
+        guns, or by any other weapon.</dd>
+      <dt>Red Doors</dt><img class="door" src="images/reddoor.png">
+      <dd>These doors can be broken open by a rocket impact.</dd>
+      <dt>Blue Doors</dt><img class="door" src="images/bluedoor.png">
+      <dd>These doors can be opened by a bomb blast.</dd>
+      <dt>Pink Doors</dt><img class="door" src="images/pinkdoor.png">
+      <dd>These heavily-armored doors will require a hyper rocket to open.</dd>
+      <dt>Cyan Doors</dt><img class="door" src="images/cyandoor.png">
+      <dd>The very strongest blast doors in Zenith require nothing less than a
+        mega bomb to break open.</dd>
+      <dt>Locked Doors</dt><img class="door" src="images/lockeddoor.png">
+      <dd>These doors cannot be opened by any weapon.  However, often they can
+        be unlocked by defeating a nearby enemy, finding the right switch, or
+        entering from the other side.  Once unlocked, they can be opened by
+        your regular guns.</dd>
+      <dt>Gate</dt><img class="door" src="images/gate.png">
+      <dd>An energy forcefield that blocks any passage.  Often there will be a
+        nearby switch to turn it off; other times you may need to search
+        farther to find a way to proceed.</dd>
+    </dl>
+  </section>
+  <section id="switches">
+    <h2>Switches</h2>
+    <p>
+      Switches can be activated by shooting them with the right weapon.
+      Similarly to doors, switches come in several colors, which hint at the
+      right weapon to use.  Activating switches that you find is almost always
+      helpful to your mission, so be sure to shoot any that you come across.
+    </p>
+    <center>
+      <img class="switch" src="images/yswitch.png">
+      <img class="switch" src="images/rswitch.png">
+      <img class="switch" src="images/bswitch.png">
+    </center>
+  </section>
+  <section id="enemies">
+    <h2>Enemies</h2>
+    <p>
+      Zenith Colony is home to many dangerous creatures and robots: from rogue
+      security turrets, to wild animals, to alien monsters.  Most enemies can
+      be defeated with any weapon, but some enemies have armor that requires
+      you to use a more powerful weapon, or to hit them in a vulnerable spot.
+    </p>
+    <p>
+      Below are a few of the enemies you will encounter while exploring the
+      Zenith planetoid:
+    </p>
+    <dl>
+      <dt>Security Turret</dt><img class="baddie" src="images/turret.png">
+      <dd>These turrets are supposed to keep the colony safe, but they seem to
+        have gone haywire.  Some have been damaged and will be easy to destroy,
+        while others are armored and impervious to your starting weapon.</dd>
+      <dt>Cave Crawler</dt><img class="baddie" src="images/crawler.png">
+      <dd>Crawls along walls and ceilings.  Not too much of a threat, as long
+        as you don't get too close.</dd>
+      <dt>Supply Box</dt><img class="baddie" src="images/box.png">
+      <dd>Leftover supplies the colonists didn't have time to take with them
+        when disaster struck.  Blast these open with guns to refill your
+        shields or ammo.  Some boxes are armored, and will require explosives
+        to break open.</dd>
+      <dt>Swooper</dt><img class="baddie" src="images/swooper.png">
+      <dd>Native flying creatures of Zenith, often found sleeping hanging from
+        the ceilings of caves and tunnels.  If disturbed, they will give chase
+        at high speed.</dd>
+      <dt>Spiner</dt><img class="baddie" src="images/spiner.png">
+      <dd>These slowly-drifting creatures shoot spines in all directions if you
+        get too close.</dd>
+      <dt>???</dt><img class="baddie" src="images/minicrab.png">
+      <dd>Mysterious invaders of unknown origin, unlike anything you've ever
+        encountered.  Extremely dangerous; engage with caution.</dd>
+    </dl>
+    <p style="clear:both">...and many, <em>many</em> more...</p>
+  </section>
+  <section id="bosses">
+    <h2>Tips for bosses</h2>
+    <img class="floatright" src="images/screenshot3.png">
+    <p>
+      Each colored region on the map has a boss enemy that you must defeat to
+      gain access to a major upgrade.  The boss room will usually be marked on
+      your map once you download map data for that region.
+    </p>
+    <p>
+      Some tips for defeating bosses:
+    </p>
+    <ul>
+      <li><strong>Stay calm, and keep moving.</strong>  Most bosses have a
+        harder time hitting you if you don't stand still.
+      <li><strong>Look for a weak point.</strong>  Some bosses have armored
+        sections that can't be damaged by your weapons.  In those cases, look
+        for a more vulnerable spot that you <em>can</em> damage.
+      <li><strong>Watch your shields.</strong>  Bosses often summon smaller
+        minions to attack you, which you can kill to gain shield and ammo
+        pickups.  If your shields get low, you may need to temporarily focus on
+        fighting minions to refill your shields rather than on fighting the
+        boss itself.
+      <li><strong>Don't give up.</strong>  Remember, if you can get to the boss
+        room, then you already have everything you need to defeat that boss.
+        That said, if you still keep dying, try exploring more before heading
+        to the boss--there may be optional upgrades you can find that will make
+        the fight a little bit easier.
+    </ul>
+  </section>
+  <section id="gun_upgrades">
+    <h2>Gun Upgrades</h2>
+    <p>
+      There are eight different gun upgrades you can acquire during the game.
+      You can use up to two of them together at once, combining their effects.
+      For example, using <span style="color:#999">CHARGE</span>
+      and <span style="color:#6ff">FREEZE</span> together allows you to charge
+      up a powerful shot that is extra effective at freezing enemies, while
+      using <span style="color:#66f">HOMING</span> and
+      <span style="color:#ff6">PHASE</span> together allows you to fire shots
+      that both seek out enemies and pass through walls.  Using the right
+      weapons in the right situations is key to survival!
+    </p>
+    <dl>
+      <dt>Charge Gun</dt>
+      <img class="upgrade" src="images/chargegun.png">
+      <dd>Allows you to charge up your gun to fire a more powerful shot.  With
+        the charge gun selected, hold down the fire key (C by default) for a
+        few seconds until the sound changes, then release.  Charged up shots
+        can damage some armored enemies that are immune to normal shots.  Some
+        breakable walls can be destroyed outright by a charged shot; those that
+        can't will flash a color when hit by a charged shot, hinting at what
+        weapon is needed.</dd>
+    </dl>
+    <dl>
+      <dt>Freeze Gun</dt>
+      <img class="upgrade" src="images/freezegun.png">
+      <dd>Allows you to freeze enemies in place in addition to damaging them.
+        Frozen enemies can't move or attack, and won't damage you if you run
+        into them.  Weaker enemies can be frozen with a single shot; stronger
+        enemies won't be frozen until most of their health has been depleted
+        first.</dd>
+    </dl>
+    <dl>
+      <dt>Triple Gun</dt>
+      <img class="upgrade" src="images/triplegun.png">
+      <dd>Fires a spray of three shots at once instead of just one, although
+        each shot is slightly weaker than normal.  Great for dealing with
+        swarms of weak enemies, or situations where aiming accurately is
+        difficult.</dd>
+    </dl>
+    <dl>
+      <dt>Homing Gun</dt>
+      <img class="upgrade" src="images/hominggun.png">
+      <dd>Fires shots that automatically seek out nearby enemies; however, each
+        shot is significantly weaker than normal.  Try combining this with
+        other guns to help offset this weakness.</dd>
+    </dl>
+    <dl>
+      <dt>Phase Gun</dt>
+      <img class="upgrade" src="images/phasegun.png">
+      <dd>Fires a short-ranged shockwave that passes freely through walls,
+        allowing you to hit switches and enemies that would otherwise be
+        unreachable.</dd>
+    </dl>
+    <dl>
+      <dt>Burst Gun</dt>
+      <img class="upgrade" src="images/burstgun.png">
+      <dd>Fires powerful shots that burst into shrapnel on impact, potentially
+        doing even more damage to nearby enemies.  This burst effect also gives
+        you an indirect way to shoot around corners.</dd>
+    </dl>
+    <dl>
+      <dt>Pierce Gun</dt>
+      <img class="upgrade" src="images/piercegun.png">
+      <dd>Fires shots that pierce straight through multiple enemies,
+        penetrating most armor and inflicting a great deal of damage.  However,
+        it requires a lot of energy to fire.</dd>
+    </dl>
+    <dl>
+      <dt>Beam Gun</dt>
+      <img class="upgrade" src="images/beamgun.png">
+      <dd>This devastating weapon fires a continuous energy beam, melting most
+        enemies in seconds.  Combine with other guns to vary the effect of the
+        beam.</dd>
+    </dl>
+  </section>
+  <section id="ordnance_upgrades">
+    <h2>Ordnance Upgrades</h2>
+    <p>
+      When energy weapons won't do the trick, try explosives!  You can use the
+      9 and 0 keys to switch between rockets and bombs.  Then press the
+      fire key (C by default) while holding down the ordnance key (X by
+      default) to use the selected ordnance.
+    </p>
+    <dl>
+      <dt>Rockets</dt>
+      <img class="upgrade" src="images/rockets.png">
+      <dd>Rockets are very fast and pack a punch, but their ammo is limited and
+        they can be hard to aim.  Each rocket upgrade increases your maximum
+        capacity by 5.</dd>
+    </dl>
+    <dl>
+      <dt>Bombs</dt>
+      <img class="upgrade" src="images/bombs.png">
+      <dd>Bombs can deal a lot of damage to a wide area.  Once you drop one
+        behind you, it will detonate after a few seconds, or when an enemy gets
+        close (for safety, the proximity detonator won't trigger if your ship
+        is still nearby).  Each bomb upgrade increases your maximum capacity by
+        3.</dd>
+    </dl>
+    <dl>
+      <dt>Hyper Rockets</dt>
+      <img class="upgrade" src="images/hyperrockets.png">
+      <dd>With this upgrade, you can charge multiple rocket warheads into a
+        single projectile with a more powerful explosive.  With rockets
+        selected, hold down the ordnance key (X by default) for a few
+        seconds, then press the fire key (C by default) to fire a
+        hyper rocket.  Each hyper rocket uses three rockets.</dd>
+    </dl>
+    <dl>
+      <dt>Mega Bombs</dt>
+      <img class="upgrade" src="images/megabombs.png">
+      <dd>With this upgrade, you can charge multiple bombs together to create a
+        single, titanic blast.  With bombs selected, hold down the ordnance key
+        (X by default) for a few seconds, then press the fire key (C by
+        default) to drop a mega bomb.  Be sure to move away immediately--the
+        blast radius is very wide and the explosion is very damaging!  Each
+        mega bomb uses three bombs.</dd>
+    </dl>
+    <dl>
+      <dt>High Explosives</dt>
+      <img class="upgrade" src="images/highexplosives.png">
+      <dd>Upgrades all of your ordnance--rockets, bombs, hyper rockets, and
+        mega bombs--to deal even more damage.</dd>
+    </dl>
+    <dl>
+      <dt>Attuned Explosives</dt>
+      <img class="upgrade" src="images/attunedexplosives.png">
+      <dd>Carefully shaped charges allow your ordnance to have a wider blast
+      radius, while simultaneously shielding your ship from the brunt of the
+      blast (should you be caught in the explosion by accident), reducing the
+      damage you take from your own explosives.</dd>
+    </dl>
+  </section>
+  <section id="shield_upgrades">
+    <h2>Shield Upgrades</h2>
+    <p>
+      Your gunship is a highly versatile design, but it wasn't really built for
+      heavy subterranean combat.  Fortunately there are a number of upgrades
+      you can find to help protect you from the various dangers you'll
+      encounter on Zenith.
+    </p>
+    <dl>
+      <dt>Shield Battery</dt>
+      <img class="upgrade" src="images/shieldbattery.png">
+      <dd>Your ship starts out with a maximum shield power of 100.  Each shield
+        battery you find increases that maximum by 25, allowing you to survive
+        that much more damage before needing to repair.</dd>
+    </dl>
+    <dl>
+      <dt>Hardened Armor</dt>
+      <img class="upgrade" src="images/hardenedarmor.png">
+      <dd>While the smooth surfaces found in the habitation section of the
+        colony don't pose a threat, bumping into rocky cave walls deeper within
+        Zenith can drain your shields quickly.  This upgrade greatly decreases
+        the damage you take from bumping into rough walls, and decreases all
+        other kinds of damage a little bit too.</dd>
+    </dl>
+    <dl>
+      <dt>Dynamic Armor</dt>
+      <img class="upgrade" src="images/dynamicarmor.png">
+      <dd>Even in its base configuration, your gunship can survive the
+        pressures of an underwater environment, but it won't be very
+        maneuverable.  This upgrade reshapes your hull to make it much more
+        hydrodynamic, as well as better protecting you from all forms of
+        damage.</dd>
+    </dl>
+    <dl>
+      <dt>Thermal Armor</dt>
+      <img class="upgrade" src="images/thermalarmor.png">
+      <dd>Extreme ambient temperatures pose a threat to your ship, and will
+        drain your shields continuously without this upgrade to protect you.
+        In addition to allowing you to safely explore high-temperature areas,
+        it also reduces all other forms of damage a little bit.</dd>
+    </dl>
+    <dl>
+      <dt>Reactive Armor</dt>
+      <img class="upgrade" src="images/reactivearmor.png">
+      <dd>The ultimate defensive upgrade: it not only reduces all damage you
+        take, but also redirects that damage back outwards.  With this upgrade,
+        enemies that collide with your ship will take damage themselves.</dd>
+    </dl>
+  </section>
+  <section id="energy_upgrades">
+    <h2>Energy Upgrades</h2>
+    <p>
+      Your primary guns require energy to fire.  Your ship will automatically
+      recharge its energy over time, but some of the later weapons you can get
+      will drain your energy even faster, so upgrading your energy systems will
+      allow your weapons to handle a heavier duty cycle.
+    </p>
+    <dl>
+      <dt>Capacitor</dt>
+      <img class="upgrade" src="images/capacitor.png">
+      <dd>Your ship starts out with a maximum energy capacity of 100.  Each
+        capacitor you find increases that maximum by 25, allowing you to fire
+        your guns a little longer before stopping to recharge.</dd>
+    </dl>
+    <dl>
+      <dt>Fusion Reactor</dt>
+      <img class="upgrade" src="images/fusionreactor.png">
+      <dd>As you collect more capacitors, you may find your ship's energy takes
+        quite a long time to recharge completely.  This upgrade will
+        significantly increase the rate at which your energy recharges.</dd>
+    </dl>
+    <dl>
+      <dt>Quantum Reactor</dt>
+      <img class="upgrade" src="images/quantumreactor.png">
+      <dd>This upgrade increases your energy recharge rate even more than the
+        Fusion Reactor.</dd>
+    </dl>
+  </section>
+  <section id="engine_upgrades">
+    <h2>Engine Upgrades</h2>
+    <p>
+      Although your ship's standard engines are well up to the task of
+      navigating deep space, there's still room for improvement when it comes
+      to terrestrial navigation.
+    </p>
+    <dl>
+      <dt>Retro Thrusters</dt>
+      <img class="upgrade" src="images/retrothrusters.png">
+      <dd>These forward-facing engines will allow your ship to reverse thrust
+        when you need to.  Once you get this upgrade, you can use the reverse
+        key (down arrow by default) to accelerate backwards.</dd>
+    </dl>
+    <dl>
+      <dt>C-Plus Drive</dt>
+      <img class="upgrade" src="images/cplusdrive.png">
+      <dd>This device lets you achieve super-luminal speeds without needing to
+        be in deep space.  Fly in a straight line for several seconds without
+        stopping to charge it up; you'll know it's ready when your smoke trail
+        turns green.  Once charged, double-tap the thrust key (up arrow by
+        default) to dash.  While dashing, the tachyon field around your ship
+        renders it impervious to all damage, and can destroy most enemies and
+        even some walls just by colliding with them.</dd>
+    </dl>
+    <dl>
+      <dt>Orion Booster</dt>
+      <img class="upgrade" src="images/orionbooster.png">
+      <dd>When you need to achieve high speeds in a space too cramped to charge
+        up your C-plus drive, you can use this upgrade.  Select bombs, hold the
+        ordnance key (X by default) for a few seconds to charge up, then
+        double-tap the reverse key (down arrow by default) to drop an orion
+        charge.  Your ship will ride the shockwave from the blast, quickly
+        accelerating you to a high speed.  Each use consumes two bombs.</dd>
+    </dl>
+  </section>
+  <section id="utility_upgrades">
+    <h2>Utility Upgrades</h2>
+    <p>
+      Exploring Zenith isn't just a matter of weapons and combat--you'll need
+      all manner of other tools as well.  Below are a few such upgrades you can
+      find that will help you during your mission.
+    </p>
+    <dl>
+      <dt>Tractor Beam</dt>
+      <img class="upgrade" src="images/tractorbeam.png">
+      <dd>Once you have this upgrade, hold down the utility key (Z by default)
+        to lock onto nearby flashing tractor nodes, allowing you swing freely
+        around them at a fixed distance.  This tool has a variety of uses, for
+        example allowing you to maintain your speed while turning corners, or
+        letting you hitch a ride from one of the automated transport rigs still
+        running throughout Zenith.</dd>
+    </dl>
+    <dl>
+      <dt>Tractor Cloak</dt>
+      <img class="upgrade" src="images/tractorcloak.png">
+      <dd>This experimental cloaking device allows you to hide from enemies or
+        motion sensors.  It must be charged up from a tractor node; lock on to
+        any tractor node for several seconds, and the cloak will automatically
+        activate.  Once you disconnect from the node, the cloak will last for
+        several more seconds, or until you fire your weapons.</dd>
+    </dl>
+    <dl>
+      <dt>Magnet Sweep</dt>
+      <img class="upgrade" src="images/magnetsweep.png">
+      <dd>Once equipped, this upgrade will automatically pull all nearby shield
+        and ammo pickups towards your ship.  Very helpful for restocking your
+        supplies quickly in a high-pressure situation, without taking away your
+        focus.</dd>
+    </dl>
+  </section>
+  <section id="sensor_upgrades">
+    <h2>Sensor Upgrades</h2>
+    <p>
+      As you search all over Zenith to find the surviving colonists, you will
+      need to upgrade your sensors to help find them.
+    </p>
+    <dl>
+      <dt>Infrascanner</dt>
+      <img class="upgrade" src="images/infrascanner.png">
+      <dd>Some areas on Zenith are extremely dark in the visible light
+        spectrum; this infrared sensor array gives you increased visibility in
+        those areas.</dd>
+    </dl>
+    <dl>
+      <dt>Milliwave Radar</dt>
+      <img class="upgrade" src="images/milliwaveradar.png">
+      <dd>Many of the upgrades and passages on Zenith are hidden behind
+        obstacles.  With this upgrade, you can hold down the utility key (Z by
+        default) for several seconds to start scanning for these hidden
+        locations.  If there is something to be found in the room you're in,
+        the arrow that appears will slowly move to point towards where you need
+        to search.</dd>
+    </dl>
+  </section>
+  <section id="license">
+    <h2>License</h2>
+    <p>
+      Azimuth is free software: you can redistribute it and/or modify it under
+      the terms of the GNU General Public License as published by the
+      <a href="http://www.fsf.org/">Free Software Foundation</a>, either
+      <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">version 3</a> of
+      the License, or (at your option) any later version.
+    </p>
+    <p>
+      Azimuth is distributed in the hope that it will be useful, but WITHOUT
+      ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+      FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+      more details.
+    </p>
+  </section>
+  <footer>
+    &copy;2012&ndash;2015 Matthew D. Steele
+  </footer>
+</body>
+</html>

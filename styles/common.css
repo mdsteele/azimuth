@@ -1,0 +1,86 @@
+@import url(https://fonts.googleapis.com/css?family=Inconsolata:400,700);
+
+body {
+  background: black url('../images/stars.png');
+  color: white;
+  font: 18px 'Inconsolata';
+  margin: 50px auto;
+  max-width: 640px;
+  padding: 5px;
+}
+
+header {
+  position: relative;
+  text-align: center;
+}
+
+h1 {
+  font-size: 72px;
+  margin: 0;
+  text-transform: uppercase;
+}
+h1 img {
+  max-width: 100%;
+}
+
+header > nav {
+  bottom: 25%;
+  position: absolute;
+  width: 100%;
+}
+header > nav > a {
+  background-image: linear-gradient(to bottom,
+    rgba(200, 200, 200, 0.8),
+    rgba( 50,  50,  50, 0.8));
+  color: white;
+  display: inline-block;
+  font-size: 21px;
+  margin: 5px 0;
+  padding: 5px;
+  text-decoration: none;
+  text-shadow: -1px -1.5px 0px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+  width: 120px;
+}
+header > nav > a.selected { background-color: green; }
+header > nav > a:hover { background-color: cyan; }
+header > nav > a:active { background-color: red; }
+
+p {
+  margin: 20px 0;
+}
+
+strong { color: #f9c; }
+
+section a { color: #6ff; }
+section a:visited { color: #f6f; }
+section a:active { color: #f99; }
+
+.floatleft, .floatright {
+  clear: both;
+  display: block;
+  height: 180px;
+  margin: 10px auto;
+  width: 240px;
+}
+@media (min-width: 500px) {
+  .floatleft {
+    float: left;
+    margin: 0 20px 18px 0;
+  }
+  .floatright {
+    float: right;
+    margin: 0 0 18px 20px;
+  }
+}
+
+footer {
+  clear: both;
+  color: #444;
+  text-align: center;
+}
+
+@media print {
+  body { color: black; }
+  header, .toc { display: none; }
+}
