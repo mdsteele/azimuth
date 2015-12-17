@@ -91,6 +91,10 @@ az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2) {
   return az_vsub(v1, az_vproj(v1, v2));
 }
 
+az_vector_t az_vreflect(az_vector_t v1, az_vector_t v2) {
+  return az_vsub(v1, az_vmul(az_vflatten(v1, v2), 2));
+}
+
 az_vector_t az_vrotate(az_vector_t v, double radians) {
   assert(vfinite(v));
   assert(isfinite(radians));

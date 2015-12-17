@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_vcaplen);
   RUN_TEST(test_vpolar);
   RUN_TEST(test_vproj);
+  RUN_TEST(test_vreflect);
   RUN_TEST(test_vrotate);
   RUN_TEST(test_vunit);
   RUN_TEST(test_vwithlen);

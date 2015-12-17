@@ -109,6 +109,15 @@ void test_vproj(void) {
   }
 }
 
+void test_vreflect(void) {
+  EXPECT_VAPPROX(((az_vector_t){5, -2}),
+                 az_vreflect((az_vector_t){5, 2}, (az_vector_t){1, 0}));
+  EXPECT_VAPPROX(((az_vector_t){-5, 2}),
+                 az_vreflect((az_vector_t){5, 2}, (az_vector_t){0, 1}));
+  EXPECT_VAPPROX(((az_vector_t){2, 5}),
+                 az_vreflect((az_vector_t){5, 2}, (az_vector_t){1, 1}));
+}
+
 void test_vrotate(void) {
   EXPECT_VAPPROX(AZ_VZERO, az_vrotate(AZ_VZERO, 47.3));
   EXPECT_VAPPROX(((az_vector_t){-1, 1}),

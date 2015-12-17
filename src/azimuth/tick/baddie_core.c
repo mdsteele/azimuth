@@ -63,6 +63,10 @@
 // Distance, in pixels that barriers are pumped:
 #define PRISMATIC_PUMP_DIST 60.0
 
+// Distance from baddie center that projectiles start; that is, the outer
+// radius of the inner octagon:
+#define FIRE_RADIUS 90.0
+
 /*===========================================================================*/
 
 static const struct {
@@ -281,7 +285,7 @@ static void init_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
       if (!mine_exists) {
         az_baddie_t *mine = az_add_baddie(
             state, AZ_BAD_PROXY_MINE,
-            az_vadd(az_vpolar(100, abs_angle), baddie->position),
+            az_vadd(az_vpolar(FIRE_RADIUS, abs_angle), baddie->position),
             az_random(-AZ_PI, AZ_PI));
         if (mine != NULL) {
           mine->velocity = az_vpolar(az_random(400, 900), abs_angle);
@@ -376,7 +380,8 @@ static void charge_rainbow_beam(
   const double particle_distance = 50.0;
   if (baddie->cooldown >= particle_lifetime) {
     const az_vector_t center =
-      az_vadd(baddie->position, az_vpolar(100, baddie->angle + angle_offset));
+      az_vadd(baddie->position,
+              az_vpolar(FIRE_RADIUS, baddie->angle + angle_offset));
     const double angle = 145.0 * baddie->cooldown;
     az_particle_t *particle;
     if (az_insert_particle(state, &particle)) {
@@ -409,7 +414,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   // Fire a beam, piercing through the ship and other baddies.
   const double beam_angle = baddie->angle + angle_offset;
   const az_vector_t beam_start =
-    az_vadd(baddie->position, az_vpolar(100, beam_angle));
+    az_vadd(baddie->position, az_vpolar(FIRE_RADIUS, beam_angle));
   az_impact_t impact;
   az_ray_impact(state, beam_start, az_vpolar(1000, beam_angle),
                 (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
@@ -504,7 +509,7 @@ static void do_pillbox_1(az_space_state_t *state, az_baddie_t *baddie,
       round((az_vtheta(az_vsub(state->ship.position, baddie->position)) -
              baddie->angle) / AZ_DEG2RAD(45));
     az_fire_baddie_projectile(state, baddie, AZ_PROJ_ROCKET,
-                              100.0, angle, 0.0);
+                              FIRE_RADIUS, angle, 0.0);
     az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
     if (!try_transition(state, baddie)) {
       const int remaining = get_tertiary_state(baddie) - 1;
@@ -539,7 +544,7 @@ static void do_pillbox_2(az_space_state_t *state, az_baddie_t *baddie,
                baddie->angle) / AZ_DEG2RAD(45));
       for (int i = -1; i <= 1; ++i) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_ROCKET,
-                                  100.0, angle, i * AZ_DEG2RAD(10));
+                                  FIRE_RADIUS, angle, i * AZ_DEG2RAD(10));
       }
       az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
       set_secondary_state(baddie, 0);

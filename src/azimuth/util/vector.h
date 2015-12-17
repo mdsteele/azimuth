@@ -73,6 +73,8 @@ double az_vcross(az_vector_t v1, az_vector_t v2);
 az_vector_t az_vproj(az_vector_t v1, az_vector_t v2);
 // Flatten the first vector with respect to the second.
 az_vector_t az_vflatten(az_vector_t v1, az_vector_t v2);
+// Reflect the first vector across the axis of the second.
+az_vector_t az_vreflect(az_vector_t v1, az_vector_t v2);
 
 // Rotate a vector counterclockwise by the given angle.
 az_vector_t az_vrotate(az_vector_t v, double radians);

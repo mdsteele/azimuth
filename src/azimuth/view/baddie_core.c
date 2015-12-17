@@ -41,10 +41,51 @@ static az_vector_t weighted_avg(az_vector_t p1, az_vector_t p2, double w2) {
 
 /*===========================================================================*/
 
+static void draw_piston(az_vector_t start, az_vector_t end) {
+  const double segment_semilength = 15;
+  const int num_segments = 5;
+  glPushMatrix(); {
+    az_gl_translated(start);
+    az_gl_rotated(az_vtheta(az_vsub(end, start)));
+    const double full_length = az_vdist(end, start);
+    const double inner_length = full_length - 2 * segment_semilength;
+    const double step = inner_length / (num_segments - 1);
+    for (int i = 0; i < num_segments; ++i) {
+      const double cx = full_length - segment_semilength - i * step;
+      const double lx = cx - segment_semilength;
+      const double rx = cx + segment_semilength + 2 * i;
+      const double segment_radius = 3 + i;
+      glBegin(GL_TRIANGLE_STRIP); {
+        glColor3f(0.1, 0.1, 0.1);
+        glVertex2d(lx,  segment_radius); glVertex2d(rx,  segment_radius);
+        glColor3f(0.2, 0.2, 0.2);
+        glVertex2d(lx,               0); glVertex2d(rx,               0);
+        glColor3f(0.1, 0.1, 0.1);
+        glVertex2d(lx, -segment_radius); glVertex2d(rx, -segment_radius);
+      } glEnd();
+    }
+  } glPopMatrix();
+}
+
+/*===========================================================================*/
+
 void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   const float flare = baddie->armor_flare;
   const float hurt = 1.0 - baddie->health / baddie->data->max_health;
+
+  // Pistons:
+  for (int i = 0; i < 8; ++i) {
+    const az_component_t *component = &baddie->components[i];
+    const az_vector_t end1 = {80, 10};
+    const az_vector_t end2 = az_vreflect(end1, az_vpolar(1, AZ_DEG2RAD(22.5)));
+    draw_piston(az_vpolar(20, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(11.25)),
+                az_vadd(az_vrotate(end1, component->angle),
+                        component->position));
+    draw_piston(az_vpolar(20, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(33.75)),
+                az_vadd(az_vrotate(end2, component->angle),
+                        component->position));
+  }
 
   // Main body:
   glColor3f(1, hurt, 1 - 0.75 * flare);
