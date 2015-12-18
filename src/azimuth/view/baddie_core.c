@@ -41,6 +41,57 @@ static az_vector_t weighted_avg(az_vector_t p1, az_vector_t p2, double w2) {
 
 /*===========================================================================*/
 
+static void draw_gear(const az_baddie_t *baddie, az_vector_t position,
+                      double radius, int num_spokes, double spin_factor) {
+  const az_color_t outer = color3(0.15f, 0.1f, 0.15f);
+  const az_color_t inner = color3(0.25f, 0.2f, 0.25f);
+  const double inner_radius = radius - 10;
+  glPushMatrix(); {
+    az_gl_rotated(-baddie->angle);
+    az_gl_translated(position);
+    az_gl_rotated(baddie->angle * spin_factor);
+    // Spokes:
+    glPushMatrix(); {
+      for (int i = 0; i < num_spokes; ++i) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          az_gl_color(outer); glVertex2f(5,  5); glVertex2f(inner_radius,  5);
+          az_gl_color(inner); glVertex2f(5, -5); glVertex2f(inner_radius, -5);
+        } glEnd();
+        az_gl_rotated(AZ_TWO_PI / num_spokes);
+      }
+    } glPopMatrix();
+    // Hub:
+    glBegin(GL_TRIANGLE_FAN); {
+      az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
+      for (int i = 0; i <= 360; i += 30) {
+        glVertex2d(9 * cos(AZ_DEG2RAD(i)), 9 * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+    // Teeth:
+    glPushMatrix(); {
+      const int num_teeth = round(radius * AZ_TWO_PI / 20);
+      az_gl_color(outer);
+      for (int i = 0; i < num_teeth; ++i) {
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(inner_radius,  5); glVertex2f(radius + 3,  5);
+          glVertex2f(inner_radius, -5); glVertex2f(radius + 3, -5);
+        } glEnd();
+        az_gl_rotated(AZ_TWO_PI / num_teeth);
+      }
+    } glPopMatrix();
+    // Rim:
+    glBegin(GL_TRIANGLE_STRIP); {
+      for (int i = 0; i <= 360; i += 20) {
+        az_gl_color(outer);
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        az_gl_color(inner);
+        glVertex2d(inner_radius * cos(AZ_DEG2RAD(i)),
+                   inner_radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_piston(az_vector_t start, az_vector_t end) {
   const double segment_semilength = 15;
   const int num_segments = 5;
@@ -54,7 +105,7 @@ static void draw_piston(az_vector_t start, az_vector_t end) {
       const double cx = full_length - segment_semilength - i * step;
       const double lx = cx - segment_semilength;
       const double rx = cx + segment_semilength + 2 * i;
-      const double segment_radius = 3 + i;
+      const double segment_radius = 2 + i;
       glBegin(GL_TRIANGLE_STRIP); {
         glColor3f(0.1, 0.1, 0.1);
         glVertex2d(lx,  segment_radius); glVertex2d(rx,  segment_radius);
@@ -78,6 +129,11 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   const float flare = baddie->armor_flare;
   const float hurt = 1.0 - baddie->health / baddie->data->max_health;
+
+  // Gears:
+  draw_gear(baddie, az_vpolar(30, AZ_DEG2RAD(-30)), 50, 5, 1.6);
+  draw_gear(baddie, az_vpolar(40, AZ_DEG2RAD(120)), 25, 4, 4.0);
+  draw_gear(baddie, az_vpolar(30, AZ_DEG2RAD(-160)), 35, 4, -2.5);
 
   // Pistons:
   for (int i = 0; i < 8; ++i) {
