@@ -138,6 +138,15 @@ az_vector_t az_vcaplen(az_vector_t v, double max_length) {
   return (length <= max_length ? v : az_vmul(v, max_length / length));
 }
 
+az_vector_t az_vaddlen(az_vector_t v, double length) {
+  assert(vfinite(v));
+  assert(isfinite(length));
+  const double norm = az_vnorm(v);
+  assert(norm >= 0.0);
+  if (norm > 0.0) return az_vmul(v, (length + norm) / norm);
+  else return (az_vector_t){length, 0.0};
+}
+
 double az_vtheta(az_vector_t v) {
   assert(vfinite(v));
   return atan2(v.y, v.x);

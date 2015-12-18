@@ -167,4 +167,18 @@ void test_vcaplen(void) {
   }
 }
 
+void test_vaddlen(void) {
+  EXPECT_APPROX(3.0, az_vnorm(az_vaddlen(AZ_VZERO, 3.0)));
+  EXPECT_APPROX(0.0, az_vtheta(az_vaddlen(AZ_VZERO, 3.0)));
+  EXPECT_APPROX(4.0, az_vnorm(az_vaddlen(AZ_VZERO, -4.0)));
+  EXPECT_APPROX(AZ_PI, az_vtheta(az_vaddlen(AZ_VZERO, -4.0)));
+  for (int i = 0; i < 1000; ++i) {
+    const az_vector_t v1 = {az_random(-1.5, 1.5), az_random(-1.5, 1.5)};
+    const double length = az_random(0.0, 1.3);
+    const az_vector_t v2 = az_vaddlen(v1, length);
+    ASSERT_APPROX((length + az_vnorm(v1)), az_vnorm(v2));
+    ASSERT_APPROX(az_vtheta(v1), az_vtheta(v2));
+  }
+}
+
 /*===========================================================================*/

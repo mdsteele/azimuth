@@ -94,6 +94,9 @@ az_vector_t az_vwithlen(az_vector_t v, double length);
 // Return a vector with the same direction as the given input vector, but with
 // length equal to the min of `max_length` and the input vector's length.
 az_vector_t az_vcaplen(az_vector_t v, double max_length);
+// Return a vector with the same direction as the given input vector, but with
+// length equal to the sum of `length` and the input vector's length.
+az_vector_t az_vaddlen(az_vector_t v, double length);
 
 // Get the polar theta angle of the vector.  Returns zero for the zero vector.
 double az_vtheta(az_vector_t v);

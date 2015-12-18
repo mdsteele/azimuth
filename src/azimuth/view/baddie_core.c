@@ -67,6 +67,11 @@ static void draw_piston(az_vector_t start, az_vector_t end) {
   } glPopMatrix();
 }
 
+static void draw_cracks(double sx, double sy, double angle, double length) {
+  az_random_seed_t seed = {1 + 4987298743 * sx, 1 + 373984471 * sy};
+  az_draw_cracks(&seed, (az_vector_t){sx, sy}, angle, length);
+}
+
 /*===========================================================================*/
 
 void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
@@ -77,22 +82,69 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
   // Pistons:
   for (int i = 0; i < 8; ++i) {
     const az_component_t *component = &baddie->components[i];
-    const az_vector_t end1 = {80, 10};
+    const az_vector_t end1 = {80, 15};
     const az_vector_t end2 = az_vreflect(end1, az_vpolar(1, AZ_DEG2RAD(22.5)));
-    draw_piston(az_vpolar(20, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(11.25)),
+    draw_piston(az_vpolar(15, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(11.25)),
                 az_vadd(az_vrotate(end1, component->angle),
                         component->position));
-    draw_piston(az_vpolar(20, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(33.75)),
+    draw_piston(az_vpolar(15, i * AZ_DEG2RAD(45) + AZ_DEG2RAD(33.75)),
                 az_vadd(az_vrotate(end2, component->angle),
                         component->position));
   }
 
-  // Main body:
-  glColor3f(1, hurt, 1 - 0.75 * flare);
-  glBegin(GL_TRIANGLE_FAN); {
+  const az_color_t outer = color3(0.15f + 0.25f * flare, 0.25f, 0.20f);
+  const az_color_t inner = color3(0.40f + 0.40f * flare, 0.45f, 0.45f);
+
+  // Diagonal struts:
+  glBegin(GL_TRIANGLE_STRIP); {
+    for (int i = 0; i <= 360; i += 90) {
+      az_gl_color(outer);
+      glVertex2d(81 * cos(AZ_DEG2RAD(i)), 81 * sin(AZ_DEG2RAD(i)));
+      az_gl_color(inner);
+      glVertex2d(89 * cos(AZ_DEG2RAD(i)), 89 * sin(AZ_DEG2RAD(i)));
+    }
+  } glEnd();
+
+  // Main spokes:
+  for (int i = 0; i < 360; i += 90) {
+    glPushMatrix(); {
+      az_gl_rotated(AZ_DEG2RAD(i));
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(outer); glVertex2f(10,  10); glVertex2f(80,  10);
+        az_gl_color(inner); glVertex2f(10, -10); glVertex2f(80, -10);
+      } glEnd();
+    } glPopMatrix();
+  }
+  draw_cracks(30, 10, AZ_DEG2RAD(-90), 4 * hurt);
+  draw_cracks(50, -10, AZ_DEG2RAD(90), 6 * hurt);
+  draw_cracks(-10, 60, AZ_DEG2RAD(0), 5 * hurt);
+  draw_cracks(10, 40, AZ_DEG2RAD(180), 5 * hurt);
+  draw_cracks(-10, 22, AZ_DEG2RAD(0), 2 * hurt);
+  draw_cracks(-30, 10, AZ_DEG2RAD(-90), 3 * hurt);
+  draw_cracks(-55, -10, AZ_DEG2RAD(90), 4 * hurt);
+  draw_cracks(-20, -10, AZ_DEG2RAD(90), 2 * hurt);
+  draw_cracks(-10, -25, AZ_DEG2RAD(0), 5 * hurt);
+  draw_cracks(10, -42, AZ_DEG2RAD(180), 4 * hurt);
+  draw_cracks(-10, -61, AZ_DEG2RAD(0), 2 * hurt);
+
+  // Outer rim:
+  glBegin(GL_TRIANGLE_STRIP); {
+    const double thickness = 10;
     const az_polygon_t polygon = baddie->data->main_body.polygon;
-    for (int i = 0; i < polygon.num_vertices; ++i) {
+    for (int i = polygon.num_vertices - 1, j = 0;
+         i < polygon.num_vertices; i = j++) {
+      az_gl_color(outer);
       az_gl_vertex(polygon.vertices[i]);
+      az_gl_color(inner);
+      az_gl_vertex(az_vaddlen(polygon.vertices[i], -thickness));
+    }
+  } glEnd();
+
+  // Central hub:
+  glBegin(GL_TRIANGLE_FAN); {
+    az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
+    for (int i = 0; i <= 360; i += 45) {
+      glVertex2d(16 * cos(AZ_DEG2RAD(i)), 16 * sin(AZ_DEG2RAD(i)));
     }
   } glEnd();
 
