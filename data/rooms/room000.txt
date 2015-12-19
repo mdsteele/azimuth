@@ -1,6 +1,6 @@
-@R z7 p8/23 k20 b9 d2 g3 n132 w99
+@R z7 p8/23 k20 b10 d2 g3 n132 w96
   c(240.00,0.00,4.712389,6.283185)
-$s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,halt,A#mus12;
+$s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix19,nix20,nix21,push4,sstat30,halt,A#mus12;
 !W1 d33 x295.69 y504.26 a2.356194 u0
 !W1 d33 x498.42 y301.53 a2.356194 u0
 !W1 d79 x227.59 y-545.94 a-1.161005 u0
@@ -89,10 +89,6 @@ $s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix1
 !W1 d139 x-510.25 y-132.73 a1.570796 u0
 !W1 d139 x-378.51 y-342.43 a2.356194 u0
 !W1 d139 x-309.74 y-411.21 a2.356194 u0
-!W1 d102 x28.00 y28.00 a3.141593 u0
-!W1 d102 x-28.00 y28.00 a-1.570796 u0
-!W1 d102 x-28.00 y-28.00 a0.000000 u0
-!W1 d102 x28.00 y-28.00 a1.570796 u0
 !W1 d139 x-391.80 y329.79 a0.785398 u0
 !W1 d33 x-284.09 y359.37 a0.785398 u10
 !W1 d139 x-321.15 y400.44 a0.785398 u11
@@ -100,28 +96,29 @@ $s:test23,beqz/A,nix1,nix10,nix11,nix12,nix13,nix14,nix15,nix16,nix17,nix18,nix1
 !W1 d32 x458.47 y341.48 a2.356194 u0
 !W1 d34 x254.94 y545.01 a-0.785399 u0
 !W1 d34 x544.03 y255.92 a0.785399 u0
+!W1 d167 x0.00 y0.00 a0.392699 u0
 !D2 x326.10 y318.55 a-2.356194 r64 u0
 !D7 x-326.98 y410.84 a-0.898563 r60 u0
 !G2 x0.00 y0.00 a0.000000 s0.00 w0.00 i90.00 t385.00 u3
 !G3 x0.00 y0.00 a0.000000 s0.00 w0.00 i45.00 t430.00 u2
 !G1 x-212.28 y-212.28 a0.785399 s0.00 o0.00 f0.00 r600.00 l300.00 u0
-$e:wait1,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,mus0,tb209,dend,activ1,mus9,musf1,wait1,activ12,activ13,activ14,activ15,activ16,activ17,activ18,activ19,A#wait0.1,gstat1,gti2,beqz/A,boss1,musf0;
+$e:test23,hnez,wait1,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144,tt145,tb146,tb147,tt148,tb149,tt150,tb151,mus0,tb209,dend,activ1,mus9,musf1,wait1,activ12,activ13,activ14,activ15,activ16,activ17,activ18,activ19,A#wait0.1,gstat1,gti2,beqz/A,boss1,musf0;
 !N5/4 x-35.30 y-312.23 a-0.001774 u0
-!N5/1 x-0.15 y-86.68 a1.569022 u0
+!N5/1 x-0.15 y-85.71 a1.569022 u0
 !N5/5 x-21.25 y-127.11 a3.139819 u0
 !N5/2 x-34.81 y-135.20 a-1.572570 u0
 !N5/2 x-8.34 y-119.11 a1.569022 u0
 !N5/1 x-152.16 y27.48 a-0.783610 u0
-!N5/1 x-86.11 y-0.15 a0.001788 u0
+!N5/1 x-85.62 y-0.15 a0.001788 u0
 !N5/4 x-121.12 y7.78 a0.787186 u0
 !N5/1 x196.27 y28.05 a-2.354547 u0
 !N5/4 x165.16 y8.15 a1.572444 u0
 !N5/1 x129.19 y0.09 a0.001647 u0
-!N5/1 x86.67 y0.02 a-3.139945 u0
+!N5/1 x85.70 y0.02 a-3.139945 u0
 !N5/5 x-70.55 y428.34 a1.569154 u0
 !N5/5 x-55.53 y286.13 a2.354552 u0
 !N5/4 x-20.75 y134.66 a0.783756 u0
-!N5/1 x0.14 y86.79 a-1.572438 u0
+!N5/1 x0.14 y85.54 a-1.572438 u0
 !N5/2 x-7.76 y118.76 a3.139951 u0
 !N8/1 x-137.15 y135.41 a0.791743 u4
 !N2 x47.20 y47.20 a0.785398 u21
@@ -147,10 +144,10 @@ $e:wait1,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144
 !N7/147 x612.82 y227.21 a-3.104092 u0
 !N7/147 x217.11 y612.94 a-1.533295 u0
 !N8/0 x-371.43 y460.13 a0.679131 u5
-!N5/1 x57.54 y-57.82 a2.353747 u0
-!N5/1 x57.67 y57.78 a-2.356194 u0
-!N5/1 x-57.66 y-57.77 a0.786323 u0
-!N5/1 x-57.65 y57.94 a-0.787866 u0
+!N5/1 x60.54 y-60.84 a2.353747 u0
+!N5/1 x60.68 y60.79 a-2.356194 u0
+!N5/1 x-60.47 y-60.59 a0.786323 u0
+!N5/1 x-60.56 y60.86 a-0.787866 u0
 !N5/1 x92.79 y92.91 a0.786351 u0
 !N5/1 x132.38 y132.57 a-2.355528 u0
 !N5/2 x169.35 y180.90 a2.356932 u0
@@ -238,6 +235,7 @@ $e:wait1,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144
 !N5/5 x75.63 y-434.76 a2.354420 u0
 !N5/5 x123.53 y-482.82 a2.354420 u0
 !N5/1 x188.52 y-548.04 a-0.787172 u0
+!B113 x0.00 y0.00 a0.392699 u30
 !B93 x-179.51 y429.70 a-1.186727 u12
 !B93 x179.62 y429.73 a-1.970706 u13
 !B93 x-430.32 y179.01 a-0.411864 u19
@@ -247,4 +245,4 @@ $e:wait1,dlog,pt1,pb6,tb137,tt138,tb139,tt140,mus0,tb141,tt142,mus18,tb143,tb144
 !B93 x429.85 y-179.16 a2.745991 u15
 !B93 x429.91 y179.27 a-2.769202 u14
 !B13 x0.00 y0.01 a0.000000 u1:20:21
-$k:set23,autop1,gpos4,spos,gvel,vmuli0.01,svel,push500,sheal,push0,sstr2,push0,sstr3,mus0,wait0.5,dlog,pt1,pb6,tb152,pt4,tt153,tb154,tt155,pb3,tb156,pt5,tt157,pt0,pb4,snd6,wait0.15,pb3,snd6,wait0.15,pb5,snd6,wait0.15,push6,A#pb4,snd6,wait0.05,pb3,snd6,wait0.05,pb5,snd6,wait0.05,subi1,dup,bnez/A,pop,pb7,snd9,flash,wait2,tb158,pt1,tt159,tb160,mus21,tb161,pt6,tt162,tb163,pt1,tt164,tb165,tb166,mus0,tt167,tb168,dend,autop0,gpos5,boom,kill10,kill11,mus13,doom360,nuke;
+$k:set23,autop1,gpos4,spos,gvel,vmuli0.01,svel,push500,sheal,push0,sstr2,push0,sstr3,mus0,wait0.5,dlog,pt1,pb6,tb152,pt4,tt153,tb154,push1,sstat30,tt155,pb3,push2,sstat30,tb156,pt5,push3,sstat30,tt157,pt0,pb4,snd6,wait0.15,pb3,snd6,wait0.15,pb5,snd6,wait0.15,push6,A#pb4,snd6,wait0.05,pb3,snd6,wait0.05,pb5,snd6,wait0.05,subi1,dup,bnez/A,pop,pb7,snd9,push4,sstat30,flash,wait2,tb158,pt1,tt159,tb160,mus21,tb161,pt6,tt162,tb163,pt1,tt164,tb165,tb166,mus0,tt167,tb168,dend,autop0,gpos5,boom,kill10,kill11,mus13,doom360,nuke;

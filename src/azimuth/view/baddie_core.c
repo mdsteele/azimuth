@@ -234,3 +234,45 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
 }
 
 /*===========================================================================*/
+
+static void draw_band(double radius, az_color_t color, bool lit) {
+  if (lit) {
+    az_color_t inner = color, outer = color;
+    inner.a = 96;
+    outer.a = 0;
+    for (int thick = -3; thick <= 3; thick += 6) {
+      glBegin(GL_TRIANGLE_STRIP); {
+        for (int i = 0; i <= 360; i += 45) {
+          az_gl_color(inner);
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+          az_gl_color(outer);
+          glVertex2d((radius + thick) * cos(AZ_DEG2RAD(i)),
+                     (radius + thick) * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+    }
+  } else {
+    glBegin(GL_LINE_LOOP); {
+      glColor4f(0, 0, 0, 0.15);
+      for (int i = 0; i < 360; i += 45) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+      }
+    } glEnd();
+  }
+}
+
+void az_draw_bad_central_network_node(const az_baddie_t *baddie,
+                                      az_clock_t clock) {
+  az_color_t color1 = {0, 255, 0, 255};
+  az_color_t color2 = {255, 0, 255, 255};
+  az_color_t color3 = {0, 0, 255, 255};
+  if (baddie->state == 4) {
+    color1 = color2 = color3 = (az_color_t){224, 255, 255, 255};
+  }
+  const int tick = az_clock_mod(3, 30, clock);
+  draw_band(50, color1, (baddie->state == 4 ? tick == 2 : baddie->state >= 1));
+  draw_band(40, color2, (baddie->state == 4 ? tick == 1 : baddie->state >= 2));
+  draw_band(30, color3, (baddie->state == 4 ? tick == 0 : baddie->state >= 3));
+}
+
+/*===========================================================================*/

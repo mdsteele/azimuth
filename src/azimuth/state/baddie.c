@@ -1976,6 +1976,11 @@ static az_baddie_data_t baddie_datas[] = {
     .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
     .main_body = { .polygon = AZ_INIT_POLYGON(oth_gunship_vertices),
                    .impact_damage = 15.0 }
+  },
+  [AZ_BAD_CENTRAL_NETWORK_NODE] = {
+    .max_health = 1000000.0,
+    .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
+    .main_body = { .bounding_radius = 20.0, .immunities = ~0 }
   }
 };
 

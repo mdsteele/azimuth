@@ -28,6 +28,9 @@
 
 void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock);
 
+void az_draw_bad_central_network_node(const az_baddie_t *baddie,
+                                      az_clock_t clock);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_BADDIE_CORE_H_

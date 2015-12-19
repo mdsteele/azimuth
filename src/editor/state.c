@@ -114,7 +114,9 @@ static const int wall_data_indices[] = {
   149, 150, 151,
   // Silver bezel pipes and connectors:
   148, 79, 147, // pipes
-  142, 143, 144, 145, 146 // connectors
+  142, 143, 144, 145, 146, // connectors
+  // Central network node:
+  167
 };
 static int reverse_wall_data_indices[AZ_ARRAY_SIZE(wall_data_indices)];
 
@@ -248,6 +250,7 @@ static az_baddie_kind_t baddie_kinds[] = {
   AZ_BAD_OTH_DECOY,
   AZ_BAD_ZENITH_CORE,
   AZ_BAD_POP_OPEN_TURRET,
+  AZ_BAD_CENTRAL_NETWORK_NODE,
 };
 static int reverse_baddie_kinds[AZ_ARRAY_SIZE(baddie_kinds)];
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(baddie_kinds) == AZ_NUM_BADDIE_KINDS);
