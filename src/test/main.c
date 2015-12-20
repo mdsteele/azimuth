@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_polygon_contains_circle);
   RUN_TEST(test_position_visible);
   RUN_TEST(test_prefs_defaults);
+  RUN_TEST(test_prefs_missing_values);
   RUN_TEST(test_prefs_save_load);
   RUN_TEST(test_randint);
   RUN_TEST(test_random);

@@ -58,39 +58,89 @@ bool az_load_prefs_from_path(const char *filepath,
   return ok;
 }
 
+static bool read_bool(FILE *file, bool *out) {
+  int value;
+  if (fscanf(file, "=%d ", &value) < 1) return false;
+  *out = (bool)value;
+  return true;
+}
+
+static bool read_key(FILE *file, az_key_id_t *out) {
+  int value;
+  if (fscanf(file, "=%d ", &value) < 1) return false;
+  if (value <= 0 || value > (int)AZ_LAST_KEY_ID) return false;
+  const az_key_id_t key = (az_key_id_t)value;
+  if (!az_is_valid_prefs_key(key)) return false;
+  *out = key;
+  return true;
+}
+
+static bool read_volume(FILE *file, float *out) {
+  double value;
+  if (fscanf(file, "=%lf ", &value) < 1) return false;
+  *out = fmin(fmax(0.0, value), 1.0);
+  return true;
+}
+
 bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
   assert(file != NULL);
   assert(prefs_out != NULL);
-  az_reset_prefs_to_defaults(prefs_out);
+
+  az_preferences_t prefs;
+  az_reset_prefs_to_defaults(&prefs);
 
   // Parse the file.
-  double music_volume, sound_volume;
-  int speedrun_timer, fullscreen, keys[AZ_PREFS_NUM_KEYS];
-  if (fscanf(file, "@F mv=%lf sv=%lf st=%d fs=%d\n"
-             "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
-             &music_volume, &sound_volume, &speedrun_timer, &fullscreen,
-             &keys[AZ_PREFS_UP_KEY_INDEX], &keys[AZ_PREFS_DOWN_KEY_INDEX],
-             &keys[AZ_PREFS_RIGHT_KEY_INDEX], &keys[AZ_PREFS_LEFT_KEY_INDEX],
-             &keys[AZ_PREFS_FIRE_KEY_INDEX], &keys[AZ_PREFS_ORDN_KEY_INDEX],
-             &keys[AZ_PREFS_UTIL_KEY_INDEX],
-             &keys[AZ_PREFS_PAUSE_KEY_INDEX]) < 12) return false;
-
-  // Require all keys to be valid and different.
-  for (int i = 0; i < AZ_ARRAY_SIZE(keys); ++i) {
-    if (keys[i] <= 0 || keys[i] > (int)AZ_LAST_KEY_ID) return false;
-    if (!az_is_valid_prefs_key((az_key_id_t)keys[i])) return false;
-    for (int j = 0; j < i; ++j) {
-      if (keys[i] == keys[j]) return false;
+  if (fscanf(file, "@F ") < 0) return false;
+  while (!feof(file)) {
+    char name[3] = {0};
+    name[0] = fgetc(file);
+    name[1] = fgetc(file);
+    if (strcmp(name, "mv") == 0) {
+      if (!read_volume(file, &prefs.music_volume)) return false;
+    }
+    if (strcmp(name, "sv") == 0) {
+      if (!read_volume(file, &prefs.sound_volume)) return false;
+    }
+    if (strcmp(name, "st") == 0) {
+      if (!read_bool(file, &prefs.speedrun_timer)) return false;
+    }
+    if (strcmp(name, "fs") == 0) {
+      if (!read_bool(file, &prefs.fullscreen_on_startup)) return false;
+    }
+    if (strcmp(name, "uk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_UP_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "dk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_DOWN_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "rk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_RIGHT_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "lk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_LEFT_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "fk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_FIRE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "ok") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_ORDN_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "tk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_UTIL_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "pk") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_PAUSE_KEY_INDEX])) return false;
     }
   }
 
-  prefs_out->music_volume = (float)fmin(fmax(0.0, music_volume), 1.0);
-  prefs_out->sound_volume = (float)fmin(fmax(0.0, sound_volume), 1.0);
-  prefs_out->speedrun_timer = (speedrun_timer != 0);
-  prefs_out->fullscreen_on_startup = (fullscreen != 0);
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    prefs_out->keys[i] = (az_key_id_t)keys[i];
+  // Require all keys to be different.
+  for (int i = 0; i < AZ_ARRAY_SIZE(prefs.keys); ++i) {
+    for (int j = 0; j < i; ++j) {
+      if (prefs.keys[i] == prefs.keys[j]) return false;
+    }
   }
+
+  *prefs_out = prefs;
   return true;
 }
 

@@ -29,6 +29,7 @@ void test_prefs_defaults(void) {
   az_preferences_t prefs = { .music_volume = 0.5f };
   az_reset_prefs_to_defaults(&prefs);
   for (int i = 1; i < AZ_ARRAY_SIZE(prefs.keys); ++i) {
+    EXPECT_TRUE(az_is_valid_prefs_key(prefs.keys[i]));
     for (int j = 0; j < i; ++j) {
       EXPECT_FALSE(prefs.keys[i] == prefs.keys[j]);
     }
@@ -67,6 +68,29 @@ void test_prefs_save_load(void) {
   EXPECT_TRUE(actual_prefs.speedrun_timer == expected_prefs.speedrun_timer);
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
     EXPECT_INT_EQ(expected_prefs.keys[i], actual_prefs.keys[i]);
+  }
+}
+
+void test_prefs_missing_values(void) {
+  az_preferences_t default_prefs;
+  az_reset_prefs_to_defaults(&default_prefs);
+  az_preferences_t actual_prefs;
+  {
+    FILE *file = tmpfile();
+    ASSERT_TRUE(file != NULL);
+    EXPECT_TRUE(fputs("@F st=1   sv=-1 \n mv=1.5", file) >= 0);
+    rewind(file);
+    EXPECT_TRUE(az_load_prefs_from_file(file, &actual_prefs));
+    fclose(file);
+  }
+  RETURN_IF_FAILED();
+  EXPECT_APPROX(0, actual_prefs.sound_volume);
+  EXPECT_APPROX(1, actual_prefs.music_volume);
+  EXPECT_TRUE(actual_prefs.speedrun_timer);
+  EXPECT_TRUE(actual_prefs.fullscreen_on_startup ==
+              default_prefs.fullscreen_on_startup);
+  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+    EXPECT_INT_EQ(default_prefs.keys[i], actual_prefs.keys[i]);
   }
 }
 
