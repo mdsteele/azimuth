@@ -1,4 +1,4 @@
-Next flag: 147
+Next flag: 148
 
 Bosses
 ======
@@ -167,3 +167,4 @@ Misc
 144: Opened one-way gate in Cnidam room 397
 145: Opened one-way gate in Sarvari room 460
 146: Opened one-way gate in Voquan room 391
+147: Visited room 14 (used for hint system)

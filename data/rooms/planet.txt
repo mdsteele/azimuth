@@ -1,4 +1,4 @@
-@P z8 r479 t255 s6
+@P z8 h39 r479 t255 s6
 $s:mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,scene0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -8,6 +8,45 @@ $s:mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,sce
 !Z"Barrag" c(64,96,224)
 !Z"Sarvari" c(224,0,0)
 !Z"Core" c(128,128,128)
+!H|& f23 = f255 r6
+!H|& f49 = f50 r323
+!H|& f69 = u12 r401
+!H|& f69 = u21 r136
+!H|| = u0 r13
+!H|& u0 = f147 r14
+!H|& f147 = f1 r20
+!H|& f1 = u27 r23
+!H& f27 | u1 = u15 r39
+!H|& u1 = u56 r65
+!H& u56 | u58 = u8 r32
+!H|& f27 = u13 r42
+!H& u8 & u13 = f69 r303
+!H|& u27 = f26 r28
+!H|& f26 = f27 r138
+!H|& u21 = u24 r252
+!H& u21 & u24 = u16 r135
+!H|& u16 = f77 r295
+!H& f77 & u3 = u44 r299
+!H& f77 & u3 = u63 r299
+!H|& f77 = u22 r181
+!H|& u22 = f30 r274
+!H|& f30 = u4 r402
+!H|& u4 = u10 r477
+!H|& u4 = f49 r265
+!H|& f50 = u9 r238
+!H|& f50 = u23 r453
+!H|& u9 = f112 r345
+!H|& f112 = u17 r202
+!H|& f112 = u14 r236
+!H& u14 & u17 = f113 r414
+!H& u6 | u7 = u20 r459
+!H|& f113 = u5 r455
+!H|& f113 = u25 r464
+!H|& u5 = f99 r423
+!H|& f99 = u7 r424
+!H& u5 & u7 = f114 r148
+!H|& f114 = f104 r54
+!H|& f104 = f23 r0
 !T0"
   Save Station"
 !T1"

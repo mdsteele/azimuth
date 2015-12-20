@@ -33,14 +33,15 @@
 
 /*===========================================================================*/
 
-// Arbitrary limit to enforce sanity:
+// Arbitrary limits to enforce sanity:
+#define AZ_MAX_NUM_HINTS 500
 #define AZ_MAX_NUM_PARAGRAPHS 50000
 
 typedef struct {
   FILE *file;
   bool success;
   jmp_buf jump;
-  int num_zones, num_paragraphs;
+  int num_zones, num_hints, num_paragraphs;
   az_planet_t *planet;
 } az_load_planet_t;
 
@@ -95,17 +96,21 @@ static char *scan_string(az_load_planet_t *loader) {
 }
 
 static void parse_planet_header(az_load_planet_t *loader) {
-  int num_zones, num_rooms, num_paragraphs, start_room_num;
-  READ("@P z%d r%d t%d s%d\n",
-       &num_zones, &num_rooms, &num_paragraphs, &start_room_num);
+  int num_zones, num_hints, num_rooms, num_paragraphs, start_room_num;
+  READ("@P z%d h%d r%d t%d s%d\n",
+       &num_zones, &num_hints, &num_rooms, &num_paragraphs, &start_room_num);
   if (num_zones < 1 || num_zones > AZ_MAX_NUM_ZONES ||
+      num_hints < 0 || num_hints > AZ_MAX_NUM_HINTS ||
       num_rooms < 1 || num_rooms > AZ_MAX_NUM_ROOMS ||
       num_paragraphs < 0 || num_paragraphs > AZ_MAX_NUM_PARAGRAPHS ||
       start_room_num < 0 || start_room_num >= num_rooms) FAIL();
   loader->num_zones = num_zones;
+  loader->num_hints = num_hints;
   loader->num_paragraphs = num_paragraphs;
   loader->planet->num_zones = 0;
   loader->planet->zones = AZ_ALLOC(num_zones, az_zone_t);
+  loader->planet->num_hints = 0;
+  loader->planet->hints = AZ_ALLOC(num_hints, az_hint_t);
   loader->planet->num_rooms = num_rooms;
   loader->planet->rooms = AZ_ALLOC(num_rooms, az_room_t);
   loader->planet->num_paragraphs = 0;
@@ -115,6 +120,66 @@ static void parse_planet_header(az_load_planet_t *loader) {
   if (fscanf(loader->file, " $s%c", &ch) < 1 || ch != ':') FAIL();
   loader->planet->on_start = az_fscan_script(loader->file);
   if (loader->planet->on_start == NULL) FAIL();
+  scan_to_bang(loader);
+}
+
+static void parse_hint_directive(az_load_planet_t *loader) {
+  if (loader->planet->num_hints >= loader->num_hints) FAIL();
+  az_hint_t *hint = &loader->planet->hints[loader->planet->num_hints];
+  char op1, op2, rtype;
+  int prereq1 = 0, prereq2 = 0, result, target_room;
+  az_hint_flags_t properties = 0;
+  READ("%c", &op1);
+  switch (op1) {
+    case '|': break;
+    case '&': properties |= AZ_HINTF_OP1_IS_AND; break;
+    default: FAIL();
+  }
+  if (properties & AZ_HINTF_OP1_IS_AND) {
+    char type;
+    READ(" %c%d ", &type, &prereq1);
+    switch (type) {
+      case 'u': break;
+      case 'f': properties |= AZ_HINTF_PREREQ1_IS_FLAG; break;
+      default: FAIL();
+    }
+  }
+  READ("%c", &op2);
+  switch (op2) {
+    case '|': break;
+    case '&': properties |= AZ_HINTF_OP2_IS_AND; break;
+    default: FAIL();
+  }
+  if ((properties & AZ_HINTF_OP1_IS_AND) ||
+      (properties & AZ_HINTF_OP2_IS_AND)) {
+    char type;
+    READ(" %c%d", &type, &prereq2);
+    switch (type) {
+      case 'u': break;
+      case 'f': properties |= AZ_HINTF_PREREQ2_IS_FLAG; break;
+      default: FAIL();
+    }
+  }
+  READ(" = %c%d r%d\n", &rtype, &result, &target_room);
+  switch (rtype) {
+    case 'u': break;
+    case 'f': properties |= AZ_HINTF_RESULT_IS_FLAG; break;
+    default: FAIL();
+  }
+  if (prereq1 < 0 || prereq2 < 0 || result < 0 ||
+      ((properties & AZ_HINTF_PREREQ1_IS_FLAG) ?
+       (prereq1 >= AZ_MAX_NUM_FLAGS) : (prereq1 >= AZ_NUM_UPGRADES)) ||
+      ((properties & AZ_HINTF_PREREQ2_IS_FLAG) ?
+       (prereq2 >= AZ_MAX_NUM_FLAGS) : (prereq2 >= AZ_NUM_UPGRADES)) ||
+      ((properties & AZ_HINTF_RESULT_IS_FLAG) ?
+       (result >= AZ_MAX_NUM_FLAGS) : (result >= AZ_NUM_UPGRADES)) ||
+      target_room < 0 || target_room >= loader->planet->num_rooms) FAIL();
+  hint->properties = properties;
+  hint->prereq1 = prereq1;
+  hint->prereq2 = prereq2;
+  hint->result = result;
+  hint->target_room = target_room;
+  ++loader->planet->num_hints;
   scan_to_bang(loader);
 }
 
@@ -149,6 +214,7 @@ static void parse_zone_directive(az_load_planet_t *loader) {
 
 static bool parse_directive(az_load_planet_t *loader) {
   switch (fgetc(loader->file)) {
+    case 'H': parse_hint_directive(loader); return true;
     case 'T': parse_paragraph_directive(loader); return true;
     case 'Z': parse_zone_directive(loader); return true;
     case EOF: return false;
@@ -219,9 +285,9 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
   } while (false)
 
 static bool write_planet_header(const az_planet_t *planet, FILE *file) {
-  WRITE("@P z%d r%d t%d s%d\n",
-        planet->num_zones, planet->num_rooms, planet->num_paragraphs,
-        planet->start_room);
+  WRITE("@P z%d h%d r%d t%d s%d\n",
+        planet->num_zones, planet->num_hints, planet->num_rooms,
+        planet->num_paragraphs, planet->start_room);
   if (planet->on_start != NULL) {
     WRITE("$s:");
     if (!az_fprint_script(planet->on_start, file)) return false;
@@ -239,6 +305,26 @@ static bool write_planet_header(const az_planet_t *planet, FILE *file) {
     }
     WRITE("\" c(%d,%d,%d)\n", (int)zone->color.r, (int)zone->color.g,
           (int)zone->color.b);
+  }
+  for (int i = 0; i < planet->num_hints; ++i) {
+    const az_hint_t *hint = &planet->hints[i];
+    if (hint->properties & AZ_HINTF_OP1_IS_AND) {
+      WRITE("!H& %c%d %c %c%d",
+            ((hint->properties & AZ_HINTF_PREREQ1_IS_FLAG) ? 'f' : 'u'),
+            (int)hint->prereq1,
+            ((hint->properties & AZ_HINTF_OP2_IS_AND) ? '&' : '|'),
+            ((hint->properties & AZ_HINTF_PREREQ2_IS_FLAG) ? 'f' : 'u'),
+            (int)hint->prereq2);
+    } else if (hint->properties & AZ_HINTF_OP2_IS_AND) {
+      WRITE("!H|& %c%d",
+            ((hint->properties & AZ_HINTF_PREREQ2_IS_FLAG) ? 'f' : 'u'),
+            (int)hint->prereq2);
+    } else {
+      WRITE("!H||");
+    }
+    WRITE(" = %c%d r%d\n",
+          ((hint->properties & AZ_HINTF_RESULT_IS_FLAG) ? 'f' : 'u'),
+          (int)hint->result, hint->target_room);
   }
   for (int i = 0; i < planet->num_paragraphs; ++i) {
     const char *paragraph = planet->paragraphs[i];
@@ -305,6 +391,41 @@ void az_clone_zone(const az_zone_t *original, az_zone_t *clone_out) {
   clone_out->name = az_strdup(original->name);
   clone_out->entering_message = az_strdup(original->entering_message);
   clone_out->color = original->color;
+}
+
+/*===========================================================================*/
+
+static bool has_hint_item(const az_player_t *player, int item, bool is_flag) {
+  return (is_flag ? az_test_flag(player, (az_flag_t)item) :
+          az_has_upgrade(player, (az_upgrade_t)item));
+}
+
+bool az_hint_matches(const az_hint_t *hint, const az_player_t *player) {
+  if (has_hint_item(player, hint->result,
+                    (hint->properties & AZ_HINTF_RESULT_IS_FLAG))) {
+    return false;
+  }
+  const bool or1 = !(hint->properties & AZ_HINTF_OP1_IS_AND);
+  const bool or2 = !(hint->properties & AZ_HINTF_OP2_IS_AND);
+  if (or1 && or2) return true;
+  const bool match2 =
+    has_hint_item(player, hint->prereq2,
+                  (hint->properties & AZ_HINTF_PREREQ2_IS_FLAG));
+  if (or1) return match2;
+  const bool match1 =
+    has_hint_item(player, hint->prereq1,
+                  (hint->properties & AZ_HINTF_PREREQ1_IS_FLAG));
+  if (or2) return match1 || match2;
+  else return match1 && match2;
+}
+
+const az_hint_t *az_get_hint(const az_planet_t *planet,
+                             const az_player_t *player) {
+  for (int i = 0; i < planet->num_hints; ++i) {
+    const az_hint_t *hint = &planet->hints[i];
+    if (az_hint_matches(hint, player)) return hint;
+  }
+  return NULL;
 }
 
 /*===========================================================================*/

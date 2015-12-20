@@ -360,6 +360,11 @@ bool az_load_editor_state(az_editor_state_t *state) {
 
   state->current_room = state->planet.start_room = planet.start_room;
   state->planet.on_start = az_clone_script(planet.on_start);
+  // Convert hints:
+  AZ_LIST_INIT(state->planet.hints, planet.num_hints);
+  for (int i = 0; i < planet.num_hints; ++i) {
+    *AZ_LIST_ADD(state->planet.hints) = planet.hints[i];
+  }
   // Convert paragraphs:
   AZ_LIST_INIT(state->planet.paragraphs, planet.num_paragraphs);
   for (int i = 0; i < planet.num_paragraphs; ++i) {
@@ -679,6 +684,7 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     if (SAVE_ALL_ROOMS || room->unsaved) ++num_rooms_to_save;
   }
   // Convert planet:
+  const int num_hints = AZ_LIST_SIZE(state->planet.hints);
   const int num_paragraphs = AZ_LIST_SIZE(state->planet.paragraphs);
   const int num_zones = AZ_LIST_SIZE(state->planet.zones);
   const int num_rooms = AZ_LIST_SIZE(state->planet.rooms);
@@ -686,6 +692,8 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   az_planet_t planet = {
     .start_room = state->planet.start_room,
     .on_start = az_clone_script(state->planet.on_start),
+    .num_hints = num_hints,
+    .hints = AZ_ALLOC(num_hints, az_hint_t),
     .num_paragraphs = num_paragraphs,
     .paragraphs = AZ_ALLOC(num_paragraphs, char*),
     .num_zones = num_zones,
@@ -693,6 +701,10 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
     .num_rooms = num_rooms,
     .rooms = AZ_ALLOC(num_rooms, az_room_t)
   };
+  // Convert hints:
+  for (int i = 0; i < num_hints; ++i) {
+    planet.hints[i] = *AZ_LIST_GET(state->planet.hints, i);
+  }
   // Convert paragraphs:
   for (int i = 0; i < num_paragraphs; ++i) {
     planet.paragraphs[i] =

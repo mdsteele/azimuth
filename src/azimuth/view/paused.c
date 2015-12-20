@@ -235,6 +235,33 @@ static void draw_minimap_room_labels(const az_paused_state_t *state) {
   }
 }
 
+static void draw_minimap_hint_label(const az_paused_state_t *state) {
+  assert(state->hint.active);
+  const az_planet_t *planet = state->planet;
+  const az_room_t *room = &planet->rooms[state->hint.target_room];
+  const az_vector_t center = minimap_room_center(state, room);
+  const double offset = AZ_SCREEN_WIDTH * (1 - state->hint.progress) +
+    az_clock_zigzag(3, 10, state->clock) + 3;
+  glPushMatrix(); {
+    glTranslated(round(center.x), round(center.y), 0);
+    for (int i = 0; i < 4; ++i) {
+      glPushMatrix(); {
+        glTranslated(offset, offset, 0);
+        glBegin(GL_TRIANGLE_FAN); {
+          glColor3f(1, 1, 1);
+          glVertex2f(4, 4); glVertex2f(0, 4); glVertex2f(0, 7);
+          glVertex2f(7, 7); glVertex2f(7, 0); glVertex2f(4, 0);
+        } glEnd();
+        glBegin(GL_LINE_STRIP); {
+          glColor3f(1, 0, 0);
+          glVertex2f(1.5, 5.5); glVertex2f(5.5, 5.5); glVertex2f(5.5, 1.5);
+        } glEnd();
+      } glPopMatrix();
+      az_gl_rotated(AZ_HALF_PI);
+    }
+  } glPopMatrix();
+}
+
 static void draw_minimap_ship_label(const az_paused_state_t *state) {
   const az_vector_t center = minimap_position(state, state->ship->position);
   glPushMatrix(); {
@@ -299,6 +326,9 @@ static void draw_minimap(const az_paused_state_t *state) {
       draw_map_markers(state);
       if (az_clock_mod(2, 30, state->clock) == 0) {
         draw_minimap_room_labels(state);
+      }
+      if (state->hint.active) {
+        draw_minimap_hint_label(state);
       }
       if (az_clock_mod(2, 12, state->clock) == 0) {
         draw_minimap_ship_label(state);
@@ -764,9 +794,15 @@ static const az_polygon_t options_drawer_handle_polygon =
 #define PREFS_BOX_LEFT ((AZ_SCREEN_WIDTH - AZ_PREFS_BOX_WIDTH) / 2)
 #define PREFS_BOX_MARGIN 5
 
+#define HINT_BUTTON_WIDTH 90
+#define HINT_BUTTON_HEIGHT 20
+#define HINT_BUTTON_LEFT 70
+#define HINT_BUTTON_TOP \
+  (PREFS_BOX_TOP + AZ_PREFS_BOX_HEIGHT + 2*PREFS_BOX_MARGIN + 12)
+
 #define QUIT_BUTTON_WIDTH 120
 #define QUIT_BUTTON_HEIGHT 20
-#define QUIT_BUTTON_LEFT (570 - QUIT_BUTTON_WIDTH)
+#define QUIT_BUTTON_LEFT (AZ_SCREEN_WIDTH - 70 - QUIT_BUTTON_WIDTH)
 #define QUIT_BUTTON_TOP \
   (PREFS_BOX_TOP + AZ_PREFS_BOX_HEIGHT + 2*PREFS_BOX_MARGIN + 12)
 
@@ -775,6 +811,15 @@ static const az_polygon_t options_drawer_handle_polygon =
   ((AZ_SCREEN_WIDTH - CONFIRM_CANCEL_SPACING) / 2 - QUIT_BUTTON_WIDTH)
 #define CANCEL_BUTTON_LEFT ((AZ_SCREEN_WIDTH + CONFIRM_CANCEL_SPACING) / 2)
 #define CONFIRM_CANCEL_TOP (PREFS_BOX_TOP + 120)
+
+static const az_vector_t hint_button_vertices[] = {
+  {HINT_BUTTON_WIDTH - 5.5, 0.5},
+  {HINT_BUTTON_WIDTH - 0.5, 0.5 * HINT_BUTTON_HEIGHT},
+  {HINT_BUTTON_WIDTH - 5.5, HINT_BUTTON_HEIGHT - 0.5},
+  {5.5, HINT_BUTTON_HEIGHT - 0.5}, {0.5, 0.5 * HINT_BUTTON_HEIGHT}, {5.5, 0.5}
+};
+static const az_polygon_t hint_button_polygon =
+  AZ_INIT_POLYGON(hint_button_vertices);
 
 static const az_vector_t quit_button_vertices[] = {
   {QUIT_BUTTON_WIDTH - 5.5, 0.5},
@@ -833,6 +878,12 @@ static void draw_prefs(const az_paused_state_t *state) {
                    CONFIRM_CANCEL_TOP + QUIT_BUTTON_HEIGHT/2 - 4, "CANCEL");
   } else az_draw_prefs_pane(&state->prefs_pane);
 
+  az_draw_standard_button(&state->hint_button);
+  if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
+  else glColor3f(0.5, 0.5, 1); // bluish
+  az_draw_string(8, AZ_ALIGN_CENTER, HINT_BUTTON_LEFT + HINT_BUTTON_WIDTH/2,
+                 HINT_BUTTON_TOP + HINT_BUTTON_HEIGHT/2 - 4, "GET HINT");
+
   az_draw_dangerous_button(&state->quit_button);
   if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
   else glColor3f(0.75, 0, 0); // red
@@ -876,6 +927,8 @@ void az_init_paused_state(
   az_init_button(&state->upgrade_drawer_handle,
                  upgrade_drawer_handle_polygon,
                  UPGRADE_DRAWER_HANDLE_LEFT, UPGRADE_DRAWER_HANDLE_TOP);
+  az_init_button(&state->hint_button, hint_button_polygon,
+                 HINT_BUTTON_LEFT, HINT_BUTTON_TOP);
   az_init_button(&state->quit_button, quit_button_polygon,
                  QUIT_BUTTON_LEFT, QUIT_BUTTON_TOP);
   az_init_button(&state->confirm_button, quit_button_polygon,
@@ -950,7 +1003,17 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
     state->hovering = AZ_PAUSE_HOVER_NOTHING;
   }
 
-  if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
+  if (state->hint.active && state->hint.progress < 1.0) {
+    state->hint.progress = fmin(1.0, state->hint.progress + time / 0.9);
+    const double goal_y =
+      az_room_center(&state->planet->rooms[state->hint.target_room]).y;
+    const double scroll_delta = 1.5 * SCROLL_SPEED * time;
+    if (state->scroll_y < goal_y) {
+      state->scroll_y = fmin(state->scroll_y + scroll_delta, goal_y);
+    } else {
+      state->scroll_y = fmax(state->scroll_y - scroll_delta, goal_y);
+    }
+  } else if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
     const az_preferences_t *prefs = state->prefs;
     const bool up = az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
     const bool down = az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
@@ -959,9 +1022,9 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
     } else if (down && !up) {
       state->scroll_y -= time * SCROLL_SPEED;
     }
-    state->scroll_y =
-      fmin(fmax(state->scroll_y_min, state->scroll_y), SCROLL_Y_MAX);
   }
+  state->scroll_y =
+    fmin(fmax(state->scroll_y_min, state->scroll_y), SCROLL_Y_MAX);
 
   az_tick_button(&state->options_drawer_handle, 0,
                  -OPTIONS_DRAWER_SLIDE_DISTANCE * (1.0 + state->drawer_slide),
@@ -975,6 +1038,8 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
   const bool prefs_active = options_active && !state->confirming_quit;
   az_tick_prefs_pane(&state->prefs_pane, prefs_active, time, state->clock,
                      &state->soundboard);
+  az_tick_button(&state->hint_button, 0, 0, prefs_active, time,
+                 state->clock, &state->soundboard);
   az_tick_button(&state->quit_button, 0, 0, prefs_active, time,
                  state->clock, &state->soundboard);
   const bool confirm_cancel_active = options_active && state->confirming_quit;
@@ -1056,8 +1121,16 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
     } else {
       az_prefs_pane_on_click(&state->prefs_pane, x, y,
                              &state->soundboard);
-      if (az_button_on_click(&state->quit_button, x, y,
-                             &state->soundboard)) {
+      if (az_button_on_click(&state->hint_button, x, y, &state->soundboard)) {
+        const az_hint_t *hint =
+          az_get_hint(state->planet, &state->ship->player);
+        state->hint.active = true;
+        state->hint.progress = 0.0;
+        state->hint.target_room = (hint == NULL ? state->planet->start_room :
+                                   hint->target_room);
+        state->current_drawer = AZ_PAUSE_DRAWER_MAP;
+      }
+      if (az_button_on_click(&state->quit_button, x, y, &state->soundboard)) {
         state->confirming_quit = true;
       }
     }

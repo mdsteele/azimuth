@@ -53,9 +53,14 @@ typedef struct {
     AZ_PAUSE_HOVER_SHIP
   } hovering;
   az_upgrade_t hovered_upgrade;
+  struct {
+    bool active;
+    double progress;
+    az_room_key_t target_room;
+  } hint;
   az_prefs_pane_t prefs_pane;
   az_button_t options_drawer_handle, upgrade_drawer_handle;
-  az_button_t quit_button;
+  az_button_t hint_button, quit_button;
   bool confirming_quit, do_quit;
   az_button_t confirm_button, cancel_button;
   double quitting_fade_alpha; // 0.0 to 1.0

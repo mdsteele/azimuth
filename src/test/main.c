@@ -54,6 +54,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_cubic_bezier_arc_param);
   RUN_TEST(test_cubic_bezier_point);
   RUN_TEST(test_find_knee);
+  RUN_TEST(test_hint_matches);
   RUN_TEST(test_hsva_color);
   RUN_TEST(test_is_number_key);
   RUN_TEST(test_lead_target);

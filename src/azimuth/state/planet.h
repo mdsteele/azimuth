@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "azimuth/state/dialog.h"
-#include "azimuth/state/player.h" // for az_room_key_t
+#include "azimuth/state/player.h"
 #include "azimuth/state/room.h"
 #include "azimuth/state/music.h" // for az_music_key_t
 #include "azimuth/state/script.h"
@@ -37,6 +37,23 @@ typedef struct {
   az_color_t color;
 } az_zone_t;
 
+// Hints are evaluated as:
+//   ((true <op1> prereq1) <op2> prereq2) AND NOT result
+// Each of prereq1/prereq2/result can be an upgrade or a flag, and each of
+// op1/op2 can be AND or OR.
+typedef uint8_t az_hint_flags_t;
+#define AZ_HINTF_OP1_IS_AND      ((az_hint_flags_t)(1u << 1))
+#define AZ_HINTF_PREREQ1_IS_FLAG ((az_hint_flags_t)(1u << 2))
+#define AZ_HINTF_OP2_IS_AND      ((az_hint_flags_t)(1u << 3))
+#define AZ_HINTF_PREREQ2_IS_FLAG ((az_hint_flags_t)(1u << 4))
+#define AZ_HINTF_RESULT_IS_FLAG  ((az_hint_flags_t)(1u << 5))
+
+typedef struct {
+  az_hint_flags_t properties;
+  uint8_t prereq1, prereq2, result;
+  az_room_key_t target_room;
+} az_hint_t;
+
 typedef struct {
   az_room_key_t start_room;
   az_script_t *on_start;
@@ -44,6 +61,8 @@ typedef struct {
   char **paragraphs;
   int num_zones;
   az_zone_t *zones;
+  int num_hints;
+  az_hint_t *hints;
   int num_rooms;
   az_room_t *rooms;
 } az_planet_t;
@@ -57,6 +76,13 @@ bool az_save_planet(const az_planet_t *planet, const char *resource_dir,
 void az_destroy_planet(az_planet_t *planet);
 
 void az_clone_zone(const az_zone_t *original, az_zone_t *clone_out);
+
+/*===========================================================================*/
+
+bool az_hint_matches(const az_hint_t *hint, const az_player_t *player);
+
+const az_hint_t *az_get_hint(const az_planet_t *planet,
+                             const az_player_t *player);
 
 /*===========================================================================*/
 

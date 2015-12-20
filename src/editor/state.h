@@ -171,6 +171,7 @@ typedef struct {
   struct {
     az_room_key_t start_room;
     az_script_t *on_start;
+    AZ_LIST_DECLARE(az_hint_t, hints);
     AZ_LIST_DECLARE(char*, paragraphs);
     AZ_LIST_DECLARE(az_zone_t, zones);
     AZ_LIST_DECLARE(az_editor_room_t, rooms);
