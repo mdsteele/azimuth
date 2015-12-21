@@ -52,7 +52,9 @@ typedef struct {
   int x, y;
   az_prefs_slider_t music_slider, sound_slider;
   az_prefs_key_picker_t pickers[AZ_PREFS_NUM_KEYS];
-  az_prefs_checkbox_t speedrun_timer_checkbox, fullscreen_checkbox;
+  az_prefs_checkbox_t speedrun_timer_checkbox;
+  az_prefs_checkbox_t fullscreen_checkbox;
+  az_prefs_checkbox_t enable_hints_checkbox;
   int selected_key_picker_index; // -1 for none
 } az_prefs_pane_t;
 

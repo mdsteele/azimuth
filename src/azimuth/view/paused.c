@@ -878,11 +878,13 @@ static void draw_prefs(const az_paused_state_t *state) {
                    CONFIRM_CANCEL_TOP + QUIT_BUTTON_HEIGHT/2 - 4, "CANCEL");
   } else az_draw_prefs_pane(&state->prefs_pane);
 
-  az_draw_standard_button(&state->hint_button);
-  if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
-  else glColor3f(0.5, 0.5, 1); // bluish
-  az_draw_string(8, AZ_ALIGN_CENTER, HINT_BUTTON_LEFT + HINT_BUTTON_WIDTH/2,
-                 HINT_BUTTON_TOP + HINT_BUTTON_HEIGHT/2 - 4, "GET HINT");
+  if (state->prefs->enable_hints) {
+    az_draw_standard_button(&state->hint_button);
+    if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
+    else glColor3f(0.5, 0.5, 1); // bluish
+    az_draw_string(8, AZ_ALIGN_CENTER, HINT_BUTTON_LEFT + HINT_BUTTON_WIDTH/2,
+                   HINT_BUTTON_TOP + HINT_BUTTON_HEIGHT/2 - 4, "GET HINT");
+  }
 
   az_draw_dangerous_button(&state->quit_button);
   if (state->confirming_quit) glColor3f(0.25, 0.25, 0.25); // dark gray
@@ -1038,7 +1040,8 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
   const bool prefs_active = options_active && !state->confirming_quit;
   az_tick_prefs_pane(&state->prefs_pane, prefs_active, time, state->clock,
                      &state->soundboard);
-  az_tick_button(&state->hint_button, 0, 0, prefs_active, time,
+  az_tick_button(&state->hint_button, 0, 0,
+                 (prefs_active && state->prefs->enable_hints), time,
                  state->clock, &state->soundboard);
   az_tick_button(&state->quit_button, 0, 0, prefs_active, time,
                  state->clock, &state->soundboard);
@@ -1121,7 +1124,8 @@ void az_paused_on_click(az_paused_state_t *state, int x, int y) {
     } else {
       az_prefs_pane_on_click(&state->prefs_pane, x, y,
                              &state->soundboard);
-      if (az_button_on_click(&state->hint_button, x, y, &state->soundboard)) {
+      if (state->prefs->enable_hints &&
+          az_button_on_click(&state->hint_button, x, y, &state->soundboard)) {
         const az_hint_t *hint =
           az_get_hint(state->planet, &state->ship->player);
         state->hint.active = true;

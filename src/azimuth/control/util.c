@@ -66,9 +66,11 @@ void az_update_prefefences(const az_prefs_pane_t *pane,
     *prefs_changed = true;
   }
   if (prefs->speedrun_timer != pane->speedrun_timer_checkbox.checked ||
-      prefs->fullscreen_on_startup != pane->fullscreen_checkbox.checked) {
+      prefs->fullscreen_on_startup != pane->fullscreen_checkbox.checked ||
+      prefs->enable_hints != pane->enable_hints_checkbox.checked) {
     prefs->speedrun_timer = pane->speedrun_timer_checkbox.checked;
     prefs->fullscreen_on_startup = pane->fullscreen_checkbox.checked;
+    prefs->enable_hints = pane->enable_hints_checkbox.checked;
     *prefs_changed = true;
   }
   for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {

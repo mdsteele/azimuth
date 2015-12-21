@@ -34,6 +34,7 @@ void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   *prefs = (az_preferences_t){
     .music_volume = 0.8, .sound_volume = 0.8,
     .speedrun_timer = false, .fullscreen_on_startup = true,
+    .enable_hints = false,
     .keys = {
       [AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_UP_ARROW,
       [AZ_PREFS_DOWN_KEY_INDEX] = AZ_KEY_DOWN_ARROW,
@@ -107,6 +108,9 @@ bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
     if (strcmp(name, "fs") == 0) {
       if (!read_bool(file, &prefs.fullscreen_on_startup)) return false;
     }
+    if (strcmp(name, "eh") == 0) {
+      if (!read_bool(file, &prefs.enable_hints)) return false;
+    }
     if (strcmp(name, "uk") == 0) {
       if (!read_key(file, &prefs.keys[AZ_PREFS_UP_KEY_INDEX])) return false;
     }
@@ -158,10 +162,11 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
   assert(prefs != NULL);
   assert(file != NULL);
   return (fprintf(
-      file, "@F mv=%.03f sv=%.03f st=%d fs=%d\n"
+      file, "@F mv=%.03f sv=%.03f st=%d fs=%d eh=%d\n"
       "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
       (prefs->speedrun_timer ? 1 : 0), (prefs->fullscreen_on_startup ? 1 : 0),
+      (prefs->enable_hints ? 1 : 0),
       (int)prefs->keys[AZ_PREFS_UP_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_DOWN_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX],

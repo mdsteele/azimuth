@@ -40,7 +40,7 @@
 
 typedef struct {
   float music_volume, sound_volume;
-  bool speedrun_timer, fullscreen_on_startup;
+  bool speedrun_timer, fullscreen_on_startup, enable_hints;
   az_key_id_t keys[AZ_PREFS_NUM_KEYS];
 } az_preferences_t;
 

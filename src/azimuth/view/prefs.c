@@ -109,7 +109,7 @@ void az_init_prefs_pane(az_prefs_pane_t *pane, int x, int y,
   }
 
   const int checkbox_left = AZ_PREFS_BOX_WIDTH / 2 + 50;
-  const int checkbox_top = PICKERS_TOP + PICKER_HEIGHT + PICKER_VERT_SPACING;
+  const int checkbox_top = PICKERS_TOP;
   az_init_button(&pane->speedrun_timer_checkbox.button, checkbox_polygon,
                  checkbox_left, checkbox_top);
   pane->speedrun_timer_checkbox.checked = prefs->speedrun_timer;
@@ -117,6 +117,10 @@ void az_init_prefs_pane(az_prefs_pane_t *pane, int x, int y,
                  checkbox_left,
                  checkbox_top + CHECKBOX_HEIGHT + CHECKBOX_SPACING);
   pane->fullscreen_checkbox.checked = prefs->fullscreen_on_startup;
+  az_init_button(&pane->enable_hints_checkbox.button, checkbox_polygon,
+                 checkbox_left,
+                 checkbox_top + 2 * (CHECKBOX_HEIGHT + CHECKBOX_SPACING));
+  pane->enable_hints_checkbox.checked = prefs->enable_hints;
 }
 
 /*===========================================================================*/
@@ -197,6 +201,7 @@ void az_draw_prefs_pane(const az_prefs_pane_t *pane) {
 
     draw_checkbox(&pane->speedrun_timer_checkbox, "Show speedrun timer");
     draw_checkbox(&pane->fullscreen_checkbox, "Fullscreen on startup");
+    draw_checkbox(&pane->enable_hints_checkbox, "Enable hint system");
   } glPopMatrix();
 }
 
@@ -246,6 +251,8 @@ void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
                  pane->x, pane->y, active, time, clock, soundboard);
   az_tick_button(&pane->fullscreen_checkbox.button,
                  pane->x, pane->y, active, time, clock, soundboard);
+  az_tick_button(&pane->enable_hints_checkbox.button,
+                 pane->x, pane->y, active, time, clock, soundboard);
 }
 
 /*===========================================================================*/
@@ -280,6 +287,7 @@ void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
     checkbox_on_click(&pane->speedrun_timer_checkbox, rel_x, rel_y,
                       soundboard);
     checkbox_on_click(&pane->fullscreen_checkbox, rel_x, rel_y, soundboard);
+    checkbox_on_click(&pane->enable_hints_checkbox, rel_x, rel_y, soundboard);
   }
 }
 
