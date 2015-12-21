@@ -1,6 +1,6 @@
-@R z4 p0 k3 b7 d5 g1 n73 w202
+@R z4 p0 k3 b7 d5 g2 n73 w202
   c(28549.22,648.91,1.530572,0.040633)
-$s:test95,beqz/A,unlock1,A#test96,beqz/B,nix5,nix6,B#test23,bnez/C,nix10,nix11,nix12,nix13,nix14,nix20,halt,C#nix2,nix3,lock7,nix15,nix16,nix17,nix18,nix19;
+$s:test149,beqz/A,nix2,nix30,nix31,nix32,nix33,A#test95,beqz/B,unlock1,B#test96,beqz/C,nix5,nix6,C#test23,bnez/D,nix10,nix11,nix12,nix13,nix14,nix20,halt,D#nix3,lock7,nix15,nix16,nix17,nix18,nix19;
 !W1 d9 x386.75 y28573.33 a-0.191438 u20
 !W1 d33 x387.43 y28575.08 a2.981651 u14
 !W1 d50 x382.02 y28514.91 a1.640929 u0
@@ -211,6 +211,8 @@ $s:test95,beqz/A,unlock1,A#test96,beqz/B,nix5,nix6,B#test23,bnez/C,nix10,nix11,n
 $o:set95;
 !G1 x155.54 y28439.76 a1.565327 s0.00 o0.00 f40.00 r40.00 l120.00 u0
 $e:test23,hnez,test96,hnez,lock7,gpos,gpos4,vsub,vtheta,sang4,push47,sbadk4;
+!G1 x-4.09 y29101.61 a1.569868 s0.00 o0.00 f200.00 r200.00 l80.00 u0
+$e:test23,heqz,test149,hnez,set149,gpos33,boom,nix33,nix32,wait0.25,gpos31,boom,nix30,nix31,kill2;
 !N5/10 x194.30 y29469.06 a1.564203 u0
 !N7/50 x1248.97 y28765.06 a1.532163 u0
 !N7/9 x237.74 y29179.17 a-0.122208 u10
@@ -243,8 +245,8 @@ $e:test23,hnez,test96,hnez,lock7,gpos,gpos4,vsub,vtheta,sang4,push47,sbadk4;
 !N7/50 x-131.53 y28599.76 a-1.568386 u0
 !N7/50 x-131.00 y28378.89 a-1.568386 u0
 !N7/48 x249.63 y28749.10 a3.132527 u0
-!N5/11 x95.69 y28716.57 a3.141392 u0
-!N5/11 x95.91 y28776.32 a3.141392 u0
+!N5/11 x95.69 y28716.57 a3.141392 u32
+!N5/11 x95.91 y28776.32 a3.141392 u33
 !N5/2 x111.90 y28813.72 a-1.574067 u0
 !N5/1 x237.26 y28820.52 a-0.007959 u0
 !N5/1 x304.63 y28847.45 a-2.366494 u0
@@ -266,10 +268,10 @@ $e:test23,hnez,test96,hnez,lock7,gpos,gpos4,vsub,vtheta,sang4,push47,sbadk4;
 !N5/10 x1180.78 y29348.91 a-1.611011 u0
 !N5/10 x-188.98 y28950.90 a0.000408 u0
 !N5/10 x-268.95 y28950.87 a0.000408 u0
-!N5/11 x468.52 y29251.38 a3.126030 u0
-!N5/11 x469.44 y29311.10 a3.126030 u0
-!N5/2 x487.51 y29348.45 a-1.584196 u0
-!N5/2 x484.05 y29213.78 a-0.016120 u0
+!N5/11 x421.50 y29364.93 a-1.583722 u30
+!N5/11 x361.78 y29365.69 a-1.583722 u31
+!N5/2 x324.38 y29383.67 a-0.010763 u0
+!N5/1 x481.60 y29373.35 a3.126086 u0
 !N7/50 x268.74 y29409.79 a-0.007577 u0
 !N7/50 x109.75 y29410.99 a-0.007577 u0
 !N7/33 x240.53 y29178.56 a3.009479 u11
