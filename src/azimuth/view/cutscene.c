@@ -678,33 +678,29 @@ static void draw_uhp_ships_scene(
   glPushMatrix(); {
     glScalef(1, -1, 1);
     glTranslatef(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
-    const float factor =
-      (cutscene->step < 5 ? 1 : cutscene->step > 5 ? 0.5 :
+    const float zoom_factor =
+      (cutscene->step < 3 ? 1 : cutscene->step > 3 ? 0.5 :
        1 - 0.5 * cutscene->step_progress * cutscene->step_progress *
        (3 - 2 * cutscene->step_progress));
-    glScalef(factor, factor, 1);
+    glTranslatef(200 * (zoom_factor - 1), 0, 0);
+    glScalef(zoom_factor, zoom_factor, 1);
     draw_bg_particles(cutscene, clock);
     // Fighters:
-    glPushMatrix(); {
-      glTranslatef(200, -150, 0);
-      draw_uhp_fighter(clock);
-    } glPopMatrix();
-    glPushMatrix(); {
-      glTranslatef(150, -140, 0);
-      draw_uhp_fighter(clock);
-    } glPopMatrix();
+    AZ_ARRAY_LOOP(object, cutscene->objects) {
+      if (object->kind == 0) continue;
+      glPushMatrix(); {
+        az_gl_translated(object->position);
+        draw_uhp_fighter(clock);
+      } glPopMatrix();
+    }
     // Crusier:
     if (cutscene->step > 0) {
       glPushMatrix(); {
         glTranslatef((cutscene->step > 1 ? 0 :
                       -650 * pow(1 - cutscene->step_progress, 1.5)),
                      8 * sin(cutscene->time), 0);
-        if (cutscene->step < 6) {
-          const float door_openness =
-            (cutscene->step == 2 ? cutscene->step_progress :
-             cutscene->step == 3 ? 1 :
-             cutscene->step == 4 ? 1 - cutscene->step_progress : 0);
-          draw_uhp_cruiser(door_openness, clock);
+        if (cutscene->step < 4) {
+          draw_uhp_cruiser(cutscene->param1, clock);
         } else {
           const double param = 1 - pow(0.1, cutscene->param2);
           const float horz_drift = 300 * sqrt(param);

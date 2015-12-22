@@ -46,6 +46,13 @@ typedef enum {
 } az_scene_t;
 
 typedef struct {
+  int kind;
+  float param;
+  az_vector_t position;
+  az_vector_t velocity;
+} az_cutscene_obj_t;
+
+typedef struct {
   az_scene_t scene;
   az_scene_t next;
   const char *scene_text;
@@ -56,6 +63,7 @@ typedef struct {
   int step;
   double step_timer;
   double step_progress;
+  az_cutscene_obj_t objects[10];
   az_particle_t fg_particles[30];
   az_particle_t bg_particles[30];
 } az_cutscene_state_t;

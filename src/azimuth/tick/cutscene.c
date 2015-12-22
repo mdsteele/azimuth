@@ -26,6 +26,7 @@
 #include "azimuth/state/space.h"
 #include "azimuth/tick/particle.h"
 #include "azimuth/tick/script.h"
+#include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 
 /*===========================================================================*/
@@ -39,12 +40,15 @@ static void next_scene(az_space_state_t *state, bool reset) {
   if (reset) {
     cutscene->fade_alpha = 1.0;
     cutscene->time = cutscene->param1 = cutscene->param2 = 0.0;
-    cutscene->step = 0;
-    cutscene->step_timer = 0.0;
-    cutscene->step_progress = 0.0;
+    AZ_ZERO_ARRAY(cutscene->objects);
+    AZ_ZERO_ARRAY(cutscene->fg_particles);
+    AZ_ZERO_ARRAY(cutscene->bg_particles);
   }
   cutscene->scene = cutscene->next;
   cutscene->scene_text = cutscene->next_text;
+  cutscene->step = 0;
+  cutscene->step_timer = 0.0;
+  cutscene->step_progress = 0.0;
   if (state->sync_vm.script != NULL) az_resume_script(state, &state->sync_vm);
 }
 
@@ -88,6 +92,24 @@ static void add_laser(az_cutscene_state_t *cutscene, bool foreground,
       (az_vector_t){(speed > 0 ? -700 - size : 700 + size), y_pos},
       (az_vector_t){speed, 0}, (speed > 0 ? 0 : AZ_PI),
       (size + 1400) / speed, size, 0.05 * size);
+}
+
+static bool step_timer_at(const az_cutscene_state_t *state, double mark,
+                          double time) {
+  return (state->step_timer >= mark && state->step_timer - time < mark);
+}
+
+static void shoot_fighter_laser_at_time(
+    az_space_state_t *state, int fighter_index, double mark, double time) {
+  az_cutscene_state_t *cutscene = &state->cutscene;
+  if (step_timer_at(cutscene, mark, time)) {
+    const double size = 20;
+    az_cutscene_add_particle(
+        cutscene, false, AZ_PAR_BEAM, (az_color_t){255, 128, 128, 255},
+        cutscene->objects[fighter_index].position, (az_vector_t){600, 0}, 0,
+        2.0, size, 0.05 * size);
+    az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
+  }
 }
 
 /*===========================================================================*/
@@ -175,23 +197,105 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_UHP_SHIPS:
       ready_for_next_scene = false;
+      AZ_ARRAY_LOOP(object, cutscene->objects) {
+        if (object->kind == 0) continue;
+        az_vpluseq(&object->position, az_vmul(object->velocity, time));
+        const az_vector_t goal_velocity = {object->param, 0};
+        const double tracking_base = 0.2; // smaller = faster tracking
+        az_vpluseq(&object->velocity,
+                   az_vmul(az_vsub(goal_velocity, object->velocity),
+                           1.0 - pow(tracking_base, time)));
+      }
       switch (cutscene->step) {
-        case 0:
-          if (progress_step(cutscene,  3.0)) {
+        case 0: // fighters flying
+          if (step_timer_at(cutscene, 1.5, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[1];
+            obj->kind = 1;
+            obj->param = 250;
+            obj->position = (az_vector_t){-350, 40};
+            obj->velocity = (az_vector_t){200, 0};
+          }
+          if (step_timer_at(cutscene, 2.2, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[0];
+            obj->kind = 1;
+            obj->param = 250;
+            obj->position = (az_vector_t){-350, -20};
+            obj->velocity = (az_vector_t){200, 0};
+          }
+          if (step_timer_at(cutscene, 2.3, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[3];
+            obj->kind = 1;
+            obj->param = 300;
+            obj->position = (az_vector_t){-350, 200};
+            obj->velocity = (az_vector_t){300, 0};
+          }
+          if (step_timer_at(cutscene, 2.5, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[2];
+            obj->kind = 1;
+            obj->param = 300;
+            obj->position = (az_vector_t){-350, -150};
+            obj->velocity = (az_vector_t){300, 0};
+          }
+          if (step_timer_at(cutscene, 2.6, time)) {
+            cutscene->objects[0].param = 10;
+            cutscene->objects[1].param = 10;
+          }
+          if (step_timer_at(cutscene, 2.8, time)) {
+            cutscene->objects[2].param = 10;
+            cutscene->objects[3].param = 10;
+          }
+          for (int i = 0; i < 8; ++i) {
+            shoot_fighter_laser_at_time(state, i % 4, 3.5 + 0.3 * i, time);
+          }
+          if (progress_step(cutscene, 6.0)) {
             add_laser(cutscene, true, 100, 50, 1200);
             az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_PIERCE);
           }
           break;
-        case 1:
+        case 1: // cruiser appears
+          for (int i = 0; i < 8; ++i) {
+            shoot_fighter_laser_at_time(state, i % 4, 2.5 + 0.2 * i, time);
+          }
+          for (int i = 0; i < 4; ++i) {
+            if (step_timer_at(cutscene, 4.0 + 0.5 * i * i, time)) {
+              cutscene->objects[i].param = 500;
+            }
+          }
           if (progress_step(cutscene, 15.0)) {
             add_laser(cutscene, false, 60, -125, 1200);
             az_play_sound_with_volume(&state->soundboard,
                                       AZ_SND_FIRE_GUN_PIERCE, 0.5);
           } break;
-        case 2: progress_step(cutscene, 2.0); break;
-        case 3: progress_step(cutscene, 2.0); break;
-        case 4: progress_step(cutscene, 2.0); break;
-        case 5:
+        case 2: { // fighter bay doors
+          const double step_duration = 6.0;
+          const double door_open_close_time = 2.0;
+          if (progress_step(cutscene, step_duration)) {
+            cutscene->param1 = 0.0;
+          } else if (cutscene->step_timer < door_open_close_time) {
+            cutscene->param1 = cutscene->step_timer / door_open_close_time;
+          } else if (cutscene->step_timer >
+                     step_duration - door_open_close_time) {
+            cutscene->param1 =
+              (step_duration - cutscene->step_timer) / door_open_close_time;
+          } else {
+            cutscene->param1 = 1.0;
+          }
+          if (step_timer_at(cutscene, door_open_close_time, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[0];
+            obj->kind = 1;
+            obj->param = 70;
+            obj->position = (az_vector_t){110, -40};
+            obj->velocity = (az_vector_t){0, -100};
+          }
+          if (step_timer_at(cutscene, door_open_close_time + 1.0, time)) {
+            az_cutscene_obj_t *obj = &cutscene->objects[1];
+            obj->kind = 1;
+            obj->param = 70;
+            obj->position = (az_vector_t){110, -40};
+            obj->velocity = (az_vector_t){0, -150};
+          }
+        } break;
+        case 3: // zoom out
           if (progress_step(cutscene, 5.0)) {
             az_cutscene_add_particle(cutscene, true, AZ_PAR_EXPLOSION,
                                      (az_color_t){255, 233, 211, 192},
@@ -214,7 +318,7 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
             az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
           }
           break;
-        case 6:
+        case 4: // cruiser pieces drifting
           cutscene->param2 += time / 10.0;
           ready_for_next_scene = (cutscene->param2 >= 1.0);
           break;
