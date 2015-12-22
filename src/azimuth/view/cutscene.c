@@ -384,14 +384,14 @@ static void draw_escape_scene(
   az_draw_planet_starfield(clock);
   if (cutscene->step == 0) {
     // Step 0: Deform planet
-    draw_zenith_planet_internal(0, 1, cutscene->param1, clock);
+    draw_zenith_planet_internal(0, 1, cutscene->step_progress, clock);
   } else if (cutscene->step == 1) {
     // Step 1: Asplode planet, with ship escaping
     glPushMatrix(); {
       // Explosion:
       glTranslated(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
       glBegin(GL_TRIANGLE_FAN); {
-        const double blast = pow(fmin(1.0, 3 * cutscene->param1), 3);
+        const double blast = pow(fmin(1.0, 3 * cutscene->step_progress), 3);
         glColor4f(blast, 1, 1, 0.5 + 0.5 * blast);
         glVertex2f(0, 0);
         glColor4f(blast, 1, 1, blast);
@@ -403,7 +403,7 @@ static void draw_escape_scene(
       } glEnd();
       // Escaping ship shadow:
       glPushMatrix(); {
-        const double translation = 1.2 * pow(cutscene->param1, 4);
+        const double translation = 1.2 * pow(cutscene->step_progress, 4);
         glTranslated(-320 * translation, 270 * translation, 0);
         const GLfloat scale_factor = 3.0 * translation;
         glScalef(scale_factor, 0.66f * scale_factor, 1);
@@ -432,7 +432,7 @@ static void draw_escape_scene(
   } else if (cutscene->step == 2) {
     // Step 2: Explosion fades away
     glBegin(GL_TRIANGLE_FAN); {
-      glColor4f(1, 1, 1, 1.0 - cutscene->param1);
+      glColor4f(1, 1, 1, 1.0 - cutscene->step_progress);
       glVertex2i(0, 0); glVertex2i(AZ_SCREEN_WIDTH, 0);
       glVertex2i(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
       glVertex2i(0, AZ_SCREEN_HEIGHT);
@@ -680,8 +680,8 @@ static void draw_uhp_ships_scene(
     glTranslatef(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
     const float factor =
       (cutscene->step < 5 ? 1 : cutscene->step > 5 ? 0.5 :
-       1 - 0.5 * cutscene->param1 * cutscene->param1 *
-       (3 - 2 * cutscene->param1));
+       1 - 0.5 * cutscene->step_progress * cutscene->step_progress *
+       (3 - 2 * cutscene->step_progress));
     glScalef(factor, factor, 1);
     draw_bg_particles(cutscene, clock);
     // Fighters:
@@ -697,13 +697,13 @@ static void draw_uhp_ships_scene(
     if (cutscene->step > 0) {
       glPushMatrix(); {
         glTranslatef((cutscene->step > 1 ? 0 :
-                      -650 * pow(1 - cutscene->param1, 1.5)),
+                      -650 * pow(1 - cutscene->step_progress, 1.5)),
                      8 * sin(cutscene->time), 0);
         if (cutscene->step < 6) {
           const float door_openness =
-            (cutscene->step == 2 ? cutscene->param1 :
+            (cutscene->step == 2 ? cutscene->step_progress :
              cutscene->step == 3 ? 1 :
-             cutscene->step == 4 ? 1 - cutscene->param1 : 0);
+             cutscene->step == 4 ? 1 - cutscene->step_progress : 0);
           draw_uhp_cruiser(door_openness, clock);
         } else {
           const double param = 1 - pow(0.1, cutscene->param2);

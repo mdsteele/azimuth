@@ -54,8 +54,10 @@ typedef struct {
   double time;
   double param1, param2;
   int step;
-  az_particle_t fg_particles[20];
-  az_particle_t bg_particles[20];
+  double step_timer;
+  double step_progress;
+  az_particle_t fg_particles[30];
+  az_particle_t bg_particles[30];
 } az_cutscene_state_t;
 
 void az_cutscene_add_particle(
