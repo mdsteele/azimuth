@@ -141,7 +141,7 @@ Boss Doors
 
 Misc
 ====
-0: Opened one-way gate in Voquan room 359
+0: Visited room 14 (used for hint system)
 5: Passed through Colony room 7, disable pausing tutorial
 6: Unlocked door in Colony Energy Recycling Unit (room 69)
 8: Reversed grav-corridor in Colony room 24
@@ -168,6 +168,6 @@ Misc
 144: Opened one-way gate in Cnidam room 397
 145: Opened one-way gate in Sarvari room 460
 146: Opened one-way gate in Voquan room 391
-147: Visited room 14 (used for hint system)
+147: Opened one-way gate in Voquan room 359
 148: NPS engine exploded in Core room 371
 149: NPS engines exploded in Voquan room 255

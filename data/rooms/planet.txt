@@ -13,7 +13,7 @@ $s:mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,sce
 !H|& f69 = u12 r401
 !H|& f69 = u21 r136
 !H|| = u0 r13
-!H|& f147 = f1 r20
+!H|& f0 = f1 r20
 !H|& f1 = u27 r23
 !H& f27 | u1 = u15 r39
 !H|& u1 = u56 r65
@@ -46,7 +46,7 @@ $s:mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,sce
 !H& u5 & u7 = f114 r148
 !H|& f114 = f104 r54
 !H|& f104 = f23 r0
-!H|& u0 = f147 r14
+!H|& u0 = f0 r14
 !T0"
   Save Station"
 !T1"
