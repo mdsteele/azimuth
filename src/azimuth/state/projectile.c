@@ -535,6 +535,17 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 300.0,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_OTH_PHASE_ROCKET] = {
+    .speed = 1200.0,
+    .lifetime = 3.0,
+    .impact_damage = 15.0,
+    .splash_damage = 7.5,
+    .splash_radius = 30.0,
+    .impact_shake = 4.0,
+    .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
+    .damage_kind = AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_PHASED
+  },
   [AZ_PROJ_OTH_ROCKET] = {
     .speed = 1200.0,
     .lifetime = 3.0,

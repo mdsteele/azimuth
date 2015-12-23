@@ -853,6 +853,13 @@ static void projectile_special_logic(az_space_state_t *state,
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.3, 6.0, AZ_DEG2RAD(720));
       break;
+    case AZ_PROJ_OTH_PHASE_ROCKET:
+      leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                           0.5, 9.0, AZ_DEG2RAD(720));
+      proj->velocity = az_vrotate((az_vector_t){proj->data->speed,
+            proj->param * proj->data->speed * cos(30.0 * proj->age)},
+        proj->angle);
+      break;
     case AZ_PROJ_OTH_ROCKET:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.5, 9.0, AZ_DEG2RAD(720));

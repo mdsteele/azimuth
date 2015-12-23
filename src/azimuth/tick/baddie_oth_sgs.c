@@ -35,6 +35,10 @@
 enum {
   DOGFIGHT_STATE = 0,
   RETREAT_STATE,
+  TRY_TO_CLOAK_STATE,
+  SNEAK_UP_BEHIND_STATE,
+  FLEE_WHILE_CLOAKED_STATE,
+  BARRAGE_STATE,
 };
 
 // Engine constants:
@@ -117,6 +121,44 @@ static void fly_towards(az_space_state_t *state, az_baddie_t *baddie,
                           FORWARD_ACCEL, 200, 100);
 }
 
+static void fly_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
+                             double time) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP ||
+         baddie->kind == AZ_BAD_OTH_DECOY);
+  az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
+                      FORWARD_ACCEL, 200, 200, 100);
+}
+
+static void fly_away_from_ship(az_space_state_t *state, az_baddie_t *baddie,
+                               double time, az_vector_t *goal_position_out) {
+  // Out of all marker nodes we can see, pick the one farthest from the ship.
+  double best_dist = 0.0;
+  az_vector_t target = baddie->position;
+  AZ_ARRAY_LOOP(node, state->nodes) {
+    if (node->kind != AZ_NODE_MARKER) continue;
+    if (az_baddie_has_clear_path_to_position(state, baddie, node->position)) {
+      const double dist = az_vdist(node->position, state->ship.position);
+      if (dist > best_dist) {
+        best_dist = dist;
+        target = node->position;
+      }
+    }
+  }
+  fly_towards(state, baddie, time, target);
+  if (goal_position_out != NULL) *goal_position_out = target;
+}
+
+static void fire_oth_spray(az_space_state_t *state, az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  for (int i = 0; i < 360; i += 15) {
+    az_fire_baddie_projectile(
+        state, baddie, AZ_PROJ_OTH_SPRAY,
+        baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0);
+  }
+  az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
+  decloak_immediately(state, baddie);
+}
+
 static void begin_dogfight(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   set_primary_state(baddie, DOGFIGHT_STATE);
@@ -128,6 +170,16 @@ static void begin_retreat(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   set_primary_state(baddie, RETREAT_STATE);
   baddie->cooldown = 5.0;
+}
+
+static void begin_charging_phase_missiles(az_space_state_t *state,
+                                          az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  set_tractor_node(baddie, NULL);
+  decloak_immediately(state, baddie);
+  set_primary_state(baddie, BARRAGE_STATE);
+  baddie->cooldown = 2.0;
+  az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET_CHARGE);
 }
 
 /*===========================================================================*/
@@ -154,21 +206,7 @@ void az_tick_bad_oth_supergunship(
       baddie->param = 1.0 + TRACTOR_CLOAK_DECAY_TIME;
       set_tractor_node(baddie, NULL);
     }
-  } else if (baddie->param == 0.0) {
-    az_node_t *nearest = NULL;
-    double best_dist = INFINITY;
-    AZ_ARRAY_LOOP(node, state->nodes) {
-      if (node->kind != AZ_NODE_TRACTOR) continue;
-      const double dist = az_vdist(baddie->position, node->position);
-      if (dist >= TRACTOR_MIN_LENGTH && dist < best_dist) {
-        nearest = node;
-        best_dist = dist;
-      }
-    }
-    if (nearest != NULL && best_dist <= TRACTOR_MAX_LENGTH) {
-      set_tractor_node(baddie, nearest);
-    }
-  } else {
+  } else if (baddie->param >= 0.0) {
     const double old_param = baddie->param;
     baddie->param = fmax(0.0, baddie->param - time);
     if (old_param > 1.0 && baddie->param <= 1.0) {
@@ -181,8 +219,7 @@ void az_tick_bad_oth_supergunship(
 
   switch (get_primary_state(baddie)) {
     case DOGFIGHT_STATE: {
-      az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
-                          FORWARD_ACCEL, 200, 200, 100);
+      fly_towards_ship(state, baddie, time);
       int secondary = get_secondary_state(baddie);
       if (baddie->cooldown <= 0.0 &&
           az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
@@ -203,9 +240,14 @@ void az_tick_bad_oth_supergunship(
       }
     } break;
     case RETREAT_STATE: {
+      az_vector_t goal_position;
+      fly_away_from_ship(state, baddie, time, &goal_position);
+      // Use an Orion boost to accelerate away.
       if (get_secondary_state(baddie) == 0 &&
           az_ship_in_range(state, baddie, 200) &&
           az_ship_within_angle(state, baddie, AZ_PI, AZ_DEG2RAD(60)) &&
+          fabs(az_mod2pi(az_vtheta(az_vsub(goal_position, baddie->position)) -
+                         baddie->angle)) < AZ_DEG2RAD(5) &&
           az_baddie_has_clear_path_to_position(state, baddie,
               az_vadd(baddie->position, az_vpolar(500, baddie->angle)))) {
         az_projectile_t *proj = az_fire_baddie_projectile(
@@ -217,35 +259,78 @@ void az_tick_bad_oth_supergunship(
         }
         set_secondary_state(baddie, 1);
       }
-      // Out of all marker nodes we can see, pick the one farthest from the
-      // ship.
-      double best_dist = 0.0;
-      az_vector_t target = baddie->position;
-      AZ_ARRAY_LOOP(node, state->nodes) {
-        if (node->kind != AZ_NODE_MARKER) continue;
-        if (az_baddie_has_clear_path_to_position(state, baddie,
-                                                 node->position)) {
-          const double dist = az_vdist(node->position, state->ship.position);
-          if (dist > best_dist) {
-            best_dist = dist;
-            target = node->position;
-          }
-        }
-      }
       // If we get far away enough, or if the cooldown expires, change states.
-      // Otherwise, fly towards the target position.
       if (baddie->cooldown <= 0.0 || !az_ship_in_range(state, baddie, 800)) {
         baddie->cooldown = 0.0;
-        for (int i = 0; i < 360; i += 15) {
-          az_fire_baddie_projectile(
-              state, baddie, AZ_PROJ_OTH_SPRAY,
-              baddie->data->main_body.bounding_radius, AZ_DEG2RAD(i), 0);
+        if (az_ship_in_range(state, baddie, 300)) {
+          fire_oth_spray(state, baddie);
+          begin_dogfight(baddie);
+        } else {
+          set_primary_state(baddie, TRY_TO_CLOAK_STATE);
         }
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_SPRAY);
-        decloak_immediately(state, baddie);
+      }
+    } break;
+    case TRY_TO_CLOAK_STATE: {
+      fly_away_from_ship(state, baddie, time, NULL);
+      if (!tractor_locked_on(baddie, NULL, NULL)) {
+        az_node_t *nearest = NULL;
+        double best_dist = INFINITY;
+        AZ_ARRAY_LOOP(node, state->nodes) {
+          if (node->kind != AZ_NODE_TRACTOR) continue;
+          const double dist = az_vdist(baddie->position, node->position);
+          if (dist >= TRACTOR_MIN_LENGTH && dist < best_dist) {
+            nearest = node;
+            best_dist = dist;
+          }
+        }
+        if (nearest != NULL && best_dist <= TRACTOR_MAX_LENGTH) {
+          set_tractor_node(baddie, nearest);
+        }
+      }
+      if (baddie->param >= 1.0) {
+        set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
+      }
+    } break;
+    case SNEAK_UP_BEHIND_STATE: {
+      // TODO: implement SNEAK_UP_BEHIND_STATE
+    } break;
+    case FLEE_WHILE_CLOAKED_STATE: {
+      fly_away_from_ship(state, baddie, time, NULL);
+      if (az_ship_is_decloaked(&state->ship) &&
+          !az_ship_in_range(state, baddie, 500)) {
+        begin_charging_phase_missiles(state, baddie);
+      } else if (baddie->param < 1.0) {
+        if (az_ship_in_range(state, baddie, 200)) {
+          fire_oth_spray(state, baddie);
+        }
         begin_dogfight(baddie);
-      } else {
-        fly_towards(state, baddie, time, target);
+      }
+    } break;
+    case BARRAGE_STATE: {
+      az_vpluseq(&baddie->velocity, az_vcaplen(az_vneg(baddie->velocity),
+                                               300 * time));
+      const az_vector_t delta_to_ship =
+        az_vsub(state->ship.position, baddie->position);
+      az_vector_t rel_impact;
+      if (!az_lead_target(delta_to_ship, state->ship.velocity, 1200,
+                          &rel_impact)) {
+        rel_impact = delta_to_ship;
+      }
+      baddie->angle = az_angle_towards(baddie->angle, TURN_RATE * time,
+                                       az_vtheta(rel_impact));
+      if (baddie->cooldown <= 0.0) {
+        if (az_can_see_ship(state, baddie)) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BARRAGE,
+                                    20.0, 0.0, 0.0);
+        } else {
+          for (int i = -1; i <= 1; i += 2) {
+            az_projectile_t *proj = az_fire_baddie_projectile(
+                state, baddie, AZ_PROJ_OTH_PHASE_ROCKET, 20.0, 0.0, 0.0);
+            if (proj != NULL) proj->param = i;
+          }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        }
+        begin_dogfight(baddie);
       }
     } break;
     default:
@@ -263,6 +348,17 @@ void az_on_oth_supergunship_damaged(
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   if (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) {
     decloak_immediately(state, baddie);
+    set_tractor_node(baddie, NULL);
+    switch (get_primary_state(baddie)) {
+      case TRY_TO_CLOAK_STATE:
+      case SNEAK_UP_BEHIND_STATE:
+        begin_dogfight(baddie);
+        break;
+      case FLEE_WHILE_CLOAKED_STATE:
+        begin_retreat(baddie);
+        break;
+      default: break;
+    }
     AZ_ARRAY_LOOP(decoy, state->baddies) {
       if (decoy->kind != AZ_BAD_OTH_DECOY) continue;
       az_kill_baddie(state, decoy);
@@ -286,8 +382,7 @@ void az_tick_bad_oth_decoy(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_DECOY);
   const double old_angle = baddie->angle;
-  az_fly_towards_ship(state, baddie, time, TURN_RATE, MAX_SPEED,
-                      FORWARD_ACCEL, 200, 200, 100);
+  fly_towards_ship(state, baddie, time);
   if (baddie->cooldown <= 0.0 &&
       az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
       az_can_see_ship(state, baddie)) {

@@ -225,9 +225,9 @@ static void draw_oth_with_alpha(
                      baddie->kind != AZ_BAD_OTH_SUPERGUNSHIP &&
                      baddie->kind != AZ_BAD_OTH_DECOY);
 
+  alpha = fmaxf(alpha, 0.33f * baddie->armor_flare);
   const double hurt_ratio = 1.0 - baddie->health / baddie->data->max_health;
   const GLfloat flare = fmax(baddie->armor_flare, 0.5 * hurt_ratio);
-  alpha = fmaxf(alpha, 0.33f * flare);
 
   for (int i = 0; i < num_triangles; ++i) {
     const az_vector_t *vs = vertices + i * 3;
