@@ -33,7 +33,7 @@
 
 typedef struct {
   int x, y;
-  az_button_t main, erase, confirm, cancel;
+  az_button_t main, erase_or_copy, confirm, cancel;
 } az_title_save_slot_t;
 
 typedef struct {
@@ -50,6 +50,7 @@ typedef struct {
     AZ_TMODE_RECORDS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_ERASING,
+    AZ_TMODE_COPYING,
     AZ_TMODE_PICK_KEY,
     AZ_TMODE_STARTING,
     AZ_TMODE_QUITTING
@@ -58,6 +59,7 @@ typedef struct {
     struct { int step; double progress; } intro;
     struct { az_clock_t start; } ready;
     struct { int slot_index; bool do_erase; } erasing;
+    struct { int dest_index; int src_index; } copying;
     struct { double progress; int slot_index; } starting;
   } mode_data;
 

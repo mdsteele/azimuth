@@ -49,6 +49,13 @@ static void do_polygon(GLenum mode, az_polygon_t polygon) {
   } glEnd();
 }
 
+static bool any_saved_games(const az_title_state_t *state) {
+  AZ_ARRAY_LOOP(saved_game, state->saved_games->games) {
+    if (saved_game->present) return true;
+  }
+  return false;
+}
+
 /*===========================================================================*/
 
 static void draw_title_letter(char ch, float hilight) {
@@ -431,6 +438,11 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
   const bool normal = (state->mode == AZ_TMODE_NORMAL);
   const bool erasing = (state->mode == AZ_TMODE_ERASING &&
                         state->mode_data.erasing.slot_index == index);
+  const bool copying_to = (state->mode == AZ_TMODE_COPYING &&
+                           state->mode_data.copying.dest_index == index);
+  const bool copying_from = (state->mode == AZ_TMODE_COPYING &&
+                             state->mode_data.copying.dest_index != index &&
+                             saved_game->present);
   const bool starting = (state->mode == AZ_TMODE_STARTING &&
                          state->mode_data.starting.slot_index == index);
   glPushMatrix(); {
@@ -438,20 +450,37 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
 
     // Draw slot frame and title:
     az_draw_standard_button(&slot->main);
-    if (normal || erasing || starting) glColor3f(1, 1, 1); // white
-    else glColor3f(0.25, 0.25, 0.25); // dark gray
+    if (normal || erasing || starting || copying_to || copying_from) {
+      glColor3f(1, 1, 1); // white
+    } else glColor3f(0.25, 0.25, 0.25); // dark gray
     az_draw_printf(8, AZ_ALIGN_LEFT, 6, 6, "HOPPER %d", index + 1);
 
-    // Draw "ERASE" button:
+    // Draw "ERASE" or "COPY" button:
     if (saved_game->present) {
-      az_draw_dangerous_button(&slot->erase);
+      az_draw_dangerous_button(&slot->erase_or_copy);
       if (normal) glColor3f(0.75, 0, 0); // red
       else glColor3f(0.25, 0.25, 0.25); // dark gray
       az_draw_string(8, AZ_ALIGN_RIGHT, SAVE_SLOT_WIDTH - 5, 5, "ERASE");
+    } else if (any_saved_games(state)) {
+      az_draw_standard_button(&slot->erase_or_copy);
+      if (normal) glColor3f(0.5, 0.5, 1); // bluish
+      else glColor3f(0.25, 0.25, 0.25); // dark gray
+      az_draw_string(8, AZ_ALIGN_RIGHT, SAVE_SLOT_WIDTH - 9, 5, "COPY");
     }
 
+    // If we're copying to this file, draw the cancellation UI:
+    if (copying_to) {
+      glColor3f(1, 1, 1); // white
+      az_draw_string(8, AZ_ALIGN_CENTER, SAVE_SLOT_WIDTH/2,
+                     SAVE_SLOT_HEIGHT/2 - 4, "Copy from where?");
+      if (slot->cancel.hovering) {
+        glColor3f(slot->cancel.hover_pulse, 1, 0);
+      } else glColor3f(0, 0.3, 0);
+      az_draw_string(8, AZ_ALIGN_CENTER, slot->cancel.x, slot->cancel.y - 4,
+                     "CANCEL");
+    }
     // If the save slot is empty, mark it as a new game.
-    if (!saved_game->present) {
+    else if (!saved_game->present) {
       if (normal) glColor3f(1, 1, 1); // white
       else glColor3f(0.25, 0.25, 0.25); // dark gray
       az_draw_string(8, AZ_ALIGN_CENTER, SAVE_SLOT_WIDTH/2,
@@ -482,12 +511,12 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
       assert(0 <= room->zone_key);
       assert(room->zone_key < state->planet->num_zones);
       const az_zone_t *zone = &state->planet->zones[room->zone_key];
-      if (normal || starting) az_gl_color(zone->color);
+      if (normal || starting || copying_from) az_gl_color(zone->color);
       else glColor3ub(zone->color.r / 3, zone->color.g / 3, zone->color.b / 3);
       az_draw_string(8, AZ_ALIGN_LEFT, 6, 24, zone->name);
 
       // Draw the elapsed time of this save file, as "hours:minutes":
-      if (normal || starting) glColor3f(1, 1, 1); // white
+      if (normal || starting || copying_from) glColor3f(1, 1, 1); // white
       else glColor3f(0.25, 0.25, 0.25); // dark gray
       assert(player->total_time >= 0.0);
       const int seconds = floor(player->total_time);
@@ -570,7 +599,7 @@ void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
     save_slot->y = SAVE_SLOTS_TOP +
       row * (SAVE_SLOT_HEIGHT + SAVE_SLOT_SPACING);
     az_init_button(&save_slot->main, save_slot_polygon, 0, 0);
-    az_init_button(&save_slot->erase, save_slot_erase_polygon, 0, 0);
+    az_init_button(&save_slot->erase_or_copy, save_slot_erase_polygon, 0, 0);
     const int confirm_cancel_y = SAVE_SLOT_HEIGHT/2 + 18;
     az_init_button(&save_slot->confirm, save_slot_confirm_cancel_polygon,
                    SAVE_SLOT_WIDTH/4, confirm_cancel_y);
@@ -704,18 +733,24 @@ static void tick_mode(az_title_state_t *state, double time) {
 static void tick_save_slot(az_title_state_t *state, int index, double time,
                            az_clock_t clock, az_soundboard_t *soundboard) {
   az_title_save_slot_t *slot = &state->slots[index];
-  az_tick_button(&slot->main, slot->x, slot->y,
-                 (state->mode == AZ_TMODE_NORMAL), time, clock, soundboard);
-  az_tick_button(&slot->erase, slot->x, slot->y,
-                 (state->mode == AZ_TMODE_NORMAL &&
-                  state->saved_games->games[index].present),
-                 time, clock, soundboard);
+  const bool present = state->saved_games->games[index].present;
+  const bool normal = (state->mode == AZ_TMODE_NORMAL);
   const bool erasing = (state->mode == AZ_TMODE_ERASING &&
                         state->mode_data.erasing.slot_index == index);
-  az_tick_button(&slot->confirm,
-                 slot->x, slot->y, erasing, time, clock, soundboard);
-  az_tick_button(&slot->cancel,
-                 slot->x, slot->y, erasing, time, clock, soundboard);
+  const bool copying_to = (state->mode == AZ_TMODE_COPYING &&
+                           state->mode_data.copying.dest_index == index);
+  const bool copying_from = (state->mode == AZ_TMODE_COPYING &&
+                             state->mode_data.copying.dest_index != index &&
+                             present);
+  az_tick_button(&slot->main, slot->x, slot->y,
+                 (normal || copying_from), time, clock, soundboard);
+  az_tick_button(&slot->erase_or_copy, slot->x, slot->y,
+                 (normal && (present || any_saved_games(state))),
+                 time, clock, soundboard);
+  az_tick_button(&slot->confirm, slot->x, slot->y, erasing,
+                 time, clock, soundboard);
+  az_tick_button(&slot->cancel, slot->x, slot->y, (erasing || copying_to),
+                 time, clock, soundboard);
 }
 
 void az_tick_title_state(az_title_state_t *state, double time) {
@@ -765,26 +800,48 @@ void az_title_start_game(az_title_state_t *state, int slot_index) {
 static void save_slot_on_click(az_title_state_t *state, int index,
                                int x, int y) {
   az_title_save_slot_t *slot = &state->slots[index];
-  if (state->mode == AZ_TMODE_NORMAL) {
+  const bool present = state->saved_games->games[index].present;
+  const bool normal = (state->mode == AZ_TMODE_NORMAL);
+  const bool copying_from = (state->mode == AZ_TMODE_COPYING &&
+                             state->mode_data.copying.dest_index != index &&
+                             present);
+  if (normal || copying_from) {
     if (az_button_on_click(&slot->main, x - slot->x, y - slot->y,
                            &state->soundboard)) {
-      az_title_start_game(state, index);
-    }
-    if (state->saved_games->games[index].present) {
-      if (az_button_on_click(&slot->erase, x - slot->x, y - slot->y,
-                             &state->soundboard)) {
-        state->mode = AZ_TMODE_ERASING;
-        state->mode_data.erasing.slot_index = index;
-        state->mode_data.erasing.do_erase = false;
+      if (normal) {
+        az_title_start_game(state, index);
+      } else {
+        state->mode_data.copying.src_index = index;
       }
     }
-  } else if (state->mode == AZ_TMODE_ERASING &&
-             state->mode_data.erasing.slot_index == index) {
-    if (az_button_on_click(&slot->confirm, x - slot->x, y - slot->y,
+  }
+  if (normal) {
+    if (present || any_saved_games(state)) {
+      if (az_button_on_click(&slot->erase_or_copy, x - slot->x, y - slot->y,
+                             &state->soundboard)) {
+        if (present) {
+          state->mode = AZ_TMODE_ERASING;
+          state->mode_data.erasing.slot_index = index;
+          state->mode_data.erasing.do_erase = false;
+        } else {
+          state->mode = AZ_TMODE_COPYING;
+          state->mode_data.copying.dest_index = index;
+          state->mode_data.copying.src_index = -1;
+        }
+      }
+    }
+  } else {
+    const bool erasing = (state->mode == AZ_TMODE_ERASING &&
+                          state->mode_data.erasing.slot_index == index);
+    const bool copying_to = (state->mode == AZ_TMODE_COPYING &&
+                             state->mode_data.copying.dest_index == index);
+    if (erasing &&
+        az_button_on_click(&slot->confirm, x - slot->x, y - slot->y,
                            &state->soundboard)) {
       state->mode_data.erasing.do_erase = true;
     }
-    if (az_button_on_click(&slot->cancel, x - slot->x, y - slot->y,
+    if ((erasing || copying_to) &&
+        az_button_on_click(&slot->cancel, x - slot->x, y - slot->y,
                            &state->soundboard)) {
       state->mode = AZ_TMODE_NORMAL;
     }

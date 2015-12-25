@@ -39,6 +39,12 @@ static void erase_saved_game(az_saved_games_t *saved_games, int slot_index) {
   az_save_saved_games(saved_games);
 }
 
+static void copy_saved_game(az_saved_games_t *saved_games, int src_index,
+                            int dest_index) {
+  saved_games->games[dest_index] = saved_games->games[src_index];
+  az_save_saved_games(saved_games);
+}
+
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs, bool skip_intro) {
@@ -108,6 +114,13 @@ az_title_action_t az_title_event_loop(
     if (state.mode == AZ_TMODE_ERASING &&
         state.mode_data.erasing.do_erase) {
       erase_saved_game(saved_games, state.mode_data.erasing.slot_index);
+      state.mode = AZ_TMODE_NORMAL;
+    }
+    // Check if we need to copy a saved game.
+    if (state.mode == AZ_TMODE_COPYING &&
+        state.mode_data.copying.src_index >= 0) {
+      copy_saved_game(saved_games, state.mode_data.copying.src_index,
+                      state.mode_data.copying.dest_index);
       state.mode = AZ_TMODE_NORMAL;
     }
 
