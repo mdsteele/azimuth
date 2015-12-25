@@ -522,7 +522,8 @@ static void summarize_scenario(const az_planet_t *planet) {
   }
   if (linebreak) { printf("\n"); linebreak = false; }
   // Print rooms numbers and destinations of doors that don't have a legitimate
-  // matching exit door; also, print ordnance doors that don't set a flag:
+  // matching exit door; print ordnance doors that don't set a flag; and print
+  // rooms leading to other zones that don't set music:
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
     const az_room_t *room = &planet->rooms[room_index];
     for (int i = 0; i < room->num_doors; ++i) {
@@ -547,6 +548,22 @@ static void summarize_scenario(const az_planet_t *planet) {
         if (!has_exit) {
           printf("\x1b[31m%d -> %d\x1b[m\n", room_index, door->destination);
           linebreak = true;
+        }
+        if (dest->zone_key != room->zone_key) {
+          bool found_mus = false;
+          if (room->on_start != NULL) {
+            for (int j = 0; j < room->on_start->num_instructions; ++j) {
+              if (room->on_start->instructions[j].opcode == AZ_OP_MUS) {
+                found_mus = true;
+                break;
+              }
+            }
+          }
+          if (!found_mus) {
+            printf("\x1b[31mRoom %d: Next to another zone without mus\x1b[m\n",
+                   room_index);
+            linebreak = true;
+          }
         }
       }
       if (door->kind == AZ_DOOR_ROCKET || door->kind == AZ_DOOR_HYPER_ROCKET ||
