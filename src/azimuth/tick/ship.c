@@ -828,7 +828,7 @@ static void fire_weapons(az_space_state_t *state, double time) {
   assert(minor_gun < major_gun ||
          (minor_gun == AZ_GUN_NONE && major_gun == AZ_GUN_NONE));
   if (major_gun == AZ_GUN_BEAM) {
-    if (!controls->fire_held) return;
+    if (controls->ordn_held || !controls->fire_held) return;
   } else if (!controls->fire_pressed) return;
   controls->fire_pressed = false;
   switch (major_gun) {
