@@ -196,6 +196,22 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
     }
   } glEnd();
 
+  // Corner guns:
+  glPushMatrix(); {
+    for (int i = 0; i < 8; ++i) {
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 0, 0, 0.7); glVertex2f(91, 0); glColor4f(1, 0, 0, 0);
+        glVertex2f(91, -4); glVertex2f(93, 0); glVertex2f(91, 4);
+      } glEnd();
+      glBegin(GL_TRIANGLE_STRIP); {
+        az_gl_color(outer); glVertex2f(85,  4); glVertex2f(92,  4);
+        az_gl_color(inner); glVertex2f(83,  0); glVertex2f(91,  0);
+        az_gl_color(outer); glVertex2f(85, -4); glVertex2f(92, -4);
+      } glEnd();
+      az_gl_rotated(AZ_DEG2RAD(45));
+    }
+  } glPopMatrix();
+
   // Central hub:
   glBegin(GL_TRIANGLE_FAN); {
     az_gl_color(inner); glVertex2f(0, 0); az_gl_color(outer);
