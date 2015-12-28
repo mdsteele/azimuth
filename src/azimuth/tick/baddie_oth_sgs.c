@@ -319,9 +319,11 @@ void az_tick_bad_oth_supergunship(
       baddie->angle = az_angle_towards(baddie->angle, TURN_RATE * time,
                                        az_vtheta(rel_impact));
       if (baddie->cooldown <= 0.0) {
-        if (az_can_see_ship(state, baddie)) {
+        const int secondary = get_secondary_state(baddie);
+        if (secondary == 0 && az_can_see_ship(state, baddie)) {
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BARRAGE,
                                     20.0, 0.0, 0.0);
+          begin_dogfight(baddie);
         } else {
           for (int i = -1; i <= 1; i += 2) {
             az_projectile_t *proj = az_fire_baddie_projectile(
@@ -329,8 +331,13 @@ void az_tick_bad_oth_supergunship(
             if (proj != NULL) proj->param = i;
           }
           az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+          if (secondary >= 2) {
+            begin_dogfight(baddie);
+          } else {
+            set_secondary_state(baddie, secondary + 1);
+            baddie->cooldown = 0.4;
+          }
         }
-        begin_dogfight(baddie);
       }
     } break;
     default:
