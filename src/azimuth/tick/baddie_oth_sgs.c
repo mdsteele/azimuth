@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/baddie_oth.h"
@@ -37,6 +38,7 @@ enum {
   RETREAT_STATE,
   TRY_TO_CLOAK_STATE,
   SNEAK_UP_BEHIND_STATE,
+  AMBUSH_STATE,
   FLEE_WHILE_CLOAKED_STATE,
   BARRAGE_STATE,
 };
@@ -72,7 +74,7 @@ static void set_secondary_state(az_baddie_t *baddie, int secondary) {
 #define TRACTOR_MAX_LENGTH 300.0
 #define TRACTOR_COMPONENT_INDEX 6
 #define TRACTOR_CLOAK_CHARGE_TIME 2.5
-#define TRACTOR_CLOAK_DECAY_TIME 5.0
+#define TRACTOR_CLOAK_DECAY_TIME 8.0
 
 static bool tractor_locked_on(
     const az_baddie_t *baddie, az_vector_t *tractor_pos_out,
@@ -288,11 +290,53 @@ void az_tick_bad_oth_supergunship(
         }
       }
       if (baddie->param >= 1.0) {
-        set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
+        if (az_ship_in_range(state, baddie, 250)) {
+          set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
+        } else {
+          set_primary_state(baddie, SNEAK_UP_BEHIND_STATE);
+        }
       }
     } break;
     case SNEAK_UP_BEHIND_STATE: {
-      // TODO: implement SNEAK_UP_BEHIND_STATE
+      if (baddie->param < 1.0) {
+        if (az_ship_in_range(state, baddie, 200)) {
+          fire_oth_spray(state, baddie);
+        }
+        begin_dogfight(baddie);
+      } else if (az_ship_is_decloaked(&state->ship)) {
+        const az_vector_t target =
+          az_vadd(az_vpolar(-75, state->ship.angle), state->ship.position);
+        if (az_vwithin(baddie->position, target, 50)) {
+          set_primary_state(baddie, AMBUSH_STATE);
+          baddie->cooldown = 1.0;
+        } else {
+          az_fly_towards_position(state, baddie, time, target, 2 * TURN_RATE,
+                                  1.5 * MAX_SPEED, 2.5 * FORWARD_ACCEL, 200,
+                                  100);
+        }
+      } else {
+        set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
+      }
+    } break;
+    case AMBUSH_STATE: {
+      az_vpluseq(&baddie->velocity, az_vcaplen(az_vneg(baddie->velocity),
+                                               300 * time));
+      const az_vector_t delta_to_ship =
+        az_vsub(state->ship.position, baddie->position);
+      az_vector_t rel_impact;
+      if (!az_lead_target(delta_to_ship, state->ship.velocity, 1200,
+                          &rel_impact)) {
+        rel_impact = delta_to_ship;
+      }
+      baddie->angle = az_angle_towards(baddie->angle, 2 * TURN_RATE * time,
+                                       az_vtheta(rel_impact));
+      if (baddie->cooldown <= 0.0 ||
+          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(2))) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                  20.0, 0.0, 0.0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        begin_dogfight(baddie);
+      }
     } break;
     case FLEE_WHILE_CLOAKED_STATE: {
       fly_away_from_ship(state, baddie, time, NULL);
