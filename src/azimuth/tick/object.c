@@ -385,6 +385,10 @@ bool az_try_damage_baddie(
           }
         }
       }
+      // For the Oth Supergunship, decloak it when it dies:
+      else if (state->boss_death_mode.boss.kind == AZ_BAD_OTH_SUPERGUNSHIP) {
+        state->boss_death_mode.boss.param = 0.0;
+      }
       // When a boss dies, kill all other baddies in the room, except for
       // baddies that are _permanently_ incorporeal.  Also expire certain kinds
       // of projectiles.
