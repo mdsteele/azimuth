@@ -96,7 +96,22 @@ static void tick_boss_death_mode(az_space_state_t *state, double time) {
       if (mode_data->progress >= 1.0) {
         mode_data->step = AZ_BDS_BOOM;
         mode_data->progress = 0.0;
-        az_play_sound(&state->soundboard, AZ_SND_BOSS_EXPLODE);
+        if (state->boss_death_mode.boss.kind == AZ_BAD_OTH_GUNSHIP) {
+          state->camera.wobble_goal = boom_time;
+          az_particle_t *particle;
+          if (az_insert_particle(state, &particle)) {
+            particle->kind = AZ_PAR_NPS_PORTAL;
+            particle->color = (az_color_t){128, 64, 255, 255};
+            particle->position = state->boss_death_mode.boss.position;
+            particle->velocity = AZ_VZERO;
+            particle->angle = 0.0;
+            particle->lifetime = 2.0 * boom_time;
+            particle->param1 = 50.0 * sqrt(2.0 * boom_time);
+          }
+          az_play_sound(&state->soundboard, AZ_SND_NPS_PORTAL);
+        } else {
+          az_play_sound(&state->soundboard, AZ_SND_BOSS_EXPLODE);
+        }
       }
       break;
     case AZ_BDS_BOOM:

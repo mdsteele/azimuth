@@ -310,27 +310,31 @@ void az_space_draw_screen(az_space_state_t *state) {
 
   // If we're in boss-death mode, draw the explosion.
   if (state->mode == AZ_MODE_BOSS_DEATH) {
-    assert(state->boss_death_mode.progress >= 0.0);
-    assert(state->boss_death_mode.progress <= 1.0);
+    const double progress = state->boss_death_mode.progress;
+    assert(progress >= 0.0);
+    assert(progress <= 1.0);
     if (state->boss_death_mode.step == AZ_BDS_BOOM) {
-      glPushMatrix(); {
-        transform_to_camera_matrix(state);
-        const az_vector_t position = state->boss_death_mode.boss.position;
-        az_gl_translated(position);
-        az_gl_rotated(az_vtheta(position));
-        glBegin(GL_QUADS); {
-          const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
-          const GLfloat inner = outer * state->boss_death_mode.progress *
-            state->boss_death_mode.progress;
-          glColor4f(1, 1, 1, state->boss_death_mode.progress);
-          glVertex2f(outer, inner); glVertex2f(-outer, inner);
-          glVertex2f(-outer, -inner); glVertex2f(outer, -inner);
-          glVertex2f(inner, outer); glVertex2f(-inner, outer);
-          glVertex2f(-inner, inner); glVertex2f(inner, inner);
-          glVertex2f(inner, -outer); glVertex2f(-inner, -outer);
-          glVertex2f(-inner, -inner); glVertex2f(inner, -inner);
-        } glEnd();
-      } glPopMatrix();
+      if (state->boss_death_mode.boss.kind == AZ_BAD_OTH_GUNSHIP) {
+        tint_screen(1, progress * progress);
+      } else {
+        glPushMatrix(); {
+          transform_to_camera_matrix(state);
+          const az_vector_t position = state->boss_death_mode.boss.position;
+          az_gl_translated(position);
+          az_gl_rotated(az_vtheta(position));
+          glBegin(GL_QUADS); {
+            const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
+            const GLfloat inner = outer * progress * progress;
+            glColor4f(1, 1, 1, progress);
+            glVertex2f(outer, inner); glVertex2f(-outer, inner);
+            glVertex2f(-outer, -inner); glVertex2f(outer, -inner);
+            glVertex2f(inner, outer); glVertex2f(-inner, outer);
+            glVertex2f(-inner, inner); glVertex2f(inner, inner);
+            glVertex2f(inner, -outer); glVertex2f(-inner, -outer);
+            glVertex2f(-inner, -inner); glVertex2f(inner, -inner);
+          } glEnd();
+        } glPopMatrix();
+      }
     } else if (state->boss_death_mode.step == AZ_BDS_FADE) {
       tint_screen(1, 1.0 - state->boss_death_mode.progress);
     }
