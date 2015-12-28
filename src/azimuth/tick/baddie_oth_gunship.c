@@ -426,6 +426,8 @@ void az_on_oth_gunship_damaged(
 void az_tick_bad_reflection(az_space_state_t *state, az_baddie_t *baddie,
                             double time) {
   assert(baddie->kind == AZ_BAD_REFLECTION);
+  const double bolt_lifetime = 2.25;
+  const double nps_lifetime = 3.0;
   if (baddie->state == 0 && !az_ship_is_alive(&state->ship)) {
     baddie->param = -1.0;
     return;
@@ -438,12 +440,17 @@ void az_tick_bad_reflection(az_space_state_t *state, az_baddie_t *baddie,
   baddie->components[0].angle = -rel_angle;
   if (baddie->state == 0) {
     baddie->param = 0.0;
-  } else {
-    const double nps_lifetime = 3.0;
-    if (baddie->param == 0.0) {
+  } else if (baddie->state == 1) {
+    az_play_sound(&state->soundboard, AZ_SND_ELECTRICITY);
+    baddie->state = 2;
+    baddie->cooldown = bolt_lifetime;
+  } else if (baddie->state == 2) {
+    if (baddie->cooldown <= 0.5 * nps_lifetime) {
+      baddie->state = 3;
       state->camera.wobble_goal = 0.5 * nps_lifetime;
       az_play_sound(&state->soundboard, AZ_SND_NPS_PORTAL);
     }
+  } else {
     baddie->param = fmin(1.0, baddie->param + time / (0.5 * nps_lifetime));
     if (baddie->param >= 1.0) {
       const az_vector_t abs_position =

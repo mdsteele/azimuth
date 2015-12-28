@@ -510,7 +510,7 @@ void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
       glColor4f(0, 1.0, 1.0, alpha); glVertex2f(18,  0); glVertex2f(12, 0);
       glColor4f(0, 0.5, 0.5, alpha); glVertex2f(15, -2);
     } glEnd();
-    if (baddie->state != 0) {
+    if (baddie->state == 3) {
       const double nps_lifetime = 3.0;
       az_particle_t particle = {
         .kind = AZ_PAR_NPS_PORTAL,
@@ -522,6 +522,29 @@ void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
       az_draw_particle(&particle, clock);
     }
   } glPopMatrix();
+  if (baddie->state >= 2) {
+    const double bolt_lifetime = 2.25;
+    const az_vector_t abs_position =
+      az_vadd(az_vrotate(baddie->components[0].position, baddie->angle),
+              baddie->position);
+    const az_vector_t abs_origin =
+      az_vadd(az_vpolar(400, baddie->angle + AZ_DEG2RAD(90)),
+              baddie->position);
+    az_particle_t particle = {
+      .kind = AZ_PAR_LIGHTNING_BOLT,
+      .color = (az_color_t){128, 64, 255, 255},
+      .age = bolt_lifetime - baddie->cooldown,
+      .lifetime = bolt_lifetime,
+      .param1 = az_vdist(abs_position, abs_origin),
+      .param2 = 0.66
+    };
+    glPushMatrix(); {
+      az_gl_rotated(-baddie->angle);
+      az_gl_translated(az_vsub(abs_origin, baddie->position));
+      az_gl_rotated(az_vtheta(az_vsub(abs_position, abs_origin)));
+      az_draw_particle(&particle, clock);
+    } glPopMatrix();
+  }
 }
 
 /*===========================================================================*/
