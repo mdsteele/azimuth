@@ -794,4 +794,17 @@ void az_draw_hud(az_space_state_t *state) {
   if (state->mode == AZ_MODE_UPGRADE) draw_upgrade_box(state);
 }
 
+void az_draw_skip_message(const az_space_state_t *state) {
+  if (state->skip.cooldown < 1.0) return;
+  const int top = AZ_SCREEN_HEIGHT - 30;
+  const int height = 26;
+  glBegin(GL_TRIANGLE_STRIP); {
+    glColor4f(0.1, 0.1, 0.1, 0.9); // dark gray tint
+    glVertex2i(0, top);          glVertex2i(AZ_SCREEN_WIDTH, top);
+    glVertex2i(0, top + height); glVertex2i(AZ_SCREEN_WIDTH, top + height);
+  } glEnd();
+  az_draw_paragraph(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + 6, 20,
+                    -1, state->prefs, "$APress [$p] to skip cutscene.");
+}
+
 /*===========================================================================*/

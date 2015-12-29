@@ -260,6 +260,7 @@ void az_space_draw_screen(az_space_state_t *state) {
     az_draw_dialogue(state);
     az_draw_monologue(state);
     draw_global_fade(state);
+    az_draw_skip_message(state);
     return;
   }
 
@@ -350,6 +351,7 @@ void az_space_draw_screen(az_space_state_t *state) {
 
   az_draw_hud(state);
   draw_global_fade(state);
+  az_draw_skip_message(state);
 }
 
 /*===========================================================================*/

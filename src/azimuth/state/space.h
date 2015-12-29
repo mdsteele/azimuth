@@ -156,6 +156,7 @@ typedef struct {
   az_upgrade_mode_data_t upgrade_mode;
   az_script_vm_t sync_vm; // VM for storing synchronously-suspended scripts
   double console_help_message_cooldown;
+  struct { double cooldown; bool allowed; bool active; } skip;
   bool intro; // true if we just started the game
   bool victory; // true if we just won the game
 

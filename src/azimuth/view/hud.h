@@ -35,6 +35,8 @@ void az_draw_monologue(const az_space_state_t *state);
 
 void az_draw_hud(az_space_state_t *state);
 
+void az_draw_skip_message(const az_space_state_t *state);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_VIEW_HUD_H_

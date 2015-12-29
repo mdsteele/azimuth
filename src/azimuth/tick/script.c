@@ -234,6 +234,12 @@ static void set_object_state(az_object_t *object, double value) {
   }
 }
 
+static void disable_skips(az_space_state_t *state) {
+  state->skip.cooldown = 0.0;
+  state->skip.allowed = false;
+  state->skip.active = false;
+}
+
 /*===========================================================================*/
 
 static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
@@ -781,12 +787,14 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
       // Cutscenes:
       case AZ_OP_FADO:
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        if (state->skip.active) break;
         state->global_fade.step = AZ_GFS_FADE_OUT;
         state->global_fade.fade_alpha = 0.0;
         state->global_fade.fade_gray = 0.0f;
         SUSPEND(&state->sync_vm);
       case AZ_OP_FADI:
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        if (state->skip.active) break;
         state->global_fade.step = AZ_GFS_FADE_IN;
         state->global_fade.fade_alpha = 1.0;
         state->global_fade.fade_gray = 0.0f;
@@ -794,6 +802,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         SUSPEND(&state->sync_vm);
       case AZ_OP_FLASH:
         assert(state->global_fade.step == AZ_GFS_INACTIVE);
+        if (state->skip.active) break;
         state->global_fade.step = AZ_GFS_FADE_IN;
         state->global_fade.fade_alpha = 1.0;
         state->global_fade.fade_gray = 1.0f;
@@ -803,6 +812,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         if (scene_index < 0 || scene_index > AZ_NUM_SCENES) {
           SCRIPT_ERROR("invalid scene index");
         }
+        if (state->skip.active && scene_index != (int)AZ_SCENE_NOTHING) break;
         state->cutscene.next = (az_scene_t)scene_index;
         state->cutscene.next_text = NULL;
         if (state->cutscene.scene == AZ_SCENE_NOTHING) {
@@ -817,6 +827,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
             paragraph_index >= state->planet->num_paragraphs) {
           SCRIPT_ERROR("invalid paragraph index");
         }
+        if (state->skip.active) break;
         state->cutscene.next = AZ_SCENE_TEXT;
         state->cutscene.next_text = state->planet->paragraphs[paragraph_index];
         if (state->cutscene.scene == AZ_SCENE_NOTHING) {
@@ -824,6 +835,10 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           state->cutscene.scene_text = state->cutscene.next_text;
           state->cutscene.fade_alpha = 1.0;
         } else SUSPEND(&state->sync_vm);
+      } break;
+      case AZ_OP_SKIP: {
+        if (ins.immediate) state->skip.allowed = true;
+        else disable_skips(state);
       } break;
       // Messages/dialog:
       case AZ_OP_MSG: {
@@ -835,6 +850,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         az_set_message(state, state->planet->paragraphs[paragraph_index]);
       } break;
       case AZ_OP_DLOG:
+        if (state->skip.active) break;
         if (state->mode == AZ_MODE_NORMAL &&
             state->dialogue.step == AZ_DLS_INACTIVE &&
             state->monologue.step == AZ_MLS_INACTIVE) {
@@ -843,6 +859,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         }
         SCRIPT_ERROR("can't start dialogue now");
       case AZ_OP_PT:
+        if (state->skip.active) break;
         if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int portrait = (int)ins.immediate;
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
@@ -853,6 +870,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         } else SCRIPT_ERROR("can't PT when not in dialogue");
         break;
       case AZ_OP_PB:
+        if (state->skip.active) break;
         if (state->dialogue.step != AZ_DLS_INACTIVE) {
           const int portrait = (int)ins.immediate;
           if (portrait < 0 || portrait > AZ_NUM_PORTRAITS) {
@@ -863,6 +881,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         } else SCRIPT_ERROR("can't PB when not in dialogue");
         break;
       case AZ_OP_TT:
+        if (state->skip.active) break;
         if (state->dialogue.step == AZ_DLS_INACTIVE) {
           SCRIPT_ERROR("can't TT when not in dialogue");
         } else if (state->monologue.step != AZ_MLS_INACTIVE) {
@@ -879,6 +898,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         }
         SUSPEND(&state->sync_vm);
       case AZ_OP_TB:
+        if (state->skip.active) break;
         if (state->dialogue.step == AZ_DLS_INACTIVE) {
           SCRIPT_ERROR("can't TB when not in dialogue");
         } else if (state->monologue.step != AZ_MLS_INACTIVE) {
@@ -896,19 +916,23 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         SUSPEND(&state->sync_vm);
       case AZ_OP_DEND:
         if (state->dialogue.step == AZ_DLS_INACTIVE) {
+          if (state->skip.active) break;
           SCRIPT_ERROR("can't DEND when not in dialogue");
         } else if (state->monologue.step != AZ_MLS_INACTIVE) {
+          if (state->skip.active) break;
           SCRIPT_ERROR("can't DEND during monologue");
         }
         state->dialogue = (az_dialogue_state_t){ .step = AZ_DLS_END };
         SUSPEND(&state->sync_vm);
       case AZ_OP_MLOG:
+        if (state->skip.active) break;
         if (state->monologue.step == AZ_MLS_INACTIVE) {
           state->monologue = (az_monologue_state_t){ .step = AZ_MLS_BEGIN };
           SUSPEND(&state->sync_vm);
         }
         SCRIPT_ERROR("can't MLOG while already in monologue");
       case AZ_OP_TM:
+        if (state->skip.active) break;
         if (state->monologue.step != AZ_MLS_INACTIVE) {
           const int paragraph_index = (int)ins.immediate;
           if (paragraph_index < 0 ||
@@ -934,6 +958,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           state->monologue.chars_to_print = 0;
           SUSPEND(&state->sync_vm);
         }
+        if (state->skip.active) break;
         SCRIPT_ERROR("can't MEND when not in monologue");
       // Music/sound:
       case AZ_OP_MUS: {
@@ -951,6 +976,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         if (sound_index < 0 || sound_index > AZ_NUM_SOUND_KEYS) {
           SCRIPT_ERROR("invalid sound index");
         }
+        if (state->skip.active) break;
         az_play_sound(&state->soundboard, (az_sound_key_t)sound_index);
       } break;
       // Timers:
@@ -960,6 +986,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         if (ins.opcode == AZ_OP_WAITS) {
           STACK_POP(&wait_duration);
         } else wait_duration = ins.immediate;
+        if (state->skip.active) break;
         if (wait_duration > 0.0) {
           if (state->cutscene.scene != AZ_SCENE_NOTHING ||
               state->dialogue.step != AZ_DLS_INACTIVE ||
@@ -983,6 +1010,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
           AZ_ARRAY_LOOP(timer, state->timers) {
             if (timer->vm.script != NULL) continue;
             timer->time_remaining = wait_duration;
+            disable_skips(state);
             SUSPEND(&timer->vm);
           }
           SCRIPT_ERROR("too many timers");
@@ -995,6 +1023,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
         state->countdown.is_active = true;
         state->countdown.active_for = 0.0;
         state->countdown.time_remaining = fmax(0.0, ins.immediate);
+        disable_skips(state);
         SUSPEND(&state->countdown.vm);
         break;
       case AZ_OP_SAFE:
@@ -1037,6 +1066,7 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
   }
 
  halt:
+  disable_skips(state);
   state->cutscene.next = AZ_SCENE_NOTHING;
   state->cutscene.next_text = NULL;
   if (state->dialogue.step != AZ_DLS_INACTIVE) {

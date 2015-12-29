@@ -133,6 +133,7 @@ typedef enum {
   AZ_OP_FLASH, // flash screen white, then fade back to normal
   AZ_OP_SCENE, // transition to cutscene i (suspend script until scene starts)
   AZ_OP_SCTXT, // display text i as a cutscene
+  AZ_OP_SKIP, // enable (if i != 0) or disable (if i == 0) skip.allowed
   // Messages/dialogue:
   AZ_OP_MSG, // display text i at bottom of screen
   AZ_OP_DLOG, // begin dialogue

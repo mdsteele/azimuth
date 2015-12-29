@@ -325,7 +325,8 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       }
       break;
   }
-  if (ready_for_next_scene && cutscene->next != cutscene->scene) {
+  if ((ready_for_next_scene || state->skip.active) &&
+      cutscene->next != cutscene->scene) {
     fade_to_next_scene(state, time);
   } else {
     fade_in(cutscene, time);

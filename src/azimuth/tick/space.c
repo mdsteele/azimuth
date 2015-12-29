@@ -265,7 +265,7 @@ static void tick_dialogue(az_space_state_t *state, double time) {
       assert(dialogue->chars_to_print < dialogue->paragraph_length);
       assert(state->sync_vm.script != NULL);
       dialogue->progress += time / char_time;
-      if (dialogue->progress >= 1.0) {
+      if (dialogue->progress >= 1.0 || state->skip.active) {
         dialogue->progress = 0.0;
         ++dialogue->chars_to_print;
         if (dialogue->chars_to_print == dialogue->paragraph_length) {
@@ -277,6 +277,7 @@ static void tick_dialogue(az_space_state_t *state, double time) {
       assert(dialogue->paragraph != NULL);
       assert(dialogue->chars_to_print == dialogue->paragraph_length);
       assert(state->sync_vm.script != NULL);
+      if (state->skip.active) az_resume_script(state, &state->sync_vm);
       break;
     case AZ_DLS_END:
       assert(dialogue->paragraph == NULL);
@@ -493,7 +494,7 @@ static void tick_monologue(az_space_state_t *state, double time) {
       assert(monologue->chars_to_print < monologue->paragraph_length);
       assert(state->sync_vm.script != NULL);
       monologue->progress += time / char_time;
-      if (monologue->progress >= 1.0) {
+      if (monologue->progress >= 1.0 || state->skip.active) {
         monologue->progress = 0.0;
         ++monologue->chars_to_print;
         if (monologue->chars_to_print == monologue->paragraph_length) {
@@ -505,6 +506,7 @@ static void tick_monologue(az_space_state_t *state, double time) {
       assert(monologue->paragraph != NULL);
       assert(monologue->chars_to_print == monologue->paragraph_length);
       assert(state->sync_vm.script != NULL);
+      if (state->skip.active) az_resume_script(state, &state->sync_vm);
       break;
     case AZ_MLS_END:
       assert(monologue->paragraph == NULL);
@@ -542,7 +544,8 @@ static void tick_sync_timer(az_space_state_t *state, double time) {
   assert(state->sync_timer.is_active);
   assert(state->sync_timer.time_remaining > 0.0);
   assert(state->sync_vm.script != NULL);
-  state->sync_timer.time_remaining -= time;
+  if (state->skip.active) state->sync_timer.time_remaining = 0.0;
+  else state->sync_timer.time_remaining -= time;
   if (state->sync_timer.time_remaining <= 0.0) {
     state->sync_timer.is_active = false;
     state->sync_timer.time_remaining = 0.0;
@@ -678,6 +681,17 @@ static void hold_ship_sounds(az_space_state_t *state) {
 /*===========================================================================*/
 
 void az_tick_space_state(az_space_state_t *state, double time) {
+  // Cool down skip timer.
+  if (state->skip.allowed) {
+    assert(state->sync_vm.script != NULL);
+    if (!state->skip.active) {
+      state->skip.cooldown = fmax(0.0, state->skip.cooldown - time);
+    } else assert(state->skip.cooldown == 0.0);
+  } else {
+    assert(!state->skip.active);
+    assert(state->skip.cooldown == 0.0);
+  }
+
   // Loop a klaxon sound if the countdown timer is active.
   if (state->countdown.is_active) {
     az_loop_sound(&state->soundboard,
@@ -757,6 +771,8 @@ void az_tick_space_state(az_space_state_t *state, double time) {
     tick_dialogue(state, time);
     return;
   } else assert(state->dialogue.paragraph == NULL);
+
+  assert(!state->skip.allowed);
 
   // Advance the speedrun timer.
   if (state->mode != AZ_MODE_UPGRADE && !state->ship.autopilot.enabled) {

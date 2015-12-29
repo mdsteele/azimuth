@@ -180,6 +180,19 @@ az_space_action_t az_space_event_loop(
     while (az_poll_event(&event)) {
       switch (event.kind) {
         case AZ_EVENT_KEY_DOWN:
+          if (state.skip.allowed && !state.skip.active) {
+            assert(state.sync_vm.script != NULL);
+            if (event.key.id == prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
+              if (state.skip.cooldown < 1.0) {
+                state.skip.cooldown = 4.0;
+              } else {
+                state.skip.active = true;
+                state.skip.cooldown = 0.0;
+              }
+            } else if (event.key.id == AZ_KEY_RETURN) {
+              state.skip.cooldown = (state.skip.cooldown > 0.0 ? 4.0 : 0.3);
+            }
+          }
           if (state.monologue.step != AZ_MLS_INACTIVE) {
             if (state.monologue.step == AZ_MLS_TALK) {
               state.monologue.step = AZ_MLS_WAIT;
@@ -246,7 +259,8 @@ az_space_action_t az_space_event_loop(
             default:
               if (event.key.id == prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
                 if (state.mode == AZ_MODE_NORMAL &&
-                    state.cutscene.scene == AZ_SCENE_NOTHING) {
+                    state.cutscene.scene == AZ_SCENE_NOTHING &&
+                    !state.ship.autopilot.enabled) {
                   state.mode = AZ_MODE_PAUSING;
                   state.pausing_mode = (az_pausing_mode_data_t){
                     .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0

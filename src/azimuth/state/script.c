@@ -124,6 +124,7 @@ const char *az_opcode_name(az_opcode_t opcode) {
     case AZ_OP_FLASH:  return "flash";
     case AZ_OP_SCENE:  return "scene";
     case AZ_OP_SCTXT:  return "sctxt";
+    case AZ_OP_SKIP:   return "skip";
     case AZ_OP_MSG:    return "msg";
     case AZ_OP_DLOG:   return "dlog";
     case AZ_OP_PT:     return "pt";
@@ -273,6 +274,7 @@ static bool should_print_immediate(az_instruction_t ins) {
     case AZ_OP_NPS:
     case AZ_OP_SCENE:
     case AZ_OP_SCTXT:
+    case AZ_OP_SKIP:
     case AZ_OP_MSG:
     case AZ_OP_PT:
     case AZ_OP_PB:
