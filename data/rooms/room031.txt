@@ -34,7 +34,7 @@ $s:has8,bnez/A,lock2,A#test10,hnez,lock1;
 !D1 x5202.81 y36869.75 a3.006252 r30 u2
 !D1 x4621.85 y36969.56 a-0.124373 r32 u1
 !N1/0 x4927.17 y37009.43 a1.438469 u0
-$u:dlog,pt1,pb3,test10,bnez/A,tb45,tt46,tb47,tt48,tb49,tb50,tt51,tb52,tt53,tb54,tt55,tb56,tt57,A#tb58,test10,bnez/B,set10,unlock1,B#test69,bnez/C,set68,C#tb86,dend;
+$u:skip1,dlog,pt1,pb3,test10,bnez/A,tb45,tt46,tb47,tt48,tb49,tb50,tt51,tb52,tt53,tb54,tt55,tb56,tt57,A#tb58,test10,bnez/B,set10,unlock1,B#test69,bnez/C,set68,C#tb86,dend,skip0;
 !N7/9 x5097.93 y36769.78 a-0.131143 u0
 !N5/2 x4962.42 y37052.21 a1.436892 u0
 !N5/1 x4974.97 y37083.66 a-1.705612 u0

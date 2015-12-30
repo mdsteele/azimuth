@@ -31,7 +31,7 @@ $o:set109;
 !N5/1 x8711.19 y9491.11 a0.832817 u0
 !N7/110 x8374.41 y9412.43 a0.833368 u0
 !N1/0 x8663.50 y9380.91 a2.403613 u0
-$u:dlog,pt1,pb4,test107,bnez/A,tb226,tt227,tb228,pb10,tb229,tb230,tb231,pb4,A#tb232,test107,hnez,tt233,tb234,dend,set107,quake3,push5,B#snd1,wait1,subi1,dup,bnez/B,quake0;
+$u:skip1,dlog,pt1,pb4,test107,bnez/A,tb226,tt227,tb228,pb10,tb229,tb230,tb231,pb4,A#tb232,test107,hnez,tt233,tb234,dend,skip0,set107,quake3,push5,B#snd1,wait1,subi1,dup,bnez/B,quake0;
 !N7/109 x8330.89 y9464.17 a0.833368 u0
 !N7/109 x8436.75 y9336.82 a-2.925580 u0
 !N5/1 x8600.40 y9369.28 a0.832817 u0

@@ -100,8 +100,39 @@ static bool script_contains_instruction(const az_script_t *script,
     ok = false; \
   } while (0)
 
-bool az_audit_scenario(const az_planet_t *planet) {
+static bool audit_script(int room_index, const az_script_t *script) {
+  if (script == NULL) return true;
   bool ok = true;
+  const bool has_dlog = script_contains_opcode(script, AZ_OP_DLOG);
+  const bool has_mlog = script_contains_opcode(script, AZ_OP_MLOG);
+  const bool has_skip1 = script_contains_instruction(script, AZ_OP_SKIP, 1);
+  // Check that dlog opcode is accompanied by dend.
+  if (has_dlog && !script_contains_opcode(script, AZ_OP_DEND)) {
+    ROOM_ERROR("Script has dlog opcode, but no dend");
+  }
+  // Check that mlog opcode is accompanied by mend.
+  if (has_mlog && !script_contains_opcode(script, AZ_OP_MEND)) {
+    ROOM_ERROR("Script has mlog opcode, but no mend");
+  }
+  // Check that dlog/mlog/cutscenes are accompanied by skip1.
+  if ((has_dlog || has_mlog || script_contains_opcode(script, AZ_OP_SCENE) ||
+       script_contains_opcode(script, AZ_OP_SCTXT)) &&
+      !has_skip1) {
+    ROOM_ERROR("Cutscene without skip1 opcode");
+  }
+  // Check that skip1 instruction is accompanied by skip0.
+  if (has_skip1 && !script_contains_instruction(script, AZ_OP_SKIP, 0)) {
+    ROOM_ERROR("Script has skip1 instruction, but no skip0");
+  }
+  return ok;
+}
+
+#define CHECK_SCRIPT(script) do { \
+    if (!audit_script(room_index, (script))) ok = false; \
+  } while (0)
+
+bool az_audit_scenario(const az_planet_t *planet) {
+  bool ok = audit_script(-1, planet->on_start);
   bool upgrade_exists[AZ_NUM_UPGRADES] = {false};
   for (int room_index = 0; room_index < planet->num_rooms; ++room_index) {
     const az_room_t *room = &planet->rooms[room_index];
@@ -109,6 +140,8 @@ bool az_audit_scenario(const az_planet_t *planet) {
     if (room->background_pattern == AZ_BG_SOLID_BLACK) {
       ROOM_ERROR("No background pattern");
     }
+    // Check on_start script.
+    CHECK_SCRIPT(room->on_start);
     // Check save points.
     const int num_save_points = count_save_points(room);
     if (num_save_points > 1) ROOM_ERROR("Multiple save points");
@@ -149,23 +182,24 @@ bool az_audit_scenario(const az_planet_t *planet) {
         }
       }
     }
-    // Check liquid orientations.
-    for (int i = 0; i < room->num_gravfields; ++i) {
-      const az_gravfield_spec_t *gravfield = &room->gravfields[i];
-      if (!az_is_liquid(gravfield->kind)) continue;
-      const double expected_angle =
-        (az_vdot(az_vpolar(1, gravfield->angle), gravfield->position) >= 0 ?
-         az_vtheta(gravfield->position) :
-         az_vtheta(az_vneg(gravfield->position)));
-      if (fabs(az_mod2pi(gravfield->angle - expected_angle)) > 0.00001) {
-        ROOM_ERROR("Liquid at (%.02f, %.02f) not vertical",
-                   gravfield->position.x, gravfield->position.y);
-      }
+    // Check baddies.
+    for (int i = 0; i < room->num_baddies; ++i) {
+      const az_baddie_spec_t *baddie = &room->baddies[i];
+      // Check on_kill script.
+      CHECK_SCRIPT(baddie->on_kill);
     }
     // Check doors.
     for (int i = 0; i < room->num_doors; ++i) {
       const az_door_spec_t *door = &room->doors[i];
-      if (door->kind == AZ_DOOR_FORCEFIELD) continue;
+      // Check that forcefield doors don't have scripts.
+      if (door->kind == AZ_DOOR_FORCEFIELD) {
+        if (door->on_open != NULL) {
+          ROOM_ERROR("Forcefield door with an on_open script");
+        }
+        continue;
+      }
+      // Check on_open script.
+      CHECK_SCRIPT(door->on_open);
       // Check that door destination is legitimate.
       if (door->destination == room_index) {
         ROOM_ERROR("Door at (%.02f, %.02f) leads to itself",
@@ -206,26 +240,58 @@ bool az_audit_scenario(const az_planet_t *planet) {
         }
       }
     }
-    // Check upgrades.
+    // Check gravfields.
+    for (int i = 0; i < room->num_gravfields; ++i) {
+      const az_gravfield_spec_t *gravfield = &room->gravfields[i];
+      // Check on_enter script.
+      CHECK_SCRIPT(gravfield->on_enter);
+      // Check that liquids are vertical.
+      if (az_is_liquid(gravfield->kind)) {
+        const double expected_angle =
+          (az_vdot(az_vpolar(1, gravfield->angle), gravfield->position) >= 0 ?
+           az_vtheta(gravfield->position) :
+           az_vtheta(az_vneg(gravfield->position)));
+        if (fabs(az_mod2pi(gravfield->angle - expected_angle)) > 0.00001) {
+          ROOM_ERROR("Liquid at (%.02f, %.02f) not vertical",
+                     gravfield->position.x, gravfield->position.y);
+        }
+      }
+    }
+    // Check nodes.
     for (int i = 0; i < room->num_nodes; ++i) {
       const az_node_spec_t *node = &room->nodes[i];
-      if (node->kind != AZ_NODE_UPGRADE) continue;
-      const az_upgrade_t upgrade = node->subkind.upgrade;
-      assert((int)upgrade >= 0 && upgrade < AZ_ARRAY_SIZE(upgrade_exists));
-      upgrade_exists[upgrade] = true;
-      // Check that getting the upgrade plays mus14 or snd5.
-      if (!script_contains_instruction(node->on_use, AZ_OP_MUS, 14) &&
-          !script_contains_instruction(node->on_use, AZ_OP_SND, 5)) {
-        ROOM_ERROR("Upgrade #%d (%s) doesn't play mus14 or snd5",
-                   (int)upgrade, az_upgrade_name(upgrade));
+      // Check the node's on_use script.
+      if (node->kind == AZ_NODE_CONSOLE || node->kind == AZ_NODE_UPGRADE) {
+        CHECK_SCRIPT(node->on_use);
+      } else if (node->on_use != NULL) {
+        ROOM_ERROR("Node kind %d with an on_use script", (int)node->kind);
       }
-      // Check for duplicate upgrades.
-      for (int other_room_index = room_index + 1;
-           other_room_index < planet->num_rooms; ++other_room_index) {
-        const az_room_t *other_room = &planet->rooms[other_room_index];
-        if (room_contains_upgrade(other_room, upgrade)) {
-          ROOM_ERROR("Upgrade #%d (%s) also appears in room %d",
-                     (int)upgrade, az_upgrade_name(upgrade), other_room_index);
+      // Check that comm consoles have dialogue.
+      if (node->kind == AZ_NODE_CONSOLE &&
+          node->subkind.console == AZ_CONS_COMM &&
+          !script_contains_opcode(node->on_use, AZ_OP_DLOG)) {
+        ROOM_ERROR("Comm console without dialogue");
+      }
+      // Check upgrades.
+      if (node->kind == AZ_NODE_UPGRADE) {
+        const az_upgrade_t upgrade = node->subkind.upgrade;
+        assert((int)upgrade >= 0 && upgrade < AZ_ARRAY_SIZE(upgrade_exists));
+        upgrade_exists[upgrade] = true;
+        // Check that getting the upgrade plays mus14 or snd5.
+        if (!script_contains_instruction(node->on_use, AZ_OP_MUS, 14) &&
+            !script_contains_instruction(node->on_use, AZ_OP_SND, 5)) {
+          ROOM_ERROR("Upgrade #%d (%s) doesn't play mus14 or snd5",
+                     (int)upgrade, az_upgrade_name(upgrade));
+        }
+        // Check for duplicate upgrades.
+        for (int other_room_index = room_index + 1;
+             other_room_index < planet->num_rooms; ++other_room_index) {
+          const az_room_t *other_room = &planet->rooms[other_room_index];
+          if (room_contains_upgrade(other_room, upgrade)) {
+            ROOM_ERROR("Upgrade #%d (%s) also appears in room %d",
+                       (int)upgrade, az_upgrade_name(upgrade),
+                       other_room_index);
+          }
         }
       }
     }

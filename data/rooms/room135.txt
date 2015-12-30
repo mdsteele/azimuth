@@ -74,7 +74,7 @@ $u:mus14,wait0.1,mus17,musf1;
 !N5/2 x-5248.31 y30865.66 a-2.973053 u0
 !N5/3 x-5290.39 y30866.38 a1.739674 u0
 !N1/0 x-5048.62 y31417.85 a0.164139 u0
-$u:dlog,pt1,pb5,test76,bnez/A,tb104,tt105,tb106,tt107,tb108,tt109,tb110,tt111,set76,unlock1,A#tb112,dend;
+$u:skip1,dlog,pt1,pb5,test76,bnez/A,tb104,tt105,tb106,tt107,tb108,tt109,tb110,tt111,set76,unlock1,A#tb112,dend,skip0;
 !N7/9 x-5237.28 y31256.87 a0.164139 u0
 !N7/50 x-5328.76 y31241.72 a0.164139 u0
 !N7/50 x-5401.93 y31229.60 a0.164139 u0
