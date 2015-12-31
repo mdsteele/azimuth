@@ -324,7 +324,7 @@ static void fire_beam_from_eye(
     az_damage_ship(state, 15.0 * power * time, false);
   }
 
-  // Add particles/sound for the beam.
+  // Add particles for the beam.
   const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
   const az_color_t beam_color = {255, 128, alt, 192};
   az_add_beam(state, beam_color, beam_start, impact.position, 0.0,

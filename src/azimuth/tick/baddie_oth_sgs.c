@@ -34,7 +34,9 @@
 /*===========================================================================*/
 
 enum {
-  DOGFIGHT_STATE = 0,
+  INITIAL_STATE = 0,
+  DOGFIGHT_STATE,
+  BEAM_SWEEP_STATE,
   RETREAT_STATE,
   TRY_TO_CLOAK_STATE,
   SNEAK_UP_BEHIND_STATE,
@@ -168,6 +170,19 @@ static void begin_dogfight(az_baddie_t *baddie) {
   baddie->cooldown = 0.2;
 }
 
+static void resume_dogfight(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  set_primary_state(baddie, DOGFIGHT_STATE);
+  set_secondary_state(baddie, az_randint(4, 7));
+  baddie->cooldown = 0.2;
+}
+
+static void begin_beam_sweep(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  set_primary_state(baddie, BEAM_SWEEP_STATE);
+  baddie->cooldown = 3.0;
+}
+
 static void begin_retreat(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   set_primary_state(baddie, RETREAT_STATE);
@@ -190,6 +205,7 @@ void az_tick_bad_oth_supergunship(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   const double old_angle = baddie->angle;
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
 
   // Handle tractor beam:
   az_vector_t tractor_position;
@@ -220,25 +236,73 @@ void az_tick_bad_oth_supergunship(
   }
 
   switch (get_primary_state(baddie)) {
+    case INITIAL_STATE: {
+      begin_dogfight(baddie);
+    } break;
     case DOGFIGHT_STATE: {
       fly_towards_ship(state, baddie, time);
       int secondary = get_secondary_state(baddie);
       if (baddie->cooldown <= 0.0 &&
-          az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3)) &&
           az_can_see_ship(state, baddie)) {
-        for (int i = -1; i <= 1; ++i) {
-          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
-                                    20.0, 0.0, AZ_DEG2RAD(10) * i);
+        if (secondary == 8 && az_ship_in_range(state, baddie, 250) &&
+            hurt > 0.2) {
+          begin_beam_sweep(baddie);
+        } else if (az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3))) {
+          for (int i = -1; i <= 1; ++i) {
+            az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
+                                      20.0, 0.0, AZ_DEG2RAD(10) * i);
+          }
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+          baddie->cooldown = 0.2;
+          decloak_immediately(state, baddie);
+          --secondary;
+          if (secondary <= 0) {
+            begin_retreat(baddie);
+          } else {
+            set_secondary_state(baddie, secondary);
+          }
         }
-        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
-        baddie->cooldown = 0.2;
-        decloak_immediately(state, baddie);
-        --secondary;
-        if (secondary <= 0) {
-          begin_retreat(baddie);
-        } else {
-          set_secondary_state(baddie, secondary);
+      }
+    } break;
+    case BEAM_SWEEP_STATE: {
+      if (az_ship_is_decloaked(&state->ship)) {
+        const bool beam_is_on = (get_secondary_state(baddie) != 0);
+        // Turn towards the ship.
+        baddie->angle = az_angle_towards(
+            baddie->angle, (beam_is_on ? AZ_DEG2RAD(90) : TURN_RATE) * time,
+            az_vtheta(az_vsub(state->ship.position, baddie->position)));
+        // Turn on the beam once we're almost facing the ship.
+        if (!beam_is_on &&
+            az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(30))) {
+          set_secondary_state(baddie, 1);
+          baddie->cooldown = 3.0;
         }
+      }
+      // If the beam has been turned on, fire the beam.
+      if (get_secondary_state(baddie) != 0) {
+        const az_vector_t beam_start =
+          az_vadd(az_vpolar(18, baddie->angle), baddie->position);
+        az_impact_t impact;
+        az_ray_impact(state, beam_start, az_vpolar(5000, baddie->angle),
+                      AZ_IMPF_BADDIE, baddie->uid, &impact);
+        if (impact.type == AZ_IMP_SHIP) {
+          az_damage_ship(state, 20.0 * time, false);
+        }
+        // Add particles/sound for the beam.
+        const uint8_t alt = 128 + 16 * az_clock_zigzag(6, 1, state->clock);
+        const az_color_t beam_color = {224, 255, alt, 192};
+        az_add_beam(state, beam_color, beam_start, impact.position, 0.0,
+                    (3.0 + 0.5 * az_clock_zigzag(8, 1, state->clock)));
+        az_add_speck(state, AZ_WHITE, 1.0, impact.position,
+                     az_vpolar(az_random(20.0, 70.0),
+                               az_vtheta(impact.normal) +
+                               az_random(-AZ_HALF_PI, AZ_HALF_PI)));
+        az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
+      }
+      // When we run out of time, go back to dogfighting.
+      if (baddie->cooldown <= 0.0) {
+        // TODO: If the beam is on, go to charged beam mode
+        resume_dogfight(baddie);
       }
     } break;
     case RETREAT_STATE: {
@@ -403,7 +467,11 @@ void az_on_oth_supergunship_damaged(
     switch (get_primary_state(baddie)) {
       case TRY_TO_CLOAK_STATE:
       case SNEAK_UP_BEHIND_STATE:
+      case AMBUSH_STATE:
         begin_dogfight(baddie);
+        break;
+      case BEAM_SWEEP_STATE:
+        resume_dogfight(baddie);
         break;
       case FLEE_WHILE_CLOAKED_STATE:
         begin_retreat(baddie);
