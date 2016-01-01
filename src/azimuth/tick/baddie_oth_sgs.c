@@ -164,6 +164,22 @@ static void fire_oth_spray(az_space_state_t *state, az_baddie_t *baddie) {
   decloak_immediately(state, baddie);
 }
 
+static void spawn_razors(az_space_state_t *state, az_vector_t position,
+                         double angle, int step_degrees) {
+  for (int i = 0; i < 360; i += step_degrees) {
+    const double theta = angle + AZ_DEG2RAD(i);
+    az_baddie_t *razor =
+      az_add_baddie(state, AZ_BAD_OTH_RAZOR_2,
+                    az_vadd(position, az_vpolar(15, theta)), theta);
+    if (razor != NULL) {
+      razor->velocity = az_vpolar(175, theta);
+      razor->cooldown = 0.25; // incorporeal for this much time
+    }
+  }
+}
+
+/*===========================================================================*/
+
 static void begin_dogfight(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   set_primary_state(baddie, DOGFIGHT_STATE);
@@ -411,6 +427,8 @@ void az_tick_bad_oth_supergunship(
         }
       }
       if (baddie->param >= 1.0) {
+        spawn_razors(state, baddie->position, baddie->angle + AZ_DEG2RAD(90),
+                     180);
         if (az_ship_in_range(state, baddie, 250)) {
           set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
         } else {
@@ -583,16 +601,7 @@ void az_tick_bad_oth_decoy(
 
 void az_on_oth_decoy_killed(
     az_space_state_t *state, az_vector_t position, double angle) {
-  for (int i = 0; i < 360; i += 120) {
-    const double theta = angle + AZ_PI + AZ_DEG2RAD(i);
-    az_baddie_t *razor =
-      az_add_baddie(state, AZ_BAD_OTH_RAZOR_2,
-                    az_vadd(position, az_vpolar(15, theta)), theta);
-    if (razor != NULL) {
-      razor->velocity = az_vpolar(175, theta);
-      razor->cooldown = 0.25; // incorporeal for this much time
-    }
-  }
+  spawn_razors(state, position, angle + AZ_DEG2RAD(180), 120);
 }
 
 /*===========================================================================*/
