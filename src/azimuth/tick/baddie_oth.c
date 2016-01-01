@@ -266,6 +266,9 @@ void az_tick_bad_oth_razor(
   assert(baddie->kind == AZ_BAD_OTH_RAZOR_1 ||
          baddie->kind == AZ_BAD_OTH_RAZOR_2);
   const double old_angle = baddie->angle;
+  if (baddie->cooldown > 0.0) {
+    baddie->temp_properties |= AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING;
+  }
   if (baddie->state == 0) {
     baddie->velocity = az_vpolar(az_random(300, 500), baddie->angle);
     baddie->state = 2;

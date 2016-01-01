@@ -34,6 +34,8 @@ void az_on_oth_supergunship_damaged(
 
 void az_tick_bad_oth_decoy(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+void az_on_oth_decoy_killed(
+    az_space_state_t *state, az_vector_t position, double angle);
 
 /*===========================================================================*/
 

@@ -287,6 +287,7 @@ void az_tick_bad_oth_supergunship(
       }
       // If the beam has been turned on, fire the beam.
       if (get_secondary_state(baddie) != 0) {
+        decloak_immediately(state, baddie);
         const az_vector_t beam_start =
           az_vadd(az_vpolar(18, baddie->angle), baddie->position);
         az_impact_t impact;
@@ -335,6 +336,7 @@ void az_tick_bad_oth_supergunship(
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_CHARGED_BEAM,
                                   18, 0, 0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_CHARGED_BEAM);
+        decloak_immediately(state, baddie);
         resume_dogfight(baddie);
       } else if (baddie->cooldown <= 0.0) {
         resume_dogfight(baddie);
@@ -358,6 +360,7 @@ void az_tick_bad_oth_supergunship(
           az_vpluseq(&proj->velocity, baddie->velocity);
           az_play_sound(&state->soundboard, AZ_SND_ORION_BOOSTER);
         }
+        decloak_immediately(state, baddie);
         set_secondary_state(baddie, 1);
       }
       // If we get far away enough, or if the cooldown expires, change states.
@@ -434,6 +437,7 @@ void az_tick_bad_oth_supergunship(
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
                                   20.0, 0.0, 0.0);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        decloak_immediately(state, baddie);
         begin_dogfight(baddie);
       }
     } break;
@@ -466,6 +470,7 @@ void az_tick_bad_oth_supergunship(
         if (secondary == 0 && az_can_see_ship(state, baddie)) {
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BARRAGE,
                                     20.0, 0.0, 0.0);
+          decloak_immediately(state, baddie);
           begin_dogfight(baddie);
         } else {
           for (int i = -1; i <= 1; i += 2) {
@@ -474,6 +479,7 @@ void az_tick_bad_oth_supergunship(
             if (proj != NULL) proj->param = i;
           }
           az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+          decloak_immediately(state, baddie);
           if (secondary >= 2) {
             begin_dogfight(baddie);
           } else {
@@ -496,7 +502,7 @@ void az_on_oth_supergunship_damaged(
     az_space_state_t *state, az_baddie_t *baddie, double amount,
     az_damage_flags_t damage_kind) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
-  if (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB)) {
+  if (damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_BOMB | AZ_DMGF_CPLUS)) {
     decloak_immediately(state, baddie);
     set_tractor_node(baddie, NULL);
     switch (get_primary_state(baddie)) {
@@ -554,6 +560,20 @@ void az_tick_bad_oth_decoy(
   }
   az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle, time,
                        state->ship.player.total_time);
+}
+
+void az_on_oth_decoy_killed(
+    az_space_state_t *state, az_vector_t position, double angle) {
+  for (int i = 0; i < 360; i += 120) {
+    const double theta = angle + AZ_PI + AZ_DEG2RAD(i);
+    az_baddie_t *razor =
+      az_add_baddie(state, AZ_BAD_OTH_RAZOR_2,
+                    az_vadd(position, az_vpolar(15, theta)), theta);
+    if (razor != NULL) {
+      razor->velocity = az_vpolar(175, theta);
+      razor->cooldown = 0.25; // incorporeal for this much time
+    }
+  }
 }
 
 /*===========================================================================*/

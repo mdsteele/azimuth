@@ -868,6 +868,9 @@ void az_on_baddie_killed(az_space_state_t *state, az_baddie_kind_t kind,
     case AZ_BAD_JUNGLE_CRAWLER:
       az_on_jungle_crawler_killed(state, position, angle);
       break;
+    case AZ_BAD_OTH_DECOY:
+      az_on_oth_decoy_killed(state, position, angle);
+      break;
     default: break;
   }
 }
