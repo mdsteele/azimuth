@@ -238,8 +238,15 @@ void az_tick_bad_oth_supergunship(
       az_play_sound(&state->soundboard, AZ_SND_CLOAK_END);
     }
   }
+  // If the Oth Supergunship is cloaked, homing weapons can't track it.
   if (baddie->param >= 1.0) {
     baddie->temp_properties |= AZ_BADF_NO_HOMING;
+    // Try to prevent collisions with the player's ship while cloaked, since
+    // those feel kind of unfair.
+    if (az_vwithin(baddie->position, state->ship.position, 50.0) &&
+        baddie->armor_flare <= 0.0) {
+      baddie->temp_properties |= AZ_BADF_INCORPOREAL;
+    }
   }
 
   switch (get_primary_state(baddie)) {
@@ -251,18 +258,30 @@ void az_tick_bad_oth_supergunship(
       int secondary = get_secondary_state(baddie);
       if (baddie->cooldown <= 0.0 &&
           az_can_see_ship(state, baddie)) {
-        if (secondary == 8 && az_ship_in_range(state, baddie, 250) &&
-            hurt > 0.2) {
+        if (hurt >= 0.2 && secondary >= 8 && secondary <= 9 &&
+            az_ship_in_range(state, baddie, 250)) {
           begin_beam_sweep(baddie);
         } else if (az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(3))) {
-          for (int i = -1; i <= 1; ++i) {
-            az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
-                                      20.0, 0.0, AZ_DEG2RAD(10) * i);
+          const double cross_speed =
+            az_vnorm(az_vflatten(state->ship.velocity,
+                                 az_vsub(state->ship.position,
+                                         baddie->position)));
+          if (cross_speed < 40.0 && !az_ship_in_range(state, baddie, 100)) {
+            az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_ROCKET,
+                                      20, 0, 0);
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+            baddie->cooldown = 0.5;
+            secondary -= 3;
+          } else {
+            for (int i = -1; i <= 1; ++i) {
+              az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BULLET,
+                                        20.0, 0.0, AZ_DEG2RAD(10) * i);
+            }
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+            baddie->cooldown = 0.2;
+            --secondary;
           }
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
-          baddie->cooldown = 0.2;
           decloak_immediately(state, baddie);
-          --secondary;
           if (secondary <= 0) {
             begin_retreat(baddie);
           } else {
