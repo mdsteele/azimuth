@@ -841,6 +841,26 @@ static void projectile_special_logic(az_space_state_t *state,
         }
       }
       break;
+    case AZ_PROJ_OTH_CHARGED_BEAM: {
+      assert(proj->fired_by != AZ_SHIP_UID);
+      const double radius =
+        proj->data->splash_radius * (proj->age / proj->data->lifetime);
+      // Destroy player projectiles within the blast:
+      AZ_ARRAY_LOOP(other_proj, state->projectiles) {
+        if (other_proj->kind == AZ_PROJ_NOTHING) continue;
+        if (other_proj->fired_by == AZ_SHIP_UID &&
+            !(other_proj->data->properties & AZ_PROJF_NO_HIT) &&
+            az_vwithin(other_proj->position, proj->position, radius)) {
+          az_expire_projectile(state, other_proj);
+        }
+      }
+      // Damage the ship if it's within the blast:
+      if (az_ship_is_alive(&state->ship) &&
+          az_vwithin(state->ship.position, proj->position, radius)) {
+        az_damage_ship(state, proj->data->splash_damage * proj->power *
+                       (time / proj->data->lifetime), false);
+      }
+    } break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));

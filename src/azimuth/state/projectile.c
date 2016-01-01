@@ -506,6 +506,12 @@ static const az_proj_data_t proj_data[] = {
     .lifetime = 2.0,
     .impact_damage = 2.0
   },
+  [AZ_PROJ_OTH_CHARGED_BEAM] = {
+    .lifetime = 0.25,
+    .splash_radius = 300.0,
+    .splash_damage = 10.0,
+    .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
+  },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,

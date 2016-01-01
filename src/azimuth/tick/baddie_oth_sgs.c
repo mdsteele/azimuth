@@ -37,6 +37,7 @@ enum {
   INITIAL_STATE = 0,
   DOGFIGHT_STATE,
   BEAM_SWEEP_STATE,
+  CHARGED_BEAM_STATE,
   RETREAT_STATE,
   TRY_TO_CLOAK_STATE,
   SNEAK_UP_BEHIND_STATE,
@@ -183,6 +184,12 @@ static void begin_beam_sweep(az_baddie_t *baddie) {
   baddie->cooldown = 3.0;
 }
 
+static void begin_charged_beam(az_baddie_t *baddie) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  set_primary_state(baddie, CHARGED_BEAM_STATE);
+  baddie->cooldown = 3.0;
+}
+
 static void begin_retreat(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
   set_primary_state(baddie, RETREAT_STATE);
@@ -299,9 +306,37 @@ void az_tick_bad_oth_supergunship(
                                az_random(-AZ_HALF_PI, AZ_HALF_PI)));
         az_loop_sound(&state->soundboard, AZ_SND_BEAM_NORMAL);
       }
-      // When we run out of time, go back to dogfighting.
+      // When we run out of time, switch modes.
       if (baddie->cooldown <= 0.0) {
-        // TODO: If the beam is on, go to charged beam mode
+        if (get_secondary_state(baddie) != 0) {
+          begin_charged_beam(baddie);
+        } else resume_dogfight(baddie);
+      }
+    } break;
+    case CHARGED_BEAM_STATE: {
+      az_loop_sound(&state->soundboard, AZ_SND_CHARGED_GUN);
+      bool ready_to_fire = false;
+      if (get_secondary_state(baddie) == 0) {
+        fly_towards_ship(state, baddie, time);
+        AZ_ARRAY_LOOP(proj, state->projectiles) {
+          if (proj->kind == AZ_PROJ_NOTHING) continue;
+          if (proj->fired_by != AZ_SHIP_UID) continue;
+          if (proj->data->properties & AZ_PROJF_NO_HIT) continue;
+          if (az_vwithin(proj->position, baddie->position, 200)) {
+            ready_to_fire = true;
+            break;
+          }
+        }
+      } else if (az_ship_is_decloaked(&state->ship)) {
+        fly_towards(state, baddie, time, state->ship.position);
+        if (az_ship_in_range(state, baddie, 120)) ready_to_fire = true;
+      } else ready_to_fire = true;
+      if (ready_to_fire) {
+        az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_CHARGED_BEAM,
+                                  18, 0, 0);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_CHARGED_BEAM);
+        resume_dogfight(baddie);
+      } else if (baddie->cooldown <= 0.0) {
         resume_dogfight(baddie);
       }
     } break;
@@ -471,6 +506,7 @@ void az_on_oth_supergunship_damaged(
         begin_dogfight(baddie);
         break;
       case BEAM_SWEEP_STATE:
+      case CHARGED_BEAM_STATE:
         resume_dogfight(baddie);
         break;
       case FLEE_WHILE_CLOAKED_STATE:
@@ -491,6 +527,10 @@ void az_on_oth_supergunship_damaged(
     if (decoy != NULL) {
       decoy->velocity = az_vneg(baddie->velocity);
       decoy->cooldown = 0.5;
+    }
+  } else if (damage_kind & AZ_DMGF_BEAM) {
+    if (get_primary_state(baddie) == CHARGED_BEAM_STATE) {
+      set_secondary_state(baddie, 1);
     }
   }
 }

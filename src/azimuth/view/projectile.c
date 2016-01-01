@@ -496,6 +496,17 @@ void az_draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
       break;
     case AZ_PROJ_NUCLEAR_EXPLOSION: break; // invisible
     case AZ_PROJ_OTH_BARRAGE: break; // invisible
+    case AZ_PROJ_OTH_CHARGED_BEAM:
+      glBegin(GL_TRIANGLE_FAN); {
+        const double ratio = proj->age / proj->data->lifetime;
+        const double radius = proj->data->splash_radius * ratio;
+        glColor4f(0.85, 1, 0.5, 0); glVertex2f(0, 0);
+        glColor4f(0.85, 1, 0.5, 1 - ratio);
+        for (int i = 0; i <= 360; i += 15) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
+        }
+      } glEnd();
+      break;
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
       break;
