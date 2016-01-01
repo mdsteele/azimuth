@@ -68,18 +68,18 @@ static void draw_title_letter(char ch, float hilight) {
         glVertex2f(15, 25); glVertex2f(28, 25);
       } glEnd();
       glBegin(GL_TRIANGLE_STRIP); {
-        glVertex2f(-5, 0); glVertex2f(5, 0);
-        glVertex2f(-9, 10); glVertex2f(9, 10);
+        glVertex2f(-4.2857, 0); glVertex2f(4.2857, 0);
+        glVertex2f(-8.5714, 10); glVertex2f(8.5714, 10);
       } glEnd();
       glBegin(GL_LINE_LOOP); {
         glColor3f(1, 1, 1);
         glVertex2f(28, 25); glVertex2f(5, -25); glVertex2f(-5, -25);
-        glVertex2f(-28, 25); glVertex2f(-15, 25); glVertex2f(-9, 10);
-        glVertex2f(9, 10); glVertex2f(15, 25);
+        glVertex2f(-28, 25); glVertex2f(-15, 25); glVertex2f(-8.5714, 10);
+        glVertex2f(8.5714, 10); glVertex2f(15, 25);
       } glEnd();
       glBegin(GL_LINE_LOOP); {
         glColor3f(1, 1, 1);
-        glVertex2f(-5, 0); glVertex2f(5, 0); glVertex2f(0, -10);
+        glVertex2f(-4.2857, 0); glVertex2f(4.2857, 0); glVertex2f(0, -10);
       } glEnd();
       break;
     case 'Z':
