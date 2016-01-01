@@ -537,9 +537,8 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
     if (minor == AZ_GUN_PHASE) {
       skip_types |= AZ_IMPF_WALL | AZ_IMPF_DOOR_INSIDE | AZ_IMPF_DOOR_OUTSIDE;
     } else if (minor == AZ_GUN_PIERCE) skip_types |= AZ_IMPF_BADDIE;
-    az_ray_impact(state, beam_start,
-                  az_vpolar(2.5 * AZ_SCREEN_RADIUS, beam_angle),
-                  skip_types, AZ_SHIP_UID, &impact);
+    az_ray_impact(state, beam_start, az_vpolar(10000, beam_angle), skip_types,
+                  AZ_SHIP_UID, &impact);
 
     // If this is a PHASE beam, hit all doors along the beam.
     if (minor == AZ_GUN_PHASE) {

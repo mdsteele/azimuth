@@ -448,11 +448,11 @@ void az_tick_bad_oth_supergunship(
         if (az_vwithin(baddie->position, target, 50)) {
           set_primary_state(baddie, AMBUSH_STATE);
           baddie->cooldown = 1.0;
-        } else {
+        } else if (baddie->armor_flare <= 0.0) {
           az_fly_towards_position(state, baddie, time, target, 2 * TURN_RATE,
                                   1.5 * MAX_SPEED, 2.5 * FORWARD_ACCEL, 200,
                                   100);
-        }
+        } else fly_towards(state, baddie, time, target);
       } else {
         set_primary_state(baddie, FLEE_WHILE_CLOAKED_STATE);
       }
