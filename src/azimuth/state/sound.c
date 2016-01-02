@@ -410,6 +410,15 @@ static az_sound_spec_t sound_specs[] = {
     .phaser_offset = 0.352112650871, .phaser_sweep = 0.549295783043,
     .volume_adjust = 0.4
   },
+  [AZ_SND_FIRE_OTH_MINIROCKET] = {
+    .wave_kind = AZ_NOISE_WAVE,
+    .env_sustain = 0.395, .env_decay = 0.605,
+    .start_freq = 0.73, .freq_slide = -0.01,
+    .arp_mod = 0.7, .arp_speed = 0.73,
+    .phaser_offset = -0.18, .phaser_sweep = -0.17,
+    .lpf_cutoff = 0.675, .lpf_ramp = -0.23, .lpf_resonance = 0.7,
+    .volume_adjust = 0.5
+  },
   [AZ_SND_FIRE_OTH_ROCKET] = {
     .wave_kind = AZ_NOISE_WAVE,
     .env_sustain = 0.605633795261, .env_punch = 0.160833105445,

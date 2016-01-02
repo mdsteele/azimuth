@@ -341,7 +341,7 @@ void az_tick_bad_oth_gunship(
                    !az_ship_in_range(state, baddie, 150)) {
           az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_MINIROCKET,
                                     20.0, 0.0, 0.0);
-          az_play_sound(&state->soundboard, AZ_SND_FIRE_ROCKET);
+          az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_MINIROCKET);
           secondary -= 2;
         } else {
           if (hurt >= 0.60) {

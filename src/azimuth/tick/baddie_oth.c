@@ -200,7 +200,7 @@ void az_tick_bad_oth_crawler(
       az_fire_baddie_projectile(
           state, baddie, AZ_PROJ_OTH_MINIROCKET,
           0.0, az_vtheta(rel_impact) - baddie->angle, 0.0);
-      az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_MINIROCKET);
       baddie->cooldown = az_random(1.0, 2.0);
     }
   }
@@ -219,7 +219,7 @@ void az_tick_bad_oth_minicrab(
       az_can_see_ship(state, baddie)) {
     if (az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_MINIROCKET,
                                   15.0, 0.0, 0.0) != NULL) {
-      az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+      az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_MINIROCKET);
       baddie->cooldown = 2.5;
     }
   }
