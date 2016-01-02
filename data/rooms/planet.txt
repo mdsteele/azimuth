@@ -1222,7 +1222,7 @@ $s:skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mu
 !T241"
   <unused 241>"
 !T242"
-  $RTHIS BOSS IS NOT DONE YET"
+  <unused 242>"
 !T243"
   $CFour years ago..."
 !T244"

@@ -280,7 +280,7 @@ $s:test104,hnez,mus12,lock1,lock2;
 !D1 x-611.32 y5682.40 a-2.982793 r56 u1
 !D1 x-446.81 y4659.92 a-2.982753 r55 u2
 !G1 x-1413.82 y4993.30 a0.276741 s0.00 o0.00 f220.00 r220.00 l300.00 u0
-$e:test104,hnez,gpos3,gpos4,bolt2.5,gpos3,gpos5,bolt2.5,gpos3,gpos6,bolt2.5,gpos3,gpos7,bolt2.5,wait1,gpos3,mus16,nps3,wait1.5,push111,sbadk3,wait1,msg242,boss3;
+$e:test104,hnez,gpos3,gpos4,bolt2.5,gpos3,gpos5,bolt2.5,gpos3,gpos6,bolt2.5,gpos3,gpos7,bolt2.5,wait1,gpos3,mus16,nps3,wait1.5,push111,sbadk3,wait1,boss3;
 !N7/139 x-2253.30 y4660.77 a1.963787 u0
 !N7/139 x-2281.00 y4727.59 a1.963787 u0
 !N7/141 x-2370.87 y4888.89 a-0.392415 u0

@@ -44,6 +44,7 @@ enum {
   AMBUSH_STATE,
   FLEE_WHILE_CLOAKED_STATE,
   BARRAGE_STATE,
+  CRAZY_STATE
 };
 
 // Engine constants:
@@ -256,6 +257,10 @@ void az_tick_bad_oth_supergunship(
   const double old_angle = baddie->angle;
   const double hurt = 1.0 - baddie->health / baddie->data->max_health;
 
+  if (hurt >= 0.95 && get_primary_state(baddie) != CRAZY_STATE) {
+    set_primary_state(baddie, CRAZY_STATE);
+  }
+
   // Handle tractor beam:
   az_vector_t tractor_position;
   double tractor_length;
@@ -313,7 +318,7 @@ void az_tick_bad_oth_supergunship(
             if (cross_speed < 40.0 && !az_ship_in_range(state, baddie, 100)) {
               fire_projectiles(state, baddie, AZ_PROJ_OTH_ROCKET, 1, 0,
                                AZ_SND_FIRE_OTH_ROCKET);
-              baddie->cooldown = 0.5;
+              baddie->cooldown = 0.6;
               secondary -= 3;
             } else {
               fire_projectiles(state, baddie, AZ_PROJ_OTH_BULLET, 3,
@@ -555,6 +560,31 @@ void az_tick_bad_oth_supergunship(
             set_secondary_state(baddie, secondary + 1);
             baddie->cooldown = 0.4;
           }
+        }
+      }
+    } break;
+    case CRAZY_STATE: {
+      decloak_immediately(state, baddie);
+      set_tractor_node(baddie, NULL);
+      baddie->cooldown = fmin(0.3, baddie->cooldown);
+      if (az_ship_is_decloaked(&state->ship)) {
+        fly_towards(state, baddie, time, state->ship.position);
+      }
+      if (baddie->cooldown <= 0.0) {
+        for (int i = 0; i < 2; ++i) {
+          az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_MINIROCKET, 12,
+                                    az_random(-AZ_PI, AZ_PI), 0);
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+        baddie->cooldown = 0.3;
+        int secondary = get_secondary_state(baddie);
+        if (secondary >= 3) {
+          set_secondary_state(baddie, 0);
+          spawn_razors(state, baddie->position, az_random(-AZ_PI, AZ_PI), 360,
+                       150);
+          az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
+        } else {
+          set_secondary_state(baddie, secondary + 1);
         }
       }
     } break;
