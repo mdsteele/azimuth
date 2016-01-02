@@ -507,6 +507,9 @@ void az_draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         }
       } glEnd();
       break;
+    case AZ_PROJ_OTH_CHARGED_PHASE:
+      draw_oth_projectile(proj, 7.0, clock);
+      break;
     case AZ_PROJ_OTH_HOMING:
       draw_oth_projectile(proj, 4.0, clock);
       break;

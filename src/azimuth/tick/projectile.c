@@ -861,6 +861,11 @@ static void projectile_special_logic(az_space_state_t *state,
                        (time / proj->data->lifetime), false);
       }
     } break;
+    case AZ_PROJ_OTH_CHARGED_PHASE:
+      leave_particle_trail(state, proj, AZ_PAR_TRAIL,
+                           (az_color_t){224, 255, 192, 128},
+                           1.5, proj->data->speed * time, 5.0);
+      break;
     case AZ_PROJ_OTH_HOMING:
       leave_particle_trail(state, proj, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                            0.2, 4.0, AZ_DEG2RAD(720));

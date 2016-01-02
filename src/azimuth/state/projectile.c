@@ -512,6 +512,15 @@ static const az_proj_data_t proj_data[] = {
     .splash_damage = 10.0,
     .properties = AZ_PROJF_NO_HIT | AZ_PROJF_FEW_SPECKS
   },
+  [AZ_PROJ_OTH_CHARGED_PHASE] = {
+    .speed = 800.0,
+    .lifetime = 3.0,
+    .impact_damage = 15.0,
+    .impact_sound = AZ_SND_IMPACT_CHARGED_SHOT,
+    .homing_rate = AZ_DEG2RAD(20),
+    .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_CHARGED,
+    .properties = AZ_PROJF_PHASED
+  },
   [AZ_PROJ_OTH_HOMING] = {
     .speed = 500.0,
     .lifetime = 5.0,
