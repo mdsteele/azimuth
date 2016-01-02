@@ -1,4 +1,4 @@
-Next flag: 152
+Next flag: 153
 
 Bosses
 ======
@@ -172,3 +172,4 @@ Misc
 148: NPS engine exploded in Core room 371
 149: NPS engines exploded in Voquan room 255
 151: Opened one-way gate in Barrag room 291
+152: Opened one-way gate in Core room 58
