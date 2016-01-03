@@ -46,6 +46,7 @@ typedef struct {
     AZ_VS_MAGBEEST,
     AZ_VS_SUPERGUNSHIP,
     AZ_VS_CORE,
+    AZ_VS_EXPLODE,
     AZ_VS_DONE
   } step;
   double step_timer;

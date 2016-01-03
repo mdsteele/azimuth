@@ -102,12 +102,17 @@ static void tick_baddies(az_victory_state_t *state, double time) {
         az_snake_towards(NULL, baddie, time, 0, 180.0, 120.0, goal, true);
       } break;
       case AZ_BAD_OTH_GUNSHIP: {
-        if (baddie->state == 2) {
-          az_vpluseq(&baddie->velocity,
-                     az_vcaplen(az_vneg(baddie->velocity), 100 * time));
+        if (baddie->state == 0) {
+          baddie->velocity = (az_vector_t){1000, 0};
+          az_victory_add_particle(
+              state, AZ_PAR_OTH_FRAGMENT, (az_color_t){192, 255, 192, 255},
+              az_vadd(baddie->position, az_vpolar(-15.0, baddie->angle)),
+              AZ_VZERO, 0, 0.3, 16, 0);
         } else {
-          az_vector_t goal = {360, 100};
-          if (baddie->state == 1) goal = (az_vector_t){50, 95};
+          az_vector_t goal = {-150, 20};
+          if (baddie->state == 2) {
+            goal = (az_vector_t){-200, 250 - 120 * state->step_timer};
+          } else if (baddie->state == 3) goal = (az_vector_t){100, 300};
           fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 300, 300, 200);
         }
         az_tick_oth_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, old_angle,
@@ -147,8 +152,27 @@ static void tick_baddies(az_victory_state_t *state, double time) {
           baddie->param = fmax(0.0, baddie->param - time / 0.8);
         }
       } break;
+      case AZ_BAD_MAGBEEST_HEAD: {
+        // TODO behavior
+      } break;
+      case AZ_BAD_OTH_SUPERGUNSHIP: {
+        // TODO behavior
+        az_vector_t goal = {-300, -60};
+        fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 300, 300, 200);
+        az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
+                             time, state->step_timer);
+      } break;
+      case AZ_BAD_OTH_DECOY: {
+        // TODO behavior
+        az_vector_t goal = {-300, -60};
+        fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 300, 300, 200);
+        az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
+                             time, state->step_timer);
+      } break;
       case AZ_BAD_ZENITH_CORE: {
-        baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
+        if (baddie->state < 2) {
+          baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
+        }
         if (baddie->state == 1) {
           az_zenith_core_adjust_to_beam_configuration(baddie, time);
         } else az_zenith_core_adjust_to_closed_configuration(baddie, time);
@@ -177,13 +201,13 @@ static bool times_per_second(double per_second, const az_projectile_t *proj,
 static void projectile_special_logic(
     az_victory_state_t *state, az_projectile_t *proj, double time) {
   switch (proj->kind) {
-    case AZ_PROJ_BOUNCING_FIREBALL:
+    case AZ_PROJ_BOUNCING_FIREBALL: {
       if (times_per_second(15, proj, time)) {
         az_victory_add_particle(
             state, AZ_PAR_EMBER, (az_color_t){255, 128, 0, 128},
             proj->position, AZ_VZERO, proj->angle, 0.3, 15.0, 0.0);
       }
-      break;
+    } break;
     case AZ_PROJ_FORCE_WAVE: {
       const double new_speed = az_vnorm(proj->velocity) + 700 * time;
       if (proj->age >= 0.5) {
@@ -198,11 +222,28 @@ static void projectile_special_logic(
         }
       }
     } break;
-    case AZ_PROJ_OTH_ROCKET:
+    case AZ_PROJ_GRAVITY_TORPEDO: {
+      az_victory_add_particle(
+          state, AZ_PAR_EXPLOSION, (az_color_t){128, 128, 255, 255},
+          proj->position, AZ_VZERO, proj->angle, 0.5, 5, 0);
+    } break;
+    case AZ_PROJ_OTH_BULLET: {
+      if (times_per_second(30, proj, time)) {
+        az_victory_add_particle(state, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                                proj->position, AZ_VZERO, proj->angle, 0.1,
+                                5.0, AZ_DEG2RAD(360));
+      }
+    } break;
+    case AZ_PROJ_OTH_MINIROCKET: {
+      az_victory_add_particle(state, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                              proj->position, AZ_VZERO, proj->angle, 0.3,
+                              6.0, AZ_DEG2RAD(720));
+    } break;
+    case AZ_PROJ_OTH_ROCKET: {
       az_victory_add_particle(state, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
                               proj->position, AZ_VZERO, proj->angle, 0.5,
                               9.0, AZ_DEG2RAD(720));
-      break;
+    } break;
     default: break;
   }
 }
@@ -245,11 +286,13 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 1.0);
     } break;
     case AZ_VS_SNAPDRAGON: {
+      // Fly in from the lower-left corner of the screen:
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_OTH_SNAPDRAGON,
                        (az_vector_t){-360, -180}, AZ_DEG2RAD(30));
         boss->velocity = az_vpolar(300, boss->angle);
       }
+      // Turn around and fire an Oth rocket to the left:
       if (timer_at(state, 1.7, time)) boss->state = 1;
       if (timer_at(state, 2.5, time)) {
         az_victory_add_projectile(state, AZ_PROJ_OTH_ROCKET,
@@ -258,6 +301,8 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
                                   boss->angle);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
       }
+      // Turn downwards to fly off the bottom of the screen, and drop three Oth
+      // Razors, which will fly off the top of the screen:
       if (timer_at(state, 3.0, time)) boss->state = 2;
       if (timer_at(state, 3.5, time)) {
         for (int i = -1; i <= 1; ++i) {
@@ -269,11 +314,13 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_ROCKWYRM: {
+      // Slither in from the bottom-left corner of the screen:
       if (timer_at(state, 0.1, time)) {
         az_init_baddie(boss, AZ_BAD_ROCKWYRM,
                        (az_vector_t){-360, -180}, AZ_DEG2RAD(30));
         boss->param = AZ_HALF_PI;
       }
+      // Open jaws and fire a stinger spread:
       if (timer_at(state, 1.3, time)) boss->state = 1;
       if (timer_at(state, 1.8, time)) {
         for (int i = -2; i <= 2; ++i) {
@@ -286,6 +333,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         az_play_sound(&state->soundboard, AZ_SND_FIRE_STINGER);
         boss->state = 0;
       }
+      // Drop two eggs behind:
       if (timer_at(state, 3.0, time)) {
         for (int i = 0; i < 2; ++i) {
           az_baddie_t *egg = &state->baddies[i + 1];
@@ -301,25 +349,64 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.5);
     } break;
     case AZ_VS_GUNSHIP: {
-      if (timer_at(state, 0.5, time)) {
+      // C-plus dash in from the left side of the screen:
+      if (timer_at(state, 1.0, time)) {
         az_init_baddie(boss, AZ_BAD_OTH_GUNSHIP,
-                       (az_vector_t){-360, 75}, AZ_DEG2RAD(0));
+                       (az_vector_t){-360, 5}, AZ_DEG2RAD(0));
+        az_play_sound(&state->soundboard, AZ_SND_CPLUS_ACTIVE);
       }
-      if (timer_at(state, 1.0, time)) boss->state = 1;
-      if (timer_at(state, 4.0, time)) boss->state = 2;
-      if (timer_at(state, 4.5, time)) boss->state = 0;
-      next_step_at(state, 7.0);
+      // Stop C-plus and turn around:
+      if (timer_at(state, 1.4, time)) boss->state = 1;
+      if (timer_at(state, 2.4, time)) boss->state = 2;
+      // FIre off some Oth bullets and rockets:
+      if (timer_at(state, 2.5, time) || timer_at(state, 2.7, time)) {
+        for (int i = -1; i <= 1; ++i) {
+          az_victory_add_projectile(
+              state, AZ_PROJ_OTH_BULLET,
+              az_vadd(boss->position, az_vpolar(18, boss->angle)),
+              az_mod2pi(boss->angle + i * AZ_DEG2RAD(10)));
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GUN_NORMAL);
+      }
+      if (timer_at(state, 2.9, time) || timer_at(state, 3.1, time)) {
+        az_victory_add_projectile(
+            state, AZ_PROJ_OTH_MINIROCKET,
+            az_vadd(boss->position, az_vpolar(18, boss->angle)), boss->angle);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_MINIROCKET);
+      }
+      if (timer_at(state, 3.3, time)) {
+        az_victory_add_projectile(
+            state, AZ_PROJ_OTH_ROCKET,
+            az_vadd(boss->position, az_vpolar(18, boss->angle)), boss->angle);
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_OTH_ROCKET);
+      }
+      // Fly off the top of the screen:
+      if (timer_at(state, 3.5, time)) boss->state = 3;
+      next_step_at(state, 6.5);
     } break;
     case AZ_VS_FORCEFIEND: {
+      // Swim in from the right side of the screen:
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_FORCEFIEND,
                        (az_vector_t){360, -150}, AZ_DEG2RAD(150));
         boss->param = AZ_HALF_PI;
       }
+      // Fire a gravity torpedo spread, then drop an egg:
+      if (timer_at(state, 1.3, time)) {
+        for (int i = -1; i <= 1; ++i) {
+          az_victory_add_projectile(
+              state, AZ_PROJ_GRAVITY_TORPEDO,
+              az_vadd(boss->position, az_vpolar(23, boss->angle)),
+              az_mod2pi(boss->angle + i * AZ_DEG2RAD(20)));
+        }
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_GRAVITY_TORPEDO);
+      }
       if (timer_at(state, 1.6, time)) {
         az_victory_add_baddie(state, AZ_BAD_FORCE_EGG, boss->position,
                               boss->angle);
       }
+      // Turn around and fire some force waves (which will push the egg off the
+      // right side of the screen):
       if (timer_at(state, 2.6, time)) boss->state = 1;
       if (timer_at(state, 3.6, time) ||
           timer_at(state, 3.9, time) ||
@@ -328,10 +415,13 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
                                   AZ_DEG2RAD(50) * sin(state->step_timer * 8));
         az_play_sound(&state->soundboard, AZ_SND_FIRE_FORCE_WAVE);
       }
+      // Swim off the top of the screen:
       if (timer_at(state, 4.7, time)) boss->state = 2;
       next_step_at(state, 7.0);
     } break;
     case AZ_VS_KILOFUGE: {
+      // TODO: One step in, fire ice torp, second step in, brief meltbeam, then
+      // quick slide out.
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_KILOFUGE,
                        (az_vector_t){520, 0}, AZ_DEG2RAD(180));
@@ -340,17 +430,21 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_NOCTURNE: {
+      // Phase in:
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_NOCTURNE,
                        (az_vector_t){-100, 50}, AZ_DEG2RAD(60));
       }
-      if (timer_at(state, 2.0, time) || timer_at(state, 3.0, time)) {
+      // Fire off some nightseeds:
+      if (timer_at(state, 2.0, time) || timer_at(state, 2.66667, time) ||
+          timer_at(state, 3.33333, time)) {
         az_victory_add_projectile(
             state, AZ_PROJ_NIGHTSEED,
             az_vadd(boss->position, az_vpolar(45, boss->angle)),
             boss->angle);
         az_play_sound(&state->soundboard, AZ_SND_FIRE_SEED_SINGLE);
       }
+      // Launch fireball spread and phase out:
       if (timer_at(state, 4.0, time)) {
         boss->state = 1;
         for (int i = 0; i < 360; i += 36) {
@@ -364,9 +458,33 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.5);
     } break;
     case AZ_VS_MAGBEEST: {
+      // TODO: Push down from top of screen in spider mode.  drop a magma bomb
+      // (which will explode in lava spurts off the bottom of the screen);
+      // meanwhile gatling guns fires and magnet does something (but no metal
+      // shards; there's not enough time).  Finally, whole thing pulls back up
+      // offscreen.
+      if (timer_at(state, 0.5, time)) {
+        az_init_baddie(boss, AZ_BAD_MAGBEEST_HEAD,
+                       (az_vector_t){0, 50}, AZ_DEG2RAD(-90));
+        az_init_baddie(&state->baddies[1], AZ_BAD_MAGBEEST_LEGS_L,
+                       (az_vector_t){200, 50}, AZ_DEG2RAD(-90));
+        az_init_baddie(&state->baddies[2], AZ_BAD_MAGBEEST_LEGS_R,
+                       (az_vector_t){-200, 50}, AZ_DEG2RAD(-90));
+      }
       next_step_at(state, 6.0);
     } break;
     case AZ_VS_SUPERGUNSHIP: {
+      // TODO: choreography
+      az_baddie_t *decoy = &state->baddies[1];
+      if (timer_at(state, 0.5, time)) {
+        az_init_baddie(boss, AZ_BAD_OTH_SUPERGUNSHIP,
+                       (az_vector_t){340, -50}, AZ_DEG2RAD(180));
+      }
+      if (timer_at(state, 2.5, time)) {
+        az_init_baddie(decoy, AZ_BAD_OTH_DECOY, boss->position, boss->angle);
+        boss->velocity = (az_vector_t){-100, 200};
+        decoy->velocity = (az_vector_t){-100, -200};
+      }
       if (next_step_at(state, 6.0)) {
         az_init_baddie(boss, AZ_BAD_ZENITH_CORE, AZ_VZERO, 0);
       }
@@ -374,7 +492,17 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
     case AZ_VS_CORE: {
       if (timer_at(state, 1.0, time)) boss->state = 1;
       if (timer_at(state, 4.0, time)) boss->state = 0;
-      next_step_at(state, 6.0);
+      if (next_step_at(state, 6.0)) {
+        az_init_baddie(boss, AZ_BAD_ZENITH_CORE, AZ_VZERO, AZ_DEG2RAD(180));
+        boss->state = 2;
+        az_play_sound(&state->soundboard, AZ_SND_BOSS_SHAKE);
+      }
+    } break;
+    case AZ_VS_EXPLODE: {
+      if (timer_at(state, 1.5, time)) {
+        az_play_sound(&state->soundboard, AZ_SND_BOSS_EXPLODE);
+      }
+      next_step_at(state, 2.5);
     } break;
     case AZ_VS_DONE: break;
   }

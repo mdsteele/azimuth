@@ -148,14 +148,34 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
     glScaled(1, -1, 1);
     // Center the screen on position (0, 0).
     glTranslated(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
+    // Shake:
+    if (state->step == AZ_VS_EXPLODE) {
+      glTranslated((az_clock_mod(2, 1, state->clock) ? 3 : -3),
+                   (az_clock_mod(2, 2, state->clock) ? 3 : -3), 0);
+    }
     // Draw objects:
     draw_baddies(state, true); // background
     draw_projectiles(state);
     draw_baddies(state, false); // foreground
     draw_particles(state);
+    // Draw final boss explosion:
+    if (state->step == AZ_VS_EXPLODE && state->step_timer >= 1.5) {
+      glBegin(GL_QUADS); {
+        const GLfloat progress = state->step_timer - 1.5;
+        const GLfloat outer = 1.5f * AZ_SCREEN_WIDTH;
+        const GLfloat inner = outer * progress * progress;
+        glColor4f(1, 1, 1, progress);
+        glVertex2f(outer, inner); glVertex2f(-outer, inner);
+        glVertex2f(-outer, -inner); glVertex2f(outer, -inner);
+        glVertex2f(inner, outer); glVertex2f(-inner, outer);
+        glVertex2f(-inner, inner); glVertex2f(inner, inner);
+        glVertex2f(inner, -outer); glVertex2f(-inner, -outer);
+        glVertex2f(-inner, -inner); glVertex2f(inner, -inner);
+      } glEnd();
+    }
   } glPopMatrix();
 
-  if ((state->step == AZ_VS_CORE || state->step == AZ_VS_CORE + 1) &&
+  if ((state->step == AZ_VS_CORE || state->step == AZ_VS_DONE) &&
       state->step_timer <= 0.75) {
     tint_screen((az_color_t){255, 255, 255,
                              255 * (1 - state->step_timer / 0.75)});
