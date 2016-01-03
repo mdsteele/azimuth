@@ -40,7 +40,8 @@
 /*===========================================================================*/
 
 static const struct {
-  int step, x, y;
+  az_victory_step_t step;
+  int x, y;
   const char *title, *name;
 } TITLES[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 250, .y = 100,
@@ -64,7 +65,8 @@ static const struct {
 };
 
 static const struct {
-  int step, x, y;
+  az_victory_step_t step;
+  int x, y;
   const char *heading, *name1, *name2;
 } CREDITS[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 150, .y = 360,

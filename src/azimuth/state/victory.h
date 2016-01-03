@@ -29,26 +29,28 @@
 
 /*===========================================================================*/
 
+typedef enum {
+  AZ_VS_START = 0,
+  AZ_VS_SNAPDRAGON,
+  AZ_VS_ROCKWYRM,
+  AZ_VS_GUNSHIP,
+  AZ_VS_FORCEFIEND,
+  AZ_VS_KILOFUGE,
+  AZ_VS_NOCTURNE,
+  AZ_VS_MAGBEEST,
+  AZ_VS_SUPERGUNSHIP,
+  AZ_VS_CORE,
+  AZ_VS_EXPLODE,
+  AZ_VS_DONE
+} az_victory_step_t;
+
 typedef struct {
   az_clock_t clock;
   az_soundboard_t soundboard;
   double clear_time;
   int percent_completion;
 
-  enum {
-    AZ_VS_START = 0,
-    AZ_VS_SNAPDRAGON,
-    AZ_VS_ROCKWYRM,
-    AZ_VS_GUNSHIP,
-    AZ_VS_FORCEFIEND,
-    AZ_VS_KILOFUGE,
-    AZ_VS_NOCTURNE,
-    AZ_VS_MAGBEEST,
-    AZ_VS_SUPERGUNSHIP,
-    AZ_VS_CORE,
-    AZ_VS_EXPLODE,
-    AZ_VS_DONE
-  } step;
+  az_victory_step_t step;
   double step_timer;
 
   az_baddie_t baddies[4];

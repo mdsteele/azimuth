@@ -69,7 +69,7 @@ static void tick_baddies(az_victory_state_t *state, double time) {
                              time, state->step_timer);
       } break;
       case AZ_BAD_OTH_RAZOR_1: {
-        baddie->velocity = baddie->velocity = az_vpolar(300, baddie->angle);
+        baddie->velocity = az_vpolar(300, baddie->angle);
         az_tick_oth_tendrils(baddie, &AZ_OTH_RAZOR_TENDRILS, old_angle, time,
                              state->step_timer);
       } break;
