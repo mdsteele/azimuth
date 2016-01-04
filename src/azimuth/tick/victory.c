@@ -31,7 +31,9 @@
 #include "azimuth/tick/baddie_util.h"
 #include "azimuth/tick/baddie_wyrm.h"
 #include "azimuth/tick/particle.h"
+#include "azimuth/tick/speck.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -136,10 +138,39 @@ static void tick_baddies(az_victory_state_t *state, double time) {
         az_forcefiend_move_claws(baddie, false, time);
       } break;
       case AZ_BAD_KILOFUGE: {
-        if (baddie->state > 0) {
-          baddie->position.x += 100 * time;
-        } else if (baddie->position.x > 350) {
+        if (baddie->state == 1) {
+          // TODO: move legs
           baddie->position.x -= 80 * time;
+        } else if (baddie->state == 2) {
+          const az_vector_t target = {-200, -125 + 100 * baddie->cooldown};
+          // Turn eyes towards target:
+          for (int i = 0; i < 3; ++i) {
+            az_component_t *eye = &baddie->components[i];
+            const az_vector_t abs_eye_position =
+              az_vadd(az_vrotate(eye->position, baddie->angle),
+                      baddie->position);
+            const double new_abs_eye_angle =
+              az_vtheta(az_vsub(target, abs_eye_position));
+            eye->angle = az_mod2pi(new_abs_eye_angle - baddie->angle);
+          }
+          // Fire a beam from the central eye:
+          const double eye_radius =
+            baddie->data->components[0].bounding_radius;
+          const az_component_t *eye = &baddie->components[0];
+          const double beam_angle = baddie->angle + eye->angle;
+          const az_vector_t beam_start =
+            az_vadd(az_vadd(az_vrotate(eye->position, baddie->angle),
+                            baddie->position),
+                    az_vpolar(0.7 * eye_radius, beam_angle));
+          const uint8_t alt = 32 * az_clock_zigzag(6, 1, state->clock);
+          const az_color_t beam_color = {255, 128, alt, 192};
+          az_victory_add_particle(
+              state, AZ_PAR_BEAM, beam_color, beam_start, AZ_VZERO, beam_angle,
+              0, 1000, 4.0 + 0.75 * az_clock_zigzag(8, 1, state->clock));
+          az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
+        } else if (baddie->state == 3) {
+          // TODO: move legs
+          baddie->position.x += 120 * time;
         }
       } break;
       case AZ_BAD_NOCTURNE: {
@@ -190,6 +221,12 @@ static void tick_particles(az_victory_state_t *state, double time) {
   }
 }
 
+static void tick_specks(az_victory_state_t *state, double time) {
+  AZ_ARRAY_LOOP(speck, state->specks) {
+    az_tick_speck(speck, time);
+  }
+}
+
 /*===========================================================================*/
 
 static bool times_per_second(double per_second, const az_projectile_t *proj,
@@ -226,6 +263,13 @@ static void projectile_special_logic(
       az_victory_add_particle(
           state, AZ_PAR_EXPLOSION, (az_color_t){128, 128, 255, 255},
           proj->position, AZ_VZERO, proj->angle, 0.5, 5, 0);
+    } break;
+    case AZ_PROJ_ICE_TORPEDO: {
+      az_victory_add_speck(
+          state, (az_color_t){0, 255, 255, 255}, az_random(0.2, 1.0),
+          az_vadd(proj->position,
+                  az_vpolar(az_random(-8.0, 8.0), proj->angle + AZ_HALF_PI)),
+          AZ_VZERO);
     } break;
     case AZ_PROJ_OTH_BULLET: {
       if (times_per_second(30, proj, time)) {
@@ -277,6 +321,7 @@ static bool next_step_at(az_victory_state_t *state, double mark) {
 void az_tick_victory_state(az_victory_state_t *state, double time) {
   ++state->clock;
   tick_particles(state, time);
+  tick_specks(state, time);
   tick_projectiles(state, time);
   tick_baddies(state, time);
   state->step_timer += time;
@@ -420,14 +465,30 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 7.0);
     } break;
     case AZ_VS_KILOFUGE: {
-      // TODO: One step in, fire ice torp, second step in, brief meltbeam, then
-      // quick slide out.
+      // Take a step in from the right side of the screen, and then fire an Ice
+      // Torpedo:
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_KILOFUGE,
                        (az_vector_t){520, 0}, AZ_DEG2RAD(180));
+        boss->state = 1;
       }
-      if (timer_at(state, 4.0, time)) boss->state = 1;
-      next_step_at(state, 6.0);
+      if (timer_at(state, 1.5, time)) {
+        az_victory_add_projectile(
+            state, AZ_PROJ_ICE_TORPEDO,
+            az_vadd(boss->position, az_vpolar(150, boss->angle)),
+            AZ_DEG2RAD(-175));
+        az_play_sound(&state->soundboard, AZ_SND_FIRE_ICE_TORPEDO);
+        boss->state = 0;
+      }
+      // Take another step in, and then fire meltbeam for a couple seconds:
+      if (timer_at(state, 2.5, time)) boss->state = 1;
+      if (timer_at(state, 3.5, time)) {
+        boss->state = 2;
+        boss->cooldown = 1.5;
+      }
+      // Slide back off the right side of the screen:
+      if (timer_at(state, 5.5, time)) boss->state = 3;
+      next_step_at(state, 7.0);
     } break;
     case AZ_VS_NOCTURNE: {
       // Phase in:

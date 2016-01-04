@@ -19,6 +19,7 @@
 
 #include "azimuth/view/victory.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -131,6 +132,19 @@ static void draw_projectiles(const az_victory_state_t *state) {
   }
 }
 
+static void draw_specks(const az_victory_state_t *state) {
+  glBegin(GL_POINTS); {
+    AZ_ARRAY_LOOP(speck, state->specks) {
+      if (speck->kind == AZ_SPECK_NOTHING) continue;
+      assert(speck->age >= 0.0);
+      assert(speck->age <= speck->lifetime);
+      glColor4ub(speck->color.r, speck->color.g, speck->color.b,
+                 speck->color.a * (1.0 - speck->age / speck->lifetime));
+      az_gl_vertex(speck->position);
+    }
+  } glEnd();
+}
+
 static void draw_fade_text(const az_victory_state_t *state, int height,
                            int x, int y, double begin_at, const char *text) {
   const double fade_time = 0.5;
@@ -160,6 +174,7 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
     draw_projectiles(state);
     draw_baddies(state, false); // foreground
     draw_particles(state);
+    draw_specks(state);
     // Draw final boss explosion:
     if (state->step == AZ_VS_EXPLODE && state->step_timer >= 1.5) {
       glBegin(GL_QUADS); {

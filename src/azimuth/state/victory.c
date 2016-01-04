@@ -25,6 +25,7 @@
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -33,8 +34,9 @@ void az_victory_add_baddie(az_victory_state_t *state, az_baddie_kind_t kind,
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind != AZ_BAD_NOTHING) continue;
     az_init_baddie(baddie, kind, position, angle);
-    break;
+    return;
   }
+  AZ_WARNING_ONCE("Failed to add baddie; array is full.\n");
 }
 
 void az_victory_add_particle(
@@ -52,8 +54,9 @@ void az_victory_add_particle(
     particle->lifetime = lifetime;
     particle->param1 = param1;
     particle->param2 = param2;
-    break;
+    return;
   }
+  AZ_WARNING_ONCE("Failed to add particle; array is full.\n");
 }
 
 void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
@@ -61,14 +64,33 @@ void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind != AZ_PROJ_NOTHING) continue;
     az_init_projectile(proj, kind, position, angle, 1.0, AZ_NULL_UID);
-    break;
+    return;
   }
+  AZ_WARNING_ONCE("Failed to add projectile; array is full.\n");
+}
+
+void az_victory_add_speck(
+    az_victory_state_t *state, az_color_t color, double lifetime,
+    az_vector_t position, az_vector_t velocity) {
+  AZ_ARRAY_LOOP(speck, state->specks) {
+    if (speck->kind == AZ_SPECK_NOTHING) {
+      speck->kind = AZ_SPECK_NORMAL;
+      speck->color = color;
+      speck->position = position;
+      speck->velocity = velocity;
+      speck->age = 0.0;
+      speck->lifetime = lifetime;
+      return;
+    }
+  }
+  AZ_WARNING_ONCE("Failed to add speck; array is full.\n");
 }
 
 void az_victory_clear_objects(az_victory_state_t *state) {
   AZ_ARRAY_LOOP(baddie, state->baddies) baddie->kind = AZ_BAD_NOTHING;
   AZ_ARRAY_LOOP(particle, state->particles) particle->kind = AZ_PAR_NOTHING;
   AZ_ARRAY_LOOP(proj, state->projectiles) proj->kind = AZ_PROJ_NOTHING;
+  AZ_ARRAY_LOOP(speck, state->specks) speck->kind = AZ_SPECK_NOTHING;
 }
 
 /*===========================================================================*/

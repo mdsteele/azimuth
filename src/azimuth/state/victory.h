@@ -24,6 +24,7 @@
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/particle.h"
 #include "azimuth/state/projectile.h"
+#include "azimuth/state/speck.h"
 #include "azimuth/util/audio.h"
 #include "azimuth/util/clock.h"
 
@@ -56,6 +57,7 @@ typedef struct {
   az_baddie_t baddies[4];
   az_particle_t particles[100];
   az_projectile_t projectiles[20];
+  az_speck_t specks[100];
 } az_victory_state_t;
 
 /*===========================================================================*/
@@ -70,6 +72,10 @@ void az_victory_add_particle(
 
 void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
                                az_vector_t position, double angle);
+
+void az_victory_add_speck(
+    az_victory_state_t *state, az_color_t color, double lifetime,
+    az_vector_t position, az_vector_t velocity);
 
 void az_victory_clear_objects(az_victory_state_t *state);
 

@@ -22,8 +22,11 @@
 #define AZIMUTH_TICK_SPECK_H_
 
 #include "azimuth/state/space.h"
+#include "azimuth/state/speck.h"
 
 /*===========================================================================*/
+
+void az_tick_speck(az_speck_t *speck, double time);
 
 void az_tick_specks(az_space_state_t *state, double time);
 

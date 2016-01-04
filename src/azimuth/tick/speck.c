@@ -25,15 +25,16 @@
 
 /*===========================================================================*/
 
+void az_tick_speck(az_speck_t *speck, double time) {
+  if (speck->kind == AZ_SPECK_NOTHING) return;
+  speck->age += time;
+  if (speck->age > speck->lifetime) speck->kind = AZ_SPECK_NOTHING;
+  else az_vpluseq(&speck->position, az_vmul(speck->velocity, time));
+}
+
 void az_tick_specks(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(speck, state->specks) {
-    if (speck->kind == AZ_SPECK_NOTHING) continue;
-    speck->age += time;
-    if (speck->age > speck->lifetime) {
-      speck->kind = AZ_SPECK_NOTHING;
-      continue;
-    }
-    az_vpluseq(&speck->position, az_vmul(speck->velocity, time));
+    az_tick_speck(speck, time);
   }
 }
 
