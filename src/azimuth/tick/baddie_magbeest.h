@@ -26,6 +26,9 @@
 
 /*===========================================================================*/
 
+void az_arrange_spider_leg(az_baddie_t *legs_l, az_baddie_t *legs_r,
+                           int leg_index, az_vector_t abs_foot_pos);
+
 void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
                                double time);
 void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,

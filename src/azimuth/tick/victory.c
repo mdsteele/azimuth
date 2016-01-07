@@ -19,6 +19,7 @@
 
 #include "azimuth/tick/victory.h"
 
+#include <assert.h>
 #include <math.h>
 
 #include "azimuth/state/baddie.h"
@@ -26,6 +27,7 @@
 #include "azimuth/state/victory.h"
 #include "azimuth/tick/baddie_core.h"
 #include "azimuth/tick/baddie_forcefiend.h"
+#include "azimuth/tick/baddie_magbeest.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
 #include "azimuth/tick/baddie_util.h"
@@ -35,6 +37,10 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+#define MAGBEEST_POP_UP_DOWN_TIME 1.5
 
 /*===========================================================================*/
 
@@ -184,7 +190,64 @@ static void tick_baddies(az_victory_state_t *state, double time) {
         }
       } break;
       case AZ_BAD_MAGBEEST_HEAD: {
-        // TODO behavior
+        az_baddie_t *legs_l = &state->baddies[1];
+        az_baddie_t *legs_r = &state->baddies[2];
+        if (baddie->state == 0 || baddie->state == 2) {
+          const double param = baddie->cooldown / MAGBEEST_POP_UP_DOWN_TIME;
+          const double unpop =
+            pow((baddie->state == 0 ? param : 1 - param), 1.5);
+          assert(0.0 <= unpop && unpop <= 1.0);
+          baddie->position = (az_vector_t){0, 100 + 200 * unpop};
+          legs_l->position =
+            az_vadd(baddie->position, az_vpolar(50, AZ_DEG2RAD(45)));
+          legs_r->position =
+            az_vadd(baddie->position, az_vpolar(50, AZ_DEG2RAD(135)));
+          const double yy1 = 240 + 100 * unpop;
+          const double yy2 = 240 + 150 * unpop;
+          az_arrange_spider_leg(legs_l, legs_r, 0, (az_vector_t){-230, yy1});
+          az_arrange_spider_leg(legs_l, legs_r, 1, (az_vector_t){-120, yy2});
+          az_arrange_spider_leg(legs_l, legs_r, 2, (az_vector_t){ 120, yy2});
+          az_arrange_spider_leg(legs_l, legs_r, 3, (az_vector_t){ 230, yy1});
+        }
+      } break;
+      case AZ_BAD_MAGBEEST_LEGS_L: {
+        az_component_t *magnet = &baddie->components[0];
+        magnet->angle = az_angle_towards(magnet->angle, AZ_DEG2RAD(30) * time,
+                                         baddie->param2);
+        if (baddie->state == 6) {
+          az_loop_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET);
+        }
+      } break;
+      case AZ_BAD_MAGBEEST_LEGS_R: {
+        az_component_t *gun = &baddie->components[0];
+        gun->angle = az_angle_towards(gun->angle, AZ_DEG2RAD(30) * time,
+                                      baddie->param2);
+        if (baddie->state > 0) {
+          // Fire gatling gun:
+          if (baddie->cooldown <= 0.0) {
+            const az_vector_t fire_from =
+              {55, 2 * (az_clock_zigzag(6, 1, baddie->state) - 3)};
+            az_victory_add_projectile(
+                state, AZ_PROJ_LASER_PULSE,
+                az_vadd(az_vrotate(az_vadd(az_vrotate(fire_from, gun->angle),
+                                           gun->position),
+                                   baddie->angle),
+                        baddie->position),
+                baddie->angle + gun->angle);
+            az_play_sound(&state->soundboard, AZ_SND_FIRE_LASER_PULSE);
+            --baddie->state;
+            baddie->cooldown = 0.1;
+          }
+          // Spin the gatling gun when we're firing.
+          baddie->param = az_mod2pi(baddie->param + 2 * AZ_TWO_PI * time);
+        }
+      } break;
+      case AZ_BAD_MAGMA_BOMB: {
+        baddie->angle =
+          az_mod2pi(baddie->angle +
+                    copysign(0.02, baddie->velocity.x) *
+                    time * az_vnorm(baddie->velocity));
+        baddie->velocity.y -= 200.0 * time;
       } break;
       case AZ_BAD_OTH_SUPERGUNSHIP: {
         // TODO behavior
@@ -520,20 +583,52 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 6.5);
     } break;
     case AZ_VS_MAGBEEST: {
-      // TODO: Push down from top of screen in spider mode.  drop a magma bomb
-      // (which will explode in lava spurts off the bottom of the screen);
-      // meanwhile gatling guns fires and magnet does something (but no metal
-      // shards; there's not enough time).  Finally, whole thing pulls back up
-      // offscreen.
+      az_baddie_t *legs_l = &state->baddies[1];
+      az_baddie_t *legs_r = &state->baddies[2];
+      // Push down from the top of the screen in spider mode:
       if (timer_at(state, 0.5, time)) {
         az_init_baddie(boss, AZ_BAD_MAGBEEST_HEAD,
-                       (az_vector_t){0, 50}, AZ_DEG2RAD(-90));
-        az_init_baddie(&state->baddies[1], AZ_BAD_MAGBEEST_LEGS_L,
-                       (az_vector_t){200, 50}, AZ_DEG2RAD(-90));
-        az_init_baddie(&state->baddies[2], AZ_BAD_MAGBEEST_LEGS_R,
-                       (az_vector_t){-200, 50}, AZ_DEG2RAD(-90));
+                       (az_vector_t){0, 350}, AZ_DEG2RAD(-45));
+        for (int i = 0; i < 5; ++i) {
+          boss->components[i].position = (az_vector_t){0, 60};
+          boss->components[i].angle = AZ_DEG2RAD(90);
+        }
+        boss->components[10].angle = AZ_DEG2RAD(-45);
+        boss->cooldown = MAGBEEST_POP_UP_DOWN_TIME;
+        az_init_baddie(legs_l, AZ_BAD_MAGBEEST_LEGS_L,
+                       (az_vector_t){200, 350}, AZ_DEG2RAD(-135));
+        legs_l->param2 = legs_l->components[0].angle = AZ_DEG2RAD(60);
+        az_init_baddie(legs_r, AZ_BAD_MAGBEEST_LEGS_R,
+                       (az_vector_t){-200, 350}, AZ_DEG2RAD(-45));
+        legs_r->param2 = legs_r->components[0].angle = AZ_DEG2RAD(-60);
       }
-      next_step_at(state, 6.0);
+      if (timer_at(state, 2.0, time)) {
+        boss->state = 1;
+      }
+      // Drop a magma bomb:
+      if (timer_at(state, 2.5, time)) {
+        az_init_baddie(&state->baddies[3], AZ_BAD_MAGMA_BOMB,
+                       boss->position, 0);
+        state->baddies[3].velocity = az_vpolar(200, AZ_DEG2RAD(-40));
+        az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGMA_BOMB);
+      }
+      // Turn on the magnet:
+      if (timer_at(state, 3.0, time)) {
+        legs_l->state = 6;
+        legs_l->param2 = AZ_DEG2RAD(0);
+      }
+      // Start firing gatling gun:
+      if (timer_at(state, 3.5, time)) {
+        legs_r->state = 12;
+        legs_r->param2 = AZ_DEG2RAD(0);
+      }
+      // Pull back up off the top of the screen:
+      if (timer_at(state, 5.0, time)) {
+        boss->state = 2;
+        boss->cooldown = MAGBEEST_POP_UP_DOWN_TIME;
+        legs_l->state = 0;
+      }
+      next_step_at(state, 7.0);
     } break;
     case AZ_VS_SUPERGUNSHIP: {
       // TODO: choreography

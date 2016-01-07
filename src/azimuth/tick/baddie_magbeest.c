@@ -312,8 +312,8 @@ static az_vector_t get_abs_foot_position(az_baddie_t *legs_l,
                             legs->angle), legs->position);
 }
 
-static void arrange_spider_leg(az_baddie_t *legs_l, az_baddie_t *legs_r,
-                               int leg_index, az_vector_t abs_foot_pos) {
+void az_arrange_spider_leg(az_baddie_t *legs_l, az_baddie_t *legs_r,
+                           int leg_index, az_vector_t abs_foot_pos) {
   assert(legs_l->kind == AZ_BAD_MAGBEEST_LEGS_L);
   assert(legs_r->kind == AZ_BAD_MAGBEEST_LEGS_R);
   assert(leg_index >= 0 && leg_index < 4);
@@ -336,7 +336,7 @@ static void move_spider_foot_towards(
   const az_vector_t new_position = az_vadd(old_position, az_vcaplen(
       az_vsub(goal, old_position),
       SPIDER_FOOT_SPEED * time * (head->param > 0.5 ? 2 : 1)));
-  arrange_spider_leg(legs_l, legs_r, leg_index, new_position);
+  az_arrange_spider_leg(legs_l, legs_r, leg_index, new_position);
 }
 
 static void shift_spider_body(az_baddie_t *head, az_baddie_t *legs_l,
@@ -360,7 +360,7 @@ static void shift_spider_body(az_baddie_t *head, az_baddie_t *legs_l,
                              az_vpolar(50, towards_wall - AZ_DEG2RAD(45)));
   legs_l->angle = az_mod2pi(towards_wall + AZ_DEG2RAD(135));
   for (int i = 0; i < 4; ++i) {
-    arrange_spider_leg(legs_l, legs_r, i, abs_foot_positions[i]);
+    az_arrange_spider_leg(legs_l, legs_r, i, abs_foot_positions[i]);
   }
 }
 
