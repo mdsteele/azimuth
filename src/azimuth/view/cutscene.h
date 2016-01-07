@@ -28,6 +28,8 @@
 
 void az_draw_planet_starfield(az_clock_t clock);
 
+void az_draw_moving_starfield(double time, double speed, double scale);
+
 void az_draw_zenith_planet(az_clock_t clock);
 
 void az_draw_zenith_planet_formation(double blacken, double create,

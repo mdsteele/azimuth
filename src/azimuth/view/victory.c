@@ -46,11 +46,11 @@ static const struct {
   const char *title, *name;
 } TITLES[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 250, .y = 100,
-   .title = "Extradimensional Fingers", .name = "OTH SNAPDRAGON"},
+   .title = "Paradimensional Finger", .name = "OTH SNAPDRAGON"},
   {.step = AZ_VS_ROCKWYRM, .x = 390, .y = 350,
    .title = "Colossal Armored Annelid", .name = "ROCKWYRM"},
   {.step = AZ_VS_GUNSHIP, .x = 250, .y = 310,
-   .title = "Extradimensional Mimic", .name = "OTH GUNSHIP"},
+   .title = "Paradimensional Mimic", .name = "OTH GUNSHIP"},
   {.step = AZ_VS_FORCEFIEND, .x = 390, .y = 100,
    .title = "Hydrokinetic Leviathan", .name = "FORCEFIEND"},
   {.step = AZ_VS_KILOFUGE, .x = 250, .y = 100,
@@ -60,7 +60,7 @@ static const struct {
   {.step = AZ_VS_MAGBEEST, .x = 250, .y = 310,
    .title = "Electromagnetic Harvester", .name = "MAGBEEST"},
   {.step = AZ_VS_SUPERGUNSHIP, .x = 390, .y = 100,
-   .title = "Extradimensional Nemesis", .name = "OTH SUPERGUNSHIP"},
+   .title = "Paradimensional Nemesis", .name = "OTH SUPERGUNSHIP"},
   {.step = AZ_VS_CORE, .x = 320, .y = 380,
    .title = "Heart of the Planet", .name = "ZENITH CORE"},
 };
@@ -157,7 +157,25 @@ static void draw_fade_text(const az_victory_state_t *state, int height,
 }
 
 void az_victory_draw_screen(const az_victory_state_t *state) {
-  az_draw_planet_starfield(state->clock);
+  const double start_step_black_time = 2.0;
+  const double start_step_fade_time = 4.0;
+  if (state->step != AZ_VS_START ||
+      state->step_timer > start_step_black_time) {
+    az_draw_moving_starfield(state->total_timer, -0.5, 0.5);
+    if (state->step == AZ_VS_START &&
+        state->step_timer < start_step_black_time + start_step_fade_time) {
+      const double alpha = 1.0 -
+        (state->step_timer - start_step_black_time) / start_step_fade_time;
+      tint_screen((az_color_t){0, 0, 0, 255 * alpha});
+    }
+  }
+
+  if (state->step == AZ_VS_START) {
+    draw_fade_text(state, 32, AZ_SCREEN_WIDTH/2, 220, 0.0, "AZIMUTH");
+    draw_fade_text(state, 8, AZ_SCREEN_WIDTH/2, 280, 1.0,
+                   "a game by mdsteele");
+    draw_fade_text(state, 16, AZ_SCREEN_WIDTH/2, 235, 6.0, "- CAST -");
+  }
 
   glPushMatrix(); {
     // Make positive Y be up instead of down.

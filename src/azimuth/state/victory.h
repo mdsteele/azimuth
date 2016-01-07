@@ -47,6 +47,7 @@ typedef enum {
 
 typedef struct {
   az_clock_t clock;
+  double total_timer;
   az_soundboard_t soundboard;
   double clear_time;
   int percent_completion;

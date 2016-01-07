@@ -320,6 +320,7 @@ static bool next_step_at(az_victory_state_t *state, double mark) {
 
 void az_tick_victory_state(az_victory_state_t *state, double time) {
   ++state->clock;
+  state->total_timer += time;
   tick_particles(state, time);
   tick_specks(state, time);
   tick_projectiles(state, time);
@@ -328,7 +329,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
   az_baddie_t *boss = &state->baddies[0];
   switch (state->step) {
     case AZ_VS_START: {
-      next_step_at(state, 1.0);
+      next_step_at(state, 11.0);
     } break;
     case AZ_VS_SNAPDRAGON: {
       // Fly in from the lower-left corner of the screen:

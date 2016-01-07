@@ -70,11 +70,19 @@ static void draw_moving_stars_layer(
   } glEnd();
 }
 
-static void draw_moving_starfield(double time, double scale) {
-  draw_moving_stars_layer(30, scale,  450, time, 0.15f);
-  draw_moving_stars_layer(45, scale,  600, time, 0.25f);
-  draw_moving_stars_layer(80, scale,  900, time, 0.40f);
-  draw_moving_stars_layer(95, scale, 1200, time, 0.50f);
+void az_draw_moving_starfield(double time, double speed, double scale) {
+  glPushMatrix(); {
+    if (speed < 0) {
+      glScalef(-1, 1, 1);
+      glTranslatef(-AZ_SCREEN_WIDTH, 0, 0);
+      speed = -speed;
+    }
+    time *= speed;
+    draw_moving_stars_layer(30, scale,  450, time, 0.15f);
+    draw_moving_stars_layer(45, scale,  600, time, 0.25f);
+    draw_moving_stars_layer(80, scale,  900, time, 0.40f);
+    draw_moving_stars_layer(95, scale, 1200, time, 0.50f);
+  } glPopMatrix();
 }
 
 #define STAR_SPACING 12
@@ -321,7 +329,7 @@ static void draw_fg_particles(
 static void draw_cruising_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
   assert(cutscene->scene == AZ_SCENE_CRUISING);
-  draw_moving_starfield(cutscene->time, 1.0);
+  az_draw_moving_starfield(cutscene->time, 1.0, 1.0);
   az_ship_t ship = {
     .position = {320, 240}, .angle = AZ_PI, .thrusters = AZ_THRUST_FORWARD
   };
@@ -332,7 +340,7 @@ static void draw_move_out_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
   assert(cutscene->scene == AZ_SCENE_MOVE_OUT);
   const double accel = cutscene->param1;
-  draw_moving_starfield(cutscene->time, 1.0 + 5.0 * accel * accel);
+  az_draw_moving_starfield(cutscene->time, 1.0, 1.0 + 5.0 * accel * accel);
   az_ship_t ship = {
     .position = {320 - 350 * (2 * accel * accel - accel), 240},
     .angle = AZ_PI, .thrusters = AZ_THRUST_FORWARD
@@ -670,11 +678,8 @@ static void draw_uhp_fighter(az_clock_t clock) {
 static void draw_uhp_ships_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
   assert(cutscene->scene == AZ_SCENE_UHP_SHIPS);
-  glPushMatrix(); {
-    glScalef(-1, 1, 1);
-    glTranslatef(-AZ_SCREEN_WIDTH, 0, 0);
-    draw_moving_starfield(cutscene->time, (cutscene->step < 6 ? 0.6 : 0.2));
-  } glPopMatrix();
+  az_draw_moving_starfield(cutscene->time, -1.0,
+                           (cutscene->step < 6 ? 0.6 : 0.2));
   glPushMatrix(); {
     glScalef(1, -1, 1);
     glTranslatef(AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2, 0);
