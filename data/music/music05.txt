@@ -1,4 +1,4 @@
-@M "S!1a YzZ:z aA|AZ AABCDAAZ AABCDET"
+@M "S!1a YzZ:z aA|AZ AABCD AABCDET"
 % Title: "Deepest Green"
 
 =tempo 120
