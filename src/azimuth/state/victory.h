@@ -72,7 +72,7 @@ void az_victory_add_particle(
     double param1, double param2);
 
 void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
-                               az_vector_t position, double angle);
+                               az_vector_t position, double angle, int param);
 
 void az_victory_add_speck(
     az_victory_state_t *state, az_color_t color, double lifetime,

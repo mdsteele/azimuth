@@ -60,10 +60,11 @@ void az_victory_add_particle(
 }
 
 void az_victory_add_projectile(az_victory_state_t *state, az_proj_kind_t kind,
-                               az_vector_t position, double angle) {
+                               az_vector_t position, double angle, int param) {
   AZ_ARRAY_LOOP(proj, state->projectiles) {
     if (proj->kind != AZ_PROJ_NOTHING) continue;
     az_init_projectile(proj, kind, position, angle, 1.0, AZ_NULL_UID);
+    proj->param = param;
     return;
   }
   AZ_WARNING_ONCE("Failed to add projectile; array is full.\n");
