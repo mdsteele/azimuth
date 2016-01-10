@@ -288,7 +288,7 @@ static void tick_baddies(az_victory_state_t *state, double time) {
       } break;
       case AZ_BAD_ZENITH_CORE: {
         if (baddie->state < 2) {
-          baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(24) * time);
+          baddie->angle = az_mod2pi(baddie->angle + AZ_DEG2RAD(30) * time);
         }
         if (baddie->state == 1) {
           az_zenith_core_adjust_to_beam_configuration(baddie, time);
@@ -425,7 +425,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
   az_baddie_t *boss = &state->baddies[0];
   switch (state->step) {
     case AZ_VS_START: {
-      next_step_at(state, 11.0);
+      next_step_at(state, 8.5);
     } break;
     case AZ_VS_SNAPDRAGON: {
       // Fly in from the lower-left corner of the screen:
@@ -453,7 +453,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         }
         az_play_sound(&state->soundboard, AZ_SND_LAUNCH_OTH_RAZORS);
       }
-      next_step_at(state, 6.0);
+      next_step_at(state, 7.5);
     } break;
     case AZ_VS_ROCKWYRM: {
       // Slither in from the bottom-left corner of the screen:
@@ -488,7 +488,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
           egg->cooldown = 1.0 + 0.75 * i;
         }
       }
-      next_step_at(state, 6.5);
+      next_step_at(state, 8.0);
     } break;
     case AZ_VS_GUNSHIP: {
       // C-plus dash in from the left side of the screen:
@@ -520,7 +520,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       }
       // Fly off the top of the screen:
       if (timer_at(state, 3.5, time)) boss->state = 3;
-      next_step_at(state, 6.5);
+      next_step_at(state, 7.5);
     } break;
     case AZ_VS_FORCEFIEND: {
       // Swim in from the right side of the screen:
@@ -556,7 +556,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       }
       // Swim off the top of the screen:
       if (timer_at(state, 4.7, time)) boss->state = 2;
-      next_step_at(state, 7.0);
+      next_step_at(state, 8.0);
     } break;
     case AZ_VS_KILOFUGE: {
       // Take a step in from the right side of the screen, and then fire an Ice
@@ -582,7 +582,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       }
       // Slide back off the right side of the screen:
       if (timer_at(state, 5.5, time)) boss->state = 3;
-      next_step_at(state, 7.0);
+      next_step_at(state, 8.0);
     } break;
     case AZ_VS_NOCTURNE: {
       // Phase in:
@@ -610,7 +610,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         }
         az_play_sound(&state->soundboard, AZ_SND_EXPLODE_FIREBALL_LARGE);
       }
-      next_step_at(state, 6.5);
+      next_step_at(state, 7.5);
     } break;
     case AZ_VS_MAGBEEST: {
       az_baddie_t *legs_l = &state->baddies[1];
@@ -658,7 +658,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         boss->cooldown = MAGBEEST_POP_UP_DOWN_TIME;
         legs_l->state = 0;
       }
-      next_step_at(state, 7.0);
+      next_step_at(state, 7.3);
     } break;
     case AZ_VS_SUPERGUNSHIP: {
       az_baddie_t *decoy = &state->baddies[1];
@@ -724,7 +724,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
     case AZ_VS_CORE: {
       if (timer_at(state, 1.0, time)) boss->state = 1;
       if (timer_at(state, 5.0, time)) boss->state = 0;
-      if (next_step_at(state, 7.5)) {
+      if (next_step_at(state, 6.0)) {
         az_init_baddie(boss, AZ_BAD_ZENITH_CORE, AZ_VZERO, AZ_DEG2RAD(180));
         boss->state = 2;
         az_play_sound(&state->soundboard, AZ_SND_BOSS_SHAKE);

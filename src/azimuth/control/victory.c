@@ -75,7 +75,8 @@ void az_victory_event_loop(az_saved_games_t *saved_games,
   }
   az_save_saved_games(saved_games);
 
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
+  az_change_music(&state.soundboard, AZ_MUS_CREDITS);
+  az_change_music_flag(&state.soundboard, 1);
 
   while (true) {
     // Tick the state and redraw the screen.

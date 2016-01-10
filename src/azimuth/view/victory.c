@@ -171,10 +171,10 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
   }
 
   if (state->step == AZ_VS_START) {
-    draw_fade_text(state, 32, AZ_SCREEN_WIDTH/2, 220, 0.0, "AZIMUTH");
+    draw_fade_text(state, 32, AZ_SCREEN_WIDTH/2, 220, -0.5, "AZIMUTH");
     draw_fade_text(state, 8, AZ_SCREEN_WIDTH/2, 280, 1.0,
                    "a game by mdsteele");
-    draw_fade_text(state, 16, AZ_SCREEN_WIDTH/2, 235, 6.0, "- CAST -");
+    draw_fade_text(state, 16, AZ_SCREEN_WIDTH/2, 235, 5.0, "- CAST -");
   }
 
   glPushMatrix(); {
