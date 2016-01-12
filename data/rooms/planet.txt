@@ -649,7 +649,9 @@ $s:skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mu
   $CCnidam$W region; I've marked the top of the
   shaft on your map."
 !T135"
-  <unused 135>"
+  Good work defusing those explosives.  The Cnidam
+  mining shaft should be safe for you to explore
+  now."
 !T136"
   Hothouse"
 !T137"
