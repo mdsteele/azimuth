@@ -1,4 +1,4 @@
-Next flag: 153
+Next flag: 159
 
 Bosses
 ======
@@ -139,6 +139,27 @@ Boss Doors
 103: Killed boss door in Core room 56
 118: Killed boss door in Sarvari room 419
 
+Gates
+=====
+55: Opened one-way gate in Barrag room 259
+138: Opened one-way gate in Filimun room 110
+139: Opened one-way gate in Nandiar room 192
+140: Opened one-way gate in Barrag room 281
+142: Opened one-way gate in Cnidam room 261
+143: Opened one-way gate in Barrag room 269
+144: Opened one-way gate in Cnidam room 397
+145: Opened one-way gate in Sarvari room 460
+146: Opened one-way gate in Voquan room 391
+147: Opened one-way gate in Voquan room 359
+151: Opened one-way gate in Barrag room 291
+152: Opened one-way gate in Core room 58
+153: Opened one-way gate in Colony room 79
+154: Opened one-way gate in Filimun room 85
+155: Opened one-way gate in Nandiar room 218
+156: Opened one-way gate in Barrag room 282
+157: Opened one-way gate in Filimun room 474
+158: Opened one-way gate in Sarvari room 442
+
 Misc
 ====
 0: Visited room 14 (used for hint system)
@@ -151,7 +172,6 @@ Misc
 25: Burst through rock floor in Filimun room 93
 30: Turned off reactor in Barrag room 274, opening forcefields in room 269
 39: Turned on drill in Filimun room 84
-55: Opened one-way gate in Barrag room 259
 61: Exploded passage in Voquan room 190
 63: Opened lower-right forcefield in Nandiar room 176
 89: Traversed room 367
@@ -160,16 +180,5 @@ Misc
 107: Lowered lava in southeastern Cnidam/Sarvari
 108: Pressed button in Cnidam room 340 to open forcefield in Cnidam room 337
 128: Core music changed
-138: Opened one-way gate in Filimun room 110
-139: Opened one-way gate in Nandiar room 192
-140: Opened one-way gate in Barrag room 281
-142: Opened one-way gate in Cnidam room 261
-143: Opened one-way gate in Barrag room 269
-144: Opened one-way gate in Cnidam room 397
-145: Opened one-way gate in Sarvari room 460
-146: Opened one-way gate in Voquan room 391
-147: Opened one-way gate in Voquan room 359
 148: NPS engine exploded in Core room 371
 149: NPS engines exploded in Voquan room 255
-151: Opened one-way gate in Barrag room 291
-152: Opened one-way gate in Core room 58
