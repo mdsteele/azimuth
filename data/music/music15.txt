@@ -1,5 +1,5 @@
 @M "SAB|CDD"
-% Title: "Lights On, Guns Out"
+=title "Lights On, Guns Out"
 
 =tempo 120
 =key 3b     % C minor

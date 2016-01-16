@@ -48,6 +48,12 @@ void az_reset_saved_games(az_saved_games_t *games);
 // Return true if the player has beaten the game at least once.
 bool az_has_beaten_game(const az_saved_games_t *games);
 
+// Return true if the player has beaten the game with 100% of items.
+bool az_has_beaten_100_percent(const az_saved_games_t *games);
+
+// Return true if the player has beaten the game with <=15% of items.
+bool az_has_beaten_low_percent(const az_saved_games_t *games);
+
 bool az_load_games_from_path(const az_planet_t *planet,
                              const char *filepath,
                              az_saved_games_t *games_out);

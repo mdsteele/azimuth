@@ -1,5 +1,5 @@
 @M "S =2z xX=1x Y|zZABCABCD"
-% Title: "Don't Make Me Come Over There"
+=title "Don't Make Me Come Over There"
 
 =tempo 140
 =key 2#     % B minor

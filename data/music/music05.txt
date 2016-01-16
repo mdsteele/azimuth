@@ -1,5 +1,5 @@
 @M "S!1a YzZ:z aA|AZ AABCD AABCDET"
-% Title: "Deepest Green"
+=title "Deepest Green"
 
 =tempo 120
 =key 5b     % Bb minor

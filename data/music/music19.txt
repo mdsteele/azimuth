@@ -1,5 +1,5 @@
 @M "S =1faA=1fBA=1fCA=1fBD=1gC=2a:y fF:m gG:m yY |mMOMPT"
-% Title: "Birth of a Planet"
+=title "Birth of a Planet"
 
 =tempo 80
 =key 3b     % C minor

@@ -1,5 +1,5 @@
 @M "SACD|BCEFGFHTTBCD"
-% Title: "The Only Way To Be Sure"
+=title "The Only Way To Be Sure"
 
 =tempo 165
 =key 2#     % B minor

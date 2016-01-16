@@ -1,4 +1,5 @@
 @M "SABBCC|DDEEBCBC"
+=title "What's Mine is Yours"
 
 =tempo 115
 =key 0N     % A minor

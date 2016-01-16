@@ -1,5 +1,5 @@
 @M "SX|ABCDB"
-% Title: "Fight or Flight"
+=title "Fight or Flight"
 
 =tempo 130
 =key 3b     % C minor

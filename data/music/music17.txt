@@ -1,5 +1,5 @@
 @M "S !0a W|aABAACA"
-% Title: "Respite"
+=title "Respite"
 
 =tempo 120
 

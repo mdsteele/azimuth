@@ -1,5 +1,5 @@
 @M "SA|BBCCADDXCCDDCCMMABB"
-% Title: "Facing Goliath"
+=title "Facing Goliath"
 
 =tempo 130
 =key 3#        % F# minor

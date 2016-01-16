@@ -1,5 +1,5 @@
 @M "SABC"
-% Title: "You Will Be Upgraded"
+=title "You Will Be Upgraded"
 
 =tempo 150
 =key 3#     % F# minor

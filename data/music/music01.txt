@@ -1,5 +1,5 @@
 @M "SA|BBCDD"
-% Title: "I Came Home to a Coffin"
+=title "I Came Home to a Coffin"
 
 =tempo 120
 =key 3b

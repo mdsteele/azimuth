@@ -1,5 +1,5 @@
 @M "S =0a WXxX=1xYZ:t aA|tABCDEFGHIJKLMNOPQ"
-% Title: "High Ground"
+=title "High Ground"
 
 =tempo 125
 =key 3#     % F# minor

@@ -1,5 +1,5 @@
 @M "SABCD|MM DMM TXUXVXWZ"
-% Title: "Crystal Quest"
+=title "Crystal Quest"
 
 =tempo 120
 =key 2b     % G minor

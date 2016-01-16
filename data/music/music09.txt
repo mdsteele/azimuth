@@ -1,4 +1,5 @@
 @M "S AAbB=1b CCDDEE|FFGGEEYGGEEYFFZZ"
+=title "Demon Core"
 
 =key 2#     % B minor
 =tempo 140

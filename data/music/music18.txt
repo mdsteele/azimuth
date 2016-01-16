@@ -1,5 +1,5 @@
 @M "S|ABABCB"
-% Title: "Revelation"
+=title "Revelation"
 
 =key 2#     % B minor
 =tempo 110

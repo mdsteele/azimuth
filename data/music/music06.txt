@@ -1,4 +1,5 @@
 @M "S|ABBABBCD"
+=title "Song of the Mermaids"
 
 =tempo 150
 =key 2b     % G minor

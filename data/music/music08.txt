@@ -1,5 +1,5 @@
 @M "SNA|ABBCCTUCCTVHIGJZ"
-% Title: "Less QQ More Pew Pew"
+=title "Less QQ, More Pew Pew"
 
 =tempo 140
 =key 3b     % C minor

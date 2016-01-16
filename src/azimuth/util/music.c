@@ -30,6 +30,7 @@
 
 #include "azimuth/util/misc.h"
 #include "azimuth/util/sound.h"
+#include "azimuth/util/string.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/util/warning.h"
 
@@ -38,6 +39,7 @@
 #define MAX_NUM_PARTS 26
 #define MAX_NOTES_PER_TRACK 2048
 #define MAX_SPEC_LENGTH 512
+#define MAX_TITLE_LENGTH 63
 
 #define HALF_STEPS_PER_OCTAVE 12
 
@@ -59,6 +61,8 @@ typedef struct {
   int spec_string_length;
   char spec_string[MAX_SPEC_LENGTH];
   int spec_num_instructions;
+
+  char title[MAX_TITLE_LENGTH + 1]; // extra byte for NUL-termination
 
   az_music_part_t parts[MAX_NUM_PARTS];
   int part_indices[MAX_NUM_PARTS];  // maps from letter to index in parts
@@ -208,6 +212,25 @@ static void parse_directive(az_music_parser_t *parser) {
             PARSE_ERROR("tempo must be positive\n");
           }
           parser->seconds_per_whole_note = 240.0 / quarter_notes_per_minute;
+        } break;
+        case 'i': {
+          if (!TRY_READ("tle \"")) goto invalid;
+          if (parser->music->title != NULL) {
+            PARSE_ERROR("multiple title directives\n");
+          }
+          int title_length = 0;
+          while (true) {
+            const char ch = next_char(parser);
+            if (ch == '"') break;
+            if (title_length >= MAX_TITLE_LENGTH) {
+              PARSE_ERROR("title is too long (max length is %d characters)\n",
+                          MAX_TITLE_LENGTH);
+            }
+            parser->title[title_length] = ch;
+            ++title_length;
+          }
+          parser->title[title_length] = '\0';
+          parser->music->title = az_strdup(parser->title);
         } break;
         case 'r': {
           int half_steps;
@@ -697,6 +720,7 @@ bool az_parse_music_from_file(
 
 void az_destroy_music(az_music_t *music) {
   if (music == NULL) return;
+  free(music->title);
   for (int p = 0; p < music->num_parts; ++p) {
     az_music_part_t *part = &music->parts[p];
     AZ_ARRAY_LOOP(track, part->tracks) free(track->notes);

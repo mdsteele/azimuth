@@ -1,4 +1,5 @@
-@M "!0s Z sSX AB DEF XDEG MNO SAB XDEH"
+@M "!0s Z sSX AB DEF XDEG MNO =0s SAB XDEH"
+=title "Where Credit is Due"
 
 =tempo 120
 =key 3b        % C minor

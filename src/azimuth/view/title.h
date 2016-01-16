@@ -49,6 +49,7 @@ typedef struct {
     AZ_TMODE_PREFS,
     AZ_TMODE_RECORDS,
     AZ_TMODE_ABOUT,
+    AZ_TMODE_MUSIC,
     AZ_TMODE_ERASING,
     AZ_TMODE_COPYING,
     AZ_TMODE_PICK_KEY,
@@ -64,8 +65,11 @@ typedef struct {
   } mode_data;
 
   az_title_save_slot_t slots[AZ_NUM_SAVED_GAME_SLOTS];
-  az_button_t prefs_button, records_button, about_button, quit_button;
+  az_button_t prefs_button, about_button, quit_button;
+  az_button_t records_button, music_button;
   az_prefs_pane_t prefs_pane;
+  az_button_t prev_track_button, next_track_button;
+  az_music_key_t current_track;
 } az_title_state_t;
 
 void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,

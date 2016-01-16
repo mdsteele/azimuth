@@ -197,6 +197,10 @@ static const az_music_t *music_data_for_key(az_music_key_t music_key) {
   return &music_datas[music_index];
 }
 
+const char *az_get_music_title(az_music_key_t music_key) {
+  return music_data_for_key(music_key)->title;
+}
+
 /*===========================================================================*/
 
 void az_change_music(az_soundboard_t *soundboard, az_music_key_t music_key) {

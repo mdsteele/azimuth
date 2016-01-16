@@ -1,5 +1,5 @@
 @M "SABAC|ZOZOGIGJZOZUGIGJ"
-% Title: "Blind Fury"
+=title "Blind Fury"
 
 =tempo 150
 =key 1#        % E minor

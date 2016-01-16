@@ -397,6 +397,84 @@ static void draw_about_box(void) {
 
 /*===========================================================================*/
 
+#define MUSIC_BOX_TOP 264
+#define MUSIC_BOX_WIDTH 490
+#define MUSIC_BOX_HEIGHT 120
+#define MUSIC_BOX_LEFT ((AZ_SCREEN_WIDTH - MUSIC_BOX_WIDTH) / 2)
+
+static const az_vector_t music_box_vertices[] = {
+  {0.5, 0.5}, {MUSIC_BOX_WIDTH - 0.5, 0.5},
+  {MUSIC_BOX_WIDTH - 0.5, MUSIC_BOX_HEIGHT - 0.5},
+  {0.5, MUSIC_BOX_HEIGHT - 0.5}
+};
+static const az_polygon_t music_box_polygon =
+  AZ_INIT_POLYGON(music_box_vertices);
+
+#define TRACK_BUTTON_TOP 56
+#define TRACK_BUTTON_WIDTH 44
+#define TRACK_BUTTON_HEIGHT 33
+#define TRACK_BUTTON_MARGIN 20
+
+static const az_vector_t prev_track_button_vertices[] = {
+  {0.5, TRACK_BUTTON_HEIGHT/2}, {TRACK_BUTTON_WIDTH - 0.5, 0.5},
+  {TRACK_BUTTON_WIDTH - 0.5, TRACK_BUTTON_HEIGHT - 0.5}
+};
+static const az_polygon_t prev_track_button_polygon =
+  AZ_INIT_POLYGON(prev_track_button_vertices);
+
+static const az_vector_t next_track_button_vertices[] = {
+  {0.5, 0.5}, {0.5, TRACK_BUTTON_HEIGHT - 0.5},
+  {TRACK_BUTTON_WIDTH - 0.5, TRACK_BUTTON_HEIGHT/2}
+};
+static const az_polygon_t next_track_button_polygon =
+  AZ_INIT_POLYGON(next_track_button_vertices);
+
+#define TRACK_NAME_HEIGHT 20
+#define TRACK_NAME_WIDTH 300
+#define TRACK_NAME_LEFT ((MUSIC_BOX_WIDTH - TRACK_NAME_WIDTH) / 2)
+#define TRACK_NAME_TOP \
+  (TRACK_BUTTON_TOP + (TRACK_BUTTON_HEIGHT - TRACK_NAME_HEIGHT) / 2)
+
+static const az_vector_t track_name_vertices[] = {
+  {TRACK_NAME_LEFT + 0.5, TRACK_NAME_TOP + 0.5},
+  {TRACK_NAME_LEFT + TRACK_NAME_WIDTH - 0.5, TRACK_NAME_TOP + 0.5},
+  {TRACK_NAME_LEFT + TRACK_NAME_WIDTH - 0.5,
+   TRACK_NAME_TOP + TRACK_NAME_HEIGHT - 0.5},
+  {TRACK_NAME_LEFT + 0.5, TRACK_NAME_TOP + TRACK_NAME_HEIGHT - 0.5}
+};
+static const az_polygon_t track_name_polygon =
+  AZ_INIT_POLYGON(track_name_vertices);
+
+static void draw_music_box(const az_title_state_t *state) {
+  glPushMatrix(); {
+    glTranslated(MUSIC_BOX_LEFT, MUSIC_BOX_TOP, 0);
+    glColor4f(0, 0, 0, 0.7); // black tint
+    do_polygon(GL_POLYGON, music_box_polygon);
+    do_polygon(GL_POLYGON, track_name_polygon);
+    glColor3f(0.75, 0.75, 0.75); // light gray
+    do_polygon(GL_LINE_LOOP, music_box_polygon);
+    do_polygon(GL_LINE_LOOP, track_name_polygon);
+
+    glColor3f(1, 1, 1);
+    az_draw_string(16, AZ_ALIGN_CENTER, MUSIC_BOX_WIDTH/2, TRACK_NAME_TOP - 30,
+                   "Now playing:");
+    const char *title = az_get_music_title(state->current_track);
+    glColor3f(0.25, 1, 0.25);
+    if (title == NULL) {
+      az_draw_printf(8, AZ_ALIGN_CENTER, MUSIC_BOX_WIDTH/2, TRACK_NAME_TOP + 6,
+                     "Untitled (#%d)", (int)state->current_track);
+    } else {
+      az_draw_string(8, AZ_ALIGN_CENTER, MUSIC_BOX_WIDTH/2, TRACK_NAME_TOP + 6,
+                     title);
+    }
+
+    az_draw_standard_button(&state->prev_track_button);
+    az_draw_standard_button(&state->next_track_button);
+  } glPopMatrix();
+}
+
+/*===========================================================================*/
+
 #define SAVE_SLOT_WIDTH 160
 #define SAVE_SLOT_HEIGHT 70
 #define SAVE_SLOT_SPACING 20
@@ -560,17 +638,24 @@ static const az_polygon_t bottom_button_polygon =
 
 static bool prefs_about_buttons_active(const az_title_state_t *state) {
   return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
-          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT);
+          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
+          state->mode == AZ_TMODE_MUSIC);
 }
 
 static bool records_button_visible(const az_title_state_t *state) {
   return az_has_beaten_game(state->saved_games);
 }
 
+static bool music_button_visible(const az_title_state_t *state) {
+  return (az_has_beaten_100_percent(state->saved_games) ||
+          az_has_beaten_low_percent(state->saved_games));
+}
+
 static bool quit_button_active(const az_title_state_t *state) {
   return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
           state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
-          state->mode == AZ_TMODE_PICK_KEY || state->mode == AZ_TMODE_ERASING);
+          state->mode == AZ_TMODE_MUSIC || state->mode == AZ_TMODE_PICK_KEY ||
+          state->mode == AZ_TMODE_ERASING);
 }
 
 static void draw_bottom_button(const az_button_t *button, bool active,
@@ -619,12 +704,23 @@ void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
   az_init_button(&state->about_button, bottom_button_polygon,
                  bottom_buttons_left + 2 * (BUTTON_WIDTH + BUTTON_SPACING),
                  bottom_buttons_top);
+  az_init_button(&state->music_button, bottom_button_polygon,
+                 bottom_buttons_left + 3 * (BUTTON_WIDTH + BUTTON_SPACING),
+                 bottom_buttons_top);
   az_init_button(&state->quit_button, bottom_button_polygon,
                  bottom_buttons_left + 4 * (BUTTON_WIDTH + BUTTON_SPACING),
                  bottom_buttons_top);
 
   az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP,
                      prefs);
+
+  az_init_button(&state->prev_track_button, prev_track_button_polygon,
+                 (MUSIC_BOX_WIDTH - TRACK_NAME_WIDTH) / 2 -
+                 TRACK_BUTTON_MARGIN - TRACK_BUTTON_WIDTH, TRACK_BUTTON_TOP);
+  az_init_button(&state->next_track_button, next_track_button_polygon,
+                 (MUSIC_BOX_WIDTH + TRACK_NAME_WIDTH) / 2 +
+                 TRACK_BUTTON_MARGIN, TRACK_BUTTON_TOP);
+  state->current_track = AZ_MUS_TITLE;
 }
 
 /*===========================================================================*/
@@ -659,6 +755,8 @@ void az_title_draw_screen(const az_title_state_t *state) {
     draw_records_box(state->saved_games);
   } else if (state->mode == AZ_TMODE_ABOUT) {
     draw_about_box();
+  } else if (state->mode == AZ_TMODE_MUSIC) {
+    draw_music_box(state);
   } else {
     for (int i = 0; i < AZ_ARRAY_SIZE(state->saved_games->games); ++i) {
       draw_save_slot(state, i);
@@ -676,6 +774,10 @@ void az_title_draw_screen(const az_title_state_t *state) {
   }
   draw_bottom_button(&state->about_button, prefs_and_about_active,
                      (state->mode == AZ_TMODE_ABOUT ? "Done" : "About"));
+  if (music_button_visible(state)) {
+    draw_bottom_button(&state->music_button, prefs_and_about_active,
+                       (state->mode == AZ_TMODE_MUSIC ? "Done" : "Music"));
+  }
   draw_bottom_button(&state->quit_button, quit_button_active(state), "Quit");
 
   // Draw mouse cursor:
@@ -768,6 +870,16 @@ void az_tick_title_state(az_title_state_t *state, double time) {
   }
   az_tick_button(&state->about_button, 0, 0, prefs_and_about_active,
                  time, state->clock, &state->soundboard);
+  if (music_button_visible(state)) {
+    az_tick_button(&state->music_button, 0, 0, prefs_and_about_active,
+                   time, state->clock, &state->soundboard);
+    az_tick_button(&state->prev_track_button, MUSIC_BOX_LEFT, MUSIC_BOX_TOP,
+                   state->mode == AZ_TMODE_MUSIC, time, state->clock,
+                   &state->soundboard);
+    az_tick_button(&state->next_track_button, MUSIC_BOX_LEFT, MUSIC_BOX_TOP,
+                   state->mode == AZ_TMODE_MUSIC, time, state->clock,
+                   &state->soundboard);
+  }
   az_tick_button(&state->quit_button, 0, 0, quit_button_active(state),
                  time, state->clock, &state->soundboard);
   az_tick_prefs_pane(&state->prefs_pane,
@@ -875,6 +987,26 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
     if (az_button_on_click(&state->about_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_ABOUT ? AZ_TMODE_NORMAL :
                      AZ_TMODE_ABOUT);
+    }
+    if (music_button_visible(state) &&
+        az_button_on_click(&state->music_button, x, y, &state->soundboard)) {
+      state->mode = (state->mode == AZ_TMODE_MUSIC ? AZ_TMODE_NORMAL :
+                     AZ_TMODE_MUSIC);
+    }
+  }
+
+  if (state->mode == AZ_TMODE_MUSIC) {
+    if (az_button_on_click(&state->prev_track_button, x - MUSIC_BOX_LEFT,
+                           y - MUSIC_BOX_TOP, &state->soundboard)) {
+      state->current_track = az_modulo((int)state->current_track - 2,
+                                       AZ_NUM_MUSIC_KEYS) + 1;
+      az_change_music(&state->soundboard, state->current_track);
+    }
+    if (az_button_on_click(&state->next_track_button, x - MUSIC_BOX_LEFT,
+                           y - MUSIC_BOX_TOP, &state->soundboard)) {
+      state->current_track = az_modulo((int)state->current_track,
+                                       AZ_NUM_MUSIC_KEYS) + 1;
+      az_change_music(&state->soundboard, state->current_track);
     }
   }
 

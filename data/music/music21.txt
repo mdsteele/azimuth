@@ -1,5 +1,5 @@
 @M "S|A"
-% Title: "Requiem for a Planet"
+=title "Requiem for a Planet"
 
 =key 2#     % B minor
 =tempo 50

@@ -1,4 +1,5 @@
 @M "S a A=1c A=1c A=1c A=1c B=1c B=1c B=1c B=1c :a cC"
+=title "Mission Briefing"
 
 =key 3b     % C minor
 =tempo 140

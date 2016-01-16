@@ -103,6 +103,7 @@ typedef struct {
 } az_music_instruction_t;
 
 typedef struct {
+  char *title; // owned; NULL if no title
   int num_parts;
   az_music_part_t *parts;
   int num_instructions;
