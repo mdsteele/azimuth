@@ -128,64 +128,56 @@ static void draw_portrait_polygon(
   } glEnd();
 }
 
-static const az_vector_t hopper_paused_vertices[] = {
-  // Back/neck:
-  {20, 0}, {32, 15}, {33, 21},
-  // Hair rear:
-  {28, 30}, {26, 43}, {27, 55},
-  // Ponytail bottom edge:
-  {32, 70}, {30, 71}, {26, 69}, {23, 62}, {22, 45}, {18, 25},
-  // Ponytail tip:
-  {20, 20}, {16, 16}, {13, 17}, {10, 25}, {10, 32}, {7, 37},
-  // Ponytail top edge:
-  {9, 50}, {8, 65}, {10, 75}, {15, 82}, {25, 84}, {31, 82}, {33, 79}, {35, 78},
-  // Hair top:
-  {42, 85}, {50, 90}, {60, 92}, {70, 90}, {75, 88},
-  // Hair front:
-  {84, 82}, {89, 76}, {92, 69}, {91, 67},
-  // Forehead:
-  {89, 65}, {88.5, 55}, {87, 51},
-  // Nose:
-  {86, 46}, {90, 33}, {89, 31}, {85, 31},
+static const az_vector_t hopper_paused1_vertices[] = {
+  // Hair:
+  {0, 7.5}, {5, 9.5},
+  {6.5, 11}, {5.5, 12}, {5, 13.5}, {5.5, 15.5}, {8, 15}, {10, 15.5},
+  {15, 18}, {13.5, 19.5}, {13, 21}, {13.5, 23}, {15.3, 25}, {15.4, 25.05},
+  {15.5, 25}, {16, 23}, {18, 22.5}, {21, 23}, {24, 25},
+  // Back of the helmet:
+  {30, 31.5}, {27, 32}, {25, 34}, {21, 45}, {20, 57}, {21, 64},
+  {18, 65}, {18, 68}, {19.5, 72}, {21, 74},
+  // Top of the helmet:
+  {26, 74}, {30.5, 82.5}, {38, 87}, {42, 89}, {52, 90.5}, {62, 90}, {67, 89},
+  {75, 85}, {82, 79}, {86, 74}, {90, 64}, {91, 60}, {91, 55}, {88, 52.5},
+  // Face:
+  {83, 51}, {83, 47}, {87, 37}, {86.8, 35}, {85, 34}, {82.5, 33.5}, {82, 30},
   // Mouth:
-  {84, 29}, {84, 25}, {84.5, 23}, {82, 22}, {83, 20}, {82, 18}, {81, 17},
+  {81, 29}, {80, 28.5}, {80, 26.8}, {78.2, 25.6},
   // Chin:
-  {81, 13}, {80, 11}, {78, 10}, {77, 10}, {73, 11},
-  // Front/neck:
-  {68, 14}, {65, 10}, {72, 5}, {77, 0},
+  {77.1, 23}, {76.8, 20}, {75.1, 18}, {72.1, 17.4}, {70.1, 17.8}, {66, 18.5},
+  // Neck/front:
+  {64.8, 12}, {65.5, 12}, {66, 9}, {78, 0},
   // Border:
-  {100, 0}, {100, 100}, {0, 100}, {0, 0}
+  {100, 0}, {100, 100}, {0, 100}
+};
+static const az_vector_t hopper2_vertices[] = {
+  {21, 0}, {23.5, 0}, {25, 7}, {22.5, 4}
 };
 
-static const az_vector_t hopper_talking_vertices[] = {
-  // Back/neck:
-  {20, 0}, {32, 15}, {33, 21},
-  // Hair rear:
-  {28, 30}, {26, 43}, {27, 55},
-  // Ponytail bottom edge:
-  {32, 70}, {30, 71}, {26, 69}, {23, 62}, {22, 45}, {18, 25},
-  // Ponytail tip:
-  {20, 20}, {16, 16}, {13, 17}, {10, 25}, {10, 32}, {7, 37},
-  // Ponytail top edge:
-  {9, 50}, {8, 65}, {10, 75}, {15, 82}, {25, 84}, {31, 82}, {33, 79}, {35, 78},
-  // Hair top:
-  {42, 85}, {50, 90}, {60, 92}, {70, 90}, {75, 88},
-  // Hair front:
-  {84, 82}, {89, 76}, {92, 69}, {91, 67},
-  // Forehead:
-  {89, 65}, {88.5, 55}, {87, 51},
-  // Nose:
-  {86, 46}, {90, 33}, {89, 31}, {85, 31},
+static const az_vector_t hopper_talking1_vertices[] = {
+  // Hair:
+  {0, 7.5}, {5, 9.5},
+  {6.5, 11}, {5.5, 12}, {5, 13.5}, {5.5, 15.5}, {8, 15}, {10, 15.5},
+  {15, 18}, {13.5, 19.5}, {13, 21}, {13.5, 23}, {15.3, 25}, {15.4, 25.05},
+  {15.5, 25}, {16, 23}, {18, 22.5}, {21, 23}, {24, 25},
+  // Back of the helmet:
+  {30, 31.5}, {27, 32}, {25, 34}, {21, 45}, {20, 57}, {21, 64},
+  {18, 65}, {18, 68}, {19.5, 72}, {21, 74},
+  // Top of the helmet:
+  {26, 74}, {30.5, 82.5}, {38, 87}, {42, 89}, {52, 90.5}, {62, 90}, {67, 89},
+  {75, 85}, {82, 79}, {86, 74}, {90, 64}, {91, 60}, {91, 55}, {88, 52.5},
+  // Face:
+  {83, 51}, {83, 47.1}, {87, 37.2}, {86.8, 35.3}, {85, 34.3}, {82.5, 33.8},
+  {82, 30.3},
   // Mouth:
-  {84, 29}, {84, 27}, {84.5, 25},
-  {82, 24}, {79, 22}, {79, 21}, {82, 19},
-  {83, 17}, {82, 15}, {81, 14},
+  {82, 30}, {81, 29.5}, {79, 28.5}, {79, 27.5}, {80, 25.8}, {78.2, 24.6},
   // Chin:
-  {81, 12}, {80, 10}, {78, 9}, {77, 9}, {73, 10},
-  // Front/neck:
-  {68, 14}, {65, 10}, {72, 5}, {77, 0},
+  {77.1, 22}, {76.8, 19}, {75.1, 17}, {72.1, 16.7}, {70.1, 17.3}, {66, 18.5},
+  // Neck/front:
+  {64.9, 12}, {65.6, 12}, {66.1, 9}, {78, 0},
   // Border:
-  {100, 0}, {100, 100}, {0, 100}, {0, 0}
+  {100, 0}, {100, 100}, {0, 100}
 };
 
 static const az_vector_t hq_paused1_vertices[] = {
@@ -426,7 +418,6 @@ static const az_vector_t human_talking_vertices[] = {
   {100, 100}, {0, 100},
   // Left shoulder:
   {0, 0}, {5, 5.5}, {8, 8}, {14, 11}, {20, 13}, {31.5, 17.5},
-
   // Left neck wisp of hair:
   {32, 20.7}, {27, 19.5}, {20.5, 20}, {20.4, 20.1}, {20.5, 20.2}, {25, 20.5},
   {28.4, 22}, {30.7, 24.3},
@@ -443,7 +434,6 @@ static const az_vector_t human_talking_vertices[] = {
   {75, 30.5}, {76.7, 36},
   // Right side of head:
   {76.7, 40}, {72, 31.3}, {71, 29},
-
   // Right side of neck/collar:
   {71, 26.5}, {72, 24.5}, {74.5, 22.5}, {77.5, 21.5}, {79, 20.5}, {79.5, 18.5},
   // Right shoulder:
@@ -459,14 +449,20 @@ void az_init_portrait_drawing(void) {
   }
   // Compile Hopper portrait:
   glNewList(portrait_display_lists_start + HOPPER_PAUSED_INDEX, GL_COMPILE); {
-    const az_polygon_t polygon = AZ_INIT_POLYGON(hopper_paused_vertices);
-    draw_portrait_polygon(5, (az_color_t){0, 255, 255, 255},
-                          (az_color_t){255, 32, 0, 0}, polygon);
+    const az_color_t color1 = {0, 255, 255, 255};
+    const az_color_t color2 = {255, 32, 0, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(hopper_paused1_vertices);
+    draw_portrait_polygon(5, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(hopper2_vertices);
+    draw_portrait_polygon(1.5, color1, color2, polygon2);
   } glEndList();
   glNewList(portrait_display_lists_start + HOPPER_TALKING_INDEX, GL_COMPILE); {
-    const az_polygon_t polygon = AZ_INIT_POLYGON(hopper_talking_vertices);
-    draw_portrait_polygon(5, (az_color_t){0, 255, 255, 255},
-                          (az_color_t){255, 32, 0, 0}, polygon);
+    const az_color_t color1 = {0, 255, 255, 255};
+    const az_color_t color2 = {255, 32, 0, 0};
+    const az_polygon_t polygon1 = AZ_INIT_POLYGON(hopper_talking1_vertices);
+    draw_portrait_polygon(5, color1, color2, polygon1);
+    const az_polygon_t polygon2 = AZ_INIT_POLYGON(hopper2_vertices);
+    draw_portrait_polygon(1.5, color1, color2, polygon2);
   } glEndList();
   // Compile HQ portrait:
   glNewList(portrait_display_lists_start + HQ_PAUSED_INDEX, GL_COMPILE); {
@@ -625,7 +621,7 @@ void az_draw_portrait(az_portrait_t portrait, bool talking, az_clock_t clock) {
   switch (portrait) {
     case AZ_POR_NOTHING: AZ_ASSERT_UNREACHABLE();
     case AZ_POR_HOPPER:
-      display_list += (talking && az_clock_mod(3, 3, clock) != 0 ?
+      display_list += (talking && az_clock_mod(3, 4, clock) != 0 ?
                        HOPPER_TALKING_INDEX : HOPPER_PAUSED_INDEX);
       break;
     case AZ_POR_HQ:
