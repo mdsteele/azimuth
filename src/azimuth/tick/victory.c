@@ -141,7 +141,12 @@ static void tick_baddies(az_victory_state_t *state, double time) {
                              time, state->step_timer);
       } break;
       case AZ_BAD_FORCEFIEND: {
-        // TODO: move jaws
+        const double jaw_angle =
+          AZ_DEG2RAD(20) * (0.5 + 0.5 * sin(3.0 * state->step_timer));
+        baddie->components[0].angle = az_angle_towards(
+            baddie->components[0].angle, AZ_DEG2RAD(90) * time, jaw_angle);
+        baddie->components[1].angle = az_angle_towards(
+            baddie->components[1].angle, AZ_DEG2RAD(90) * time, -jaw_angle);
         if (baddie->state == 1) {
           baddie->angle = az_angle_towards(
               baddie->angle, AZ_DEG2RAD(180) * time, AZ_DEG2RAD(0));
@@ -207,7 +212,14 @@ static void tick_baddies(az_victory_state_t *state, double time) {
       case AZ_BAD_MAGBEEST_HEAD: {
         az_baddie_t *legs_l = &state->baddies[1];
         az_baddie_t *legs_r = &state->baddies[2];
-        if (baddie->state == 0 || baddie->state == 2) {
+        if (baddie->state == 2) {
+          baddie->components[10].angle =
+            az_mod2pi(baddie->components[10].angle + AZ_DEG2RAD(100) * time);
+        } else if (baddie->state == 4) {
+          baddie->components[10].angle =
+            az_mod2pi(baddie->components[10].angle - AZ_DEG2RAD(50) * time);
+        }
+        if (baddie->state == 0 || baddie->state == 1) {
           const double param = baddie->cooldown / MAGBEEST_POP_UP_DOWN_TIME;
           const double unpop =
             pow((baddie->state == 0 ? param : 1 - param), 1.5);
@@ -632,15 +644,14 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
                        (az_vector_t){-200, 350}, AZ_DEG2RAD(-45));
         legs_r->param2 = legs_r->components[0].angle = AZ_DEG2RAD(-60);
       }
-      if (timer_at(state, 2.0, time)) {
-        boss->state = 1;
-      }
+      if (timer_at(state, 2.0, time)) boss->state = 2;
       // Drop a magma bomb:
       if (timer_at(state, 2.5, time)) {
         az_init_baddie(&state->baddies[3], AZ_BAD_MAGMA_BOMB,
                        boss->position, 0);
         state->baddies[3].velocity = az_vpolar(200, AZ_DEG2RAD(-40));
         az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGMA_BOMB);
+        boss->state = 3;
       }
       // Turn on the magnet:
       if (timer_at(state, 3.0, time)) {
@@ -652,9 +663,10 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         legs_r->state = 12;
         legs_r->param2 = AZ_DEG2RAD(0);
       }
+      if (timer_at(state, 4.0, time)) boss->state = 4;
       // Pull back up off the top of the screen:
       if (timer_at(state, 5.0, time)) {
-        boss->state = 2;
+        boss->state = 1;
         boss->cooldown = MAGBEEST_POP_UP_DOWN_TIME;
         legs_l->state = 0;
       }
