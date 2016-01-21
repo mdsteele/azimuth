@@ -541,7 +541,7 @@ $s:autop1,skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,w
 
   Thank you."
 !T114"
-  \"Computer, where are the survivors?\""
+  \"Computer, where are the survivors now?\""
 !T115"
   I don't know.  Deeper down, I think.  I am still
   trying to access to the remote links down there,
@@ -551,17 +551,17 @@ $s:autop1,skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,w
   \"Okay, I'll have to keep search...$_15hold it.$_15  Did
   you just say 'I think'?$_08  And 'thank you'?$_08
   That's...$_12not how standard-issue Fed computers
-  usually talk.\"
+  usually talk.\"$_12
 
   \"Are you an AI or something?\""
 !T117"
   I am...what you might call a $MFragment AI$W.
   However, what remains is merely pattern-based.
-  I am not truly sentient.
+  I am not truly sentient.$_12
 
   Probably."
 !T118"
-  \"That's...  ...um, okay.  What remains of $/what$|?
+  \"That's...$_06  ...um, okay.  What remains of $/what$|?
   And what's a Fragment AI, anyway?\""
 !T119"
   Unknown.$_26
