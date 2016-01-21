@@ -573,7 +573,7 @@ void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
       .age = bolt_lifetime - baddie->cooldown,
       .lifetime = bolt_lifetime,
       .param1 = az_vdist(abs_position, abs_origin),
-      .param2 = 0.66
+      .param2 = 0.25
     };
     glPushMatrix(); {
       az_gl_rotated(-baddie->angle);

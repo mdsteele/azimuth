@@ -125,8 +125,9 @@ static void fly_towards_ship(az_space_state_t *state, az_baddie_t *baddie,
                       FORWARD_ACCEL, 200, 200, 100);
 }
 
-static void begin_retreat(az_baddie_t *baddie, double hurt) {
+static void begin_retreat(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   set_primary_state(baddie, RETREAT_STATE);
   set_secondary_state(baddie, 1 + (int)(hurt * 8));
   baddie->cooldown = 0.5;
@@ -134,8 +135,9 @@ static void begin_retreat(az_baddie_t *baddie, double hurt) {
 
 static void begin_dogfight(az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   set_primary_state(baddie, DOGFIGHT_STATE);
-  set_secondary_state(baddie, az_randint(20, 40));
+  set_secondary_state(baddie, az_randint(20, 40 - 15 * hurt));
   baddie->cooldown = 0.2;
 }
 
@@ -365,7 +367,7 @@ void az_tick_bad_oth_gunship(
         if (secondary > 0) {
           set_secondary_state(baddie, secondary);
         } else {
-          begin_retreat(baddie, hurt);
+          begin_retreat(baddie);
         }
       }
     } break;
@@ -375,7 +377,7 @@ void az_tick_bad_oth_gunship(
           az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(7))) {
         az_fire_baddie_projectile(state, baddie, AZ_PROJ_OTH_BARRAGE,
                                   20.0, 0.0, 0.0);
-        begin_retreat(baddie, hurt);
+        begin_retreat(baddie);
       }
     } break;
     case CRAZY_STATE: {
