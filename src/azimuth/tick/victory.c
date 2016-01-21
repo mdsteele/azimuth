@@ -282,10 +282,10 @@ static void tick_baddies(az_victory_state_t *state, double time) {
           if (baddie->state == 1) goal = (az_vector_t){60, -20};
           else if (baddie->state == 3) goal = (az_vector_t){-400, -100};
           fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 500, 400, 200);
-        } else if (baddie->state == 3) {
+        } else if (baddie->state == 9) {
           az_vector_t goal = {60, -20};
           fly_towards(baddie, goal, time, AZ_DEG2RAD(285), 80, 50, 200);
-        } else if (baddie->state == 4) {
+        } else if (baddie->state > 255) {
           baddie->angle -= AZ_DEG2RAD(40) * time;
         }
         az_tick_oth_tendrils(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, old_angle,
@@ -713,12 +713,15 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       // of Oth Phase Rockets:
       if (timer_at(state, 1.9, time)) boss->state = 1;
       if (timer_at(state, 2.6, time)) {
-        boss->state = 3;
+        boss->state = 9;
+        boss->cooldown = 2.0;
         az_play_sound(&state->soundboard, AZ_SND_MAGBEEST_MAGNET_CHARGE);
       }
       if (timer_at(state, 4.6, time) || timer_at(state, 5.0, time) ||
           timer_at(state, 5.4, time)) {
-        boss->state = 4;
+        boss->state += 0x100;
+        if (boss->state > 0x300) boss->state = 0x300;
+        boss->cooldown = 0.4;
         for (int i = -1; i <= 1; i += 2) {
           az_victory_add_projectile(
               state, AZ_PROJ_OTH_PHASE_ROCKET,

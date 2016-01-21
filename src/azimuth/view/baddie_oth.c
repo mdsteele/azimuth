@@ -342,6 +342,53 @@ static void draw_tractor_beam(const az_baddie_t *baddie,
   }
 }
 
+static void draw_gun_charge(const az_baddie_t *baddie, az_clock_t clock,
+                            double charge) {
+  assert(baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  glPushMatrix(); {
+    glTranslatef(20, 0, 0);
+    const double radius = charge * (7.0 + 0.3 * az_clock_zigzag(10, 1, clock));
+    const int offset = 6 * az_clock_mod(60, 1, clock);
+    for (int n = 0; n < 2; ++n) {
+      glBegin(GL_TRIANGLE_FAN); {
+        if (charge >= 1.0) glColor4f(1, 1, 0.5, 0.4);
+        else glColor4f(1, 0.5, 0.5, 0.4);
+        glVertex2d(0, 0);
+        glColor4f(1, 1, 1, 0.0);
+        for (int i = 0; i <= 360; i += 60) {
+          const double degrees = (n == 0 ? i + offset : i - offset);
+          glVertex2d(radius * cos(AZ_DEG2RAD(degrees)),
+                     radius * sin(AZ_DEG2RAD(degrees)));
+        }
+      } glEnd();
+    }
+  } glPopMatrix();
+}
+
+static void draw_ordn_charge(const az_baddie_t *baddie, az_clock_t clock) {
+  assert(baddie->kind == AZ_BAD_OTH_GUNSHIP ||
+         baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP);
+  glPushMatrix(); {
+    const GLfloat scale = 1.0 - 0.5 * baddie->cooldown;
+    glTranslatef(20, 0, 0);
+    glScalef(scale, scale, 1);
+    int offset = 6 * az_clock_mod(60, 1, clock);
+    for (int j = 0; j < 2; ++j) {
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor4f(1, 1, 0.75, 0.5);
+        glVertex2f(0, 0);
+        glColor4f(1, 1, 1, 0);
+        for (int i = 0; i <= 8; ++i) {
+          const double radius = (i % 2 ? 4 : 20);
+          const double theta = AZ_DEG2RAD(45 * i + offset) - baddie->angle;
+          glVertex2d(radius * cos(theta), radius * sin(theta));
+        }
+      } glEnd();
+      offset *= -2;
+    }
+  } glPopMatrix();
+}
+
 /*===========================================================================*/
 
 void az_draw_bad_oth_brawler(
@@ -374,25 +421,7 @@ void az_draw_bad_oth_gunship(
   assert(baddie->kind == AZ_BAD_OTH_GUNSHIP);
   draw_tractor_beam(baddie, clock);
   if (baddie->state == 7) {
-    glPushMatrix(); {
-      const GLfloat scale = 1.0 - 0.5 * baddie->cooldown;
-      glTranslatef(20, 0, 0);
-      glScalef(scale, scale, 1);
-      int offset = 6 * az_clock_mod(60, 1, clock);
-      for (int j = 0; j < 2; ++j) {
-        glBegin(GL_TRIANGLE_FAN); {
-          glColor4f(1, 1, 0.75, 0.5);
-          glVertex2f(0, 0);
-          glColor4f(1, 1, 1, 0);
-          for (int i = 0; i <= 8; ++i) {
-            const double radius = (i % 2 ? 4 : 20);
-            const double theta = AZ_DEG2RAD(45 * i + offset) - baddie->angle;
-            glVertex2d(radius * cos(theta), radius * sin(theta));
-          }
-        } glEnd();
-        offset *= -2;
-      }
-    } glPopMatrix();
+    draw_ordn_charge(baddie, clock);
   }
   draw_tendrils(baddie, &AZ_OTH_GUNSHIP_TENDRILS, clock);
   draw_oth(baddie, frozen, clock, oth_gunship_triangles,
@@ -456,6 +485,14 @@ void az_draw_bad_oth_supergunship(
   if (baddie->kind == AZ_BAD_OTH_SUPERGUNSHIP) {
     draw_tractor_beam(baddie, clock);
     alpha = cbrt(1 - fmin(1, baddie->param));
+    if (baddie->state == 0x102) {
+      draw_gun_charge(baddie, clock, 1.0 - baddie->cooldown / 3.0);
+    } else if (baddie->state == 3) {
+      draw_gun_charge(baddie, clock, 1.0);
+    }
+    if ((baddie->state & 0xff) == 9) {
+      draw_ordn_charge(baddie, clock);
+    }
   }
   draw_tendrils_with_alpha(baddie, &AZ_OTH_SUPERGUNSHIP_TENDRILS, alpha,
                            clock);
