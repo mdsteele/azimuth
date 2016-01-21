@@ -82,6 +82,8 @@ typedef struct {
   az_uid_t node_uid;
   az_vector_t position_delta;
   double angle_delta;
+  double start_shields, start_energy;
+  int start_rockets, start_bombs;
 } az_console_mode_data_t;
 
 typedef struct {

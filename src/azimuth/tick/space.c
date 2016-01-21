@@ -187,6 +187,10 @@ static void tick_console_mode(az_space_state_t *state, double time) {
       if (mode_data->progress >= 1.0) {
         mode_data->step = AZ_CSS_USE;
         mode_data->progress = 0.0;
+        mode_data->start_shields = player->shields;
+        mode_data->start_energy = player->energy;
+        mode_data->start_rockets = player->rockets;
+        mode_data->start_bombs = player->bombs;
         az_sound_key_t sound_key = AZ_SND_NOTHING;
         switch (node->subkind.console) {
           case AZ_CONS_COMM:   sound_key = AZ_SND_USE_COMM_CONSOLE;   break;
@@ -203,16 +207,21 @@ static void tick_console_mode(az_space_state_t *state, double time) {
       switch (node->subkind.console) {
         case AZ_CONS_COMM: break;
         case AZ_CONS_REFILL:
-          player->rockets = az_imax(
-              player->rockets, mode_data->progress * player->max_rockets);
-          player->bombs =
-            az_imax(player->bombs, mode_data->progress * player->max_bombs);
+          player->rockets = mode_data->start_rockets +
+            mode_data->progress *
+            (player->max_rockets - mode_data->start_rockets);
+          player->bombs = mode_data->start_bombs +
+            mode_data->progress * (player->max_bombs - mode_data->start_bombs);
           // fallthrough
         case AZ_CONS_SAVE:
           player->shields =
-            fmax(player->shields, mode_data->progress * player->max_shields);
+            fmin(player->max_shields, mode_data->start_shields +
+                 mode_data->progress *
+                 (player->max_shields - mode_data->start_shields));
           player->energy =
-            fmax(player->energy, mode_data->progress * player->max_energy);
+            fmin(player->max_energy, mode_data->start_energy +
+                 mode_data->progress *
+                 (player->max_energy - mode_data->start_energy));
           break;
       }
       if (mode_data->progress >= 1.0) {
