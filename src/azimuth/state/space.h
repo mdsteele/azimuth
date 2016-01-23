@@ -259,15 +259,18 @@ typedef enum {
 } az_impact_type_t;
 
 // Flags for which impact types to skip; liquid surface impacts are skipped by
-// default, unless AZ_IMPF_NOT_LIQUID is included.
+// default, unless AZ_IMPF_NOT_LIQUID is included.  If AZ_IMPF_BADDIE and
+// AZ_IMPF_NOT_WALL_LIKE_BADDIE are both included, then only baddies lacking
+// the AZ_BADF_WALL_LIKE property are skipped.
 typedef uint_fast8_t az_impact_flags_t;
-#define AZ_IMPF_NONE         ((az_impact_flags_t)0)
-#define AZ_IMPF_BADDIE       ((az_impact_flags_t)(1u << AZ_IMP_BADDIE))
-#define AZ_IMPF_DOOR_INSIDE  ((az_impact_flags_t)(1u << AZ_IMP_DOOR_INSIDE))
-#define AZ_IMPF_DOOR_OUTSIDE ((az_impact_flags_t)(1u << AZ_IMP_DOOR_OUTSIDE))
-#define AZ_IMPF_NOT_LIQUID   ((az_impact_flags_t)(1u << AZ_IMP_LIQUID_SURFACE))
-#define AZ_IMPF_SHIP         ((az_impact_flags_t)(1u << AZ_IMP_SHIP))
-#define AZ_IMPF_WALL         ((az_impact_flags_t)(1u << AZ_IMP_WALL))
+#define AZ_IMPF_NONE                 ((az_impact_flags_t)0)
+#define AZ_IMPF_BADDIE               ((az_impact_flags_t)(1u << 0))
+#define AZ_IMPF_DOOR_INSIDE          ((az_impact_flags_t)(1u << 1))
+#define AZ_IMPF_DOOR_OUTSIDE         ((az_impact_flags_t)(1u << 2))
+#define AZ_IMPF_NOT_LIQUID           ((az_impact_flags_t)(1u << 3))
+#define AZ_IMPF_SHIP                 ((az_impact_flags_t)(1u << 4))
+#define AZ_IMPF_WALL                 ((az_impact_flags_t)(1u << 5))
+#define AZ_IMPF_NOT_WALL_LIKE_BADDIE ((az_impact_flags_t)(1u << 6))
 
 typedef struct {
   // What type of object was hit:

@@ -1190,7 +1190,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ |
+                          AZ_BADF_WALL_LIKE),
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_sensor_target_vertices),
                    .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_components)
@@ -1198,7 +1199,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_SENSOR_INV] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ |
+                          AZ_BADF_WALL_LIKE),
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_sensor_target_vertices),
                    .immunities = ~AZ_DMGF_BEAM },
     DECL_COMPONENTS(beam_sensor_inv_components)
@@ -1295,7 +1297,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_GUN_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = AZ_BADF_DRAW_BG,
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_WALL_LIKE),
     .main_body = { .bounding_radius = 15.0,
                    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS |
                                   AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB |
@@ -1339,7 +1341,7 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BEAM_WALL] = {
     .max_health = 25.0, .potential_pickups = AZ_PUPF_NOTHING,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = AZ_BADF_NO_HOMING,
+    .static_properties = (AZ_BADF_NO_HOMING | AZ_BADF_WALL_LIKE),
     .main_body = { .polygon = AZ_INIT_POLYGON(beam_wall_vertices),
                    .immunities = ~AZ_DMGF_BEAM }
   },
@@ -1757,7 +1759,7 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000000.0, .color = {160, 160, 160, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_INVINCIBLE |
-                          AZ_BADF_NO_HOMING),
+                          AZ_BADF_NO_HOMING | AZ_BADF_WALL_LIKE),
     .main_body = { .polygon = AZ_INIT_POLYGON(sensor_laser_vertices),
                    .immunities = ~0 }
   },
@@ -1837,7 +1839,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_BOMB_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING |
+                          AZ_BADF_WALL_LIKE),
     .main_body = { .bounding_radius = 15.0,
                    .immunities = ~(AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB) },
     DECL_COMPONENTS(bomb_sensor_components)
@@ -1845,7 +1848,8 @@ static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_ROCKET_SENSOR] = {
     .max_health = 1000000.0, .overall_bounding_radius = 30.0,
     .color = {160, 160, 160, 255}, .death_sound = AZ_SND_KILL_TURRET,
-    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ),
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_NO_HOMING_PROJ |
+                          AZ_BADF_WALL_LIKE),
     .main_body = { .bounding_radius = 15.0,
                    .immunities = ~(AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET) },
     DECL_COMPONENTS(rocket_sensor_components)

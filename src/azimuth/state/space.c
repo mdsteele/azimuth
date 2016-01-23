@@ -449,11 +449,15 @@ void az_ray_impact(az_space_state_t *state, az_vector_t start,
     }
   }
   // Baddies:
-  if (!(skip_types & AZ_IMPF_BADDIE)) {
+  const bool skip_non_wall_like_baddies = (skip_types & AZ_IMPF_BADDIE);
+  if (!skip_non_wall_like_baddies ||
+      (skip_types & AZ_IMPF_NOT_WALL_LIKE_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
+      if (skip_non_wall_like_baddies &&
+          !az_baddie_has_flag(baddie, AZ_BADF_WALL_LIKE)) continue;
       const az_component_data_t *component;
       if (az_ray_hits_baddie(baddie, start, delta,
                              position, normal, &component)) {
@@ -535,11 +539,15 @@ void az_circle_impact(az_space_state_t *state, double radius,
     }
   }
   // Baddies:
-  if (!(skip_types & AZ_IMPF_BADDIE)) {
+  const bool skip_non_wall_like_baddies = (skip_types & AZ_IMPF_BADDIE);
+  if (!skip_non_wall_like_baddies ||
+      (skip_types & AZ_IMPF_NOT_WALL_LIKE_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
+      if (skip_non_wall_like_baddies &&
+          !az_baddie_has_flag(baddie, AZ_BADF_WALL_LIKE)) continue;
       const az_component_data_t *component;
       if (az_circle_hits_baddie(baddie, radius, start, delta,
                                 position_out, normal_out, &component)) {
@@ -556,6 +564,7 @@ void az_circle_impact(az_space_state_t *state, double radius,
     *normal_out = AZ_VZERO;
   }
 }
+
 
 void az_arc_circle_impact(
     az_space_state_t *state, double circle_radius,
@@ -613,11 +622,15 @@ void az_arc_circle_impact(
     }
   }
   // Baddies:
-  if (!(skip_types & AZ_IMPF_BADDIE)) {
+  const bool skip_non_wall_like_baddies = (skip_types & AZ_IMPF_BADDIE);
+  if (!skip_non_wall_like_baddies ||
+      (skip_types & AZ_IMPF_NOT_WALL_LIKE_BADDIE)) {
     AZ_ARRAY_LOOP(baddie, state->baddies) {
       if (baddie->kind == AZ_BAD_NOTHING) continue;
       if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
       if (baddie->uid == skip_uid) continue;
+      if (skip_non_wall_like_baddies &&
+          !az_baddie_has_flag(baddie, AZ_BADF_WALL_LIKE)) continue;
       const az_component_data_t *component;
       if (az_arc_circle_hits_baddie(
               baddie, circle_radius, start, spin_center, spin_angle,

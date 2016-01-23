@@ -1326,7 +1326,9 @@ void az_tick_ship(az_space_state_t *state, double time) {
   assert(is_normal_mode(state));
   assert(az_ship_is_alive(ship));
   az_impact_flags_t impact_flags = AZ_IMPF_SHIP;
-  if (ship->temp_invincibility > 0.0) impact_flags |= AZ_IMPF_BADDIE;
+  if (ship->temp_invincibility > 0.0) {
+    impact_flags |= AZ_IMPF_BADDIE | AZ_IMPF_NOT_WALL_LIKE_BADDIE;
+  }
   if (ship->tractor_beam.active) {
     assert(tractor_node != NULL);
     assert(tractor_node->kind == AZ_NODE_TRACTOR);
