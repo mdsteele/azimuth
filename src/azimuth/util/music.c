@@ -888,7 +888,7 @@ void az_synthesize_music(az_music_synth_t *synth, int16_t *samples,
           sin(voice->time_from_note_start * voice->vibrato_speed);
         const double period =
           1.0 / (note->attributes.tone.frequency * vibrato);
-        const int iperiod = AZ_AUDIO_RATE * SYNTH_SUPERSAMPLE * period;
+        const int iperiod = (int)(AZ_AUDIO_RATE * SYNTH_SUPERSAMPLE * period);
         double amplitude = 0.0;
         for (int s = 0; s < SYNTH_SUPERSAMPLE; ++s) {
           ++voice->iphase;

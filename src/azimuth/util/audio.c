@@ -54,7 +54,7 @@ void az_play_sound_data(az_soundboard_t *soundboard,
     for (int i = 0; i < soundboard->num_oneshots; ++i) {
       if (soundboard->oneshots[i].sound_data == sound_data) {
         soundboard->oneshots[i].volume =
-          fmax(volume, soundboard->oneshots[i].volume);
+          fmaxf(volume, soundboard->oneshots[i].volume);
         return;
       }
     }
@@ -84,7 +84,7 @@ static void persist_sound_internal(
  merge:
   assert(soundboard->persists[index].sound_data == sound_data);
   soundboard->persists[index].volume =
-    fmax(volume, soundboard->persists[index].volume);
+    fmaxf(volume, soundboard->persists[index].volume);
   soundboard->persists[index].play |= play;
   soundboard->persists[index].loop |= loop;
   soundboard->persists[index].reset |= reset;

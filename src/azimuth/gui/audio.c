@@ -146,7 +146,8 @@ static void tick_music(const az_soundboard_t *soundboard) {
       }
     } else {
       music_fade_slowdown =
-        (soundboard->music_fade_out_seconds * AZ_AUDIO_RATE) / MAX_VOLUME;
+        (int)((soundboard->music_fade_out_seconds * AZ_AUDIO_RATE) /
+              MAX_VOLUME);
       next_music = soundboard->next_music;
       next_music_flag = (soundboard->change_next_music_flag ?
                          soundboard->new_next_music_flag : 0);
@@ -177,7 +178,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       if (!soundboard->persists[i].reset) {
         reset = false;
         already_active[i] = true;
-        sound->volume = soundboard->persists[i].volume * MAX_VOLUME;
+        sound->volume = (int)(soundboard->persists[i].volume * MAX_VOLUME);
         sound->paused = !soundboard->persists[i].play;
       }
       break;
@@ -196,7 +197,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       if (sound->data != NULL) continue;
       sound->data = soundboard->persists[i].sound_data;
       sound->sample_index = 0;
-      sound->volume = soundboard->persists[i].volume * MAX_VOLUME;
+      sound->volume = (int)(soundboard->persists[i].volume * MAX_VOLUME);
       sound->loop = soundboard->persists[i].loop;
       sound->persisted = true;
       sound->paused = false;
@@ -214,7 +215,7 @@ static void tick_sounds(const az_soundboard_t *soundboard) {
       if (sound->data != NULL) continue;
       sound->data = soundboard->oneshots[i].sound_data;
       sound->sample_index = 0;
-      sound->volume = soundboard->oneshots[i].volume * MAX_VOLUME;
+      sound->volume = (int)(soundboard->oneshots[i].volume * MAX_VOLUME);
       sound->loop = false;
       sound->persisted = false;
       sound->paused = false;
