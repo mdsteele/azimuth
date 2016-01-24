@@ -27,13 +27,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -96,11 +91,11 @@ void az_draw_bad_grabber_plant(
     const GLfloat length = az_vnorm(tongue->position);
     const GLfloat width = 3.0 - length / 300.0;
     const az_color_t inner =
-      color3(0.5f + 0.3f * flare - 0.5f * frozen, 0.2f + 0.4f * frozen,
-             0.35f - 0.2f * flare + 0.4f * frozen);
+      az_color3f(0.5f + 0.3f * flare - 0.5f * frozen, 0.2f + 0.4f * frozen,
+                 0.35f - 0.2f * flare + 0.4f * frozen);
     const az_color_t outer =
-      color3(0.2f + 0.1f * flare - 0.2f * frozen, 0.1f * flare + 0.3f * frozen,
-             0.3f * frozen);
+      az_color3f(0.2f + 0.1f * flare - 0.2f * frozen,
+                 0.1f * flare + 0.3f * frozen, 0.3f * frozen);
     az_gl_rotated(tongue->angle);
     glBegin(GL_TRIANGLE_STRIP); {
       az_gl_color(outer); glVertex2f(0, -width); glVertex2f(length, -width);

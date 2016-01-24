@@ -25,13 +25,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -97,18 +92,18 @@ static void draw_zipper(
 void az_draw_bad_zipper(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper(color3(0.5 + 0.5 * flare - 0.5 * frozen, 1 - flare, frozen),
-              color3(0.4 - 0.4 * frozen, 0.4, frozen),
-              color3(0.4 * flare, 0.5, frozen), flare, frozen, clock);
+  draw_zipper(az_color3f(0.5 + 0.5 * flare - 0.5 * frozen, 1 - flare, frozen),
+              az_color3f(0.4 - 0.4 * frozen, 0.4, frozen),
+              az_color3f(0.4 * flare, 0.5, frozen), flare, frozen, clock);
 }
 
 void az_draw_bad_armored_zipper(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper(color3(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
-                     0.7 + 0.3 * frozen),
-              color3(0, 0.4, 0.4 + 0.6 * frozen),
-              color3(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
+  draw_zipper(az_color3f(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
+                         0.7 + 0.3 * frozen),
+              az_color3f(0, 0.4, 0.4 + 0.6 * frozen),
+              az_color3f(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
               flare, frozen, clock);
 }
 
@@ -123,11 +118,11 @@ void az_draw_bad_mini_armored_zipper(
 void az_draw_bad_fire_zipper(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper(color3(0.5f + 0.5f * flare - 0.5f * frozen, 0.5f * frozen,
-                     1.0f - flare),
-              color3(0.6f - 0.6f * frozen, 0.4f, frozen),
-              color3(0.25f + 0.25f * flare, 0.25f * frozen,
-                     0.5f - 0.5f * flare),
+  draw_zipper(az_color3f(0.5f + 0.5f * flare - 0.5f * frozen, 0.5f * frozen,
+                         1.0f - flare),
+              az_color3f(0.6f - 0.6f * frozen, 0.4f, frozen),
+              az_color3f(0.25f + 0.25f * flare, 0.25f * frozen,
+                         0.5f - 0.5f * flare),
               flare, frozen, clock);
 }
 
@@ -136,10 +131,10 @@ void az_draw_bad_mosquito(
   const float flare = baddie->armor_flare;
   glPushMatrix(); {
     glScalef(0.7, 0.7, 1);
-    draw_zipper_antennae(color3(0.5, 0.25, 0.25));
-    draw_zipper_body(color3(1 - frozen, 0.5 - 0.5 * flare, frozen),
-                     color3(1 - frozen, 0.25, frozen),
-                     color3(0.4 + 0.4 * flare, 0, frozen), 8);
+    draw_zipper_antennae(az_color3f(0.5, 0.25, 0.25));
+    draw_zipper_body(az_color3f(1 - frozen, 0.5 - 0.5 * flare, frozen),
+                     az_color3f(1 - frozen, 0.25, frozen),
+                     az_color3f(0.4 + 0.4 * flare, 0, frozen), 8);
     draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
   } glPopMatrix();
 }
@@ -149,10 +144,10 @@ void az_draw_bad_gnat(
   const float flare = baddie->armor_flare;
   glPushMatrix(); {
     glScalef(0.5, 0.5, 1);
-    draw_zipper_antennae(color3(0.5, 0.25, 0.25));
-    draw_zipper_body(color3(0.5f + 0.5f * flare, 0.25f, 1.0f - flare),
-                     color3(0.25f + 0.75f * flare, 0, 1.0f - flare),
-                     color3(0.4 + 0.4 * flare, 0, frozen), 8);
+    draw_zipper_antennae(az_color3f(0.5, 0.25, 0.25));
+    draw_zipper_body(az_color3f(0.5f + 0.5f * flare, 0.25f, 1.0f - flare),
+                     az_color3f(0.25f + 0.75f * flare, 0, 1.0f - flare),
+                     az_color3f(0.4 + 0.4 * flare, 0, frozen), 8);
     draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
   } glPopMatrix();
 }
@@ -160,27 +155,27 @@ void az_draw_bad_gnat(
 void az_draw_bad_dragonfly(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper_antennae(color3(0.5, 0.25, 0.25));
-  draw_zipper_body(color3(1 - frozen, 0.5 - 0.5 * flare, frozen),
-                   color3(1 - frozen, 0.25, frozen),
-                   color3(0.4 + 0.4 * flare, 0, frozen), 4);
+  draw_zipper_antennae(az_color3f(0.5, 0.25, 0.25));
+  draw_zipper_body(az_color3f(1 - frozen, 0.5 - 0.5 * flare, frozen),
+                   az_color3f(1 - frozen, 0.25, frozen),
+                   az_color3f(0.4 + 0.4 * flare, 0, frozen), 4);
   draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
 }
 
 void az_draw_bad_hornet(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper_antennae(color3(0.5, 0.5, 0.25));
-  draw_zipper_body(color3(1 - frozen, 1 - flare, frozen),
-                   color3(1 - frozen, 0.5, frozen),
-                   color3(0.4 + 0.4 * flare, 0.4, frozen), 4);
+  draw_zipper_antennae(az_color3f(0.5, 0.5, 0.25));
+  draw_zipper_body(az_color3f(1 - frozen, 1 - flare, frozen),
+                   az_color3f(1 - frozen, 0.5, frozen),
+                   az_color3f(0.4 + 0.4 * flare, 0.4, frozen), 4);
   draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
 }
 
 void az_draw_bad_super_hornet(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper_antennae(color3(0.25, 0.5, 0.12));
+  draw_zipper_antennae(az_color3f(0.25, 0.5, 0.12));
   for (int y = -1; y <= 1; y += 2) {
     for (int i = -3; i <= 4; ++i) {
       glPushMatrix(); {
@@ -196,9 +191,10 @@ void az_draw_bad_super_hornet(
       } glPopMatrix();
     }
   }
-  draw_zipper_body(color3(0.6f - 0.6f * frozen, 0.5f - 0.5f * flare, frozen),
-                   color3(0, 1.0f - 0.5f * frozen, frozen),
-                   color3(0.2 + 0.6 * flare, 0.4, frozen), 4);
+  draw_zipper_body(az_color3f(0.6f - 0.6f * frozen, 0.5f - 0.5f * flare,
+                              frozen),
+                   az_color3f(0, 1.0f - 0.5f * frozen, frozen),
+                   az_color3f(0.2 + 0.6 * flare, 0.4, frozen), 4);
   draw_zipper_wings(5, -1.1, 1.9, flare, frozen, clock);
 }
 
@@ -208,11 +204,11 @@ void az_draw_bad_switcher(
   glPushMatrix(); {
     glTranslatef(-2.5, 0, 0);
     glScalef(0.75, 1, 1);
-    draw_zipper_antennae(color3(0.25, 0.75, 0.25));
-    draw_zipper_body(color3(flare, 0.5 + 0.25 * frozen, 0.75),
-                     color3(0.5 - 0.5 * frozen, 1, 0.5 + 0.25 * frozen),
-                     color3(0.2 + 0.4 * flare, 0.1 + 0.4 * frozen,
-                            0.4 + 0.4 * frozen), 8);
+    draw_zipper_antennae(az_color3f(0.25, 0.75, 0.25));
+    draw_zipper_body(az_color3f(flare, 0.5 + 0.25 * frozen, 0.75),
+                     az_color3f(0.5 - 0.5 * frozen, 1, 0.5 + 0.25 * frozen),
+                     az_color3f(0.2 + 0.4 * flare, 0.1 + 0.4 * frozen,
+                                0.4 + 0.4 * frozen), 8);
   } glPopMatrix();
   draw_zipper_wings(8, 1.8, 3.8, flare, frozen,
                     (baddie->state == 0 ? 4 : clock));

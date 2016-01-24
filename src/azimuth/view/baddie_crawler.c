@@ -26,13 +26,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -54,8 +49,8 @@ static void draw_feet(az_color_t color1, az_color_t color2, az_clock_t clock,
 }
 
 static void draw_normal_feet(float frozen, az_clock_t clock, bool stopped) {
-  draw_feet(color3(0.5f, 0.15f, 0.1f + 0.6f * frozen),
-            color3(0.2f, 0.1f, 0.4f + 0.6f * frozen),
+  draw_feet(az_color3f(0.5f, 0.15f, 0.1f + 0.6f * frozen),
+            az_color3f(0.2f, 0.1f, 0.4f + 0.6f * frozen),
             clock, 5, 2.0f, stopped);
 }
 
@@ -145,11 +140,11 @@ void az_draw_bad_crab_crawler(
     glTranslatef((baddie->state == 3 ? -2.5f :
                   -0.25f * az_clock_zigzag(5, 5, clock)), 0, 0);
     const az_color_t inner =
-      color3(0.6f + 0.4f * flare - 0.4f * frozen, 0.4f - 0.2f * flare,
-             0.2f + 0.8f * frozen);
+      az_color3f(0.6f + 0.4f * flare - 0.4f * frozen, 0.4f - 0.2f * flare,
+                 0.2f + 0.8f * frozen);
     const az_color_t outer =
-      color3(0.24f + 0.4f * flare - 0.15f * frozen, 0.12f - 0.05f * flare,
-             0.06f + 0.5f * frozen);
+      az_color3f(0.24f + 0.4f * flare - 0.15f * frozen, 0.12f - 0.05f * flare,
+                 0.06f + 0.5f * frozen);
     // Antennae:
     glBegin(GL_LINE_STRIP); {
       az_gl_color(outer);
@@ -188,8 +183,8 @@ void az_draw_bad_ice_crawler(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_ICE_CRAWLER);
   const float flare = baddie->armor_flare;
-  draw_feet(color3(0.5f + 0.5f * flare, 0.15f, 0.5f),
-            color3(0.2f + 0.2f * flare, 0.1f, 0.4f),
+  draw_feet(az_color3f(0.5f + 0.5f * flare, 0.15f, 0.5f),
+            az_color3f(0.2f + 0.2f * flare, 0.1f, 0.4f),
             clock, 6, 1.0f, false);
   // Body:
   glPushMatrix(); {

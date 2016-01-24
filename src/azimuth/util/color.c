@@ -29,6 +29,23 @@
 
 AZ_STATIC_ASSERT(sizeof(az_color_t) == sizeof(int32_t));
 
+az_color_t az_color3f(float r, float g, float b) {
+  assert(r >= 0.0f && r <= 1.0f);
+  assert(g >= 0.0f && g <= 1.0f);
+  assert(b >= 0.0f && b <= 1.0f);
+  return (az_color_t){(uint8_t)(r * UINT8_MAX), (uint8_t)(g * UINT8_MAX),
+                      (uint8_t)(b * UINT8_MAX), UINT8_MAX};
+}
+
+az_color_t az_color4f(float r, float g, float b, float a) {
+  assert(r >= 0.0f && r <= 1.0f);
+  assert(g >= 0.0f && g <= 1.0f);
+  assert(b >= 0.0f && b <= 1.0f);
+  assert(a >= 0.0f && a <= 1.0f);
+  return (az_color_t){(uint8_t)(r * UINT8_MAX), (uint8_t)(g * UINT8_MAX),
+                      (uint8_t)(b * UINT8_MAX), (uint8_t)(a * UINT8_MAX)};
+}
+
 const az_color_t AZ_WHITE = {255, 255, 255, 255};
 const az_color_t AZ_RED = {255, 0, 0, 255};
 const az_color_t AZ_GREEN = {0, 255, 0, 255};
@@ -44,11 +61,11 @@ az_color_t az_hsva_color(double hue_radians, double saturation, double value,
   const double hh = AZ_RAD2DEG(az_mod2pi_nonneg(hue_radians)) / 60.0;
   const int ii = (int)hh;
   const double ff = hh - ii;
-  const uint8_t vv = value * 255;
-  const uint8_t pp = value * (1.0 - saturation) * 255;
-  const uint8_t qq = value * (1.0 - saturation * ff) * 255;
-  const uint8_t tt = value * (1.0 - saturation * (1.0 - ff)) * 255;
-  const uint8_t aa = 255 * alpha;
+  const uint8_t vv = (uint8_t)(value * 255);
+  const uint8_t pp = (uint8_t)(value * (1.0 - saturation) * 255);
+  const uint8_t qq = (uint8_t)(value * (1.0 - saturation * ff) * 255);
+  const uint8_t tt = (uint8_t)(value * (1.0 - saturation * (1.0 - ff)) * 255);
+  const uint8_t aa = (uint8_t)(255 * alpha);
   switch (ii) {
     case 0: return (az_color_t){vv, tt, pp, aa};
     case 1: return (az_color_t){qq, vv, pp, aa};
@@ -64,10 +81,10 @@ az_color_t az_transition_color(az_color_t color0, az_color_t color1,
                                double param) {
   assert(0.0 <= param && param <= 1.0);
   return (az_color_t){
-    color0.r + param * ((int)color1.r - (int)color0.r),
-    color0.g + param * ((int)color1.g - (int)color0.g),
-    color0.b + param * ((int)color1.b - (int)color0.b),
-    color0.a + param * ((int)color1.a - (int)color0.a)
+    (uint8_t)(color0.r + param * ((int)color1.r - (int)color0.r)),
+    (uint8_t)(color0.g + param * ((int)color1.g - (int)color0.g)),
+    (uint8_t)(color0.b + param * ((int)color1.b - (int)color0.b)),
+    (uint8_t)(color0.a + param * ((int)color1.a - (int)color0.a))
   };
 }
 

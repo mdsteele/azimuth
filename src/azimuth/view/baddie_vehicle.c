@@ -27,13 +27,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -65,9 +60,9 @@ void az_draw_bad_copter(
     glVertex2f(-10, -6);
   } glEnd();
   const az_color_t outer =
-    color3(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
+    az_color3f(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
   const az_color_t inner =
-    color3(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
+    az_color3f(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
   // Rotor hub:
   glBegin(GL_QUAD_STRIP); {
     az_gl_color(outer); glVertex2f(-21, 2); glVertex2f(-14, 2);
@@ -130,9 +125,9 @@ void az_draw_bad_small_truck(
   // Body siding:
   glBegin(GL_QUAD_STRIP); {
     const az_color_t outer =
-      color3(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
+      az_color3f(0.15f + 0.85f * flare, 0.25f, 0.2f + 0.8f * frozen);
     const az_color_t inner =
-      color3(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
+      az_color3f(0.4f + 0.6f * flare, 0.45f, 0.45f + 0.55f * frozen);
     az_gl_color(outer); glVertex2f(10, 14);
     az_gl_color(inner); glVertex2f(10, 9);
     az_gl_color(outer); glVertex2f(-30, 14);
@@ -174,9 +169,9 @@ void az_draw_bad_small_auv(
   } glEnd();
   // Propeller axle:
   const az_color_t outer =
-    color3(0.25f + 0.75f * flare, 0.35f, 0.2f + 0.8f * frozen);
+    az_color3f(0.25f + 0.75f * flare, 0.35f, 0.2f + 0.8f * frozen);
   const az_color_t inner =
-    color3(0.5f + 0.5f * flare, 0.55f, 0.45f + 0.55f * frozen);
+    az_color3f(0.5f + 0.5f * flare, 0.55f, 0.45f + 0.55f * frozen);
   glBegin(GL_QUAD_STRIP); {
     az_gl_color(outer); glVertex2f(-36, 2); glVertex2f(-29, 2);
     az_gl_color(inner); glVertex2f(-37, 0); glVertex2f(-29, 0);

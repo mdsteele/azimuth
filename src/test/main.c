@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_circle_touches_polygon_trans);
   RUN_TEST(test_clock_mod);
   RUN_TEST(test_clock_zigzag);
+  RUN_TEST(test_color3f);
   RUN_TEST(test_create_sound_data);
   RUN_TEST(test_cubic_bezier_angle);
   RUN_TEST(test_cubic_bezier_arc_length);

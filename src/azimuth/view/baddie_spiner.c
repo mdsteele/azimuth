@@ -31,10 +31,6 @@
 
 /*===========================================================================*/
 
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
 static void draw_spine(float flare, float frozen) {
   glBegin(GL_TRIANGLE_STRIP); {
     glColor4f(0.5f * flare, 0.3, 0, 0);
@@ -116,8 +112,8 @@ void az_draw_bad_spiner(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_SPINER);
   const float flare = baddie->armor_flare;
-  draw_spiner(color3(1 - frozen, 1 - 0.5 * flare, frozen),
-              color3(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
+  draw_spiner(az_color3f(1 - frozen, 1 - 0.5 * flare, frozen),
+              az_color3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
               baddie, flare, frozen, clock);
 }
 
@@ -125,9 +121,9 @@ void az_draw_bad_super_spiner(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_SUPER_SPINER);
   const float flare = baddie->armor_flare;
-  draw_spiner(color3(0.5 + 0.5 * flare - 0.5 * frozen, 0.25 + 0.5 * frozen,
-                     1 - 0.75 * flare),
-              color3(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
+  draw_spiner(az_color3f(0.5 + 0.5 * flare - 0.5 * frozen, 0.25 + 0.5 * frozen,
+                         1 - 0.75 * flare),
+              az_color3f(0.4 * flare, 0.3 - 0.3 * flare, 0.4 * frozen),
               baddie, flare, frozen, clock);
 }
 

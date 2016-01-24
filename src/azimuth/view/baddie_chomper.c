@@ -27,13 +27,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -158,9 +153,9 @@ void az_draw_bad_chomper_plant(
   assert(baddie->kind == AZ_BAD_CHOMPER_PLANT);
   const float flare = baddie->armor_flare;
   const az_color_t center_color =
-    color3(0.5f - 0.5f * frozen, 1.0f - 0.5f * flare, frozen);
+    az_color3f(0.5f - 0.5f * frozen, 1.0f - 0.5f * flare, frozen);
   const az_color_t side_color =
-    color3(0.4f * flare, 0.3f - 0.3f * flare, 0.4f * frozen);
+    az_color3f(0.4f * flare, 0.3f - 0.3f * flare, 0.4f * frozen);
   draw_stalk(baddie, 3, true, 1.0, false, center_color, side_color);
   draw_base(baddie, center_color, side_color, 0);
   draw_core(baddie, flare, frozen);
@@ -172,10 +167,11 @@ void az_draw_bad_aquatic_chomper(
   assert(baddie->kind == AZ_BAD_AQUATIC_CHOMPER);
   const float flare = baddie->armor_flare;
   const az_color_t center_color =
-    color3(0.4f + 0.5f * flare, 0.3f - 0.2f * flare + 0.5f * frozen,
-           0.8f - 0.5f * flare);
+    az_color3f(0.4f + 0.5f * flare, 0.3f - 0.2f * flare + 0.5f * frozen,
+               0.8f - 0.5f * flare);
   const az_color_t side_color =
-    color3(0.1f + 0.3f * flare, 0.2f - 0.2f * flare + 0.3f * frozen, 0.35f);
+    az_color3f(0.1f + 0.3f * flare, 0.2f - 0.2f * flare + 0.3f * frozen,
+               0.35f);
   draw_stalk(baddie, 3, false, 0.5, false, center_color, side_color);
   draw_base(baddie, center_color, side_color, 0);
   draw_core(baddie, flare, frozen);
@@ -187,9 +183,9 @@ void az_draw_bad_jungle_chomper(
   assert(baddie->kind == AZ_BAD_JUNGLE_CHOMPER);
   const float flare = baddie->armor_flare;
   const az_color_t center_color =
-    color3(0.75f - 0.75f * frozen, 1.0f - 0.5f * flare, frozen);
+    az_color3f(0.75f - 0.75f * frozen, 1.0f - 0.5f * flare, frozen);
   const az_color_t side_color =
-    color3(0.15f + 0.4f * flare, 0.3f - 0.3f * flare, 0.4f * frozen);
+    az_color3f(0.15f + 0.4f * flare, 0.3f - 0.3f * flare, 0.4f * frozen);
   draw_stalk(baddie, 3, true, 1.0, false, center_color, side_color);
   draw_base(baddie, center_color, side_color, 0);
   draw_core(baddie, flare, frozen);
@@ -201,11 +197,11 @@ void az_draw_bad_fire_chomper(
   assert(baddie->kind == AZ_BAD_FIRE_CHOMPER);
   const float flare = baddie->armor_flare;
   const az_color_t center_color =
-    color3(0.8f - 0.7f * frozen, 0.3f + 0.2f * flare + 0.5f * frozen,
-           0.1f - 0.1f * flare + 0.9f * frozen);
+    az_color3f(0.8f - 0.7f * frozen, 0.3f + 0.2f * flare + 0.5f * frozen,
+               0.1f - 0.1f * flare + 0.9f * frozen);
   const az_color_t side_color =
-    color3(0.4f - 0.4f * frozen, 0.2f + 0.2f * flare + 0.4f * frozen,
-           0.1f - 0.1f * flare + 0.6f * frozen);
+    az_color3f(0.4f - 0.4f * frozen, 0.2f + 0.2f * flare + 0.4f * frozen,
+               0.1f - 0.1f * flare + 0.6f * frozen);
   draw_stalk(baddie, 3, false, 0.5, false, center_color, side_color);
   draw_base(baddie, center_color, side_color, 0);
   draw_core(baddie, flare, frozen);
@@ -217,11 +213,11 @@ void az_draw_bad_spiked_vine(
   assert(baddie->kind == AZ_BAD_SPIKED_VINE);
   const float flare = baddie->armor_flare;
   const az_color_t center_color =
-    color3(0.4f + 0.2f * flare - 0.4f * frozen,
-           0.8f - 0.3f * flare, 0.4f - 0.1f * flare + 0.6f * frozen);
+    az_color3f(0.4f + 0.2f * flare - 0.4f * frozen,
+               0.8f - 0.3f * flare, 0.4f - 0.1f * flare + 0.6f * frozen);
   const az_color_t side_color =
-    color3(0.4f * flare, 0.3f - 0.1f * flare,
-           0.2f - 0.1f * flare + 0.4f * frozen);
+    az_color3f(0.4f * flare, 0.3f - 0.1f * flare,
+               0.2f - 0.1f * flare + 0.4f * frozen);
   draw_stalk(baddie, 1, true, 0.5 + fmin(0.5, baddie->param / 28.0), true,
              center_color, side_color);
   glBegin(GL_TRIANGLE_FAN); {

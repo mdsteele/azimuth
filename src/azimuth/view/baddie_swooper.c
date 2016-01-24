@@ -26,13 +26,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -99,13 +94,13 @@ void az_draw_bad_cave_swooper(
   assert(baddie->kind == AZ_BAD_CAVE_SWOOPER);
   const float flare = baddie->armor_flare;
   draw_swooper_feet(baddie, frozen);
-  draw_swooper_body(color3(0.2f + 0.8f * flare, 0.4, 0.3f + 0.7f * frozen),
-                    color3(0.2f + 0.4f * flare, 0.25, 0.4f * frozen));
+  draw_swooper_body(az_color3f(0.2f + 0.8f * flare, 0.4, 0.3f + 0.7f * frozen),
+                    az_color3f(0.2f + 0.4f * flare, 0.25, 0.4f * frozen));
   draw_swooper_eyes(frozen);
   draw_swooper_wings(baddie, clock,
-      color3(0.4f + 0.6f * flare, 0.6, 0.4 + 0.6f * frozen),
-      color3(0.2f + 0.4f * flare, 0.5, 0.2f + 0.4f * frozen),
-      color3(0, 0.2, 0.1));
+      az_color3f(0.4f + 0.6f * flare, 0.6, 0.4 + 0.6f * frozen),
+      az_color3f(0.2f + 0.4f * flare, 0.5, 0.2f + 0.4f * frozen),
+      az_color3f(0, 0.2, 0.1));
 }
 
 void az_draw_bad_echo_swooper(
@@ -114,15 +109,15 @@ void az_draw_bad_echo_swooper(
   const float flare = baddie->armor_flare;
   draw_swooper_feet(baddie, frozen);
   draw_swooper_body(
-      color3(0.3f + 0.7f * flare - 0.1f * frozen, 0.2f,
-             0.4f + 0.6f * frozen),
-      color3(0.1f + 0.4f * flare, 0.25f * frozen, 0.25 + 0.25f * frozen));
+      az_color3f(0.3f + 0.7f * flare - 0.1f * frozen, 0.2f,
+                 0.4f + 0.6f * frozen),
+      az_color3f(0.1f + 0.4f * flare, 0.25f * frozen, 0.25 + 0.25f * frozen));
   draw_swooper_eyes(frozen);
   draw_swooper_wings(baddie, clock,
-      color3(0.4f + 0.6f * flare - 0.2f * frozen, 0.4,
-             0.6 + 0.4f * frozen),
-      color3(0.2f + 0.4f * flare, 0.2, 0.5f + 0.4f * frozen),
-      color3(0.1, 0, 0.2));
+      az_color3f(0.4f + 0.6f * flare - 0.2f * frozen, 0.4,
+                 0.6 + 0.4f * frozen),
+      az_color3f(0.2f + 0.4f * flare, 0.2, 0.5f + 0.4f * frozen),
+      az_color3f(0.1, 0, 0.2));
 }
 
 static az_vector_t transform(const az_baddie_t *baddie, int i, int j) {
@@ -139,10 +134,10 @@ void az_draw_bad_demon_swooper(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_DEMON_SWOOPER);
   const float flare = baddie->armor_flare;
-  const az_color_t inner = color3(0.5f + 0.5f * flare - 0.4f * frozen,
-                                  0.2f + 0.4f * frozen, 0.7f * frozen);
-  const az_color_t outer = color3(0.25f + 0.4f * flare - 0.2f * frozen,
-                                  0.1f * frozen, 0.1f + 0.25f * frozen);
+  const az_color_t inner = az_color3f(0.5f + 0.5f * flare - 0.4f * frozen,
+                                      0.2f + 0.4f * frozen, 0.7f * frozen);
+  const az_color_t outer = az_color3f(0.25f + 0.4f * flare - 0.2f * frozen,
+                                      0.1f * frozen, 0.1f + 0.25f * frozen);
   const int tip = baddie->data->num_components - 1;
   glBegin(GL_TRIANGLE_STRIP); {
     az_gl_color(inner); az_gl_vertex(transform(baddie, 0, 1));
@@ -183,9 +178,11 @@ void az_draw_bad_demon_swooper(
   draw_swooper_body(inner, outer);
   draw_swooper_eyes(frozen);
   draw_swooper_wings(baddie, clock,
-      color3(0.6f + 0.4f * flare - 0.5f * frozen, 0.3f, 0.3f + 0.4f * frozen),
-      color3(0.5f + 0.4f * flare - 0.4f * frozen, 0.2f, 0.2f + 0.4f * frozen),
-      color3(0.2, 0.1, 0));
+      az_color3f(0.6f + 0.4f * flare - 0.5f * frozen, 0.3f,
+                 0.3f + 0.4f * frozen),
+      az_color3f(0.5f + 0.4f * flare - 0.4f * frozen, 0.2f,
+                 0.2f + 0.4f * frozen),
+      az_color3f(0.2, 0.1, 0));
 }
 
 /*===========================================================================*/

@@ -31,10 +31,6 @@
 
 /*===========================================================================*/
 
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
 static void draw_eyeball(az_vector_t position, double angle, double radius,
                          float flare, float hurt) {
   glPushMatrix(); {
@@ -80,9 +76,9 @@ void az_draw_bad_kilofuge(const az_baddie_t *baddie, az_clock_t clock) {
   const float flare = baddie->armor_flare;
   const float hurt = 1.0 - baddie->health / baddie->data->max_health;
   const az_color_t inner =
-    color3(0.6f, 0.4f + 0.2f * hurt, 0.6f - 0.2f * hurt);
+    az_color3f(0.6f, 0.4f + 0.2f * hurt, 0.6f - 0.2f * hurt);
   const az_color_t outer =
-    color3(0.2f, 0.1f + 0.1f * hurt, 0.2f - 0.1f * hurt);
+    az_color3f(0.2f, 0.1f + 0.1f * hurt, 0.2f - 0.1f * hurt);
   // Legs:
   for (int i = 5; i < 11; ++i) {
     glPushMatrix(); {

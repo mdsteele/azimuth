@@ -31,10 +31,6 @@
 
 /*===========================================================================*/
 
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
 static az_vector_t weighted_avg(az_vector_t p1, az_vector_t p2, double w2) {
   return az_vadd(az_vmul(az_vsub(p2, p1), w2), p1);
 }
@@ -43,8 +39,8 @@ static az_vector_t weighted_avg(az_vector_t p1, az_vector_t p2, double w2) {
 
 static void draw_gear(const az_baddie_t *baddie, az_vector_t position,
                       double radius, int num_spokes, double spin_factor) {
-  const az_color_t outer = color3(0.15f, 0.1f, 0.15f);
-  const az_color_t inner = color3(0.25f, 0.2f, 0.25f);
+  const az_color_t outer = az_color3f(0.15f, 0.1f, 0.15f);
+  const az_color_t inner = az_color3f(0.25f, 0.2f, 0.25f);
   const double inner_radius = radius - 10;
   glPushMatrix(); {
     az_gl_rotated(-baddie->angle);
@@ -69,7 +65,7 @@ static void draw_gear(const az_baddie_t *baddie, az_vector_t position,
     } glEnd();
     // Teeth:
     glPushMatrix(); {
-      const int num_teeth = round(radius * AZ_TWO_PI / 20);
+      const int num_teeth = (int)round(radius * AZ_TWO_PI / 20);
       az_gl_color(outer);
       for (int i = 0; i < num_teeth; ++i) {
         glBegin(GL_TRIANGLE_STRIP); {
@@ -147,8 +143,8 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
                         component->position));
   }
 
-  const az_color_t outer = color3(0.15f + 0.25f * flare, 0.25f, 0.20f);
-  const az_color_t inner = color3(0.40f + 0.40f * flare, 0.45f, 0.45f);
+  const az_color_t outer = az_color3f(0.15f + 0.25f * flare, 0.25f, 0.20f);
+  const az_color_t inner = az_color3f(0.40f + 0.40f * flare, 0.45f, 0.45f);
 
   // Diagonal struts:
   glBegin(GL_TRIANGLE_STRIP); {
@@ -220,10 +216,10 @@ void az_draw_bad_zenith_core(const az_baddie_t *baddie, az_clock_t clock) {
   } glEnd();
 
   // Armor plating:
-  const az_color_t outer_edge = color3(0.5, 0.5, 0.5);
-  const az_color_t outer_mid = color3(0.7, 0.7, 0.7);
-  const az_color_t inner_mid = color3(0.5, 0.5, 0.6);
-  const az_color_t inner_edge = color3(0.3, 0.3, 0.3);
+  const az_color_t outer_edge = az_color3f(0.5, 0.5, 0.5);
+  const az_color_t outer_mid = az_color3f(0.7, 0.7, 0.7);
+  const az_color_t inner_mid = az_color3f(0.5, 0.5, 0.6);
+  const az_color_t inner_edge = az_color3f(0.3, 0.3, 0.3);
   for (int i = 0; i < 8; ++i) {
     const az_component_t *component = &baddie->components[i];
     const az_polygon_t polygon = baddie->data->components[i].polygon;

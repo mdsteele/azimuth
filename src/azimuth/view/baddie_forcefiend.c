@@ -31,10 +31,6 @@
 
 /*===========================================================================*/
 
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
-
 static az_vector_t transform(const az_component_t *component, az_vector_t v) {
   return az_vadd(az_vrotate(v, component->angle), component->position);
 }
@@ -135,15 +131,15 @@ void az_draw_bad_forcefiend(const az_baddie_t *baddie) {
   assert(baddie->kind == AZ_BAD_FORCEFIEND);
   const float flare = baddie->armor_flare;
   const float hurt = 1.0 - baddie->health / baddie->data->max_health;
-  const az_color_t inner = color3(0.8f + 0.2f * flare - 0.3f * hurt,
-                                  0.1f - 0.1f * flare + 0.6f * hurt,
-                                  0.3f - 0.3f * flare);
-  const az_color_t midst = color3(0.6f + 0.1f * flare - 0.1f * hurt,
-                                  0.1f - 0.1f * flare + 0.3f * hurt,
-                                  0.3f - 0.3f * flare);
-  const az_color_t outer = color3(0.35f + 0.2f * flare - 0.1f * hurt,
-                                  0.1f - 0.1f * flare + 0.1f * hurt,
-                                  0.15f - 0.1f * flare);
+  const az_color_t inner = az_color3f(0.8f + 0.2f * flare - 0.3f * hurt,
+                                      0.1f - 0.1f * flare + 0.6f * hurt,
+                                      0.3f - 0.3f * flare);
+  const az_color_t midst = az_color3f(0.6f + 0.1f * flare - 0.1f * hurt,
+                                      0.1f - 0.1f * flare + 0.3f * hurt,
+                                      0.3f - 0.3f * flare);
+  const az_color_t outer = az_color3f(0.35f + 0.2f * flare - 0.1f * hurt,
+                                      0.1f - 0.1f * flare + 0.1f * hurt,
+                                      0.15f - 0.1f * flare);
   // Stinger:
   draw_forcefiend_bone(baddie, 11, 13);
   // Pincers:
@@ -242,7 +238,7 @@ void az_draw_bad_force_egg(const az_baddie_t *baddie) {
   glPushMatrix(); {
     for (double rho = baddie->data->main_body.bounding_radius;
          rho > 0.0; rho -= 3.1) {
-      const int num_steps = round(rho * AZ_TWO_PI / 8.0);
+      const int num_steps = (int)round(rho * AZ_TWO_PI / 8.0);
       const GLfloat step = 360.0 / num_steps;
       glRotatef(0.5f * step, 0, 0, 1);
       for (int i = 0; i < num_steps; ++i) {
@@ -266,11 +262,11 @@ void az_draw_bad_forceling(const az_baddie_t *baddie, float frozen,
   assert(baddie->kind == AZ_BAD_FORCELING);
   const float flare = baddie->armor_flare;
   const az_color_t inner =
-    color3(0.8f + 0.2f * flare, 0.1f - 0.1f * flare + 0.5f * frozen,
-           0.3f - 0.3f * flare + 0.7f * frozen);
+    az_color3f(0.8f + 0.2f * flare, 0.1f - 0.1f * flare + 0.5f * frozen,
+               0.3f - 0.3f * flare + 0.7f * frozen);
   const az_color_t outer =
-    color3(0.4f + 0.4f * flare, 0.1f - 0.1f * flare + 0.3f * frozen,
-           0.15f - 0.1f * flare + 0.5f * frozen);
+    az_color3f(0.4f + 0.4f * flare, 0.1f - 0.1f * flare + 0.3f * frozen,
+               0.15f - 0.1f * flare + 0.5f * frozen);
   draw_fish(baddie, inner, outer, 0.6, clock);
 }
 
@@ -279,11 +275,11 @@ void az_draw_bad_small_fish(const az_baddie_t *baddie, float frozen,
   assert(baddie->kind == AZ_BAD_SMALL_FISH);
   const float flare = baddie->armor_flare;
   const az_color_t inner =
-    color3(0.9f + 0.1f * flare, 0.5f * flare + 0.5f * frozen,
-           0.4f - 0.4f * flare + 0.6f * frozen);
+    az_color3f(0.9f + 0.1f * flare, 0.5f * flare + 0.5f * frozen,
+               0.4f - 0.4f * flare + 0.6f * frozen);
   const az_color_t outer =
-    color3(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
-           0.3f - 0.2f * flare + 0.3f * frozen);
+    az_color3f(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
+               0.3f - 0.2f * flare + 0.3f * frozen);
   draw_fish(baddie, inner, outer, 1.0, clock);
 }
 
@@ -299,12 +295,12 @@ void az_draw_bad_large_fish(const az_baddie_t *baddie, float frozen,
   const az_vector_t *tvertices = baddie->data->components[2].polygon.vertices;
   const float flare = baddie->armor_flare;
   const az_color_t inner =
-    color3(0.8f + 0.2f * flare, 0.1f - 0.1f * flare + 0.5f * frozen,
-           0.3f - 0.3f * flare + 0.7f * frozen);
+    az_color3f(0.8f + 0.2f * flare, 0.1f - 0.1f * flare + 0.5f * frozen,
+               0.3f - 0.3f * flare + 0.7f * frozen);
   const az_color_t outer =
-    color3(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
-           0.3f - 0.2f * flare + 0.3f * frozen);
-  const az_color_t tip = color3(0.3, 0.25, 0.25);
+    az_color3f(0.4f + 0.4f * flare, 0.3f * flare + 0.3f * frozen,
+               0.3f - 0.2f * flare + 0.3f * frozen);
+  const az_color_t tip = az_color3f(0.3, 0.25, 0.25);
   // Fins:
   glPushMatrix(); {
     glTranslatef(-5, 0, 0);

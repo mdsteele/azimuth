@@ -27,13 +27,10 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 static void draw_sensor_lamp(GLfloat x_offset, bool lit) {
   glPushMatrix(); {
@@ -214,10 +211,10 @@ void az_draw_bad_piston(
   assert(baddie->kind == AZ_BAD_PISTON);
   const float flare = baddie->armor_flare;
   draw_piston(baddie,
-              color3(0.65f + 0.35f * flare, 0.65f + 0.2f * frozen,
-                     0.7f + 0.3f * frozen),
-              color3(0.25f + 0.5f * flare, 0.25f + 0.15f * frozen,
-                     0.3f + 0.2f * frozen));
+              az_color3f(0.65f + 0.35f * flare, 0.65f + 0.2f * frozen,
+                         0.7f + 0.3f * frozen),
+              az_color3f(0.25f + 0.5f * flare, 0.25f + 0.15f * frozen,
+                         0.3f + 0.2f * frozen));
 }
 
 void az_draw_bad_armored_piston(
@@ -226,10 +223,10 @@ void az_draw_bad_armored_piston(
          baddie->kind == AZ_BAD_ARMORED_PISTON_EXT);
   const float flare = baddie->armor_flare;
   draw_piston(baddie,
-              color3(0.7f + 0.3f * flare, 0.65f + 0.2f * frozen,
-                     0.65f + 0.35f * frozen),
-              color3(0.3f + 0.5f * flare, 0.25f + 0.15f * frozen,
-                     0.25f + 0.2f * frozen));
+              az_color3f(0.7f + 0.3f * flare, 0.65f + 0.2f * frozen,
+                         0.65f + 0.35f * frozen),
+              az_color3f(0.3f + 0.5f * flare, 0.25f + 0.15f * frozen,
+                         0.25f + 0.2f * frozen));
 }
 
 void az_draw_bad_incorporeal_piston(
@@ -238,7 +235,7 @@ void az_draw_bad_incorporeal_piston(
          baddie->kind == AZ_BAD_INCORPOREAL_PISTON_EXT);
   assert(frozen == 0);
   assert(baddie->armor_flare == 0);
-  draw_piston(baddie, color3(0.2, 0.2, 0.2), color3(0.1, 0.1, 0.1));
+  draw_piston(baddie, az_color3f(0.2, 0.2, 0.2), az_color3f(0.1, 0.1, 0.1));
 }
 
 /*===========================================================================*/
@@ -285,9 +282,9 @@ void az_draw_bad_heat_ray(
   const float flare = baddie->armor_flare;
   draw_ray(baddie, clock, baddie->state == 0 ||
            (baddie->cooldown <= 1.0 && az_clock_mod(2, 4, clock)),
-           color3(0.35 + 0.25 * flare, 0.25, 0.25),
-           color3(0.55 + 0.25 * flare, 0.45, 0.45),
-           color3(0.85 + 0.15 * flare, 0.65, 0.65));
+           az_color3f(0.35 + 0.25 * flare, 0.25, 0.25),
+           az_color3f(0.55 + 0.25 * flare, 0.45, 0.45),
+           az_color3f(0.85 + 0.15 * flare, 0.65, 0.65));
 }
 
 void az_draw_bad_death_ray(
@@ -297,9 +294,9 @@ void az_draw_bad_death_ray(
   const float flare = baddie->armor_flare;
   draw_ray(baddie, clock, baddie->cooldown > 0.0 ||
            (baddie->state == 0 && az_clock_mod(2, 10, clock)),
-           color3(0.2 + 0.25 * flare, 0.2, 0.1),
-           color3(0.3 + 0.25 * flare, 0.3, 0.2),
-           color3(0.4 + 0.15 * flare, 0.4, 0.3));
+           az_color3f(0.2 + 0.25 * flare, 0.2, 0.1),
+           az_color3f(0.3 + 0.25 * flare, 0.3, 0.2),
+           az_color3f(0.4 + 0.15 * flare, 0.4, 0.3));
 }
 
 /*===========================================================================*/

@@ -36,6 +36,9 @@ extern const az_color_t AZ_RED;
 extern const az_color_t AZ_GREEN;
 extern const az_color_t AZ_BLUE;
 
+az_color_t az_color3f(float r, float g, float b);
+az_color_t az_color4f(float r, float g, float b, float a);
+
 // Convert HSVA values to an az_color_t value.  The hue_radians argument can be
 // any angle, measured in radians; the other three arguments must be in the
 // range [0, 1].

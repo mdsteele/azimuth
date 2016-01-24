@@ -23,6 +23,26 @@
 
 /*===========================================================================*/
 
+void test_color3f(void) {
+  const az_color_t color0 = az_color3f(0, 0, 0);
+  EXPECT_INT_EQ(  0, color0.r);
+  EXPECT_INT_EQ(  0, color0.g);
+  EXPECT_INT_EQ(  0, color0.b);
+  EXPECT_INT_EQ(255, color0.a);
+
+  const az_color_t color1 = az_color3f(1, 1, 1);
+  EXPECT_INT_EQ(255, color1.r);
+  EXPECT_INT_EQ(255, color1.g);
+  EXPECT_INT_EQ(255, color1.b);
+  EXPECT_INT_EQ(255, color1.a);
+
+  const az_color_t color2 = az_color3f(0.25f, 0.5f, 0.75f);
+  EXPECT_INT_EQ(63, color2.r);
+  EXPECT_INT_EQ(127, color2.g);
+  EXPECT_INT_EQ(191, color2.b);
+  EXPECT_INT_EQ(255, color2.a);
+}
+
 void test_hsva_color(void) {
   const az_color_t color0 = az_hsva_color(0, 0, 0, 0);
   EXPECT_INT_EQ(  0, color0.r);

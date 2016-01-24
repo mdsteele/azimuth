@@ -31,10 +31,6 @@
 
 /*===========================================================================*/
 
-static az_color_t color4(float r, float g, float b, float a) {
-  return (az_color_t){r * 255, g * 255, b * 255, a * 255};
-}
-
 static void gl_matrix_wobble(double param) {
   if (0.0 < param && param < 1.0) {
     const double wobble_intensity = sin(AZ_PI * param);
@@ -153,11 +149,11 @@ void az_draw_bad_nocturne(const az_baddie_t *baddie, az_clock_t clock) {
   const double invis = fmax(baddie->param, flare);
   const float hurt = 1.0 - baddie->health / baddie->data->max_health;
   const az_color_t inner =
-    color4(0.25f + 0.5f * hurt + 0.25f * flare, 0.8f - 0.8f * hurt,
-           0.0f, invis);
+    az_color4f(0.25f + 0.5f * hurt + 0.25f * flare, 0.8f - 0.8f * hurt,
+               0.0f, invis);
   const az_color_t outer =
-    color4(0.2f + 0.2f * hurt + 0.4f * flare, 0.3f - 0.2f * hurt, 0.0f,
-           invis * invis * invis);
+    az_color4f(0.2f + 0.2f * hurt + 0.4f * flare, 0.3f - 0.2f * hurt, 0.0f,
+               invis * invis * invis);
   glPushMatrix(); {
     gl_matrix_wobble(baddie->param);
     // Legs:

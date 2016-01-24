@@ -27,13 +27,8 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
@@ -155,8 +150,9 @@ void az_draw_bad_atom(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_ATOM);
   const float flare = baddie->armor_flare;
-  draw_atom(baddie, color3(flare, 1 - 0.5 * flare, frozen),
-            color3(0.4 * flare, 0.3 - 0.3 * flare, 0.1 + 0.4 * frozen));
+  draw_atom(baddie, az_color3f(flare, 1.0f - 0.5f * flare, frozen),
+            az_color3f(0.4f * flare, 0.3f - 0.3f * flare,
+                       0.1f + 0.4f * frozen));
 }
 
 void az_draw_bad_red_atom(
@@ -164,8 +160,10 @@ void az_draw_bad_red_atom(
   assert(baddie->kind == AZ_BAD_RED_ATOM);
   const float flare = baddie->armor_flare;
   draw_atom(baddie,
-            color3(1 - 0.75f * frozen, 0.75f * flare + 0.25f * frozen, frozen),
-            color3(0.3 - 0.3f * frozen, 0.3 * flare, 0.1 + 0.4 * frozen));
+            az_color3f(1.0f - 0.75f * frozen, 0.75f * flare + 0.25f * frozen,
+                       frozen),
+            az_color3f(0.3f - 0.3f * frozen, 0.3f * flare,
+                       0.1f + 0.4f * frozen));
 }
 
 /*===========================================================================*/

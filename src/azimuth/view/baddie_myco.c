@@ -26,23 +26,18 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/color.h"
 #include "azimuth/view/util.h"
-
-/*===========================================================================*/
-
-static az_color_t color3(float r, float g, float b) {
-  return (az_color_t){r * 255, g * 255, b * 255, 255};
-}
 
 /*===========================================================================*/
 
 static void draw_flakker_stem(float flare, float frozen) {
   const az_color_t inner =
-    color3(0.7f + 0.3f * flare - 0.6f * frozen,
-           0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
+    az_color3f(0.7f + 0.3f * flare - 0.6f * frozen,
+               0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
   const az_color_t outer =
-    color3(0.3f + 0.3f * flare - 0.2f * frozen,
-           0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
+    az_color3f(0.3f + 0.3f * flare - 0.2f * frozen,
+               0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
   glBegin(GL_TRIANGLE_STRIP); {
     az_gl_color(outer); glVertex2f(-16,   9); glVertex2f(8,  7);
     az_gl_color(inner); glVertex2f(-16,  -1); glVertex2f(8,  0);
@@ -60,11 +55,11 @@ static void draw_flakker_stem(float flare, float frozen) {
 static void draw_stalker_stem_and_feet(float flare, float frozen,
                                        az_clock_t clock) {
   const az_color_t inner =
-    color3(0.7f + 0.3f * flare - 0.6f * frozen,
-           0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
+    az_color3f(0.7f + 0.3f * flare - 0.6f * frozen,
+               0.7f - 0.4f * flare, 0.9f - 0.5f * flare);
   const az_color_t outer =
-    color3(0.3f + 0.3f * flare - 0.2f * frozen,
-           0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
+    az_color3f(0.3f + 0.3f * flare - 0.2f * frozen,
+               0.3f - 0.2f * flare, 0.4f - 0.2f * flare);
   // Stem:
   glBegin(GL_TRIANGLE_STRIP); {
     az_gl_color(outer); glVertex2f(0,  8); glVertex2f(10,  7);
@@ -126,10 +121,10 @@ void az_draw_bad_mycoflakker(
   assert(baddie->kind == AZ_BAD_MYCOFLAKKER);
   const float flare = baddie->armor_flare;
   draw_flakker_stem(flare, frozen);
-  draw_shroom_cap(color3(0.6f + 0.4f * flare - 0.6f * frozen,
-                         0.4f + 0.3f * frozen, 1.0f - 0.5f * flare),
-                  color3(0.2f + 0.3f * flare - 0.2f * frozen,
-                         0.15f + 0.1f * frozen, 0.5f - 0.25f * flare),
+  draw_shroom_cap(az_color3f(0.6f + 0.4f * flare - 0.6f * frozen,
+                             0.4f + 0.3f * frozen, 1.0f - 0.5f * flare),
+                  az_color3f(0.2f + 0.3f * flare - 0.2f * frozen,
+                             0.15f + 0.1f * frozen, 0.5f - 0.25f * flare),
                   6, (baddie->state != 0), clock);
 }
 
@@ -138,10 +133,10 @@ void az_draw_bad_mycostalker(
   assert(baddie->kind == AZ_BAD_MYCOSTALKER);
   const float flare = baddie->armor_flare;
   draw_stalker_stem_and_feet(flare, frozen, clock);
-  draw_shroom_cap(color3(0.7f + 0.3f * flare - 0.6f * frozen,
-                         0.4f + 0.3f * frozen, 0.9f - 0.5f * flare),
-                  color3(0.3f + 0.3f * flare - 0.2f * frozen,
-                         0.15f + 0.1f * frozen, 0.4f - 0.25f * flare),
+  draw_shroom_cap(az_color3f(0.7f + 0.3f * flare - 0.6f * frozen,
+                             0.4f + 0.3f * frozen, 0.9f - 0.5f * flare),
+                  az_color3f(0.3f + 0.3f * flare - 0.2f * frozen,
+                             0.15f + 0.1f * frozen, 0.4f - 0.25f * flare),
                   8, (baddie->state != 0), clock);
 }
 
@@ -150,12 +145,12 @@ void az_draw_bad_pyroflakker(
   assert(baddie->kind == AZ_BAD_PYROFLAKKER);
   const float flare = baddie->armor_flare;
   draw_flakker_stem(flare, frozen);
-  draw_shroom_cap(color3(1.0f - 0.9f * frozen,
-                         0.4f + 0.3f * flare + 0.3f * frozen,
-                         1.0f * frozen),
-                  color3(0.5f - 0.4f * frozen,
-                         0.2f + 0.2f * flare + 0.2f * frozen,
-                         0.5f * frozen),
+  draw_shroom_cap(az_color3f(1.0f - 0.9f * frozen,
+                             0.4f + 0.3f * flare + 0.3f * frozen,
+                             1.0f * frozen),
+                  az_color3f(0.5f - 0.4f * frozen,
+                             0.2f + 0.2f * flare + 0.2f * frozen,
+                             0.5f * frozen),
                   6, (baddie->state != 0), clock);
 }
 
@@ -164,12 +159,12 @@ void az_draw_bad_pyrostalker(
   assert(baddie->kind == AZ_BAD_PYROSTALKER);
   const float flare = baddie->armor_flare;
   draw_stalker_stem_and_feet(flare, frozen, clock);
-  draw_shroom_cap(color3(1.0f - 0.9f * frozen,
-                         0.6f + 0.3f * flare + 0.1f * frozen,
-                         1.0f * frozen),
-                  color3(0.5f - 0.4f * frozen,
-                         0.3f + 0.2f * flare + 0.2f * frozen,
-                         0.5f * frozen),
+  draw_shroom_cap(az_color3f(1.0f - 0.9f * frozen,
+                             0.6f + 0.3f * flare + 0.1f * frozen,
+                             1.0f * frozen),
+                  az_color3f(0.5f - 0.4f * frozen,
+                             0.3f + 0.2f * flare + 0.2f * frozen,
+                             0.5f * frozen),
                   8, (baddie->state != 0), clock);
 }
 
