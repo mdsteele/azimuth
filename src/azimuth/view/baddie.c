@@ -125,8 +125,7 @@ static void draw_box(const az_baddie_t *baddie, bool armored, float flare) {
     (baddie->data->max_health - baddie->health) / baddie->data->max_health;
   for (int i = 0; i < 2; ++i) {
     const double angle = AZ_DEG2RAD(180) * i;
-    az_random_seed_t seed = {1 + 472019387 * baddie->uid, 1 + 2185827049 * i};
-    az_draw_cracks(&seed, az_vpolar(-16, angle), angle, 4.0 * hurt);
+    az_draw_cracks(az_vpolar(-16, angle), angle, 4.0 * hurt);
   }
 }
 
@@ -442,9 +441,7 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
           baddie->data->max_health;
         for (int i = 0; i < 5; ++i) {
           const double angle = AZ_DEG2RAD(20) + i * AZ_DEG2RAD(72);
-          az_random_seed_t seed = {1 + 4987298743 * baddie->uid,
-                                   1 + 373984471 * i};
-          az_draw_cracks(&seed, az_vpolar(-radius, angle), angle,
+          az_draw_cracks(az_vpolar(-radius, angle), angle,
                          5 * hurt * (1.5 - 0.33 * ((3 * i) % 5)));
         }
         for (int i = 0; i < 10; ++i) {

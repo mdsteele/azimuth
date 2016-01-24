@@ -119,8 +119,7 @@ static void draw_piston(az_vector_t start, az_vector_t end) {
 }
 
 static void draw_cracks(double sx, double sy, double angle, double length) {
-  az_random_seed_t seed = {1 + 4987298743 * sx, 1 + 373984471 * sy};
-  az_draw_cracks(&seed, (az_vector_t){sx, sy}, angle, length);
+  az_draw_cracks((az_vector_t){sx, sy}, angle, length);
 }
 
 /*===========================================================================*/

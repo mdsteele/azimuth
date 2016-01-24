@@ -44,35 +44,37 @@ void az_gl_vertex(az_vector_t v) {
   glVertex2d(v.x, v.y);
 }
 
-void az_draw_cracks(az_random_seed_t *seed, az_vector_t origin,
-                    double angle, double length) {
-  az_draw_cracks_with_color(seed, origin, angle, length,
-                            (az_color_t){0, 0, 0, 64});
+void az_draw_cracks(az_vector_t origin, double angle, double length) {
+  az_draw_cracks_with_color(origin, angle, length, (az_color_t){0, 0, 0, 64});
 }
 
-void az_draw_cracks_with_color(az_random_seed_t *seed, az_vector_t origin,
-                               double angle, double length, az_color_t color) {
+void az_draw_cracks_with_color(az_vector_t origin, double angle, double length,
+                               az_color_t color) {
   if (length <= 0.0) return;
+  az_random_seed_t seed = (az_random_seed_t){
+    715225741u * (uint32_t)az_signmod(origin.x, UINT32_MAX, 1),
+    472882049u * (uint32_t)az_signmod(origin.y, UINT32_MAX, 1)
+  };
   az_gl_color(color);
   glBegin(GL_LINES); {
     az_gl_vertex(origin);
-    az_vpluseq(&origin,
-               az_vpolar((4.0 + az_rand_sdouble(seed)) * fmin(1, length),
-                         angle + az_rand_sdouble(seed) * AZ_DEG2RAD(40)));
+    const double rho = (4.0 + az_rand_sdouble(&seed)) * fmin(1, length);
+    const double theta = angle + az_rand_sdouble(&seed) * AZ_DEG2RAD(40);
+    az_vpluseq(&origin, az_vpolar(rho, theta));
     az_gl_vertex(origin);
     length -= 1.0;
-    int sign = az_rand_udouble(seed) < 0.5 ? -1 : 1;
+    int sign = az_rand_udouble(&seed) < 0.5 ? -1 : 1;
     while (length > 0.0) {
       double angle_diverge =
-        sign * (AZ_DEG2RAD(45) + az_rand_sdouble(seed) * AZ_DEG2RAD(30));
+        sign * (AZ_DEG2RAD(45) + az_rand_sdouble(&seed) * AZ_DEG2RAD(30));
       az_gl_vertex(origin);
-      az_gl_vertex(az_vadd(origin, az_vpolar((4.0 + az_rand_sdouble(seed)) *
-                                             cbrt(length),
+      az_gl_vertex(az_vadd(origin, az_vpolar((4.0 + az_rand_sdouble(&seed)) *
+                                             sqrt(sqrt(length)),
                                              angle + angle_diverge)));
       angle_diverge -=
-        sign * (AZ_DEG2RAD(90) + az_rand_sdouble(seed) * AZ_DEG2RAD(30));
+        sign * (AZ_DEG2RAD(90) + az_rand_sdouble(&seed) * AZ_DEG2RAD(30));
       az_gl_vertex(origin);
-      az_vpluseq(&origin, az_vpolar((4.0 + az_rand_sdouble(seed)) *
+      az_vpluseq(&origin, az_vpolar((4.0 + az_rand_sdouble(&seed)) *
                                     fmin(1, length),
                                     angle + angle_diverge));
       az_gl_vertex(origin);

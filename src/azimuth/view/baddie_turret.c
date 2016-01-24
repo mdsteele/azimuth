@@ -40,9 +40,7 @@ static az_color_t color3(float r, float g, float b) {
 static void draw_turret_cracks(const az_baddie_t *baddie, double length) {
   for (int i = 0; i < 3; ++i) {
     const double angle = AZ_DEG2RAD(-90) + i * AZ_DEG2RAD(120);
-    az_random_seed_t seed = {1 + 4987298743 * baddie->uid, 1 + 373984471 * i};
-    az_draw_cracks(&seed, az_vpolar(-15, angle), angle,
-                   length * (1 - 0.33 * i));
+    az_draw_cracks(az_vpolar(-15, angle), angle, length * (1 - 0.33 * i));
   }
 }
 
@@ -118,8 +116,7 @@ static void draw_turret(const az_baddie_t *baddie,
     } glEnd();
     const double hurt =
       (baddie->data->max_health - baddie->health) / baddie->data->max_health;
-    az_random_seed_t seed = {1, 1};
-    az_draw_cracks(&seed, (az_vector_t){30, 0}, AZ_PI, 2.0 * hurt);
+    az_draw_cracks((az_vector_t){30, 0}, AZ_PI, 2.0 * hurt);
   } glPopMatrix();
   draw_turret_body_center(baddie, mid_edge, near_edge, center);
 }
