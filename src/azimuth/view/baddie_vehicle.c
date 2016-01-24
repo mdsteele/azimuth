@@ -82,6 +82,11 @@ void az_draw_bad_copter(
     az_gl_color(outer); glVertex2f(14, 21);
     az_gl_color(inner); glVertex2f(10, 17);
   } glEnd();
+  // Cracks:
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  az_draw_cracks((az_vector_t){4, 20}, AZ_DEG2RAD(-110), 4 * hurt);
+  az_draw_cracks((az_vector_t){13, -11}, AZ_DEG2RAD(180), 3 * hurt);
+  az_draw_cracks((az_vector_t){-6, -20}, AZ_DEG2RAD(80), 3 * hurt);
 }
 
 void az_draw_bad_small_truck(
@@ -151,6 +156,11 @@ void az_draw_bad_small_truck(
     glVertex2f(32, -12);
     glVertex2f(10, -20);
   } glEnd();
+  // Cracks:
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  az_draw_cracks((az_vector_t){32, -1}, AZ_DEG2RAD(180), 5 * hurt);
+  az_draw_cracks((az_vector_t){-20, -14}, AZ_DEG2RAD(90), 3.5 * hurt);
+  az_draw_cracks((az_vector_t){-30, 6}, AZ_DEG2RAD(0), 3.5 * hurt);
 }
 
 void az_draw_bad_small_auv(
@@ -218,6 +228,11 @@ void az_draw_bad_small_auv(
     az_gl_color(outer); glVertex2f(10, -14);
     az_gl_color(inner); glVertex2f(10, -6);
   } glEnd();
+  // Cracks:
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  az_draw_cracks((az_vector_t){30, 3}, AZ_DEG2RAD(180), 5 * hurt);
+  az_draw_cracks((az_vector_t){-20, -14}, AZ_DEG2RAD(90), 3.5 * hurt);
+  az_draw_cracks((az_vector_t){-30, 6}, AZ_DEG2RAD(0), 3.5 * hurt);
 }
 
 /*===========================================================================*/

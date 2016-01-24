@@ -690,7 +690,7 @@ static void do_starburst(az_space_state_t *state, az_baddie_t *baddie,
 }
 
 static void do_buzzsaw(az_space_state_t *state, az_baddie_t *baddie,
-                       double time, double reverse) {
+                       double time, bool reverse) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
   const double turn_rate = (reverse ? AZ_DEG2RAD(-90) : AZ_DEG2RAD(60));
   adjust_to_buzzsaw_configuration(baddie, time, reverse);
