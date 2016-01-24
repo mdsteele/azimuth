@@ -762,6 +762,12 @@ void az_tick_space_state(az_space_state_t *state, double time) {
 
   // If we're fading the whole screen in or out, do that and then stop.
   if (state->global_fade.step != AZ_GFS_INACTIVE) {
+    if (state->nuke.active) {
+      az_tick_particles(state, time);
+      az_tick_specks(state, time);
+      az_tick_projectiles(state, time);
+      tick_nuke(state, time);
+    }
     tick_global_fade(state, time);
     return;
   }

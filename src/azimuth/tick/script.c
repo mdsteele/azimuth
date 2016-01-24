@@ -745,9 +745,12 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
                           0.0, 1.0, AZ_NULL_UID);
       } break;
       case AZ_OP_NUKE: {
-        state->nuke.active = true;
-        state->nuke.rho =
-          fmax(az_vnorm(state->camera.center) - AZ_SCREEN_HEIGHT, 0.0);
+        if (!state->nuke.active) {
+          state->nuke.active = true;
+          state->nuke.rho =
+            fmax(az_vnorm(state->camera.center) - AZ_SCREEN_HEIGHT, 0.0);
+          az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
+        }
       } break;
       case AZ_OP_BOLT: {
         az_vector_t p1, p2;
