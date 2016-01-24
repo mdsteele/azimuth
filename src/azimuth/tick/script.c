@@ -745,12 +745,9 @@ static void run_vm(az_space_state_t *state, az_script_vm_t *vm) {
                           0.0, 1.0, AZ_NULL_UID);
       } break;
       case AZ_OP_NUKE: {
-        const az_vector_t position =
-          az_vwithlen(state->camera.center,
-                      fmax(az_vnorm(state->camera.center) -
-                           AZ_SCREEN_HEIGHT, 0.0));
-        az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION, position,
-                          az_vtheta(position), 1.0, AZ_NULL_UID);
+        state->nuke.active = true;
+        state->nuke.rho =
+          fmax(az_vnorm(state->camera.center) - AZ_SCREEN_HEIGHT, 0.0);
       } break;
       case AZ_OP_BOLT: {
         az_vector_t p1, p2;

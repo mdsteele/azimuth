@@ -187,6 +187,22 @@ static void draw_darkness(az_space_state_t *state) {
   }
 }
 
+static void draw_nuke(const az_space_state_t *state) {
+  if (!state->nuke.active) return;
+  glPushMatrix(); {
+    az_gl_translated(az_vwithlen(state->camera.center, state->nuke.rho));
+    az_gl_rotated(az_vtheta(state->camera.center));
+    glBegin(GL_TRIANGLE_STRIP); {
+      glColor4f(1, 0.9, 0.8, 0.5);
+      glVertex2f(0, -AZ_SCREEN_WIDTH);
+      glVertex2f(0,  AZ_SCREEN_WIDTH);
+      glColor4f(1, 0.75, 0.5, 0);
+      glVertex2f(-5 * AZ_SCREEN_HEIGHT, -AZ_SCREEN_WIDTH);
+      glVertex2f(-5 * AZ_SCREEN_HEIGHT,  AZ_SCREEN_WIDTH);
+    } glEnd();
+  } glPopMatrix();
+}
+
 static void draw_camera_view(az_space_state_t *state) {
   const az_room_t *room =
     &state->planet->rooms[state->ship.player.current_room];
@@ -205,6 +221,7 @@ static void draw_camera_view(az_space_state_t *state) {
   az_draw_tractor_nodes(state);
   az_draw_pickups(state);
   az_draw_projectiles(state);
+  draw_nuke(state);
   if (state->mode == AZ_MODE_BOSS_DEATH) {
     if (state->boss_death_mode.boss.kind != AZ_BAD_NOTHING) {
       az_draw_baddie(&state->boss_death_mode.boss, state->clock);

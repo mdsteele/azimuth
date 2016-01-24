@@ -161,6 +161,7 @@ typedef struct {
   struct { double cooldown; bool allowed; bool active; } skip;
   bool intro; // true if we just started the game
   bool victory; // true if we just won the game
+  struct { bool active; double rho; } nuke;
 
   // Space objects (these all get cleared out when we exit a room):
   double darkness, dark_goal;

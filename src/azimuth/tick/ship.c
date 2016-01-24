@@ -280,7 +280,7 @@ static void on_ship_impact(az_space_state_t *state, const az_impact_t *impact,
     case AZ_IMP_DOOR_INSIDE:
       assert(impact->target.door->kind != AZ_DOOR_NOTHING);
       assert(impact->target.door->kind != AZ_DOOR_FORCEFIELD);
-      if (can_change_mode(state)) {
+      if (can_change_mode(state) && !state->nuke.active) {
         ship->tractor_beam.active = false;
         state->mode = AZ_MODE_DOORWAY;
         state->doorway_mode = (az_doorway_mode_data_t){

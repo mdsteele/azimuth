@@ -660,6 +660,37 @@ static void check_countdown(az_space_state_t *state, double time) {
   }
 }
 
+static void tick_nuke(az_space_state_t *state, double time) {
+  if (!state->nuke.active) return;
+  state->nuke.rho += 700.0 * time;
+  // Kill everything (baddies and ship) below the shockwave:
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING) continue;
+    if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
+    if (az_vwithin(baddie->position, AZ_VZERO, state->nuke.rho)) {
+      az_kill_baddie(state, baddie);
+    }
+  }
+  if (az_ship_is_alive(&state->ship) &&
+      az_vwithin(state->ship.position, AZ_VZERO, state->nuke.rho)) {
+    az_kill_ship(state);
+  }
+  // Create minor explosions along the way:
+  const double center_theta = az_vtheta(state->camera.center);
+  const double theta_span =
+    atan(AZ_SCREEN_WIDTH / az_vnorm(state->camera.center));
+  const double step = 0.1 * theta_span;
+  for (double theta = center_theta - theta_span;
+       theta < center_theta + theta_span; theta += step) {
+    if (az_random(0, 1) < 1.0 - pow(0.5, 3.0 * time)) {
+      az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION,
+                        az_vpolar(state->nuke.rho,
+                                  theta + step * az_random(-0.5, 0.5)),
+                        0, 1, AZ_NULL_UID);
+    }
+  }
+}
+
 static void tick_most_objects(az_space_state_t *state, double time) {
   tick_darkness(state, time);
   az_tick_pickups(state, time);
@@ -667,6 +698,7 @@ static void tick_most_objects(az_space_state_t *state, double time) {
   az_tick_walls(state, time);
   az_tick_doors(state, time);
   az_tick_projectiles(state, time);
+  tick_nuke(state, time);
   az_tick_baddies(state, time);
 }
 

@@ -578,8 +578,6 @@ static const az_proj_data_t proj_data[] = {
     .homing_rate = AZ_DEG2RAD(40)
   },
   [AZ_PROJ_PLANETARY_EXPLOSION] = {
-    .speed = 700.0,
-    .lifetime = 1e10,
     .splash_damage = 75.0,
     .splash_radius = 120.0,
     .impact_shake = 5.0,
