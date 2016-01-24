@@ -882,7 +882,7 @@ static az_sound_spec_t sound_specs[] = {
     .start_freq = 0.08, .freq_slide = 0.10, .freq_delta_slide = -0.02,
     .vibrato_depth = 0.145, .vibrato_speed = 0.55,
     .square_duty = 0.92, .duty_sweep = -0.12,
-    .phaser_sweep = 0.09, .lpf_cutoff = 0.00252298, .volume_adjust = -0.5
+    .phaser_sweep = 0.09, .lpf_cutoff = 0.00252298, .volume_adjust = 0.5
   },
   [AZ_SND_PLANET_EXPLODE] = {
     .wave_kind = AZ_NOISE_WAVE,

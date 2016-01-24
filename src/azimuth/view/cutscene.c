@@ -390,6 +390,7 @@ static void draw_escape_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
   assert(cutscene->scene == AZ_SCENE_ESCAPE);
   az_draw_planet_starfield(clock);
+  draw_bg_particles(cutscene, clock);
   if (cutscene->step == 0) {
     // Step 0: Deform planet
     draw_zenith_planet_internal(0, 1, cutscene->step_progress, clock);
@@ -446,6 +447,7 @@ static void draw_escape_scene(
       glVertex2i(0, AZ_SCREEN_HEIGHT);
     } glEnd();
   }
+  draw_fg_particles(cutscene, clock);
 }
 
 static void draw_sapiais_scene(

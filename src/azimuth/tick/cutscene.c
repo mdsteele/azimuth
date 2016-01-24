@@ -170,6 +170,38 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_ESCAPE:
       ready_for_next_scene = false;
+      if (cutscene->step == 0) {
+        cutscene->param2 -= time;
+        if (cutscene->param2 <= 0.0) {
+          cutscene->param2 = (cutscene->step_timer < 2.5 ? 0.2 : 0.15);
+          az_vector_t position = {AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2};
+          az_vpluseq(&position, az_vpolar(
+              fmod(70.0 + cutscene->step_timer * 53.7,
+                   120 - 20 * cutscene->step_timer),
+              fmod(cutscene->step_timer * 11.3, AZ_TWO_PI)));
+          az_cutscene_add_particle(
+              cutscene, true, AZ_PAR_EXPLOSION,
+              (az_color_t){255, 240, 224, 192}, position,
+              AZ_VZERO, 0, 0.6 - 0.05 * cutscene->step_timer, 25, 0);
+          az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
+        }
+      } else if (cutscene->step == 1) {
+        if (cutscene->param2 == 0.0) {
+          cutscene->param2 = 1.0;
+        } else {
+          cutscene->param2 = 0.0;
+          const double translation = 1.2 * pow(cutscene->step_progress, 4);
+          const double scale_factor = 3.0 * translation;
+          const az_vector_t position = {
+            AZ_SCREEN_WIDTH/2 - 320 * translation,
+            AZ_SCREEN_HEIGHT/2 + 270 * translation
+          };
+          az_cutscene_add_particle(
+              cutscene, true, AZ_PAR_EMBER,
+              (az_color_t){0, 0, 0, 192}, position,
+              AZ_VZERO, 0, 0.5, 15 * scale_factor, 0);
+        }
+      }
       switch (cutscene->step) {
         case 0: // deform
           if (cutscene->step_progress == 0.0) {
