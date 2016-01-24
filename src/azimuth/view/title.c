@@ -354,9 +354,9 @@ static void draw_records_box(const az_saved_games_t *saved_games) {
 
 /*===========================================================================*/
 
-#define ABOUT_BOX_TOP 260
+#define ABOUT_BOX_TOP 215
 #define ABOUT_BOX_WIDTH 512
-#define ABOUT_BOX_HEIGHT 146
+#define ABOUT_BOX_HEIGHT 191
 
 static const az_vector_t about_box_vertices[] = {
   {0.5, 0.5}, {ABOUT_BOX_WIDTH - 0.5, 0.5},
@@ -366,17 +366,19 @@ static const az_vector_t about_box_vertices[] = {
 static const az_polygon_t about_box_polygon =
   AZ_INIT_POLYGON(about_box_vertices);
 
-static const char *about_box_lines[] = {
-  "Copyright 2012 Matthew D Steele <mdsteele@alum.mit.edu>",
-  "",
-  "This program comes with ABSOLUTELY NO WARRANTY.",
-  "This program is free software: you can redistribute it and/or",
-  "modify it under the terms of the GNU General Public License as",
-  "published by the Free Software Foundation, either version 3 of",
-  "the License, or (at your option) any later version.",
-  "",
-  "Thanks for playing!"
-};
+static const char about_box_paragraph[] =
+  "Copyright 2012 Matthew D Steele <mdsteele@alum.mit.edu>\n"
+  "\n"
+  "    Game website: https://mdsteele.github.io/azimuth/\n"
+  "    Source code: https://github.com/mdsteele/azimuth/\n"
+  "\n"
+  "$/Azimuth$| comes with ABSOLUTELY NO WARRANTY.\n"
+  "$/Azimuth$| is free software: you can redistribute it and/or\n"
+  "modify it under the terms of the GNU General Public License as\n"
+  "published by the Free Software Foundation, either version 3 of\n"
+  "the License, or (at your option) any later version.\n"
+  "\n"
+  "Thanks for playing!";
 
 static void draw_about_box(void) {
   glPushMatrix(); {
@@ -386,10 +388,9 @@ static void draw_about_box(void) {
     glColor3f(0.75, 0.75, 0.75); // light gray
     do_polygon(GL_LINE_LOOP, about_box_polygon);
 
-    glColor3f(1, 1, 1); // white
-    for (int i = 0; i < AZ_ARRAY_SIZE(about_box_lines); ++i) {
-      az_draw_string(8, AZ_ALIGN_LEFT, 8, 8 + 15 * i, about_box_lines[i]);
-    }
+    az_preferences_t prefs;
+    az_draw_paragraph(8, AZ_ALIGN_LEFT, 8, 8, 15, -1, &prefs,
+                      about_box_paragraph);
     az_draw_string(8, AZ_ALIGN_RIGHT, ABOUT_BOX_WIDTH - 8,
                    ABOUT_BOX_HEIGHT - 16, AZ_VERSION_STRING);
   } glPopMatrix();
