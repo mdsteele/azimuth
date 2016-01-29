@@ -857,6 +857,15 @@ static az_sound_spec_t sound_specs[] = {
     .vibrato_depth = 0.39781, .vibrato_speed = 0.06258,
     .phaser_offset = 0.746478915215, .phaser_sweep = -0.0704225301743
   },
+  [AZ_SND_OTH_SCREAM] = {
+    .wave_kind = AZ_SQUARE_WAVE,
+    .env_attack = 0.2, .env_sustain = 1.0,
+    .env_punch = 0.000476076, .env_decay = 1.0,
+    .start_freq = 0.5, .freq_slide = 0.08, .freq_delta_slide = -0.05,
+    .vibrato_depth = 0.78, .vibrato_speed = 0.625,
+    .arp_mod = 0.54, .arp_speed = 0.595,
+    .phaser_offset = -0.43, .hpf_cutoff = 0.485, .volume_adjust = 0.5
+  },
   [AZ_SND_PICKUP_ORDNANCE] = {
     .wave_kind = AZ_SQUARE_WAVE,
     .env_sustain = 0.17572, .env_decay = 0.2746479,

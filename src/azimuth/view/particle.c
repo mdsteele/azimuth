@@ -286,6 +286,21 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
         }
       } glEnd();
     } break;
+    case AZ_PAR_ROCK:
+      glScaled(particle->param1, particle->param1, 1);
+      glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);
+      glBegin(GL_TRIANGLE_FAN); {
+        const double progress = particle->age / particle->lifetime;
+        const az_color_t black = {0, 0, 0, 255};
+        az_gl_color(az_transition_color(particle->color, black, progress));
+        glVertex2f(0, 0);
+        az_gl_color(az_transition_color(particle->color, black,
+                                        0.7 + 0.3 * progress));
+        glVertex2f(4, 0); glVertex2f(1, 4); glVertex2f(-1, 5);
+        glVertex2f(-2, 0); glVertex2f(-1, -2); glVertex2f(1, -3);
+        glVertex2f(4, 0);
+      } glEnd();
+      break;
     case AZ_PAR_SHARD:
       glScaled(particle->param1, particle->param1, 1);
       glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);

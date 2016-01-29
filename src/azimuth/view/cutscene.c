@@ -236,6 +236,55 @@ static void draw_zenith_planet_internal(double blacken, double create,
                    (radius + atmosphere_thickness) * sin(theta));
       }
     } glEnd();
+
+    if (deform > 0.0) {
+      // Draw tendrils:
+      const int num_tendrils = 12;
+      for (int i = 1; i <= num_tendrils; ++i) {
+        const double progress = 0.75 * (deform - pow(deform, 8));
+        if (progress > 0.0) {
+          const az_clock_t clk = clock + 7 * i;
+          const GLfloat r = (az_clock_mod(6, 1, clk)     < 3 ? 1.0f : 0.25f);
+          const GLfloat g = (az_clock_mod(6, 1, clk + 2) < 3 ? 1.0f : 0.25f);
+          const GLfloat b = (az_clock_mod(6, 1, clk + 4) < 3 ? 1.0f : 0.25f);
+          glColor4f(r, g, b, 0.5f);
+          glBegin(GL_TRIANGLE_STRIP); {
+            const double angle = AZ_DEG2RAD(108) * i;
+            az_random_seed_t seed = {i, i};
+            az_vector_t vec = AZ_VZERO;
+            const az_vector_t step = az_vpolar(2.5, angle);
+            const az_vector_t side = az_vrot90ccw(step);
+            for (double j = 0.0; j <= progress; j += 0.01) {
+              const az_vector_t edge =
+                az_vmul(side, 3.0 * (progress - j) / progress);
+              const az_vector_t wobble = {
+                0, atan(0.02 * vec.x) * 10.0 *
+                sin(deform * 20.0 + vec.x / 20.0)};
+              az_gl_vertex(az_vadd(az_vadd(vec, edge), wobble));
+              az_gl_vertex(az_vadd(az_vsub(vec, edge), wobble));
+              az_vpluseq(&vec, step);
+              az_vpluseq(&vec, az_vmul(side, 2 * az_rand_sdouble(&seed)));
+            }
+          } glEnd();
+        }
+      }
+
+      // Draw portal:
+      glBegin(GL_TRIANGLE_FAN); {
+        const GLfloat r = (az_clock_mod(6, 1, clock)     < 3 ? 1.0f : 0.25f);
+        const GLfloat g = (az_clock_mod(6, 1, clock + 2) < 3 ? 1.0f : 0.25f);
+        const GLfloat b = (az_clock_mod(6, 1, clock + 4) < 3 ? 1.0f : 0.25f);
+        glColor4f(r, g, b, 1);
+        glVertex2f(0, 0);
+        glColor4f(r, g, b, 0);
+        const double radius = 2 * (1 - deform - pow(1 - deform, 4)) *
+          (60 + 0.15 * az_clock_zigzag(30, 1, clock));
+        for (int i = 0; i <= 360; i += 10) {
+          glVertex2d(radius * cos(AZ_DEG2RAD(i)),
+                     radius * sin(AZ_DEG2RAD(i)) * 0.8);
+        }
+      } glEnd();
+    }
   } glPopMatrix();
 }
 

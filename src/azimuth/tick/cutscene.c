@@ -170,53 +170,71 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
       break;
     case AZ_SCENE_ESCAPE:
       ready_for_next_scene = false;
-      if (cutscene->step == 0) {
-        cutscene->param2 -= time;
-        if (cutscene->param2 <= 0.0) {
-          cutscene->param2 = (cutscene->step_timer < 2.5 ? 0.2 : 0.15);
-          az_vector_t position = {AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2};
-          az_vpluseq(&position, az_vpolar(
-              fmod(70.0 + cutscene->step_timer * 53.7,
-                   120 - 20 * cutscene->step_timer),
-              fmod(cutscene->step_timer * 11.3, AZ_TWO_PI)));
-          az_cutscene_add_particle(
-              cutscene, true, AZ_PAR_EXPLOSION,
-              (az_color_t){255, 240, 224, 192}, position,
-              AZ_VZERO, 0, 0.6 - 0.05 * cutscene->step_timer, 25, 0);
-          az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
-        }
-      } else if (cutscene->step == 1) {
-        if (cutscene->param2 == 0.0) {
-          cutscene->param2 = 1.0;
-        } else {
-          cutscene->param2 = 0.0;
-          const double translation = 1.2 * pow(cutscene->step_progress, 4);
-          const double scale_factor = 3.0 * translation;
-          const az_vector_t position = {
-            AZ_SCREEN_WIDTH/2 - 320 * translation,
-            AZ_SCREEN_HEIGHT/2 + 270 * translation
-          };
-          az_cutscene_add_particle(
-              cutscene, true, AZ_PAR_EMBER,
-              (az_color_t){0, 0, 0, 192}, position,
-              AZ_VZERO, 0, 0.5, 15 * scale_factor, 0);
-        }
-      }
       switch (cutscene->step) {
         case 0: // deform
           if (cutscene->step_progress == 0.0) {
             az_play_sound(&state->soundboard, AZ_SND_PLANET_DEFORM);
+            az_play_sound(&state->soundboard, AZ_SND_OTH_SCREAM);
           }
-          if (progress_step(cutscene, 4.0)) {
+          if (step_timer_at(cutscene, 4.0, time)) {
+            az_play_sound_with_volume(&state->soundboard, AZ_SND_NPS_PORTAL,
+                                      0.5);
+          }
+          cutscene->param2 -= time;
+          if (cutscene->param2 <= 0.0) {
+            cutscene->param2 = (cutscene->step_timer < 2.5 ? 0.2 : 0.15);
+            az_vector_t position = {AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2};
+            az_vpluseq(&position, az_vpolar(
+                fmod(70.0 + cutscene->step_timer * 53.7,
+                     120 - 20 * cutscene->step_timer),
+                fmod(cutscene->step_timer * 11.3, AZ_TWO_PI)));
+            az_cutscene_add_particle(
+                cutscene, true, AZ_PAR_EXPLOSION,
+                (az_color_t){255, 240, 224, 192}, position,
+                AZ_VZERO, 0, 0.6 - 0.05 * cutscene->step_timer, 25, 0);
+            az_play_sound(&state->soundboard, AZ_SND_EXPLODE_BOMB);
+          }
+          if (progress_step(cutscene, 6.0)) {
             az_play_sound(&state->soundboard, AZ_SND_PLANET_EXPLODE);
             az_play_sound(&state->soundboard, AZ_SND_EXPLODE_MEGA_BOMB);
+            az_play_sound(&state->soundboard, AZ_SND_KILL_OTH);
           }
           break;
         case 1: // explode
-          progress_step(cutscene, 1.5);
+          if (cutscene->param2 == 0.0) {
+            cutscene->param2 = 1.0;
+          } else {
+            cutscene->param2 = 0.0;
+            const double translation = 1.2 * pow(cutscene->step_progress, 4);
+            const double scale_factor = 3.0 * translation;
+            const az_vector_t position = {
+              AZ_SCREEN_WIDTH/2 - 320 * translation,
+              AZ_SCREEN_HEIGHT/2 + 270 * translation
+            };
+            az_cutscene_add_particle(
+                cutscene, true, AZ_PAR_EMBER,
+                (az_color_t){0, 0, 0, 192}, position,
+                AZ_VZERO, 0, 0.5, 15 * scale_factor, 0);
+          }
+          if (progress_step(cutscene, 1.5)) {
+            const az_color_t color = az_color3f(0.5, 0.35, 0.45);
+            az_random_seed_t seed = {1, 1};
+            for (int i = 0; i < 25; ++i) {
+              const double dx = 200 * az_rand_sdouble(&seed);
+              const double dy = 150 * az_rand_sdouble(&seed);
+              const az_vector_t delta = {dx, dy};
+              const double size = 2 + 2 * az_rand_udouble(&seed);
+              const double angle = AZ_PI * az_rand_sdouble(&seed);
+              const double spin = AZ_DEG2RAD(50) * az_rand_sdouble(&seed);
+              az_cutscene_add_particle(
+                  cutscene, false, AZ_PAR_ROCK, color,
+                  (az_vector_t){320 + dx, 240 + dy},
+                  az_vmul(delta, 0.05), angle, 12, size, spin);
+            }
+          }
           break;
         case 2: progress_step(cutscene, 2.0); break; // fade
-        case 3: progress_step(cutscene, 2.5); break; // silence
+        case 3: progress_step(cutscene, 3.5); break; // silence
         default: ready_for_next_scene = true; break;
       }
       break;

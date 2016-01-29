@@ -48,6 +48,8 @@ typedef enum {
   AZ_PAR_OTH_FRAGMENT,
   // NPS_PORTAL: A Nonlinear Paradimensional Shear portal.  param1=radius
   AZ_PAR_NPS_PORTAL,
+  // ROCK: A chunk of rock.  param1=scale, param2=spin_rate
+  AZ_PAR_ROCK,
   // SHARD: A trianglar shard of metal/rock.  param1=scale, param2=spin_rate
   AZ_PAR_SHARD,
   // SPARK: An energy spark.  param1=radius, param2=spin_rate
