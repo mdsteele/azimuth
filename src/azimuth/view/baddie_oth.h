@@ -23,6 +23,13 @@
 
 #include "azimuth/state/baddie.h"
 #include "azimuth/util/clock.h"
+#include "azimuth/util/vector.h"
+
+/*===========================================================================*/
+
+void az_draw_oth_tendril(az_vector_t base, az_vector_t ctrl1,
+                         az_vector_t ctrl2, az_vector_t tip, double semithick,
+                         float alpha, az_clock_t clock);
 
 /*===========================================================================*/
 

@@ -263,7 +263,7 @@ static void draw_oth(
   draw_oth_with_alpha(baddie, frozen, 1.0f, clock, vertices, num_vertices);
 }
 
-static void next_tendril_color(int *color_index, GLfloat alpha,
+static void next_tendril_color(int *color_index, float alpha,
                                az_clock_t clock) {
   const az_clock_t clk = clock + 2 * (*color_index++ % 3);
   const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 0.75f : 0.25f);
@@ -272,9 +272,28 @@ static void next_tendril_color(int *color_index, GLfloat alpha,
   glColor4f(r, g, b, 0.5f * alpha);
 }
 
+void az_draw_oth_tendril(az_vector_t base, az_vector_t ctrl1,
+                         az_vector_t ctrl2, az_vector_t tip, double semithick,
+                         float alpha, az_clock_t clock) {
+  glBegin(GL_TRIANGLE_STRIP); {
+    int color_index = 0;
+    for (double t = 0.0; t <= 1.0; t += 0.0625) {
+      const az_vector_t point =
+        az_cubic_bezier_point(base, ctrl1, ctrl2, tip, t);
+      const double angle = az_cubic_bezier_angle(base, ctrl1, ctrl2, tip, t);
+      const az_vector_t perp =
+        az_vpolar(semithick * (1.0 - t), angle + AZ_HALF_PI);
+      next_tendril_color(&color_index, alpha, clock);
+      az_gl_vertex(az_vadd(point, perp));
+      next_tendril_color(&color_index, alpha, clock);
+      az_gl_vertex(az_vsub(point, perp));
+    }
+  } glEnd();
+}
+
 static void draw_tendrils_with_alpha(const az_baddie_t *baddie,
                                      const az_oth_tendrils_data_t *tendrils,
-                                     GLfloat alpha, az_clock_t clock) {
+                                     float alpha, az_clock_t clock) {
   assert(tendrils->num_tendrils <= AZ_MAX_BADDIE_COMPONENTS);
   for (int i = 0; i < tendrils->num_tendrils; ++i) {
     const az_component_t *tip =
@@ -284,21 +303,8 @@ static void draw_tendrils_with_alpha(const az_baddie_t *baddie,
     const az_vector_t ctrl1 = az_vadd(az_vwithlen(base, 0.4 * dist), base);
     const az_vector_t ctrl2 = az_vadd(az_vpolar(-0.4 * dist, tip->angle),
                                       tip->position);
-    glBegin(GL_TRIANGLE_STRIP); {
-      int color_index = 0;
-      for (double t = 0.0; t <= 1.0; t += 0.0625) {
-        const az_vector_t point = az_cubic_bezier_point(
-            base, ctrl1, ctrl2, tip->position, t);
-        const double angle = az_cubic_bezier_angle(
-            base, ctrl1, ctrl2, tip->position, t);
-        const az_vector_t perp =
-          az_vpolar(tendrils->semithick * (1.0 - t), angle + AZ_HALF_PI);
-        next_tendril_color(&color_index, alpha, clock);
-        az_gl_vertex(az_vadd(point, perp));
-        next_tendril_color(&color_index, alpha, clock);
-        az_gl_vertex(az_vsub(point, perp));
-      }
-    } glEnd();
+    az_draw_oth_tendril(base, ctrl1, ctrl2, tip->position, tendrils->semithick,
+                        alpha, clock);
   }
 }
 

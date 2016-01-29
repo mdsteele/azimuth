@@ -32,6 +32,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/baddie_oth.h"
 #include "azimuth/view/util.h"
 
 /*===========================================================================*/
@@ -249,18 +250,42 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
         }
       } glEnd();
       break;
-    case AZ_PAR_NPS_PORTAL:
+    case AZ_PAR_NPS_PORTAL: {
+      const double progress = particle->age / particle->lifetime;
+      const double scale = 1 - 2 * fabs(progress - 0.5);
+      const double tscale = fmax(0, 1 - pow(2.25 * progress - 1.25, 2));
+      // Tendrils:
+      for (int i = 0; i < 10; ++i) {
+        const double theta = AZ_DEG2RAD(i * 36);
+        const az_vector_t tip =
+          az_vadd(az_vpolar(1.1 * particle->param1 * tscale, theta),
+                  az_vpolar(15 * tscale,
+                            particle->age * AZ_DEG2RAD(180) * ((i % 3) + 1)));
+        const az_vector_t ctrl1 =
+          az_vadd(az_vpolar(0.8 * particle->param1 * tscale, theta),
+                  az_vpolar(10 * sin(particle->age * AZ_DEG2RAD(400)),
+                            theta + AZ_HALF_PI));
+        const az_vector_t ctrl2 =
+          az_vadd(az_vpolar(0.4 * particle->param1 * tscale, theta),
+                  az_vpolar(10 * cos(particle->age * AZ_DEG2RAD(400)),
+                            theta + AZ_HALF_PI));
+        az_draw_oth_tendril(AZ_VZERO, ctrl1, ctrl2, tip, 5 * tscale,
+                            1.0f, clock);
+      }
+      // Portal:
       glBegin(GL_TRIANGLE_FAN); {
-        with_color_alpha(particle->color, 1);
+        const GLfloat r = (az_clock_mod(6, 1, clock)     < 3 ? 1.0f : 0.25f);
+        const GLfloat g = (az_clock_mod(6, 1, clock + 2) < 3 ? 1.0f : 0.25f);
+        const GLfloat b = (az_clock_mod(6, 1, clock + 4) < 3 ? 1.0f : 0.75f);
+        glColor4f(r, g, b, 1.0f);
         glVertex2f(0, 0);
-        with_color_alpha(particle->color, 0.5);
-        const double radius = particle->param1 *
-          (1.0 - 2.0 * fabs((particle->age / particle->lifetime) - 0.5));
-        for (int i = 0; i <= 360; i += 5) {
+        glColor4f(r, g, b, 0.15f);
+        const double radius = particle->param1 * scale;
+        for (int i = 0; i <= 360; i += 10) {
           glVertex2d(radius * cos(AZ_DEG2RAD(i)), radius * sin(AZ_DEG2RAD(i)));
         }
       } glEnd();
-      break;
+    } break;
     case AZ_PAR_SHARD:
       glScaled(particle->param1, particle->param1, 1);
       glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);
