@@ -421,6 +421,7 @@ static bool next_step_at(az_victory_state_t *state, double mark) {
   if (state->step_timer >= mark) {
     ++state->step;
     state->step_timer = 0.0;
+    state->step_start = state->clock;
     az_victory_clear_objects(state);
     return true;
   } else return false;
@@ -750,6 +751,9 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         az_play_sound(&state->soundboard, AZ_SND_BOSS_EXPLODE);
       }
       next_step_at(state, 2.5);
+    } break;
+    case AZ_VS_STATS: {
+      next_step_at(state, 1.0);
     } break;
     case AZ_VS_DONE: break;
   }

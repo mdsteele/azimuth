@@ -210,7 +210,7 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
     }
   } glPopMatrix();
 
-  if ((state->step == AZ_VS_CORE || state->step == AZ_VS_DONE) &&
+  if ((state->step == AZ_VS_CORE || state->step == AZ_VS_STATS) &&
       state->step_timer <= 0.75) {
     tint_screen((az_color_t){255, 255, 255,
                              255 * (1 - state->step_timer / 0.75)});
@@ -229,7 +229,7 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
     draw_fade_text(state, 8, credit->x, credit->y + 40, 1.75, credit->name2);
   }
 
-  if (state->step == AZ_VS_DONE) {
+  if (state->step == AZ_VS_STATS || state->step == AZ_VS_DONE) {
     glColor3f(0.5, 1, 1);
     const int total_seconds = (int)state->clear_time;
     const int hours = total_seconds / 3600;
@@ -239,6 +239,14 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
                    "Clear time: %d:%02d:%02d", hours, minutes, seconds);
     az_draw_printf(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 290,
                    "Items collected: %d%%", state->percent_completion);
+  }
+
+  if (state->step == AZ_VS_DONE) {
+    const GLfloat alpha =
+      0.01 * az_clock_zigzag(100, 2, state->clock - state->step_start);
+    glColor4f(0, 0.75, 0.5, alpha);
+    az_draw_string(16, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, 430,
+                   "Press any key");
   }
 }
 

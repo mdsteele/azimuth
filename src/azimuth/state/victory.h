@@ -42,6 +42,7 @@ typedef enum {
   AZ_VS_SUPERGUNSHIP,
   AZ_VS_CORE,
   AZ_VS_EXPLODE,
+  AZ_VS_STATS,
   AZ_VS_DONE
 } az_victory_step_t;
 
@@ -54,6 +55,7 @@ typedef struct {
 
   az_victory_step_t step;
   double step_timer;
+  az_clock_t step_start;
 
   az_baddie_t baddies[4];
   az_particle_t particles[100];
