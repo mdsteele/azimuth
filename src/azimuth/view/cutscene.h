@@ -35,6 +35,8 @@ void az_draw_zenith_planet(az_clock_t clock);
 void az_draw_zenith_planet_formation(double blacken, double create,
                                      az_clock_t clock);
 
+void az_draw_planet_debris(az_clock_t clock);
+
 void az_draw_cutscene(const az_space_state_t *state);
 
 /*===========================================================================*/

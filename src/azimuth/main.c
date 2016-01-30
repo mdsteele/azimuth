@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
   az_set_global_sound_volume(preferences.sound_volume);
 
   az_controller_t controller = AZ_CONTROLLER_TITLE;
-  bool skip_intro = false;
+  az_title_intro_t title_intro = AZ_TI_SHOW_INTRO;
   int saved_game_slot_index = 0;
   while (true) {
     switch (controller) {
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
         {
           const az_title_action_t action =
             az_title_event_loop(&planet, &saved_games, &preferences,
-                                skip_intro);
+                                title_intro);
           switch (action.kind) {
             case AZ_TA_QUIT:
               return EXIT_SUCCESS;
@@ -102,10 +102,14 @@ int main(int argc, char **argv) {
                                     saved_game_slot_index)) {
           case AZ_SA_EXIT_TO_TITLE:
             controller = AZ_CONTROLLER_TITLE;
-            skip_intro = true;
+            title_intro = AZ_TI_SKIP_INTRO;
             break;
           case AZ_SA_GAME_OVER:
             controller = AZ_CONTROLLER_GAME_OVER;
+            break;
+          case AZ_SA_VICTORY:
+            controller = AZ_CONTROLLER_TITLE;
+            title_intro = AZ_TI_PLANET_DEBRIS;
             break;
         }
         break;
@@ -116,7 +120,7 @@ int main(int argc, char **argv) {
             break;
           case AZ_GOA_RETURN_TO_TITLE:
             controller = AZ_CONTROLLER_TITLE;
-            skip_intro = true;
+            title_intro = AZ_TI_SKIP_INTRO;
             break;
           case AZ_GOA_QUIT:
             return EXIT_SUCCESS;

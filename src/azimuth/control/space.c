@@ -144,7 +144,7 @@ az_space_action_t az_space_event_loop(
     // handling events.
     if (state.victory) {
       az_victory_event_loop(saved_games, &state.ship.player);
-      return AZ_SA_EXIT_TO_TITLE;
+      return AZ_SA_VICTORY;
     } else if (state.mode == AZ_MODE_GAME_OVER) {
       // If we're at the end of the game over animation, exit this controller
       // and signal that we should transition to the game over screen

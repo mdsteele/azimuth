@@ -29,6 +29,12 @@
 
 /*===========================================================================*/
 
+typedef enum {
+  AZ_TI_SHOW_INTRO,
+  AZ_TI_SKIP_INTRO,
+  AZ_TI_PLANET_DEBRIS,
+} az_title_intro_t;
+
 typedef struct {
   enum { AZ_TA_START_GAME, AZ_TA_QUIT } kind;
   int slot_index;
@@ -36,7 +42,7 @@ typedef struct {
 
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs, bool skip_intro);
+    az_preferences_t *prefs, az_title_intro_t intro);
 
 /*===========================================================================*/
 

@@ -70,6 +70,7 @@ typedef struct {
   az_prefs_pane_t prefs_pane;
   az_button_t prev_track_button, next_track_button;
   az_music_key_t current_track;
+  bool show_planet_debris;
 } az_title_state_t;
 
 void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,

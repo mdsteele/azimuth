@@ -297,6 +297,30 @@ void az_draw_zenith_planet_formation(double blacken, double create,
   draw_zenith_planet_internal(blacken, create, 0.0, clock);
 }
 
+void az_draw_planet_debris(az_clock_t clock) {
+  const az_color_t color = az_color3f(0.5, 0.35, 0.45);
+  az_random_seed_t seed = {1, 1};
+  for (int i = 0; i < 25; ++i) {
+    const double cx = 320 + 300 * az_rand_sdouble(&seed);
+    const double cy = 240 + 200 * az_rand_sdouble(&seed);
+    const double size = 2 + 2 * az_rand_udouble(&seed);
+    const double angle = AZ_PI * az_rand_sdouble(&seed);
+    const double spin = AZ_DEG2RAD(30) * az_rand_sdouble(&seed);
+    const az_particle_t particle = {
+      .kind = AZ_PAR_ROCK,
+      .color = color,
+      .age = 0.5,
+      .lifetime = 1,
+      .param1 = size
+    };
+    glPushMatrix(); {
+      glTranslated(cx, cy, 0);
+      az_gl_rotated(angle + spin * (clock / 60.0));
+      az_draw_particle(&particle, clock);
+    } glPopMatrix();
+  }
+}
+
 static void tint_screen(GLfloat gray, GLfloat alpha) {
   glColor4f(gray, gray, gray, alpha);
   glBegin(GL_QUADS); {

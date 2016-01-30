@@ -753,7 +753,7 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
       next_step_at(state, 2.5);
     } break;
     case AZ_VS_STATS: {
-      next_step_at(state, 1.0);
+      next_step_at(state, 2.0);
     } break;
     case AZ_VS_DONE: break;
   }

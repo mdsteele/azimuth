@@ -29,7 +29,8 @@
 
 typedef enum {
   AZ_SA_EXIT_TO_TITLE,
-  AZ_SA_GAME_OVER
+  AZ_SA_GAME_OVER,
+  AZ_SA_VICTORY
 } az_space_action_t;
 
 az_space_action_t az_space_event_loop(

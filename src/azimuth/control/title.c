@@ -47,12 +47,15 @@ static void copy_saved_game(az_saved_games_t *saved_games, int src_index,
 
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
-    az_preferences_t *prefs, bool skip_intro) {
+    az_preferences_t *prefs, az_title_intro_t title_intro) {
   static az_title_state_t state;
   az_init_title_state(&state, planet, saved_games, prefs);
-  if (skip_intro) {
+  if (title_intro != AZ_TI_SHOW_INTRO) {
     az_title_skip_intro(&state);
     state.mode = AZ_TMODE_NORMAL;
+  }
+  if (title_intro == AZ_TI_PLANET_DEBRIS) {
+    state.show_planet_debris = true;
   }
 
   bool prefs_changed = false;

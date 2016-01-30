@@ -247,7 +247,11 @@ static void draw_background(const az_title_state_t *state) {
   } else {
     title_progress = 1.0;
     az_draw_planet_starfield(state->clock);
-    az_draw_zenith_planet(state->clock);
+    if (state->show_planet_debris) {
+      az_draw_planet_debris(state->clock);
+    } else {
+      az_draw_zenith_planet(state->clock);
+    }
   }
 
   // Draw game title:
