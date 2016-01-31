@@ -63,6 +63,9 @@ void az_tick_bad_oth_razor(
 void az_tick_bad_oth_snapdragon(
     az_space_state_t *state, az_baddie_t *baddie, double time);
 
+void az_tick_bad_oth_tentacle(
+    az_space_state_t *state, az_baddie_t *baddie, double time);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_TICK_BADDIE_OTH_H_

@@ -244,7 +244,7 @@ static bool adjust_gravity(az_space_state_t *state, double time,
 
 static void spin_gravity_back_and_forth(
     az_space_state_t *state, az_baddie_t *baddie, double time) {
-  const double goal = 600.0 * baddie->param;
+  const double goal = 500.0 * baddie->param;
   if (adjust_gravity(state, time, goal, true)) baddie->param = -baddie->param;
 }
 
@@ -419,7 +419,7 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
   az_ray_impact(state, beam_start, az_vpolar(1000, beam_angle),
                 (AZ_IMPF_BADDIE | AZ_IMPF_SHIP), baddie->uid, &impact);
   const az_vector_t beam_delta = az_vsub(impact.position, beam_start);
-  const double beam_damage = 100.0 * time;
+  const double beam_damage = 70.0 * time;
   // Damage the ship and any baddies within the beam.
   if (az_ship_is_alive(&state->ship) &&
       az_ray_hits_ship(&state->ship, beam_start, beam_delta,
@@ -428,7 +428,9 @@ static void fire_rainbow_beam(az_space_state_t *state, az_baddie_t *baddie,
     az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
   }
   AZ_ARRAY_LOOP(other, state->baddies) {
-    if (other->kind == AZ_BAD_NOTHING || other == baddie) continue;
+    if (other->kind == AZ_BAD_NOTHING) continue;
+    if (other->kind == AZ_BAD_OTH_TENTACLE) continue;
+    if (other == baddie) continue;
     const az_component_data_t *component;
     if (az_ray_hits_baddie(other, beam_start, beam_delta,
                            NULL, NULL, &component)) {
@@ -716,6 +718,7 @@ static void do_buzzsaw(az_space_state_t *state, az_baddie_t *baddie,
 void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
                              double time) {
   assert(baddie->kind == AZ_BAD_ZENITH_CORE);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
   // If the ship accidentally gets caught inside the baddie, knock it away.
   if (az_ship_is_alive(&state->ship) &&
       az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS,
@@ -726,7 +729,39 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
       az_vpluseq(&state->ship.velocity, az_vmul(unit, 800.0));
     }
   }
-  switch (get_primary_state(baddie)) {
+
+  // Summon Oth tentacles.
+  const int primary = get_primary_state(baddie);
+  if (primary != INITIAL_STATE && primary != DORMANT_STATE) {
+    baddie->param2 += time;
+    if (baddie->param2 >= 7.0 - 3.0 * hurt) {
+      baddie->param2 = 0.0;
+      int num_tentacles = 0;
+      AZ_ARRAY_LOOP(other, state->baddies) {
+        if (other->kind == AZ_BAD_OTH_TENTACLE) ++num_tentacles;
+      }
+      if (num_tentacles < 9) {
+        const double rho = az_random(600, 675);
+        const double theta = az_random(-AZ_PI, AZ_PI);
+        az_particle_t *particle;
+        if (az_insert_particle(state, &particle)) {
+          particle->kind = AZ_PAR_LIGHTNING_BOLT;
+          particle->color = (az_color_t){128, 64, 255, 255};
+          particle->position = az_vpolar(80, theta);
+          particle->velocity = AZ_VZERO;
+          particle->angle = theta;
+          particle->lifetime = 2.0;
+          particle->param1 = rho - 80;
+          particle->param2 = 0.5;
+        }
+        az_play_sound(&state->soundboard, AZ_SND_ELECTRICITY);
+        az_add_baddie(state, AZ_BAD_OTH_TENTACLE,
+                      az_vpolar(rho, theta), az_mod2pi(theta + AZ_PI));
+      }
+    }
+  }
+
+  switch (primary) {
     case INITIAL_STATE:
       baddie->temp_properties |= AZ_BADF_INVINCIBLE;
       break;

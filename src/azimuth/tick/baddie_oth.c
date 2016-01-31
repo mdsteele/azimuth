@@ -28,6 +28,7 @@
 #include "azimuth/state/sound.h"
 #include "azimuth/state/space.h"
 #include "azimuth/tick/baddie_util.h"
+#include "azimuth/util/bezier.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
@@ -357,6 +358,76 @@ void az_tick_bad_oth_snapdragon(
   }
   az_tick_oth_tendrils(baddie, &AZ_OTH_SNAPDRAGON_TENDRILS, old_angle, time,
                        state->ship.player.total_time);
+}
+
+/*===========================================================================*/
+
+void az_tick_bad_oth_tentacle(
+    az_space_state_t *state, az_baddie_t *baddie, double time) {
+  assert(baddie->kind == AZ_BAD_OTH_TENTACLE);
+  const double hurt = 1.0 - baddie->health / baddie->data->max_health;
+  const double anger = 1.0 + hurt;
+  // Grow longer over time.
+  const double max_length_per_segment = 36.0;
+  const double time_to_fully_extend = 5.0;  // seconds
+  baddie->param = fmax(0.7, baddie->param + time * anger);
+  const double progress = fmin(1.0, baddie->param / time_to_fully_extend);
+  const double length_per_segment =
+    max_length_per_segment * (0.5 + 0.5 * progress);
+  const double length_limit = 11.4 * max_length_per_segment * progress;
+  // Get the absolute position of the base.
+  az_component_t *base = &baddie->components[11];
+  const az_vector_t base_pos =
+    az_vadd(baddie->position, az_vrotate(base->position, baddie->angle));
+  const double base_angle = az_mod2pi(baddie->angle + base->angle);
+  // Pick a new position for the tip.
+  const double ship_dist_factor =
+    1.0 - fmax(0.0, fmin(1.0, (az_vdist(state->ship.position, base_pos) /
+                               length_limit - 1.0) / 0.75));
+  const double ship_theta_offset =
+    (az_ship_is_decloaked(&state->ship) ? ship_dist_factor *
+     fmin(fmax(az_mod2pi(az_vtheta(az_vsub(state->ship.position, base_pos)) -
+                         base_angle), -AZ_DEG2RAD(40)), AZ_DEG2RAD(40)) : 0.0);
+  const double head_angle_goal = base_angle + ship_theta_offset +
+    AZ_DEG2RAD(30) * progress * cos(baddie->param * AZ_PI);
+  const double head_angle =
+    az_angle_towards(baddie->angle, AZ_DEG2RAD(120) * time, head_angle_goal);
+  const az_vector_t head_pos_goal = az_vadd(base_pos, az_vrotate(
+      az_vpolar(length_limit, base_angle),
+      AZ_DEG2RAD(10) * anger * progress *
+      sin(baddie->param * AZ_PI) + ship_theta_offset));
+  az_vector_t head_pos = baddie->position;
+  const double tracking_base = 0.3; // smaller = faster tracking
+  const az_vector_t delta =
+    az_vmul(az_vsub(head_pos_goal, head_pos), 1.0 - pow(tracking_base, time));
+  az_vpluseq(&head_pos, delta);
+  // The baddie is centered on the head, so move the baddie to where we
+  // want the head to be.
+  baddie->position = head_pos;
+  baddie->angle = head_angle;
+  // Now that the head has moved, move the base component so that it
+  // stays in the same absolute position as before.
+  base->position = az_vrotate(az_vsub(base_pos, baddie->position),
+                              -baddie->angle);
+  base->angle = az_mod2pi(base_angle - baddie->angle);
+  // Update the positions of the segments:
+  const az_vector_t ctrl1 =
+    az_vsub(head_pos, az_vpolar(90 * progress, head_angle));
+  const az_vector_t ctrl2 =
+    az_vadd(base_pos, az_vpolar(150 * progress, base_angle));
+  double param = az_cubic_bezier_arc_param(
+      head_pos, ctrl1, ctrl2, base_pos, 1000, 0.0, length_per_segment * 0.5);
+  for (int i = 0; i < 11; ++i) {
+    az_component_t *segment = &baddie->components[i];
+    segment->position = az_vrotate(az_vsub(
+        az_cubic_bezier_point(head_pos, ctrl1, ctrl2, base_pos, param),
+        baddie->position), -baddie->angle);
+    segment->angle = az_mod2pi(
+        az_cubic_bezier_angle(head_pos, ctrl1, ctrl2, base_pos, param) -
+        baddie->angle);
+    param = az_cubic_bezier_arc_param(
+        head_pos, ctrl1, ctrl2, base_pos, 1000, param, length_per_segment);
+  }
 }
 
 /*===========================================================================*/

@@ -765,6 +765,9 @@ static void draw_baddie_internal(const az_baddie_t *baddie, az_clock_t clock) {
     case AZ_BAD_CENTRAL_NETWORK_NODE:
       az_draw_bad_central_network_node(baddie, clock);
       break;
+    case AZ_BAD_OTH_TENTACLE:
+      az_draw_bad_oth_tentacle(baddie, frozen, clock);
+      break;
   }
 }
 

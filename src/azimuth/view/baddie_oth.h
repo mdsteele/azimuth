@@ -63,6 +63,9 @@ void az_draw_bad_oth_snapdragon(
 void az_draw_bad_oth_supergunship(
     const az_baddie_t *baddie, float frozen, az_clock_t clock);
 
+void az_draw_bad_oth_tentacle(
+    const az_baddie_t *baddie, float frozen, az_clock_t clock);
+
 /*===========================================================================*/
 
 void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock);

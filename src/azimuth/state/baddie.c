@@ -1046,6 +1046,21 @@ static const az_vector_t scrap_metal_vertices[] = {
   {10, 2}, {0, 8}, {-3, 3}, {-10, 0}, {2, -6}, {3, -3}
 };
 
+static const az_vector_t oth_tentacle_segment_vertices[] = {
+  {19, -3}, {19, 3}, {-19, 3}, {-19, -3}
+};
+static az_component_data_t oth_tentacle_components[] = {
+#define TENTACLE_SEGMENT() \
+  { .polygon = AZ_INIT_POLYGON(oth_tentacle_segment_vertices), \
+    .immunities = (AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB), .impact_damage = 20.0 }
+
+  TENTACLE_SEGMENT(), TENTACLE_SEGMENT(), TENTACLE_SEGMENT(),
+  TENTACLE_SEGMENT(), TENTACLE_SEGMENT(), TENTACLE_SEGMENT(),
+  TENTACLE_SEGMENT(), TENTACLE_SEGMENT(), TENTACLE_SEGMENT(),
+  TENTACLE_SEGMENT(), TENTACLE_SEGMENT(), TENTACLE_SEGMENT()
+#undef TENTACLE_SEGMENT
+};
+
 static az_baddie_data_t baddie_datas[] = {
   [AZ_BAD_MARKER] = {
     .max_health = 1000000.0,
@@ -1985,6 +2000,16 @@ static az_baddie_data_t baddie_datas[] = {
     .max_health = 1000000.0,
     .static_properties = (AZ_BADF_INCORPOREAL | AZ_BADF_NO_HOMING),
     .main_body = { .bounding_radius = 20.0, .immunities = ~0 }
+  },
+  [AZ_BAD_OTH_TENTACLE] = {
+    .max_health = 25.0, .overall_bounding_radius = 500.0,
+    .color = {255, 255, 255, 255}, .hurt_sound = AZ_SND_HURT_OTH,
+    .death_sound = AZ_SND_KILL_OTH, .death_style = AZ_DEATH_OTH,
+    .potential_pickups = ~AZ_PUPF_NOTHING,
+    .static_properties = AZ_BADF_NO_HOMING,
+    .main_body = { .bounding_radius = 3, .impact_damage = 20.0,
+                   .immunities = (AZ_DMGF_BOMB | AZ_DMGF_MEGA_BOMB) },
+    DECL_COMPONENTS(oth_tentacle_components)
   }
 };
 

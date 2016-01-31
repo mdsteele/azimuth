@@ -100,10 +100,11 @@ void az_draw_bad_zipper(
 void az_draw_bad_armored_zipper(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   const float flare = baddie->armor_flare;
-  draw_zipper(az_color3f(0.7 + 0.25 * flare - 0.5 * frozen, 0.75 - flare,
-                         0.7 + 0.3 * frozen),
-              az_color3f(0, 0.4, 0.4 + 0.6 * frozen),
-              az_color3f(0.2 + 0.4 * flare, 0.3, 0.2 + 0.8 * frozen),
+  draw_zipper(az_color3f(0.7f + 0.25f * flare - 0.5f * frozen,
+                         0.75f - 0.75f * flare,
+                         0.7f + 0.3f * frozen),
+              az_color3f(0, 0.4f, 0.4f + 0.6f * frozen),
+              az_color3f(0.2f + 0.4f * flare, 0.3f, 0.2f + 0.8f * frozen),
               flare, frozen, clock);
 }
 
