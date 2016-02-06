@@ -1,5 +1,5 @@
 @P z8 h39 r479 t255 s6
-$s:autop1,skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,mus0,scene0,skip0;
+$s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,mus0,scene0,skip0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
 !Z"Cnidam" c(0,224,224)
@@ -1016,11 +1016,11 @@ $s:autop1,skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,w
 
   After all, if I had never gone on that
   mission, most likely we would not now
-  be at war.$_18
+  be fighting this war at all.$_18
 
 
-  ...because we would already have been
-  destroyed."
+  Instead, we would probably simply have
+  been destroyed."
 !T213"
   With the NPS engines obliterated along
   with the rest of Zenith Colony, the
@@ -1044,10 +1044,11 @@ $s:autop1,skip1,mus17,scene9,wait32,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,w
   power in the galaxy?
 
   Or would thousands--or millions--of
-  Oth fingers broken free into our
-  universe and laid waste to all of us?
+  Oth fingers have broken free into our
+  universe, and promptly laid waste to
+  all of us?
 
-  We'll never know."
+  I suppose we'll never know for sure."
 !T215"
   Still, even without the Oth at their
   side, the Trichord Alliance is a still

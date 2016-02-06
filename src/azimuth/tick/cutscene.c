@@ -374,6 +374,8 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
           break;
       }
       break;
+    case AZ_SCENE_CIVIL_WAR:
+      break;
   }
   if ((ready_for_next_scene || state->skip.active) &&
       cutscene->next != cutscene->scene) {

@@ -29,7 +29,7 @@
 
 // The number of different cutscenes there are, not counting AZ_SCENE_NOTHING
 // and AZ_SCENE_TEXT:
-#define AZ_NUM_SCENES 9
+#define AZ_NUM_SCENES 10
 
 typedef enum {
   AZ_SCENE_TEXT = -1,
@@ -43,6 +43,7 @@ typedef enum {
   AZ_SCENE_BLACK,
   AZ_SCENE_SAPIAIS,
   AZ_SCENE_UHP_SHIPS,
+  AZ_SCENE_CIVIL_WAR,
 } az_scene_t;
 
 typedef struct {

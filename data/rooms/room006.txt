@@ -62,7 +62,7 @@ $e:test23,hnez,test20,hnez,msg35,wait10,deact5;
 !G1 x-2.84 y50020.79 a1.570853 s0.00 o0.00 f100.00 r100.00 l60.00 u6
 $e:test23,heqz,safe,autop1,push1000,sheal,gang6,turn,thrust1,close2,wait0.25,close1,cplus1,push20,B#gpos8,gpos,vsub,vtheta,turn,wait0.1,subi1,gvel,vnorm,gei375,beqz/A,nuke,A#dup,bnez/B,pop;
 !G1 x-10.39 y53259.34 a1.570853 s0.00 o0.00 f330.00 r330.00 l100.00 u8
-$e:test23,heqz,fado,skip1,scene4,wait1.5,scene5,mus17,scene1,wait1,mlog,tm213,tm214,tm215,scene8,mus0,tm216,mend,wait1,mus22,wait3.5,skip0,vict;
+$e:test23,heqz,fado,skip1,scene4,wait1.5,scene5,mus17,scene1,wait1,mlog,tm213,tm214,scene10,tm215,scene8,mus0,tm216,mend,wait1,mus22,wait3.5,skip0,vict;
 !G1 x-9.79 y49793.00 a1.570993 s0.00 o0.00 f300.00 r300.00 l60.00 u0
 $e:test23,hnez,test19,hnez,set19,msg14,close1,thrust0,gang4,turn,wait0.25,close2,wait0.4,thrust1,wait0.45,thrust0,wait0.75,push0,rcam,autop0,wait1.5,deact4;
 !N7/166 x249.07 y49068.87 a1.570993 u0
