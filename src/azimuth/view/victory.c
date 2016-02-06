@@ -71,23 +71,23 @@ static const struct {
   const char *heading, *name1, *name2;
 } CREDITS[] = {
   {.step = AZ_VS_SNAPDRAGON, .x = 150, .y = 360,
-   .heading = "BETA TESTERS", .name1 = "Lorem Ipsum", .name2 = "Jane Doe"},
-  {.step = AZ_VS_ROCKWYRM, .x = 180, .y = 120,
-   .heading = "BETA TESTERS", .name1 = "Alan Smithee", .name2 = "Anony Moose"},
-  {.step = AZ_VS_GUNSHIP, .x = 150, .y = 130,
-   .heading = "BETA TESTERS", .name1 = "Some One", .name2 = "Know Body"},
-  {.step = AZ_VS_FORCEFIEND, .x = 120, .y = 380,
-   .heading = "BETA TESTERS", .name1 = "Set Us", .name2 = "Up The Bomb"},
-  {.step = AZ_VS_KILOFUGE, .x = 150, .y = 380,
-   .heading = "BETA TESTERS", .name1 = "Dolor Sit Amet", .name2 = "Whatever"},
-  {.step = AZ_VS_NOCTURNE, .x = 480, .y = 80,
-   .heading = "BETA TESTERS", .name1 = "Temporary", .name2 = "Fake Names"},
-  {.step = AZ_VS_MAGBEEST, .x = 550, .y = 315,
-   .heading = "BETA TESTERS", .name1 = "Put Something", .name2 = "Real Here"},
-  {.step = AZ_VS_SUPERGUNSHIP, .x = 450, .y = 380,
-   .heading = "BETA TESTERS", .name1 = "Eventually", .name2 = "Anyway"},
+   .heading = "ASST. ART DIRECTOR", .name1 = "Stephanie Steele"},
+  {.step = AZ_VS_ROCKWYRM, .x = 180, .y = 120, .heading = "BETA TESTING",
+   .name1 = "Eric DT Chang", .name2 = "Ben Charrow"},
+  {.step = AZ_VS_GUNSHIP, .x = 150, .y = 130, .heading = "BETA TESTING",
+   .name1 = "James Dietz", .name2 = "Kyle Gong"},
+  {.step = AZ_VS_FORCEFIEND, .x = 120, .y = 380, .heading = "BETA TESTING",
+   .name1 = "Lulu Hu", .name2 = "Andrew Kelley"},
+  {.step = AZ_VS_KILOFUGE, .x = 150, .y = 380, .heading = "BETA TESTING",
+   .name1 = "dtkerns", .name2 = "Dave Mankoff"},
+  {.step = AZ_VS_NOCTURNE, .x = 480, .y = 80, .heading = "BETA TESTING",
+   .name1 = "Peter A. Steele", .name2 = "Josh Wolfe"},
+  {.step = AZ_VS_MAGBEEST, .x = 550, .y = 330, .heading = "BETA TESTING",
+   .name1 = "David Wong"},
+  {.step = AZ_VS_SUPERGUNSHIP, .x = 450, .y = 380, .heading = "SFXR CODE",
+   .name1 = "DrPetter", .name2 = "(MIT/Expat License)"},
   {.step = AZ_VS_CORE, .x = 320, .y = 60,
-   .heading = "SPECIAL THANKS", .name1 = "Someone Special", .name2 = ""},
+   .heading = "DEDICATED TO", .name1 = "Steph & Holly"},
 };
 
 static void tint_screen(az_color_t color) {
@@ -147,6 +147,7 @@ static void draw_specks(const az_victory_state_t *state) {
 
 static void draw_fade_text(const az_victory_state_t *state, int height,
                            int x, int y, double begin_at, const char *text) {
+  if (text == NULL) return;
   const double fade_time = 0.5;
   const double end_at = begin_at + 4.0;
   if (state->step_timer <= begin_at || state->step_timer >= end_at) return;
@@ -173,7 +174,7 @@ void az_victory_draw_screen(const az_victory_state_t *state) {
   if (state->step == AZ_VS_START) {
     draw_fade_text(state, 32, AZ_SCREEN_WIDTH/2, 220, -0.5, "AZIMUTH");
     draw_fade_text(state, 8, AZ_SCREEN_WIDTH/2, 280, 1.0,
-                   "a game by mdsteele");
+                   "a game by Matthew Steele");
     draw_fade_text(state, 16, AZ_SCREEN_WIDTH/2, 235, 5.0, "- CAST -");
   }
 
