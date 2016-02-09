@@ -1,16 +1,17 @@
-@M "S AAbB=1b CCDDEE|FFGGEEYGGEEYFFZZ"
+@M "S AABbB=1b CCEEF|PQRRFZZT"
 =title "Demon Core"
 
 =key 2#     % B minor
 =tempo 140
+=loudness 1.2
 
 
 !Part S
 
-1 Wp50 L30  E0,0   D+15,30
-2 Wp25 L30  E0,25
-3 Wt25 L200 E0,15  D+10,60
-4 Wn   L30  E0,100
+1 Wt25 L100 E0,0   D+15,30 V+1,60
+2 Wp25 L40  E25,25 D+5,10
+3 Wp25 L80  E0,15  D+5,30
+4 Wn   L50  E0,100
 5 Wn   L70  E0,100
 
 
@@ -26,93 +27,152 @@
 
 !Part C
 
-3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
-5| x1q x7q ' x1q x7q |
-
-3| b2q3 fe3 ' bq3 fe3 ' aq3 ee3 ' aq3 ee3 |
-5| x1q x7q ' x1q x7q |
+3 L50
 
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
-5| x1q x7q ' x1q x7q |
-
-3| g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
-5| x1q x7q ' x1q x7q |
-
-
-!Part D
-
-3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
-5| x1q ' x7q ' x1q ' x7q |
-
-3| b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
-5| x1q ' x7q ' x1q ' x7q |
-
-3| e3q3 f3e re b2e re3 be ' be3 b b |
-5| x1q ' x7q ' x1q ' x7q |
-
-3| a2q3 f3 fN ' e d# d |
-5| x1q x7e3 x1q3 ' x1 x1 x1 |
+ | b2q3 fe3 ' bq3 fe3 ' aq3 ee3 ' aq3 ee3 |
+ | b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
+5| x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
 
 
 !Part E
 
-1| b4e3 g f ' b4e3 g f ' b4e3 g f ' b4e3 g f |
+1| b3e3 g f ' be3 g f ' be3 g f ' be3 g f |
+ | c4e3 a3 g ' c4e3 a3 g ' d4e3 b3 a ' e4e3 c b3 |
+ | f4e3 d c ' fe3 d c ' fe3 d c ' fe3 d c |
+ | f4e3 d c ' fe3 d c ' fe3 d c ' fe3 d c |
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
-5| x1q ' x7q ' x1q ' x7q |
-
-1| c5e3 a4 g ' c5e3 a4 g ' d5e3 b4 a ' e5e3 c b4 |
-3| b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
-5| x1q ' x7q ' x1q ' x7q |
-
-1| f5e3 d c ' f5e3 d c ' f5e3 d c ' f5e3 d c |
-3| e3q3 f3e re b2e re3 be ' be3 b b |
-5| x1q ' x7q ' x1q ' x7q |
-
-1| f5e3 d c ' f5e3 d c ' f5e3 d c ' f5e3 d c |
-3| a2q3 f3 fN ' e d# d |
-5| x1q x7e3 x1q3 ' x1 x1 x1 |
-
-
-!Part Y
-
-1| g5q3 e a g f e |
- | f5q3 d g f e d |
- | e5q3 d b4 c5 e g |
- | f5w |
-5| x1q x1 x1 x1 |
- | x1q x1 x1 x1 |
- | x1q x1 x1 x1 |
- | x1q x1 x1 x1 |
+ | b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+ | e3q3 f3e re b2e re3 be ' be3 b b |
+ | a2q3 f3 fN ' e d# d |
+5| x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q x7e3 x1q3 ' x1 x1 x1 |
 
 
 !Part F
 
+1| g4q3 e a g f e |
+ | f4q3 d g f e d |
+ | e4q3 d b3 c4 e g |
+ | f4w |
+2| E75,50 re g5q. re eq. | re fq. re dq. |
+ | re e5q. re cq. | E100,75 fw E25,25 |
+3| E0,75 b2w E0,15 |
+4| rw | rw | rw |
+ | rh ' g3s g g g ' g g g g |
+5| x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q x7 x1 x7 |
+ | x1q ' x1 ' x1e x1 ' x1s x1 x1 x1 |
+
+3 L80
+
+
+
+!Part P
+
+1| b3e. fe. ae ' be. fe. ae | be. fe. ae ' be. fe. ae |
+ | b3e. fe. ae ' be. fe. ae | d4e. a3e. d4e ' e4e. b3e. e4e |
+2| rq b4q rq bq | rq gq rq fq |
+ | rq b4q rq bq | rq d5q rq eq |
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
 5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
 
-3| g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
-5| x1q x1 x1 x1 |
-
+1| b3e. fe. ae ' be. fe. ae | be. fe. ae ' be. fe. ae |
+ | b3e. fe. ae ' be. fe. ae | d4e. a3e. d4e ' e4e. b3e. e4e |
+2| rq b4q rq bq | rq gq rq fq |
+ | rq b4q rq bq | d5q d5q eq fq |
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
 5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
 
-3| d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
-5| x1q x1 x1 x1 |
 
+!Part Q
 
-!Part G
-
+1| b3q c4 d c |
+ | b3 g4 a f |
+ | e4s f g f ' e d c d ' c d e f ' g f g a |
+ | b4e f ' c5 f4 ' d5 f4 ' c5 f4 |
+2| rq b4 r b | rq b r a |
+ | rq b4 r b | gq g ' fq3 f f |
 3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+ | e3q3 f3e re b2e re3 be ' be3 b b |
+ | a2q3 f3 fN ' e d# d |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2e3 b b ' c3 c c ' d3q3 c b2 |
 5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1e3 x1q3 ' x1 x1 x1 |
 
-3| b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+1| b4q c5 d c |
+ | b4 a g f |
+ | e4s f g f ' e d c d ' c d e f ' g f g a |
+ | b4e3 g f ' c5 a4 f ' d5e3 b4 f ' c5 a4 f |
+2| rq b4 r b | rq b r a |
+ | rq b4 r b | gq g ' fq3 f f |
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+ | e3q3 f3e re b2e re3 be ' be3 b b |
+ | a2q3 f3 fN ' e d# d |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2e3 b b ' c3 c c ' d3q3 c b2 |
 5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1e3 x1q3 ' x1 x1 x1 |
 
-3| e3q3 f3e re b2e re3 be ' be3 b b |
+
+!Part R
+
+1| b4e3 g f ' b4e3 g f ' b4e3 g f ' b4e3 g f |
+ | c5e3 a4 g ' c5e3 a4 g ' d5e3 b4 a ' e5e3 c b4 |
+ | f5e3 d c ' f5e3 d c ' f5e3 d c ' f5e3 d c |
+ | f5e3 d c ' f5e3 d c ' f5e3 d c ' f5e3 d c |
+2| rq b4 r b | rq b r a |
+ | rq b4 r b | gq g ' fq3 f f |
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' c3q3 g#2e3 ' d3q3 a2e3 |
+ | e3q3 f3e re b2e re3 be ' be3 b b |
+ | a2q3 f3 fN ' e d# d |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2e3 b b ' c3 c c ' d3q3 c b2 |
 5| x1q x1 x1 x1 |
-
-3| a2q3 f3 fN ' e d# d |
-5| x1q x1e3 x1q3 ' x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1e3 x1q3 ' x1 x1 x1 |
 
 
 !Part Z
@@ -125,14 +185,58 @@
  | a2q3 fe3 ' aq3 fe3 ' c3q3 a2e3 ' c3q3 a2e3 |
  | d3q3 b2e3 ' d3q3 b2e3 ' d3q3 b2e3 ' d3q3 b2e3 |
  | c3q3 a2e3 ' c3q3 a2e3 ' a#2q3 fe3 ' a#2q3 fe3 |
-5| x1q x1 x1 x1 | x1q x1 x1 x1 |
- | x1q x1 x1 x1 | x1q x1 x1 x1 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
 
 1| b4e3 f d ' b f d ' f4 d b3 ' f4 d b3 |
  | d4e3 b3 f ' d4 b3 f ' c4 a3 e ' c4 a3 e |
  | b3q3 b4 a# ' f d5 c |
  | a4q3 d5 c ' d c a#4 |
 3| b2q3 fe3 ' bq3 d3e3 ' f2q3 de3 ' f2q3 de3 |
-3| b2q3 fe3 ' bq3 fe3 ' c3q3 a2e3 ' c3q3 a2e3 |
-5| x1q x1 x1 x1 | x1q x1 x1 x1 |
- | x1q x1e3 x1q3 ' x1 x1 x1 | x1q3 x1 x1 ' x1e3 x1 x1 x1 x1 x1 |
+ | b2q3 fe3 ' bq3 fe3 ' c3q3 a2e3 ' c3q3 a2e3 |
+ | E0,75 b2w E0,15 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2e3 b b ' c3 c c ' d3q3 c b2 |
+ | b2e3 b b ' c3e3 cs3 c ce3 ' d3e3 d c ' cs3 c b2 b be3 |
+5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1e3 x1q3 ' x1 x1 x1 |
+ | x1q3 x1 x1 ' x1e3 x1 x1 x1 x1 x1 |
+
+
+
+!Part T
+
+1| E0,75 b4w E0,0 |
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+
+3| b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | g2q3 ee3 ' gq3 ee3 ' fq3 de3 ' aq3 fe3 |
+ | b2q3 fe3 ' bq3 fe3 ' bq3 fe3 ' bq3 fe3 |
+ | d3q3 a2e3 ' d3q3 a2e3 ' e3q3 a2e3 ' f3q3 a2e3 |
+4| b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+ | b2s b b b ' d3e b2 ' b2s b b b ' d3e b2 |
+5| x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
+ | x1q x1 x1 x1 |
