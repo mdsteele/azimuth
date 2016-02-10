@@ -526,6 +526,63 @@ static void draw_escape_scene(
   draw_fg_particles(cutscene, clock);
 }
 
+static void draw_oth_scene(const az_cutscene_state_t *cutscene,
+                           az_clock_t clock) {
+  assert(cutscene->scene == AZ_SCENE_OTH);
+  az_draw_planet_starfield(clock);
+  draw_bg_particles(cutscene, clock);
+  glPushMatrix(); {
+    glTranslated(AZ_SCREEN_WIDTH/2, AZ_SCREEN_HEIGHT/2, 0);
+    const double progress =
+      0.7 + 0.3 * tanh(0.25 * cutscene->step_timer - 3.0);
+    // Draw tendrils:
+    const int num_tendrils = 12;
+    for (int i = 1; i <= num_tendrils; ++i) {
+      if (progress > 0.0) {
+        const az_clock_t clk = clock + 7 * i;
+        const GLfloat r = (az_clock_mod(6, 1, clk)     < 3 ? 0.75f : 0.25f);
+        const GLfloat g = (az_clock_mod(6, 1, clk + 2) < 3 ? 0.75f : 0.25f);
+        const GLfloat b = (az_clock_mod(6, 1, clk + 4) < 3 ? 0.75f : 0.25f);
+        glColor4f(r, g, b, 0.5f);
+        glBegin(GL_TRIANGLE_STRIP); {
+          const double angle = AZ_DEG2RAD(108) * i;
+          az_random_seed_t seed = {i, i};
+          az_vector_t vec = AZ_VZERO;
+          const az_vector_t step = az_vpolar(2 + 3 * progress, angle);
+          const az_vector_t side = az_vrot90ccw(step);
+          for (double j = 0.0; j <= progress; j += 0.01) {
+            const az_vector_t edge =
+              az_vmul(side, 2.0 * (progress - j) / progress);
+            const az_vector_t wobble = {
+              0, atan(0.02 * vec.x) * 10.0 *
+              sin(cutscene->step_timer * 2.0 + vec.x / 20.0)};
+            az_gl_vertex(az_vadd(az_vadd(vec, edge), wobble));
+            az_gl_vertex(az_vadd(az_vsub(vec, edge), wobble));
+            az_vpluseq(&vec, step);
+            az_vpluseq(&vec, az_vmul(side, 2 * az_rand_sdouble(&seed)));
+          }
+        } glEnd();
+      }
+    }
+    // Draw portal:
+    glBegin(GL_TRIANGLE_FAN); {
+      const GLfloat r = (az_clock_mod(6, 1, clock)     < 3 ? 1.0f : 0.25f);
+      const GLfloat g = (az_clock_mod(6, 1, clock + 2) < 3 ? 1.0f : 0.25f);
+      const GLfloat b = (az_clock_mod(6, 1, clock + 4) < 3 ? 1.0f : 0.25f);
+      glColor4f(r, g, b, 1);
+      glVertex2f(0, 0);
+      glColor4f(r, g, b, 0);
+      const double radius =
+        progress * (80 + 0.25 * az_clock_zigzag(90, 1, clock));
+      for (int i = 0; i <= 360; i += 10) {
+        glVertex2d(radius * cos(AZ_DEG2RAD(i)),
+                   radius * sin(AZ_DEG2RAD(i)) * 0.8);
+      }
+    } glEnd();
+  } glPopMatrix();
+  draw_fg_particles(cutscene, clock);
+}
+
 static void draw_sapiais_scene(
     const az_cutscene_state_t *cutscene, az_clock_t clock) {
   assert(cutscene->scene == AZ_SCENE_SAPIAIS);
@@ -1073,7 +1130,9 @@ void az_draw_cutscene(const az_space_state_t *state) {
     case AZ_SCENE_ESCAPE:
       draw_escape_scene(cutscene, state->clock);
       break;
-    case AZ_SCENE_HOMECOMING: break; // TODO
+    case AZ_SCENE_OTH:
+      draw_oth_scene(cutscene, state->clock);
+      break;
     case AZ_SCENE_BLACK: break;
     case AZ_SCENE_SAPIAIS:
       draw_sapiais_scene(cutscene, state->clock);

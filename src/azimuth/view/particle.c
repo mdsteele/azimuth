@@ -237,7 +237,9 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
       glRotated(particle->age * AZ_RAD2DEG(particle->param2), 0, 0, 1);
       glBegin(GL_TRIANGLES); {
         const double radius =
-          particle->param1 * (1.0 - particle->age / particle->lifetime);
+          (particle->param1 >= 0.0 ?
+           particle->param1 * (1.0 - particle->age / particle->lifetime) :
+           -particle->param1 * (particle->age / particle->lifetime));
         const az_color_t color = particle->color;
         for (int i = 0; i < 3; ++i) {
           const az_clock_t clk = clock + 2 * i;

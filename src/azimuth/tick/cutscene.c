@@ -238,9 +238,20 @@ void az_tick_cutscene(az_space_state_t *state, double time) {
         default: ready_for_next_scene = true; break;
       }
       break;
-    case AZ_SCENE_HOMECOMING:
-      // TODO: implement homecoming scene
-      break;
+    case AZ_SCENE_OTH: {
+      const double delay = 9.0;
+      cutscene->param1 = fmax(0.0, cutscene->param1 - time);
+      if (cutscene->step_timer >= delay && cutscene->param1 <= 0.0) {
+        cutscene->param1 =
+          0.5 - 0.4 * fmin(1.0, 0.2 * (cutscene->step_timer - delay));
+        az_vector_t start = {320, 240};
+        az_vector_t velocity = az_vpolar(300, az_random(-AZ_PI, AZ_PI));
+        velocity.y *= 0.75;
+        az_cutscene_add_particle(cutscene, true, AZ_PAR_OTH_FRAGMENT, AZ_WHITE,
+                                 start, velocity, 0.0, 2.0, -25.0,
+                                 AZ_DEG2RAD(540));
+      }
+    } break;
     case AZ_SCENE_BLACK:
       break;
     case AZ_SCENE_SAPIAIS:
