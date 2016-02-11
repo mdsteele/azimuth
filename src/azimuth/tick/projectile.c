@@ -564,6 +564,11 @@ static void projectile_special_logic(az_space_state_t *state,
           const double offset = 24 * i;
           for (int j = (i == 0); j <= 1; ++j) {
             az_add_projectile(
+                state, AZ_PROJ_HYPER_ROCKET,
+                az_vadd(proj->position, az_vpolar((j ? offset : -offset),
+                                                  proj->angle + AZ_HALF_PI)),
+                proj->angle, proj->power, proj->fired_by);
+            az_add_projectile(
                 state, AZ_PROJ_MISSILE_TRIPLE,
                 az_vadd(proj->position, az_vpolar((j ? offset : -offset),
                                                   proj->angle + AZ_HALF_PI)),

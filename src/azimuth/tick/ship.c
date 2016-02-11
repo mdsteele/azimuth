@@ -43,15 +43,15 @@
 // Constants:
 
 // How long after using energy we are unable to recharge, in seconds:
-#define AZ_RECHARGE_COOLDOWN_TIME 0.5
+#define AZ_RECHARGE_COOLDOWN_TIME 0.0
 // Min delay between firing ordnance rounds, in seconds:
-#define AZ_ORDN_COOLDOWN_TIME 0.25
+#define AZ_ORDN_COOLDOWN_TIME 0.0
 // The time needed to charge the CHARGE gun, in seconds:
-#define AZ_CHARGE_GUN_CHARGING_TIME 1.66666666666666666
+#define AZ_CHARGE_GUN_CHARGING_TIME 0.0
 // The time needed to charge up hyper/mega ordnance, in seconds:
-#define AZ_ORDN_CHARGING_TIME 1.66666666666666666
+#define AZ_ORDN_CHARGING_TIME 0.0
 // How much damage triple-gun projectiles do compared to normal ones:
-#define AZ_TRIPLE_DAMAGE_MULT 0.8
+#define AZ_TRIPLE_DAMAGE_MULT 1.0
 // How much damage the BEAM gun normally deals per second:
 #define AZ_BEAM_GUN_BASE_DAMAGE_PER_SECOND 20.0
 // How much energy the BEAM gun normally uses per second:
@@ -63,9 +63,9 @@
 // The max time, in seconds, between key taps to count as a double-tap:
 #define AZ_DOUBLE_TAP_TIME 0.3
 // The time needed to charge up the C-plus drive, in seconds:
-#define AZ_CPLUS_CHARGE_TIME 2.0
+#define AZ_CPLUS_CHARGE_TIME 1.0
 // How long the C-plus drive stays ready once charged, in seconds:
-#define AZ_CPLUS_DECAY_TIME 3.5
+#define AZ_CPLUS_DECAY_TIME 5.5
 // Energy consumed by the C-plus drive per second while active:
 #define AZ_CPLUS_POWER_COST 70.0
 // The time needed to charge up the Tractor Cloak, in seconds:
@@ -722,26 +722,20 @@ static void fire_weapons(az_space_state_t *state, double time) {
 
   // If we're not firing ordnance, we should be firing our gun.  If the gun is
   // fully charged and the player releases the fire key, fire a charged shot.
-  if (ship->gun_charge > 0.0 && !controls->fire_held) {
-    assert(player->gun1 == AZ_GUN_CHARGE);
-    if (ship->gun_charge >= 1.0) {
+  if (controls->fire_held || (ship->gun_charge > 0.0 && !controls->fire_held)) {
+    //assert(player->gun1 == AZ_GUN_CHARGE);
+    if (true || ship->gun_charge >= 1.0) {
       // If the hyper rockets are also fully charged (and if the ship has
       // enough rocket ammo), fire off a gun/rocket combo.
-      if (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
+      if (true || (ship->ordn_charge >= 1.0 && player->gun2 != AZ_GUN_NONE &&
           player->ordnance == AZ_ORDN_ROCKETS &&
-          player->rockets >= AZ_ROCKETS_PER_MISSILE_COMBO) {
-        assert(az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS));
+          player->rockets >= AZ_ROCKETS_PER_MISSILE_COMBO)) {
+        //assert(az_has_upgrade(player, AZ_UPG_HYPER_ROCKETS));
         player->rockets -= AZ_ROCKETS_PER_MISSILE_COMBO;
         switch (player->gun2) {
-          case AZ_GUN_NONE: AZ_ASSERT_UNREACHABLE();
-          case AZ_GUN_CHARGE: AZ_ASSERT_UNREACHABLE();
-          case AZ_GUN_FREEZE:
-            fire_ordn_single(state, AZ_PROJ_MISSILE_FREEZE, true,
-                             AZ_SND_FIRE_HYPER_ROCKET, 70);
-            break;
-          case AZ_GUN_TRIPLE:
+            default:
             fire_ordn_single(state, AZ_PROJ_MISSILE_BARRAGE, true,
-                             AZ_SND_FIRE_HYPER_ROCKET, 0);
+                             AZ_SND_FIRE_HYPER_ROCKET, 60);
             break;
           case AZ_GUN_HOMING:
             fire_ordn_multi(state, AZ_PROJ_MISSILE_HOMING, true, 3,
