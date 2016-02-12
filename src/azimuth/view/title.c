@@ -1003,14 +1003,12 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
   if (state->mode == AZ_TMODE_MUSIC) {
     if (az_button_on_click(&state->prev_track_button, x - MUSIC_BOX_LEFT,
                            y - MUSIC_BOX_TOP, &state->soundboard)) {
-      state->current_track = az_modulo((int)state->current_track - 2,
-                                       AZ_NUM_MUSIC_KEYS) + 1;
+      state->current_track = az_advance_music_key(state->current_track, -1);
       az_change_music(&state->soundboard, state->current_track);
     }
     if (az_button_on_click(&state->next_track_button, x - MUSIC_BOX_LEFT,
                            y - MUSIC_BOX_TOP, &state->soundboard)) {
-      state->current_track = az_modulo((int)state->current_track,
-                                       AZ_NUM_MUSIC_KEYS) + 1;
+      state->current_track = az_advance_music_key(state->current_track, 1);
       az_change_music(&state->soundboard, state->current_track);
     }
   }

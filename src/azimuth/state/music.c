@@ -26,6 +26,7 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/music.h"
 #include "azimuth/util/string.h"
+#include "azimuth/util/vector.h"
 #include "azimuth/util/warning.h"
 
 /*===========================================================================*/
@@ -129,6 +130,33 @@ void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out) {
 
 /*===========================================================================*/
 
+static az_music_key_t ordered_music_keys[] = {
+  AZ_MUS_TITLE,
+  AZ_MUS_MISSION,
+  AZ_MUS_COLONY_1,
+  AZ_MUS_COLONY_2,
+  AZ_MUS_FILIMUN_ZONE,
+  AZ_MUS_NANDIAR_ZONE,
+  AZ_MUS_BARRAG_ZONE,
+  AZ_MUS_CNIDAM_ZONE,
+  AZ_MUS_VOQUAN_ZONE,
+  AZ_MUS_SARVARI_ZONE,
+  AZ_MUS_CORE_ZONE,
+  AZ_MUS_SUSPENSE,
+  AZ_MUS_BOSS_1,
+  AZ_MUS_BOSS_2,
+  AZ_MUS_BOSS_3,
+  AZ_MUS_REVELATION,
+  AZ_MUS_ZENITH_CORE,
+  AZ_MUS_REQUIEM,
+  AZ_MUS_ESCAPE,
+  AZ_MUS_CREDITS,
+  AZ_MUS_RESPITE,
+  AZ_MUS_UPGRADE
+};
+static int inverse_music_keys[AZ_ARRAY_SIZE(ordered_music_keys)];
+AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(ordered_music_keys) == AZ_NUM_MUSIC_KEYS);
+
 static const char *music_filenames[] = {
   [AZ_MUS_COLONY_1] = "music01.txt",
   [AZ_MUS_FILIMUN_ZONE] = "music02.txt",
@@ -153,7 +181,6 @@ static const char *music_filenames[] = {
   [AZ_MUS_REQUIEM] = "music21.txt",
   [AZ_MUS_CREDITS] = "music22.txt",
 };
-
 AZ_STATIC_ASSERT(AZ_ARRAY_SIZE(music_filenames) == AZ_NUM_MUSIC_KEYS + 1);
 
 static az_music_t music_datas[AZ_ARRAY_SIZE(music_filenames)];
@@ -167,6 +194,10 @@ static void destroy_music_datas(void) {
 bool az_init_music_datas(const char *resource_dir) {
   assert(!music_data_initialized);
   assert(resource_dir != NULL);
+  // Initialize inverse music keys:
+  for (int i = 0; i < AZ_NUM_MUSIC_KEYS; ++i) {
+    inverse_music_keys[ordered_music_keys[i] - 1] = i;
+  }
   // Initialize drum kit:
   int num_drums = 0;
   const az_sound_data_t *drums = NULL;
@@ -199,6 +230,14 @@ static const az_music_t *music_data_for_key(az_music_key_t music_key) {
 
 const char *az_get_music_title(az_music_key_t music_key) {
   return music_data_for_key(music_key)->title;
+}
+
+az_music_key_t az_advance_music_key(az_music_key_t music_key, int delta) {
+  assert(music_data_initialized);
+  const int key_index = (int)music_key - 1;
+  assert(0 <= key_index && key_index < AZ_NUM_MUSIC_KEYS);
+  const int old = inverse_music_keys[key_index];
+  return ordered_music_keys[az_modulo(old + delta, AZ_NUM_MUSIC_KEYS)];
 }
 
 /*===========================================================================*/

@@ -64,6 +64,10 @@ bool az_init_music_datas(const char *resource_dir);
 // Returns the title of the music, or NULL if it has no title.
 const char *az_get_music_title(az_music_key_t music_key);
 
+// Get the delta-th next music key in the Music Test jukebox ordering.  The
+// music_key argument must not be AZ_MUS_NOTHING.
+az_music_key_t az_advance_music_key(az_music_key_t music_key, int delta);
+
 // Indicate that we would like to change which music is playing.
 void az_change_music(az_soundboard_t *soundboard, az_music_key_t music_key);
 
