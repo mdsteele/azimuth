@@ -36,7 +36,7 @@ CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
          -Wsign-compare -Wstrict-prototypes -Wundef -Wno-unused-local-typedef
 
 ifeq "$(BUILDTYPE)" "debug"
-  CFLAGS += -O1 -g
+  CFLAGS += -O1 -g -fsanitize=address
 else ifeq "$(BUILDTYPE)" "release"
   # For release builds, disable asserts, but don't warn about e.g. static
   # functions or local variables that are only used for asserts, and which
