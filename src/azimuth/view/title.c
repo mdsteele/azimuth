@@ -704,10 +704,10 @@ void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
   az_init_button(&state->prefs_button, bottom_button_polygon,
                  bottom_buttons_left, bottom_buttons_top);
   az_init_button(&state->records_button, bottom_button_polygon,
-                 bottom_buttons_left + BUTTON_WIDTH + BUTTON_SPACING,
+                 bottom_buttons_left + 2 * (BUTTON_WIDTH + BUTTON_SPACING),
                  bottom_buttons_top);
   az_init_button(&state->about_button, bottom_button_polygon,
-                 bottom_buttons_left + 2 * (BUTTON_WIDTH + BUTTON_SPACING),
+                 bottom_buttons_left + BUTTON_WIDTH + BUTTON_SPACING,
                  bottom_buttons_top);
   az_init_button(&state->music_button, bottom_button_polygon,
                  bottom_buttons_left + 3 * (BUTTON_WIDTH + BUTTON_SPACING),
