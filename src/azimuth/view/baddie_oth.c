@@ -263,19 +263,20 @@ static void draw_oth(
   draw_oth_with_alpha(baddie, frozen, 1.0f, clock, vertices, num_vertices);
 }
 
-static void next_tendril_color(int *color_index, float alpha,
-                               az_clock_t clock) {
+static void next_tendril_color(int *color_index, float flare, float frozen,
+                               float alpha, az_clock_t clock) {
   const az_clock_t clk = clock + 2 * (*color_index++ % 3);
   const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 0.75f : 0.25f);
   const GLfloat g = (az_clock_mod(6, 2, clk + 2) < 3 ? 0.75f : 0.25f);
   const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 0.75f : 0.25f);
-  glColor4f(r, g, b, 0.5f * alpha);
+  glColor4f(r + flare * (1.0f - r), (1.0f - 0.5f * flare) * g,
+            (1.0f - flare) * b + frozen * (1.0f - b), alpha);
 }
 
 static void draw_oth_tendril_internal(
     az_vector_t base, az_vector_t ctrl1, az_vector_t ctrl2, az_vector_t tip,
-    double max_semithick, double min_semithick, float alpha,
-    az_clock_t clock) {
+    double max_semithick, double min_semithick, float flare, float frozen,
+    float alpha, az_clock_t clock) {
   glBegin(GL_TRIANGLE_STRIP); {
     int color_index = 0;
     for (double t = 0.0; t <= 1.0; t += 0.0625) {
@@ -285,9 +286,9 @@ static void draw_oth_tendril_internal(
       const az_vector_t perp =
         az_vpolar(max_semithick - (max_semithick - min_semithick) * t,
                   angle + AZ_HALF_PI);
-      next_tendril_color(&color_index, alpha, clock);
+      next_tendril_color(&color_index, flare, frozen, alpha, clock);
       az_gl_vertex(az_vadd(point, perp));
-      next_tendril_color(&color_index, alpha, clock);
+      next_tendril_color(&color_index, flare, frozen, alpha, clock);
       az_gl_vertex(az_vsub(point, perp));
     }
   } glEnd();
@@ -296,8 +297,8 @@ static void draw_oth_tendril_internal(
 void az_draw_oth_tendril(az_vector_t base, az_vector_t ctrl1,
                          az_vector_t ctrl2, az_vector_t tip, double semithick,
                          float alpha, az_clock_t clock) {
-  draw_oth_tendril_internal(base, ctrl1, ctrl2, tip, semithick, 0.0, alpha,
-                            clock);
+  draw_oth_tendril_internal(base, ctrl1, ctrl2, tip, semithick, 0.0,
+                            0.0f, 0.0f, 0.5f * alpha, clock);
 }
 
 static void draw_tendrils_with_alpha(const az_baddie_t *baddie,
@@ -599,34 +600,6 @@ void az_draw_bad_reflection(const az_baddie_t *baddie, az_clock_t clock) {
   }
 }
 
-static void draw_tentacle_segment(
-    int idx, az_vector_t position, double angle, double radius, float flare,
-    float frozen, az_clock_t clock) {
-  glPushMatrix(); {
-    az_gl_translated(position);
-    az_gl_rotated(angle);
-    const int num_triangles = (idx < 0 ? 1 : 3);
-    for (int i = 0; i < num_triangles; ++i) {
-      glPushMatrix(); {
-        if (idx >= 0) glTranslatef(16 - 12 * i, 0, 0);
-        glRotatef(3 * az_clock_mod(360, 1, clock) + (3 * idx + i) * 5,
-                  0, 0, 1);
-        glBegin(GL_TRIANGLES); {
-          for (int j = 0; j < 3; ++j) {
-            const az_clock_t clk = clock + 2 * j;
-            const GLfloat r = (az_clock_mod(6, 2, clk)     < 3 ? 1.0f : 0.25f);
-            const GLfloat g = (az_clock_mod(6, 2, clk + 2) < 3 ? 1.0f : 0.25f);
-            const GLfloat b = (az_clock_mod(6, 2, clk + 4) < 3 ? 1.0f : 0.25f);
-            glColor3f(r + flare * (1.0f - r), (1.0f - 0.5f * flare) * g,
-                      (1.0f - flare) * b + frozen * (1.0f - b));
-            az_gl_vertex(az_vpolar(radius, j * AZ_DEG2RAD(120)));
-          }
-        } glEnd();
-      } glPopMatrix();
-    }
-  } glPopMatrix();
-}
-
 void az_draw_bad_oth_tentacle(
     const az_baddie_t *baddie, float frozen, az_clock_t clock) {
   assert(baddie->kind == AZ_BAD_OTH_TENTACLE);
@@ -642,17 +615,10 @@ void az_draw_bad_oth_tentacle(
     az_vsub(head_pos, az_vpolar(90 * progress, head_angle));
   const az_vector_t ctrl1 =
     az_vadd(base_pos, az_vpolar(150 * progress, base_angle));
-  draw_oth_tendril_internal(base_pos, ctrl1, ctrl2, head_pos, 10.0, 3.0,
-                            1.0f, clock);
-
   const double hurt_ratio = 1.0 - baddie->health / baddie->data->max_health;
   const GLfloat flare = fmax(baddie->armor_flare, 0.5 * hurt_ratio);
-  for (int i = baddie->data->num_components - 1; i >= 0; --i) {
-    const az_component_t *component = &baddie->components[i];
-    draw_tentacle_segment(i, component->position, component->angle,
-                          8.5 + 0.5 * i, flare, frozen, clock);
-  }
-  draw_tentacle_segment(-1, AZ_VZERO, 0.0, 6.5, flare, frozen, clock);
+  draw_oth_tendril_internal(base_pos, ctrl1, ctrl2, head_pos, 10.0, 1.0, flare,
+                            frozen, 0.9f, clock);
 }
 
 /*===========================================================================*/
