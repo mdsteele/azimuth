@@ -763,10 +763,10 @@ void az_tick_bad_zenith_core(az_space_state_t *state, az_baddie_t *baddie,
 
   switch (primary) {
     case INITIAL_STATE:
-      baddie->temp_properties |= AZ_BADF_INVINCIBLE;
+      baddie->temp_properties |= AZ_BADF_INVINCIBLE | AZ_BADF_NO_HOMING;
       break;
     case DORMANT_STATE:
-      baddie->temp_properties |= AZ_BADF_INVINCIBLE;
+      baddie->temp_properties |= AZ_BADF_INVINCIBLE | AZ_BADF_NO_HOMING;
       if (get_secondary_state(baddie) == 0) {
         set_secondary_state(baddie, 1);
         baddie->cooldown = 10.0;

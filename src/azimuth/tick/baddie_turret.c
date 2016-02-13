@@ -298,6 +298,9 @@ void az_tick_bad_pop_open_turret(
   const double barrel_turn_rate = AZ_DEG2RAD(40);
   const bool open_shell =
     (baddie->state > 0 && az_ship_in_range(state, baddie, 500));
+  if (baddie->state <= 0) {
+    baddie->temp_properties |= AZ_BADF_NO_HOMING;
+  }
   // Aim barrel:
   if (open_shell) {
     aim_towards_ship(state, baddie, time, max_angle, barrel_turn_rate);
