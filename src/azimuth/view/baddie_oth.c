@@ -619,6 +619,18 @@ void az_draw_bad_oth_tentacle(
   const GLfloat flare = fmax(baddie->armor_flare, 0.5 * hurt_ratio);
   draw_oth_tendril_internal(base_pos, ctrl1, ctrl2, head_pos, 10.0, 1.0, flare,
                             frozen, 0.9f, clock);
+
+  glPushMatrix(); {
+    az_gl_translated(base_pos);
+    az_gl_rotated(base_angle);
+    glBegin(GL_TRIANGLE_FAN); {
+      const GLfloat r = (az_clock_mod(6, 2, clock)     < 3 ? 0.75f : 0.25f);
+      const GLfloat g = (az_clock_mod(6, 2, clock + 2) < 3 ? 0.75f : 0.25f);
+      const GLfloat b = (az_clock_mod(6, 2, clock + 4) < 3 ? 0.75f : 0.25f);
+      glColor3f(r, g, b); glVertex2f(-5, 0);
+      glVertex2f(-10, 10); glVertex2f(10, 0); glVertex2f(-10, -10);
+    } glEnd();
+  } glPopMatrix();
 }
 
 /*===========================================================================*/

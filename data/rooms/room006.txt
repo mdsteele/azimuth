@@ -1,6 +1,6 @@
-@R z0 p0 k22 b0 d3 g5 n26 w50
+@R z0 p0 k22 b5 d3 g5 n26 w50
   c(49278.36,568.86,1.570993,0.000000)
-$s:test23,beqz/A,msg14,activ1,activ2,gpos7,vnorm,rcam,halt,A#test19,beqz/B,msg14,halt,B#mus1,activ1,activ2,activ4,gpos9,spos,gang9,sang,push800,gang,vpolar,svel,gpos3,vnorm,rcam,autop1,thrust1;
+$s:test23,beqz/A,msg14,activ1,activ2,gpos7,vnorm,rcam,halt,A#nix10,nix11,nix12,nix13,nix14,test19,beqz/B,msg14,halt,B#mus1,activ1,activ2,activ4,gpos9,spos,gang9,sang,push800,gang,vpolar,svel,gpos3,vnorm,rcam,autop1,thrust1;
 !W1 d11 x-343.45 y49628.18 a0.008009 u0
 !W1 d5 x-282.00 y49832.02 a-1.569412 u0
 !W1 d13 x-321.93 y49735.36 a1.051880 u0
@@ -91,3 +91,8 @@ $e:test23,hnez,test19,hnez,set19,msg14,close1,thrust0,gang4,turn,wait0.25,close2
 !N8/0 x-10.34 y52567.61 a-1.570600 u7
 !N8/0 x-10.00 y50818.79 a-1.570600 u3
 !N8/0 x-10.07 y51159.79 a-1.570600 u9
+!B114 x-411.50 y49952.27 a1.577913 u10
+!B114 x396.59 y50000.63 a1.578741 u11
+!B114 x491.33 y49689.94 a2.190853 u12
+!B114 x-378.29 y49467.47 a0.683419 u13
+!B114 x357.77 y49154.24 a2.348771 u14

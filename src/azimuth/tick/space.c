@@ -667,6 +667,7 @@ static void tick_nuke(az_space_state_t *state, double time) {
   AZ_ARRAY_LOOP(baddie, state->baddies) {
     if (baddie->kind == AZ_BAD_NOTHING) continue;
     if (az_baddie_has_flag(baddie, AZ_BADF_INCORPOREAL)) continue;
+    if (baddie->kind == AZ_BAD_OTH_TENTACLE) continue;
     if (az_vwithin(baddie->position, AZ_VZERO, state->nuke.rho)) {
       az_kill_baddie(state, baddie);
     }
@@ -682,7 +683,7 @@ static void tick_nuke(az_space_state_t *state, double time) {
   const double step = 0.1 * theta_span;
   for (double theta = center_theta - theta_span;
        theta < center_theta + theta_span; theta += step) {
-    if (az_random(0, 1) < 1.0 - pow(0.5, 3.0 * time)) {
+    if (az_random(0, 1) < 0.5 * (1.0 - pow(0.5, 3.0 * time))) {
       az_add_projectile(state, AZ_PROJ_PLANETARY_EXPLOSION,
                         az_vpolar(state->nuke.rho,
                                   theta + step * az_random(-0.5, 0.5)),
