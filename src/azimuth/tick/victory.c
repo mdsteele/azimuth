@@ -427,6 +427,16 @@ static bool next_step_at(az_victory_state_t *state, double mark) {
   } else return false;
 }
 
+static void core_bolt(az_victory_state_t *state, double mark,
+                      double time, double theta) {
+  if (timer_at(state, mark, time)) {
+    az_victory_add_particle(
+        state, AZ_PAR_LIGHTNING_BOLT, (az_color_t){128, 64, 255, 255},
+        az_vpolar(80, theta), AZ_VZERO, theta, 2.0, 600, 0.5);
+    az_play_sound(&state->soundboard, AZ_SND_ELECTRICITY);
+  }
+}
+
 void az_tick_victory_state(az_victory_state_t *state, double time) {
   ++state->clock;
   state->total_timer += time;
@@ -739,6 +749,9 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
     } break;
     case AZ_VS_CORE: {
       if (timer_at(state, 1.0, time)) boss->state = 1;
+      core_bolt(state, 2.0, time, AZ_DEG2RAD(20));
+      core_bolt(state, 3.0, time, AZ_DEG2RAD(165));
+      core_bolt(state, 3.5, time, AZ_DEG2RAD(220));
       if (timer_at(state, 5.0, time)) boss->state = 0;
       if (next_step_at(state, 6.0)) {
         az_init_baddie(boss, AZ_BAD_ZENITH_CORE, AZ_VZERO, AZ_DEG2RAD(180));
