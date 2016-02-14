@@ -48,6 +48,7 @@ typedef struct {
     AZ_TMODE_NORMAL,
     AZ_TMODE_PREFS,
     AZ_TMODE_RECORDS,
+    AZ_TMODE_CLEAR_RECORDS,
     AZ_TMODE_ABOUT,
     AZ_TMODE_MUSIC,
     AZ_TMODE_ERASING,
@@ -59,6 +60,7 @@ typedef struct {
   union {
     struct { int step; double progress; } intro;
     struct { az_clock_t start; } ready;
+    struct { bool do_clear; } clear_records;
     struct { int slot_index; bool do_erase; } erasing;
     struct { int dest_index; int src_index; } copying;
     struct { double progress; int slot_index; } starting;
@@ -68,6 +70,7 @@ typedef struct {
   az_button_t prefs_button, about_button, quit_button;
   az_button_t records_button, music_button;
   az_prefs_pane_t prefs_pane;
+  az_button_t clear_records_button, confirm_clear_button, cancel_clear_button;
   az_button_t prev_track_button, next_track_button;
   az_music_key_t current_track;
   bool show_planet_debris;

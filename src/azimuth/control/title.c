@@ -45,6 +45,11 @@ static void copy_saved_game(az_saved_games_t *saved_games, int src_index,
   az_save_saved_games(saved_games);
 }
 
+static void clear_records(az_saved_games_t *saved_games) {
+  az_clear_completion_records(saved_games);
+  az_save_saved_games(saved_games);
+}
+
 az_title_action_t az_title_event_loop(
     const az_planet_t *planet, az_saved_games_t *saved_games,
     az_preferences_t *prefs, az_title_intro_t title_intro) {
@@ -124,6 +129,12 @@ az_title_action_t az_title_event_loop(
         state.mode_data.copying.src_index >= 0) {
       copy_saved_game(saved_games, state.mode_data.copying.src_index,
                       state.mode_data.copying.dest_index);
+      state.mode = AZ_TMODE_NORMAL;
+    }
+    // Check if we need to clear records.
+    if (state.mode == AZ_TMODE_CLEAR_RECORDS &&
+        state.mode_data.clear_records.do_clear) {
+      clear_records(saved_games);
       state.mode = AZ_TMODE_NORMAL;
     }
 

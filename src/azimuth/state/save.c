@@ -38,6 +38,12 @@ void az_reset_saved_games(az_saved_games_t *games) {
   games->highest_percentage = games->lowest_percentage = -1;
 }
 
+void az_clear_completion_records(az_saved_games_t *games) {
+  games->highest_percentage = games->lowest_percentage = -1;
+  games->best_any_percent_time = games->best_100_percent_time =
+    games->best_low_percent_time = 0.0;
+}
+
 bool az_has_beaten_game(const az_saved_games_t *games) {
   return games->highest_percentage >= 0;
 }

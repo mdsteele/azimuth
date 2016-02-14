@@ -286,6 +286,64 @@ static void draw_background(const az_title_state_t *state) {
   }
 }
 
+static void draw_confirm_button(const az_button_t *button) {
+  if (button->hovering) glColor3f(1, button->hover_pulse, 0);
+  else glColor3f(0.3, 0, 0);
+  az_draw_string(8, AZ_ALIGN_CENTER, button->x, button->y - 4, "ERASE");
+}
+
+static void draw_cancel_button(const az_button_t *button) {
+  if (button->hovering) glColor3f(button->hover_pulse, 1, 0);
+  else glColor3f(0, 0.3, 0);
+  az_draw_string(8, AZ_ALIGN_CENTER, button->x, button->y - 4, "CANCEL");
+}
+
+/*===========================================================================*/
+
+#define BUTTON_WIDTH 80
+#define BUTTON_HEIGHT 20
+#define BUTTON_SPACING 14
+
+static const az_vector_t bottom_button_vertices[] = {
+  {BUTTON_WIDTH - 5.5, 0.5}, {BUTTON_WIDTH - 0.5, 0.5 * BUTTON_HEIGHT},
+  {BUTTON_WIDTH - 5.5, BUTTON_HEIGHT - 0.5},
+  {5.5, BUTTON_HEIGHT - 0.5}, {0.5, 0.5 * BUTTON_HEIGHT}, {5.5, 0.5}
+};
+static const az_polygon_t bottom_button_polygon =
+  AZ_INIT_POLYGON(bottom_button_vertices);
+
+static bool prefs_about_buttons_active(const az_title_state_t *state) {
+  return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
+          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
+          state->mode == AZ_TMODE_MUSIC);
+}
+
+static bool records_button_visible(const az_title_state_t *state) {
+  return az_has_beaten_game(state->saved_games);
+}
+
+static bool music_button_visible(const az_title_state_t *state) {
+  return (az_has_beaten_100_percent(state->saved_games) ||
+          az_has_beaten_low_percent(state->saved_games));
+}
+
+static bool quit_button_active(const az_title_state_t *state) {
+  return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
+          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
+          state->mode == AZ_TMODE_MUSIC || state->mode == AZ_TMODE_PICK_KEY ||
+          state->mode == AZ_TMODE_ERASING ||
+          state->mode == AZ_TMODE_CLEAR_RECORDS);
+}
+
+static void draw_bottom_button(const az_button_t *button, bool active,
+                               const char *label) {
+  az_draw_standard_button(button);
+  if (active) glColor3f(1, 1, 1); // white
+  else glColor3f(0.25, 0.25, 0.25); // dark gray
+  az_draw_string(8, AZ_ALIGN_CENTER, button->x + BUTTON_WIDTH/2,
+                 button->y + BUTTON_HEIGHT/2 - 4, label);
+}
+
 /*===========================================================================*/
 
 #define PREFS_BOX_LEFT ((AZ_SCREEN_WIDTH - AZ_PREFS_BOX_WIDTH) / 2)
@@ -311,9 +369,10 @@ static void draw_prefs_box(const az_title_state_t *state) {
 
 /*===========================================================================*/
 
-#define RECORDS_BOX_TOP 256
+#define RECORDS_BOX_TOP 230
 #define RECORDS_BOX_WIDTH 544
-#define RECORDS_BOX_HEIGHT 140
+#define RECORDS_BOX_HEIGHT 165
+#define RECORDS_BOX_LEFT ((AZ_SCREEN_WIDTH - RECORDS_BOX_WIDTH) / 2)
 
 static const az_vector_t records_box_vertices[] = {
   {0.5, 0.5}, {RECORDS_BOX_WIDTH - 0.5, 0.5},
@@ -323,36 +382,78 @@ static const az_vector_t records_box_vertices[] = {
 static const az_polygon_t records_box_polygon =
   AZ_INIT_POLYGON(records_box_vertices);
 
-static void draw_records_box(const az_saved_games_t *saved_games) {
+#define CLEAR_RECORDS_BUTTON_TOP 130
+#define CLEAR_RECORDS_BUTTON_WIDTH 128
+#define CLEAR_RECORDS_BUTTON_HEIGHT 16
+#define CLEAR_RECORDS_BUTTON_LEFT \
+  ((RECORDS_BOX_WIDTH - CLEAR_RECORDS_BUTTON_WIDTH) / 2)
+
+static const az_vector_t clear_records_button_vertices[] = {
+  {CLEAR_RECORDS_BUTTON_WIDTH - 4.5, 0.5},
+  {CLEAR_RECORDS_BUTTON_WIDTH - 0.5, 0.5 * CLEAR_RECORDS_BUTTON_HEIGHT},
+  {CLEAR_RECORDS_BUTTON_WIDTH - 4.5, CLEAR_RECORDS_BUTTON_HEIGHT - 0.5},
+  {4.5, CLEAR_RECORDS_BUTTON_HEIGHT - 0.5},
+  {0.5, 0.5 * CLEAR_RECORDS_BUTTON_HEIGHT}, {4.5, 0.5}
+};
+static const az_polygon_t clear_records_button_polygon =
+  AZ_INIT_POLYGON(clear_records_button_vertices);
+
+#define CONFIRM_CANCEL_CLEAR_SPACING 60
+#define CONFIRM_CANCEL_CLEAR_TOP 90
+
+static void draw_records_box(const az_title_state_t *state) {
+  const az_saved_games_t *saved_games = state->saved_games;
   glPushMatrix(); {
-    glTranslated(0.5 * (AZ_SCREEN_WIDTH - RECORDS_BOX_WIDTH),
-                 RECORDS_BOX_TOP, 0);
+    glTranslated(RECORDS_BOX_LEFT, RECORDS_BOX_TOP, 0);
     glColor4f(0, 0, 0, 0.7); // black tint
     do_polygon(GL_POLYGON, records_box_polygon);
     glColor3f(0.75, 0.75, 0.75); // light gray
     do_polygon(GL_LINE_LOOP, records_box_polygon);
 
-    glColor3f(1, 1, 1); // white
-    const int seconds_anyp = floor(saved_games->best_any_percent_time);
-    az_draw_printf(16, AZ_ALIGN_CENTER, RECORDS_BOX_WIDTH/2, 32,
-                   "Best game time: %d:%02d:%02d", seconds_anyp / 3600,
-                   (seconds_anyp / 60) % 60, seconds_anyp % 60);
-    az_draw_printf(8, AZ_ALIGN_LEFT, 32, 76, "Highest percentage: %d%%",
-                   saved_games->highest_percentage);
-    if (saved_games->highest_percentage >= 100) {
-      const int seconds_100p = floor(saved_games->best_100_percent_time);
-      az_draw_printf(8, AZ_ALIGN_LEFT, 24, 96,
-                     "Best 100%% game time: %d:%02d:%02d", seconds_100p / 3600,
-                     (seconds_100p / 60) % 60, seconds_100p % 60);
+    if (state->mode == AZ_TMODE_CLEAR_RECORDS) {
+      glColor3f(1, 1, 1); // white
+      az_draw_string(8, AZ_ALIGN_CENTER, RECORDS_BOX_WIDTH/2, 32,
+                     "Are you sure you want to clear all completion records?");
+      if (music_button_visible(state)) {
+        az_draw_string(8, AZ_ALIGN_CENTER, RECORDS_BOX_WIDTH/2, 50,
+                       "(You will also lose the \"Music\" button below.)");
+      }
+      draw_confirm_button(&state->confirm_clear_button);
+      draw_cancel_button(&state->cancel_clear_button);
+    } else {
+      glColor3f(1, 1, 1); // white
+      const int seconds_anyp = floor(saved_games->best_any_percent_time);
+      az_draw_printf(16, AZ_ALIGN_CENTER, RECORDS_BOX_WIDTH/2, 32,
+                     "Best game time: %d:%02d:%02d", seconds_anyp / 3600,
+                     (seconds_anyp / 60) % 60, seconds_anyp % 60);
+      az_draw_printf(8, AZ_ALIGN_LEFT, 32, 76, "Highest percentage: %d%%",
+                     saved_games->highest_percentage);
+      if (saved_games->highest_percentage >= 100) {
+        const int seconds_100p = floor(saved_games->best_100_percent_time);
+        az_draw_printf(8, AZ_ALIGN_LEFT, 24, 96,
+                       "Best 100%% game time: %d:%02d:%02d",
+                       seconds_100p / 3600, (seconds_100p / 60) % 60,
+                       seconds_100p % 60);
+      }
+      az_draw_printf(8, AZ_ALIGN_LEFT, 296, 76, "Lowest percentage: %d%%",
+                     saved_games->lowest_percentage);
+      if (saved_games->lowest_percentage <= 15) {
+        const int seconds_lowp = floor(saved_games->best_low_percent_time);
+        az_draw_printf(8, AZ_ALIGN_LEFT, 288, 96,
+                       "Best 15%% game time: %d:%02d:%02d",
+                       seconds_lowp / 3600, (seconds_lowp / 60) % 60,
+                       seconds_lowp % 60);
+      }
     }
-    az_draw_printf(8, AZ_ALIGN_LEFT, 296, 76, "Lowest percentage: %d%%",
-                   saved_games->lowest_percentage);
-    if (saved_games->lowest_percentage <= 15) {
-      const int seconds_lowp = floor(saved_games->best_low_percent_time);
-      az_draw_printf(8, AZ_ALIGN_LEFT, 288, 96,
-                     "Best 15%% game time: %d:%02d:%02d", seconds_lowp / 3600,
-                     (seconds_lowp / 60) % 60, seconds_lowp % 60);
-    }
+
+    az_draw_dangerous_button(&state->clear_records_button);
+    if (state->mode == AZ_TMODE_RECORDS) glColor3f(0.75, 0, 0);
+    else glColor3f(0.25, 0.25, 0.25);
+    az_draw_string(8, AZ_ALIGN_CENTER,
+                   state->clear_records_button.x +
+                   CLEAR_RECORDS_BUTTON_WIDTH/2,
+                   state->clear_records_button.y +
+                   CLEAR_RECORDS_BUTTON_HEIGHT/2 - 4, "Clear Records");
   } glPopMatrix();
 }
 
@@ -556,11 +657,7 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
       glColor3f(1, 1, 1); // white
       az_draw_string(8, AZ_ALIGN_CENTER, SAVE_SLOT_WIDTH/2,
                      SAVE_SLOT_HEIGHT/2 - 4, "Copy from where?");
-      if (slot->cancel.hovering) {
-        glColor3f(slot->cancel.hover_pulse, 1, 0);
-      } else glColor3f(0, 0.3, 0);
-      az_draw_string(8, AZ_ALIGN_CENTER, slot->cancel.x, slot->cancel.y - 4,
-                     "CANCEL");
+      draw_cancel_button(&slot->cancel);
     }
     // If the save slot is empty, mark it as a new game.
     else if (!saved_game->present) {
@@ -574,16 +671,8 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
       glColor3f(1, 1, 1); // white
       az_draw_string(8, AZ_ALIGN_CENTER, SAVE_SLOT_WIDTH/2,
                      SAVE_SLOT_HEIGHT/2 - 4, "Are you sure?");
-      if (slot->confirm.hovering) {
-        glColor3f(1, slot->confirm.hover_pulse, 0);
-      } else glColor3f(0.3, 0, 0);
-      az_draw_string(8, AZ_ALIGN_CENTER, slot->confirm.x, slot->confirm.y - 4,
-                     "ERASE");
-      if (slot->cancel.hovering) {
-        glColor3f(slot->cancel.hover_pulse, 1, 0);
-      } else glColor3f(0, 0.3, 0);
-      az_draw_string(8, AZ_ALIGN_CENTER, slot->cancel.x, slot->cancel.y - 4,
-                     "CANCEL");
+      draw_confirm_button(&slot->confirm);
+      draw_cancel_button(&slot->cancel);
     }
     // Otherwise, draw save file info:
     else {
@@ -623,53 +712,6 @@ static void draw_save_slot(const az_title_state_t *state, int index) {
       }
     }
   } glPopMatrix();
-}
-
-/*===========================================================================*/
-
-#define BUTTON_WIDTH 80
-#define BUTTON_HEIGHT 20
-#define BUTTON_SPACING 14
-
-static const az_vector_t bottom_button_vertices[] = {
-  {BUTTON_WIDTH - 5.5, 0.5}, {BUTTON_WIDTH - 0.5, 0.5 * BUTTON_HEIGHT},
-  {BUTTON_WIDTH - 5.5, BUTTON_HEIGHT - 0.5},
-  {5.5, BUTTON_HEIGHT - 0.5}, {0.5, 0.5 * BUTTON_HEIGHT}, {5.5, 0.5}
-};
-static const az_polygon_t bottom_button_polygon =
-  AZ_INIT_POLYGON(bottom_button_vertices);
-
-/*===========================================================================*/
-
-static bool prefs_about_buttons_active(const az_title_state_t *state) {
-  return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
-          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
-          state->mode == AZ_TMODE_MUSIC);
-}
-
-static bool records_button_visible(const az_title_state_t *state) {
-  return az_has_beaten_game(state->saved_games);
-}
-
-static bool music_button_visible(const az_title_state_t *state) {
-  return (az_has_beaten_100_percent(state->saved_games) ||
-          az_has_beaten_low_percent(state->saved_games));
-}
-
-static bool quit_button_active(const az_title_state_t *state) {
-  return (state->mode == AZ_TMODE_NORMAL || state->mode == AZ_TMODE_PREFS ||
-          state->mode == AZ_TMODE_RECORDS || state->mode == AZ_TMODE_ABOUT ||
-          state->mode == AZ_TMODE_MUSIC || state->mode == AZ_TMODE_PICK_KEY ||
-          state->mode == AZ_TMODE_ERASING);
-}
-
-static void draw_bottom_button(const az_button_t *button, bool active,
-                               const char *label) {
-  az_draw_standard_button(button);
-  if (active) glColor3f(1, 1, 1); // white
-  else glColor3f(0.25, 0.25, 0.25); // dark gray
-  az_draw_string(8, AZ_ALIGN_CENTER, button->x + BUTTON_WIDTH/2,
-                 button->y + BUTTON_HEIGHT/2 - 4, label);
 }
 
 /*===========================================================================*/
@@ -719,6 +761,18 @@ void az_init_title_state(az_title_state_t *state, const az_planet_t *planet,
   az_init_prefs_pane(&state->prefs_pane, PREFS_BOX_LEFT, PREFS_BOX_TOP,
                      prefs);
 
+  az_init_button(&state->clear_records_button, clear_records_button_polygon,
+                 (RECORDS_BOX_WIDTH - CLEAR_RECORDS_BUTTON_WIDTH) / 2,
+                 CLEAR_RECORDS_BUTTON_TOP);
+  az_init_button(&state->confirm_clear_button,
+                 save_slot_confirm_cancel_polygon,
+                 RECORDS_BOX_WIDTH/2 - CONFIRM_CANCEL_CLEAR_SPACING,
+                 CONFIRM_CANCEL_CLEAR_TOP);
+  az_init_button(&state->cancel_clear_button,
+                 save_slot_confirm_cancel_polygon,
+                 RECORDS_BOX_WIDTH/2 + CONFIRM_CANCEL_CLEAR_SPACING,
+                 CONFIRM_CANCEL_CLEAR_TOP);
+
   az_init_button(&state->prev_track_button, prev_track_button_polygon,
                  (MUSIC_BOX_WIDTH - TRACK_NAME_WIDTH) / 2 -
                  TRACK_BUTTON_MARGIN - TRACK_BUTTON_WIDTH, TRACK_BUTTON_TOP);
@@ -756,8 +810,9 @@ void az_title_draw_screen(const az_title_state_t *state) {
   // Draw save slots:
   if (state->mode == AZ_TMODE_PREFS || state->mode == AZ_TMODE_PICK_KEY) {
     draw_prefs_box(state);
-  } else if (state->mode == AZ_TMODE_RECORDS) {
-    draw_records_box(state->saved_games);
+  } else if (state->mode == AZ_TMODE_RECORDS ||
+             state->mode == AZ_TMODE_CLEAR_RECORDS) {
+    draw_records_box(state);
   } else if (state->mode == AZ_TMODE_ABOUT) {
     draw_about_box();
   } else if (state->mode == AZ_TMODE_MUSIC) {
@@ -775,7 +830,9 @@ void az_title_draw_screen(const az_title_state_t *state) {
                       state->mode == AZ_TMODE_PICK_KEY ? "Done" : "Options"));
   if (records_button_visible(state)) {
     draw_bottom_button(&state->records_button, prefs_and_about_active,
-                       (state->mode == AZ_TMODE_RECORDS ? "Done" : "Records"));
+                       (state->mode == AZ_TMODE_RECORDS ||
+                        state->mode == AZ_TMODE_CLEAR_RECORDS ?
+                        "Done" : "Records"));
   }
   draw_bottom_button(&state->about_button, prefs_and_about_active,
                      (state->mode == AZ_TMODE_ABOUT ? "Done" : "About"));
@@ -874,6 +931,15 @@ void az_tick_title_state(az_title_state_t *state, double time) {
                    time, state->clock, &state->soundboard);
   }
   az_tick_button(&state->about_button, 0, 0, prefs_and_about_active,
+                 time, state->clock, &state->soundboard);
+  az_tick_button(&state->clear_records_button, RECORDS_BOX_LEFT,
+                 RECORDS_BOX_TOP, state->mode == AZ_TMODE_RECORDS,
+                 time, state->clock, &state->soundboard);
+  az_tick_button(&state->confirm_clear_button, RECORDS_BOX_LEFT,
+                 RECORDS_BOX_TOP, state->mode == AZ_TMODE_CLEAR_RECORDS,
+                 time, state->clock, &state->soundboard);
+  az_tick_button(&state->cancel_clear_button, RECORDS_BOX_LEFT,
+                 RECORDS_BOX_TOP, state->mode == AZ_TMODE_CLEAR_RECORDS,
                  time, state->clock, &state->soundboard);
   if (music_button_visible(state)) {
     az_tick_button(&state->music_button, 0, 0, prefs_and_about_active,
@@ -986,8 +1052,9 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
     }
     if (records_button_visible(state) &&
         az_button_on_click(&state->records_button, x, y, &state->soundboard)) {
-      state->mode = (state->mode == AZ_TMODE_RECORDS ? AZ_TMODE_NORMAL :
-                     AZ_TMODE_RECORDS);
+      state->mode = (state->mode == AZ_TMODE_RECORDS ||
+                     state->mode == AZ_TMODE_CLEAR_RECORDS ?
+                     AZ_TMODE_NORMAL : AZ_TMODE_RECORDS);
     }
     if (az_button_on_click(&state->about_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_ABOUT ? AZ_TMODE_NORMAL :
@@ -997,6 +1064,23 @@ void az_title_on_click(az_title_state_t *state, int x, int y) {
         az_button_on_click(&state->music_button, x, y, &state->soundboard)) {
       state->mode = (state->mode == AZ_TMODE_MUSIC ? AZ_TMODE_NORMAL :
                      AZ_TMODE_MUSIC);
+    }
+  }
+
+  if (state->mode == AZ_TMODE_RECORDS) {
+    if (az_button_on_click(&state->clear_records_button, x - RECORDS_BOX_LEFT,
+                           y - RECORDS_BOX_TOP, &state->soundboard)) {
+      state->mode = AZ_TMODE_CLEAR_RECORDS;
+      state->mode_data.clear_records.do_clear = false;
+    }
+  } else if (state->mode == AZ_TMODE_CLEAR_RECORDS) {
+    if (az_button_on_click(&state->confirm_clear_button, x - RECORDS_BOX_LEFT,
+                           y - RECORDS_BOX_TOP, &state->soundboard)) {
+      state->mode_data.clear_records.do_clear = true;
+    }
+    if (az_button_on_click(&state->cancel_clear_button, x - RECORDS_BOX_LEFT,
+                           y - RECORDS_BOX_TOP, &state->soundboard)) {
+      state->mode = AZ_TMODE_RECORDS;
     }
   }
 

@@ -45,6 +45,8 @@ typedef struct {
 
 void az_reset_saved_games(az_saved_games_t *games);
 
+void az_clear_completion_records(az_saved_games_t *games);
+
 // Return true if the player has beaten the game at least once.
 bool az_has_beaten_game(const az_saved_games_t *games);
 
