@@ -567,7 +567,7 @@ static az_vector_t boss_door_eyelid_vertices[] = {
 static az_component_data_t boss_door_components[] = {
   // Eye:
   { .bounding_radius = 20.0, .impact_damage = 12.0,
-    .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
+    .immunities = AZ_DMGF_FREEZE },
   // Eyelids:
   { .polygon = AZ_INIT_POLYGON(boss_door_eyelid_vertices),
     .immunities = ~0, .impact_damage = 10.0, .init_angle = AZ_DEG2RAD(0) },
