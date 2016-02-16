@@ -197,10 +197,10 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
       }
     case AZ_UPG_GUN_HOMING:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires shots that will seek out enemies.\n"
+        return ("Fires low-damage shots that seek out enemies.\n"
                 "Press [4] to select, press [$f] to fire.");
       } else {
-        return ("Fires shots that will seek out enemies.\n"
+        return ("Fires low-damage shots that seek out enemies.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_PHASE:
