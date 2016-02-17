@@ -27,11 +27,13 @@
 #include "azimuth/state/room.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
-void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
-                          bool visited, bool blink) {
+void az_draw_minimap_room(
+    const az_planet_t *planet, const az_room_t *room, bool visited, bool blink,
+    az_vector_t camera_center) {
   const az_camera_bounds_t *bounds = &room->camera_bounds;
   const double min_r = bounds->min_r - AZ_SCREEN_HEIGHT/2;
   const double max_r = min_r + bounds->r_span + AZ_SCREEN_HEIGHT;
@@ -45,9 +47,7 @@ void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
 
   // Fill room with color:
   const az_color_t zone_color = planet->zones[room->zone_key].color;
-  if (blink) {
-    glColor3f(0.75, 0.75, 0.75);
-  } else if (!visited) {
+  if (!visited) {
     glColor3ub(zone_color.r / 4, zone_color.g / 4, zone_color.b / 4);
   } else glColor3ub(zone_color.r, zone_color.g, zone_color.b);
   if (bounds->theta_span >= 6.28) {
@@ -71,6 +71,21 @@ void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
       glVertex2d(max_r * cos(max_theta) + offset2.x,
                  max_r * sin(max_theta) + offset2.y);
     } glEnd();
+  }
+
+  // Blink camera rect:
+  if (blink) {
+    glPushMatrix(); {
+      az_gl_translated(camera_center);
+      az_gl_rotated(az_vtheta(camera_center) + AZ_HALF_PI);
+      glBegin(GL_TRIANGLE_FAN); {
+        glColor3f(0.75, 0.75, 0.75);
+        glVertex2i( AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+        glVertex2i(-AZ_SCREEN_WIDTH/2,  AZ_SCREEN_HEIGHT/2);
+        glVertex2i(-AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+        glVertex2i( AZ_SCREEN_WIDTH/2, -AZ_SCREEN_HEIGHT/2);
+      } glEnd();
+    } glPopMatrix();
   }
 
   // Draw outline:

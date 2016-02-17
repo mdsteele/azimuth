@@ -197,7 +197,7 @@ static void draw_minimap_rooms(const az_paused_state_t *state,
     const az_room_t *room = &planet->rooms[i];
     if (!az_test_room_mapped(player, i, room)) continue;
     const bool visited = az_test_room_visited(player, i);
-    az_draw_minimap_room(planet, room, visited, false);
+    az_draw_minimap_room(planet, room, visited, false, AZ_VZERO);
     *room_flags_out |= room->properties & AZ_ROOMF_WITH_SAVE;
     if (visited) {
       *room_flags_out |= room->properties & (AZ_ROOMF_WITH_COMM |

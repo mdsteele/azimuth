@@ -31,7 +31,7 @@
 /*===========================================================================*/
 
 void az_draw_minimap_room(const az_planet_t *planet, const az_room_t *room,
-                          bool visited, bool blink);
+                          bool visited, bool blink, az_vector_t camera_center);
 
 void az_draw_map_marker(az_vector_t center, az_clock_t clock);
 

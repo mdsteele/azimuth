@@ -238,7 +238,8 @@ static void draw_minimap_rooms(const az_space_state_t *state) {
 
     const bool visited = az_test_room_visited(player, i);
     az_draw_minimap_room(planet, room, visited, i == player->current_room &&
-                         az_clock_mod(2, 15, state->clock));
+                         az_clock_mod(2, 8, state->clock),
+                         state->camera.center);
   }
 }
 
