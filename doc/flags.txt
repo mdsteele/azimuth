@@ -1,4 +1,4 @@
-Next flag: 160
+Next flag: 162
 
 Bosses
 ======
@@ -160,6 +160,8 @@ Gates
 157: Opened one-way gate in Filimun room 474
 158: Opened one-way gate in Sarvari room 442
 159: Opened one-way gate in Nandiar room 193
+160: Opened eastern one-way gate in Barrag room 271
+161: Opened western one-way gate in Barrag room 271
 
 Misc
 ====
