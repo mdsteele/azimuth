@@ -1,4 +1,4 @@
-@M "SAB|CDD"
+@M "S AB C|F MM CF MMTT DF MMTTU E"
 =title "Lights On, Guns Out"
 
 =tempo 120
@@ -9,14 +9,14 @@
 
 1 Wp25 L30  E0,25  D+10,20
 2 Wt75 L50  E0,33  D-10,10
-3 Wt50 L150        D-20,20
+3 Wt50             D-20,20
 4 Wn   L35  E0,100
 5 Wn   L35  E0,100
 
 
 !Part A
 
-3 E300,0
+3 L150 E300,0
 
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
@@ -29,7 +29,7 @@
 
 !Part B
 
-3 E0,100
+3 L150 E0,100
 
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
 3| c2w |
@@ -45,12 +45,31 @@
 5| x0q x2 x0s x2e. x2e c7 |
 
 
+
 !Part C
 
 1| rw |
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
 4| re c7 ' r c7 ' r c7 ' r c7 |
 5| x0q ' x2 ' x0 ' x2 |
+
+!Part D
+
+1| rw |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c5q |
+4| re c7 ' re c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+!Part E
+
+1| rw |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c5w |
+4| c7e c7 ' re c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+!Part F
 
 1| rw |
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
@@ -68,7 +87,8 @@
 5| x0q ' x2 ' x0s x2e. ' x2q |
 
 
-!Part D
+
+!Part M
 
 1| c3h. ' cs b2 c3 e |
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
@@ -89,3 +109,62 @@
 2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
 4| re c7 ' r c7 ' r c7 ' r c7 |
 5| x0q ' x2 ' x0s x2e. ' x2q |
+
+
+!Part T
+
+3 L60 E0,75
+
+1| c3h. ' cs b2 c3 e |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c5e re ' e5s d c b4 ' c5e ds e ' fe re |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| d3e. b2e. bh be |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| c5s d e d ' c5s b4 c5 e ' d5e. b4e. be |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| a2e. e3e. dq b2q be |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| a4s ae e5s ee ds de ds b4q bs bs |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| a2e. e3e. dq b2e e3 b2e |
+2| c4s g g c ' a a c g ' g c f g ' e f e b3 |
+3| a4s ae e5s ee ds de ds b4e e5 b4e |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0s x2e. ' x2q |
+
+
+!Part U
+
+1 T-12
+3 L60 E0,75
+
+1| c4q d e d |
+2| e3q f g f |
+3| c5s ce ds ' de es es+ ' +s ds de ' ds d d d |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| c4q a b g |
+2| e3q c4 d b3 |
+3| c5s c c c ' ae bs bs+ ' +s gs ge ' ge gs gs |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| f4e f ' g g ' e e ' f f |
+2| a3q b g a |
+3| f5s g a g ' f e d e ' d e f g ' a b g a |
+4| re c7 ' r c7 ' r c7 ' r c7 |
+5| x0q ' x2 ' x0 ' x2 |
+
+1| g3e e ' f d ' e c ' d bN2 |
+2| g4q f e d |
+3| g5s g ge ' fe fs fs ' es e e e ' de d |
+4| c7e r ' c r ' c r ' cs c c c |
+5| x0q ' x0q ' x0q ' x0s x0 x0 x0 |
