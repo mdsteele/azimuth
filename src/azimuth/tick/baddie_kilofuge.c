@@ -395,6 +395,17 @@ void az_tick_bad_kilofuge(az_space_state_t *state, az_baddie_t *baddie,
                           double time) {
   assert(baddie->kind == AZ_BAD_KILOFUGE);
   init_leg_anchors(baddie->data);
+
+  // If the ship accidentally gets caught inside the baddie, knock it away.
+  if (az_ship_is_alive(&state->ship) &&
+      az_circle_touches_baddie(baddie, AZ_SHIP_DEFLECTOR_RADIUS,
+                               state->ship.position, NULL)) {
+    const az_vector_t unit = az_vpolar(1, baddie->angle);
+    if (az_vdot(state->ship.velocity, unit) < 100.0) {
+      az_vpluseq(&state->ship.velocity, az_vmul(unit, 300.0));
+    }
+  }
+
   switch (baddie->state) {
     case MOVE_BODY_FORWARD_STATE:
       move_body(state, baddie, time, 1);
