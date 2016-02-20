@@ -1,4 +1,4 @@
-@P z8 h39 r479 t255 s6
+@P z8 h40 r479 t255 s6
 $s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,wait3,mus0,scene7,wait1,snd4,wait1,scene1,mus20,wait1.5,dlog,pt1,tt24,pb2,tb25,tt26,tb27,tb28,tt29,tb30,tt31,tb32,pt0,scene2,tb33,dend,sctxt244,wait3,scene4,wait1,musf1,wait0.5,scene3,scene7,mus0,scene0,skip0;
 !Z"Colony" c(192,96,0)
 !Z"Filimun" c(224,0,224)
@@ -35,7 +35,8 @@ $s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,
 !H|& f50 = u9 r238
 !H|& f50 = u23 r453
 !H|& u9 = f112 r345
-!H|& f112 = u17 r202
+!H|& f112 = f61 r190
+!H|& f61 = u17 r202
 !H|& f112 = u14 r236
 !H& u14 & u17 = f113 r414
 !H& u6 | u7 = u20 r459
