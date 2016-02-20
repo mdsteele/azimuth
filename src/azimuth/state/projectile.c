@@ -88,7 +88,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
-    .impact_damage = 0.1,
+    .impact_damage = 0.15,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_CHARGED_PHASE] = {
@@ -103,7 +103,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_FREEZE_PHASE] = {
     .speed = 600.0,
     .lifetime = 0.5,
-    .impact_damage = 0.1,
+    .impact_damage = 0.15,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
@@ -117,7 +117,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
     .lifetime = 0.5,
-    .impact_damage = 0.2,
+    .impact_damage = 0.35,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_PIERCING | AZ_PROJF_FEW_SPECKS
   },
@@ -188,7 +188,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_PHASE_SHRAPNEL] = {
     .speed = 600.0,
     .lifetime = 0.25,
-    .impact_damage = 0.1,
+    .impact_damage = 0.15,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
   [AZ_PROJ_GUN_PIERCE_SHRAPNEL] = {
@@ -201,7 +201,7 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_PIERCE] = {
     .speed = 700.0,
     .lifetime = 2.0,
-    .impact_damage = 2.0,
+    .impact_damage = 2.5,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
   },
@@ -217,14 +217,14 @@ static const az_proj_data_t proj_data[] = {
   [AZ_PROJ_GUN_FREEZE_PIERCE] = {
     .speed = 700.0,
     .lifetime = 2.0,
-    .impact_damage = 2.0,
+    .impact_damage = 2.5,
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
   },
   [AZ_PROJ_GUN_HOMING_PIERCE] = {
     .speed = 600.0,
     .lifetime = 3.0,
-    .impact_damage = 1.0,
+    .impact_damage = 1.5,
     .homing_rate = AZ_DEG2RAD(200),
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_PIERCE,
     .properties = AZ_PROJF_PIERCING
