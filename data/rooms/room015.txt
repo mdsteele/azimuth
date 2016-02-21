@@ -1,6 +1,6 @@
 @R z0 p0 k3 b5 d3 g0 n2 w26
   c(46624.31,0.00,1.516090,0.000000)
-$s:push3,sheal2,test23,beqz/A,lock1,halt,A#nix10,nix11,test7,beqz/B,unlock1,B#test1,hnez,dark0.5,C#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/C;
+$s:push2.5,sheal2,test23,beqz/A,lock1,halt,A#nix10,nix11,test7,beqz/B,unlock1,B#test1,hnez,dark0.5,C#rand,dup,mul,muli4,addi0.75,waits,blink0,snd6,jump/C;
 !W1 d163 x2261.08 y46689.61 a1.516763 u0
 !W2 d10 x2759.29 y46481.74 a-0.057727 u0
 !W1 d35 x2434.14 y46391.67 a-1.624468 u0
