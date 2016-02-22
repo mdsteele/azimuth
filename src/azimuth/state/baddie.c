@@ -1247,7 +1247,8 @@ static az_baddie_data_t baddie_datas[] = {
   },
   [AZ_BAD_TRAPDOOR] = {
     .max_health = 3.0, .overall_bounding_radius = 95.6,
-    .static_properties = AZ_BADF_DRAW_BG, .color = {160, 160, 160, 255},
+    .static_properties = (AZ_BADF_DRAW_BG | AZ_BADF_WALL_LIKE),
+    .color = {160, 160, 160, 255},
     .death_sound = AZ_SND_KILL_TURRET, .death_style = AZ_DEATH_SHARDS,
     .main_body = { .polygon = AZ_INIT_POLYGON(trapdoor_hinge_vertices),
                    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED |
