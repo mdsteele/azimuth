@@ -31,16 +31,16 @@
 
 /*===========================================================================*/
 
-static int count_save_points(const az_room_t *room) {
-  int num_save_points = 0;
+static int count_consoles(const az_room_t *room, az_console_kind_t *kind_out) {
+  int num_consoles = 0;
   for (int i = 0; i < room->num_nodes; ++i) {
     const az_node_spec_t *node = &room->nodes[i];
-    if (node->kind == AZ_NODE_CONSOLE &&
-        node->subkind.console == AZ_CONS_SAVE) {
-      ++num_save_points;
+    if (node->kind == AZ_NODE_CONSOLE) {
+      ++num_consoles;
+      *kind_out = node->subkind.console;
     }
   }
-  return num_save_points;
+  return num_consoles;
 }
 
 static int room_contains_upgrade(const az_room_t *room, az_upgrade_t upgrade) {
@@ -142,20 +142,35 @@ bool az_audit_scenario(const az_planet_t *planet) {
     }
     // Check on_start script.
     CHECK_SCRIPT(room->on_start);
-    // Check save points.
-    const int num_save_points = count_save_points(room);
-    if (num_save_points > 1) ROOM_ERROR("Multiple save points");
-    if (num_save_points > 0) {
-      if (!script_contains_instruction(room->on_start, AZ_OP_MSG, 0)) {
-        ROOM_ERROR("Save point without msg0");
-      }
-      if (!script_contains_opcode(room->on_start, AZ_OP_MUS)) {
-        ROOM_ERROR("Save point without music");
+    // Check consoles.
+    az_console_kind_t console_kind;
+    const int num_consoles = count_consoles(room, &console_kind);
+    if (num_consoles > 1) ROOM_ERROR("Multiple consoles");
+    if (num_consoles > 0) {
+      if (console_kind == AZ_CONS_SAVE) {
+        if (!script_contains_instruction(room->on_start, AZ_OP_MSG, 0)) {
+          ROOM_ERROR("Save point without msg0");
+        }
+        if (!script_contains_opcode(room->on_start, AZ_OP_MUS)) {
+          ROOM_ERROR("Save point without music");
+        }
+      } else if (console_kind == AZ_CONS_REFILL) {
+        if (!script_contains_instruction(room->on_start, AZ_OP_MSG, 1)) {
+          ROOM_ERROR("Repair bay without msg1");
+        }
       }
     }
-    // Check for duplicate walls.
+    // Check walls.
     for (int i = 0; i < room->num_walls; ++i) {
       const az_wall_spec_t *wall = &room->walls[i];
+      // Icicles should always be charge-destructible.
+      const int wall_data_index = az_wall_data_index(wall->data);
+      if ((wall_data_index == 18 || wall_data_index == 19) &&
+          wall->kind != AZ_WALL_DESTRUCTIBLE_CHARGED) {
+        ROOM_ERROR("Non-charge-destructible icicle at (%.02f, %.02f)",
+                   wall->position.x, wall->position.y);
+      }
+      // Check for duplicate walls.
       for (int j = i + 1; j < room->num_walls; ++j) {
         const az_wall_spec_t *other_wall = &room->walls[j];
         if (other_wall->data == wall->data &&
