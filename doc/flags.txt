@@ -1,4 +1,4 @@
-Next flag: 162
+Next flag: 168
 
 Bosses
 ======
@@ -162,6 +162,12 @@ Gates
 159: Opened one-way gate in Nandiar room 193
 160: Opened eastern one-way gate in Barrag room 271
 161: Opened western one-way gate in Barrag room 271
+162: Opened one-way gate in Barrag room 232
+163: Opened one-way gate in Barrag room 298
+164: Opened two-way gate in Filimun room 130
+165: Opened two-way gate in Colony room 161
+166: Opened two-way gate in Nandiar room 189
+167: Opened two-way gate in Barrag room 240
 
 Misc
 ====
