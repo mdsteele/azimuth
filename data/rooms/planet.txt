@@ -425,7 +425,7 @@ $s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,
   explosives$W far below here has just been set to
   go off.  They've cut me off from it.  I managed
   to reengage the safeties just before they did,
-  but even that only buys us a few minutes.  If I
+  but even that only buys us $Ma few minutes$W.  If I
   can't reestablish a connection, you'll have to
   fly down there and shut it down manually."
 !T93"
