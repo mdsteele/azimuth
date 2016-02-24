@@ -663,11 +663,9 @@ static az_component_data_t incorporeal_piston_ext_components[] = {
     .init_position = {-90, 0} }
 };
 
-// TODO: Update the various Kilofuge component polygons once we have real
-//   graphics for the Kilofuge.
 static const az_vector_t kilofuge_main_body_vertices[] = {
-  {150, 0}, {90, 120}, {30, 140}, {-80, 150},
-  {-150, 0}, {-80, -150}, {30, -140}, {90, -120}
+  {140, -20}, {144, 0}, {140, 20}, {90, 120}, {20, 140}, {-80, 145},
+  {-123, 78}, {-150, 0}, {-123, -78}, {-80, -145}, {20, -140}, {90, -120}
 };
 static const az_vector_t kilofuge_left_pincer_vertices[] = {
   {50, 10}, {100, 0}, {50, 20}, {0, 6}, {-5, 0}, {0, -6}
@@ -675,12 +673,15 @@ static const az_vector_t kilofuge_left_pincer_vertices[] = {
 static const az_vector_t kilofuge_right_pincer_vertices[] = {
   {50, -10}, {100, 0}, {50, -20}, {0, -6}, {-5, 0}, {0, 6}
 };
-static const az_vector_t kilofuge_leg_vertices[] = {
-  {-100, -10}, {0, 0}, {-100, 10}
+static const az_vector_t kilofuge_left_leg_vertices[] = {
+  {-100, -10}, {-50, -12}, {0, -2}, {2, 0}, {0, 2}, {-50, 1}, {-100, 10}
+};
+static const az_vector_t kilofuge_right_leg_vertices[] = {
+  {-100, -10}, {-50, -1}, {0, -2}, {2, 0}, {0, 2}, {-50, 12}, {-100, 10}
 };
 static az_component_data_t kilofuge_components[] = {
   // Eyes:
-  { .bounding_radius = 10, .init_position = {150, 0}, .impact_damage = 10,
+  { .bounding_radius = 10, .init_position = {144, 0}, .impact_damage = 10,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
   { .bounding_radius = 10, .init_position = {140, 20}, .impact_damage = 10,
     .immunities = (AZ_DMGF_FREEZE | AZ_DMGF_CPLUS) },
@@ -692,14 +693,14 @@ static az_component_data_t kilofuge_components[] = {
   { .polygon = AZ_INIT_POLYGON(kilofuge_right_pincer_vertices),
     .init_position = {110, -60}, .immunities = ~0, .impact_damage = 30 },
   // Legs:
-#define KILOFUGE_LEG(x, y, theta) \
-  { .polygon = AZ_INIT_POLYGON(kilofuge_leg_vertices), \
+#define KILOFUGE_LEG(side, x, y, theta) \
+  { .polygon = AZ_INIT_POLYGON(kilofuge_##side##_leg_vertices), \
     .init_position = {(x), (y)}, .init_angle = (theta), \
     .immunities = ~0, .impact_damage = 20 }
 
-  KILOFUGE_LEG( 70,  190,  1.5), KILOFUGE_LEG(110, -195, -1.0),
-  KILOFUGE_LEG( 20, -200, -1.5), KILOFUGE_LEG( 55,  190,  1.0),
-  KILOFUGE_LEG(-50,  190,  1.5), KILOFUGE_LEG(-10, -200, -1.0)
+  KILOFUGE_LEG(left,  70,  190,  1.5), KILOFUGE_LEG(right, 110, -195, -1.0),
+  KILOFUGE_LEG(right, 20, -200, -1.5), KILOFUGE_LEG(left,   55,  190,  1.0),
+  KILOFUGE_LEG(left, -50,  190,  1.5), KILOFUGE_LEG(right, -10, -200, -1.0)
 #undef KILOFUGE_LEG
 };
 

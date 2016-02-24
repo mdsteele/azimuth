@@ -43,7 +43,7 @@ static void draw_eyeball(az_vector_t position, double angle, double radius,
       glVertex2f(0, 0);
       glColor3f(0.5f, (0.5f - 0.3f * hurt) * (1.0f - 0.8f * flare),
                   (0.5f - 0.4f * hurt) * (1.0f - 0.8f * flare));
-      for (int j = 0; j <= 360; j += 30) {
+      for (int j = 0; j <= 360; j += 20) {
         glVertex2d(radius * cos(AZ_DEG2RAD(j)), radius * sin(AZ_DEG2RAD(j)));
       }
     } glEnd();
@@ -82,13 +82,15 @@ void az_draw_bad_kilofuge(const az_baddie_t *baddie, az_clock_t clock) {
   // Legs:
   for (int i = 5; i < 11; ++i) {
     glPushMatrix(); {
-      az_gl_translated(baddie->components[i].position);
-      az_gl_rotated(baddie->components[i].angle);
+      const az_component_t *leg = &baddie->components[i];
+      az_gl_translated(leg->position);
+      az_gl_rotated(leg->angle);
       glBegin(GL_TRIANGLE_FAN); {
-        az_gl_color(inner); glVertex2f(-100, 0);
+        az_gl_color(inner); glVertex2f(-50, -copysign(5, leg->position.y));
         az_gl_color(outer);
         const az_polygon_t polygon = baddie->data->components[i].polygon;
-        for (int j = 0; j < polygon.num_vertices; ++j) {
+        for (int j = polygon.num_vertices - 1, k = 0;
+             j < polygon.num_vertices; j = k++) {
           az_gl_vertex(polygon.vertices[j]);
         }
       } glEnd();
