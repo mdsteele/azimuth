@@ -105,7 +105,7 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
       const double alpha = 1 - factor;
       glBegin(GL_QUAD_STRIP); {
         const double outer = major + minor;
-        for (int i = 0; i <= 360; i += 20) {
+        for (int i = 0; i <= 360; i += 10) {
           with_color_alpha(particle->color, 0);
           glVertex2d(outer * cos(AZ_DEG2RAD(i)), outer * sin(AZ_DEG2RAD(i)));
           with_color_alpha(particle->color, alpha);
@@ -115,7 +115,7 @@ void az_draw_particle(const az_particle_t *particle, az_clock_t clock) {
       glBegin(GL_QUAD_STRIP); {
         const double inner = fmax(0, major - minor);
         const double beta = alpha * (1 - fmin(major, minor) / minor);
-        for (int i = 0; i <= 360; i += 20) {
+        for (int i = 0; i <= 360; i += 10) {
           with_color_alpha(particle->color, alpha);
           glVertex2d(major * cos(AZ_DEG2RAD(i)), major * sin(AZ_DEG2RAD(i)));
           with_color_alpha(particle->color, beta);

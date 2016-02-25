@@ -665,8 +665,9 @@ void az_draw_upgrade_icon(az_upgrade_t upgrade, az_clock_t clock) {
       if (frame % 2) glColor3f(1, 1, 0);
       else glColor3f(1, 0, 0);
       glBegin(GL_LINE_STRIP); {
-        glVertex2f(-6, -7); glVertex2f(-6, 7); glVertex2f(6, 7);
-        glVertex2f(6, 0); glVertex2f(-6, 0); glVertex2f(6, -7);
+        glVertex2f(-6, -7); glVertex2f(-6, 7); glVertex2f(4, 7);
+        glVertex2f(6, 3.5); glVertex2f(4, 0); glVertex2f(-6, 0);
+        glVertex2f(6, -7);
       } glEnd();
       break;
     case AZ_UPG_FUSION_REACTOR:

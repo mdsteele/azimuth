@@ -61,6 +61,43 @@ static bool any_saved_games(const az_title_state_t *state) {
 static void draw_title_letter(char ch, float hilight) {
   glColor4f(0.25f + hilight, 0.35f + 0.5f * hilight, 0.35f, 0.5f);
   switch (ch) {
+    case '%':
+      glPushMatrix(); {
+        glRotatef(135, 0, 0, 1);
+        glScalef(1.75, 1.75, 1);
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(-10, 12); glVertex2f(6, 12);
+          glVertex2f(-11, 7); glVertex2f(8, 7);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(-7, 7); glVertex2f(1, 7);
+          glVertex2f(-7, 4); glVertex2f(1, 4);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(-14,  4); glVertex2f(15,  4);
+          glVertex2f(-14,  0); glVertex2f(20,  0);
+          glVertex2f(-14, -4); glVertex2f(15, -4);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(-7, -4); glVertex2f(1, -4);
+          glVertex2f(-7, -7); glVertex2f(1, -7);
+        } glEnd();
+        glBegin(GL_TRIANGLE_STRIP); {
+          glVertex2f(-11, -7); glVertex2f(8, -7);
+          glVertex2f(-10, -12); glVertex2f(6, -12);
+        } glEnd();
+        glBegin(GL_LINE_LOOP); {
+          glColor3f(1, 1, 1);
+          glVertex2f(20, 0); glVertex2f(15, 4); glVertex2f(1, 4);
+          glVertex2f(1, 7); glVertex2f(8, 7); glVertex2f(6, 12);
+          glVertex2f(-10, 12); glVertex2f(-11, 7); glVertex2f(-7, 7);
+          glVertex2f(-7, 4); glVertex2f(-14, 4); glVertex2f(-14, -4);
+          glVertex2f(-7, -4); glVertex2f(-7, -7); glVertex2f(-11, -7);
+          glVertex2f(-10, -12); glVertex2f(6, -12); glVertex2f(8, -7);
+          glVertex2f(1, -7); glVertex2f(1, -4); glVertex2f(15, -4);
+        } glEnd();
+      } glPopMatrix();
+      break;
     case 'A':
       glBegin(GL_TRIANGLE_STRIP); {
         glVertex2f(-28, 25); glVertex2f(-15, 25);
@@ -234,7 +271,7 @@ static void draw_background(const az_title_state_t *state) {
         blacken = 1.0;
         break;
       case 4:
-        draw_subtitle_text(" 2012-2015", true);
+        draw_subtitle_text(" 2012-2016", true);
         return;
       case 5:
         create = 0.25 + 0.75 * state->mode_data.intro.progress;
@@ -256,10 +293,11 @@ static void draw_background(const az_title_state_t *state) {
 
   // Draw game title:
   if (title_progress > 0.0) {
+    const float letter_spacing = 76;
     glPushMatrix(); {
       glTranslatef(AZ_SCREEN_WIDTH / 2, 150, 0);
-      glTranslatef(-3 * 80 + 0.5, 0.5, 0);
-      for (int i = 0; i < 7; ++i) {
+      glTranslatef(-3.5f * letter_spacing + 0.5f, 0.5, 0);
+      for (int i = 0; i < 8; ++i) {
         glPushMatrix(); {
           if (title_progress < 1.0) {
             const GLfloat angle = (i % 2 ? -45 : 45);
@@ -267,10 +305,10 @@ static void draw_background(const az_title_state_t *state) {
             glScalef(title_progress, 1, 1);
             glRotatef(-angle, 0, 0, 1);
           }
-          draw_title_letter("AZIMUTH"[i], fmax(0.0, 0.005 * (az_clock_zigzag(
+          draw_title_letter("%AZIMUTH"[i], fmax(0.0, 0.005 * (az_clock_zigzag(
               200, 1, state->clock + 10 * (7 - i)) - 140)));
         } glPopMatrix();
-        glTranslatef(80, 0, 0);
+        glTranslatef(letter_spacing, 0, 0);
       }
     } glPopMatrix();
   }
