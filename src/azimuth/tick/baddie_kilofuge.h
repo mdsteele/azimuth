@@ -21,6 +21,8 @@
 #ifndef AZIMUTH_TICK_BADDIE_KILOFUGE_H_
 #define AZIMUTH_TICK_BADDIE_KILOFUGE_H_
 
+#include <stdbool.h>
+
 #include "azimuth/state/baddie.h"
 #include "azimuth/state/space.h"
 
@@ -28,6 +30,13 @@
 
 void az_tick_bad_kilofuge(
     az_space_state_t *state, az_baddie_t *baddie, double time);
+
+void az_kilofuge_close_pincers(az_baddie_t *baddie, double time);
+void az_kilofuge_open_pincers(az_baddie_t *baddie, double time);
+void az_kilofuge_relax_pincers(az_baddie_t *baddie, double time);
+
+bool az_kilofuge_shift_legs(az_baddie_t *baddie, double time, int parity,
+                            int direction);
 
 void az_on_kilofuge_damaged(
     az_space_state_t *state, az_baddie_t *baddie, double amount,

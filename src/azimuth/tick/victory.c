@@ -27,6 +27,7 @@
 #include "azimuth/state/victory.h"
 #include "azimuth/tick/baddie_core.h"
 #include "azimuth/tick/baddie_forcefiend.h"
+#include "azimuth/tick/baddie_kilofuge.h"
 #include "azimuth/tick/baddie_magbeest.h"
 #include "azimuth/tick/baddie_nocturne.h"
 #include "azimuth/tick/baddie_oth.h"
@@ -165,9 +166,15 @@ static void tick_baddies(az_victory_state_t *state, double time) {
       } break;
       case AZ_BAD_KILOFUGE: {
         if (baddie->state == 1) {
-          // TODO: move legs
-          baddie->position.x -= 80 * time;
+          az_kilofuge_relax_pincers(baddie, time);
+          baddie->position.x -= 100 * time;
         } else if (baddie->state == 2) {
+          az_kilofuge_relax_pincers(baddie, time);
+          az_kilofuge_shift_legs(baddie, 0.3 * time, 0, -1);
+          az_kilofuge_shift_legs(baddie, 0.85 * time, 1, -1);
+          baddie->position.x -= 100 * time;
+        } else if (baddie->state == 3) {
+          az_kilofuge_open_pincers(baddie, time);
           const az_vector_t target = {-200, -125 + 100 * baddie->cooldown};
           // Turn eyes towards target:
           for (int i = 0; i < 3; ++i) {
@@ -194,9 +201,13 @@ static void tick_baddies(az_victory_state_t *state, double time) {
               state, AZ_PAR_BEAM, beam_color, beam_start, AZ_VZERO, beam_angle,
               0, 1000, 4.0 + 0.75 * az_clock_zigzag(8, 1, state->clock));
           az_loop_sound(&state->soundboard, AZ_SND_BEAM_PHASE);
-        } else if (baddie->state == 3) {
-          // TODO: move legs
+        } else if (baddie->state == 4) {
+          az_kilofuge_close_pincers(baddie, time);
+          az_kilofuge_shift_legs(baddie, time, 0, 1);
+          az_kilofuge_shift_legs(baddie, time, 1, 1);
           baddie->position.x += 120 * time;
+        } else {
+          az_kilofuge_relax_pincers(baddie, time);
         }
       } break;
       case AZ_BAD_NOCTURNE: {
@@ -598,13 +609,13 @@ void az_tick_victory_state(az_victory_state_t *state, double time) {
         boss->state = 0;
       }
       // Take another step in, and then fire meltbeam for a couple seconds:
-      if (timer_at(state, 2.5, time)) boss->state = 1;
+      if (timer_at(state, 2.5, time)) boss->state = 2;
       if (timer_at(state, 3.5, time)) {
-        boss->state = 2;
+        boss->state = 3;
         boss->cooldown = 1.5;
       }
       // Slide back off the right side of the screen:
-      if (timer_at(state, 5.5, time)) boss->state = 3;
+      if (timer_at(state, 5.5, time)) boss->state = 4;
       next_step_at(state, 8.0);
     } break;
     case AZ_VS_NOCTURNE: {
