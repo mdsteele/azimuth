@@ -243,7 +243,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 25.0,
     .impact_shake = 0.75,
     .impact_sound = AZ_SND_EXPLODE_ROCKET,
-    .damage_kind = AZ_DMGF_ROCKET
+    .damage_kind = AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_HYPER_ROCKET] = {
     .speed = 1500.0,
@@ -253,7 +254,8 @@ static const az_proj_data_t proj_data[] = {
     .splash_radius = 40.0,
     .impact_shake = 4.0,
     .impact_sound = AZ_SND_EXPLODE_HYPER_ROCKET,
-    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET
+    .damage_kind = AZ_DMGF_HYPER_ROCKET | AZ_DMGF_ROCKET,
+    .properties = AZ_PROJF_TEMP_INVINC
   },
   [AZ_PROJ_MISSILE_FREEZE] = {
     .speed = 1000.0,
