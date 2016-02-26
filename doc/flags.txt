@@ -1,4 +1,4 @@
-Next flag: 168
+Next flag: 175
 
 Bosses
 ======
@@ -168,6 +168,13 @@ Gates
 165: Opened two-way gate in Colony room 161
 166: Opened two-way gate in Nandiar room 189
 167: Opened two-way gate in Barrag room 240
+168: Opened one-way gate in Nandiar room 228
+169: Opened one-way gate in Voquan room 348
+170: Opened left-hand two-way gate in Colony room 159
+171: Opened right-hand two-way gate in Colony room 159
+172: Opened shortcut gates in Sarvari room 421
+173: Opened odd-numbered gates in Sarvari room 144
+174: Opened even-numbered gates in Sarvari room 144
 
 Misc
 ====
