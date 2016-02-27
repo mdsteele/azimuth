@@ -30,7 +30,14 @@
 
 void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
                             double time);
+
 void az_forcefiend_move_claws(az_baddie_t *baddie, bool swipe, double time);
+
+void az_on_forcefiend_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind);
+
+/*===========================================================================*/
 
 void az_tick_bad_force_egg(az_space_state_t *state, az_baddie_t *baddie,
                            bool bounced, double time);

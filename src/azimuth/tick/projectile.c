@@ -784,7 +784,7 @@ static void projectile_special_logic(az_space_state_t *state,
           az_vwithin(proj->position, state->ship.position, 100.0)) {
         az_vpluseq(&state->ship.velocity, az_vwithlen(
             az_vsub(proj->position, state->ship.position),
-            time * 800.0 * (1.0 - proj->age / proj->data->lifetime)));
+            time * 600.0 * (1.0 - proj->age / proj->data->lifetime)));
       }
       break;
     case AZ_PROJ_ICE_TORPEDO:

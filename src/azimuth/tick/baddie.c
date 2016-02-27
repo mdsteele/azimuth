@@ -843,6 +843,9 @@ void az_on_baddie_damaged(az_space_state_t *state, az_baddie_t *baddie,
     case AZ_BAD_OTH_GUNSHIP:
       az_on_oth_gunship_damaged(state, baddie, amount, damage_kind);
       break;
+    case AZ_BAD_FORCEFIEND:
+      az_on_forcefiend_damaged(state, baddie, amount, damage_kind);
+      break;
     case AZ_BAD_KILOFUGE:
       az_on_kilofuge_damaged(state, baddie, amount, damage_kind);
       break;

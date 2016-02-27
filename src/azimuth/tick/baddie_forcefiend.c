@@ -182,7 +182,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   const int primary = get_primary_state(baddie);
   // CHASE_STATE: Chase ship and fire homing torpedoes.
   if (primary == CHASE_STATE) {
-    az_snake_towards(state, baddie, time, 8, 130 + 130 * hurt, 60,
+    az_snake_towards(state, baddie, time, 8, 130 + 80 * hurt, 60,
                      state->ship.position, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie) &&
         az_ship_within_angle(state, baddie, 0, AZ_DEG2RAD(20))) {
@@ -219,7 +219,7 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
     const double dt = 150.0 / r;
     const az_vector_t dest = az_vpolar(r, bounds->min_theta +
         (primary == FLEE_LEFT_STATE ? bounds->theta_span + dt : -dt));
-    az_snake_towards(state, baddie, time, 8, 250 + 100 * hurt,
+    az_snake_towards(state, baddie, time, 8, 200 + 100 * hurt,
                      150 + 150 * hurt, dest, true);
     if (baddie->cooldown <= 0.0 && az_can_see_ship(state, baddie)) {
       az_vector_t rel_impact;
@@ -314,6 +314,16 @@ void az_tick_bad_forcefiend(az_space_state_t *state, az_baddie_t *baddie,
   // Move claws:
   az_forcefiend_move_claws(baddie, (primary == CLAW_SWIPE_STATE ||
                                     primary == CLAW_UNSWIPE_STATE), time);
+}
+
+void az_on_forcefiend_damaged(
+    az_space_state_t *state, az_baddie_t *baddie, double amount,
+    az_damage_flags_t damage_kind) {
+  assert(baddie->kind == AZ_BAD_FORCEFIEND);
+  if ((damage_kind & (AZ_DMGF_ROCKET | AZ_DMGF_HYPER_ROCKET)) != 0 &&
+      get_primary_state(baddie) == CHASE_STATE) {
+    begin_flee(state, baddie);
+  }
 }
 
 /*===========================================================================*/
