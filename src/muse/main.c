@@ -25,6 +25,7 @@
 #include "azimuth/state/music.h"
 #include "azimuth/util/music.h"
 #include "azimuth/util/sound.h"
+#include "muse/wave.h"
 
 /*===========================================================================*/
 
@@ -43,15 +44,21 @@ static void destroy_music(void) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2 || argc > 3) {
-    fprintf(stderr, "Usage: %s filename [flag]\n", argv[0]);
+  if (argc < 2 || argc > 4) {
+    fprintf(stderr, "Usage: %s <filename> [<flag>] [<duration>]\n", argv[0]);
     return EXIT_FAILURE;
   }
-
   int music_flag = 0;
   if (argc >= 3) {
     if (sscanf(argv[2], "%d", &music_flag) < 1) {
       fprintf(stderr, "Invalid flag value: %s\n", argv[2]);
+      return EXIT_FAILURE;
+    }
+  }
+  double wav_duration = 0.0;
+  if (argc >= 4) {
+    if (sscanf(argv[3], "%lf", &wav_duration) < 1) {
+      fprintf(stderr, "Invalid WAV duration: %s\n", argv[3]);
       return EXIT_FAILURE;
     }
   }
@@ -68,6 +75,12 @@ int main(int argc, char **argv) {
   }
   atexit(destroy_music);
   az_reset_music_synth(&synth, &music, music_flag);
+
+  // If we're in WAV mode, generate WAV file and exit.
+  if (wav_duration > 0.0) {
+    az_write_music_to_wav_file(stdout, &synth, wav_duration);
+    return EXIT_SUCCESS;
+  }
 
   // Initialize SDL audio:
   if (SDL_Init(SDL_INIT_AUDIO) != 0) {
