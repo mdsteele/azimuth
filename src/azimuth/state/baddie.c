@@ -511,10 +511,10 @@ static az_component_data_t jungle_chomper_components[] = {
     .init_position = {-190, 0}, .impact_damage = 6.0 },
   // Pincers:
   { .polygon = AZ_INIT_POLYGON(chomper_plant_left_pincer_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
     .impact_damage = 18.0 },
   { .polygon = AZ_INIT_POLYGON(chomper_plant_right_pincer_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
     .impact_damage = 18.0 },
   // Stalk:
 #define STALK_SEGMENT(x) \
@@ -535,10 +535,10 @@ static az_component_data_t fire_chomper_components[] = {
     .init_position = {-95, 0}, .impact_damage = 4.0 },
   // Pincers:
   { .polygon = AZ_INIT_POLYGON(chomper_plant_left_pincer_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
     .impact_damage = 18.0 },
   { .polygon = AZ_INIT_POLYGON(chomper_plant_right_pincer_vertices),
-    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED | AZ_DMGF_ROCKET),
+    .immunities = (AZ_DMGF_NORMAL | AZ_DMGF_CHARGED),
     .impact_damage = 18.0 },
   // Stalk:
 #define STALK_SEGMENT(x) \
