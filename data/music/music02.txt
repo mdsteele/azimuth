@@ -1,4 +1,4 @@
-@M "SABBCC|DDEEBCBC"
+@M "SAB|BCC DDEE BCBC DYFFGG R"
 =title "What's Mine is Yours"
 
 =tempo 115
@@ -7,7 +7,7 @@
 
 !Part S
 
-1 Wp50 L30  E0,0
+1 Wp50 L25  E0,75 D+10,40
 2 Wp25 L25  E0,25 D+10,30
 3 Wt75 L120 E0,25
 4 Wn   L25  E0,100
@@ -62,6 +62,13 @@
 5| x1q x7e. x1e x7e. x7q |
 
 
+!Part Y
+
+2| a3e es  e  ' ae es  e  ' ae es  e  ' c4e. rs |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae.  rs |
+5| x1q x7e. x1e x7e. ' x7s x0 x0 x0 |
+
+
 !Part E
 
 2| re a3e ' c4q ' de ds d ' ee de+ | +e f4e ' de ds e ' ds c b3e ' aq |
@@ -75,5 +82,60 @@
 5| x1q x7e. x1e x7e. x7e x0s x0 |
 
 2| d3e ds d ' e3e es e ' f3e fs f ' g3e gs g |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part F
+
+1| a4e r ' a4e r ' a4e r ' a4e r |
+ | a4e r ' a4e r ' g4e e ' a4s a ae |
+2| re c4e ' a3q ' bs a ge ' eq |
+ | d3e ds d ' e3e es e ' f3e fs f ' g3e gs g |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+ | a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+ | x1q x7e. x1e x7e. x7e x0s x0 |
+
+1| a4e a4e ' c5q ' de ds d ' ee de |
+2| re c4e ' a3q ' bs a ge ' eq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+1| a4e c5 ' a4e c5 ' g4e e ' a4e r |
+2| e4s es ee ' de de ' fq ' es e e e |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part G
+
+1 T+12
+
+1| re a3e ' c4q ' de ds d ' ee de+ | +e f4e ' de ds e ' ds c b3e ' aq |
+2| a3e r ' ae r ' ae r ' ae r |
+ | a3e r ' ae r ' ge e ' as a ae |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+ | a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+ | x1q x7e. x1e x7e. x7e x0s x0 |
+
+1| re c4e ' a3q ' bs a ge ' eq |
+ | d3e ds d ' e3e es e ' f3e fs f ' g3s g g g |
+2| re a3e ' c4q ' de ds d ' ee de+ | +e f4e ' de ds e ' ds c b3e ' aq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+ | a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+ | x1q x7e. x1e x7e. x7e x0s x0 |
+
+
+!Part R
+
+1| a4w |
+2| a3q ' c4q ' de ds d ' eq |
+3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
+5| x1q x7e. x1e x7e. x7e x0s x0 |
+
+2| f4e ds d ' ee cs c ' ds c b3e ' a3q |
 3| a2e c3s a2 ' ae c3s a2 ' ae c3s a2 ' ae c3s a2 |
 5| x1q x7e. x1e x7e. x7e x0s x0 |
