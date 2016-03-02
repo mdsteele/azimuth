@@ -191,18 +191,21 @@ typedef uint_fast16_t az_baddie_flags_t;
 #define AZ_BADF_KAMIKAZE       ((az_baddie_flags_t)(1u << 5))
 // NO_HOMING_BEAM: homing beam ignores this baddie
 #define AZ_BADF_NO_HOMING_BEAM ((az_baddie_flags_t)(1u << 6))
+// NO_HOMING_PHASE: homing phase ignores this baddie
+#define AZ_BADF_NO_HOMING_PHASE ((az_baddie_flags_t)(1u << 7))
 // NO_HOMING_PROJ: homing projectiles ignore this baddie
-#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 7))
+#define AZ_BADF_NO_HOMING_PROJ ((az_baddie_flags_t)(1u << 8))
 // NO_HOMING: all homing weapons ignore this baddie
-#define AZ_BADF_NO_HOMING (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PROJ)
+#define AZ_BADF_NO_HOMING \
+  (AZ_BADF_NO_HOMING_BEAM | AZ_BADF_NO_HOMING_PHASE | AZ_BADF_NO_HOMING_PROJ)
 // QUAD_IMPACT: impact damage is quadrupled
-#define AZ_BADF_QUAD_IMPACT    ((az_baddie_flags_t)(1u << 8))
+#define AZ_BADF_QUAD_IMPACT    ((az_baddie_flags_t)(1u << 9))
 // VULNERABLE: main body takes double damage (compared to components)
-#define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 9))
+#define AZ_BADF_VULNERABLE     ((az_baddie_flags_t)(1u << 10))
 // WALL_LIKE: baddie counts as a wall when calculating impacts
-#define AZ_BADF_WALL_LIKE      ((az_baddie_flags_t)(1u << 10))
+#define AZ_BADF_WALL_LIKE      ((az_baddie_flags_t)(1u << 11))
 // WATER_BOUNCE: baddie bounces off of liquid surfaces
-#define AZ_BADF_WATER_BOUNCE   ((az_baddie_flags_t)(1u << 11))
+#define AZ_BADF_WATER_BOUNCE   ((az_baddie_flags_t)(1u << 12))
 
 typedef struct {
   double overall_bounding_radius;

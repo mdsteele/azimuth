@@ -350,8 +350,6 @@ static void projectile_home_in(az_space_state_t *state,
                                az_projectile_t *proj,
                                double time) {
   assert(proj->data->homing_rate > 0.0);
-  // Homing/phase projectiles' homing can be turned off by its special logic.
-  if (proj->kind == AZ_PROJ_GUN_HOMING_PHASE && proj->param != 0) return;
   // First, figure out what position we're homing in on.
   bool found_target = false;
   az_vector_t goal = AZ_VZERO;
@@ -469,25 +467,6 @@ static void projectile_special_logic(az_space_state_t *state,
         leave_particle_trail(state, proj, AZ_PAR_EXPLOSION,
                              (az_color_t){255, 0, 255, 128}, 0.5, 7.0, 0.0);
       }
-      break;
-    case AZ_PROJ_GUN_HOMING_PHASE:
-      // Check if we're inside a wall.  Homing is turned off when we are.
-      proj->param = 0;
-      AZ_ARRAY_LOOP(wall, state->walls) {
-        if (wall->kind == AZ_WALL_NOTHING) continue;
-        if (az_point_touches_wall(wall, proj->position)) {
-          proj->param = 1;
-          break;
-        }
-      }
-      az_add_speck(state, (proj->param == 0 ?
-                           (az_color_t){0, 255, 128, 255} :
-                           (az_color_t){255, 255, 0, 255}),
-                   0.2, proj->position, AZ_VZERO);
-      // Move faster when inside a wall.
-      proj->velocity =
-        az_vpolar(proj->data->speed * (proj->param == 0 ? 1.0 : 1.5),
-                  proj->angle);
       break;
     case AZ_PROJ_GUN_HOMING_PIERCE:
       az_add_speck(state, (az_color_t){255, 0, 255, 255}, 0.3,

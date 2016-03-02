@@ -164,13 +164,6 @@ void az_draw_projectile(const az_projectile_t *proj, az_clock_t clock) {
         glVertex2f(-4, 4); glVertex2f(4, 0); glVertex2f(-4, -4);
       } glEnd();
       break;
-    case AZ_PROJ_GUN_HOMING_PHASE:
-      glBegin(GL_TRIANGLES); {
-        if (proj->param == 0) glColor3f(0, 1, 0.5);
-        else glColor3f(1, 1, 0);
-        glVertex2f(5, 0); glVertex2f(-5, 2.5); glVertex2f(-5, -2.5);
-      } glEnd();
-      break;
     case AZ_PROJ_GUN_PHASE:
     case AZ_PROJ_GUN_FREEZE_PHASE:
     case AZ_PROJ_GUN_PHASE_SHRAPNEL:

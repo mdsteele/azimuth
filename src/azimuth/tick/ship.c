@@ -36,6 +36,7 @@
 #include "azimuth/tick/script.h"
 #include "azimuth/util/color.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/polygon.h"
 #include "azimuth/util/random.h"
 #include "azimuth/util/vector.h"
 
@@ -396,6 +397,40 @@ static double ordn_power_mult(const az_player_t *player) {
           AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER : 1.0);
 }
 
+static double auto_aim_angle(const az_space_state_t *state, double limit,
+                             az_baddie_flags_t ignore_flag) {
+  const az_vector_t start =
+    az_vadd(state->ship.position, az_vpolar(18, state->ship.angle));
+  const double forward = state->ship.angle;
+  double best_dist = INFINITY;
+  double best_angle = forward;
+  AZ_ARRAY_LOOP(baddie, state->baddies) {
+    if (baddie->kind == AZ_BAD_NOTHING) continue;
+    if (az_baddie_has_flag(baddie, ignore_flag)) continue;
+    const az_vector_t delta = az_vsub(baddie->position, start);
+    const double dist = az_vnorm(delta);
+    if (dist >= best_dist) continue;
+    const double angle = az_vtheta(delta);
+    if (fabs(az_mod2pi(angle - forward)) <= limit) {
+      best_dist = dist;
+      best_angle = angle;
+    }
+  }
+  AZ_ARRAY_LOOP(door, state->doors) {
+    if (door->kind != AZ_DOOR_NORMAL) continue;
+    if (door->is_open) continue;
+    const az_vector_t delta = az_vsub(door->position, start);
+    const double dist = az_vnorm(delta);
+    if (dist >= best_dist) continue;
+    if (az_ray_hits_bounding_circle(start, az_vpolar(dist, forward),
+                                    door->position, AZ_DOOR_BOUNDING_RADIUS)) {
+      best_dist = dist;
+      best_angle = forward;
+    }
+  }
+  return best_angle;
+}
+
 static void fire_projectiles(
     az_space_state_t *state, az_proj_kind_t kind, double power, bool forward,
     int num_shots, double dtheta, double theta_offset, bool alt_params,
@@ -516,19 +551,8 @@ static void fire_beam(az_space_state_t *state, az_gun_t minor, double time) {
       if (beam_index == 1) beam_angle += AZ_DEG2RAD(10);
       else if (beam_index == 2) beam_angle -= AZ_DEG2RAD(10);
     } else if (minor == AZ_GUN_HOMING) {
-      double best_dist = INFINITY;
-      AZ_ARRAY_LOOP(baddie, state->baddies) {
-        if (baddie->kind == AZ_BAD_NOTHING) continue;
-        if (az_baddie_has_flag(baddie, AZ_BADF_NO_HOMING_BEAM)) continue;
-        const az_vector_t delta = az_vsub(baddie->position, beam_start);
-        const double dist = az_vnorm(delta);
-        if (dist >= best_dist) continue;
-        const double angle = az_vtheta(delta);
-        if (fabs(az_mod2pi(angle - beam_init_angle)) <= AZ_DEG2RAD(60)) {
-          best_dist = dist;
-          beam_angle = angle;
-        }
-      }
+      beam_angle = auto_aim_angle(state, AZ_DEG2RAD(60),
+                                  AZ_BADF_NO_HOMING_BEAM);
     }
 
     // Determine what the beam hits (if anything).
@@ -883,9 +907,10 @@ static void fire_weapons(az_space_state_t *state, double time) {
                          45, AZ_DEG2RAD(1), 0, AZ_SND_FIRE_GUN_NORMAL);
           return;
         case AZ_GUN_HOMING:
-          fire_gun_multi(state, 2.5, AZ_PROJ_GUN_HOMING_PHASE, 1.0,
-                         2, AZ_DEG2RAD(60), AZ_DEG2RAD(-30),
-                         AZ_SND_FIRE_GUN_NORMAL);
+          fire_gun_multi(state, 2.0, AZ_PROJ_GUN_PHASE, 1.0, 12, AZ_DEG2RAD(1),
+                         az_mod2pi(auto_aim_angle(state, AZ_DEG2RAD(120),
+                                                  AZ_BADF_NO_HOMING_PHASE) -
+                                   ship->angle), AZ_SND_FIRE_GUN_NORMAL);
           return;
         default: AZ_ASSERT_UNREACHABLE();
       }

@@ -107,13 +107,6 @@ static const az_proj_data_t proj_data[] = {
     .damage_kind = AZ_DMGF_NORMAL | AZ_DMGF_FREEZE,
     .properties = AZ_PROJF_PHASED | AZ_PROJF_FEW_SPECKS
   },
-  [AZ_PROJ_GUN_HOMING_PHASE] = {
-    .speed = 400.0,
-    .lifetime = 0.75,
-    .impact_damage = 0.75,
-    .homing_rate = AZ_DEG2RAD(200),
-    .properties = AZ_PROJF_PHASED
-  },
   [AZ_PROJ_GUN_PHASE_PIERCE] = {
     .speed = 600.0,
     .lifetime = 0.5,
