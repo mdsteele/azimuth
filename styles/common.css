@@ -56,6 +56,23 @@ section a { color: #6ff; }
 section a:visited { color: #f6f; }
 section a:active { color: #f99; }
 
+.video {
+  margin-bottom: 20px;
+  text-align: center;
+}
+@media (max-width: 520px) {
+  .video iframe {
+    width: 336px;
+    height: 189px;
+  }
+}
+@media (max-width: 336px) {
+  .video iframe {
+    width: 224px;
+    height: 126px;
+  }
+}
+
 .floatleft, .floatright {
   clear: both;
   display: block;
