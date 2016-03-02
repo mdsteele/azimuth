@@ -1,7 +1,7 @@
 # Azimuth
 
-Azimuth is a metroidvania game, with vector graphics.  It is nearing
-completion, and is currently undergoing beta testing.
+Azimuth is a metroidvania game, with vector graphics.  You can build it from
+source here, or download binaries at http://mdsteele.github.io/azimuth/download
 
 Azimuth is inspired by such games as the Metroid series (particularly Super
 Metroid and Metroid Fusion), SketchFighter 4000 Alpha, and Star Control II
