@@ -23,8 +23,8 @@
 
 /*===========================================================================*/
 
-#define AZ_VERSION_MAJOR 0
-#define AZ_VERSION_MINOR 5
+#define AZ_VERSION_MAJOR 1
+#define AZ_VERSION_MINOR 0
 #define AZ_VERSION_PATCH 0
 
 /*===========================================================================*/
