@@ -33,7 +33,7 @@
 /*===========================================================================*/
 
 typedef struct {
-  FILE *file;
+  az_reader_t *reader;
   bool success;
   jmp_buf jump;
   int num_baddies, num_doors, num_gravfields, num_nodes, num_walls;
@@ -50,24 +50,17 @@ typedef struct {
 #endif // NDEBUG
 
 #define READ(...) do { \
-    if (fscanf(loader->file, __VA_ARGS__) < AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
+    if (az_rscanf(loader->reader, __VA_ARGS__) < \
+        AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
       FAIL(); \
     } \
   } while (false)
-
-#define TRY_GETC(ch) try_getc(ch, loader->file)
-static bool try_getc(char ch, FILE *file) {
-  const char next_ch = fgetc(file);
-  if (next_ch == ch) return true;
-  ungetc(next_ch, file);
-  return false;
-}
 
 // Read the next non-whitespace character.  If it is '$', return true; if it is
 // '!' or if we reach EOF, return false; otherwise, fail parsing.
 static bool scan_to_script(az_load_room_t *loader) {
   char ch;
-  if (fscanf(loader->file, " %c", &ch) < 1) return false;
+  if (az_rscanf(loader->reader, " %c", &ch) < 1) return false;
   else if (ch == '!') return false;
   else if (ch == '$') return true;
   else FAIL();
@@ -75,9 +68,9 @@ static bool scan_to_script(az_load_room_t *loader) {
 
 static az_script_t *maybe_parse_script(az_load_room_t *loader, char ch) {
   if (!scan_to_script(loader)) return NULL;
-  if (fgetc(loader->file) != ch) FAIL();
-  if (fgetc(loader->file) != ':') FAIL();
-  az_script_t *script = az_fscan_script(loader->file);
+  if (az_rgetc(loader->reader) != ch) FAIL();
+  if (az_rgetc(loader->reader) != ':') FAIL();
+  az_script_t *script = az_read_script(loader->reader);
   if (script == NULL) FAIL();
   if (scan_to_script(loader)) FAIL();
   return script;
@@ -149,7 +142,8 @@ static void parse_baddie_directive(az_load_room_t *loader) {
   baddie->angle = angle;
   baddie->uuid_slot = uuid_slot;
   for (int i = 0; i < AZ_ARRAY_SIZE(baddie->cargo_slots); ++i) {
-    if (!TRY_GETC(':')) break;
+    if (az_rpeek(loader->reader) != ':') break;
+    az_rgetc(loader->reader);  // skip past the ':'
     int cargo_slot;
     READ("%d", &cargo_slot);
     if (cargo_slot < 0 || cargo_slot > AZ_NUM_UUID_SLOTS) FAIL();
@@ -296,7 +290,7 @@ static void parse_wall_directive(az_load_room_t *loader) {
 }
 
 static bool parse_directive(az_load_room_t *loader) {
-  switch (fgetc(loader->file)) {
+  switch (az_rgetc(loader->reader)) {
     case 'B': parse_baddie_directive(loader); return true;
     case 'D': parse_door_directive(loader); return true;
     case 'G': parse_gravfield_directive(loader); return true;
@@ -316,7 +310,6 @@ static void validate_room(az_load_room_t *loader) {
       loader->room->num_walls != loader->num_walls) FAIL();
 }
 
-#undef TRY_GETC
 #undef READ
 #undef FAIL
 
@@ -332,36 +325,44 @@ static void parse_room(az_load_room_t *loader) {
 }
 
 bool az_load_room_from_path(const char *filepath, az_room_t *room_out) {
+  az_reader_t reader;
+  if (!az_file_reader(filepath, &reader)) return false;
+  const bool success = az_read_room(&reader, room_out);
+  az_rclose(&reader);
+  return success;
+}
+
+bool az_read_room(az_reader_t *reader, az_room_t *room_out) {
   assert(room_out != NULL);
   AZ_ZERO_OBJECT(room_out);
-  FILE *file = fopen(filepath, "r");
-  if (file == NULL) return false;
-  az_load_room_t loader = {.file = file, .room = room_out, .success = false};
+  az_load_room_t loader = {
+    .reader = reader, .room = room_out, .success = false
+  };
   parse_room(&loader);
-  fclose(file);
   return loader.success;
 }
 
 /*===========================================================================*/
 
 #define WRITE(...) do { \
-    if (fprintf(file, __VA_ARGS__) < 0) return false; \
+    if (!az_wprintf(writer, __VA_ARGS__)) return false; \
   } while (false)
 
-static bool try_write_script(char ch, const az_script_t *script, FILE *file) {
+static bool try_write_script(char ch, const az_script_t *script,
+                             az_writer_t *writer) {
   if (script != NULL) {
     WRITE("$%c:", ch);
-    if (!az_fprint_script(script, file)) return false;
+    if (!az_write_script(script, writer)) return false;
     WRITE("\n");
   }
   return true;
 }
 
 #define WRITE_SCRIPT(ch, script) do { \
-    if (!try_write_script(ch, script, file)) return false; \
+    if (!try_write_script(ch, script, writer)) return false; \
   } while (false)
 
-static bool write_room(const az_room_t *room, FILE *file) {
+bool az_write_room(const az_room_t *room, az_writer_t *writer) {
   WRITE("@R z%d p%u", (int)room->zone_key, (unsigned int)room->properties);
   if (room->properties & (AZ_ROOMF_MARK_IF_CLR | AZ_ROOMF_MARK_IF_SET)) {
     WRITE("/%d", (int)room->marker_flag);
@@ -461,10 +462,10 @@ static bool write_room(const az_room_t *room, FILE *file) {
 #undef WRITE_SCRIPT
 
 bool az_save_room_to_path(const az_room_t *room, const char *filepath) {
-  FILE *file = fopen(filepath, "w");
-  if (file == NULL) return false;
-  const bool ok = write_room(room, file);
-  fclose(file);
+  az_writer_t writer;
+  if (!az_file_writer(filepath, &writer)) return false;
+  const bool ok = az_write_room(room, &writer);
+  az_wclose(&writer);
   return ok;
 }
 

@@ -77,6 +77,7 @@ bool az_rsetpos(az_reader_t *reader, const az_rw_pos_t *pos);
 
 // Read:
 int az_rgetc(az_reader_t *reader);
+int az_rpeek(az_reader_t *reader);
 int az_rscanf(az_reader_t *reader, const char *format, ...)
   __attribute__((__format__(__scanf__,2,3)));
 

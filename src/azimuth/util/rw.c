@@ -111,6 +111,24 @@ int az_rgetc(az_reader_t *reader) {
   return ch;
 }
 
+int az_rpeek(az_reader_t *reader) {
+  int ch = EOF;
+  switch (reader->type) {
+    case AZ_RW_CLOSED: break;
+    case AZ_RW_STREAM:
+    case AZ_RW_FILE:
+      ch = fgetc(reader->data.file);
+      ungetc(ch, reader->data.file);
+      break;
+    case AZ_RW_STRING:
+      if (reader->data.string.position < reader->data.string.size) {
+        ch = reader->data.string.buffer[reader->data.string.position];
+      }
+      break;
+  }
+  return ch;
+}
+
 int az_rscanf(az_reader_t *reader, const char *format, ...) {
   int result = -1;
   switch (reader->type) {
