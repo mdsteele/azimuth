@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdio.h> // for FILE
 
+#include "azimuth/util/rw.h"
+
 /*===========================================================================*/
 
 typedef enum {
@@ -194,10 +196,12 @@ typedef struct {
 // Serialize the script to a file or string and return true, or return false on
 // error (e.g. file I/O fails, or the string buffer isn't large enough).  In
 // the string case, the buffer will be NUL-terminated.
+bool az_write_script(const az_script_t *script, az_writer_t *writer);
 bool az_fprint_script(const az_script_t *script, FILE *file);
 bool az_sprint_script(const az_script_t *script, char *buffer, int length);
 
 // Parse, allocate, and return the script, or return NULL on error.
+az_script_t *az_read_script(az_reader_t *reader);
 az_script_t *az_fscan_script(FILE *file);
 az_script_t *az_sscan_script(const char *string, int length);
 

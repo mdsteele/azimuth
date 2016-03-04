@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "azimuth/util/misc.h"
+#include "azimuth/util/rw.h"
 
 /*===========================================================================*/
 
@@ -300,40 +301,6 @@ static bool is_jump(az_opcode_t opcode) {
 
 /*===========================================================================*/
 
-typedef enum {
-  AZ_FILE_WRITER,
-  AZ_STRING_WRITER,
-} az_writer_type_t;
-
-typedef struct {
-  az_writer_type_t type;
-  union {
-    FILE *file;
-    struct { char *start; size_t size; } string;
-  } data;
-} az_writer_t;
-
-static bool az_wprintf(az_writer_t *writer, const char *format, ...)
-  __attribute__((__format__(__printf__,2,3)));
-static bool az_wprintf(az_writer_t *writer, const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  bool success = false;
-  if (writer->type ==  AZ_FILE_WRITER) {
-    success = (0 <= vfprintf(writer->data.file, format, args));
-  } else {
-    const int result = vsnprintf(writer->data.string.start,
-                                 writer->data.string.size, format, args);
-    if (result >= 0 && (size_t)result < writer->data.string.size) {
-      writer->data.string.start += (size_t)result;
-      writer->data.string.size -= (size_t)result;
-      success = true;
-    }
-  }
-  va_end(args);
-  return success;
-}
-
 static void fill_jump_table(const az_script_t *script, char *jump_table) {
   memset(jump_table, '\0', script->num_instructions);
   int next_label = 'A';
@@ -351,7 +318,7 @@ static void fill_jump_table(const az_script_t *script, char *jump_table) {
   }
 }
 
-static bool write_script(const az_script_t *script, az_writer_t *writer) {
+bool az_write_script(const az_script_t *script, az_writer_t *writer) {
   const int num_instructions = script->num_instructions;
   char jump_table[num_instructions];
   fill_jump_table(script, jump_table);
@@ -389,42 +356,47 @@ static bool write_script(const az_script_t *script, az_writer_t *writer) {
 }
 
 bool az_fprint_script(const az_script_t *script, FILE *file) {
-  az_writer_t writer = { .type = AZ_FILE_WRITER, .data.file = file };
-  return write_script(script, &writer);
+  az_writer_t writer;
+  az_stream_writer(file, &writer);
+  const bool success = az_write_script(script, &writer);
+  az_wclose(&writer);
+  return success;
 }
 
 bool az_sprint_script(const az_script_t *script, char *buffer, int length) {
-  az_writer_t writer = { .type = AZ_STRING_WRITER,
-                         .data.string = { .start = buffer, .size = length } };
-  return write_script(script, &writer);
+  az_writer_t writer;
+  az_charbuf_writer(buffer, length, &writer);
+  const bool success = az_write_script(script, &writer);
+  az_wclose(&writer);
+  return success;
 }
 
 /*===========================================================================*/
 
-static bool fscan_instructions(FILE *file, int num_instructions,
-                               az_instruction_t *instructions) {
+static bool read_instructions(az_reader_t *reader, int num_instructions,
+                              az_instruction_t *instructions) {
   int label_table[26] = {0};
   char jump_table[num_instructions];
   memset(jump_table, '\0', num_instructions);
   for (int i = 0; i < num_instructions; ++i) {
     char label[2];
     int num_read;
-    if (fscanf(file, "%1[A-Z]#%n", label, &num_read) == 1) {
+    if (az_rscanf(reader, "%1[A-Z]#%n", label, &num_read) == 1) {
       const int label_index = label[0] - 'A';
       assert(label_index >= 0 && label_index < AZ_ARRAY_SIZE(label_table));
       label_table[label_index] = i;
       if (num_read != 2) return false;
     }
     char name[12];
-    if (fscanf(file, "%11[a-z]%lf", name,
+    if (az_rscanf(reader, "%11[a-z]%lf", name,
                &instructions[i].immediate) == 0 ||
         !opcode_for_name(name, &instructions[i].opcode)) {
       return false;
     }
-    if (fscanf(file, "/%1[@A-Z]", label) == 1) {
+    if (az_rscanf(reader, "/%1[@A-Z]", label) == 1) {
       jump_table[i] = label[0];
     }
-    if (fgetc(file) != (i == num_instructions - 1 ? ';' : ',')) {
+    if (az_rgetc(reader) != (i == num_instructions - 1 ? ';' : ',')) {
       return false;
     }
   }
@@ -443,13 +415,13 @@ static bool fscan_instructions(FILE *file, int num_instructions,
   return true;
 }
 
-az_script_t *az_fscan_script(FILE *file) {
+az_script_t *az_read_script(az_reader_t *reader) {
   // Scan ahead and determine how many instructions long this script is.
-  fpos_t pos;
-  if (fgetpos(file, &pos) != 0) return NULL;
+  az_rw_pos_t pos;
+  if (!az_rgetpos(reader, &pos)) return NULL;
   int num_instructions = 1;
   for (bool finished = false; !finished;) {
-    switch (fgetc(file)) {
+    switch (az_rgetc(reader)) {
       case EOF: return NULL;
       case ',': ++num_instructions; break;
       case ';': finished = true; break;
@@ -457,11 +429,11 @@ az_script_t *az_fscan_script(FILE *file) {
     }
   }
   // Go back to the start of the script.
-  if (fsetpos(file, &pos) != 0) return NULL;
+  if (!az_rsetpos(reader, &pos)) return NULL;
   // Parse the instructions.
   az_instruction_t *instructions =
     AZ_ALLOC(num_instructions, az_instruction_t);
-  if (!fscan_instructions(file, num_instructions, instructions)) {
+  if (!read_instructions(reader, num_instructions, instructions)) {
     free(instructions);
     return NULL;
   }
@@ -471,15 +443,19 @@ az_script_t *az_fscan_script(FILE *file) {
   return script;
 }
 
+az_script_t *az_fscan_script(FILE *file) {
+  az_reader_t reader;
+  az_stream_reader(file, &reader);
+  az_script_t *script = az_read_script(&reader);
+  az_rclose(&reader);
+  return script;
+}
+
 az_script_t *az_sscan_script(const char *string, int length) {
-  FILE *file = tmpfile();
-  if (file == NULL) return NULL;
-  az_script_t *script = NULL;
-  if (fputs(string, file) >= 0) {
-    rewind(file);
-    script = az_fscan_script(file);
-  }
-  fclose(file);
+  az_reader_t reader;
+  az_charbuf_reader(string, length, &reader);
+  az_script_t *script = az_read_script(&reader);
+  az_rclose(&reader);
   return script;
 }
 
