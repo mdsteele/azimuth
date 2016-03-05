@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   RUN_TEST(test_modulo);
   RUN_TEST(test_mod2pi);
   RUN_TEST(test_paragraph_length);
-  RUN_TEST(test_paragraph_scan);
+  RUN_TEST(test_paragraph_read);
   RUN_TEST(test_parse_music);
   RUN_TEST(test_parse_music_instructions);
   RUN_TEST(test_persist_sound);

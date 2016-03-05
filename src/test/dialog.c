@@ -26,15 +26,18 @@
 
 /*===========================================================================*/
 
-static const char input_string[] = "\n"
-  "  This $$ is a $Gtest$W.  However$_10, $Xface42it is\n"
-  "  $Ronly$W a test.  Press [$u].";
+static const char input_string[] = "\"\n"
+  "  This $$ is a \\\"$Gtest$W\\\".  However$_10, $Xface42it is\n"
+  "  $Ronly$W a test.  Press [$u].\"";
 static const char paragraph[] =
-  "This $$ is a $Gtest$W.  However$_10, $Xface42it is\n"
+  "This $$ is a \"$Gtest$W\".  However$_10, $Xface42it is\n"
   "$Ronly$W a test.  Press [$u].";
 
-void test_paragraph_scan(void) {
-  char *actual_paragraph = az_sscan_paragraph(input_string);
+void test_paragraph_read(void) {
+  az_reader_t reader;
+  az_cstring_reader(input_string, &reader);
+  char *actual_paragraph = az_read_paragraph(&reader);
+  az_rclose(&reader);
   ASSERT_TRUE(actual_paragraph != NULL);
   EXPECT_STRING_EQ(paragraph, actual_paragraph);
   free(actual_paragraph);
@@ -49,11 +52,11 @@ void test_paragraph_length(void) {
   EXPECT_INT_EQ(0, az_paragraph_total_length(&prefs, ""));
 
   EXPECT_INT_EQ(2, az_paragraph_num_lines(paragraph));
-  EXPECT_INT_EQ(43, az_paragraph_line_length(&prefs, paragraph, 0));
-  EXPECT_INT_EQ(67, az_paragraph_total_length(&prefs, paragraph));
+  EXPECT_INT_EQ(45, az_paragraph_line_length(&prefs, paragraph, 0));
+  EXPECT_INT_EQ(69, az_paragraph_total_length(&prefs, paragraph));
 
   prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
-  EXPECT_INT_EQ(69, az_paragraph_total_length(&prefs, paragraph));
+  EXPECT_INT_EQ(71, az_paragraph_total_length(&prefs, paragraph));
 
   // Now test some paragraphs with bad escapes:
   EXPECT_INT_EQ(5, az_paragraph_total_length(&prefs, "Wr$_XXong$_4"));

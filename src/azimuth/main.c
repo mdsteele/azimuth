@@ -37,6 +37,8 @@
 #include "azimuth/system/resource.h"
 #include "azimuth/util/misc.h" // for AZ_ASSERT_UNREACHABLE
 #include "azimuth/util/prefs.h"
+#include "azimuth/util/rw.h"
+#include "azimuth/util/string.h"
 #include "azimuth/view/dialog.h" // for az_init_portrait_drawing
 #include "azimuth/view/wall.h" // for az_init_wall_drawing
 
@@ -46,11 +48,20 @@ static az_planet_t planet;
 static az_saved_games_t saved_games;
 static az_preferences_t preferences;
 
+static bool resource_reader(const char *name, az_reader_t *reader) {
+  const char *resource_dir = az_get_resource_directory();
+  if (resource_dir == NULL) return false;
+  char *path = az_strprintf("%s/%s", resource_dir, name);
+  const bool success = az_file_reader(path, reader);
+  free(path);
+  return success;
+}
+
 static bool load_scenario(void) {
   const char *resource_dir = az_get_resource_directory();
   if (resource_dir == NULL) return false;
   if (!az_init_music_datas(resource_dir)) return false;
-  if (!az_load_planet(resource_dir, &planet)) return false;
+  if (!az_read_planet(&resource_reader, &planet)) return false;
   return true;
 }
 

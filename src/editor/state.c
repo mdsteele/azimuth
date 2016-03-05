@@ -29,6 +29,7 @@
 #include "azimuth/state/planet.h"
 #include "azimuth/state/script.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/rw.h"
 #include "azimuth/util/string.h"
 #include "azimuth/util/vector.h"
 #include "editor/audit.h"
@@ -338,6 +339,13 @@ void az_relabel_editor_room(az_editor_room_t *room) {
   }
 }
 
+static bool resource_reader(const char *name, az_reader_t *reader) {
+  char *path = az_strprintf("data/%s", name);
+  const bool success = az_file_reader(path, reader);
+  free(path);
+  return success;
+}
+
 bool az_load_editor_state(az_editor_state_t *state) {
   init_reverse_indices();
   state->spin_camera = true;
@@ -358,7 +366,7 @@ bool az_load_editor_state(az_editor_state_t *state) {
   AZ_LIST_INIT(state->clipboard, 0);
 
   az_planet_t planet;
-  if (!az_load_planet("data", &planet)) return false;
+  if (!az_read_planet(&resource_reader, &planet)) return false;
 
   state->current_room = state->planet.start_room = planet.start_room;
   state->planet.on_start = az_clone_script(planet.on_start);
@@ -480,6 +488,13 @@ static void summarize_scenario(const az_planet_t *planet) {
          (int)(100.0 * (double)total_pop_rooms / (double)planet->num_rooms));
 }
 
+static bool resource_writer(const char *name, az_writer_t *writer) {
+  char *path = az_strprintf("data/%s", name);
+  const bool success = az_file_writer(path, writer);
+  free(path);
+  return success;
+}
+
 bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   assert(state != NULL);
   // Count unsaved rooms:
@@ -577,8 +592,8 @@ bool az_save_editor_state(az_editor_state_t *state, bool summarize) {
   // Summarize:
   if (summarize) summarize_scenario(&planet);
   // Write to disk:
-  const bool success =
-    az_save_planet(&planet, "data", rooms_to_save, num_rooms_to_save);
+  const bool success = az_write_planet(&planet, &resource_writer,
+                                       rooms_to_save, num_rooms_to_save);
   // Clean up:
   free(rooms_to_save);
   az_destroy_planet(&planet);

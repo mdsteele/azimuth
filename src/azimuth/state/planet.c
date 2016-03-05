@@ -38,8 +38,7 @@
 #define AZ_MAX_NUM_PARAGRAPHS 50000
 
 typedef struct {
-  FILE *file;
-  bool success;
+  az_reader_t *reader;
   jmp_buf jump;
   int num_zones, num_hints, num_paragraphs;
   az_planet_t *planet;
@@ -55,7 +54,8 @@ typedef struct {
 #endif // NDEBUG
 
 #define READ(...) do { \
-    if (fscanf(loader->file, __VA_ARGS__) < AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
+    if (az_rscanf(loader->reader, __VA_ARGS__) < \
+        AZ_COUNT_ARGS(__VA_ARGS__) - 1) { \
       FAIL(); \
     } \
   } while (false)
@@ -64,35 +64,8 @@ typedef struct {
 // do nothing more; otherwise, fail parsing.
 static void scan_to_bang(az_load_planet_t *loader) {
   char ch;
-  if (fscanf(loader->file, " %c", &ch) < 1) return;
+  if (az_rscanf(loader->reader, " %c", &ch) < 1) return;
   if (ch != '!') FAIL();
-}
-
-static char *scan_string(az_load_planet_t *loader) {
-  if (fgetc(loader->file) != '"') FAIL();
-  fpos_t pos;
-  if (fgetpos(loader->file, &pos) != 0) FAIL();
-  size_t length = 0;
-  while (true) {
-    const int ch = fgetc(loader->file);
-    if (ch == EOF) FAIL();
-    else if (ch == '"') break;
-    else if (ch == '\\') fgetc(loader->file);
-    ++length;
-  }
-  if (fsetpos(loader->file, &pos) != 0) FAIL();
-  char *string = AZ_ALLOC(length + 1, char);
-  for (size_t i = 0; i < length; ++i) {
-    const int ch = fgetc(loader->file);
-    if (ch == EOF) FAIL();
-    string[i] = (ch == '\\' ? fgetc(loader->file) : ch);
-  }
-  assert(string[length] == '\0');
-  if (fgetc(loader->file) != '"') {
-    free(string);
-    FAIL();
-  }
-  return string;
 }
 
 static void parse_planet_header(az_load_planet_t *loader) {
@@ -117,8 +90,8 @@ static void parse_planet_header(az_load_planet_t *loader) {
   loader->planet->paragraphs = AZ_ALLOC(num_paragraphs, char*);
   loader->planet->start_room = start_room_num;
   char ch = '\0';
-  if (fscanf(loader->file, " $s%c", &ch) < 1 || ch != ':') FAIL();
-  loader->planet->on_start = az_fscan_script(loader->file);
+  if (az_rscanf(loader->reader, " $s%c", &ch) < 1 || ch != ':') FAIL();
+  loader->planet->on_start = az_read_script(loader->reader);
   if (loader->planet->on_start == NULL) FAIL();
   scan_to_bang(loader);
 }
@@ -188,9 +161,7 @@ static void parse_paragraph_directive(az_load_planet_t *loader) {
   int paragraph_index;
   READ("%d", &paragraph_index);
   if (paragraph_index != loader->planet->num_paragraphs) FAIL();
-  char *string = scan_string(loader);
-  char *paragraph = az_sscan_paragraph(string);
-  free(string);
+  char *paragraph = az_read_paragraph(loader->reader);
   if (paragraph == NULL) FAIL();
   loader->planet->paragraphs[loader->planet->num_paragraphs] = paragraph;
   ++loader->planet->num_paragraphs;
@@ -200,7 +171,8 @@ static void parse_paragraph_directive(az_load_planet_t *loader) {
 static void parse_zone_directive(az_load_planet_t *loader) {
   if (loader->planet->num_zones >= loader->num_zones) FAIL();
   az_zone_t *zone = &loader->planet->zones[loader->planet->num_zones];
-  zone->name = scan_string(loader);
+  zone->name = az_read_paragraph(loader->reader);
+  if (zone->name == NULL) FAIL();
   int red, green, blue;
   READ(" c(%d,%d,%d)\n", &red, &green, &blue);
   if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 ||
@@ -213,7 +185,7 @@ static void parse_zone_directive(az_load_planet_t *loader) {
 }
 
 static bool parse_directive(az_load_planet_t *loader) {
-  switch (fgetc(loader->file)) {
+  switch (az_rgetc(loader->reader)) {
     case 'H': parse_hint_directive(loader); return true;
     case 'T': parse_paragraph_directive(loader); return true;
     case 'Z': parse_zone_directive(loader); return true;
@@ -225,50 +197,47 @@ static bool parse_directive(az_load_planet_t *loader) {
 
 static void validate_planet_basis(az_load_planet_t *loader) {
   if (loader->planet->num_zones != loader->num_zones ||
+      loader->planet->num_hints != loader->num_hints ||
       loader->planet->num_paragraphs != loader->num_paragraphs) FAIL();
 }
 
 #undef READ
 #undef FAIL
 
-static void parse_planet_basis(az_load_planet_t *loader) {
+static bool parse_planet_basis(az_load_planet_t *loader) {
   if (setjmp(loader->jump) != 0) {
     az_destroy_planet(loader->planet);
-    return;
+    return false;
   }
   parse_planet_header(loader);
   while (parse_directive(loader));
   validate_planet_basis(loader);
-  loader->success = true;
+  return true;
 }
 
-static bool load_planet_basis(const char *filepath, az_planet_t *planet_out) {
+static bool read_planet_basis(az_reader_t *reader, az_planet_t *planet_out) {
   assert(planet_out != NULL);
-  FILE *file = fopen(filepath, "r");
-  if (file == NULL) return false;
-  az_load_planet_t loader = {.file = file, .planet = planet_out};
-  parse_planet_basis(&loader);
-  fclose(file);
-  return loader.success;
+  az_load_planet_t loader = {.reader = reader, .planet = planet_out};
+  return parse_planet_basis(&loader);
 }
 
-bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
-  assert(resource_dir != NULL);
+bool az_read_planet(az_resource_reader_fn_t resource_reader,
+                    az_planet_t *planet_out) {
   assert(planet_out != NULL);
 
-  {
-    char *planet_path = az_strprintf("%s/rooms/planet.txt", resource_dir);
-    const bool success = load_planet_basis(planet_path, planet_out);
-    free(planet_path);
-    if (!success) return false;
-  }
+  az_reader_t reader;
+  if (!resource_reader("rooms/planet.txt", &reader)) return false;
+  bool success = read_planet_basis(&reader, planet_out);
+  az_rclose(&reader);
+  if (!success) return false;
 
   for (int i = 0; i < planet_out->num_rooms; ++i) {
-    char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, i);
-    const bool success =
-      az_load_room_from_path(room_path, &planet_out->rooms[i]) &&
+    char *room_name = az_strprintf("rooms/room%03d.txt", i);
+    resource_reader(room_name, &reader);
+    success = az_read_room(&reader, &planet_out->rooms[i]) &&
       planet_out->rooms[i].zone_key < planet_out->num_zones;
-    free(room_path);
+    az_rclose(&reader);
+    free(room_name);
     if (!success) {
       az_destroy_planet(planet_out);
       return false;
@@ -281,16 +250,17 @@ bool az_load_planet(const char *resource_dir, az_planet_t *planet_out) {
 /*===========================================================================*/
 
 #define WRITE(...) do { \
-    if (fprintf(file, __VA_ARGS__) < 0) return false; \
+    if (!az_wprintf(writer, __VA_ARGS__)) return false; \
   } while (false)
 
-static bool write_planet_header(const az_planet_t *planet, FILE *file) {
+static bool write_planet_basis(const az_planet_t *planet,
+                               az_writer_t *writer) {
   WRITE("@P z%d h%d r%d t%d s%d\n",
         planet->num_zones, planet->num_hints, planet->num_rooms,
         planet->num_paragraphs, planet->start_room);
   if (planet->on_start != NULL) {
     WRITE("$s:");
-    if (!az_fprint_script(planet->on_start, file)) return false;
+    if (!az_write_script(planet->on_start, writer)) return false;
     WRITE("\n");
   }
   for (int i = 0; i < planet->num_zones; ++i) {
@@ -328,41 +298,40 @@ static bool write_planet_header(const az_planet_t *planet, FILE *file) {
   }
   for (int i = 0; i < planet->num_paragraphs; ++i) {
     const char *paragraph = planet->paragraphs[i];
-    WRITE("!T%d\"", i);
-    if (!az_fprint_paragraph(paragraph, file)) return false;
-    WRITE("\"\n");
+    WRITE("!T%d", i);
+    if (!az_write_paragraph(paragraph, writer)) return false;
+    WRITE("\n");
   }
   return true;
 }
 
 #undef WRITE
 
-static bool save_planet_header(const az_planet_t *planet,
-                               const char *filepath) {
-  FILE *file = fopen(filepath, "w");
-  if (file == NULL) return false;
-  const bool success = write_planet_header(planet, file);
-  fclose(file);
-  return success;
-}
-
-bool az_save_planet(
-    const az_planet_t *planet, const char *resource_dir,
-    const az_room_key_t *rooms_to_save, int num_rooms_to_save) {
+bool az_write_planet(const az_planet_t *planet,
+                     az_resource_writer_fn_t resource_writer,
+                     const az_room_key_t *rooms_to_write,
+                     int num_rooms_to_write) {
   assert(planet != NULL);
-  assert(resource_dir != NULL);
 
-  for (int i = 0; i < num_rooms_to_save; ++i) {
-    const int key = rooms_to_save[i];
-    char *room_path = az_strprintf("%s/rooms/room%03d.txt", resource_dir, key);
-    const bool success = az_save_room_to_path(&planet->rooms[key], room_path);
-    free(room_path);
+  for (int i = 0; i < num_rooms_to_write; ++i) {
+    const int key = rooms_to_write[i];
+    char *room_name = az_strprintf("rooms/room%03d.txt", key);
+    bool success = false;
+    az_writer_t writer;
+    if (resource_writer(room_name, &writer)) {
+      success = az_write_room(&planet->rooms[key], &writer);
+      az_wclose(&writer);
+    }
+    free(room_name);
     if (!success) return false;
   }
 
-  char *planet_path = az_strprintf("%s/rooms/planet.txt", resource_dir);
-  const bool success = save_planet_header(planet, planet_path);
-  free(planet_path);
+  bool success = false;
+  az_writer_t writer;
+  if (resource_writer("rooms/planet.txt", &writer)) {
+    success = write_planet_basis(planet, &writer);
+    az_wclose(&writer);
+  }
   return success;
 }
 

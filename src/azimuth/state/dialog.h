@@ -25,6 +25,7 @@
 #include <stdio.h> // for FILE
 
 #include "azimuth/util/prefs.h"
+#include "azimuth/util/rw.h"
 
 /*===========================================================================*/
 
@@ -84,12 +85,12 @@ typedef struct {
 
 /*===========================================================================*/
 
-// Serialize the paragraph to a file and return true, or return false on error
-// (e.g. if file I/O fails).
-bool az_fprint_paragraph(const char *paragraph, FILE *file);
+// Serialize the paragraph and return true, or return false on error (e.g. if
+// file I/O fails).
+bool az_write_paragraph(const char *paragraph, az_writer_t *writer);
 
-// Parse and allocate the paragraph.
-char *az_sscan_paragraph(const char *string);
+// Parse and allocate the paragraph; return NULL on failure.
+char *az_read_paragraph(az_reader_t *reader);
 
 // Return the number of lines in the paragraph.  This will be at least 1,
 // even for an empty string.

@@ -28,6 +28,7 @@
 #include "azimuth/state/room.h"
 #include "azimuth/state/music.h" // for az_music_key_t
 #include "azimuth/state/script.h"
+#include "azimuth/util/rw.h"
 
 /*===========================================================================*/
 
@@ -67,10 +68,13 @@ typedef struct {
   az_room_t *rooms;
 } az_planet_t;
 
-bool az_load_planet(const char *resource_dir, az_planet_t *planet_out);
+bool az_read_planet(az_resource_reader_fn_t resource_reader,
+                    az_planet_t *planet_out);
 
-bool az_save_planet(const az_planet_t *planet, const char *resource_dir,
-                    const az_room_key_t *rooms_to_save, int num_rooms_to_save);
+bool az_write_planet(const az_planet_t *planet,
+                     az_resource_writer_fn_t resource_writer,
+                     const az_room_key_t *rooms_to_write,
+                     int num_rooms_to_write);
 
 // Delete the data arrays owned by a planet (but not the planet object itself).
 void az_destroy_planet(az_planet_t *planet);

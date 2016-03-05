@@ -62,6 +62,9 @@ typedef union {
   size_t string_pos;
 } az_rw_pos_t;
 
+typedef bool (*az_resource_reader_fn_t)(const char *name, az_reader_t *reader);
+typedef bool (*az_resource_writer_fn_t)(const char *name, az_writer_t *writer);
+
 /*===========================================================================*/
 
 // Construtors:

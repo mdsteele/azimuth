@@ -32,11 +32,11 @@
 /*===========================================================================*/
 
 #define WRITE(...) do { \
-    if (fprintf(file, __VA_ARGS__) < 0) return false; \
+    if (!az_wprintf(writer, __VA_ARGS__)) return false; \
   } while (false)
 
-bool az_fprint_paragraph(const char *paragraph, FILE *file) {
-  WRITE("\n  ");
+bool az_write_paragraph(const char *paragraph, az_writer_t *writer) {
+  WRITE("\"\n  ");
   for (const char *ch = paragraph; *ch != '\0'; ++ch) {
     switch (*ch) {
       case '\n': WRITE(*(ch + 1) == '\n' ? "\n" : "\n  "); break;
@@ -45,6 +45,7 @@ bool az_fprint_paragraph(const char *paragraph, FILE *file) {
       default: WRITE("%c", *ch); break;
     }
   }
+  WRITE("\"");
   return true;
 }
 
@@ -52,37 +53,56 @@ bool az_fprint_paragraph(const char *paragraph, FILE *file) {
 
 /*===========================================================================*/
 
-char *az_sscan_paragraph(const char *string) {
-  const int length = strlen(string);
-  int paragraph_length = 0;
-  int start = 0;
-  for (; start < length; ++start) {
-    if (string[start] != ' ' && string[start] != '\n') break;
-  }
-  int s_index = start;
-  while (s_index < length) {
-    const bool linebreak = (string[s_index] == '\n');
-    ++paragraph_length;
-    ++s_index;
-    if (linebreak) {
-      for (; s_index < length && string[s_index] == ' '; ++s_index) {}
+char *az_read_paragraph(az_reader_t *reader) {
+  if (az_rgetc(reader) != '"') return NULL;
+  az_rw_pos_t pos;
+  if (!az_rgetpos(reader, &pos)) return NULL;
+  bool skip_spaces = true, skip_linebreaks = true;
+  int paragraph_size = 1;  // Include 1 for terminating NUL.
+  for (int ch = az_rgetc(reader); ch != '"'; ch = az_rgetc(reader)) {
+    switch (ch) {
+      case EOF: return NULL;
+      case '\n':
+        if (skip_linebreaks) continue;
+        skip_spaces = true;
+        break;
+      case ' ':
+        if (skip_spaces) continue;
+        break;
+      case '\\':
+        ch = az_rgetc(reader);
+        if (ch == EOF) return NULL;
+        // fallthrough
+      default:
+        skip_spaces = skip_linebreaks = false;
+        break;
     }
+    ++paragraph_size;
   }
-  char *paragraph = AZ_ALLOC(paragraph_length + 1, char);
+  if (!az_rsetpos(reader, &pos)) return NULL;
+  char *paragraph = AZ_ALLOC(paragraph_size, char);
+  skip_spaces = skip_linebreaks = true;
   int p_index = 0;
-  s_index = start;
-  while (s_index < length) {
-    const bool linebreak = (string[s_index] == '\n');
-    assert(p_index < paragraph_length);
-    paragraph[p_index] = string[s_index];
-    ++p_index;
-    ++s_index;
-    if (linebreak) {
-      for (; s_index < length && string[s_index] == ' '; ++s_index) {}
+  for (int ch = az_rgetc(reader); ch != '"'; ch = az_rgetc(reader)) {
+    switch (ch) {
+      case '\n':
+        if (skip_linebreaks) continue;
+        skip_spaces = true;
+        break;
+      case ' ':
+        if (skip_spaces) continue;
+        break;
+      case '\\':
+        ch = az_rgetc(reader);
+        // fallthrough
+      default:
+        assert(ch != EOF);
+        skip_spaces = skip_linebreaks = false;
+        break;
     }
+    paragraph[p_index++] = ch;
   }
-  assert(p_index == paragraph_length);
-  assert(paragraph[paragraph_length] == '\0');
+  assert(paragraph[paragraph_size - 1] == '\0');
   return paragraph;
 }
 
