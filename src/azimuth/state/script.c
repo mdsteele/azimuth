@@ -355,14 +355,6 @@ bool az_write_script(const az_script_t *script, az_writer_t *writer) {
   return true;
 }
 
-bool az_fprint_script(const az_script_t *script, FILE *file) {
-  az_writer_t writer;
-  az_stream_writer(file, &writer);
-  const bool success = az_write_script(script, &writer);
-  az_wclose(&writer);
-  return success;
-}
-
 bool az_sprint_script(const az_script_t *script, char *buffer, int length) {
   az_writer_t writer;
   az_charbuf_writer(buffer, length, &writer);
@@ -440,14 +432,6 @@ az_script_t *az_read_script(az_reader_t *reader) {
   az_script_t *script = AZ_ALLOC(1, az_script_t);
   script->num_instructions = num_instructions;
   script->instructions = instructions;
-  return script;
-}
-
-az_script_t *az_fscan_script(FILE *file) {
-  az_reader_t reader;
-  az_stream_reader(file, &reader);
-  az_script_t *script = az_read_script(&reader);
-  az_rclose(&reader);
   return script;
 }
 

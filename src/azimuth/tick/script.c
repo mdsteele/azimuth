@@ -34,6 +34,7 @@
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/random.h"
+#include "azimuth/util/rw.h"
 #include "azimuth/util/vector.h"
 
 /*===========================================================================*/
@@ -47,14 +48,17 @@
 #else
 
 static void print_error(const char *msg, const az_script_vm_t *vm) {
-  fprintf(stderr, "SCRIPT ERROR: %s\n  ", msg);
-  az_fprint_script(vm->script, stderr);
-  fprintf(stderr, "\n  pc = %d\n  stack: ", vm->pc);
+  az_writer_t writer;
+  az_stderr_writer(&writer);
+  az_wprintf(&writer, "SCRIPT ERROR: %s\n  ", msg);
+  az_write_script(vm->script, &writer);
+  az_wprintf(&writer, "\n  pc = %d\n  stack: ", vm->pc);
   for (int i = 0; i < vm->stack_size; ++i) {
-    if (i != 0) fprintf(stderr, ", ");
-    fprintf(stderr, "%.12g", vm->stack[i]);
+    if (i != 0) az_wprintf(&writer, ", ");
+    az_wprintf(&writer, "%.12g", vm->stack[i]);
   }
-  fputc('\n', stderr);
+  az_wprintf(&writer, "\n");
+  az_wclose(&writer);
 }
 
 #define SCRIPT_ERROR(msg) do { \
