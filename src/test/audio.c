@@ -20,6 +20,8 @@
 #include <stdio.h>
 
 #include "azimuth/util/audio.h"
+#include "azimuth/util/music.h"
+#include "azimuth/util/rw.h"
 #include "azimuth/util/sound.h"
 #include "test/test.h"
 
@@ -126,12 +128,10 @@ void test_sound_volume(void) {
 }
 
 #define PARSE_MUSIC_FROM_STRING(music_string, music) do { \
-    FILE *file = tmpfile(); \
-    ASSERT_TRUE(file != NULL); \
-    EXPECT_TRUE(0 <= fputs((music_string), file)); \
-    rewind(file); \
-    const bool success = az_parse_music_from_file(file, 0, NULL, (music)); \
-    fclose(file); \
+    az_reader_t reader; \
+    az_cstring_reader((music_string), &reader); \
+    const bool success = az_read_music(&reader, 0, NULL, (music)); \
+    az_rclose(&reader); \
     ASSERT_TRUE(success); \
   } while (false)
 

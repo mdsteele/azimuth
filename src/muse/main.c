@@ -69,10 +69,16 @@ int main(int argc, char **argv) {
   az_get_drum_kit(&num_drums, &drums);
 
   // Load music:
-  if (!az_parse_music_from_path(argv[1], num_drums, drums, &music)) {
+  az_reader_t reader;
+  if (!az_file_reader(argv[1], &reader)) {
+    fprintf(stderr, "ERROR: could not open %s\n", argv[1]);
+    return EXIT_FAILURE;
+  }
+  if (!az_read_music(&reader, num_drums, drums, &music)) {
     fprintf(stderr, "ERROR: failed to parse music.\n");
     return EXIT_FAILURE;
   }
+  az_rclose(&reader);
   atexit(destroy_music);
   az_reset_music_synth(&synth, &music, music_flag);
 

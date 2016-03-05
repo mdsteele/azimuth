@@ -51,8 +51,8 @@
 
 typedef struct {
   az_music_t *music;
-  FILE *file;
-  int current_char; // the most recent character read from the file
+  az_reader_t *reader;
+  int current_char; // the most recent character read
   int line, col;
   jmp_buf jump;
   int num_drums;
@@ -101,13 +101,13 @@ typedef struct {
 } az_music_parser_t;
 
 az_music_parser_t *new_music_parser(
-    az_music_t *music, FILE *file, int num_drums,
+    az_music_t *music, az_reader_t *reader, int num_drums,
     const az_sound_data_t *drums) {
   assert(num_drums >= 0);
   assert(drums != NULL || num_drums == 0);
   az_music_parser_t *parser = AZ_ALLOC(1, az_music_parser_t);
   parser->music = music;
-  parser->file = file;
+  parser->reader = reader;
   parser->line = 1;
   parser->num_drums = num_drums;
   parser->drums = drums;
@@ -131,7 +131,7 @@ void free_music_parser(az_music_parser_t *parser) {
 /*===========================================================================*/
 
 #define TRY_READ(...) \
-  (fscanf(parser->file, __VA_ARGS__) == AZ_COUNT_ARGS(__VA_ARGS__) - 1)
+  (az_rscanf(parser->reader, __VA_ARGS__) == AZ_COUNT_ARGS(__VA_ARGS__) - 1)
 
 #define PARSE_ERROR(...) do { \
     fprintf(stderr, "line %d: parse error: ", parser->line); \
@@ -140,7 +140,7 @@ void free_music_parser(az_music_parser_t *parser) {
   } while (false)
 
 static int next_char(az_music_parser_t *parser) {
-  const int ch = fgetc(parser->file);
+  const int ch = az_rgetc(parser->reader);
   if (parser->current_char == '\n') ++parser->line;
   parser->current_char = ch;
   return ch;
@@ -151,7 +151,7 @@ static void parse_music_header(az_music_parser_t *parser) {
   assert(parser->spec_string_length == 0);
   assert(parser->spec_num_instructions == 0);
   while (true) {
-    const int ch = fgetc(parser->file);
+    const int ch = az_rgetc(parser->reader);
     if (ch == EOF) PARSE_ERROR("EOF in middle of spec string\n");
     else if (ch == '"') break;
     else if (ch == '|' || ch == '=' || ch == '!' || ch == '$' ||
@@ -695,24 +695,12 @@ static bool parse_music(az_music_parser_t *parser) {
 
 /*===========================================================================*/
 
-bool az_parse_music_from_path(
-    const char *filepath, int num_drums, const az_sound_data_t *drums,
-    az_music_t *music_out) {
-  FILE *file = fopen(filepath, "r");
-  if (file == NULL) return false;
-  const bool success =
-    az_parse_music_from_file(file, num_drums, drums, music_out);
-  fclose(file);
-  return success;
-}
-
-bool az_parse_music_from_file(
-    FILE *file, int num_drums, const az_sound_data_t *drums,
-    az_music_t *music_out) {
+bool az_read_music(az_reader_t *reader, int num_drums,
+                   const az_sound_data_t *drums, az_music_t *music_out) {
   assert(music_out != NULL);
   AZ_ZERO_OBJECT(music_out);
   az_music_parser_t *parser =
-    new_music_parser(music_out, file, num_drums, drums);
+    new_music_parser(music_out, reader, num_drums, drums);
   const bool success = parse_music(parser);
   free_music_parser(parser);
   return success;

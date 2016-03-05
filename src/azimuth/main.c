@@ -58,9 +58,7 @@ static bool resource_reader(const char *name, az_reader_t *reader) {
 }
 
 static bool load_scenario(void) {
-  const char *resource_dir = az_get_resource_directory();
-  if (resource_dir == NULL) return false;
-  if (!az_init_music_datas(resource_dir)) return false;
+  if (!az_init_music_datas(&resource_reader)) return false;
   if (!az_read_planet(&resource_reader, &planet)) return false;
   return true;
 }

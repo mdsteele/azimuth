@@ -23,6 +23,7 @@
 
 #include "azimuth/util/audio.h"
 #include "azimuth/util/music.h"
+#include "azimuth/util/rw.h"
 
 /*===========================================================================*/
 
@@ -59,7 +60,7 @@ typedef enum {
 
 void az_get_drum_kit(int *num_drums_out, const az_sound_data_t **drums_out);
 
-bool az_init_music_datas(const char *resource_dir);
+bool az_init_music_datas(az_resource_reader_fn_t resource_reader);
 
 // Returns the title of the music, or NULL if it has no title.
 const char *az_get_music_title(az_music_key_t music_key);

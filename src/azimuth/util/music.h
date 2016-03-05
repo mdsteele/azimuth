@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "azimuth/util/rw.h"
 #include "azimuth/util/sound.h"
 
 /*===========================================================================*/
@@ -110,13 +111,8 @@ typedef struct {
   az_music_instruction_t *instructions;
 } az_music_t;
 
-bool az_parse_music_from_path(
-    const char *filepath, int num_drums, const az_sound_data_t *drums,
-    az_music_t *music_out);
-
-bool az_parse_music_from_file(
-    FILE *file, int num_drums, const az_sound_data_t *drums,
-    az_music_t *music_out);
+bool az_read_music(az_reader_t *reader, int num_drums,
+                   const az_sound_data_t *drums, az_music_t *music_out);
 
 void az_destroy_music(az_music_t *music);
 

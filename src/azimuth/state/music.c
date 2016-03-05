@@ -25,6 +25,7 @@
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/music.h"
+#include "azimuth/util/rw.h"
 #include "azimuth/util/string.h"
 #include "azimuth/util/vector.h"
 #include "azimuth/util/warning.h"
@@ -191,9 +192,8 @@ static void destroy_music_datas(void) {
   AZ_ARRAY_LOOP(music, music_datas) az_destroy_music(music);
 }
 
-bool az_init_music_datas(const char *resource_dir) {
+bool az_init_music_datas(az_resource_reader_fn_t resource_reader) {
   assert(!music_data_initialized);
-  assert(resource_dir != NULL);
   // Initialize inverse music keys:
   for (int i = 0; i < AZ_NUM_MUSIC_KEYS; ++i) {
     inverse_music_keys[ordered_music_keys[i] - 1] = i;
@@ -206,14 +206,19 @@ bool az_init_music_datas(const char *resource_dir) {
   for (int i = 0; i < AZ_ARRAY_SIZE(music_filenames); ++i) {
     const char *filename = music_filenames[i];
     if (filename == NULL) continue;
-    char *music_path = az_strprintf("%s/music/%s", resource_dir, filename);
-    if (!az_parse_music_from_path(music_path, num_drums, drums,
-                                  &music_datas[i])) {
-      AZ_WARNING_ALWAYS("Failed to load music from %s\n", music_path);
-      free(music_path);
+    char *music_name = az_strprintf("music/%s", filename);
+    bool success = false;
+    az_reader_t reader;
+    if (resource_reader(music_name, &reader)) {
+      success = az_read_music(&reader, num_drums, drums, &music_datas[i]);
+      az_rclose(&reader);
+    }
+    if (!success) {
+      AZ_WARNING_ALWAYS("Failed to load music from %s\n", music_name);
+      free(music_name);
       destroy_music_datas();
       return false;
-    } else free(music_path);
+    } else free(music_name);
   }
   atexit(destroy_music_datas);
   music_data_initialized = true;
