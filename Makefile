@@ -79,13 +79,15 @@ ifeq "$(OS_NAME)" "Darwin"
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
+                    $(OBJDIR)/azimuth/system/resource_common.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
   MAIN_LIBFLAGS = -lm -lSDL -lGL
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lm -lSDL
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_linux.o
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_common.o \
+                    $(OBJDIR)/azimuth/system/resource_linux.o
   ALL_TARGETS += linux_app
 endif
 
@@ -199,10 +201,12 @@ $(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
 	$(compile-sys)
 
 $(OBJDIR)/azimuth/system/resource_mac.o: \
-    $(SRCDIR)/azimuth/system/resource_mac.m $(AZ_SYSTEM_HEADERS)
+    $(SRCDIR)/azimuth/system/resource_mac.m $(AZ_SYSTEM_HEADERS) \
+    $(SRCDIR)/azimuth/util/rw.h
 	$(compile-sys)
 
-$(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c $(AZ_SYSTEM_HEADERS)
+$(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
+    $(AZ_SYSTEM_HEADERS) $(SRCDIR)/azimuth/util/rw.h
 	$(compile-sys)
 
 #=============================================================================#

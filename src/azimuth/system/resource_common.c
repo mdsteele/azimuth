@@ -17,30 +17,23 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#pragma once
-#ifndef AZIMUTH_SYSTEM_RESOURCE_H_
-#define AZIMUTH_SYSTEM_RESOURCE_H_
+#include "azimuth/system/resource.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "azimuth/util/rw.h"
+#include "azimuth/util/string.h"
 
 /*===========================================================================*/
 
-// Get the path to the user-specific directory for storing persistent data for
-// this application (e.g. preferences or save files) as a NUL-terminated string
-// (without the trailing slash).  If the directory doesn't already exist,
-// create it.  If anything fails, this will return a NULL pointer.
-const char *az_get_app_data_directory(void);
-
-// Get the path to the directory containing the game's resource files as a
-// NUL-terminated string (without the trailing slash).  If this fails, it will
-// return a NULL pointer.
-const char *az_get_resource_directory(void);
-
-// An az_resource_reader_fn_t for reading game resources.
-bool az_system_resource_reader(const char *name, az_reader_t *reader);
+bool az_system_resource_reader(const char *name, az_reader_t *reader) {
+  const char *resource_dir = az_get_resource_directory();
+  if (resource_dir == NULL) return false;
+  char *path = az_strprintf("%s/%s", resource_dir, name);
+  const bool success = az_file_reader(path, reader);
+  free(path);
+  return success;
+}
 
 /*===========================================================================*/
-
-#endif // AZIMUTH_SYSTEM_RESOURCE_H_
