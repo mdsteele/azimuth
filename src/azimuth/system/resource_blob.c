@@ -21,19 +21,37 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "azimuth/util/rw.h"
 #include "azimuth/util/string.h"
 
 /*===========================================================================*/
 
+// Keep this declaration in sync with generate_blob_index.sh
+extern const struct resource_entry {
+  const char *name;
+  size_t offset, length;
+} resource_index[];
+extern const size_t resource_index_size;
+extern const char _binary_resources_start[];
+
+// Comparison function for bsearch.
+static int compare_resource_entries(const void *key_ptr,
+                                    const void *value_ptr) {
+  const char *name = key_ptr;
+  const struct resource_entry *entry = value_ptr;
+  return strcmp(name, entry->name);
+}
+
 bool az_system_resource_reader(const char *name, az_reader_t *reader) {
-  const char *resource_dir = az_get_resource_directory();
-  if (resource_dir == NULL) return false;
-  char *path = az_strprintf("%s/%s", resource_dir, name);
-  const bool success = az_file_reader(path, reader);
-  free(path);
-  return success;
+  struct resource_entry *entry =
+    bsearch(name, resource_index, resource_index_size,
+            sizeof(struct resource_entry), &compare_resource_entries);
+  if (entry == NULL) return false;
+  az_charbuf_reader(_binary_resources_start + entry->offset, entry->length,
+                    reader);
+  return true;
 }
 
 /*===========================================================================*/

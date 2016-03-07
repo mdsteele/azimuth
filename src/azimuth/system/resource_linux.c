@@ -59,18 +59,4 @@ const char *az_get_app_data_directory(void) {
   return path_buffer;
 }
 
-const char *az_get_resource_directory(void) {
-  static char path_buffer[PATH_MAX];
-  if (path_buffer[0] == '\0') {
-    int len = readlink("/proc/self/exe", path_buffer, sizeof(path_buffer) - 1);
-    if (len < 0) {
-      path_buffer[0] = '\0';
-      return NULL;
-    }
-    while (--len > 0 && path_buffer[len] != '/');
-    path_buffer[len] = '\0';
-  }
-  return path_buffer;
-}
-
 /*===========================================================================*/

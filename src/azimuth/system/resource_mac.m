@@ -19,9 +19,13 @@
 
 #include "azimuth/system/resource.h"
 
+#include <stdlib.h>
+
 #include <CoreFoundation/CFBundle.h>
 #include <CoreFoundation/CFURL.h>
 #include <Foundation/Foundation.h>
+
+#include "azimuth/util/string.h"
 
 /*===========================================================================*/
 
@@ -54,7 +58,7 @@ const char *az_get_app_data_directory(void) {
   return path_buffer;
 }
 
-const char *az_get_resource_directory(void) {
+static const char *get_resource_directory(void) {
   static unsigned char path[PATH_MAX];
   if (path[0] == '\0') {
     CFBundleRef bundle = CFBundleGetMainBundle();
@@ -65,6 +69,15 @@ const char *az_get_resource_directory(void) {
     }
   }
   return (char *)path;
+}
+
+bool az_system_resource_reader(const char *name, az_reader_t *reader) {
+  const char *resource_dir = get_resource_directory();
+  if (resource_dir == NULL) return false;
+  char *path = az_strprintf("%s/%s", resource_dir, name);
+  const bool success = az_file_reader(path, reader);
+  free(path);
+  return success;
 }
 
 /*===========================================================================*/

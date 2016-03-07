@@ -33,7 +33,7 @@ ALL_TARGETS = $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/unit_tests \
 
 CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
          -Wmissing-field-initializers -Wold-style-definition -Wshadow \
-         -Wsign-compare -Wstrict-prototypes -Wundef -Wno-unused-local-typedef
+         -Wsign-compare -Wstrict-prototypes -Wundef
 
 ifeq "$(BUILDTYPE)" "debug"
   CFLAGS += -O1 -g -fsanitize=address
@@ -49,7 +49,8 @@ endif
 # Use clang if it's available, otherwise use gcc.
 CC := $(shell which clang > /dev/null && echo clang || echo gcc)
 ifeq "$(CC)" "clang"
-  CFLAGS += -Winitializer-overrides -Wno-objc-protocol-method-implementation
+  CFLAGS += -Winitializer-overrides -Wno-objc-protocol-method-implementation \
+            -Wno-unused-local-typedef
 else
   CFLAGS += -Woverride-init -Wno-unused-local-typedefs
 endif
@@ -79,14 +80,15 @@ ifeq "$(OS_NAME)" "Darwin"
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
-                    $(OBJDIR)/azimuth/system/resource_common.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
 else
   MAIN_LIBFLAGS = -lm -lSDL -lGL
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lm -lSDL
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_common.o \
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
+                    $(OBJDIR)/azimuth/system/resource_blob_data.o \
+                    $(OBJDIR)/azimuth/system/resource_blob_index.o \
                     $(OBJDIR)/azimuth/system/resource_linux.o
   ALL_TARGETS += linux_app
 endif
@@ -156,8 +158,8 @@ MUSE_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(MUSE_C99FILES)) \
 ZFXR_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(ZFXR_C99FILES)) \
                  $(SYSTEM_OBJFILES)
 
-RESOURCE_FILES := $(shell find $(DATADIR)/music -name '*.txt') \
-                  $(shell find $(DATADIR)/rooms -name '*.txt')
+RESOURCE_FILES := $(sort $(shell find $(DATADIR)/music -name '*.txt') \
+                         $(shell find $(DATADIR)/rooms -name '*.txt'))
 
 #=============================================================================#
 # Default build target:
@@ -200,9 +202,29 @@ $(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
                             $(SRCDIR)/macosx/SDLMain.h
 	$(compile-sys)
 
+$(OBJDIR)/azimuth/system/resources: $(RESOURCE_FILES)
+	@echo "Combining $@"
+	@mkdir -p $(@D)
+	@cat $^ > $@
+
+%/resource_blob_data.o: %/resources
+	@echo "Compiling $@"
+	@mkdir -p $(@D)
+	@cd $(@D) && ld -r -b binary resources -o $(@F)
+
+$(OBJDIR)/azimuth/system/resource_blob_index.c: \
+    $(SRCDIR)/azimuth/system/generate_blob_index.sh $(RESOURCE_FILES)
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@sh $< $@ $(filter-out $<,$^)
+
+$(OBJDIR)/azimuth/system/resource_blob_index.o: \
+    $(OBJDIR)/azimuth/system/resource_blob_index.c
+	$(compile-sys)
+
 $(OBJDIR)/azimuth/system/resource_mac.o: \
     $(SRCDIR)/azimuth/system/resource_mac.m $(AZ_SYSTEM_HEADERS) \
-    $(SRCDIR)/azimuth/util/rw.h
+    $(SRCDIR)/azimuth/util/rw.h $(SRCDIR)/azimuth/util/string.h
 	$(compile-sys)
 
 $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
@@ -307,19 +329,12 @@ $(MACOSX_APPDIR)/Resources/rooms/%: $(DATADIR)/rooms/%
 # Build rules for bundling Linux application:
 
 LINUX_APPDIR = $(OUTDIR)/Azimuth
-LINUX_APP_FILES := $(LINUX_APPDIR)/Azimuth \
-    $(patsubst $(DATADIR)/%,$(LINUX_APPDIR)/%,$(RESOURCE_FILES))
+LINUX_APP_FILES := $(LINUX_APPDIR)/Azimuth
 
 .PHONY: linux_app
 linux_app: $(LINUX_APP_FILES)
 
 $(LINUX_APPDIR)/Azimuth: $(BINDIR)/azimuth
-	$(copy-file)
-
-$(LINUX_APPDIR)/music/%: $(DATADIR)/music/%
-	$(copy-file)
-
-$(LINUX_APPDIR)/rooms/%: $(DATADIR)/rooms/%
 	$(copy-file)
 
 #=============================================================================#
