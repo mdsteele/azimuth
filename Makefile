@@ -18,6 +18,7 @@
 #=============================================================================#
 
 BUILDTYPE ?= debug
+TARGET ?= host
 
 SRCDIR = src
 DATADIR = data
@@ -36,18 +37,34 @@ CFLAGS = -I$(SRCDIR) -Wall -Werror -Wempty-body -Winline \
          -Wsign-compare -Wstrict-prototypes -Wundef
 
 ifeq "$(BUILDTYPE)" "debug"
-  CFLAGS += -O1 -g -fsanitize=address
+  CFLAGS += -O1 -g
 else ifeq "$(BUILDTYPE)" "release"
   # For release builds, disable asserts, but don't warn about e.g. static
   # functions or local variables that are only used for asserts, and which
   # therefore become unused when asserts are disabled.
-  CFLAGS += -O2 -DNDEBUG -Wno-unused-function -Wno-unused-variable
+  CFLAGS += -O2 -DNDEBUG -Wno-unused-function -Wno-unused-variable \
+            -Wno-unused-but-set-variable -Wno-empty-body
 else
   $(error BUILDTYPE must be 'debug' or 'release')
 endif
 
-# Use clang if it's available, otherwise use gcc.
-CC := $(shell which clang > /dev/null && echo clang || echo gcc)
+ifeq "$(TARGET)" "host"
+  OS_NAME := $(shell uname)
+  # Use clang if it's available, otherwise use gcc.
+  CC := $(shell which clang > /dev/null && echo clang || echo gcc)
+  LD = ld
+  ifeq "$(BUILDTYPE)" "debug"
+    CFLAGS += -fsanitize=address
+  endif
+else ifeq "$(TARGET)" "windows"
+  OS_NAME := Windows
+  CC := i686-w64-mingw32.static-gcc
+  LD = i686-w64-mingw32.static-ld
+  PKG_CONFIG = i686-w64-mingw32.static-pkg-config
+else
+  $(error TARGET must be 'host' or 'windows')
+endif
+
 ifeq "$(CC)" "clang"
   CFLAGS += -Winitializer-overrides -Wno-objc-protocol-method-implementation \
             -Wno-unused-local-typedef
@@ -55,7 +72,6 @@ else
   CFLAGS += -Woverride-init -Wno-unused-local-typedefs
 endif
 
-OS_NAME := $(shell uname)
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx -mmacosx-version-min=10.6
   # Use the SDL framework if it's installed.  Otherwise, look to see if SDL has
@@ -82,6 +98,16 @@ ifeq "$(OS_NAME)" "Darwin"
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
                     $(OBJDIR)/azimuth/system/resource_mac.o
   ALL_TARGETS += macosx_app
+else ifeq "$(OS_NAME)" "Windows"
+  MAIN_LIBFLAGS := -lm -lgdi32 -lole32 -lopengl32 -lshell32 \
+                   $(shell $(PKG_CONFIG) --libs sdl)
+  TEST_LIBFLAGS = -lm
+  MUSE_LIBFLAGS = -lm -lSDL
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
+                    $(OBJDIR)/azimuth/system/resource_blob_data.o \
+                    $(OBJDIR)/azimuth/system/resource_blob_index.o \
+                    $(OBJDIR)/azimuth/system/resource_windows.o
+  ALL_TARGETS += windows_app
 else
   MAIN_LIBFLAGS = -lm -lSDL -lGL
   TEST_LIBFLAGS = -lm
@@ -93,7 +119,10 @@ else
   ALL_TARGETS += linux_app
 endif
 
-C99FLAGS = -std=c99 -pedantic $(CFLAGS)
+C99FLAGS = -std=c99 $(CFLAGS)
+ifeq "$(TARGET)" "host"
+  C99FLAGS += -pedantic
+endif
 
 define compile-sys
 	@echo "Compiling $@"
@@ -210,7 +239,7 @@ $(OBJDIR)/azimuth/system/resources: $(RESOURCE_FILES)
 %/resource_blob_data.o: %/resources
 	@echo "Compiling $@"
 	@mkdir -p $(@D)
-	@cd $(@D) && ld -r -b binary resources -o $(@F)
+	@cd $(@D) && $(LD) -r -b binary resources -o $(@F)
 
 $(OBJDIR)/azimuth/system/resource_blob_index.c: \
     $(SRCDIR)/azimuth/system/generate_blob_index.sh $(RESOURCE_FILES)
@@ -335,6 +364,15 @@ LINUX_APP_FILES := $(LINUX_APPDIR)/Azimuth
 linux_app: $(LINUX_APP_FILES)
 
 $(LINUX_APPDIR)/Azimuth: $(BINDIR)/azimuth
+	$(copy-file)
+
+#=============================================================================#
+# Build rules for bundling Windows application:
+
+.PHONY: windows_app
+windows_app: $(OUTDIR)/Azimuth.exe
+
+$(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth
 	$(copy-file)
 
 #=============================================================================#

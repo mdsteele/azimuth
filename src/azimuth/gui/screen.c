@@ -116,7 +116,9 @@ void az_set_fullscreen(bool fullscreen) {
   glDepthMask(GL_FALSE);
   // Enable alpha blending:
   glEnable(GL_BLEND);
+#ifndef WIN32
   glBlendEquation(GL_FUNC_ADD);
+#endif
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   // Set antialiasing:
   glEnable(GL_POINT_SMOOTH);
