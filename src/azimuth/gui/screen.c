@@ -28,6 +28,7 @@
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/util/misc.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -86,11 +87,15 @@ void az_set_fullscreen(bool fullscreen) {
   // Enable OpenGL double-buffering:
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   // Enable vsync:
+  const int vsync_result =
 #if SDL_VERSION_ATLEAST(1,3,0)
-  SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(1);
 #else
-  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
+    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 #endif
+  if (vsync_result != 0) {
+    AZ_WARNING_ALWAYS("Failed to enable vsync: %s\n", SDL_GetError());
+  }
   // Enable antialiasing:
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
