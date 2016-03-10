@@ -22,7 +22,7 @@ TARGET ?= host
 
 SRCDIR = src
 DATADIR = data
-OUTDIR = out/$(BUILDTYPE)
+OUTDIR = out/$(BUILDTYPE)/$(TARGET)
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 
@@ -43,7 +43,7 @@ else ifeq "$(BUILDTYPE)" "release"
   # functions or local variables that are only used for asserts, and which
   # therefore become unused when asserts are disabled.
   CFLAGS += -O2 -DNDEBUG -Wno-unused-function -Wno-unused-variable \
-            -Wno-unused-but-set-variable -Wno-empty-body
+            -Wno-empty-body
 else
   $(error BUILDTYPE must be 'debug' or 'release')
 endif
@@ -53,6 +53,7 @@ ifeq "$(TARGET)" "host"
   # Use clang if it's available, otherwise use gcc.
   CC := $(shell which clang > /dev/null && echo clang || echo gcc)
   LD = ld
+  STRIP = strip
   ifeq "$(BUILDTYPE)" "debug"
     CFLAGS += -fsanitize=address
   endif
@@ -61,8 +62,12 @@ else ifeq "$(TARGET)" "windows"
   CC := i686-w64-mingw32.static-gcc
   LD = i686-w64-mingw32.static-ld
   PKG_CONFIG = i686-w64-mingw32.static-pkg-config
+  STRIP = i686-w64-mingw32.static-strip
 else
   $(error TARGET must be 'host' or 'windows')
+endif
+ifeq "$(BUILDTYPE)" "debug"
+  STRIP = touch
 endif
 
 ifeq "$(CC)" "clang"
@@ -70,6 +75,9 @@ ifeq "$(CC)" "clang"
             -Wno-unused-local-typedef
 else
   CFLAGS += -Woverride-init -Wno-unused-local-typedefs
+  ifeq "$(BUILDTYPE)" "release"
+    CFLAGS += -Wno-unused-but-set-variable
+  endif
 endif
 
 ifeq "$(OS_NAME)" "Darwin"
@@ -135,9 +143,15 @@ define compile-c99
 	@$(CC) -o $@ -c $< $(C99FLAGS)
 endef
 define copy-file
-	@echo "Copying $<"
+	@echo "Copying to $@"
 	@mkdir -p $(@D)
 	@cp $< $@
+endef
+define strip-binary
+	@echo "Stripping $@"
+	@mkdir -p $(@D)
+	@cp $< $@
+	@$(STRIP) $@
 endef
 
 #=============================================================================#
@@ -189,6 +203,15 @@ ZFXR_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(ZFXR_C99FILES)) \
 
 RESOURCE_FILES := $(sort $(shell find $(DATADIR)/music -name '*.txt') \
                          $(shell find $(DATADIR)/rooms -name '*.txt'))
+
+VERSION_NUMBER := \
+    $(shell sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$$/\1/p' \
+                $(SRCDIR)/azimuth/version.h | paste -s -d. -)
+ifeq "$(BUILDTYPE)" "debug"
+  ZIP_FILE_PREFIX = Azimuth-v$(VERSION_NUMBER)-debug
+else
+  ZIP_FILE_PREFIX = Azimuth-v$(VERSION_NUMBER)
+endif
 
 #=============================================================================#
 # Default build target:
@@ -316,16 +339,18 @@ $(OBJDIR)/zfxr/%.o: $(SRCDIR)/zfxr/%.c \
 #=============================================================================#
 # Build rules for bundling Mac OS X application:
 
-MACOSX_APPDIR = $(OUTDIR)/Azimuth.app/Contents
+MACOSX_APP_BUNDLE = $(OUTDIR)/Azimuth.app
+MACOSX_APPDIR = $(MACOSX_APP_BUNDLE)/Contents
 MACOSX_APP_FILES := $(MACOSX_APPDIR)/Info.plist \
     $(MACOSX_APPDIR)/MacOS/azimuth \
     $(MACOSX_APPDIR)/Resources/application.icns \
     $(patsubst $(DATADIR)/%,$(MACOSX_APPDIR)/Resources/%,$(RESOURCE_FILES))
+MACOSX_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Mac.zip
 
 ifdef SDL_FRAMEWORK_PATH
 MACOSX_APP_FILES += $(MACOSX_APPDIR)/Frameworks/SDL.framework
 $(MACOSX_APPDIR)/Frameworks/SDL.framework: $(SDL_FRAMEWORK_PATH)
-	@echo "Copying $<"
+	@echo "Copying to $@"
 	@mkdir -p $(@D)
 	@cp -R $< $@
 endif
@@ -336,14 +361,11 @@ macosx_app: $(MACOSX_APP_FILES)
 $(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
-	@sed "s/%AZ_VERSION_NUMBER/$(shell \
-	      sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$$/\1/p' \
-	          $(SRCDIR)/azimuth/version.h | \
-	      paste -s -d. -)/g" < \
+	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < \
 	    $(DATADIR)/Info.plist > $@
 
 $(MACOSX_APPDIR)/MacOS/azimuth: $(BINDIR)/azimuth
-	$(copy-file)
+	$(strip-binary)
 
 $(MACOSX_APPDIR)/Resources/application.icns: $(DATADIR)/application.icns
 	$(copy-file)
@@ -354,17 +376,21 @@ $(MACOSX_APPDIR)/Resources/music/%: $(DATADIR)/music/%
 $(MACOSX_APPDIR)/Resources/rooms/%: $(DATADIR)/rooms/%
 	$(copy-file)
 
+.PHONY: macosx_zip
+macosx_zip: $(MACOSX_ZIP_FILE)
+
+$(MACOSX_ZIP_FILE): macosx_app
+	@echo "Compressing $@"
+	@ditto -c -k --keepParent $(MACOSX_APP_BUNDLE) $@
+
 #=============================================================================#
 # Build rules for bundling Linux application:
 
-LINUX_APPDIR = $(OUTDIR)/Azimuth
-LINUX_APP_FILES := $(LINUX_APPDIR)/Azimuth
-
 .PHONY: linux_app
-linux_app: $(LINUX_APP_FILES)
+linux_app: $(OUTDIR)/Azimuth
 
-$(LINUX_APPDIR)/Azimuth: $(BINDIR)/azimuth
-	$(copy-file)
+$(OUTDIR)/Azimuth: $(BINDIR)/azimuth
+	$(strip-binary)
 
 #=============================================================================#
 # Build rules for bundling Windows application:
@@ -373,7 +399,7 @@ $(LINUX_APPDIR)/Azimuth: $(BINDIR)/azimuth
 windows_app: $(OUTDIR)/Azimuth.exe
 
 $(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth
-	$(copy-file)
+	$(strip-binary)
 
 #=============================================================================#
 # Convenience build targets:
@@ -382,9 +408,12 @@ $(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth
 ifeq "$(OS_NAME)" "Darwin"
 run: macosx_app
 	$(MACOSX_APPDIR)/MacOS/azimuth
+else ifeq "$(OS_NAME)" "Windows"
+run: windows_app
+	$(OUTDIR)/Azimuth.exe
 else
 run: linux_app
-	$(LINUX_APPDIR)/Azimuth
+	$(OUTDIR)/Azimuth
 endif
 
 .PHONY: edit
