@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/control/paused.h"
 #include "azimuth/control/util.h"
 #include "azimuth/control/victory.h"
@@ -133,7 +134,7 @@ az_space_action_t az_space_event_loop(
 
     // Tick the state and redraw the screen.
     update_controls(prefs);
-    az_tick_space_state(&state, 1.0/60.0);
+    az_tick_space_state(&state, AZ_FRAME_TIME_SECONDS);
     az_tick_audio(&state.soundboard);
     az_start_screen_redraw(); {
       az_space_draw_screen(&state);

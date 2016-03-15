@@ -25,6 +25,7 @@
 
 #include <SDL/SDL.h> // for main() renaming
 
+#include "azimuth/constants.h"
 #include "azimuth/gui/event.h"
 #include "azimuth/gui/screen.h"
 #include "azimuth/state/baddie.h" // for az_init_baddie_datas
@@ -1502,7 +1503,7 @@ static void event_loop(void) {
         state.controls.right = false;
     }
 
-    az_tick_editor_state(&state, 1.0/60.0);
+    az_tick_editor_state(&state, AZ_FRAME_TIME_SECONDS);
     az_start_screen_redraw(); {
       az_editor_draw_screen(&state);
     } az_finish_screen_redraw();

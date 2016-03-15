@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "azimuth/constants.h"
 #include "azimuth/control/util.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"
@@ -67,7 +68,7 @@ az_title_action_t az_title_event_loop(
 
   while (true) {
     // Tick the state and redraw the screen.
-    az_tick_title_state(&state, 1.0/60.0);
+    az_tick_title_state(&state, AZ_FRAME_TIME_SECONDS);
     az_tick_audio(&state.soundboard);
     az_start_screen_redraw(); {
       az_title_draw_screen(&state);

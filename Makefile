@@ -104,7 +104,8 @@ ifeq "$(OS_NAME)" "Darwin"
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
-                    $(OBJDIR)/azimuth/system/resource_mac.o
+                    $(OBJDIR)/azimuth/system/resource_mac.o \
+                    $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
   MAIN_LIBFLAGS := -lm -lgdi32 -lole32 -lopengl32 -lshell32 \
@@ -114,7 +115,8 @@ else ifeq "$(OS_NAME)" "Windows"
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/resource_windows.o
+                    $(OBJDIR)/azimuth/system/resource_windows.o \
+                    $(OBJDIR)/azimuth/system/timer_windows.o
   ALL_TARGETS += windows_app
 else
   MAIN_LIBFLAGS = -lm -lSDL -lGL
@@ -123,7 +125,8 @@ else
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/resource_linux.o
+                    $(OBJDIR)/azimuth/system/resource_linux.o \
+                    $(OBJDIR)/azimuth/system/timer_linux.o
   ALL_TARGETS += linux_app
 endif
 
@@ -148,7 +151,7 @@ define copy-file
 	@cp $< $@
 endef
 define strip-binary
-	@echo "Stripping $@"
+	@echo "Finishing $@"
 	@mkdir -p $(@D)
 	@cp $< $@
 	@$(STRIP) $@
@@ -280,7 +283,8 @@ $(OBJDIR)/azimuth/system/resource_mac.o: \
 	$(compile-sys)
 
 $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
-    $(AZ_SYSTEM_HEADERS) $(SRCDIR)/azimuth/util/rw.h
+    $(AZ_SYSTEM_HEADERS) $(SRCDIR)/azimuth/util/misc.h \
+    $(SRCDIR)/azimuth/util/rw.h
 	$(compile-sys)
 
 #=============================================================================#

@@ -27,6 +27,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
+#include "azimuth/system/timer.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/warning.h"
 
@@ -163,6 +164,10 @@ void az_finish_screen_redraw(void) {
   glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
   glFinish();
   SDL_GL_SwapBuffers();
+  // Synchronize, in case vsync fails to lock us to 60Hz:
+  static uint64_t sync_time = 0;
+  const uint64_t now = az_sleep_until(sync_time);
+  sync_time = now + AZ_FRAME_TIME_NANOS;
 }
 
 /*===========================================================================*/

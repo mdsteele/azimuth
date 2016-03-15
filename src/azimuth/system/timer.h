@@ -17,56 +17,24 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/control/gameover.h"
+#pragma once
+#ifndef AZIMUTH_SYSTEM_TIMER_H_
+#define AZIMUTH_SYSTEM_TIMER_H_
 
-#include "azimuth/constants.h"
-#include "azimuth/gui/audio.h"
-#include "azimuth/gui/event.h"
-#include "azimuth/gui/screen.h"
-#include "azimuth/state/planet.h"
-#include "azimuth/state/save.h"
-#include "azimuth/util/misc.h"
-#include "azimuth/view/gameover.h"
+#include <stdint.h>
 
 /*===========================================================================*/
 
-az_gameover_action_t az_gameover_event_loop(void) {
-  static az_gameover_state_t state;
-  az_init_gameover_state(&state);
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
-  az_change_music_flag(&state.soundboard, 2);
+// Get the current time in nanoseconds, as measured from some unspecified zero
+// point.  This time is guaranteed to be monotonic even in the face of e.g. NTP
+// time adjustments.
+uint64_t az_current_time_nanos(void);
 
-  while (true) {
-    // Tick the state and redraw the screen.
-    az_tick_gameover_state(&state, AZ_FRAME_TIME_SECONDS);
-    az_tick_audio(&state.soundboard);
-    az_start_screen_redraw(); {
-      az_gameover_draw_screen(&state);
-    } az_finish_screen_redraw();
-
-    // Check if we need to return with an action.
-    if (state.mode == AZ_GMODE_QUITTING) {
-      return AZ_GOA_QUIT;
-    }
-    if (state.mode == AZ_GMODE_RETRYING && state.mode_progress >= 1.0) {
-      return AZ_GOA_TRY_AGAIN;
-    }
-    if (state.mode == AZ_GMODE_RETURNING && state.mode_progress >= 1.0) {
-      return AZ_GOA_RETURN_TO_TITLE;
-    }
-
-    // Get and process GUI events.
-    az_event_t event;
-    while (az_poll_event(&event)) {
-      switch (event.kind) {
-        case AZ_EVENT_MOUSE_DOWN:
-          az_gameover_on_click(&state, event.mouse.x, event.mouse.y);
-          break;
-        default: break;
-      }
-    }
-  }
-  AZ_ASSERT_UNREACHABLE();
-}
+// Sleep until az_current_time_nanos() would return the given time value and
+// return the time at which the sleep *started*.  Returns without sleeping if
+// the returned current time is greater than or equal to the given time.
+uint64_t az_sleep_until(uint64_t time);
 
 /*===========================================================================*/
+
+#endif // AZIMUTH_SYSTEM_TIMER_H_

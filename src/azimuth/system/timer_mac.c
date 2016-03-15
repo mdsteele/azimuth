@@ -17,56 +17,29 @@
 | with Azimuth.  If not, see <http://www.gnu.org/licenses/>.                  |
 =============================================================================*/
 
-#include "azimuth/control/gameover.h"
+#include "azimuth/system/timer.h"
 
-#include "azimuth/constants.h"
-#include "azimuth/gui/audio.h"
-#include "azimuth/gui/event.h"
-#include "azimuth/gui/screen.h"
-#include "azimuth/state/planet.h"
-#include "azimuth/state/save.h"
-#include "azimuth/util/misc.h"
-#include "azimuth/view/gameover.h"
+#include <assert.h>
+#include <mach/mach_time.h>
+#include <stdint.h>
 
 /*===========================================================================*/
 
-az_gameover_action_t az_gameover_event_loop(void) {
-  static az_gameover_state_t state;
-  az_init_gameover_state(&state);
-  az_change_music(&state.soundboard, AZ_MUS_TITLE);
-  az_change_music_flag(&state.soundboard, 2);
+static mach_timebase_info_data_t timebase_info;
 
-  while (true) {
-    // Tick the state and redraw the screen.
-    az_tick_gameover_state(&state, AZ_FRAME_TIME_SECONDS);
-    az_tick_audio(&state.soundboard);
-    az_start_screen_redraw(); {
-      az_gameover_draw_screen(&state);
-    } az_finish_screen_redraw();
+uint64_t az_current_time_nanos(void) {
+  if (timebase_info.denom == 0) mach_timebase_info(&timebase_info);
+  return mach_absolute_time() * timebase_info.numer / timebase_info.denom;
+}
 
-    // Check if we need to return with an action.
-    if (state.mode == AZ_GMODE_QUITTING) {
-      return AZ_GOA_QUIT;
-    }
-    if (state.mode == AZ_GMODE_RETRYING && state.mode_progress >= 1.0) {
-      return AZ_GOA_TRY_AGAIN;
-    }
-    if (state.mode == AZ_GMODE_RETURNING && state.mode_progress >= 1.0) {
-      return AZ_GOA_RETURN_TO_TITLE;
-    }
-
-    // Get and process GUI events.
-    az_event_t event;
-    while (az_poll_event(&event)) {
-      switch (event.kind) {
-        case AZ_EVENT_MOUSE_DOWN:
-          az_gameover_on_click(&state, event.mouse.x, event.mouse.y);
-          break;
-        default: break;
-      }
-    }
+uint64_t az_sleep_until(uint64_t time) {
+  const uint64_t now = az_current_time_nanos();
+  if (time > now) {
+    assert(timebase_info.denom != 0);
+    assert(timebase_info.numer != 0);
+    mach_wait_until(time * timebase_info.denom / timebase_info.numer);
   }
-  AZ_ASSERT_UNREACHABLE();
+  return now;
 }
 
 /*===========================================================================*/
