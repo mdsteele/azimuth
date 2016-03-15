@@ -390,20 +390,38 @@ $(MACOSX_ZIP_FILE): macosx_app
 #=============================================================================#
 # Build rules for bundling Linux application:
 
+LINUX_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Linux.tar.bz2
+
 .PHONY: linux_app
 linux_app: $(OUTDIR)/Azimuth
 
 $(OUTDIR)/Azimuth: $(BINDIR)/azimuth
 	$(strip-binary)
 
+.PHONY: linux_zip
+linux_zip: $(LINUX_ZIP_FILE)
+
+$(LINUX_ZIP_FILE): $(OUTDIR)/Azimuth
+	@echo "Compressing $@"
+	@tar -cjf $@ $^
+
 #=============================================================================#
 # Build rules for bundling Windows application:
+
+WINDOWS_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Windows.zip
 
 .PHONY: windows_app
 windows_app: $(OUTDIR)/Azimuth.exe
 
 $(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth
 	$(strip-binary)
+
+.PHONY: windows_zip
+windows_zip: $(WINDOWS_ZIP_FILE)
+
+$(WINDOWS_ZIP_FILE): $(OUTDIR)/Azimuth.exe
+	@echo "Compressing $@"
+	@zip $@ $^
 
 #=============================================================================#
 # Convenience build targets:
