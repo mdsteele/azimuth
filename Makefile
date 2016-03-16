@@ -284,7 +284,7 @@ $(OBJDIR)/azimuth/system/resource_mac.o: \
 
 $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
     $(AZ_SYSTEM_HEADERS) $(SRCDIR)/azimuth/util/misc.h \
-    $(SRCDIR)/azimuth/util/rw.h
+    $(SRCDIR)/azimuth/util/rw.h $(SRCDIR)/azimuth/util/warning.h
 	$(compile-sys)
 
 #=============================================================================#

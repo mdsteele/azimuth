@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include "azimuth/util/misc.h"
+#include "azimuth/util/warning.h"
 
 /*===========================================================================*/
 
@@ -30,7 +31,7 @@
 
 uint64_t az_current_time_nanos(void) {
   struct timespec ts;
-  if (clock_gettime(CLOCK_MONOTONIC_RAW, &ts) != 0) {
+  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
     AZ_FATAL("clock_gettime failed.\n");
   }
   return NANOS_PER_SECOND * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec;
@@ -43,7 +44,10 @@ uint64_t az_sleep_until(uint64_t time) {
       .tv_sec = time / NANOS_PER_SECOND,
       .tv_nsec = time % NANOS_PER_SECOND
     };
-    clock_nanosleep(CLOCK_MONOTONIC_RAW, TIMER_ABSTIME, &ts, NULL);
+    const int err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
+    if (err != 0) {
+      AZ_WARNING_ONCE("clock_nanosleep failed with error %d.\n", err);
+    }
   }
   return now;
 }
