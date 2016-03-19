@@ -30,9 +30,9 @@
 // time adjustments.
 uint64_t az_current_time_nanos(void);
 
-// Sleep until az_current_time_nanos() would return the given time value and
-// return the time at which the sleep *started*.  Returns without sleeping if
-// the returned current time is greater than or equal to the given time.
+// Sleep until az_current_time_nanos() would return the given time value, and
+// then return the time at which the sleep ended.  Return the current time
+// immediately without sleeping if it is already past the requested time.
 uint64_t az_sleep_until(uint64_t time);
 
 /*===========================================================================*/

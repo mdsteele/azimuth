@@ -39,17 +39,16 @@ uint64_t az_current_time_nanos(void) {
 
 uint64_t az_sleep_until(uint64_t time) {
   const uint64_t now = az_current_time_nanos();
-  if (time > now) {
-    const struct timespec ts = {
-      .tv_sec = time / NANOS_PER_SECOND,
-      .tv_nsec = time % NANOS_PER_SECOND
-    };
-    const int err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
-    if (err != 0) {
-      AZ_WARNING_ONCE("clock_nanosleep failed with error %d.\n", err);
-    }
+  if (time <= now) return now;
+  const struct timespec ts = {
+    .tv_sec = time / NANOS_PER_SECOND,
+    .tv_nsec = time % NANOS_PER_SECOND
+  };
+  const int err = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
+  if (err != 0) {
+    AZ_WARNING_ONCE("clock_nanosleep failed with error %d.\n", err);
   }
-  return now;
+  return time;
 }
 
 /*===========================================================================*/

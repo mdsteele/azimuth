@@ -34,12 +34,11 @@ uint64_t az_current_time_nanos(void) {
 
 uint64_t az_sleep_until(uint64_t time) {
   const uint64_t now = az_current_time_nanos();
-  if (time > now) {
-    assert(timebase_info.denom != 0);
-    assert(timebase_info.numer != 0);
-    mach_wait_until(time * timebase_info.denom / timebase_info.numer);
-  }
-  return now;
+  if (time <= now) return now;
+  assert(timebase_info.denom != 0);
+  assert(timebase_info.numer != 0);
+  mach_wait_until(time * timebase_info.denom / timebase_info.numer);
+  return time;
 }
 
 /*===========================================================================*/

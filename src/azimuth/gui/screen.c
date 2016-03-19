@@ -166,8 +166,7 @@ void az_finish_screen_redraw(void) {
   SDL_GL_SwapBuffers();
   // Synchronize, in case vsync fails to lock us to 60Hz:
   static uint64_t sync_time = 0;
-  const uint64_t now = az_sleep_until(sync_time);
-  sync_time = now + AZ_FRAME_TIME_NANOS;
+  sync_time = az_sleep_until(sync_time) + AZ_FRAME_TIME_NANOS;
 }
 
 /*===========================================================================*/
