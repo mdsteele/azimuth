@@ -23,6 +23,8 @@
 
 #include <stdbool.h>
 
+#include "azimuth/util/misc.h"
+
 /*===========================================================================*/
 
 // In debug mode, print a warning message.  Do nothing in release mode.

@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "azimuth/util/warning.h"
+
 // require Windows Vista or later
 #if _WIN32_WINNT < 0x0600
 #undef _WIN32_WINNT
@@ -41,15 +43,28 @@ const char *az_get_app_data_directory(void) {
     PWSTR path = NULL;
     const HRESULT result = SHGetKnownFolderPath(&FOLDERID_RoamingAppData,
                                                 KF_FLAG_CREATE, NULL, &path);
-    if (FAILED(result)) return NULL;
+    if (FAILED(result)) {
+      AZ_WARNING_ONCE("SHGetKnownFolderPath failed.\n");
+      return NULL;
+    }
     const size_t length = wcstombs(path_buffer, path, MAX_PATH - 1);
     CoTaskMemFree(path);
     const char suffix[] = "\\Azimuth";
     if (length > MAX_PATH - sizeof(suffix)) {
+      AZ_WARNING_ONCE("App data directory path too long.\n");
       path_buffer[0] = '\0';
       return NULL;
     }
     strcpy(path_buffer + length, suffix);
+    // Create the directory if it doesn't already exist.
+    if (!CreateDirectory(path_buffer, NULL)) {
+      const DWORD error = GetLastError();
+      if (error != ERROR_ALREADY_EXISTS) {
+        AZ_WARNING_ONCE("CreateDirectory failed (error %ld).\n", error);
+        path_buffer[0] = '\0';
+        return NULL;
+      }
+    }
   }
   return path_buffer;
 }
