@@ -108,10 +108,13 @@ ifeq "$(OS_NAME)" "Darwin"
                     $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
-  MAIN_LIBFLAGS := -lm -lgdi32 -lole32 -lopengl32 -lshell32 \
-                   $(shell $(PKG_CONFIG) --libs sdl)
+  SDL_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl)
+  MAIN_LIBFLAGS = -lm -lgdi32 -lole32 -lopengl32 -lshell32 $(SDL_LIBFLAGS)
+  ifeq "$(BUILDTYPE)" "debug"
+    MAIN_LIBFLAGS += -mconsole
+  endif
   TEST_LIBFLAGS = -lm
-  MUSE_LIBFLAGS = -lm -lSDL
+  MUSE_LIBFLAGS = -lm $(SDL_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \

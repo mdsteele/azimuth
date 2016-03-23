@@ -53,7 +53,7 @@ uint64_t az_current_time_nanos(void) {
 uint64_t az_sleep_until(uint64_t time) {
   const uint64_t now = az_current_time_nanos();
   if (time <= now) return now;
-  LARGE_INTEGER decimicros = {.QuadPart = (time - now) / 100u};
+  const LARGE_INTEGER decimicros = {.QuadPart = (int64_t)(time - now) / -100};
   HANDLE timer = CreateWaitableTimer(NULL, TRUE, NULL);
   if (!timer) AZ_FATAL("CreateWaitableTimer failed.\n");
   if (!SetWaitableTimer(timer, &decimicros, 0, NULL, NULL, FALSE)) {
