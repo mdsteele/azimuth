@@ -406,7 +406,7 @@ linux_zip: $(LINUX_ZIP_FILE)
 
 $(LINUX_ZIP_FILE): $(OUTDIR)/Azimuth
 	@echo "Compressing $@"
-	@tar -cjf $@ $^
+	@tar -cjf $@ -C $(<D) $(<F)
 
 #=============================================================================#
 # Build rules for bundling Windows application:
@@ -424,7 +424,7 @@ windows_zip: $(WINDOWS_ZIP_FILE)
 
 $(WINDOWS_ZIP_FILE): $(OUTDIR)/Azimuth.exe
 	@echo "Compressing $@"
-	@zip $@ $^
+	@zip -j $@ $^
 
 #=============================================================================#
 # Convenience build targets:
