@@ -72,6 +72,15 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
   sdl_initialized = true;
   az_set_fullscreen(fullscreen);
   SDL_ShowCursor(SDL_DISABLE);
+
+#ifndef NDEBUG
+  fprintf(stderr, "Using GL implementation:\n"
+          "    Vendor: %s\n"
+          "  Renderer: %s\n"
+          "   Version: %s\n",
+          glGetString(GL_VENDOR), glGetString(GL_RENDERER),
+          glGetString(GL_VERSION));
+#endif
 }
 
 bool az_is_fullscreen(void) {
