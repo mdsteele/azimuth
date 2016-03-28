@@ -27,18 +27,20 @@
 #include "azimuth/state/space.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
+#include "azimuth/view/util.h"
 
 /*===========================================================================*/
 
 void az_draw_specks(const az_space_state_t *state) {
-  glBegin(GL_POINTS); {
+  glBegin(GL_LINES); {
     AZ_ARRAY_LOOP(speck, state->specks) {
       if (speck->kind == AZ_SPECK_NOTHING) continue;
       assert(speck->age >= 0.0);
       assert(speck->age <= speck->lifetime);
       glColor4ub(speck->color.r, speck->color.g, speck->color.b,
                  speck->color.a * (1.0 - speck->age / speck->lifetime));
-      glVertex2d(speck->position.x, speck->position.y);
+      az_gl_vertex(speck->position);
+      az_gl_vertex(az_vsub(speck->position, az_vunit(speck->velocity)));
     }
   } glEnd();
 }

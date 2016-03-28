@@ -50,7 +50,7 @@ static az_color_t scale_color(float r, float g, float b, az_color_t color) {
 
 static void draw_moving_stars_layer(
     double spacing, double scale, double speed, double total_time,
-    GLfloat alpha) {
+    GLfloat gray) {
   const double modulus = AZ_SCREEN_WIDTH + spacing;
   const double scroll = fmod(total_time * speed, modulus);
   az_random_seed_t seed = {1, 1};
@@ -61,9 +61,9 @@ static void draw_moving_stars_layer(
           fmod(xoff + 3.0 * spacing * az_rand_udouble(&seed) + scroll,
                modulus);
         const double y = yoff + 3.0 * spacing * az_rand_udouble(&seed);
-        glColor4f(1, 1, 1, alpha);
+        glColor3f(gray, gray, gray);
         glVertex2d(x, y);
-        glColor4f(1, 1, 1, 0);
+        glColor3f(0, 0, 0);
         glVertex2d(x - spacing * scale, y);
       }
     }
@@ -88,15 +88,17 @@ void az_draw_moving_starfield(double time, double speed, double scale) {
 static void draw_planet_starfield_internal(int width, az_clock_t clock) {
   const int star_spacing = 12;
   az_random_seed_t seed = {1, 1};
-  glBegin(GL_POINTS); {
+  glBegin(GL_LINES); {
     int i = 0;
     for (int xoff = 0; xoff < width; xoff += star_spacing) {
       for (int yoff = 0; yoff < AZ_SCREEN_HEIGHT; yoff += star_spacing) {
         const int twinkle = az_clock_zigzag(10, 4, clock + i);
-        glColor4f(1, 1, 1, (twinkle * 0.02) + 0.3 * az_rand_udouble(&seed));
+        const GLfloat gray = (twinkle * 0.02) + 0.3 * az_rand_udouble(&seed);
+        glColor3f(gray, gray, gray);
         const double x = xoff + 3 * star_spacing * az_rand_udouble(&seed);
         const double y = yoff + 3 * star_spacing * az_rand_udouble(&seed);
         glVertex2d(x, y);
+        glVertex2d(x + 1, y);
         ++i;
       }
     }

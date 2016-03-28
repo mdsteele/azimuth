@@ -133,7 +133,7 @@ static void draw_projectiles(const az_victory_state_t *state) {
 }
 
 static void draw_specks(const az_victory_state_t *state) {
-  glBegin(GL_POINTS); {
+  glBegin(GL_LINES); {
     AZ_ARRAY_LOOP(speck, state->specks) {
       if (speck->kind == AZ_SPECK_NOTHING) continue;
       assert(speck->age >= 0.0);
@@ -141,6 +141,7 @@ static void draw_specks(const az_victory_state_t *state) {
       glColor4ub(speck->color.r, speck->color.g, speck->color.b,
                  speck->color.a * (1.0 - speck->age / speck->lifetime));
       az_gl_vertex(speck->position);
+      az_gl_vertex(az_vsub(speck->position, az_vunit(speck->velocity)));
     }
   } glEnd();
 }
