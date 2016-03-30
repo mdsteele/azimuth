@@ -30,10 +30,16 @@
 
 /*===========================================================================*/
 
+#ifdef __APPLE__
+#define DEFAULT_FULLSCREEN true
+#else
+#define DEFAULT_FULLSCREEN false
+#endif
+
 void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   *prefs = (az_preferences_t){
     .music_volume = 0.8, .sound_volume = 0.8,
-    .speedrun_timer = false, .fullscreen_on_startup = true,
+    .speedrun_timer = false, .fullscreen_on_startup = DEFAULT_FULLSCREEN,
     .enable_hints = false,
     .keys = {
       [AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_UP_ARROW,
