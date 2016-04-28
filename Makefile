@@ -63,6 +63,7 @@ else ifeq "$(TARGET)" "windows"
   LD = i686-w64-mingw32.static-ld
   PKG_CONFIG = i686-w64-mingw32.static-pkg-config
   STRIP = i686-w64-mingw32.static-strip
+  WINDRES = i686-w64-mingw32.static-windres
 else
   $(error TARGET must be 'host' or 'windows')
 endif
@@ -119,7 +120,8 @@ else ifeq "$(OS_NAME)" "Windows"
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
                     $(OBJDIR)/azimuth/system/resource_windows.o \
-                    $(OBJDIR)/azimuth/system/timer_windows.o
+                    $(OBJDIR)/azimuth/system/timer_windows.o \
+                    $(OBJDIR)/info.res
   ALL_TARGETS += windows_app
 else
   MAIN_LIBFLAGS = -lm -lSDL -lGL
@@ -290,6 +292,15 @@ $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
     $(SRCDIR)/azimuth/util/rw.h $(SRCDIR)/azimuth/util/warning.h
 	$(compile-sys)
 
+$(OBJDIR)/info.rc: $(DATADIR)/info.rc $(SRCDIR)/azimuth/version.h
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
+
+$(OBJDIR)/info.res: $(OBJDIR)/info.rc $(DATADIR)/application.ico
+	@echo "Building $@"
+	$(WINDRES) $< -O coff -o $@
+
 #=============================================================================#
 # Build rules for compiling non-system-specific code:
 
@@ -368,8 +379,7 @@ macosx_app: $(MACOSX_APP_FILES)
 $(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
-	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < \
-	    $(DATADIR)/Info.plist > $@
+	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
 
 $(MACOSX_APPDIR)/MacOS/azimuth: $(BINDIR)/azimuth
 	$(strip-binary)
