@@ -28,6 +28,8 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
+#pragma GCC diagnostic error "-Wconversion"
+
 /*===========================================================================*/
 // Synthesizer:
 
@@ -100,7 +102,7 @@ static void refill_noise_buffer(void) {
     const uint32_t t = x ^ (x << 11);
     x = y; y = z; z = w;
     w = w ^ (w >> 19) ^ t ^ (t >> 8);
-    synth.noise_buffer[i] = (w * 4.656612874161595e-10) - 1.0;
+    synth.noise_buffer[i] = (float)((w * 4.656612874161595e-10) - 1.0);
   }
 }
 
@@ -111,33 +113,33 @@ static void reset_synth(const az_sound_spec_t *spec, bool restart) {
   synth.fperiod = 100.0 / (spec->start_freq * spec->start_freq + 0.001);
   synth.period = (int)synth.fperiod;
   synth.fmaxperiod = 100.0 / (spec->freq_limit * spec->freq_limit + 0.001);
-  synth.fslide = 1.0 - pow(spec->freq_slide, 3.0) * 0.01;
-  synth.fdslide = -pow(spec->freq_delta_slide, 3.0) * 0.000001;
+  synth.fslide = 1.0 - pow(spec->freq_slide, 3) * 0.01;
+  synth.fdslide = -pow(spec->freq_delta_slide, 3) * 0.000001;
   synth.square_duty = 0.5f - spec->square_duty * 0.5f;
   synth.square_slide = -spec->duty_sweep * 0.00005f;
   if (spec->arp_mod >= 0.0f) {
-    synth.arp_mod = 1.0 - pow(spec->arp_mod, 2.0) * 0.9;
+    synth.arp_mod = 1.0 - pow(spec->arp_mod, 2) * 0.9;
   } else {
-    synth.arp_mod = 1.0 + pow(spec->arp_mod, 2.0) * 10.0;
+    synth.arp_mod = 1.0 + pow(spec->arp_mod, 2) * 10.0;
   }
   synth.arp_time = 0;
-  synth.arp_limit = (int)(pow(1.0 - spec->arp_speed, 2.0) * 20000 + 32);
+  synth.arp_limit = (int)(pow(1.0 - spec->arp_speed, 2) * 20000 + 32);
   if (spec->arp_speed == 1.0f) synth.arp_limit = 0;
   if (!restart) {
     // Reset filter:
     synth.fltp = 0.0f;
     synth.fltdp = 0.0f;
-    synth.fltw = pow(1.0 - spec->lpf_cutoff, 3.0) * 0.1f;
+    synth.fltw = powf(1.0f - spec->lpf_cutoff, 3) * 0.1f;
     synth.fltw_d = 1.0f + spec->lpf_ramp * 0.0001f;
-    synth.fltdmp = 5.0f / (1.0f + pow(spec->lpf_resonance, 2.0) * 20.0f) *
+    synth.fltdmp = 5.0f / (1.0f + powf(spec->lpf_resonance, 2) * 20.0f) *
       (0.01f + synth.fltw);
     if (synth.fltdmp > 0.8f) synth.fltdmp = 0.8f;
     synth.fltphp = 0.0f;
-    synth.flthp = pow(spec->hpf_cutoff, 2.0) * 0.1f;
-    synth.flthp_d = 1.0 + spec->hpf_ramp * 0.0003f;
+    synth.flthp = powf(spec->hpf_cutoff, 2) * 0.1f;
+    synth.flthp_d = 1.0f + spec->hpf_ramp * 0.0003f;
     // Reset vibrato:
     synth.vib_phase = 0.0f;
-    synth.vib_speed = pow(spec->vibrato_speed, 2.0) * 0.01f;
+    synth.vib_speed = powf(spec->vibrato_speed, 2) * 0.01f;
     synth.vib_amp = spec->vibrato_depth * 0.5f;
     // Reset envelope:
     synth.env_vol = 0.0f;
@@ -150,9 +152,9 @@ static void reset_synth(const az_sound_spec_t *spec, bool restart) {
     synth.env_length[2] =
       (int)(spec->env_decay * spec->env_decay * 100000.0f);
     // Reset phaser:
-    synth.fphase = pow(spec->phaser_offset, 2.0) * 1020.0f;
+    synth.fphase = powf(spec->phaser_offset, 2) * 1020.0f;
     if (spec->phaser_offset < 0.0f) synth.fphase = -synth.fphase;
-    synth.fdphase = pow(spec->phaser_sweep, 2.0);
+    synth.fdphase = powf(spec->phaser_sweep, 2);
     if (spec->phaser_sweep < 0.0f) synth.fdphase = -synth.fdphase;
     synth.iphase = abs((int)synth.fphase);
     synth.ipp = 0;
@@ -162,7 +164,7 @@ static void reset_synth(const az_sound_spec_t *spec, bool restart) {
     // Reset repeat:
     synth.rep_time = 0;
     synth.rep_limit =
-      (int)(pow(1.0f - spec->repeat_speed, 2.0f) * 20000 + 32);
+      (int)(powf(1.0f - spec->repeat_speed, 2) * 20000 + 32);
     if (spec->repeat_speed == 0.0f) synth.rep_limit = 0;
   }
 }
@@ -195,16 +197,17 @@ static void synth_sound(const az_sound_spec_t *spec) {
       synth.fperiod = synth.fmaxperiod;
       if (spec->freq_limit > 0.0f) finished = true;
     }
-    float rfperiod = synth.fperiod;
+    float rfperiod = (float)synth.fperiod;
     if (synth.vib_amp > 0.0f) {
       synth.vib_phase += synth.vib_speed;
-      rfperiod = synth.fperiod * (1.0 + sin(synth.vib_phase) * synth.vib_amp);
+      rfperiod =
+        (float)(synth.fperiod * (1.0 + sin(synth.vib_phase) * synth.vib_amp));
     }
     synth.period = (int)rfperiod;
     if (synth.period < 8) synth.period = 8;
     synth.square_duty += synth.square_slide;
-    if (synth.square_duty < 0.0f) synth.square_duty=0.0f;
-    if (synth.square_duty > 0.5f) synth.square_duty=0.5f;
+    if (synth.square_duty < 0.0f) synth.square_duty = 0.0f;
+    if (synth.square_duty > 0.5f) synth.square_duty = 0.5f;
     // volume envelope
     synth.env_time++;
     if (synth.env_time > synth.env_length[synth.env_stage]) {
@@ -212,14 +215,23 @@ static void synth_sound(const az_sound_spec_t *spec) {
       ++synth.env_stage;
       if (synth.env_stage == 3) finished = true;
     }
-    if (synth.env_stage == 0)
+    if (synth.env_stage == 0) {
+      assert(synth.env_length[0] > 0);
       synth.env_vol = (float)synth.env_time / synth.env_length[0];
-    if (synth.env_stage == 1)
-      synth.env_vol = 1.0f +
-        pow(1.0f - (float)synth.env_time / synth.env_length[1], 1.0f) *
-        2.0f * spec->env_punch;
-    if (synth.env_stage==2)
-      synth.env_vol = 1.0f - (float)synth.env_time / synth.env_length[2];
+    }
+    if (synth.env_stage == 1) {
+      synth.env_vol = 1.0f;
+      if (synth.env_length[1] > 0) {
+        synth.env_vol +=
+          powf(1.0f - (float)synth.env_time / synth.env_length[1], 1.0f) *
+          2.0f * spec->env_punch;
+      }
+    }
+    if (synth.env_stage == 2) {
+      synth.env_vol = (synth.env_length[2] > 0 ?
+                       1.0f - (float)synth.env_time / synth.env_length[2] :
+                       1.0f);
+    }
 
     // phaser step
     synth.fphase += synth.fdphase;
@@ -243,6 +255,7 @@ static void synth_sound(const az_sound_spec_t *spec) {
         }
       }
       // base waveform
+      assert(synth.period > 0);
       float fp = (float)synth.phase / synth.period;
       switch (spec->wave_kind) {
         case AZ_NOISE_WAVE:
@@ -258,7 +271,7 @@ static void synth_sound(const az_sound_spec_t *spec) {
           sample = (fp < synth.square_duty ? 0.5f : -0.5f);
           break;
         case AZ_TRIANGLE_WAVE:
-          sample = 4.0f * fabs(fp - 0.5f) - 1.0f;
+          sample = 4.0f * fabsf(fp - 0.5f) - 1.0f;
           break;
         case AZ_WOBBLE_WAVE:
           sample = (float)(0.5 * (cos(fp * AZ_TWO_PI) +
@@ -305,6 +318,12 @@ static void synth_sound(const az_sound_spec_t *spec) {
       synth.samples[synth.num_samples++] = (int16_t)(filesample * 32000);
       filesample = 0.0f;
     }
+  }
+
+  // Trim unneeded zeros off the end.
+  while (synth.num_samples > 0 &&
+         synth.samples[synth.num_samples - 1] == 0) {
+    --synth.num_samples;
   }
 }
 
