@@ -28,8 +28,6 @@
 #include "azimuth/util/misc.h"
 #include "azimuth/util/vector.h"
 
-#pragma GCC diagnostic error "-Wconversion"
-
 /*===========================================================================*/
 // Synthesizer:
 

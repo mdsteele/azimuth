@@ -215,6 +215,8 @@ RESOURCE_FILES := $(sort $(shell find $(DATADIR)/music -name '*.txt') \
 VERSION_NUMBER := \
     $(shell sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$$/\1/p' \
                 $(SRCDIR)/azimuth/version.h | paste -s -d. -)
+COMMA = ,
+VERSION_QUAD := $(subst .,$(COMMA),$(VERSION_NUMBER)),0
 ifeq "$(BUILDTYPE)" "debug"
   ZIP_FILE_PREFIX = Azimuth-v$(VERSION_NUMBER)-debug
 else
@@ -295,11 +297,12 @@ $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
 $(OBJDIR)/info.rc: $(DATADIR)/info.rc $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
-	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
+	@sed -e "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" \
+	     -e "s/%AZ_VERSION_QUAD/$(VERSION_QUAD)/g" < $< > $@
 
 $(OBJDIR)/info.res: $(OBJDIR)/info.rc $(DATADIR)/application.ico
 	@echo "Building $@"
-	$(WINDRES) $< -O coff -o $@
+	@$(WINDRES) $< -O coff -o $@
 
 #=============================================================================#
 # Build rules for compiling non-system-specific code:
