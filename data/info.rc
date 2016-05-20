@@ -11,7 +11,7 @@ BEGIN
       VALUE "FileDescription", "Azimuth"
       VALUE "FileVersion", "%AZ_VERSION_NUMBER"
       VALUE "InternalName", "Azimuth"
-      VALUE "LegalCopyright", "Matthew D. Steele"
+      VALUE "LegalCopyright", "Copyright 2012-2016 Matthew D. Steele"
       VALUE "OriginalFilename", "Azimuth.exe"
       VALUE "ProductName", "Azimuth"
       VALUE "ProductVersion", "%AZ_VERSION_NUMBER"

@@ -12,5 +12,7 @@
 	<string>%AZ_VERSION_NUMBER</string>
 	<key>CFBundleVersion</key>
 	<string>%AZ_VERSION_NUMBER</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2012-2016 Matthew D. Steele</string>
 </dict>
 </plist>
