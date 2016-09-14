@@ -82,7 +82,7 @@ else
 endif
 
 ifeq "$(OS_NAME)" "Darwin"
-  CFLAGS += -I$(SRCDIR)/macosx -mmacosx-version-min=10.6
+  CFLAGS += -I$(SRCDIR)/macosx -mmacosx-version-min=10.9 -F/Library/Frameworks
   # Use the SDL framework if it's installed.  Otherwise, look to see if SDL has
   # been installed via MacPorts.  Otherwise, give up.
   ifeq "$(shell test -d /Library/Frameworks/SDL.framework && echo ok)" "ok"
