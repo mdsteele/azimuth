@@ -50,6 +50,11 @@ endif
 
 ifeq "$(TARGET)" "host"
   OS_NAME := $(shell uname)
+  ifeq "$(shell uname -m)" "x86_64"
+    ARCH = amd64
+  else
+    ARCH = i386
+  endif
   # Use clang if it's available, otherwise use gcc.
   CC := $(shell which clang > /dev/null && echo clang || echo gcc)
   LD = ld
@@ -59,6 +64,7 @@ ifeq "$(TARGET)" "host"
   endif
 else ifeq "$(TARGET)" "windows"
   OS_NAME := Windows
+  ARCH = i386
   CC := i686-w64-mingw32.static-gcc
   LD = i686-w64-mingw32.static-ld
   PKG_CONFIG = i686-w64-mingw32.static-pkg-config
@@ -407,6 +413,15 @@ $(MACOSX_ZIP_FILE): macosx_app
 # Build rules for bundling Linux application:
 
 LINUX_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Linux.tar.bz2
+LINUX_DEB_DIR = $(OUTDIR)/deb
+LINUX_DEB_CONTROL_FILES := $(LINUX_DEB_DIR)/control/control
+LINUX_DEB_DATA_FILES := $(LINUX_DEB_DIR)/data/usr/bin/azimuth \
+    $(LINUX_DEB_DIR)/data/usr/share/applications/azimuth.desktop \
+    $(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/128x128/apps/azimuth.png
+LINUX_DEB_PKG_FILES := $(LINUX_DEB_DIR)/debian-binary \
+    $(LINUX_DEB_DIR)/control.tar.gz \
+    $(LINUX_DEB_DIR)/data.tar.gz
+LINUX_DEB_PKG = $(OUTDIR)/azimuth_$(VERSION_NUMBER)_$(ARCH).deb
 
 .PHONY: linux_app
 linux_app: $(OUTDIR)/Azimuth
@@ -419,7 +434,53 @@ linux_zip: $(LINUX_ZIP_FILE)
 
 $(LINUX_ZIP_FILE): $(OUTDIR)/Azimuth
 	@echo "Compressing $@"
+	@mkdir -p $(@D)
 	@tar -cjf $@ -C $(<D) $(<F)
+
+.PHONY: linux_deb
+linux_deb: $(LINUX_DEB_PKG)
+
+$(LINUX_DEB_PKG): $(LINUX_DEB_PKG_FILES)
+	@echo "Archiving $@"
+	@mkdir -p $(@D)
+	@ar -cr $@ $^
+
+$(LINUX_DEB_DIR)/debian-binary:
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@echo "2.0" > $@
+
+$(LINUX_DEB_DIR)/control.tar.gz: $(LINUX_DEB_CONTROL_FILES)
+	@echo "Compressing $@"
+	@mkdir -p $(@D)
+	@tar -czf $@ -C $(LINUX_DEB_DIR)/control \
+	    $(patsubst $(LINUX_DEB_DIR)/control/%,%,$^)
+
+$(LINUX_DEB_DIR)/data.tar.gz: $(LINUX_DEB_DATA_FILES)
+	@echo "Compressing $@"
+	@mkdir -p $(@D)
+	@tar -czf $@ -C $(LINUX_DEB_DIR)/data \
+	    $(patsubst $(LINUX_DEB_DIR)/data/%,%,$^)
+
+$(LINUX_DEB_DIR)/control/control: $(DATADIR)/control \
+    $(SRCDIR)/azimuth/version.h
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@sed "s/%AZ_ARCHITECTURE/$(ARCH)/g; \
+	      s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
+
+$(LINUX_DEB_DIR)/data/usr/bin/azimuth: $(BINDIR)/azimuth
+	$(strip-binary)
+
+$(LINUX_DEB_DIR)/data/usr/share/applications/azimuth.desktop: \
+    $(DATADIR)/azimuth.desktop $(SRCDIR)/azimuth/version.h
+	@echo "Generating $@"
+	@mkdir -p $(@D)
+	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
+
+$(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/128x128/apps/azimuth.png: \
+    $(DATADIR)/application.png
+	$(copy-file)
 
 #=============================================================================#
 # Build rules for bundling Windows application:

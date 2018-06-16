@@ -1,0 +1,11 @@
+Package: Azimuth
+Version: %AZ_VERSION_NUMBER
+Architecture: %AZ_ARCHITECTURE
+Maintainer: Matthew D. Steele <mdsteele@alum.mit.edu>
+Description: A spaceship metroidvania.
+ Azimuth is a metroidvania-style game -- you explore, fight enemies, solve
+ puzzles, find new upgrades and weapons, and uncover the storyline piece by
+ piece.  Unlike many games in the genre, it's not a platformer; instead, you
+ pilot a spaceship with Astroids-style controls.  There is a huge game world to
+ explore, lots of little puzzles to solve, dozens of weapons and upgrades to
+ find and use, and a wide variety of enemies and bosses to tangle with.
