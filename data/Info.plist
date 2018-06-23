@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleExecutable</key>
-	<string>azimuth</string>
-	<key>CFBundleIconFile</key>
-	<string>application.icns</string>
-	<key>CFBundleName</key>
-	<string>Azimuth</string>
-	<key>CFBundleShortVersionString</key>
-	<string>%AZ_VERSION_NUMBER</string>
-	<key>CFBundleVersion</key>
-	<string>%AZ_VERSION_NUMBER</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2012-2016 Matthew D. Steele</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>English</string>
+  <key>CFBundleDisplayName</key>
+  <string>Azimuth</string>
+  <key>CFBundleExecutable</key>
+  <string>azimuth</string>
+  <key>CFBundleIconFile</key>
+  <string>application.icns</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.github.mdsteele.azimuth</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>Azimuth</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>%AZ_VERSION_NUMBER</string>
+  <key>CFBundleVersion</key>
+  <string>%AZ_VERSION_NUMBER</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright 2012-2016 Matthew D. Steele</string>
 </dict>
 </plist>

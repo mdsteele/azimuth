@@ -418,6 +418,33 @@ $(MACOSX_ZIP_FILE): macosx_app
 	@ditto -c -k --keepParent $(MACOSX_APP_BUNDLE) $@
 
 #=============================================================================#
+# Build rules for signing Mac OS X application:
+
+ifdef IDENTITY
+
+SIGNED_MACOSX_APP_BUNDLE = $(OUTDIR)/signed/Azimuth.app
+SIGNED_MACOSX_ZIP_FILE = $(OUTDIR)/signed/$(ZIP_FILE_PREFIX)-Mac.zip
+
+.PHONY: signed_macosx_app
+signed_macosx_app: macosx_app
+	@echo "Signing $(SIGNED_MACOSX_APP_BUNDLE)"
+	@rm -rf $(SIGNED_MACOSX_APP_BUNDLE)
+	@mkdir -p $(OUTDIR)/signed
+	@cp -R $(MACOSX_APP_BUNDLE) $(SIGNED_MACOSX_APP_BUNDLE)
+	@codesign --deep --force --sign "$(IDENTITY)" \
+	    $(SIGNED_MACOSX_APP_BUNDLE)
+	@codesign --deep --verify --strict $(SIGNED_MACOSX_APP_BUNDLE)
+
+.PHONY: signed_macosx_zip
+signed_macosx_zip: $(SIGNED_MACOSX_ZIP_FILE)
+
+$(SIGNED_MACOSX_ZIP_FILE): signed_macosx_app
+	@echo "Compressing $@"
+	@ditto -c -k --keepParent $(SIGNED_MACOSX_APP_BUNDLE) $@
+
+endif
+
+#=============================================================================#
 # Build rules for bundling Linux application:
 
 LINUX_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Linux.tar.bz2
