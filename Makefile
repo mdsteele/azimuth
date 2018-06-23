@@ -217,6 +217,7 @@ ZFXR_OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(ZFXR_C99FILES)) \
 
 RESOURCE_FILES := $(sort $(shell find $(DATADIR)/music -name '*.txt') \
                          $(shell find $(DATADIR)/rooms -name '*.txt'))
+PNG_ICON_FILES := $(shell find $(DATADIR)/icons -name '*.png')
 
 VERSION_NUMBER := \
     $(shell sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$$/\1/p' \
@@ -366,6 +367,8 @@ $(OBJDIR)/zfxr/%.o: $(SRCDIR)/zfxr/%.c \
 #=============================================================================#
 # Build rules for bundling Mac OS X application:
 
+MACOSX_ICONSET_FILES = \
+    $(patsubst $(DATADIR)/icons/%,$(OUTDIR)/icon.iconset/%,$(PNG_ICON_FILES))
 MACOSX_APP_BUNDLE = $(OUTDIR)/Azimuth.app
 MACOSX_APPDIR = $(MACOSX_APP_BUNDLE)/Contents
 MACOSX_APP_FILES := $(MACOSX_APPDIR)/Info.plist \
@@ -382,6 +385,9 @@ $(MACOSX_APPDIR)/Frameworks/SDL.framework: $(SDL_FRAMEWORK_PATH)
 	@cp -R $< $@
 endif
 
+$(OUTDIR)/icon.iconset/%.png: $(DATADIR)/icons/%.png
+	$(copy-file)
+
 .PHONY: macosx_app
 macosx_app: $(MACOSX_APP_FILES)
 
@@ -393,8 +399,10 @@ $(MACOSX_APPDIR)/Info.plist: $(DATADIR)/Info.plist $(SRCDIR)/azimuth/version.h
 $(MACOSX_APPDIR)/MacOS/azimuth: $(BINDIR)/azimuth
 	$(strip-binary)
 
-$(MACOSX_APPDIR)/Resources/application.icns: $(DATADIR)/application.icns
-	$(copy-file)
+$(MACOSX_APPDIR)/Resources/application.icns: $(MACOSX_ICONSET_FILES)
+	@echo "Converting $@"
+	@mkdir -p $(@D)
+	@iconutil -c icns $(OUTDIR)/icon.iconset -o $@ 2> /dev/null
 
 $(MACOSX_APPDIR)/Resources/music/%: $(DATADIR)/music/%
 	$(copy-file)
@@ -417,7 +425,9 @@ LINUX_DEB_DIR = $(OUTDIR)/deb
 LINUX_DEB_CONTROL_FILES := $(LINUX_DEB_DIR)/control/control
 LINUX_DEB_DATA_FILES := $(LINUX_DEB_DIR)/data/usr/bin/azimuth \
     $(LINUX_DEB_DIR)/data/usr/share/applications/azimuth.desktop \
-    $(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/128x128/apps/azimuth.png
+    $(patsubst $(DATADIR)/icons/icon_%.png,\
+        $(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/%/apps/azimuth.png,\
+        $(PNG_ICON_FILES))
 LINUX_DEB_PKG_FILES := $(LINUX_DEB_DIR)/debian-binary \
     $(LINUX_DEB_DIR)/control.tar.gz \
     $(LINUX_DEB_DIR)/data.tar.gz
@@ -478,8 +488,8 @@ $(LINUX_DEB_DIR)/data/usr/share/applications/azimuth.desktop: \
 	@mkdir -p $(@D)
 	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
 
-$(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/128x128/apps/azimuth.png: \
-    $(DATADIR)/application.png
+$(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/%/apps/azimuth.png: \
+    $(DATADIR)/icons/icon_%.png
 	$(copy-file)
 
 #=============================================================================#
