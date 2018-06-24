@@ -4,9 +4,25 @@ body {
   background: black url('../images/stars.png');
   color: white;
   font: 18px 'Inconsolata';
-  margin: 50px auto;
+  margin: 20px auto;
   max-width: 640px;
   padding: 5px;
+}
+
+div.sitename {
+  border-bottom: 1px solid #ddd;
+  color: #ddd;
+  font-family: "Courier New", monospace;
+  font-size: 36px;
+  font-weight: normal;
+  margin: 0 auto 25px auto;
+  max-width: 600px;
+  text-align: left;
+}
+
+div.sitename a {
+  color: inherit;
+  text-decoration: none;
 }
 
 header {
@@ -24,9 +40,12 @@ h1 img {
 }
 
 header > nav {
-  bottom: 25%;
+  bottom: 20%;
   position: absolute;
   width: 100%;
+}
+@media (max-width: 360px) {
+  header > nav { bottom: 15%; }
 }
 header > nav > a {
   background-image: linear-gradient(to bottom,
