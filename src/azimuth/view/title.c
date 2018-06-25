@@ -512,7 +512,7 @@ static const az_polygon_t about_box_polygon =
 static const char about_box_paragraph[] =
   "Copyright 2012 Matthew D Steele <mdsteele@alum.mit.edu>\n"
   "\n"
-  "    Game website: https://mdsteele.github.io/azimuth/\n"
+  "    Game website: https://mdsteele.games/azimuth/\n"
   "    Source code: https://github.com/mdsteele/azimuth/\n"
   "\n"
   "$/Azimuth$| comes with ABSOLUTELY NO WARRANTY.\n"
