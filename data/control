@@ -2,6 +2,7 @@ Package: Azimuth
 Version: %AZ_VERSION_NUMBER
 Architecture: %AZ_ARCHITECTURE
 Maintainer: Matthew D. Steele <mdsteele@alum.mit.edu>
+Depends: libsdl1.2debian (>= 1.2.15), libgl1-mesa-glx | libgl1
 Description: A spaceship metroidvania.
  Azimuth is a metroidvania-style game -- you explore, fight enemies, solve
  puzzles, find new upgrades and weapons, and uncover the storyline piece by
