@@ -17,12 +17,12 @@ either in Framework form or via e.g. MacPorts, and the Makefile should be able
 to sort it out.  On Debian, all it should take is:
 
 ```shell
-$ sudo apt-get install libsdl1.2-dev
+$ sudo apt-get install libgl-mesa-dev libsdl1.2-dev
 ```
 
 ### Building and running
 
-From the root of the repository, run:
+To build and run a debug build of the game, run:
 
 ```shell
 $ make       # Compiles everything.
@@ -30,19 +30,21 @@ $ make test  # Runs unit tests, to make sure things look okay on your system.
 $ make run   # Starts the game.
 ```
 
-The final packaged game will be output to `out/debug/Azimuth.app` on Mac, or to
-`out/debug/Azimuth` on Linux.  (If you try to run the executable found at
-`out/debug/bin/azimuth`, it won't be able find the game resource files.)
-
-You can also build a release version with:
+To build and install a packaged app on Mac OS X, run:
 
 ```shell
-$ BUILDTYPE=release make
-$ BUILDTYPE=release make test
-$ BUILDTYPE=release make run
+$ BUILDTYPE=release make macosx_app
+$ mv -i out/release/host/Azimuth.app /Applications/
+$ open /Applications/Azimuth.app
 ```
 
-in which case the outputs will be found in `out/release/` instead.
+To build and install a packaged app on Debian, run:
+
+```shell
+$ BUILDTYPE=release make linux_deb
+$ sudo dpkg -i out/release/host/azimuth_*.deb
+$ azimuth
+```
 
 ## License
 
