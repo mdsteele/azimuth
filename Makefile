@@ -496,8 +496,7 @@ $(LINUX_DEB_DIR)/control.tar.gz: $(LINUX_DEB_CONTROL_FILES)
 $(LINUX_DEB_DIR)/data.tar.gz: $(LINUX_DEB_DATA_FILES)
 	@echo "Compressing $@"
 	@mkdir -p $(@D)
-	@tar -czf $@ -C $(LINUX_DEB_DIR)/data \
-	    $(patsubst $(LINUX_DEB_DIR)/data/%,%,$^)
+	@tar -czf $@ -C $(LINUX_DEB_DIR)/data usr
 
 $(LINUX_DEB_DIR)/control/control: $(DATADIR)/control \
     $(SRCDIR)/azimuth/version.h
