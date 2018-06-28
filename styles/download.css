@@ -1,6 +1,6 @@
 table.download {
   margin: 30px auto;
-  width: 310px;
+  max-width: 310px;
 }
 
 td.icon {
