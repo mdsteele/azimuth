@@ -143,7 +143,7 @@ bool az_audit_scenario(const az_planet_t *planet) {
     // Check on_start script.
     CHECK_SCRIPT(room->on_start);
     // Check consoles.
-    az_console_kind_t console_kind;
+    az_console_kind_t console_kind = AZ_CONS_SAVE;
     const int num_consoles = count_consoles(room, &console_kind);
     if (num_consoles > 1) ROOM_ERROR("Multiple consoles");
     if (num_consoles > 0) {
