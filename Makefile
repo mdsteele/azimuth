@@ -526,7 +526,7 @@ INSTALLBINDIR = $(INSTALLDIR)/bin
 INSTALLSHAREDIR = $(INSTALLDIR)/share
 INSTALLDOCDIR = $(INSTALLSHAREDIR)/doc/azimuth
 INSTALLICONDIR = $(INSTALLSHAREDIR)/icons/hicolor
-INSTALLTOOL = true
+INSTALLTOOL = false
 INSTALLDOC = true
 
 .PHONY : install
@@ -550,7 +550,7 @@ endif
 	mkdir -p $(INSTALLSHAREDIR)/applications
 	cp data/azimuth.desktop $(INSTALLSHAREDIR)/applications/azimuth.desktop
 
-
+.PHONY : uninstall
 uninstall:
 	rm -f $(INSTALLBINDIR)/azimuth
 	rm -f $(INSTALLBINDIR)/azimuth-editor
