@@ -519,6 +519,51 @@ $(LINUX_DEB_DIR)/data/usr/share/icons/hicolor/%/apps/azimuth.png: \
 	$(copy-file)
 
 #=============================================================================#
+# Build rules to install linux version
+
+INSTALLDIR = /usr
+INSTALLBINDIR = $(INSTALLDIR)/bin
+INSTALLSHAREDIR = $(INSTALLDIR)/share
+INSTALLDOCDIR = $(INSTALLSHAREDIR)/doc/azimuth
+INSTALLICONDIR = $(INSTALLSHAREDIR)/icons/hicolor
+INSTALLTOOL = false
+INSTALLDOC = true
+
+.PHONY : install
+install: $(BINDIR)/azimuth $(BINDIR)/editor $(BINDIR)/muse $(BINDIR)/zfxr
+	mkdir -p $(INSTALLBINDIR)
+	install $(BINDIR)/azimuth $(INSTALLBINDIR)/azimuth
+ifeq "$(INSTALLTOOL)" "true"
+		install $(BINDIR)/editor $(INSTALLBINDIR)/azimuth-editor
+		install $(BINDIR)/muse $(INSTALLBINDIR)/azimuth-muse
+		install $(BINDIR)/zfxr $(INSTALLBINDIR)/azimuth-zfxr
+endif
+ifeq "$(INSTALLDOC)" "true"
+		mkdir -p $(INSTALLDOCDIR)
+		install doc/* README.md LICENSE $(INSTALLDOCDIR)
+endif
+	mkdir -p $(INSTALLICONDIR)/128x128/apps/ $(INSTALLICONDIR)/64x64/apps/ $(INSTALLICONDIR)/48x48/apps/ $(INSTALLICONDIR)/32x32/apps/
+	install data/icons/icon_128x128.png $(INSTALLICONDIR)/128x128/apps/azimuth.png
+	install data/icons/icon_64x64.png $(INSTALLICONDIR)/64x64/apps/azimuth.png
+	install data/icons/icon_48x48.png $(INSTALLICONDIR)/48x48/apps/azimuth.png
+	install data/icons/icon_32x32.png $(INSTALLICONDIR)/32x32/apps/azimuth.png
+	mkdir -p $(INSTALLSHAREDIR)/applications
+	cp data/azimuth.desktop $(INSTALLSHAREDIR)/applications/azimuth.desktop
+
+.PHONY : uninstall
+uninstall:
+	rm -f $(INSTALLBINDIR)/azimuth
+	rm -f $(INSTALLBINDIR)/azimuth-editor
+	rm -f $(INSTALLBINDIR)/azimuth-muse
+	rm -f $(INSTALLBINDIR)/azimuth-zfxr
+	rm -rf $(INSTALLDOCDIR)
+	rm -f $(INSTALLICONDIR)/128x128/apps/azimuth.png
+	rm -f $(INSTALLICONDIR)/64x64/apps/azimuth.png
+	rm -f $(INSTALLICONDIR)/48x48/apps/azimuth.png
+	rm -f $(INSTALLICONDIR)/32x32/apps/azimuth.png
+	rm -f $(INSTALLSHAREDIR)/applications/azimuth.desktop
+
+#=============================================================================#
 # Build rules for bundling Windows application:
 
 WINDOWS_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Windows.zip
