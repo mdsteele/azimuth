@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h> // for EXIT_SUCCESS
 
-#include <SDL/SDL.h> // for main() renaming
+#include "SDL.h" // for main() renaming
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/event.h"
@@ -1492,7 +1492,17 @@ static void do_save(bool summarize) {
 }
 
 static void event_loop(void) {
+  bool textInputEnabled = false;
   while (true) {
+    // Enable SDL's text events if we're in text editing mode
+    if (state.text.action != AZ_ETA_NOTHING && !textInputEnabled) {
+      SDL_StartTextInput();
+      textInputEnabled = true;
+    } else if(state.text.action == AZ_ETA_NOTHING && textInputEnabled) {
+      SDL_StopTextInput();
+      textInputEnabled = false;
+    }
+
     if (state.text.action == AZ_ETA_NOTHING) {
       state.controls.up = az_is_key_held(AZ_KEY_UP_ARROW);
       state.controls.down = az_is_key_held(AZ_KEY_DOWN_ARROW);
@@ -1793,6 +1803,7 @@ int main(int argc, char **argv) {
   event_loop();
   az_destroy_editor_state(&state);
 
+  az_deinit_gui();
   return EXIT_SUCCESS;
 }
 

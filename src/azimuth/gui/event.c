@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h> // for exit and EXIT_SUCCESS
 
-#include <SDL/SDL.h>
+#include "SDL.h"
 
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"
@@ -39,7 +39,7 @@
 #define AZ_KMOD_CMD KMOD_CTRL
 #endif
 
-static SDLKey az_key_to_sdl_key(az_key_id_t key) {
+static SDL_Keycode az_key_to_sdl_key(az_key_id_t key) {
   assert(key != AZ_KEY_UNKNOWN);
   switch (key) {
     case AZ_KEY_UNKNOWN: AZ_ASSERT_UNREACHABLE();
@@ -103,7 +103,7 @@ static SDLKey az_key_to_sdl_key(az_key_id_t key) {
   AZ_ASSERT_UNREACHABLE();
 }
 
-static az_key_id_t sdl_key_to_az_key(SDLKey key) {
+static az_key_id_t sdl_key_to_az_key(SDL_Keycode key) {
   switch (key) {
     case SDLK_BACKSPACE: return AZ_KEY_BACKSPACE;
     case SDLK_TAB: return AZ_KEY_TAB;
@@ -172,9 +172,8 @@ static void pause_until_refocus(void) {
   while (true) {
     while (SDL_PollEvent(&sdl_event)) {
       switch (sdl_event.type) {
-        case SDL_ACTIVEEVENT:
-          if (sdl_event.active.gain == 1 &&
-              (sdl_event.active.state & SDL_APPINPUTFOCUS)) {
+        case SDL_WINDOWEVENT:
+          if (sdl_event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
             az_unpause_all_audio();
             return;
           }
@@ -192,13 +191,15 @@ bool az_poll_event(az_event_t *event) {
   SDL_Event sdl_event;
   while (SDL_PollEvent(&sdl_event)) {
     switch (sdl_event.type) {
-      case SDL_ACTIVEEVENT:
-        if (sdl_event.active.gain == 0 &&
-            (sdl_event.active.state & SDL_APPINPUTFOCUS)) {
+      case SDL_WINDOWEVENT:
+        if (sdl_event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
           pause_until_refocus();
         }
         continue;
       case SDL_KEYDOWN:
+        if (sdl_event.key.repeat) {
+          continue;
+        }
         if ((sdl_event.key.keysym.mod & AZ_KMOD_CMD) &&
             !(sdl_event.key.keysym.mod & KMOD_SHIFT)) {
           // For Command/Ctrl-F, toggle fullscreen, then get the next event.
@@ -215,14 +216,29 @@ bool az_poll_event(az_event_t *event) {
         event->key.id = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
-        event->key.character = sdl_event.key.keysym.unicode;
+        event->key.character = 0;
+        return true;
+      case SDL_TEXTINPUT:
+        // The key.character consumer in src/editor/main.c only
+        // uses key.character so 'zero' out the other members
+        event->kind = AZ_EVENT_KEY_DOWN;
+        event->key.id = AZ_KEY_UNKNOWN;
+        event->key.command = false;
+        event->key.shift = false;
+        // The key.character consumer in src/editor/main.c only
+        // accepts printable low-ASCII so just send it the the
+        // first UTF-8 character from the text array
+        event->key.character = sdl_event.text.text[0];
         return true;
       case SDL_KEYUP:
+        if (sdl_event.key.repeat) {
+          continue;
+        }
         event->kind = AZ_EVENT_KEY_UP;
         event->key.id = sdl_key_to_az_key(sdl_event.key.keysym.sym);
         event->key.command = (bool)(sdl_event.key.keysym.mod & AZ_KMOD_CMD);
         event->key.shift = (bool)(sdl_event.key.keysym.mod & KMOD_SHIFT);
-        event->key.character = sdl_event.key.keysym.unicode;
+        event->key.character = 0;
         return true;
       case SDL_MOUSEBUTTONDOWN:
         // Ignore all but the left mouse button.
@@ -261,7 +277,7 @@ bool az_poll_event(az_event_t *event) {
 }
 
 bool az_get_mouse_position(int *x, int *y) {
-  if (!(SDL_GetAppState() & SDL_APPMOUSEFOCUS)) return false;
+  if (!az_has_mousefocus()) return false;
   SDL_GetMouseState(x, y);
   return true;
 }
@@ -272,7 +288,7 @@ bool az_is_mouse_held(void) {
 
 bool az_is_key_held(az_key_id_t key) {
   assert(key != AZ_KEY_UNKNOWN);
-  return (bool)SDL_GetKeyState(NULL)[az_key_to_sdl_key(key)];
+  return (bool)SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(az_key_to_sdl_key(key))];
 }
 
 bool az_is_shift_key_held(void) {

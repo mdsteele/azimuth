@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include <SDL/SDL.h> // for main() renaming
+#include "SDL.h" // for main() renaming
 
 #include "azimuth/control/gameover.h"
 #include "azimuth/control/space.h"
@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
                                 title_intro);
           switch (action.kind) {
             case AZ_TA_QUIT:
+              az_deinit_gui();
               return EXIT_SUCCESS;
             case AZ_TA_START_GAME:
               controller = AZ_CONTROLLER_SPACE;
@@ -121,6 +122,7 @@ int main(int argc, char **argv) {
             title_intro = AZ_TI_SKIP_INTRO;
             break;
           case AZ_GOA_QUIT:
+            az_deinit_gui();
             return EXIT_SUCCESS;
         }
         break;

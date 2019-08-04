@@ -22,8 +22,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include <GL/gl.h>
-#include <SDL/SDL.h>
+#include "SDL.h"
+#include "SDL_opengl.h"
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
@@ -40,14 +40,13 @@
 #define CMD_KEY_NAME "Ctrl-"
 #endif
 
-#define VIDEO_DEPTH 32
-#define VIDEO_FLAGS (SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL)
-
 static bool sdl_initialized = false;
 static bool display_initialized = false;
 static bool currently_fullscreen;
 static int num_gl_init_funcs = 0;
 static az_init_func_t gl_init_funcs[8];
+static SDL_Window* window = NULL;
+static SDL_GLContext context = NULL;
 
 void az_register_gl_init_func(az_init_func_t func) {
   assert(!sdl_initialized);
@@ -67,8 +66,26 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
   if (enable_audio) {
     az_init_audio();
   }
-  SDL_WM_SetCaption("Azimuth (press " CMD_KEY_NAME "F to run full-screen)",
-                    "Azimuth");
+  // Enable OpenGL double-buffering:
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  // Enable antialiasing:
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+  window = SDL_CreateWindow(
+    "Azimuth",
+    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT,
+    SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+  if (NULL == window) {
+    AZ_FATAL("SDL_CreateWindow failed: %s\n", SDL_GetError());
+  }
+  // TODO: set window title on maximize/minimize in event.c somehow?
+  SDL_SetWindowTitle(window, "Azimuth (press " CMD_KEY_NAME "F to run full-screen)");
+  context = SDL_GL_CreateContext(window);
+  if (!context) {
+      AZ_FATAL("SDL_GL_CreateContext failed: %s\n", SDL_GetError());
+  }
+
   sdl_initialized = true;
   az_set_fullscreen(fullscreen);
   SDL_ShowCursor(SDL_DISABLE);
@@ -83,6 +100,12 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
 #endif
 }
 
+void az_deinit_gui(void) {
+  SDL_GL_DeleteContext(context);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+}
+
 bool az_is_fullscreen(void) {
   assert(sdl_initialized);
   assert(display_initialized);
@@ -94,37 +117,25 @@ void az_set_fullscreen(bool fullscreen) {
   if (display_initialized && fullscreen == currently_fullscreen) return;
   currently_fullscreen = fullscreen;
   az_pause_all_audio();
-  // Enable OpenGL double-buffering:
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  // Enable vsync:
-  const int vsync_result =
-#if SDL_VERSION_ATLEAST(1,3,0)
-    SDL_GL_SetSwapInterval(1);
-#else
-    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-#endif
-  if (vsync_result != 0) {
-    AZ_WARNING_ALWAYS("Failed to enable vsync: %s\n", SDL_GetError());
-  }
-  // Enable antialiasing:
-  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
 
   // Init the display:
   int x = 0, y = 0;
   if (display_initialized) {
     SDL_GetMouseState(&x, &y);
   }
-  if (!SDL_SetVideoMode(AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, VIDEO_DEPTH,
-                        VIDEO_FLAGS | (fullscreen ? SDL_FULLSCREEN : 0))) {
-    AZ_FATAL("SDL_SetVideoMode failed: %s\n", SDL_GetError());
-  }
-  if (display_initialized) {
-    SDL_WarpMouse(x, y);
+
+  if(0 != SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0)) {
+      AZ_FATAL("SDL_SetWindowFullscreen failed: %s\n", SDL_GetError());
   }
 
-  // Enable unicode values for keyboard events:
-  SDL_EnableUNICODE(1);
+  // Enable vsync:
+  const int vsync_result = SDL_GL_SetSwapInterval(1);
+  if (vsync_result != 0) {
+    AZ_WARNING_ALWAYS("Failed to enable vsync: %s\n", SDL_GetError());
+  }
+  if (display_initialized) {
+    SDL_WarpMouseInWindow(window, x, y);
+  }
 
   // Turn off the depth buffer:
   glDisable(GL_DEPTH_TEST);
@@ -160,6 +171,11 @@ void az_set_fullscreen(bool fullscreen) {
   az_unpause_all_audio();
 }
 
+bool az_has_mousefocus(void) {
+  assert(sdl_initialized);
+  return (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS);
+}
+
 void az_start_screen_redraw(void) {
   assert(sdl_initialized);
   assert(display_initialized);
@@ -172,7 +188,7 @@ void az_finish_screen_redraw(void) {
   assert(display_initialized);
   glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
   glFinish();
-  SDL_GL_SwapBuffers();
+  SDL_GL_SwapWindow(window);
   // Synchronize, in case vsync fails to lock us to 60Hz:
   static uint64_t sync_time = 0;
   sync_time = az_sleep_until(sync_time) + AZ_FRAME_TIME_NANOS;

@@ -19,7 +19,7 @@
 
 #include <stdlib.h> // for EXIT_SUCCESS
 
-#include <SDL/SDL.h> // for main() renaming
+#include "SDL.h" // for main() renaming
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
@@ -61,6 +61,7 @@ int main(int argc, char **argv) {
 
   event_loop();
 
+  az_deinit_gui();
   return EXIT_SUCCESS;
 }
 
