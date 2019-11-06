@@ -58,3 +58,11 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 The complete license can be found in the LICENSE file.
+
+### Music
+
+Additionally, the music for Azimuth (found in the `data/music` directory) may
+optionally be used under a [Creative Commons Attribution
+4.0](https://creativecommons.org/licenses/by/4.0/) (CC-BY 4.0) license.  When
+attributing, I'd appreciate it if you would link back to
+https://mdsteele.games/azimuth/ or to this repository.
