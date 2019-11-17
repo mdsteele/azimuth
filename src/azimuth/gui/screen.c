@@ -170,8 +170,6 @@ void az_start_screen_redraw(void) {
 void az_finish_screen_redraw(void) {
   assert(sdl_initialized);
   assert(display_initialized);
-  glFlush(); // Are the flush and finish at all necessary?  I'm not sure.
-  glFinish();
   SDL_GL_SwapBuffers();
   // Synchronize, in case vsync fails to lock us to 60Hz:
   static uint64_t sync_time = 0;
