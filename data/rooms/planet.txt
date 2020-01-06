@@ -545,7 +545,7 @@ $s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,
   \"Computer, where are the survivors now?\""
 !T115"
   I don't know.  Deeper down, I think.  I am still
-  trying to access to the remote links down there,
+  trying to access the remote links down there,
   but without much success so far.  My systems are
   still badly damaged."
 !T116"
