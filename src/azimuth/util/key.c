@@ -30,7 +30,7 @@ const char *az_key_name(az_key_id_t key) {
     case AZ_KEY_BACKTICK: return "~";
     case AZ_KEY_HYPHEN: return "-";
     case AZ_KEY_EQUALS: return "=";
-    case AZ_KEY_BACKSPACE: return "DEL";
+    case AZ_KEY_BACKSPACE: return "BKS";
     case AZ_KEY_TAB: return "TAB";
     case AZ_KEY_LEFT_BRACKET: return "{";
     case AZ_KEY_RIGHT_BRACKET: return "}";
@@ -82,6 +82,22 @@ const char *az_key_name(az_key_id_t key) {
     case AZ_KEY_X: return "X";
     case AZ_KEY_Y: return "Y";
     case AZ_KEY_Z: return "Z";
+    case AZ_KEY_INSERT: return "INS";
+    case AZ_KEY_DELETE: return "DEL";
+    case AZ_KEY_LEFT_ALT: return "LAT";
+    case AZ_KEY_RIGHT_ALT: return "RAT";
+    case AZ_KEY_LEFT_CONTROL: return "LCT";
+    case AZ_KEY_RIGHT_CONTROL: return "RCT";
+    case AZ_KEY_LEFT_SHIFT: return "LSH";
+    case AZ_KEY_RIGHT_SHIFT: return "RSH";
+    case AZ_KEY_LEFT_META: return "LMT";
+    case AZ_KEY_RIGHT_META: return "RMT";
+    case AZ_KEY_LEFT_SUPER: return "LSU";
+    case AZ_KEY_RIGHT_SUPER: return "RSU";
+    case AZ_KEY_HOME: return "HME";
+    case AZ_KEY_END: return "END";
+    case AZ_KEY_PAGE_UP: return "PG\x11";
+    case AZ_KEY_PAGE_DOWN: return "PG\x12";
   }
   AZ_ASSERT_UNREACHABLE();
 }
