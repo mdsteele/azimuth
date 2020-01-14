@@ -99,6 +99,22 @@ static SDLKey az_key_to_sdl_key(az_key_id_t key) {
     case AZ_KEY_X: return SDLK_x;
     case AZ_KEY_Y: return SDLK_y;
     case AZ_KEY_Z: return SDLK_z;
+    case AZ_KEY_INSERT: return SDLK_INSERT;
+    case AZ_KEY_DELETE: return SDLK_DELETE;
+    case AZ_KEY_LEFT_ALT: return SDLK_LALT;
+    case AZ_KEY_RIGHT_ALT: return SDLK_RALT;
+    case AZ_KEY_LEFT_CONTROL: return SDLK_LCTRL;
+    case AZ_KEY_RIGHT_CONTROL: return SDLK_RCTRL;
+    case AZ_KEY_LEFT_SHIFT: return SDLK_LSHIFT;
+    case AZ_KEY_RIGHT_SHIFT: return SDLK_RSHIFT;
+    case AZ_KEY_LEFT_META: return SDLK_LMETA;
+    case AZ_KEY_RIGHT_META: return SDLK_RMETA;
+    case AZ_KEY_LEFT_SUPER: return SDLK_LSUPER;
+    case AZ_KEY_RIGHT_SUPER: return SDLK_RSUPER;
+    case AZ_KEY_HOME: return SDLK_HOME;
+    case AZ_KEY_END: return SDLK_END;
+    case AZ_KEY_PAGE_UP: return SDLK_PAGEUP;
+    case AZ_KEY_PAGE_DOWN: return SDLK_PAGEDOWN;
   }
   AZ_ASSERT_UNREACHABLE();
 }
@@ -157,11 +173,26 @@ static az_key_id_t sdl_key_to_az_key(SDLKey key) {
     case SDLK_x: return AZ_KEY_X;
     case SDLK_y: return AZ_KEY_Y;
     case SDLK_z: return AZ_KEY_Z;
-    case SDLK_DELETE: return AZ_KEY_BACKSPACE;
     case SDLK_UP: return AZ_KEY_UP_ARROW;
     case SDLK_DOWN: return AZ_KEY_DOWN_ARROW;
     case SDLK_RIGHT: return AZ_KEY_RIGHT_ARROW;
     case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
+    case SDLK_INSERT: return AZ_KEY_INSERT;
+    case SDLK_DELETE: return AZ_KEY_DELETE;
+    case SDLK_LALT: return AZ_KEY_LEFT_ALT;
+    case SDLK_RALT: return AZ_KEY_RIGHT_ALT;
+    case SDLK_LCTRL: return AZ_KEY_LEFT_CONTROL;
+    case SDLK_RCTRL: return AZ_KEY_RIGHT_CONTROL;
+    case SDLK_LSHIFT: return AZ_KEY_LEFT_SHIFT;
+    case SDLK_RSHIFT: return AZ_KEY_RIGHT_SHIFT;
+    case SDLK_LMETA: return AZ_KEY_LEFT_META;
+    case SDLK_RMETA: return AZ_KEY_RIGHT_META;
+    case SDLK_LSUPER: return AZ_KEY_LEFT_SUPER;
+    case SDLK_RSUPER: return AZ_KEY_RIGHT_SUPER;
+    case SDLK_HOME: return AZ_KEY_HOME;
+    case SDLK_END: return AZ_KEY_END;
+    case SDLK_PAGEDOWN: return AZ_KEY_PAGE_DOWN;
+    case SDLK_PAGEUP: return AZ_KEY_PAGE_UP;
     default: return AZ_KEY_UNKNOWN;
   }
 }
