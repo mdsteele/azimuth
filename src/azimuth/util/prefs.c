@@ -49,7 +49,17 @@ void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
       [AZ_PREFS_FIRE_KEY_INDEX] = AZ_KEY_C,
       [AZ_PREFS_ORDN_KEY_INDEX] = AZ_KEY_X,
       [AZ_PREFS_UTIL_KEY_INDEX] = AZ_KEY_Z,
-      [AZ_PREFS_PAUSE_KEY_INDEX] = AZ_KEY_ESCAPE
+      [AZ_PREFS_PAUSE_KEY_INDEX] = AZ_KEY_ESCAPE,
+      [AZ_PREFS_CHARGE_KEY_INDEX] = AZ_KEY_1,
+      [AZ_PREFS_FREEZE_KEY_INDEX] = AZ_KEY_2,
+      [AZ_PREFS_TRIPLE_KEY_INDEX] = AZ_KEY_3,
+      [AZ_PREFS_HOMING_KEY_INDEX] = AZ_KEY_4,
+      [AZ_PREFS_PHASE_KEY_INDEX] = AZ_KEY_5,
+      [AZ_PREFS_BURST_KEY_INDEX] = AZ_KEY_6,
+      [AZ_PREFS_PIERCE_KEY_INDEX] = AZ_KEY_7,
+      [AZ_PREFS_BEAM_KEY_INDEX] = AZ_KEY_8,
+      [AZ_PREFS_ROCKETS_KEY_INDEX] = AZ_KEY_9,
+      [AZ_PREFS_BOMBS_KEY_INDEX] = AZ_KEY_0,
     }
   };
 }
@@ -141,6 +151,36 @@ bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
     if (strcmp(name, "pk") == 0) {
       if (!read_key(file, &prefs.keys[AZ_PREFS_PAUSE_KEY_INDEX])) return false;
     }
+    if (strcmp(name, "1k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_CHARGE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "2k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_FREEZE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "3k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_TRIPLE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "4k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_HOMING_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "5k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_PHASE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "6k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_BURST_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "7k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_PIERCE_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "8k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_BEAM_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "9k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_ROCKETS_KEY_INDEX])) return false;
+    }
+    if (strcmp(name, "0k") == 0) {
+      if (!read_key(file, &prefs.keys[AZ_PREFS_BOMBS_KEY_INDEX])) return false;
+    }
   }
 
   // Require all keys to be different.
@@ -169,7 +209,8 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
   assert(file != NULL);
   return (fprintf(
       file, "@F mv=%.03f sv=%.03f st=%d fs=%d eh=%d\n"
-      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n",
+      "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n"
+      "   1k=%d 2k=%d 3k=%d 4k=%d 5k=%d 6k=%d 7k=%d 8k=%d 9k=%d 0k=%d\n",
       (double)prefs->music_volume, (double)prefs->sound_volume,
       (prefs->speedrun_timer ? 1 : 0), (prefs->fullscreen_on_startup ? 1 : 0),
       (prefs->enable_hints ? 1 : 0),
@@ -180,7 +221,17 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
       (int)prefs->keys[AZ_PREFS_FIRE_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_ORDN_KEY_INDEX],
       (int)prefs->keys[AZ_PREFS_UTIL_KEY_INDEX],
-      (int)prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) >= 0);
+      (int)prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_CHARGE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_FREEZE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_TRIPLE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_HOMING_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_PHASE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_BURST_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_PIERCE_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_BEAM_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_ROCKETS_KEY_INDEX],
+      (int)prefs->keys[AZ_PREFS_BOMBS_KEY_INDEX]) >= 0);
 }
 
 bool az_is_valid_prefs_key(az_key_id_t key_id) {
