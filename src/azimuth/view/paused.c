@@ -363,7 +363,7 @@ static void draw_minimap(const az_paused_state_t *state) {
     else if (blink) az_gl_color(hilight);
     else az_gl_color(normal);
     az_draw_printf(8, AZ_ALIGN_CENTER, 78, 367, "[%s]",
-                   az_key_name(state->prefs->keys[AZ_PREFS_UP_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_UP]));
     if (disabled) az_gl_color(dark);
     else az_gl_color(normal);
     az_draw_string(8, AZ_ALIGN_CENTER, 78, 380, "SCROLL");
@@ -371,7 +371,7 @@ static void draw_minimap(const az_paused_state_t *state) {
     else if (blink) az_gl_color(hilight);
     else az_gl_color(normal);
     az_draw_printf(8, AZ_ALIGN_CENTER, 78, 393, "[%s]",
-                   az_key_name(state->prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_DOWN]));
   }
 
   if (room_flags_union & AZ_ROOMF_WITH_SAVE) {
@@ -591,10 +591,10 @@ static void draw_upgrades(const az_paused_state_t *state) {
   else glColor3f(0, 1, 0);
   if (state->current_drawer == AZ_PAUSE_DRAWER_UPGRADES) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 525, 10, "\x12 MAP [%s] \x12",
-                   az_key_name(state->prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_ORDN]));
   } else {
     az_draw_printf(8, AZ_ALIGN_CENTER, 525, 10, "\x11 UPGRADES [%s] \x11",
-                   az_key_name(state->prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_FIRE]));
   }
 
   glColor3f(1, 0, 1);
@@ -846,11 +846,11 @@ static void draw_prefs(const az_paused_state_t *state) {
   if (state->current_drawer == AZ_PAUSE_DRAWER_OPTIONS) {
     az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 5,
                    "\x11 MAP [%s] \x11",
-                   az_key_name(state->prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_ORDN]));
   } else {
     az_draw_printf(8, AZ_ALIGN_CENTER, 105, OPTIONS_DRAWER_SLIDE_DISTANCE + 5,
                    "\x12 OPTIONS [%s] \x12",
-                   az_key_name(state->prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]));
+                   az_key_name(state->prefs->control_mapping.key_for_control[(int)AZ_CONTROL_UTIL]));
   }
 
   glColor3f(0.25, 0.25, 0.25);
@@ -1016,9 +1016,9 @@ void az_tick_paused_state(az_paused_state_t *state, double time) {
       state->scroll_y = fmax(state->scroll_y - scroll_delta, goal_y);
     }
   } else if (state->current_drawer == AZ_PAUSE_DRAWER_MAP) {
-    const az_preferences_t *prefs = state->prefs;
-    const bool up = az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
-    const bool down = az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
+    const az_key_id_t *key_for_control = state->prefs->control_mapping.key_for_control;
+    const bool up = az_is_key_held(key_for_control[AZ_CONTROL_UP]);
+    const bool down = az_is_key_held(key_for_control[AZ_CONTROL_DOWN]);
     if (up && !down) {
       state->scroll_y += time * SCROLL_SPEED;
     } else if (down && !up) {

@@ -98,14 +98,14 @@ void az_init_prefs_pane(az_prefs_pane_t *pane, int x, int y,
   init_slider(&pane->sound_slider, slider_left, SLIDERS_TOP + SLIDER_SPACING,
               prefs->sound_volume);
 
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    const int row = i % 4;
-    const int col = i / 4;
+  for (int i = AZ_FIRST_CONTROL; i < (int)AZ_CONTROL_BOMBS; ++i) {
+    const int row = (i - AZ_FIRST_CONTROL) % 4;
+    const int col = (i - AZ_FIRST_CONTROL) / 4;
     const int top = PICKERS_TOP + row * (PICKER_HEIGHT + PICKER_VERT_SPACING);
     const int left = AZ_PREFS_BOX_WIDTH / 2 - 222 +
       col * (PICKER_WIDTH + PICKER_HORZ_SPACING);
     az_init_button(&pane->pickers[i].button, picker_polygon, left, top);
-    pane->pickers[i].key = prefs->keys[i];
+    pane->pickers[i].key = prefs->control_mapping.key_for_control[i];
   }
 
   const int checkbox_left = AZ_PREFS_BOX_WIDTH / 2 + 50;
@@ -190,14 +190,14 @@ void az_draw_prefs_pane(const az_prefs_pane_t *pane) {
     draw_slider(&pane->music_slider, "Music", true);
     draw_slider(&pane->sound_slider, "Sound", false);
 
-    draw_key_picker(&pane->pickers[AZ_PREFS_UP_KEY_INDEX], "Thrust");
-    draw_key_picker(&pane->pickers[AZ_PREFS_DOWN_KEY_INDEX], "Reverse");
-    draw_key_picker(&pane->pickers[AZ_PREFS_RIGHT_KEY_INDEX], "Turn right");
-    draw_key_picker(&pane->pickers[AZ_PREFS_LEFT_KEY_INDEX], "Turn left");
-    draw_key_picker(&pane->pickers[AZ_PREFS_FIRE_KEY_INDEX], "Fire");
-    draw_key_picker(&pane->pickers[AZ_PREFS_ORDN_KEY_INDEX], "Ordnance");
-    draw_key_picker(&pane->pickers[AZ_PREFS_UTIL_KEY_INDEX], "Utility");
-    draw_key_picker(&pane->pickers[AZ_PREFS_PAUSE_KEY_INDEX], "Pause");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_UP], "Thrust");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_DOWN], "Reverse");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_RIGHT], "Turn right");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_LEFT], "Turn left");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_FIRE], "Fire");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_ORDN], "Ordnance");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_UTIL], "Utility");
+    draw_key_picker(&pane->pickers[(int)AZ_CONTROL_PAUSE], "Pause");
 
     draw_checkbox(&pane->speedrun_timer_checkbox, "Show speedrun timer");
     draw_checkbox(&pane->fullscreen_checkbox, "Fullscreen on startup");
@@ -234,7 +234,8 @@ static bool tick_slider(az_prefs_slider_t *slider, int xoff, int yoff,
 
 void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
                         az_clock_t clock, az_soundboard_t *soundboard) {
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  // TODO: tick past BOMBS
+  for (int i = AZ_FIRST_CONTROL; i < (int)AZ_CONTROL_BOMBS; ++i) {
     if (i != pane->selected_key_picker_index) {
       az_tick_button(&pane->pickers[i].button, pane->x, pane->y, visible, time,
                      clock, soundboard);
@@ -275,7 +276,8 @@ static void checkbox_on_click(az_prefs_checkbox_t *checkbox, int x, int y,
 void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
                             az_soundboard_t *soundboard) {
   const int rel_x = abs_x - pane->x, rel_y = abs_y - pane->y;
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  // TODO: click past BOMBS
+  for (int i = AZ_FIRST_CONTROL; i < (int)AZ_CONTROL_BOMBS; ++i) {
     if (az_button_on_click(&pane->pickers[i].button, rel_x, rel_y,
                            soundboard)) {
       pane->selected_key_picker_index = i;
@@ -294,11 +296,14 @@ void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
 void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
                            az_soundboard_t *soundboard) {
   const int picker_index = pane->selected_key_picker_index;
-  if (picker_index < 0 || picker_index >= AZ_PREFS_NUM_KEYS) return;
+  // TODO: pick past BOMBS
+  if (picker_index < 0 || picker_index >= (int)AZ_CONTROL_BOMBS) return;
   az_prefs_key_picker_t *picker = &pane->pickers[picker_index];
   pane->selected_key_picker_index = -1;
-  if (az_is_valid_prefs_key(key_id)) {
-    for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  const az_control_id_t control_id = (az_control_id_t)picker_index;
+  if (az_is_valid_prefs_key(key_id, control_id)) {
+    // TODO: check past BOMBS
+    for (int i = 0; i < (int)AZ_CONTROL_BOMBS; ++i) {
       if (i == picker_index) continue;
       if (pane->pickers[i].key == key_id) {
         pane->pickers[i].key = picker->key;

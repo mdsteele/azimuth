@@ -53,7 +53,7 @@ bool az_save_preferences(const az_preferences_t *prefs) {
   return success;
 }
 
-void az_update_prefefences(const az_prefs_pane_t *pane,
+void az_update_preferences(const az_prefs_pane_t *pane,
                            az_preferences_t *prefs, bool *prefs_changed) {
   if (prefs->music_volume != pane->music_slider.value) {
     prefs->music_volume = pane->music_slider.value;
@@ -73,9 +73,11 @@ void az_update_prefefences(const az_prefs_pane_t *pane,
     prefs->enable_hints = pane->enable_hints_checkbox.checked;
     *prefs_changed = true;
   }
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    if (prefs->keys[i] != pane->pickers[i].key) {
-      prefs->keys[i] = pane->pickers[i].key;
+  // TODO: control picks past BOMBS
+  for (int i = AZ_FIRST_CONTROL; i < (int)AZ_CONTROL_BOMBS; ++i) {
+    if (prefs->control_mapping.key_for_control[i] != pane->pickers[i].key) {
+      prefs->control_mapping.key_for_control[i] = pane->pickers[i].key;
+      prefs->control_mapping.control_for_key[(int)pane->pickers[i].key] = i;
       *prefs_changed = true;
     }
   }

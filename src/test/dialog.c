@@ -55,7 +55,7 @@ void test_paragraph_length(void) {
   EXPECT_INT_EQ(45, az_paragraph_line_length(&prefs, paragraph, 0));
   EXPECT_INT_EQ(69, az_paragraph_total_length(&prefs, paragraph));
 
-  prefs.keys[AZ_PREFS_UP_KEY_INDEX] = AZ_KEY_TAB;
+  prefs.control_mapping.key_for_control[AZ_CONTROL_UP] = AZ_KEY_TAB;
   EXPECT_INT_EQ(71, az_paragraph_total_length(&prefs, paragraph));
 
   // Now test some paragraphs with bad escapes:

@@ -25,31 +25,102 @@
 
 /*===========================================================================*/
 
+void expect_valid_controls(const az_control_mapping_t *control_mapping) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
+    EXPECT_TRUE(az_is_valid_prefs_key(control_mapping->key_for_control[i],
+                                      (az_control_id_t)i));
+  }
+}
+
+void expect_unique_keys_for_controls(const az_control_mapping_t *control_mapping) {
+  for (int i = AZ_FIRST_CONTROL + 1; i < AZ_NUM_CONTROLS; ++i) {
+    for (int j = AZ_FIRST_CONTROL; j < i; ++j) {
+      EXPECT_FALSE(control_mapping->key_for_control[i] ==
+                   control_mapping->key_for_control[j]);
+    }
+  }
+}
+
+void expect_working_bidirectional_mapping(const az_control_mapping_t *control_mapping) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
+    const az_key_id_t key_id = control_mapping->key_for_control[i];
+    EXPECT_TRUE((int)control_mapping->control_for_key[(int)key_id] == i);
+  }
+}
+
+void expect_weapons_from_keys_0_to_9(const az_control_mapping_t *control_mapping) {  
+  for (int i = 0; i < 10; ++i) {
+    const int control_id = (int)control_mapping->control_for_key[(int)AZ_KEY_0 + i];
+    EXPECT_INT_EQ(control_id, (int)AZ_CONTROL_BOMBS + i);
+  }
+}
+
+void expect_controls_to_match(const az_control_mapping_t *actual,
+                              const az_control_mapping_t *expected) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
+    EXPECT_INT_EQ(expected->key_for_control[i], actual->key_for_control[i]);
+  }
+  for (int i = 1; i < AZ_NUM_ALLOWED_KEYS; ++i) {
+    EXPECT_INT_EQ(expected->control_for_key[i], actual->control_for_key[i]);
+  }
+}
+
 void test_prefs_defaults(void) {
   az_preferences_t prefs = { .music_volume = 0.5f };
   az_reset_prefs_to_defaults(&prefs);
-  for (int i = 1; i < AZ_ARRAY_SIZE(prefs.keys); ++i) {
-    EXPECT_TRUE(az_is_valid_prefs_key(prefs.keys[i]));
-    for (int j = 0; j < i; ++j) {
-      EXPECT_FALSE(prefs.keys[i] == prefs.keys[j]);
-    }
-  }
+
+  expect_valid_controls(&prefs.control_mapping);
+  expect_unique_keys_for_controls(&prefs.control_mapping);
+  expect_working_bidirectional_mapping(&prefs.control_mapping);
+  expect_weapons_from_keys_0_to_9(&prefs.control_mapping);
 }
 
 void test_prefs_save_load(void) {
   const az_preferences_t expected_prefs = {
     .music_volume = 0.125f, .sound_volume = 0.75f,
     .fullscreen_on_startup = false, .speedrun_timer = true,
-    .keys = {
-      [AZ_PREFS_UP_KEY_INDEX]    = AZ_KEY_M,
-      [AZ_PREFS_DOWN_KEY_INDEX]  = AZ_KEY_A,
-      [AZ_PREFS_RIGHT_KEY_INDEX] = AZ_KEY_G,
-      [AZ_PREFS_LEFT_KEY_INDEX]  = AZ_KEY_N,
-      [AZ_PREFS_FIRE_KEY_INDEX]  = AZ_KEY_E,
-      [AZ_PREFS_ORDN_KEY_INDEX]  = AZ_KEY_T,
-      [AZ_PREFS_UTIL_KEY_INDEX]  = AZ_KEY_I,
-      [AZ_PREFS_PAUSE_KEY_INDEX] = AZ_KEY_C
-    }
+    .control_mapping = {
+      .key_for_control = {
+        [AZ_CONTROL_UP]      = AZ_KEY_M,
+        [AZ_CONTROL_DOWN]    = AZ_KEY_A,
+        [AZ_CONTROL_RIGHT]   = AZ_KEY_G,
+        [AZ_CONTROL_LEFT]    = AZ_KEY_N,
+        [AZ_CONTROL_FIRE]    = AZ_KEY_E,
+        [AZ_CONTROL_ORDN]    = AZ_KEY_T,
+        [AZ_CONTROL_UTIL]    = AZ_KEY_I,
+        [AZ_CONTROL_PAUSE]   = AZ_KEY_C,
+        [AZ_CONTROL_BOMBS]   = AZ_KEY_SPACE,
+        [AZ_CONTROL_CHARGE]  = AZ_KEY_B,
+        [AZ_CONTROL_FREEZE]  = AZ_KEY_U,
+        [AZ_CONTROL_TRIPLE]  = AZ_KEY_R,
+        [AZ_CONTROL_HOMING]  = AZ_KEY_P,
+        [AZ_CONTROL_PHASE]   = AZ_KEY_COMMA,
+        [AZ_CONTROL_BURST]   = AZ_KEY_LEFT_ALT,
+        [AZ_CONTROL_PIERCE]  = AZ_KEY_HOME,
+        [AZ_CONTROL_BEAM]    = AZ_KEY_END,
+        [AZ_CONTROL_ROCKETS] = AZ_KEY_LEFT_SUPER,
+      },
+      .control_for_key = {
+        [AZ_KEY_M]          = AZ_CONTROL_UP,
+        [AZ_KEY_A]          = AZ_CONTROL_DOWN,
+        [AZ_KEY_G]          = AZ_CONTROL_RIGHT,
+        [AZ_KEY_N]          = AZ_CONTROL_LEFT,
+        [AZ_KEY_E]          = AZ_CONTROL_FIRE,
+        [AZ_KEY_T]          = AZ_CONTROL_ORDN,
+        [AZ_KEY_I]          = AZ_CONTROL_UTIL,
+        [AZ_KEY_C]          = AZ_CONTROL_PAUSE,
+        [AZ_KEY_SPACE]      = AZ_CONTROL_BOMBS,
+        [AZ_KEY_B]          = AZ_CONTROL_CHARGE,
+        [AZ_KEY_U]          = AZ_CONTROL_FREEZE,
+        [AZ_KEY_R]          = AZ_CONTROL_TRIPLE,
+        [AZ_KEY_P]          = AZ_CONTROL_HOMING,
+        [AZ_KEY_COMMA]      = AZ_CONTROL_PHASE,
+        [AZ_KEY_LEFT_ALT]   = AZ_CONTROL_BURST,
+        [AZ_KEY_HOME]       = AZ_CONTROL_PIERCE,
+        [AZ_KEY_END]        = AZ_CONTROL_BEAM,
+        [AZ_KEY_LEFT_SUPER] = AZ_CONTROL_ROCKETS,
+      },
+    },
   };
   az_preferences_t actual_prefs;
   {
@@ -66,9 +137,8 @@ void test_prefs_save_load(void) {
   EXPECT_TRUE(actual_prefs.fullscreen_on_startup ==
               expected_prefs.fullscreen_on_startup);
   EXPECT_TRUE(actual_prefs.speedrun_timer == expected_prefs.speedrun_timer);
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    EXPECT_INT_EQ(expected_prefs.keys[i], actual_prefs.keys[i]);
-  }
+  expect_controls_to_match(&actual_prefs.control_mapping,
+                           &expected_prefs.control_mapping);
 }
 
 void test_prefs_missing_values(void) {
@@ -89,9 +159,8 @@ void test_prefs_missing_values(void) {
   EXPECT_TRUE(actual_prefs.speedrun_timer);
   EXPECT_TRUE(actual_prefs.fullscreen_on_startup ==
               default_prefs.fullscreen_on_startup);
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    EXPECT_INT_EQ(default_prefs.keys[i], actual_prefs.keys[i]);
-  }
+  expect_controls_to_match(&actual_prefs.control_mapping,
+                           &default_prefs.control_mapping);
 }
 
 /*===========================================================================*/

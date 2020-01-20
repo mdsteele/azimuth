@@ -120,6 +120,7 @@ static int paragraph_line_length_internal(
     const az_preferences_t *prefs, const char *paragraph, int *start) {
   int line_length = 0;
   int line_end = *start;
+  const az_key_id_t *key_for_control = prefs->control_mapping.key_for_control;
   while (paragraph[line_end] != '\0' && paragraph[line_end] != '\n') {
     ++line_end;
     // If we see a $-escape, we need to determine its expanded length.
@@ -156,13 +157,14 @@ static int paragraph_line_length_internal(
         // The key name escapes add the length of the key name to the line.
         // Note for now which key_id we need to insert the name of, and we'll
         // handle it below.
-        case 'u': key_id = prefs->keys[AZ_PREFS_UP_KEY_INDEX]; break;
-        case 'd': key_id = prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]; break;
-        case 'r': key_id = prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX]; break;
-        case 'l': key_id = prefs->keys[AZ_PREFS_LEFT_KEY_INDEX]; break;
-        case 'f': key_id = prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]; break;
-        case 'o': key_id = prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]; break;
-        case 't': key_id = prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]; break;
+        case 'u': key_id = key_for_control[(int)AZ_CONTROL_UP]; break;
+        case 'd': key_id = key_for_control[(int)AZ_CONTROL_DOWN]; break;
+        case 'r': key_id = key_for_control[(int)AZ_CONTROL_RIGHT]; break;
+        case 'l': key_id = key_for_control[(int)AZ_CONTROL_LEFT]; break;
+        case 'f': key_id = key_for_control[(int)AZ_CONTROL_FIRE]; break;
+        case 'o': key_id = key_for_control[(int)AZ_CONTROL_ORDN]; break;
+        case 't': key_id = key_for_control[(int)AZ_CONTROL_UTIL]; break;
+        // TODO: add BOMBS, CHARGE, ..., ROCKETS to names.
         // All other escapes are just a single character after the '$', which
         // we should skip over without increasing the line length.
         default:

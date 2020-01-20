@@ -101,7 +101,7 @@ typedef enum {
   AZ_KEY_PAGE_DOWN
 } az_key_id_t;
 
-#define AZ_LAST_KEY_ID AZ_KEY_PAGE_DOWN
+#define AZ_NUM_ALLOWED_KEYS ((int)AZ_KEY_PAGE_DOWN + 1)
 
 const char *az_key_name(az_key_id_t key);
 
