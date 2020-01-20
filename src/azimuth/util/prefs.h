@@ -55,6 +55,8 @@ typedef enum {
 #define AZ_NUM_CONTROLS ((int)AZ_CONTROL_ROCKETS + 1)
 
 // Manually curated bi-directional map for keys <-> controls:
+// Sometimes a control is overloaded, e.g. number keys always work for weapon changes.
+// In these cases, the key_for_control is set by the user's preference, not the overload.
 typedef struct {
   az_key_id_t key_for_control[AZ_NUM_CONTROLS];
   az_control_id_t control_for_key[AZ_NUM_ALLOWED_KEYS];

@@ -119,6 +119,17 @@ void test_prefs_save_load(void) {
         [AZ_KEY_HOME]       = AZ_CONTROL_PIERCE,
         [AZ_KEY_END]        = AZ_CONTROL_BEAM,
         [AZ_KEY_LEFT_SUPER] = AZ_CONTROL_ROCKETS,
+        // These are overloads that stick around always:
+        [AZ_KEY_0] = AZ_CONTROL_BOMBS,
+        [AZ_KEY_1] = AZ_CONTROL_CHARGE,
+        [AZ_KEY_2] = AZ_CONTROL_FREEZE,
+        [AZ_KEY_3] = AZ_CONTROL_TRIPLE,
+        [AZ_KEY_4] = AZ_CONTROL_HOMING,
+        [AZ_KEY_5] = AZ_CONTROL_PHASE,
+        [AZ_KEY_6] = AZ_CONTROL_BURST,
+        [AZ_KEY_7] = AZ_CONTROL_PIERCE,
+        [AZ_KEY_8] = AZ_CONTROL_BEAM,
+        [AZ_KEY_9] = AZ_CONTROL_ROCKETS,
       },
     },
   };

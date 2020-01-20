@@ -73,6 +73,13 @@ static void az_finalize_prefs(az_preferences_t *prefs) {
     az_key_id_t key = prefs->control_mapping.key_for_control[i];
     prefs->control_mapping.control_for_key[(int)key] = (az_control_id_t)i;
   }
+  // Ensure that number keys work for weapon changes,
+  // even if they're not the preferences chosen by the user.
+  for (int i = 0; i < 10; ++i) {
+    int key = (int)AZ_KEY_0 + i;
+    az_control_id_t control = (az_control_id_t)((int)AZ_CONTROL_BOMBS + i);
+    prefs->control_mapping.control_for_key[key] = control;
+  }
 }
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
