@@ -28,8 +28,8 @@
 
 /*===========================================================================*/
 
-#define AZ_PREFS_BOX_WIDTH 512
-#define AZ_PREFS_BOX_HEIGHT 186
+#define AZ_PREFS_BOX_WIDTH 570
+#define AZ_PREFS_BOX_HEIGHT 230
 
 typedef struct {
   int x, y;

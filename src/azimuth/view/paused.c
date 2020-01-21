@@ -771,7 +771,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
 /*===========================================================================*/
 // Options drawer:
 
-#define OPTIONS_DRAWER_SLIDE_DISTANCE 280
+#define OPTIONS_DRAWER_SLIDE_DISTANCE (AZ_PREFS_BOX_HEIGHT + 94)
 
 static const az_vector_t options_drawer_vertices[] = {
   {12.5, -0.5}, {12.5, OPTIONS_DRAWER_SLIDE_DISTANCE + 18.5},

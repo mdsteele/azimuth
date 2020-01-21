@@ -73,8 +73,7 @@ void az_update_preferences(const az_prefs_pane_t *pane,
     prefs->enable_hints = pane->enable_hints_checkbox.checked;
     *prefs_changed = true;
   }
-  // TODO: control picks past BOMBS
-  for (int i = AZ_FIRST_CONTROL; i < (int)AZ_CONTROL_BOMBS; ++i) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
     if (prefs->control_mapping.key_for_control[i] != pane->pickers[i].key) {
       prefs->control_mapping.key_for_control[i] = pane->pickers[i].key;
       prefs->control_mapping.control_for_key[(int)pane->pickers[i].key] = i;
