@@ -331,11 +331,19 @@ void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
   pane->selected_key_picker_index = -1;
   const az_control_id_t control_id = (az_control_id_t)picker_index;
   if (az_is_valid_prefs_key(key_id, control_id)) {
-    for (int i = 0; i < AZ_NUM_CONTROLS; ++i) {
+    // Ensure no one else is using the same key_id:
+    for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
       if (i == picker_index) continue;
       if (pane->pickers[i].key == key_id) {
-        // TODO! fix for number keys, they can't be transfered.
-        pane->pickers[i].key = picker->key;
+        // Check if we can reassign picker's current key to other control:
+        if (az_is_valid_prefs_key(picker->key, (az_control_id_t)i)) {
+          pane->pickers[i].key = picker->key;
+        } else {
+          // Key was invalid; this is because it was a weapon slot, so
+          // set it back to the default:
+          pane->pickers[i].key = (az_key_id_t)
+            ((int)AZ_KEY_0 + i - (int)AZ_CONTROL_BOMBS);
+        }
         break;
       }
     }
