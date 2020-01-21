@@ -283,4 +283,8 @@ bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_id) {
   }
 }
 
+bool az_show_extra_weapon_key(const az_preferences_t *prefs, int slot) {
+  return (int)prefs->control_mapping.key_for_control[(int)AZ_CONTROL_BOMBS + slot] != AZ_KEY_0 + slot;
+}
+
 /*===========================================================================*/

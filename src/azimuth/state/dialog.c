@@ -164,7 +164,16 @@ static int paragraph_line_length_internal(
         case 'f': key_id = key_for_control[(int)AZ_CONTROL_FIRE]; break;
         case 'o': key_id = key_for_control[(int)AZ_CONTROL_ORDN]; break;
         case 't': key_id = key_for_control[(int)AZ_CONTROL_UTIL]; break;
-        // TODO: add BOMBS, CHARGE, ..., ROCKETS to names.
+        case '0': key_id = key_for_control[(int)AZ_CONTROL_BOMBS]; break;
+        case '1': key_id = key_for_control[(int)AZ_CONTROL_CHARGE]; break;
+        case '2': key_id = key_for_control[(int)AZ_CONTROL_FREEZE]; break;
+        case '3': key_id = key_for_control[(int)AZ_CONTROL_TRIPLE]; break;
+        case '4': key_id = key_for_control[(int)AZ_CONTROL_HOMING]; break;
+        case '5': key_id = key_for_control[(int)AZ_CONTROL_PHASE]; break;
+        case '6': key_id = key_for_control[(int)AZ_CONTROL_BURST]; break;
+        case '7': key_id = key_for_control[(int)AZ_CONTROL_PIERCE]; break;
+        case '8': key_id = key_for_control[(int)AZ_CONTROL_BEAM]; break;
+        case '9': key_id = key_for_control[(int)AZ_CONTROL_ROCKETS]; break;
         // All other escapes are just a single character after the '$', which
         // we should skip over without increasing the line length.
         default:

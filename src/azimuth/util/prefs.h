@@ -91,6 +91,9 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file);
 // Returns true if this key may be used for one of the game controls.
 bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_index);
 
+// Returns true if user has configured a non-default control for weapon slots 0-9.
+bool az_show_extra_weapon_key(const az_preferences_t *prefs, int slot);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_UTIL_PREFS_H_

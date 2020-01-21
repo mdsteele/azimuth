@@ -700,7 +700,7 @@ static void draw_upgrade_box_message(
     az_upgrade_t upgrade, double height, int gun_instructions_top,
     az_clock_t clock) {
   const char *name = az_upgrade_name(upgrade);
-  const char *description = az_upgrade_description(upgrade, &player->upgrades);
+  const char *description = az_upgrade_description(upgrade, &player->upgrades, prefs);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
   glPushMatrix(); {
     glTranslated(AZ_SCREEN_WIDTH/2 + 0.5, top + 58.5, 0);
@@ -741,7 +741,8 @@ static void draw_upgrade_box(const az_space_state_t *state) {
   double height = UPGRADE_BOX_BASE_HEIGHT +
     UPGRADE_BOX_EXTRA_HEIGHT_PER_LINEBREAK *
     count_linebreaks(az_upgrade_description(mode_data->upgrade,
-                                            &state->ship.player.upgrades));
+                                            &state->ship.player.upgrades,
+                                            state->prefs));
   int gun_instructions_top = 0;
   if (mode_data->upgrade >= AZ_UPG_GUN_CHARGE &&
       mode_data->upgrade <= AZ_UPG_GUN_BEAM) {
