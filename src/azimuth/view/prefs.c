@@ -338,11 +338,17 @@ void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
         // Check if we can reassign picker's current key to other control:
         if (az_is_valid_prefs_key(picker->key, (az_control_id_t)i)) {
           pane->pickers[i].key = picker->key;
-        } else {
-          // Key was invalid; this is because it was a weapon slot, so
-          // set it back to the default:
+        } else if (i >= AZ_CONTROL_BOMBS && i <= AZ_CONTROL_ROCKETS) {
+          // We were trading keys between weapon slots, but we are
+          // not allowed to do so.  Reset weapon slot to the default value:
           pane->pickers[i].key = (az_key_id_t)
             ((int)AZ_KEY_0 + i - (int)AZ_CONTROL_BOMBS);
+        } else {
+          fprintf(stderr, "Key [%s] already in use.  "
+                  "Cannot swap numeric weapon key with a non-weapon control.\n",
+                  az_key_name(key_id));
+          az_play_sound(soundboard, AZ_SND_KLAXON_SHIELDS_LOW);
+          return;
         }
         break;
       }
