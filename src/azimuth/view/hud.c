@@ -716,16 +716,18 @@ static void draw_upgrade_box_message(
     az_draw_paragraph(
         8, AZ_ALIGN_CENTER, AZ_SCREEN_WIDTH/2, top + gun_instructions_top + 14,
         20, -1, prefs,
-        "You can switch guns at any time using the number keys,\n"
-        "as shown below.  Combine up to two guns at once.");
+        "You can switch guns at any time using the corresponding\n"
+        "keys, as shown below.  Combine up to two guns at once.");
     for (int i = 0; i < 8; ++i) {
       if (!az_has_upgrade(player, AZ_UPG_GUN_CHARGE + i)) continue;
       const az_gun_t gun = AZ_GUN_CHARGE + i;
+      const char *weapon_key =
+        az_key_name(prefs->key_for_control[AZ_CONTROL_CHARGE + i]);
       if (gun == player->gun1 || gun == player->gun2) glColor3f(0.25, 1, 0.25);
       else glColor3f(0.25, 0.25, 0.25);
-      az_draw_printf(8, AZ_ALIGN_LEFT, AZ_SCREEN_WIDTH/2 - 192 + 96 * (i % 4),
-                     top + gun_instructions_top + 60 + 20 * (i / 4), "[%d] %s",
-                     i + 1, az_gun_name(gun));
+      az_draw_printf(8, AZ_ALIGN_LEFT, AZ_SCREEN_WIDTH/2 - 224 + 116 * (i % 4),
+                     top + gun_instructions_top + 60 + 20 * (i / 4), "[%s] %s",
+                     weapon_key, az_gun_name(gun));
     }
     glBegin(GL_LINES); {
       glColor3f(0, 0.5, 0);

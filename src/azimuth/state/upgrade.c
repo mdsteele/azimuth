@@ -365,19 +365,12 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
           return "Hold down [$o] and press [$f] to fire.";
         }
       } else if (has_multiple_rocket_ammos(upgrades)) {
-        return az_show_extra_weapon_key(prefs, 9) ?
-               "Maximum rockets increased by 5.\n"
-               "Use [9]/[$9] and [0] to switch between rockets and bombs.\n"
-               "Select rockets, then hold down [$o] and press [$f] to fire." :
-               "Maximum rockets increased by 5.\n"
-               "Use [9] and [0] to switch between rockets and bombs.\n"
-               "Select rockets, then hold down [$o] and press [$f] to fire.";
+        return ("Maximum rockets increased by 5.\n"
+                "Use [$9] and [$0] to switch between rockets and bombs.\n"
+                "Select rockets, then hold down [$o] and press [$f] to fire.");
       } else {
-        return az_show_extra_weapon_key(prefs, 9) ?
-               "Use [9]/[$9] and [0] to switch between rockets and bombs.\n"
-               "Select rockets, then hold down [$o] and press [$f] to fire." :
-               "Use [9] and [0] to switch between rockets and bombs.\n"
-               "Select rockets, then hold down [$o] and press [$f] to fire.";
+        return ("Use [$9] and [$0] to switch between rockets and bombs.\n"
+                "Select rockets, then hold down [$o] and press [$f] to fire.");
       }
     case AZ_UPG_BOMB_AMMO_00:
     case AZ_UPG_BOMB_AMMO_01:
@@ -408,19 +401,12 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
           return "Hold down [$o] and press [$f] to drop.";
         }
       } else if (has_multiple_bomb_ammos(upgrades)) {
-        return az_show_extra_weapon_key(prefs, 0) ?
-               "Maximum bombs increased by 3.\n"
-               "Use [9] and [0]/[$0] to switch between rockets and bombs.\n"
-               "Select bombs, then hold down [$o] and press [$f] to drop." :
-               "Maximum bombs increased by 3.\n"
-               "Use [9] and [0] to switch between rockets and bombs.\n"
-               "Select bombs, then hold down [$o] and press [$f] to drop.";
+        return ("Maximum bombs increased by 3.\n"
+                "Use [$9] and [$0] to switch between rockets and bombs.\n"
+                "Select bombs, then hold down [$o] and press [$f] to drop.");
       } else {
-        return az_show_extra_weapon_key(prefs, 0) ?
-               "Use [9] and [0]/[$0] to switch between rockets and bombs.\n"
-               "Select bombs, then hold down [$o] and press [$f] to drop." :
-               "Use [9] and [0] to switch between rockets and bombs.\n"
-               "Select bombs, then hold down [$o] and press [$f] to drop.";
+        return ("Use [$9] and [$0] to switch between rockets and bombs.\n"
+                "Select bombs, then hold down [$o] and press [$f] to drop.");
       }
     case AZ_UPG_CAPACITOR_00:
     case AZ_UPG_CAPACITOR_01:
