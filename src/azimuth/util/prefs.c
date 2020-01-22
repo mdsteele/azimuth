@@ -36,55 +36,32 @@
 #define DEFAULT_FULLSCREEN false
 #endif
 
-// Ensure calling az_finalize_prefs to set up the bidirectional mapping for controls <-> keys.
-static void az_initialize_prefs_to_defaults(az_preferences_t *prefs) {
+void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
   *prefs = (az_preferences_t){
     .music_volume = 0.8, .sound_volume = 0.8,
     .speedrun_timer = false, .fullscreen_on_startup = DEFAULT_FULLSCREEN,
     .enable_hints = false,
-    .control_mapping = {
-      .key_for_control = {
-        [(int)AZ_CONTROL_UP] = AZ_KEY_UP_ARROW,
-        [(int)AZ_CONTROL_DOWN] = AZ_KEY_DOWN_ARROW,
-        [(int)AZ_CONTROL_RIGHT] = AZ_KEY_RIGHT_ARROW,
-        [(int)AZ_CONTROL_LEFT] = AZ_KEY_LEFT_ARROW,
-        [(int)AZ_CONTROL_FIRE] = AZ_KEY_C,
-        [(int)AZ_CONTROL_ORDN] = AZ_KEY_X,
-        [(int)AZ_CONTROL_UTIL] = AZ_KEY_Z,
-        [(int)AZ_CONTROL_PAUSE] = AZ_KEY_ESCAPE,
-        [(int)AZ_CONTROL_BOMBS] = AZ_KEY_0,
-        [(int)AZ_CONTROL_CHARGE] = AZ_KEY_1,
-        [(int)AZ_CONTROL_FREEZE] = AZ_KEY_2,
-        [(int)AZ_CONTROL_TRIPLE] = AZ_KEY_3,
-        [(int)AZ_CONTROL_HOMING] = AZ_KEY_4,
-        [(int)AZ_CONTROL_PHASE] = AZ_KEY_5,
-        [(int)AZ_CONTROL_BURST] = AZ_KEY_6,
-        [(int)AZ_CONTROL_PIERCE] = AZ_KEY_7,
-        [(int)AZ_CONTROL_BEAM] = AZ_KEY_8,
-        [(int)AZ_CONTROL_ROCKETS] = AZ_KEY_9,
-      },
-      .control_for_key = { 0 },
+    .key_for_control = {
+      [AZ_CONTROL_UP] = AZ_KEY_UP_ARROW,
+      [AZ_CONTROL_DOWN] = AZ_KEY_DOWN_ARROW,
+      [AZ_CONTROL_RIGHT] = AZ_KEY_RIGHT_ARROW,
+      [AZ_CONTROL_LEFT] = AZ_KEY_LEFT_ARROW,
+      [AZ_CONTROL_FIRE] = AZ_KEY_C,
+      [AZ_CONTROL_ORDN] = AZ_KEY_X,
+      [AZ_CONTROL_UTIL] = AZ_KEY_Z,
+      [AZ_CONTROL_PAUSE] = AZ_KEY_ESCAPE,
+      [AZ_CONTROL_BOMBS] = AZ_KEY_0,
+      [AZ_CONTROL_CHARGE] = AZ_KEY_1,
+      [AZ_CONTROL_FREEZE] = AZ_KEY_2,
+      [AZ_CONTROL_TRIPLE] = AZ_KEY_3,
+      [AZ_CONTROL_HOMING] = AZ_KEY_4,
+      [AZ_CONTROL_PHASE] = AZ_KEY_5,
+      [AZ_CONTROL_BURST] = AZ_KEY_6,
+      [AZ_CONTROL_PIERCE] = AZ_KEY_7,
+      [AZ_CONTROL_BEAM] = AZ_KEY_8,
+      [AZ_CONTROL_ROCKETS] = AZ_KEY_9,
     },
   };
-}
-
-static void az_finalize_prefs(az_preferences_t *prefs) {
-  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
-    az_key_id_t key = prefs->control_mapping.key_for_control[i];
-    prefs->control_mapping.control_for_key[(int)key] = (az_control_id_t)i;
-  }
-  // Ensure that number keys work for weapon changes,
-  // even if they're not the preferences chosen by the user.
-  for (int i = 0; i < 10; ++i) {
-    int key = (int)AZ_KEY_0 + i;
-    az_control_id_t control = (az_control_id_t)((int)AZ_CONTROL_BOMBS + i);
-    prefs->control_mapping.control_for_key[key] = control;
-  }
-}
-
-void az_reset_prefs_to_defaults(az_preferences_t *prefs) {
-  az_initialize_prefs_to_defaults(prefs);
-  az_finalize_prefs(prefs);
 }
 
 
@@ -105,13 +82,14 @@ static bool read_bool(FILE *file, bool *out) {
   return true;
 }
 
-static bool read_key(FILE *file, az_key_id_t *key_for_control, az_control_id_t control_id) {
+static bool read_key(FILE *file, az_key_id_t *key_for_control,
+                     az_control_id_t control_id) {
   int value;
   if (fscanf(file, "=%d ", &value) < 1) return false;
   if (value <= 0 || value >= AZ_NUM_ALLOWED_KEYS) return false;
   const az_key_id_t key = (az_key_id_t)value;
   if (!az_is_valid_prefs_key(key, control_id)) return false;
-  key_for_control[(int)control_id] = key;
+  key_for_control[control_id] = key;
   return true;
 }
 
@@ -127,8 +105,8 @@ bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
   assert(prefs_out != NULL);
 
   az_preferences_t prefs;
-  az_initialize_prefs_to_defaults(&prefs);
-  az_key_id_t *key_for_control = prefs.control_mapping.key_for_control;
+  az_reset_prefs_to_defaults(&prefs);
+  az_key_id_t *key_for_control = prefs.key_for_control;
 
   // Parse the file.
   if (fscanf(file, "@F ") < 0) return false;
@@ -214,8 +192,6 @@ bool az_load_prefs_from_file(FILE *file, az_preferences_t *prefs_out) {
     }
   }
 
-  az_finalize_prefs(&prefs);
-
   *prefs_out = prefs;
   return true;
 }
@@ -233,7 +209,7 @@ bool az_save_prefs_to_path(const az_preferences_t *prefs,
 bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
   assert(prefs != NULL);
   assert(file != NULL);
-  const az_key_id_t* key_for_control = prefs->control_mapping.key_for_control;
+  const az_key_id_t* key_for_control = prefs->key_for_control;
   return (fprintf(
       file, "@F mv=%.03f sv=%.03f st=%d fs=%d eh=%d\n"
       "   uk=%d dk=%d rk=%d lk=%d fk=%d ok=%d tk=%d pk=%d\n"
@@ -241,24 +217,24 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file) {
       (double)prefs->music_volume, (double)prefs->sound_volume,
       (prefs->speedrun_timer ? 1 : 0), (prefs->fullscreen_on_startup ? 1 : 0),
       (prefs->enable_hints ? 1 : 0),
-      (int)key_for_control[(int)AZ_CONTROL_UP],
-      (int)key_for_control[(int)AZ_CONTROL_DOWN],
-      (int)key_for_control[(int)AZ_CONTROL_RIGHT],
-      (int)key_for_control[(int)AZ_CONTROL_LEFT],
-      (int)key_for_control[(int)AZ_CONTROL_FIRE],
-      (int)key_for_control[(int)AZ_CONTROL_ORDN],
-      (int)key_for_control[(int)AZ_CONTROL_UTIL],
-      (int)key_for_control[(int)AZ_CONTROL_PAUSE],
-      (int)key_for_control[(int)AZ_CONTROL_BOMBS],
-      (int)key_for_control[(int)AZ_CONTROL_CHARGE],
-      (int)key_for_control[(int)AZ_CONTROL_FREEZE],
-      (int)key_for_control[(int)AZ_CONTROL_TRIPLE],
-      (int)key_for_control[(int)AZ_CONTROL_HOMING],
-      (int)key_for_control[(int)AZ_CONTROL_PHASE],
-      (int)key_for_control[(int)AZ_CONTROL_BURST],
-      (int)key_for_control[(int)AZ_CONTROL_PIERCE],
-      (int)key_for_control[(int)AZ_CONTROL_BEAM],
-      (int)key_for_control[(int)AZ_CONTROL_ROCKETS]) >= 0);
+      key_for_control[AZ_CONTROL_UP],
+      key_for_control[AZ_CONTROL_DOWN],
+      key_for_control[AZ_CONTROL_RIGHT],
+      key_for_control[AZ_CONTROL_LEFT],
+      key_for_control[AZ_CONTROL_FIRE],
+      key_for_control[AZ_CONTROL_ORDN],
+      key_for_control[AZ_CONTROL_UTIL],
+      key_for_control[AZ_CONTROL_PAUSE],
+      key_for_control[AZ_CONTROL_BOMBS],
+      key_for_control[AZ_CONTROL_CHARGE],
+      key_for_control[AZ_CONTROL_FREEZE],
+      key_for_control[AZ_CONTROL_TRIPLE],
+      key_for_control[AZ_CONTROL_HOMING],
+      key_for_control[AZ_CONTROL_PHASE],
+      key_for_control[AZ_CONTROL_BURST],
+      key_for_control[AZ_CONTROL_PIERCE],
+      key_for_control[AZ_CONTROL_BEAM],
+      key_for_control[AZ_CONTROL_ROCKETS]) >= 0);
 }
 
 bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_id) {
@@ -276,15 +252,27 @@ bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_id) {
     case AZ_KEY_7:
     case AZ_KEY_8:
     case AZ_KEY_9:
-      // Number keys only valid for the specific advanced weapon slot:
-      return (int)key_id - (int)AZ_KEY_0 == (int)control_id - (int)AZ_CONTROL_BOMBS;
+      // Number keys are only valid for the specific advanced weapon slot:
+      return key_id - AZ_KEY_0 == control_id - AZ_CONTROL_BOMBS;
     default:
       return true;
   }
 }
 
-bool az_show_extra_weapon_key(const az_preferences_t *prefs, int slot) {
-  return (int)prefs->control_mapping.key_for_control[(int)AZ_CONTROL_BOMBS + slot] != AZ_KEY_0 + slot;
+bool az_show_extra_weapon_key(const az_preferences_t *prefs,
+                              unsigned int slot) {
+  return prefs->key_for_control[AZ_CONTROL_BOMBS + slot] != AZ_KEY_0 + slot;
+}
+
+az_control_id_t az_control_for_key(const az_preferences_t *prefs,
+                                   az_key_id_t key_id) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
+    if (prefs->key_for_control[i] == key_id) return i;
+  }
+  if (key_id >= AZ_KEY_0 && key_id <= AZ_KEY_9) {
+    return AZ_CONTROL_BOMBS + (key_id - AZ_KEY_0);
+  }
+  return AZ_CONTROL_NONE;
 }
 
 /*===========================================================================*/

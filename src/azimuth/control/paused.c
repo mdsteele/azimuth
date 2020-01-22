@@ -64,24 +64,51 @@ az_paused_action_t az_paused_event_loop(
           }
           if (event.key.id == AZ_KEY_RETURN) return AZ_PA_RESUME;
           const az_control_id_t control_id =
-            prefs->control_mapping.control_for_key[event.key.id];
+            az_control_for_key(prefs, event.key.id);
           switch (control_id) {
-            case AZ_CONTROL_NONE: break;
-            case AZ_CONTROL_CHARGE: az_select_gun(player, AZ_GUN_CHARGE); break;
-            case AZ_CONTROL_FREEZE: az_select_gun(player, AZ_GUN_FREEZE); break;
-            case AZ_CONTROL_TRIPLE: az_select_gun(player, AZ_GUN_TRIPLE); break;
-            case AZ_CONTROL_HOMING: az_select_gun(player, AZ_GUN_HOMING); break;
-            case AZ_CONTROL_PHASE: az_select_gun(player, AZ_GUN_PHASE);   break;
-            case AZ_CONTROL_BURST: az_select_gun(player, AZ_GUN_BURST);   break;
-            case AZ_CONTROL_PIERCE: az_select_gun(player, AZ_GUN_PIERCE); break;
-            case AZ_CONTROL_BEAM: az_select_gun(player, AZ_GUN_BEAM);     break;
-            case AZ_CONTROL_ROCKETS: az_select_ordnance(player, AZ_ORDN_ROCKETS); break;
-            case AZ_CONTROL_BOMBS: az_select_ordnance(player, AZ_ORDN_BOMBS);     break;
-            case AZ_CONTROL_PAUSE: return AZ_PA_RESUME;
-            case AZ_CONTROL_FIRE: state.current_drawer = AZ_PAUSE_DRAWER_UPGRADES; break;
-            case AZ_CONTROL_ORDN: state.current_drawer = AZ_PAUSE_DRAWER_MAP;      break;
-            case AZ_CONTROL_UTIL: state.current_drawer = AZ_PAUSE_DRAWER_OPTIONS;  break;
-            default: break;
+            case AZ_CONTROL_CHARGE:
+              az_select_gun(player, AZ_GUN_CHARGE);
+              break;
+            case AZ_CONTROL_FREEZE:
+              az_select_gun(player, AZ_GUN_FREEZE);
+              break;
+            case AZ_CONTROL_TRIPLE:
+              az_select_gun(player, AZ_GUN_TRIPLE);
+              break;
+            case AZ_CONTROL_HOMING:
+              az_select_gun(player, AZ_GUN_HOMING);
+              break;
+            case AZ_CONTROL_PHASE:
+              az_select_gun(player, AZ_GUN_PHASE);
+              break;
+            case AZ_CONTROL_BURST:
+              az_select_gun(player, AZ_GUN_BURST);
+              break;
+            case AZ_CONTROL_PIERCE:
+              az_select_gun(player, AZ_GUN_PIERCE);
+              break;
+            case AZ_CONTROL_BEAM:
+              az_select_gun(player, AZ_GUN_BEAM);
+              break;
+            case AZ_CONTROL_ROCKETS:
+              az_select_ordnance(player, AZ_ORDN_ROCKETS);
+              break;
+            case AZ_CONTROL_BOMBS:
+              az_select_ordnance(player, AZ_ORDN_BOMBS);
+              break;
+            case AZ_CONTROL_PAUSE:
+              return AZ_PA_RESUME;
+            case AZ_CONTROL_FIRE:
+              state.current_drawer = AZ_PAUSE_DRAWER_UPGRADES;
+              break;
+            case AZ_CONTROL_ORDN:
+              state.current_drawer = AZ_PAUSE_DRAWER_MAP;
+              break;
+            case AZ_CONTROL_UTIL:
+              state.current_drawer = AZ_PAUSE_DRAWER_OPTIONS;
+              break;
+            default:
+              break;
           }
           break;
         }

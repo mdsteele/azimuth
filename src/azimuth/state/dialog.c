@@ -120,7 +120,7 @@ static int paragraph_line_length_internal(
     const az_preferences_t *prefs, const char *paragraph, int *start) {
   int line_length = 0;
   int line_end = *start;
-  const az_key_id_t *key_for_control = prefs->control_mapping.key_for_control;
+  const az_key_id_t *key_for_control = prefs->key_for_control;
   while (paragraph[line_end] != '\0' && paragraph[line_end] != '\n') {
     ++line_end;
     // If we see a $-escape, we need to determine its expanded length.
@@ -157,23 +157,23 @@ static int paragraph_line_length_internal(
         // The key name escapes add the length of the key name to the line.
         // Note for now which key_id we need to insert the name of, and we'll
         // handle it below.
-        case 'u': key_id = key_for_control[(int)AZ_CONTROL_UP]; break;
-        case 'd': key_id = key_for_control[(int)AZ_CONTROL_DOWN]; break;
-        case 'r': key_id = key_for_control[(int)AZ_CONTROL_RIGHT]; break;
-        case 'l': key_id = key_for_control[(int)AZ_CONTROL_LEFT]; break;
-        case 'f': key_id = key_for_control[(int)AZ_CONTROL_FIRE]; break;
-        case 'o': key_id = key_for_control[(int)AZ_CONTROL_ORDN]; break;
-        case 't': key_id = key_for_control[(int)AZ_CONTROL_UTIL]; break;
-        case '0': key_id = key_for_control[(int)AZ_CONTROL_BOMBS]; break;
-        case '1': key_id = key_for_control[(int)AZ_CONTROL_CHARGE]; break;
-        case '2': key_id = key_for_control[(int)AZ_CONTROL_FREEZE]; break;
-        case '3': key_id = key_for_control[(int)AZ_CONTROL_TRIPLE]; break;
-        case '4': key_id = key_for_control[(int)AZ_CONTROL_HOMING]; break;
-        case '5': key_id = key_for_control[(int)AZ_CONTROL_PHASE]; break;
-        case '6': key_id = key_for_control[(int)AZ_CONTROL_BURST]; break;
-        case '7': key_id = key_for_control[(int)AZ_CONTROL_PIERCE]; break;
-        case '8': key_id = key_for_control[(int)AZ_CONTROL_BEAM]; break;
-        case '9': key_id = key_for_control[(int)AZ_CONTROL_ROCKETS]; break;
+        case 'u': key_id = key_for_control[AZ_CONTROL_UP]; break;
+        case 'd': key_id = key_for_control[AZ_CONTROL_DOWN]; break;
+        case 'r': key_id = key_for_control[AZ_CONTROL_RIGHT]; break;
+        case 'l': key_id = key_for_control[AZ_CONTROL_LEFT]; break;
+        case 'f': key_id = key_for_control[AZ_CONTROL_FIRE]; break;
+        case 'o': key_id = key_for_control[AZ_CONTROL_ORDN]; break;
+        case 't': key_id = key_for_control[AZ_CONTROL_UTIL]; break;
+        case '0': key_id = key_for_control[AZ_CONTROL_BOMBS]; break;
+        case '1': key_id = key_for_control[AZ_CONTROL_CHARGE]; break;
+        case '2': key_id = key_for_control[AZ_CONTROL_FREEZE]; break;
+        case '3': key_id = key_for_control[AZ_CONTROL_TRIPLE]; break;
+        case '4': key_id = key_for_control[AZ_CONTROL_HOMING]; break;
+        case '5': key_id = key_for_control[AZ_CONTROL_PHASE]; break;
+        case '6': key_id = key_for_control[AZ_CONTROL_BURST]; break;
+        case '7': key_id = key_for_control[AZ_CONTROL_PIERCE]; break;
+        case '8': key_id = key_for_control[AZ_CONTROL_BEAM]; break;
+        case '9': key_id = key_for_control[AZ_CONTROL_ROCKETS]; break;
         // All other escapes are just a single character after the '$', which
         // we should skip over without increasing the line length.
         default:

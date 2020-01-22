@@ -74,9 +74,8 @@ void az_update_preferences(const az_prefs_pane_t *pane,
     *prefs_changed = true;
   }
   for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
-    if (prefs->control_mapping.key_for_control[i] != pane->pickers[i].key) {
-      prefs->control_mapping.key_for_control[i] = pane->pickers[i].key;
-      prefs->control_mapping.control_for_key[(int)pane->pickers[i].key] = i;
+    if (prefs->key_for_control[i] != pane->pickers[i].key) {
+      prefs->key_for_control[i] = pane->pickers[i].key;
       *prefs_changed = true;
     }
   }

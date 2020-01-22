@@ -700,7 +700,8 @@ static void draw_upgrade_box_message(
     az_upgrade_t upgrade, double height, int gun_instructions_top,
     az_clock_t clock) {
   const char *name = az_upgrade_name(upgrade);
-  const char *description = az_upgrade_description(upgrade, &player->upgrades, prefs);
+  const char *description = az_upgrade_description(upgrade, &player->upgrades,
+                                                   prefs);
   const double top = 0.5 * (AZ_SCREEN_HEIGHT - height);
   glPushMatrix(); {
     glTranslated(AZ_SCREEN_WIDTH/2 + 0.5, top + 58.5, 0);

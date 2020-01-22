@@ -51,21 +51,13 @@ typedef enum {
   AZ_CONTROL_ROCKETS,
 } az_control_id_t;
 
-#define AZ_FIRST_CONTROL ((int)AZ_CONTROL_UP)
-#define AZ_NUM_CONTROLS ((int)AZ_CONTROL_ROCKETS + 1)
-
-// Manually curated bi-directional map for keys <-> controls:
-// Sometimes a control is overloaded, e.g. number keys always work for weapon changes.
-// In these cases, the key_for_control is set by the user's preference, not the overload.
-typedef struct {
-  az_key_id_t key_for_control[AZ_NUM_CONTROLS];
-  az_control_id_t control_for_key[AZ_NUM_ALLOWED_KEYS];
-} az_control_mapping_t;
+#define AZ_FIRST_CONTROL AZ_CONTROL_UP
+#define AZ_NUM_CONTROLS (AZ_CONTROL_ROCKETS + 1)
 
 typedef struct {
   float music_volume, sound_volume;
   bool speedrun_timer, fullscreen_on_startup, enable_hints;
-  az_control_mapping_t control_mapping;
+  az_key_id_t key_for_control[AZ_NUM_CONTROLS];
 } az_preferences_t;
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs);
@@ -91,8 +83,14 @@ bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file);
 // Returns true if this key may be used for one of the game controls.
 bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_index);
 
-// Returns true if user has configured a non-default control for weapon slots 0-9.
-bool az_show_extra_weapon_key(const az_preferences_t *prefs, int slot);
+// Returns true if user has configured a non-default key for weapon
+// slots 0-9, i.e., AZ_CONTROL_BOMBS to AZ_CONTROL_ROCKETS.
+bool az_show_extra_weapon_key(const az_preferences_t *prefs,
+                              unsigned int slot);
+
+// Returns the control for a given key.
+az_control_id_t az_control_for_key(const az_preferences_t *prefs,
+                                   az_key_id_t key_id);
 
 /*===========================================================================*/
 
