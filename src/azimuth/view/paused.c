@@ -744,7 +744,7 @@ static void draw_upgrades(const az_paused_state_t *state) {
          state->hovered_upgrade == AZ_UPG_ROCKET_AMMO_00 ?
          (az_upgrades_have_any_bombs(&player->upgrades) ?
           az_show_extra_weapon_key(state->prefs, 9) ?
-          "Press [9] or [$9] to select rockets, then \n"
+          "Press [9] or [$9] to select rockets, then\n"
           "hold down [$o] and press [$f] to fire." :
           "Press [9] to select rockets, then hold down [$o] and\n"
           "press [$f] to fire." :
@@ -752,8 +752,8 @@ static void draw_upgrades(const az_paused_state_t *state) {
          state->hovered_upgrade == AZ_UPG_BOMB_AMMO_00 ?
          (az_upgrades_have_any_rockets(&player->upgrades) ?
           az_show_extra_weapon_key(state->prefs, 0) ?
-          "Press [0] or [$0] to select bombs,\n"
-          "then hold down [$o] and press [$f] to drop." :
+          "Press [0] or [$0] to select bombs, then\n"
+          "hold down [$o] and press [$f] to drop." :
           "Press [0] to select bombs, then hold down [$o] and\n"
           "press [$f] to drop." :
           "Hold down [$o] and press [$f] to drop.") :
