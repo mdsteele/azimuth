@@ -28,20 +28,36 @@
 
 /*===========================================================================*/
 
-#define AZ_PREFS_UP_KEY_INDEX 0
-#define AZ_PREFS_DOWN_KEY_INDEX 1
-#define AZ_PREFS_RIGHT_KEY_INDEX 2
-#define AZ_PREFS_LEFT_KEY_INDEX 3
-#define AZ_PREFS_FIRE_KEY_INDEX 4
-#define AZ_PREFS_ORDN_KEY_INDEX 5
-#define AZ_PREFS_UTIL_KEY_INDEX 6
-#define AZ_PREFS_PAUSE_KEY_INDEX 7
-#define AZ_PREFS_NUM_KEYS 8
+// The current control that a key press corresponds to.
+typedef enum {
+  AZ_CONTROL_NONE = 0,
+  AZ_CONTROL_UP,
+  AZ_CONTROL_DOWN,
+  AZ_CONTROL_RIGHT,
+  AZ_CONTROL_LEFT,
+  AZ_CONTROL_FIRE,
+  AZ_CONTROL_ORDN,
+  AZ_CONTROL_UTIL,
+  AZ_CONTROL_PAUSE,
+  AZ_CONTROL_BOMBS,
+  AZ_CONTROL_CHARGE,
+  AZ_CONTROL_FREEZE,
+  AZ_CONTROL_TRIPLE,
+  AZ_CONTROL_HOMING,
+  AZ_CONTROL_PHASE,
+  AZ_CONTROL_BURST,
+  AZ_CONTROL_PIERCE,
+  AZ_CONTROL_BEAM,
+  AZ_CONTROL_ROCKETS,
+} az_control_id_t;
+
+#define AZ_FIRST_CONTROL AZ_CONTROL_UP
+#define AZ_NUM_CONTROLS (AZ_CONTROL_ROCKETS + 1)
 
 typedef struct {
   float music_volume, sound_volume;
   bool speedrun_timer, fullscreen_on_startup, enable_hints;
-  az_key_id_t keys[AZ_PREFS_NUM_KEYS];
+  az_key_id_t key_for_control[AZ_NUM_CONTROLS];
 } az_preferences_t;
 
 void az_reset_prefs_to_defaults(az_preferences_t *prefs);
@@ -65,7 +81,16 @@ bool az_save_prefs_to_path(const az_preferences_t *prefs,
 bool az_save_prefs_to_file(const az_preferences_t *prefs, FILE *file);
 
 // Returns true if this key may be used for one of the game controls.
-bool az_is_valid_prefs_key(az_key_id_t key_id);
+bool az_is_valid_prefs_key(az_key_id_t key_id, az_control_id_t control_index);
+
+// Returns true if user has configured a non-default key for weapon
+// slots 0-9, i.e., AZ_CONTROL_BOMBS to AZ_CONTROL_ROCKETS.
+bool az_show_extra_weapon_key(const az_preferences_t *prefs,
+                              unsigned int slot);
+
+// Returns the control for a given key.
+az_control_id_t az_control_for_key(const az_preferences_t *prefs,
+                                   az_key_id_t key_id);
 
 /*===========================================================================*/
 

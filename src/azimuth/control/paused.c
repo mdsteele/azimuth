@@ -55,42 +55,63 @@ az_paused_action_t az_paused_event_loop(
     az_event_t event;
     while (az_poll_event(&event)) {
       switch (event.kind) {
-        case AZ_EVENT_KEY_DOWN:
+        case AZ_EVENT_KEY_DOWN: {
           if (state.do_quit) break;
           if (state.prefs_pane.selected_key_picker_index >= 0) {
             az_prefs_try_pick_key(&state.prefs_pane, event.key.id,
                                   &state.soundboard);
             break;
           }
-          switch (event.key.id) {
-            case AZ_KEY_RETURN: return AZ_PA_RESUME;
-            case AZ_KEY_1: az_select_gun(player, AZ_GUN_CHARGE); break;
-            case AZ_KEY_2: az_select_gun(player, AZ_GUN_FREEZE); break;
-            case AZ_KEY_3: az_select_gun(player, AZ_GUN_TRIPLE); break;
-            case AZ_KEY_4: az_select_gun(player, AZ_GUN_HOMING); break;
-            case AZ_KEY_5: az_select_gun(player, AZ_GUN_PHASE);  break;
-            case AZ_KEY_6: az_select_gun(player, AZ_GUN_BURST);  break;
-            case AZ_KEY_7: az_select_gun(player, AZ_GUN_PIERCE); break;
-            case AZ_KEY_8: az_select_gun(player, AZ_GUN_BEAM);   break;
-            case AZ_KEY_9: az_select_ordnance(player, AZ_ORDN_ROCKETS); break;
-            case AZ_KEY_0: az_select_ordnance(player, AZ_ORDN_BOMBS);   break;
+          if (event.key.id == AZ_KEY_RETURN) return AZ_PA_RESUME;
+          const az_control_id_t control_id =
+            az_control_for_key(prefs, event.key.id);
+          switch (control_id) {
+            case AZ_CONTROL_CHARGE:
+              az_select_gun(player, AZ_GUN_CHARGE);
+              break;
+            case AZ_CONTROL_FREEZE:
+              az_select_gun(player, AZ_GUN_FREEZE);
+              break;
+            case AZ_CONTROL_TRIPLE:
+              az_select_gun(player, AZ_GUN_TRIPLE);
+              break;
+            case AZ_CONTROL_HOMING:
+              az_select_gun(player, AZ_GUN_HOMING);
+              break;
+            case AZ_CONTROL_PHASE:
+              az_select_gun(player, AZ_GUN_PHASE);
+              break;
+            case AZ_CONTROL_BURST:
+              az_select_gun(player, AZ_GUN_BURST);
+              break;
+            case AZ_CONTROL_PIERCE:
+              az_select_gun(player, AZ_GUN_PIERCE);
+              break;
+            case AZ_CONTROL_BEAM:
+              az_select_gun(player, AZ_GUN_BEAM);
+              break;
+            case AZ_CONTROL_ROCKETS:
+              az_select_ordnance(player, AZ_ORDN_ROCKETS);
+              break;
+            case AZ_CONTROL_BOMBS:
+              az_select_ordnance(player, AZ_ORDN_BOMBS);
+              break;
+            case AZ_CONTROL_PAUSE:
+              return AZ_PA_RESUME;
+            case AZ_CONTROL_FIRE:
+              state.current_drawer = AZ_PAUSE_DRAWER_UPGRADES;
+              break;
+            case AZ_CONTROL_ORDN:
+              state.current_drawer = AZ_PAUSE_DRAWER_MAP;
+              break;
+            case AZ_CONTROL_UTIL:
+              state.current_drawer = AZ_PAUSE_DRAWER_OPTIONS;
+              break;
             default:
-              if (event.key.id ==
-                  state.prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
-                return AZ_PA_RESUME;
-              } else if (event.key.id ==
-                         state.prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]) {
-                state.current_drawer = AZ_PAUSE_DRAWER_UPGRADES;
-              } else if (event.key.id ==
-                         state.prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]) {
-                state.current_drawer = AZ_PAUSE_DRAWER_MAP;
-              } else if (event.key.id ==
-                         state.prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) {
-                state.current_drawer = AZ_PAUSE_DRAWER_OPTIONS;
-              }
               break;
           }
           break;
+        }
         case AZ_EVENT_MOUSE_DOWN:
           az_paused_on_click(&state, event.mouse.x, event.mouse.y);
           break;
@@ -101,7 +122,7 @@ az_paused_action_t az_paused_event_loop(
       }
     }
 
-    az_update_prefefences(&state.prefs_pane, prefs, &prefs_changed);
+    az_update_preferences(&state.prefs_pane, prefs, &prefs_changed);
 
     if (state.quitting_fade_alpha >= 1.0) {
       assert(state.do_quit);

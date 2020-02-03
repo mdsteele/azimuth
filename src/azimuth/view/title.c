@@ -385,7 +385,7 @@ static void draw_bottom_button(const az_button_t *button, bool active,
 /*===========================================================================*/
 
 #define PREFS_BOX_LEFT ((AZ_SCREEN_WIDTH - AZ_PREFS_BOX_WIDTH) / 2)
-#define PREFS_BOX_TOP 220
+#define PREFS_BOX_TOP 190
 
 static const az_vector_t prefs_box_vertices[] = {
   {PREFS_BOX_LEFT + 0.5, PREFS_BOX_TOP + 0.5},

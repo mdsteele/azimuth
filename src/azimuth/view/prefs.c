@@ -57,6 +57,8 @@ static const az_polygon_t slider_handle_polygon =
 #define PICKERS_TOP 85
 #define PICKER_HORZ_SPACING 108
 #define PICKER_VERT_SPACING 8
+#define PICKERS_WEAPON_VERT_SPACING 10
+#define PICKER_WEAPON_HORZ_SPACING 80
 
 static const az_vector_t picker_vertices[] = {
   {0.5, 0.5}, {PICKER_WIDTH - 0.5, 0.5},
@@ -98,14 +100,33 @@ void az_init_prefs_pane(az_prefs_pane_t *pane, int x, int y,
   init_slider(&pane->sound_slider, slider_left, SLIDERS_TOP + SLIDER_SPACING,
               prefs->sound_volume);
 
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
-    const int row = i % 4;
-    const int col = i / 4;
+  for (int i = AZ_FIRST_CONTROL; i < AZ_CONTROL_BOMBS; ++i) {
+    const int delta = i - AZ_FIRST_CONTROL;
+    const int row = delta % 4;
+    const int col = delta / 4;
     const int top = PICKERS_TOP + row * (PICKER_HEIGHT + PICKER_VERT_SPACING);
     const int left = AZ_PREFS_BOX_WIDTH / 2 - 222 +
       col * (PICKER_WIDTH + PICKER_HORZ_SPACING);
     az_init_button(&pane->pickers[i].button, picker_polygon, left, top);
-    pane->pickers[i].key = prefs->keys[i];
+    pane->pickers[i].key = prefs->key_for_control[i];
+  }
+
+  for (int i = AZ_CONTROL_BOMBS; i < AZ_CONTROL_BOMBS + 10; ++i) {
+    const int weapon = i - AZ_CONTROL_BOMBS;
+    int row, col;
+    if (weapon == 0 || weapon == 9) {
+      row = weapon == 0 ? 1 : 0;
+      col = 4;
+    } else {
+      row = (weapon - 1) / 4;
+      col = (weapon - 1) % 4;
+    }
+    const int top = PICKERS_TOP + PICKERS_WEAPON_VERT_SPACING +
+      (row + 4) * (PICKER_HEIGHT + PICKER_VERT_SPACING);
+    const int left = AZ_PREFS_BOX_WIDTH / 2 - 266 +
+      col * (PICKER_WIDTH + PICKER_WEAPON_HORZ_SPACING);
+    az_init_button(&pane->pickers[i].button, picker_polygon, left, top);
+    pane->pickers[i].key = prefs->key_for_control[i];
   }
 
   const int checkbox_left = AZ_PREFS_BOX_WIDTH / 2 + 50;
@@ -190,18 +211,29 @@ void az_draw_prefs_pane(const az_prefs_pane_t *pane) {
     draw_slider(&pane->music_slider, "Music", true);
     draw_slider(&pane->sound_slider, "Sound", false);
 
-    draw_key_picker(&pane->pickers[AZ_PREFS_UP_KEY_INDEX], "Thrust");
-    draw_key_picker(&pane->pickers[AZ_PREFS_DOWN_KEY_INDEX], "Reverse");
-    draw_key_picker(&pane->pickers[AZ_PREFS_RIGHT_KEY_INDEX], "Turn right");
-    draw_key_picker(&pane->pickers[AZ_PREFS_LEFT_KEY_INDEX], "Turn left");
-    draw_key_picker(&pane->pickers[AZ_PREFS_FIRE_KEY_INDEX], "Fire");
-    draw_key_picker(&pane->pickers[AZ_PREFS_ORDN_KEY_INDEX], "Ordnance");
-    draw_key_picker(&pane->pickers[AZ_PREFS_UTIL_KEY_INDEX], "Utility");
-    draw_key_picker(&pane->pickers[AZ_PREFS_PAUSE_KEY_INDEX], "Pause");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_UP], "Thrust");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_DOWN], "Reverse");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_RIGHT], "Turn right");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_LEFT], "Turn left");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_FIRE], "Fire");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_ORDN], "Ordnance");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_UTIL], "Utility");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_PAUSE], "Pause");
 
     draw_checkbox(&pane->speedrun_timer_checkbox, "Show speedrun timer");
     draw_checkbox(&pane->fullscreen_checkbox, "Fullscreen on startup");
     draw_checkbox(&pane->enable_hints_checkbox, "Enable hint system");
+
+    draw_key_picker(&pane->pickers[AZ_CONTROL_BOMBS], "Bombs");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_CHARGE], "Charge");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_FREEZE], "Freeze");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_TRIPLE], "Triple");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_HOMING], "Homing");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_PHASE], "Phase");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_BURST], "Burst");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_PIERCE], "Pierce");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_BEAM], "Beam");
+    draw_key_picker(&pane->pickers[AZ_CONTROL_ROCKETS], "Rockets");
   } glPopMatrix();
 }
 
@@ -234,7 +266,7 @@ static bool tick_slider(az_prefs_slider_t *slider, int xoff, int yoff,
 
 void az_tick_prefs_pane(az_prefs_pane_t *pane, bool visible, double time,
                         az_clock_t clock, az_soundboard_t *soundboard) {
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
     if (i != pane->selected_key_picker_index) {
       az_tick_button(&pane->pickers[i].button, pane->x, pane->y, visible, time,
                      clock, soundboard);
@@ -275,7 +307,7 @@ static void checkbox_on_click(az_prefs_checkbox_t *checkbox, int x, int y,
 void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
                             az_soundboard_t *soundboard) {
   const int rel_x = abs_x - pane->x, rel_y = abs_y - pane->y;
-  for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
     if (az_button_on_click(&pane->pickers[i].button, rel_x, rel_y,
                            soundboard)) {
       pane->selected_key_picker_index = i;
@@ -294,14 +326,30 @@ void az_prefs_pane_on_click(az_prefs_pane_t *pane, int abs_x, int abs_y,
 void az_prefs_try_pick_key(az_prefs_pane_t *pane, az_key_id_t key_id,
                            az_soundboard_t *soundboard) {
   const int picker_index = pane->selected_key_picker_index;
-  if (picker_index < 0 || picker_index >= AZ_PREFS_NUM_KEYS) return;
+  if (picker_index < 0 || picker_index >= AZ_NUM_CONTROLS) return;
   az_prefs_key_picker_t *picker = &pane->pickers[picker_index];
   pane->selected_key_picker_index = -1;
-  if (az_is_valid_prefs_key(key_id)) {
-    for (int i = 0; i < AZ_PREFS_NUM_KEYS; ++i) {
+  const az_control_id_t control_id = (az_control_id_t)picker_index;
+  if (az_is_valid_prefs_key(key_id, control_id)) {
+    // Ensure no one else is using the same key_id:
+    for (int i = AZ_FIRST_CONTROL; i < AZ_NUM_CONTROLS; ++i) {
       if (i == picker_index) continue;
       if (pane->pickers[i].key == key_id) {
-        pane->pickers[i].key = picker->key;
+        // Check if we can reassign picker's current key to other control:
+        if (az_is_valid_prefs_key(picker->key, (az_control_id_t)i)) {
+          pane->pickers[i].key = picker->key;
+        } else if (i >= AZ_CONTROL_BOMBS && i <= AZ_CONTROL_ROCKETS) {
+          // We were trading keys between weapon slots, but we are
+          // not allowed to do so.  Reset weapon slot to the default value:
+          pane->pickers[i].key = (az_key_id_t)
+            (AZ_KEY_0 + i - AZ_CONTROL_BOMBS);
+        } else {
+          fprintf(stderr, "Key [%s] already in use.  "
+                  "Cannot swap numeric weapon key with a non-weapon control.\n",
+                  az_key_name(key_id));
+          az_play_sound(soundboard, AZ_SND_KLAXON_SHIELDS_LOW);
+          return;
+        }
         break;
       }
     }

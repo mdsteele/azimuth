@@ -76,6 +76,16 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
 //   $o - insert name of prefs ORDN key
 //   $t - insert name of prefs UTIL key
 //   $p - insert name of prefs PAUSE key
+//   $0 - insert name of prefs BOMBS key
+//   $1 - insert name of prefs CHARGE key
+//   $2 - insert name of prefs FREEZE key
+//   $3 - insert name of prefs TRIPLE key
+//   $4 - insert name of prefs HOMING key
+//   $5 - insert name of prefs PHASE key
+//   $6 - insert name of prefs BURST key
+//   $7 - insert name of prefs PIERCE key
+//   $8 - insert name of prefs BEAM key
+//   $9 - insert name of prefs ROCKETS key
 void az_draw_paragraph(
     double height, az_alignment_t align, double x, double top, double spacing,
     int max_chars, const az_preferences_t *prefs, const char *paragraph);

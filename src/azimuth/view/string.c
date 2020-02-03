@@ -271,6 +271,7 @@ void az_draw_paragraph(
   int line_pauses = 0; // how many chars "printed" on this line were pauses
   int line_start = 0; // index into paragraph for first char of current line
   double line_top = top; // y-position of top of the current line
+  const az_key_id_t *key_for_control = prefs->key_for_control;
   while (true) {
     // Determine the x-position of the left side of this line.  For alignments
     // other than AZ_ALIGN_LEFT, this will require calculating the length of
@@ -404,14 +405,24 @@ void az_draw_paragraph(
           break;
         // For key name escapes, note for now which key_id we need to insert
         // the name of, and we'll handle it below.
-        case 'u': key_id = prefs->keys[AZ_PREFS_UP_KEY_INDEX]; break;
-        case 'd': key_id = prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]; break;
-        case 'r': key_id = prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX]; break;
-        case 'l': key_id = prefs->keys[AZ_PREFS_LEFT_KEY_INDEX]; break;
-        case 'f': key_id = prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]; break;
-        case 'o': key_id = prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]; break;
-        case 't': key_id = prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]; break;
-        case 'p': key_id = prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]; break;
+        case 'u': key_id = key_for_control[AZ_CONTROL_UP]; break;
+        case 'd': key_id = key_for_control[AZ_CONTROL_DOWN]; break;
+        case 'r': key_id = key_for_control[AZ_CONTROL_RIGHT]; break;
+        case 'l': key_id = key_for_control[AZ_CONTROL_LEFT]; break;
+        case 'f': key_id = key_for_control[AZ_CONTROL_FIRE]; break;
+        case 'o': key_id = key_for_control[AZ_CONTROL_ORDN]; break;
+        case 't': key_id = key_for_control[AZ_CONTROL_UTIL]; break;
+        case 'p': key_id = key_for_control[AZ_CONTROL_PAUSE]; break;
+        case '0': key_id = key_for_control[AZ_CONTROL_BOMBS]; break;
+        case '1': key_id = key_for_control[AZ_CONTROL_CHARGE]; break;
+        case '2': key_id = key_for_control[AZ_CONTROL_FREEZE]; break;
+        case '3': key_id = key_for_control[AZ_CONTROL_TRIPLE]; break;
+        case '4': key_id = key_for_control[AZ_CONTROL_HOMING]; break;
+        case '5': key_id = key_for_control[AZ_CONTROL_PHASE]; break;
+        case '6': key_id = key_for_control[AZ_CONTROL_BURST]; break;
+        case '7': key_id = key_for_control[AZ_CONTROL_PIERCE]; break;
+        case '8': key_id = key_for_control[AZ_CONTROL_BEAM]; break;
+        case '9': key_id = key_for_control[AZ_CONTROL_ROCKETS]; break;
         // If we see an unknown escape (e.g. "$Q"), skip over both characters,
         // print a warning, and keep going.
         default:

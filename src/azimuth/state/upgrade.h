@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "azimuth/util/prefs.h"
+
 /*===========================================================================*/
 
 #define AZ_ROCKETS_PER_AMMO_UPGRADE 5
@@ -35,7 +37,7 @@
 #define AZ_ARMOR_DAMAGE_FACTOR 0.8
 // Multiplier for incoming wall damage for Hardened Armor upgrade:
 #define AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR 0.5
-// Ordanance power multiplier for High Explosives:
+// Ordnance power multiplier for High Explosives:
 #define AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER 1.5
 // Multiplier for incoming splash damage, for Attuned Explosives:
 #define AZ_ATTUNED_EXPLOSIVES_DAMAGE_FACTOR 0.25
@@ -175,9 +177,10 @@ const char *az_upgrade_name(az_upgrade_t upgrade);
 
 // Return the description string for the upgrade, to be passed directly to
 // az_draw_paragraph.  The description may depend on what other upgrades have
-// been acquired.
+// been acquired, and any custom key preferences for the weapons.
 const char *az_upgrade_description(az_upgrade_t upgrade,
-                                   const az_upgrades_t *upgrades);
+                                   const az_upgrades_t *upgrades,
+                                   const az_preferences_t *prefs);
 
 /*===========================================================================*/
 

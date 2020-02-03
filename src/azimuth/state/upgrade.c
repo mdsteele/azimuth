@@ -169,80 +169,111 @@ static bool has_multiple_bomb_ammos(const az_upgrades_t *upgrades) {
 }
 
 const char *az_upgrade_description(az_upgrade_t upgrade,
-                                   const az_upgrades_t *upgrades) {
+                                   const az_upgrades_t *upgrades,
+                                   const az_preferences_t *prefs) {
   switch (upgrade) {
     case AZ_UPG_GUN_CHARGE:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Press [1] to select, hold [$f] to charge, release to fire.\n"
-                "Charged shots can destroy certain walls.");
+        return az_show_extra_weapon_key(prefs, 1) ?
+               "Press [1] or [$1] to select, hold [$f] to charge, release\n"
+               "to fire.  Charged shots can destroy certain walls." :
+               "Press [1] to select, hold [$f] to charge, release to fire.\n"
+               "Charged shots can destroy certain walls.";
       } else {
         return ("Hold [$f] to charge, release to fire.\n"
                 "Charged shots can destroy certain walls.");
       }
     case AZ_UPG_GUN_FREEZE:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires shots that can freeze enemies.\n"
-                "Press [2] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 2) ?
+               "Fires shots that can freeze enemies.\n"
+               "Press [2] or [$2] to select, press [$f] to fire." :
+               "Fires shots that can freeze enemies.\n"
+               "Press [2] to select, press [$f] to fire.";
       } else {
         return ("Fires shots that can freeze enemies.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_TRIPLE:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires three shots at once.\n"
-                "Press [3] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 3) ?
+               "Fires three shots at once.\n"
+               "Press [3] or [$3] to select, press [$f] to fire." :
+               "Fires three shots at once.\n"
+               "Press [3] to select, press [$f] to fire.";
       } else {
         return ("Fires three shots at once.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_HOMING:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires low-damage shots that seek out enemies.\n"
-                "Press [4] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 4) ?
+               "Fires low-damage shots that seek out enemies.\n"
+               "Press [4] or [$4] to select, press [$f] to fire." :
+               "Fires low-damage shots that seek out enemies.\n"
+               "Press [4] to select, press [$f] to fire.";
       } else {
         return ("Fires low-damage shots that seek out enemies.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_PHASE:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires shots that can pass through walls.\n"
-                "Press [5] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 5) ?
+               "Fires shots that can pass through walls.\n"
+               "Press [5] or [$5] to select, press [$f] to fire." :
+               "Fires shots that can pass through walls.\n"
+               "Press [5] to select, press [$f] to fire.";
       } else {
         return ("Fires shots that can pass through walls.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_BURST:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires shots that explode into shrapnel on impact.\n"
-                "Press [6] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 6) ?
+               "Fires shots that explode into shrapnel on impact.\n"
+               "Press [6] or [$6] to select, press [$f] to fire." :
+               "Fires shots that explode into shrapnel on impact.\n"
+               "Press [6] to select, press [$f] to fire.";
       } else {
         return ("Fires shots that explode into shrapnel on impact.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_PIERCE:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires shots that can pierce through multiple enemies.\n"
-                "Press [7] to select, press [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 7) ?
+               "Fires shots that can pierce through multiple enemies.\n"
+               "Press [7] or [$7] to select, press [$f] to fire." :
+               "Fires shots that can pierce through multiple enemies.\n"
+               "Press [7] to select, press [$f] to fire.";
       } else {
         return ("Fires shots that can pierce through multiple enemies.\n"
                 "Press [$f] to fire.");
       }
     case AZ_UPG_GUN_BEAM:
       if (has_more_than_two_guns(upgrades)) {
-        return ("Fires a continuous beam of energy.\n"
-                "Press [8] to select, hold [$f] to fire.");
+        return az_show_extra_weapon_key(prefs, 8) ?
+               "Fires a continuous beam of energy.\n"
+               "Press [8] or [$8] to select, hold [$f] to fire." :
+               "Fires a continuous beam of energy.\n"
+               "Press [8] to select, hold [$f] to fire.";
       } else {
         return ("Fires a continuous beam of energy.\n"
                 "Hold [$f] to fire.");
       }
     case AZ_UPG_HYPER_ROCKETS:
       { AZ_STATIC_ASSERT(AZ_ROCKETS_PER_HYPER_ROCKET == 3); }
-      return ("Press [9] to select rockets, hold [$o] to charge,\n"
-              "and press [$f] to fire.  Uses 3 rockets.");
+      return az_show_extra_weapon_key(prefs, 9) ?
+             "Press [9] or [$9] to select rockets, hold [$o] to\n"
+             "charge, and press [$f] to fire.  Uses 3 rockets." :
+             "Press [9] to select rockets, hold [$o] to charge,\n"
+             "and press [$f] to fire.  Uses 3 rockets.";
     case AZ_UPG_MEGA_BOMBS:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_MEGA_BOMB == 3); }
-      return ("Press [0] to select bombs, hold [$o] to charge,\n"
-              "and press [$f] to drop.  Uses 3 bombs.");
+      return az_show_extra_weapon_key(prefs, 0) ?
+             "Press [0] or [$0] to select bombs, hold [$o] to\n"
+             "charge, and press [$f] to drop.  Uses 3 bombs." :
+             "Press [0] to select bombs, hold [$o] to charge,\n"
+             "and press [$f] to drop.  Uses 3 bombs.";
     case AZ_UPG_HIGH_EXPLOSIVES:
       { AZ_STATIC_ASSERT(AZ_HIGH_EXPLOSIVES_POWER_MULTIPLIER == 1.5); }
       return "Increases the damage of your rockets and bombs by 50%.";
@@ -259,8 +290,11 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
               "Destroys certain walls on impact.");
     case AZ_UPG_ORION_BOOSTER:
       { AZ_STATIC_ASSERT(AZ_BOMBS_PER_ORION_BOOST == 2); }
-      return ("Press [0] to select bombs, hold [$o] to charge,\n"
-              "then double-tap [$d] to boost.  Uses 2 bombs.");
+      return az_show_extra_weapon_key(prefs, 0) ?
+             "Press [0] or [$0] to select bombs, hold [$o] to\n"
+             "charge, then double-tap [$d] to boost.  Uses 2 bombs." :
+             "Press [0] to select bombs, hold [$o] to charge,\n"
+             "then double-tap [$d] to boost.  Uses 2 bombs.";
     case AZ_UPG_HARDENED_ARMOR:
       { AZ_STATIC_ASSERT(AZ_ARMOR_DAMAGE_FACTOR == 0.8); }
       { AZ_STATIC_ASSERT(AZ_HARDENED_ARMOR_WALL_DAMAGE_FACTOR == 0.5); }
@@ -332,10 +366,10 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
         }
       } else if (has_multiple_rocket_ammos(upgrades)) {
         return ("Maximum rockets increased by 5.\n"
-                "Use [9] and [0] to switch between rockets and bombs.\n"
+                "Use [$9] and [$0] to switch between rockets and bombs.\n"
                 "Select rockets, then hold down [$o] and press [$f] to fire.");
       } else {
-        return ("Use [9] and [0] to switch between rockets and bombs.\n"
+        return ("Use [$9] and [$0] to switch between rockets and bombs.\n"
                 "Select rockets, then hold down [$o] and press [$f] to fire.");
       }
     case AZ_UPG_BOMB_AMMO_00:
@@ -368,10 +402,10 @@ const char *az_upgrade_description(az_upgrade_t upgrade,
         }
       } else if (has_multiple_bomb_ammos(upgrades)) {
         return ("Maximum bombs increased by 3.\n"
-                "Use [9] and [0] to switch between rockets and bombs.\n"
+                "Use [$9] and [$0] to switch between rockets and bombs.\n"
                 "Select bombs, then hold down [$o] and press [$f] to drop.");
       } else {
-        return ("Use [9] and [0] to switch between rockets and bombs.\n"
+        return ("Use [$9] and [$0] to switch between rockets and bombs.\n"
                 "Select bombs, then hold down [$o] and press [$f] to drop.");
       }
     case AZ_UPG_CAPACITOR_00:

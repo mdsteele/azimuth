@@ -100,21 +100,21 @@ static bool save_current_game(az_saved_games_t *saved_games) {
   return az_save_saved_games(saved_games);
 }
 
-static void update_controls(const az_preferences_t *prefs) {
+static void update_held_controls(const az_key_id_t *key_for_control) {
   state.ship.controls.up_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_UP_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_UP]);
   state.ship.controls.down_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_DOWN]);
   state.ship.controls.right_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_RIGHT_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_RIGHT]);
   state.ship.controls.left_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_LEFT_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_LEFT]);
   state.ship.controls.fire_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_FIRE]);
   state.ship.controls.ordn_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_ORDN_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_ORDN]);
   state.ship.controls.util_held =
-    az_is_key_held(prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]);
+    az_is_key_held(key_for_control[AZ_CONTROL_UTIL]);
 }
 
 az_space_action_t az_space_event_loop(
@@ -133,7 +133,7 @@ az_space_action_t az_space_event_loop(
     }
 
     // Tick the state and redraw the screen.
-    update_controls(prefs);
+    update_held_controls(prefs->key_for_control);
     az_tick_space_state(&state, AZ_FRAME_TIME_SECONDS);
     az_tick_audio(&state.soundboard);
     az_start_screen_redraw(); {
@@ -183,7 +183,7 @@ az_space_action_t az_space_event_loop(
         case AZ_EVENT_KEY_DOWN:
           if (state.skip.allowed && !state.skip.active) {
             assert(state.sync_vm.script != NULL);
-            if (event.key.id == prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
+            if (prefs->key_for_control[AZ_CONTROL_PAUSE] == event.key.id) {
               if (state.skip.cooldown < 1.0) {
                 state.skip.cooldown = 4.0;
               } else {
@@ -226,59 +226,62 @@ az_space_action_t az_space_event_loop(
             break;
           } else if (state.mode == AZ_MODE_GAME_OVER) break;
           // Handle the keystroke:
-          switch (event.key.id) {
-            case AZ_KEY_1:
+          const az_control_id_t control_id =
+            az_control_for_key(prefs, event.key.id);
+          switch (control_id) {
+            case AZ_CONTROL_CHARGE:
               az_select_gun(&state.ship.player, AZ_GUN_CHARGE);
               break;
-            case AZ_KEY_2:
+            case AZ_CONTROL_FREEZE:
               az_select_gun(&state.ship.player, AZ_GUN_FREEZE);
               break;
-            case AZ_KEY_3:
+            case AZ_CONTROL_TRIPLE:
               az_select_gun(&state.ship.player, AZ_GUN_TRIPLE);
               break;
-            case AZ_KEY_4:
+            case AZ_CONTROL_HOMING:
               az_select_gun(&state.ship.player, AZ_GUN_HOMING);
               break;
-            case AZ_KEY_5:
+            case AZ_CONTROL_PHASE:
               az_select_gun(&state.ship.player, AZ_GUN_PHASE);
               break;
-            case AZ_KEY_6:
+            case AZ_CONTROL_BURST:
               az_select_gun(&state.ship.player, AZ_GUN_BURST);
               break;
-            case AZ_KEY_7:
+            case AZ_CONTROL_PIERCE:
               az_select_gun(&state.ship.player, AZ_GUN_PIERCE);
               break;
-            case AZ_KEY_8:
+            case AZ_CONTROL_BEAM:
               az_select_gun(&state.ship.player, AZ_GUN_BEAM);
               break;
-            case AZ_KEY_9:
+            case AZ_CONTROL_ROCKETS:
               az_select_ordnance(&state.ship.player, AZ_ORDN_ROCKETS);
               break;
-            case AZ_KEY_0:
+            case AZ_CONTROL_BOMBS:
               az_select_ordnance(&state.ship.player, AZ_ORDN_BOMBS);
               break;
-            default:
-              if (event.key.id == prefs->keys[AZ_PREFS_PAUSE_KEY_INDEX]) {
-                if (state.mode == AZ_MODE_NORMAL &&
-                    state.cutscene.scene == AZ_SCENE_NOTHING &&
-                    !state.ship.autopilot.enabled) {
-                  state.mode = AZ_MODE_PAUSING;
-                  state.pausing_mode = (az_pausing_mode_data_t){
-                    .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0
-                  };
-                }
-              } else if (event.key.id == prefs->keys[AZ_PREFS_UP_KEY_INDEX]) {
-                state.ship.controls.up_pressed = true;
-              } else if (event.key.id ==
-                         prefs->keys[AZ_PREFS_DOWN_KEY_INDEX]) {
-                state.ship.controls.down_pressed = true;
-              } else if (event.key.id ==
-                         prefs->keys[AZ_PREFS_FIRE_KEY_INDEX]) {
-                state.ship.controls.fire_pressed = true;
-              } else if (event.key.id ==
-                         prefs->keys[AZ_PREFS_UTIL_KEY_INDEX]) {
-                state.ship.controls.util_pressed = true;
+            case AZ_CONTROL_PAUSE:
+              if (state.mode == AZ_MODE_NORMAL &&
+                  state.cutscene.scene == AZ_SCENE_NOTHING &&
+                  !state.ship.autopilot.enabled) {
+                state.mode = AZ_MODE_PAUSING;
+                state.pausing_mode = (az_pausing_mode_data_t){
+                  .step = AZ_PSS_FADE_OUT, .fade_alpha = 0.0
+                };
               }
+              break;
+            case AZ_CONTROL_UP:
+              state.ship.controls.up_pressed = true;
+              break;
+            case AZ_CONTROL_DOWN:
+              state.ship.controls.down_pressed = true;
+              break;
+            case AZ_CONTROL_FIRE:
+              state.ship.controls.fire_pressed = true;
+              break;
+            case AZ_CONTROL_UTIL:
+              state.ship.controls.util_pressed = true;
+              break;
+            default:
               break;
           }
           break;

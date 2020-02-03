@@ -139,7 +139,7 @@ az_title_action_t az_title_event_loop(
       state.mode = AZ_TMODE_NORMAL;
     }
 
-    az_update_prefefences(&state.prefs_pane, prefs, &prefs_changed);
+    az_update_preferences(&state.prefs_pane, prefs, &prefs_changed);
   }
 }
 

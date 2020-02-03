@@ -28,8 +28,8 @@
 
 /*===========================================================================*/
 
-#define AZ_PREFS_BOX_WIDTH 512
-#define AZ_PREFS_BOX_HEIGHT 186
+#define AZ_PREFS_BOX_WIDTH 570
+#define AZ_PREFS_BOX_HEIGHT 230
 
 typedef struct {
   int x, y;
@@ -51,7 +51,7 @@ typedef struct {
 typedef struct {
   int x, y;
   az_prefs_slider_t music_slider, sound_slider;
-  az_prefs_key_picker_t pickers[AZ_PREFS_NUM_KEYS];
+  az_prefs_key_picker_t pickers[AZ_NUM_CONTROLS];
   az_prefs_checkbox_t speedrun_timer_checkbox;
   az_prefs_checkbox_t fullscreen_checkbox;
   az_prefs_checkbox_t enable_hints_checkbox;
