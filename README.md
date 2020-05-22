@@ -46,6 +46,22 @@ $ sudo dpkg -i out/release/host/azimuth_*.deb
 $ azimuth
 ```
 
+### Troubleshooting
+
+## `SDL_SetVideoMode failed: Couldn't find matching GLX visual`
+
+This error seems to occur on some older Linux machines.  One thing you can try
+is to edit `src/azimuth/gui/screen.c` and comment out the following lines
+before recompiling:
+
+```c
+SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+```
+
+This will disable antialiasing, so the graphics might not be 100% correct, but
+the game should still be perfectly playable.
+
 ## License
 
 This codebase is licensed under the GNU GPL, version 3.  This codebase is free
