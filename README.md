@@ -48,7 +48,7 @@ $ azimuth
 
 ### Troubleshooting
 
-## `SDL_SetVideoMode failed: Couldn't find matching GLX visual`
+## SDL_SetVideoMode failed: Couldn't find matching GLX visual
 
 This error seems to occur on some older Linux machines.  One thing you can try
 is to edit `src/azimuth/gui/screen.c` and comment out the following lines
