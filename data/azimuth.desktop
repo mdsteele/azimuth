@@ -5,4 +5,4 @@ Icon=azimuth
 Name=Azimuth
 Terminal=false
 Type=Application
-Version=%AZ_VERSION_NUMBER
+Version=1.0
