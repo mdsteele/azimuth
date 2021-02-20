@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include <SDL/SDL.h>
+#include "SDL.h"
 
 #include "azimuth/state/music.h"
 #include "azimuth/util/music.h"

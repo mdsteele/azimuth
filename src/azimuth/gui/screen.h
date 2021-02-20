@@ -36,12 +36,18 @@ void az_register_gl_init_func(az_init_func_t func);
 // startup, before making any OpenGL calls.
 void az_init_gui(bool fullscreen, bool enable_audio);
 
+// Tear down the GUI/window.  Should be called before exiting.
+void az_deinit_gui(void);
+
 // Query whether we are currently in full-screen mode.
 bool az_is_fullscreen(void);
 
 // Set whether the GUI is full-screen or not.  This must not be called before
 // az_init_gui.
 void az_set_fullscreen(bool fullscreen);
+
+// Query whether we have mouse focus.
+bool az_has_mousefocus(void);
 
 // Call this functions just before and just after drawing a frame to the screen
 // with OpenGL.

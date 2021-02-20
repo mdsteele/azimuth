@@ -62,6 +62,7 @@ ifeq "$(TARGET)" "host"
   ifeq "$(BUILDTYPE)" "debug"
     CFLAGS += -fsanitize=address
   endif
+  PKG_CONFIG = pkg-config
 else ifeq "$(TARGET)" "windows"
   OS_NAME := Windows
   ARCH = i386
@@ -130,9 +131,10 @@ else ifeq "$(OS_NAME)" "Windows"
                     $(OBJDIR)/info.res
   ALL_TARGETS += windows_app
 else
-  MAIN_LIBFLAGS = -lm -lSDL -lGL
+  CFLAGS += $(shell $(PKG_CONFIG) --cflags sdl2 gl)
+  MAIN_LIBFLAGS = -lm $(shell $(PKG_CONFIG) --libs sdl2 gl)
   TEST_LIBFLAGS = -lm
-  MUSE_LIBFLAGS = -lm -lSDL
+  MUSE_LIBFLAGS = -lm $(shell $(PKG_CONFIG) --libs sdl2)
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
