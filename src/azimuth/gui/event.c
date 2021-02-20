@@ -34,7 +34,7 @@
 // On Macs, we use the Command key (which SDL recognizes as the Meta key); on
 // other platforms we use the Control key.
 #ifdef __APPLE__
-#define AZ_KMOD_CMD KMOD_META
+#define AZ_KMOD_CMD KMOD_GUI
 #else
 #define AZ_KMOD_CMD KMOD_CTRL
 #endif
@@ -107,14 +107,15 @@ static SDL_Keycode az_key_to_sdl_key(az_key_id_t key) {
     case AZ_KEY_RIGHT_CONTROL: return SDLK_RCTRL;
     case AZ_KEY_LEFT_SHIFT: return SDLK_LSHIFT;
     case AZ_KEY_RIGHT_SHIFT: return SDLK_RSHIFT;
-    case AZ_KEY_LEFT_META: return SDLK_LMETA;
-    case AZ_KEY_RIGHT_META: return SDLK_RMETA;
-    case AZ_KEY_LEFT_SUPER: return SDLK_LSUPER;
-    case AZ_KEY_RIGHT_SUPER: return SDLK_RSUPER;
+    case AZ_KEY_LEFT_GUI: return SDLK_LGUI;
+    case AZ_KEY_RIGHT_GUI: return SDLK_RGUI;
+    case AZ_KEY_PRINT_SCREEN: return SDLK_PRINTSCREEN;
+    case AZ_KEY_SCROLL_LOCK: return SDLK_SCROLLLOCK;
     case AZ_KEY_HOME: return SDLK_HOME;
     case AZ_KEY_END: return SDLK_END;
     case AZ_KEY_PAGE_UP: return SDLK_PAGEUP;
     case AZ_KEY_PAGE_DOWN: return SDLK_PAGEDOWN;
+    case AZ_KEY_PAUSE: return SDLK_PAUSE;
   }
   AZ_ASSERT_UNREACHABLE();
 }
@@ -183,16 +184,15 @@ static az_key_id_t sdl_key_to_az_key(SDL_Keycode key) {
     case SDLK_RALT: return AZ_KEY_RIGHT_ALT;
     case SDLK_LCTRL: return AZ_KEY_LEFT_CONTROL;
     case SDLK_RCTRL: return AZ_KEY_RIGHT_CONTROL;
-    case SDLK_LSHIFT: return AZ_KEY_LEFT_SHIFT;
-    case SDLK_RSHIFT: return AZ_KEY_RIGHT_SHIFT;
-    case SDLK_LMETA: return AZ_KEY_LEFT_META;
-    case SDLK_RMETA: return AZ_KEY_RIGHT_META;
-    case SDLK_LSUPER: return AZ_KEY_LEFT_SUPER;
-    case SDLK_RSUPER: return AZ_KEY_RIGHT_SUPER;
+    case SDLK_PRINTSCREEN: return AZ_KEY_PRINT_SCREEN;
+    case SDLK_SCROLLLOCK: return AZ_KEY_SCROLL_LOCK;
+    case SDLK_LGUI: return AZ_KEY_LEFT_GUI;
+    case SDLK_RGUI: return AZ_KEY_RIGHT_GUI;
     case SDLK_HOME: return AZ_KEY_HOME;
     case SDLK_END: return AZ_KEY_END;
     case SDLK_PAGEDOWN: return AZ_KEY_PAGE_DOWN;
     case SDLK_PAGEUP: return AZ_KEY_PAGE_UP;
+    case SDLK_PAUSE: return AZ_KEY_PAUSE;
     default: return AZ_KEY_UNKNOWN;
   }
 }

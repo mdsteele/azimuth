@@ -90,39 +90,38 @@ endif
 
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -I$(SRCDIR)/macosx -mmacosx-version-min=10.9 -F/Library/Frameworks
-  # Use the SDL framework if it's installed.  Otherwise, look to see if SDL has
-  # been installed via MacPorts.  Otherwise, give up.
-  ifeq "$(shell test -d /Library/Frameworks/SDL.framework && echo ok)" "ok"
-    SDL_FRAMEWORK_PATH = /Library/Frameworks/SDL.framework
-  else ifeq "$(shell test -d ~/Library/Frameworks/SDL.framework \
+  # Use the SDL2 framework if it's installed.  Otherwise, look to see if SDL2
+  # has been installed via MacPorts.  Otherwise, give up.
+  ifeq "$(shell test -d /Library/Frameworks/SDL2.framework && echo ok)" "ok"
+    SDL2_FRAMEWORK_PATH = /Library/Frameworks/SDL2.framework
+  else ifeq "$(shell test -d ~/Library/Frameworks/SDL2.framework \
 	             && echo ok)" "ok"
-    SDL_FRAMEWORK_PATH = ~/Library/Frameworks/SDL.framework
-  else ifeq "$(shell test -d /Network/Library/Frameworks/SDL.framework \
+    SDL2_FRAMEWORK_PATH = ~/Library/Frameworks/SDL2.framework
+  else ifeq "$(shell test -d /Network/Library/Frameworks/SDL2.framework \
 	             && echo ok)" "ok"
-    SDL_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL.framework
+    SDL2_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL2.framework
   endif
-  ifdef SDL_FRAMEWORK_PATH
-    SDL_LIBFLAGS = -framework SDL -rpath @executable_path/../Frameworks
-  else ifeq "$(shell test -f /opt/local/lib/libSDL.a && echo ok)" "ok"
-    SDL_LIBFLAGS = -I/opt/local/include -L/opt/local/lib -lSDL
+  ifdef SDL2_FRAMEWORK_PATH
+    SDL2_LIBFLAGS = -framework SDL2 -rpath @executable_path/../Frameworks
+  else ifeq "$(shell test -f /opt/local/lib/libSDL2.a && echo ok)" "ok"
+    SDL2_LIBFLAGS = -I/opt/local/include -L/opt/local/lib -lSDL2
   else
-    $(error SDL does not seem to be installed)
+    $(error SDL2 does not seem to be installed)
   endif
-  MAIN_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS) -framework OpenGL
+  MAIN_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS) -framework OpenGL
   TEST_LIBFLAGS =
-  MUSE_LIBFLAGS = -framework Cocoa $(SDL_LIBFLAGS)
-  SYSTEM_OBJFILES = $(OBJDIR)/macosx/SDLMain.o \
-                    $(OBJDIR)/azimuth/system/resource_mac.o \
+  MUSE_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS)
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_mac.o \
                     $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
-  SDL_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl)
-  MAIN_LIBFLAGS = -lm -lgdi32 -lole32 -lopengl32 -lshell32 $(SDL_LIBFLAGS)
+  SDL2_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl)
+  MAIN_LIBFLAGS = -lm -lgdi32 -lole32 -lopengl32 -lshell32 $(SDL2_LIBFLAGS)
   ifeq "$(BUILDTYPE)" "debug"
     MAIN_LIBFLAGS += -mconsole
   endif
   TEST_LIBFLAGS = -lm
-  MUSE_LIBFLAGS = -lm $(SDL_LIBFLAGS)
+  MUSE_LIBFLAGS = -lm $(SDL2_LIBFLAGS)
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
@@ -269,10 +268,6 @@ $(BINDIR)/zfxr: $(ZFXR_OBJFILES)
 #=============================================================================#
 # Build rules for compiling system-specific code:
 
-$(OBJDIR)/macosx/SDLMain.o: $(SRCDIR)/macosx/SDLMain.m \
-                            $(SRCDIR)/macosx/SDLMain.h
-	$(compile-sys)
-
 $(OBJDIR)/azimuth/system/resources: $(RESOURCE_FILES)
 	@echo "Combining $@"
 	@mkdir -p $(@D)
@@ -379,9 +374,9 @@ MACOSX_APP_FILES := $(MACOSX_APPDIR)/Info.plist \
     $(patsubst $(DATADIR)/%,$(MACOSX_APPDIR)/Resources/%,$(RESOURCE_FILES))
 MACOSX_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Mac.zip
 
-ifdef SDL_FRAMEWORK_PATH
-MACOSX_APP_FILES += $(MACOSX_APPDIR)/Frameworks/SDL.framework
-$(MACOSX_APPDIR)/Frameworks/SDL.framework: $(SDL_FRAMEWORK_PATH)
+ifdef SDL2_FRAMEWORK_PATH
+MACOSX_APP_FILES += $(MACOSX_APPDIR)/Frameworks/SDL2.framework
+$(MACOSX_APPDIR)/Frameworks/SDL2.framework: $(SDL2_FRAMEWORK_PATH)
 	@echo "Copying to $@"
 	@mkdir -p $(@D)
 	@cp -R $< $@

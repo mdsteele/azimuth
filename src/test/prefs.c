@@ -84,7 +84,7 @@ void test_prefs_save_load(void) {
       [AZ_CONTROL_BURST]   = AZ_KEY_LEFT_ALT,
       [AZ_CONTROL_PIERCE]  = AZ_KEY_HOME,
       [AZ_CONTROL_BEAM]    = AZ_KEY_END,
-      [AZ_CONTROL_ROCKETS] = AZ_KEY_LEFT_SUPER,
+      [AZ_CONTROL_ROCKETS] = AZ_KEY_LEFT_GUI,
     },
   };
   az_preferences_t actual_prefs;

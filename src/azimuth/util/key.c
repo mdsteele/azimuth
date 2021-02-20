@@ -90,14 +90,15 @@ const char *az_key_name(az_key_id_t key) {
     case AZ_KEY_RIGHT_CONTROL: return "RCT";
     case AZ_KEY_LEFT_SHIFT: return "LSH";
     case AZ_KEY_RIGHT_SHIFT: return "RSH";
-    case AZ_KEY_LEFT_META: return "LMT";
-    case AZ_KEY_RIGHT_META: return "RMT";
-    case AZ_KEY_LEFT_SUPER: return "LSU";
-    case AZ_KEY_RIGHT_SUPER: return "RSU";
+    case AZ_KEY_LEFT_GUI: return "LGU";
+    case AZ_KEY_RIGHT_GUI: return "RGU";
+    case AZ_KEY_PRINT_SCREEN: return "PRI";
+    case AZ_KEY_SCROLL_LOCK: return "SCR";
     case AZ_KEY_HOME: return "HME";
     case AZ_KEY_END: return "END";
     case AZ_KEY_PAGE_UP: return "PG\x11";
     case AZ_KEY_PAGE_DOWN: return "PG\x12";
+    case AZ_KEY_PAUSE: return "PAU";
   }
   AZ_ASSERT_UNREACHABLE();
 }

@@ -11,13 +11,13 @@ Metroid and Metroid Fusion), SketchFighter 4000 Alpha, and Star Control II
 
 ### Prerequisites
 
-Azimuth depends on OpenGL and on [SDL
-1.2](https://www.libsdl.org/download-1.2.php).  On Mac, you can install SDL 1.2
+Azimuth depends on OpenGL and on
+[SDL2](https://www.libsdl.org/download-2.0.php).  On Mac, you can install SDL2
 either in Framework form or via e.g. MacPorts, and the Makefile should be able
 to sort it out.  On Debian, all it should take is:
 
 ```shell
-$ sudo apt-get install libgl-mesa-dev libsdl1.2-dev
+$ sudo apt-get install libgl-mesa-dev libsdl2-dev
 ```
 
 ### Building and running
