@@ -115,7 +115,7 @@ ifeq "$(OS_NAME)" "Darwin"
                     $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
-  SDL2_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl)
+  SDL2_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl2)
   MAIN_LIBFLAGS = -lm -lgdi32 -lole32 -lopengl32 -lshell32 $(SDL2_LIBFLAGS)
   ifeq "$(BUILDTYPE)" "debug"
     MAIN_LIBFLAGS += -mconsole

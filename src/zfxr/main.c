@@ -19,8 +19,6 @@
 
 #include <stdlib.h> // for EXIT_SUCCESS
 
-#include "SDL.h" // for main() renaming
-
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/event.h"

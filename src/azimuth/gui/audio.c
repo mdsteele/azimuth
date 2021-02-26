@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 
 #include "azimuth/util/audio.h"
 #include "azimuth/util/misc.h"

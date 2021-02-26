@@ -20,8 +20,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "SDL.h" // for main() renaming
-
 #include "azimuth/control/gameover.h"
 #include "azimuth/control/space.h"
 #include "azimuth/control/title.h"
