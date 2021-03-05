@@ -826,7 +826,6 @@ void az_tick_bad_magbeest_head(az_space_state_t *state, az_baddie_t *baddie,
       }
     }
   }
-  // TODO: occasionally cause scrap metal to fall from ceiling?
 }
 
 void az_tick_bad_magbeest_legs_l(az_space_state_t *state, az_baddie_t *baddie,

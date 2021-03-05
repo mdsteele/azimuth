@@ -38,7 +38,6 @@
 void az_move_object(az_space_state_t *state, az_object_t *object,
                     az_vector_t delta_position, double delta_angle);
 
-// TODO: Is az_move_baddie_cargo really the right API?
 void az_move_baddie_cargo(az_space_state_t *state, az_baddie_t *baddie,
                           az_vector_t delta_position, double delta_angle);
 

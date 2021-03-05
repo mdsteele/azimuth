@@ -83,7 +83,6 @@ static void draw_magbeest_leg(const az_baddie_t *baddie, int leg_index) {
         }
       } glEnd();
       // Screw:
-      // TODO: Make the screw turn with the other leg segment
       glBegin(GL_TRIANGLE_FAN); {
         glColor3f(0.35, 0.4, 0.4);
         for (int i = 0; i < 360; i += 30) {
@@ -122,7 +121,6 @@ static void draw_magbeest_legs_base(const az_baddie_t *baddie) {
     }
   } glEnd();
   // Leg screws:
-  // TODO: Make the screw turn with the leg segment
   for (int j = 0; j < 2; ++j) {
     const double y = -25 + 50 * j;
     glBegin(GL_TRIANGLE_FAN); {
@@ -261,7 +259,6 @@ void az_draw_bad_magbeest_legs_l(const az_baddie_t *baddie, az_clock_t clock) {
         glVertex2d(4 * cos(AZ_DEG2RAD(i)), 4 * sin(AZ_DEG2RAD(i)));
       }
     } glEnd();
-    // TODO: Make the screw stay fixed to the casing
     glBegin(GL_LINES); {
       glColor3f(0.2, 0.2, 0.2);
       glVertex2f(0, -4); glVertex2f(0, 4);

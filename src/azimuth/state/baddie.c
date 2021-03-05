@@ -767,8 +767,6 @@ static az_component_data_t large_fish_components[] = {
     .init_position = {-67.5, 0}, .impact_damage = 15.0 }
 };
 
-// TODO: Update the various Nocturne component polygons once we have real
-//   graphics for the Nocturne.
 static const az_vector_t nocturne_main_body_vertices[] = {
   {45, 0}, {15, 60}, {-15, 70}, {-70, 45},
   {-105, 0}, {-70, -45}, {-15, -70}, {15, -60}

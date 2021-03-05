@@ -150,7 +150,6 @@ static void apply_drag_to_ship(az_ship_t *ship, bool is_in_water,
 
 static void disable_ship_tractor_cloak(az_space_state_t *state) {
   if (state->ship.tractor_cloak.active) {
-    // TODO decloak particles
     az_play_sound(&state->soundboard, AZ_SND_CLOAK_END);
   }
   state->ship.tractor_cloak.active = false;
@@ -1320,7 +1319,6 @@ void az_tick_ship(az_space_state_t *state, double time) {
         if (ship->tractor_cloak.charge >= 1.0) {
           ship->tractor_cloak.charge = 1.0;
           ship->tractor_cloak.active = true;
-          // TODO cloak particles?
           az_play_sound(&state->soundboard, AZ_SND_CLOAK_BEGIN);
         }
       }
