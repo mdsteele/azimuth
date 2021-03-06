@@ -54,6 +54,12 @@ bool az_has_mousefocus(void);
 void az_start_screen_redraw(void);
 void az_finish_screen_redraw(void);
 
+// Wrapper for glScissor() that applies virtual-resolution scaling factor & offsets
+void az_gl_scissor(int x, int y, int width, int height);
+
+// Convert raw SDL mouse coordinates to virtual AZ_SCREEN_WIDTH/HEIGHT coordinates
+void az_map_mouse_coords(int x_in, int y_in, int *x_out, int *y_out);
+
 /*===========================================================================*/
 
 #endif // AZIMUTH_GUI_SCREEN_H_

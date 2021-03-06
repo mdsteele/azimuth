@@ -26,6 +26,7 @@
 #include <GL/gl.h>
 
 #include "azimuth/constants.h"
+#include "azimuth/gui/screen.h"
 #include "azimuth/state/dialog.h"
 #include "azimuth/state/ship.h"
 #include "azimuth/state/space.h"
@@ -277,8 +278,8 @@ static void draw_minimap(const az_space_state_t *state) {
             MINIMAP_WIDTH + 1, MINIMAP_HEIGHT + 1);
 
   glEnable(GL_SCISSOR_TEST); {
-    glScissor(MINIMAP_LEFT, AZ_SCREEN_HEIGHT - MINIMAP_TOP - MINIMAP_HEIGHT,
-              MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    az_gl_scissor(MINIMAP_LEFT, AZ_SCREEN_HEIGHT - MINIMAP_TOP - MINIMAP_HEIGHT,
+                  MINIMAP_WIDTH, MINIMAP_HEIGHT);
     glPushMatrix(); {
       // Make positive Y be up instead of down.
       glScaled(1, -1, 1);
