@@ -277,6 +277,7 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_MOUSE_DOWN;
         event->mouse.x = sdl_event.button.x;
         event->mouse.y = sdl_event.button.y;
+        az_map_mouse_coords(event->mouse.x, event->mouse.y, &event->mouse.x, &event->mouse.y);
         event->mouse.dx = event->mouse.dy = 0;
         event->mouse.pressed = true;
         return true;
@@ -286,6 +287,7 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_MOUSE_UP;
         event->mouse.x = sdl_event.button.x;
         event->mouse.y = sdl_event.button.y;
+        az_map_mouse_coords(event->mouse.x, event->mouse.y, &event->mouse.x, &event->mouse.y);
         event->mouse.dx = event->mouse.dy = 0;
         event->mouse.pressed = false;
         return true;
@@ -293,6 +295,7 @@ bool az_poll_event(az_event_t *event) {
         event->kind = AZ_EVENT_MOUSE_MOVE;
         event->mouse.x = sdl_event.motion.x;
         event->mouse.y = sdl_event.motion.y;
+        az_map_mouse_coords(event->mouse.x, event->mouse.y, &event->mouse.x, &event->mouse.y);
         event->mouse.dx = sdl_event.motion.xrel;
         event->mouse.dy = sdl_event.motion.yrel;
         event->mouse.pressed = (bool)(sdl_event.motion.state &
@@ -310,6 +313,7 @@ bool az_poll_event(az_event_t *event) {
 bool az_get_mouse_position(int *x, int *y) {
   if (!az_has_mousefocus()) return false;
   SDL_GetMouseState(x, y);
+  az_map_mouse_coords(*x, *y, x, y);
   return true;
 }
 

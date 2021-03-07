@@ -42,11 +42,16 @@
 
 static bool sdl_initialized = false;
 static bool display_initialized = false;
-static bool currently_fullscreen;
+static bool currently_fullscreen = false;
 static int num_gl_init_funcs = 0;
 static az_init_func_t gl_init_funcs[8];
 static SDL_Window* window = NULL;
 static SDL_GLContext context = NULL;
+static int current_screen_width = AZ_SCREEN_WIDTH;
+static int current_screen_height = AZ_SCREEN_HEIGHT;
+static float current_screen_scale = 1.0f;
+static float current_screen_xoffset = 0;
+static float current_screen_yoffset = 0;
 
 void az_register_gl_init_func(az_init_func_t func) {
   assert(!sdl_initialized);
@@ -58,6 +63,7 @@ void az_register_gl_init_func(az_init_func_t func) {
 }
 
 void az_init_gui(bool fullscreen, bool enable_audio) {
+  SDL_DisplayMode display_mode = {0};
   assert(!sdl_initialized);
   if (SDL_Init(SDL_INIT_VIDEO | (enable_audio ? SDL_INIT_AUDIO : 0)) != 0) {
     AZ_FATAL("SDL_Init failed: %s\n", SDL_GetError());
@@ -71,11 +77,12 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
   // Enable antialiasing:
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+  SDL_GetDesktopDisplayMode(0, &display_mode);
   window = SDL_CreateWindow(
     "Azimuth",
-    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT,
-    SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+    SDL_WINDOWPOS_CENTERED_DISPLAY(0), SDL_WINDOWPOS_CENTERED_DISPLAY(0),
+    display_mode.w, display_mode.h,
+    SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
   if (NULL == window) {
     AZ_FATAL("SDL_CreateWindow failed: %s\n", SDL_GetError());
   }
@@ -113,6 +120,8 @@ bool az_is_fullscreen(void) {
 }
 
 void az_set_fullscreen(bool fullscreen) {
+  int display_index = 0;
+  SDL_DisplayMode display_mode = {0};
   assert(sdl_initialized);
   if (display_initialized && fullscreen == currently_fullscreen) return;
   currently_fullscreen = fullscreen;
@@ -124,6 +133,9 @@ void az_set_fullscreen(bool fullscreen) {
     SDL_GetMouseState(&x, &y);
   }
 
+  display_index = SDL_GetWindowDisplayIndex(window);
+  SDL_GetDesktopDisplayMode(display_index, &display_mode);
+  SDL_SetWindowDisplayMode(window, &display_mode);
   if(0 != SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0)) {
       AZ_FATAL("SDL_SetWindowFullscreen failed: %s\n", SDL_GetError());
   }
@@ -155,7 +167,6 @@ void az_set_fullscreen(bool fullscreen) {
   // Set the view:
   glClearColor(0, 0, 0, 0);
   glClearDepth(1.0f);
-  glViewport(0, 0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0, AZ_SCREEN_WIDTH, AZ_SCREEN_HEIGHT, 0, 1, -1);
@@ -181,6 +192,24 @@ void az_start_screen_redraw(void) {
   assert(display_initialized);
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
+
+  // Calculate letterboxing scaling factor & offsets
+  SDL_GL_GetDrawableSize(window, &current_screen_width, &current_screen_height);
+  if (current_screen_width / (float)AZ_SCREEN_WIDTH >
+      current_screen_height / (float)AZ_SCREEN_HEIGHT) {
+	current_screen_scale = current_screen_height / (float)AZ_SCREEN_HEIGHT;
+  } else {
+	current_screen_scale = current_screen_width / (float)AZ_SCREEN_WIDTH;
+  }
+  current_screen_xoffset = (current_screen_width - (AZ_SCREEN_WIDTH * current_screen_scale)) / 2.0f;
+  current_screen_yoffset = (current_screen_height - (AZ_SCREEN_HEIGHT * current_screen_scale)) / 2.0f;
+
+  glLineWidth(current_screen_scale);
+  glViewport(
+    current_screen_xoffset,
+    current_screen_yoffset,
+    current_screen_scale * AZ_SCREEN_WIDTH,
+    current_screen_scale * AZ_SCREEN_HEIGHT);
 }
 
 void az_finish_screen_redraw(void) {
@@ -190,6 +219,23 @@ void az_finish_screen_redraw(void) {
   // Synchronize, in case vsync fails to lock us to 60Hz:
   static uint64_t sync_time = 0;
   sync_time = az_sleep_until(sync_time) + AZ_FRAME_TIME_NANOS;
+}
+
+void az_gl_scissor(int x, int y, int width, int height) {
+  glScissor(
+    (current_screen_scale * x) + current_screen_xoffset,
+    (current_screen_scale * y) + current_screen_yoffset,
+    current_screen_scale * width,
+    current_screen_scale * height);
+}
+
+void az_map_mouse_coords(int x_in, int y_in, int *x_out, int *y_out) {
+  if(x_out) {
+    *x_out = (x_in - current_screen_xoffset) / current_screen_scale;
+  }
+  if(y_out) {
+    *y_out = (y_in - current_screen_yoffset) / current_screen_scale;
+  }
 }
 
 /*===========================================================================*/

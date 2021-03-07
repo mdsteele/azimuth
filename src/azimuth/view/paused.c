@@ -28,6 +28,7 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/event.h"
+#include "azimuth/gui/screen.h"
 #include "azimuth/state/camera.h"
 #include "azimuth/state/planet.h"
 #include "azimuth/state/player.h"
@@ -309,7 +310,7 @@ static void draw_minimap_ship_label(const az_paused_state_t *state) {
 static void draw_minimap(const az_paused_state_t *state) {
   az_room_flags_t room_flags_union = 0;
   glEnable(GL_SCISSOR_TEST); {
-    glScissor(30, 50, 580, 400);
+    az_gl_scissor(30, 50, 580, 400);
     glPushMatrix(); {
       // Make positive Y be up instead of down.
       glScaled(1, -1, 1);
