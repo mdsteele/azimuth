@@ -116,6 +116,7 @@ static SDL_Keycode az_key_to_sdl_key(az_key_id_t key) {
     case AZ_KEY_PAGE_UP: return SDLK_PAGEUP;
     case AZ_KEY_PAGE_DOWN: return SDLK_PAGEDOWN;
     case AZ_KEY_PAUSE: return SDLK_PAUSE;
+    case AZ_NUM_ALLOWED_KEYS: AZ_ASSERT_UNREACHABLE();
   }
   AZ_ASSERT_UNREACHABLE();
 }
