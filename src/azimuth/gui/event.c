@@ -116,22 +116,33 @@ static SDL_Keycode az_key_to_sdl_key(az_key_id_t key) {
     case AZ_KEY_PAGE_UP: return SDLK_PAGEUP;
     case AZ_KEY_PAGE_DOWN: return SDLK_PAGEDOWN;
     case AZ_KEY_PAUSE: return SDLK_PAUSE;
+    case AZ_NUM_ALLOWED_KEYS: AZ_ASSERT_UNREACHABLE();
   }
   AZ_ASSERT_UNREACHABLE();
 }
 
 static az_key_id_t sdl_key_to_az_key(SDL_Keycode key) {
   switch (key) {
+    case SDLK_ESCAPE: return AZ_KEY_ESCAPE;
+    case SDLK_BACKQUOTE: return AZ_KEY_BACKTICK;
+    case SDLK_MINUS: return AZ_KEY_HYPHEN;
+    case SDLK_EQUALS: return AZ_KEY_EQUALS;
     case SDLK_BACKSPACE: return AZ_KEY_BACKSPACE;
     case SDLK_TAB: return AZ_KEY_TAB;
-    case SDLK_RETURN: return AZ_KEY_RETURN;
-    case SDLK_ESCAPE: return AZ_KEY_ESCAPE;
-    case SDLK_SPACE: return AZ_KEY_SPACE;
+    case SDLK_LEFTBRACKET: return AZ_KEY_LEFT_BRACKET;
+    case SDLK_RIGHTBRACKET: return AZ_KEY_RIGHT_BRACKET;
+    case SDLK_BACKSLASH: return AZ_KEY_BACKSLASH;
+    case SDLK_SEMICOLON: return AZ_KEY_SEMICOLON;
     case SDLK_QUOTE: return AZ_KEY_QUOTE;
+    case SDLK_RETURN: return AZ_KEY_RETURN;
     case SDLK_COMMA: return AZ_KEY_COMMA;
-    case SDLK_MINUS: return AZ_KEY_HYPHEN;
     case SDLK_PERIOD: return AZ_KEY_PERIOD;
     case SDLK_SLASH: return AZ_KEY_SLASH;
+    case SDLK_SPACE: return AZ_KEY_SPACE;
+    case SDLK_UP: return AZ_KEY_UP_ARROW;
+    case SDLK_DOWN: return AZ_KEY_DOWN_ARROW;
+    case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
+    case SDLK_RIGHT: return AZ_KEY_RIGHT_ARROW;
     case SDLK_0: return AZ_KEY_0;
     case SDLK_1: return AZ_KEY_1;
     case SDLK_2: return AZ_KEY_2;
@@ -142,12 +153,6 @@ static az_key_id_t sdl_key_to_az_key(SDL_Keycode key) {
     case SDLK_7: return AZ_KEY_7;
     case SDLK_8: return AZ_KEY_8;
     case SDLK_9: return AZ_KEY_9;
-    case SDLK_SEMICOLON: return AZ_KEY_SEMICOLON;
-    case SDLK_EQUALS: return AZ_KEY_EQUALS;
-    case SDLK_LEFTBRACKET: return AZ_KEY_LEFT_BRACKET;
-    case SDLK_BACKSLASH: return AZ_KEY_BACKSLASH;
-    case SDLK_RIGHTBRACKET: return AZ_KEY_RIGHT_BRACKET;
-    case SDLK_BACKQUOTE: return AZ_KEY_BACKTICK;
     case SDLK_a: return AZ_KEY_A;
     case SDLK_b: return AZ_KEY_B;
     case SDLK_c: return AZ_KEY_C;
@@ -174,24 +179,22 @@ static az_key_id_t sdl_key_to_az_key(SDL_Keycode key) {
     case SDLK_x: return AZ_KEY_X;
     case SDLK_y: return AZ_KEY_Y;
     case SDLK_z: return AZ_KEY_Z;
-    case SDLK_UP: return AZ_KEY_UP_ARROW;
-    case SDLK_DOWN: return AZ_KEY_DOWN_ARROW;
-    case SDLK_RIGHT: return AZ_KEY_RIGHT_ARROW;
-    case SDLK_LEFT: return AZ_KEY_LEFT_ARROW;
     case SDLK_INSERT: return AZ_KEY_INSERT;
     case SDLK_DELETE: return AZ_KEY_DELETE;
     case SDLK_LALT: return AZ_KEY_LEFT_ALT;
     case SDLK_RALT: return AZ_KEY_RIGHT_ALT;
     case SDLK_LCTRL: return AZ_KEY_LEFT_CONTROL;
     case SDLK_RCTRL: return AZ_KEY_RIGHT_CONTROL;
-    case SDLK_PRINTSCREEN: return AZ_KEY_PRINT_SCREEN;
-    case SDLK_SCROLLLOCK: return AZ_KEY_SCROLL_LOCK;
+    case SDLK_LSHIFT: return AZ_KEY_LEFT_SHIFT;
+    case SDLK_RSHIFT: return AZ_KEY_RIGHT_SHIFT;
     case SDLK_LGUI: return AZ_KEY_LEFT_GUI;
     case SDLK_RGUI: return AZ_KEY_RIGHT_GUI;
+    case SDLK_PRINTSCREEN: return AZ_KEY_PRINT_SCREEN;
+    case SDLK_SCROLLLOCK: return AZ_KEY_SCROLL_LOCK;
     case SDLK_HOME: return AZ_KEY_HOME;
     case SDLK_END: return AZ_KEY_END;
-    case SDLK_PAGEDOWN: return AZ_KEY_PAGE_DOWN;
     case SDLK_PAGEUP: return AZ_KEY_PAGE_UP;
+    case SDLK_PAGEDOWN: return AZ_KEY_PAGE_DOWN;
     case SDLK_PAUSE: return AZ_KEY_PAUSE;
     default: return AZ_KEY_UNKNOWN;
   }

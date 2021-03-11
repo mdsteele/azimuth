@@ -100,9 +100,9 @@ typedef enum {
   AZ_KEY_PAGE_UP,
   AZ_KEY_PAGE_DOWN,
   AZ_KEY_PAUSE,
+  // Leave this value as the last one; not a valid key though:
+  AZ_NUM_ALLOWED_KEYS,
 } az_key_id_t;
-
-#define AZ_NUM_ALLOWED_KEYS ((int)AZ_KEY_PAGE_DOWN + 1)
 
 const char *az_key_name(az_key_id_t key);
 

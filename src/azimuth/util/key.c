@@ -99,6 +99,8 @@ const char *az_key_name(az_key_id_t key) {
     case AZ_KEY_PAGE_UP: return "PG\x11";
     case AZ_KEY_PAGE_DOWN: return "PG\x12";
     case AZ_KEY_PAUSE: return "PAU";
+    // Should not appear in practice:
+    case AZ_NUM_ALLOWED_KEYS: return "!?!";
   }
   AZ_ASSERT_UNREACHABLE();
 }
