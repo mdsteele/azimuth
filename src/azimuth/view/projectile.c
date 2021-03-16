@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 #include "azimuth/state/projectile.h"
 #include "azimuth/state/space.h"
