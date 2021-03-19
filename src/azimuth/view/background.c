@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 #include "azimuth/constants.h"
 #include "azimuth/state/background.h"

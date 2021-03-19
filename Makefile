@@ -89,22 +89,29 @@ else
 endif
 
 ifeq "$(OS_NAME)" "Darwin"
-  CFLAGS += -I$(SRCDIR)/macosx -mmacosx-version-min=10.9 -F/Library/Frameworks
+  CFLAGS += -mmacosx-version-min=10.9
   # Use the SDL2 framework if it's installed.  Otherwise, look to see if SDL2
   # has been installed via MacPorts.  Otherwise, give up.
   ifeq "$(shell test -d /Library/Frameworks/SDL2.framework && echo ok)" "ok"
+    CFLAGS += -F/Library/Frameworks
+    CFLAGS += -I/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Library/Frameworks/SDL2.framework
   else ifeq "$(shell test -d ~/Library/Frameworks/SDL2.framework \
 	             && echo ok)" "ok"
+    CFLAGS += -F$(HOME)/Library/Frameworks
+    CFLAGS += -I$(HOME)/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = ~/Library/Frameworks/SDL2.framework
   else ifeq "$(shell test -d /Network/Library/Frameworks/SDL2.framework \
 	             && echo ok)" "ok"
+    CFLAGS += -F/Network/Library/Frameworks
+    CFLAGS += -I/Network/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL2.framework
   endif
   ifdef SDL2_FRAMEWORK_PATH
     SDL2_LIBFLAGS = -framework SDL2 -rpath @executable_path/../Frameworks
   else ifeq "$(shell test -f /opt/local/lib/libSDL2.a && echo ok)" "ok"
-    SDL2_LIBFLAGS = -I/opt/local/include -L/opt/local/lib -lSDL2
+    CFLAGS += -I/opt/local/include/SDL2
+    SDL2_LIBFLAGS = -L/opt/local/lib -lSDL2
   else
     $(error SDL2 does not seem to be installed)
   endif
@@ -115,6 +122,7 @@ ifeq "$(OS_NAME)" "Darwin"
                     $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
+  CFLAGS += $(shell $(PKG_CONFIG) --cflags sdl2)
   SDL2_LIBFLAGS := $(shell $(PKG_CONFIG) --libs sdl2)
   MAIN_LIBFLAGS = -lm -lgdi32 -lole32 -lopengl32 -lshell32 $(SDL2_LIBFLAGS)
   ifeq "$(BUILDTYPE)" "debug"

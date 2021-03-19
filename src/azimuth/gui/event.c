@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdlib.h> // for exit and EXIT_SUCCESS
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "azimuth/gui/audio.h"
 #include "azimuth/gui/screen.h"

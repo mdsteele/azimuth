@@ -23,7 +23,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include <GL/gl.h>
+#include <SDL_opengl.h>
 
 #include "azimuth/state/dialog.h"
 #include "azimuth/util/clock.h"
