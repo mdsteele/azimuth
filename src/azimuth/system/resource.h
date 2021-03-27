@@ -27,12 +27,6 @@
 
 /*===========================================================================*/
 
-// Get the path to the user-specific directory for storing persistent data for
-// this application (e.g. preferences or save files) as a NUL-terminated string
-// (without the trailing slash).  If the directory doesn't already exist,
-// create it.  If anything fails, this will return a NULL pointer.
-const char *az_get_app_data_directory(void);
-
 // An az_resource_reader_fn_t for reading game resources.
 bool az_system_resource_reader(const char *name, az_reader_t *reader);
 

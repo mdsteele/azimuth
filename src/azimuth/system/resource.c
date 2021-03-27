@@ -19,54 +19,58 @@
 
 #include "azimuth/system/resource.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "azimuth/util/warning.h"
+#include <SDL_filesystem.h>
 
-// require Windows Vista or later
-#if _WIN32_WINNT < 0x0600
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
-#endif
-#define INITGUID
-#include <windows.h>
-#include <knownfolders.h>
-#include <objbase.h>
-#include <shlobj.h>
+#include "azimuth/util/rw.h"
+#include "azimuth/util/string.h"
 
 /*===========================================================================*/
 
-const char *az_get_app_data_directory(void) {
-  static char path_buffer[MAX_PATH];
-  if (path_buffer[0] == '\0') {
-    PWSTR path = NULL;
-    const HRESULT result = SHGetKnownFolderPath(&FOLDERID_RoamingAppData,
-                                                KF_FLAG_CREATE, NULL, &path);
-    if (FAILED(result)) {
-      AZ_WARNING_ONCE("SHGetKnownFolderPath failed.\n");
-      return NULL;
-    }
-    const size_t length = wcstombs(path_buffer, path, MAX_PATH - 1);
-    CoTaskMemFree(path);
-    const char suffix[] = "\\Azimuth";
-    if (length > MAX_PATH - sizeof(suffix)) {
-      AZ_WARNING_ONCE("App data directory path too long.\n");
-      path_buffer[0] = '\0';
-      return NULL;
-    }
-    strcpy(path_buffer + length, suffix);
-    // Create the directory if it doesn't already exist.
-    if (!CreateDirectory(path_buffer, NULL)) {
-      const DWORD error = GetLastError();
-      if (error != ERROR_ALREADY_EXISTS) {
-        AZ_WARNING_ONCE("CreateDirectory failed (error %ld).\n", error);
-        path_buffer[0] = '\0';
-        return NULL;
-      }
-    }
-  }
-  return path_buffer;
+#ifdef WIN32
+#define _binary_resources_start binary_resources_start
+#endif
+
+// Keep this declaration in sync with generate_blob_index.sh
+extern const struct resource_entry {
+  const char *name;
+  size_t offset, length;
+} resource_index[];
+extern const size_t resource_index_size;
+extern const char _binary_resources_start[];
+
+#if defined(__APPLE__)
+// Use app-bundle resources on macOS
+bool az_system_resource_reader(const char *name, az_reader_t *reader) {
+  char *resource_dir = SDL_GetBasePath();
+  if (resource_dir == NULL) return false;
+  char *path = az_strprintf("%s/%s", resource_dir, name);
+  SDL_free(resource_dir);
+  const bool success = az_file_reader(path, reader);
+  free(path);
+  return success;
 }
+#else
+// Comparison function for bsearch.
+static int compare_resource_entries(const void *key_ptr,
+                                    const void *value_ptr) {
+  const char *name = key_ptr;
+  const struct resource_entry *entry = value_ptr;
+  return strcmp(name, entry->name);
+}
+
+bool az_system_resource_reader(const char *name, az_reader_t *reader) {
+  struct resource_entry *entry =
+    bsearch(name, resource_index, resource_index_size,
+            sizeof(struct resource_entry), &compare_resource_entries);
+  if (entry == NULL) return false;
+  az_charbuf_reader(_binary_resources_start + entry->offset, entry->length,
+                    reader);
+  return true;
+}
+#endif
 
 /*===========================================================================*/
