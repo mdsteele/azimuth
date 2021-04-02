@@ -118,7 +118,7 @@ ifeq "$(OS_NAME)" "Darwin"
   MAIN_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS) -framework OpenGL
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS)
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_mac.o \
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
                     $(OBJDIR)/azimuth/system/timer_mac.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
@@ -130,10 +130,9 @@ else ifeq "$(OS_NAME)" "Windows"
   endif
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lm $(SDL2_LIBFLAGS)
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/resource_windows.o \
                     $(OBJDIR)/azimuth/system/timer_windows.o \
                     $(OBJDIR)/info.res
   ALL_TARGETS += windows_app
@@ -142,10 +141,9 @@ else
   MAIN_LIBFLAGS = -lm $(shell $(PKG_CONFIG) --libs sdl2 gl)
   TEST_LIBFLAGS = -lm
   MUSE_LIBFLAGS = -lm $(shell $(PKG_CONFIG) --libs sdl2)
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource_blob.o \
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/resource_linux.o \
                     $(OBJDIR)/azimuth/system/timer_linux.o
   ALL_TARGETS += linux_app
 endif
@@ -296,8 +294,8 @@ $(OBJDIR)/azimuth/system/resource_blob_index.o: \
     $(OBJDIR)/azimuth/system/resource_blob_index.c
 	$(compile-sys)
 
-$(OBJDIR)/azimuth/system/resource_mac.o: \
-    $(SRCDIR)/azimuth/system/resource_mac.m $(AZ_SYSTEM_HEADERS) \
+$(OBJDIR)/azimuth/system/resource.o: \
+    $(SRCDIR)/azimuth/system/resource.c $(AZ_SYSTEM_HEADERS) \
     $(SRCDIR)/azimuth/util/rw.h $(SRCDIR)/azimuth/util/string.h
 	$(compile-sys)
 
