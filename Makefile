@@ -118,8 +118,7 @@ ifeq "$(OS_NAME)" "Darwin"
   MAIN_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS) -framework OpenGL
   TEST_LIBFLAGS =
   MUSE_LIBFLAGS = -framework Cocoa $(SDL2_LIBFLAGS)
-  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
-                    $(OBJDIR)/azimuth/system/timer_mac.o
+  SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o
   ALL_TARGETS += macosx_app
 else ifeq "$(OS_NAME)" "Windows"
   CFLAGS += $(shell $(PKG_CONFIG) --cflags sdl2)
@@ -133,7 +132,6 @@ else ifeq "$(OS_NAME)" "Windows"
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
                     $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/timer_windows.o \
                     $(OBJDIR)/info.res
   ALL_TARGETS += windows_app
 else
@@ -143,8 +141,7 @@ else
   MUSE_LIBFLAGS = -lm $(shell $(PKG_CONFIG) --libs sdl2)
   SYSTEM_OBJFILES = $(OBJDIR)/azimuth/system/resource.o \
                     $(OBJDIR)/azimuth/system/resource_blob_data.o \
-                    $(OBJDIR)/azimuth/system/resource_blob_index.o \
-                    $(OBJDIR)/azimuth/system/timer_linux.o
+                    $(OBJDIR)/azimuth/system/resource_blob_index.o
   ALL_TARGETS += linux_app
 endif
 
