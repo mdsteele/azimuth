@@ -27,7 +27,6 @@
 
 #include "azimuth/constants.h"
 #include "azimuth/gui/audio.h"
-#include "azimuth/system/timer.h"
 #include "azimuth/util/misc.h"
 #include "azimuth/util/warning.h"
 
@@ -52,6 +51,24 @@ static int current_screen_height = AZ_SCREEN_HEIGHT;
 static float current_screen_scale = 1.0f;
 static float current_screen_xoffset = 0;
 static float current_screen_yoffset = 0;
+static double nanoseconds_per_count = 1000000000;
+
+// Get the current time in nanoseconds, as measured from some unspecified zero
+// point.  Not guaranteed to be monotonic.
+static uint64_t az_current_time_nanos(void) {
+  return SDL_GetPerformanceCounter() * nanoseconds_per_count;
+}
+
+// Sleep until az_current_time_nanos() would return the given time value, and
+// then return the time at which the sleep ended.  Return the current time
+// immediately without sleeping if it is already past the requested time.
+static uint64_t az_sleep_until(uint64_t time) {
+  const uint64_t now = az_current_time_nanos();
+  if (time <= now) return now;
+  const Uint32 milliseconds = (time - now) / 1000000;
+  if (milliseconds > 0) SDL_Delay(milliseconds);
+  return az_current_time_nanos();
+}
 
 void az_register_gl_init_func(az_init_func_t func) {
   assert(!sdl_initialized);
@@ -69,6 +86,7 @@ void az_init_gui(bool fullscreen, bool enable_audio) {
     AZ_FATAL("SDL_Init failed: %s\n", SDL_GetError());
   }
   atexit(SDL_Quit);
+  nanoseconds_per_count = 1000000000 / (double)SDL_GetPerformanceFrequency();
   if (enable_audio) {
     az_init_audio();
   }
