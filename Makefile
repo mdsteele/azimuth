@@ -90,9 +90,13 @@ endif
 
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -mmacosx-version-min=10.9
-  # Use the SDL2 framework if it's installed.  Otherwise, look to see if SDL2
-  # has been installed via MacPorts.  Otherwise, give up.
-  ifeq "$(shell test -d /Library/Frameworks/SDL2.framework && echo ok)" "ok"
+  # Use `sdl2-config` to locate SDL2.  If it isn't available, look for the
+  # SDL2 framework.  If that isn't available, look to see if SDL2 has been
+  # installed via MacPorts.  Otherwise, give up.
+  ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
+    CFLAGS += $(shell sdl2-config --cflags)
+  else ifeq "$(shell test -d /Library/Frameworks/SDL2.framework \
+	             && echo ok)" "ok"
     CFLAGS += -F/Library/Frameworks
     CFLAGS += -I/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Library/Frameworks/SDL2.framework
@@ -107,7 +111,9 @@ ifeq "$(OS_NAME)" "Darwin"
     CFLAGS += -I/Network/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL2.framework
   endif
-  ifdef SDL2_FRAMEWORK_PATH
+  ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
+    SDL2_LIBFLAGS = $(shell sdl2-config --libs)
+  else ifdef SDL2_FRAMEWORK_PATH
     SDL2_LIBFLAGS = -framework SDL2 -rpath @executable_path/../Frameworks
   else ifeq "$(shell test -f /opt/local/lib/libSDL2.a && echo ok)" "ok"
     CFLAGS += -I/opt/local/include/SDL2
