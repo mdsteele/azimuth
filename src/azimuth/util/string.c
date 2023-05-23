@@ -42,7 +42,7 @@ char *az_strprintf(const char *format, ...) {
   va_end(args);
   char *out = AZ_ALLOC(size + 1, char); // add 1 for trailing '\0'
   va_start(args, format);
-  vsprintf(out, format, args);
+  vsnprintf(out, size + 1, format, args);
   va_end(args);
   return out;
 }

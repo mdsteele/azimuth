@@ -213,7 +213,7 @@ int az_imax(int a, int b) {
   return a > b ? a : b;
 }
 
-#define EPSILON 0.00000001
+#define EPSILON 1e-7
 
 bool az_dapprox(double a, double b) {
   assert(isfinite(a));

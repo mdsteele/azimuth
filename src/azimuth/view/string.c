@@ -222,7 +222,7 @@ void az_draw_printf(double height, az_alignment_t align, double x, double top,
   va_end(args);
   char buffer[size + 1]; // add one for trailing '\0'
   va_start(args, format);
-  vsprintf(buffer, format, args);
+  vsnprintf(buffer, size + 1, format, args);
   va_end(args);
   draw_chars_internal(height, align, x, top, false, buffer, size);
 }
