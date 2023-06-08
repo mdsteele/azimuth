@@ -1052,9 +1052,9 @@ $s:autop1,skip1,mus17,scene10,wait15,mlog,tm210,tm211,tm212,mend,wait1,sctxt243,
   I suppose we'll never know for sure."
 !T215"
   Still, even without the Oth at their
-  side, the Trichord Alliance is a still
-  a formidable enemy.  By now the war
-  has ground down to a bitter stalemate.
+  side, the Trichord Alliance is still a
+  formidable enemy.  By now the war has
+  ground down to a bitter stalemate.
 
   Even the three remaining SapiAIs have
   been pulled into the fray--Noumena in
