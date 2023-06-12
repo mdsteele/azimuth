@@ -159,6 +159,7 @@ void test_parse_music(void) {
   EXPECT_INT_EQ(4, part_b_track_1->num_notes);
   const az_music_track_t *part_a_track_1 = &music.parts[1].tracks[0];
   EXPECT_INT_EQ(6, part_a_track_1->num_notes);
+  az_destroy_music(&music);
 }
 
 void test_parse_music_instructions(void) {
@@ -177,6 +178,7 @@ void test_parse_music_instructions(void) {
   EXPECT_INT_EQ(AZ_MUSOP_BFEQ, music.instructions[3].opcode);
   EXPECT_INT_EQ(5, music.instructions[3].value);
   EXPECT_INT_EQ(2, music.instructions[3].index);
+  az_destroy_music(&music);
 }
 
 /*===========================================================================*/

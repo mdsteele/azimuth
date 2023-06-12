@@ -43,7 +43,7 @@ else ifeq "$(BUILDTYPE)" "release"
   # functions or local variables that are only used for asserts, and which
   # therefore become unused when asserts are disabled.
   CFLAGS += -O2 -DNDEBUG -Wno-unused-function -Wno-unused-variable \
-            -Wno-empty-body
+            -Wno-empty-body -Wno-unused-but-set-variable
 else
   $(error BUILDTYPE must be 'debug' or 'release')
 endif
@@ -504,7 +504,7 @@ $(LINUX_DEB_DIR)/data.tar.gz: $(LINUX_DEB_DATA_FILES)
 	@mkdir -p $(@D)
 	@tar -czf $@ -C $(LINUX_DEB_DIR)/data usr
 
-$(LINUX_DEB_DIR)/control/control: $(DATADIR)/control \
+$(LINUX_DEB_DIR)/control/control: $(DATADIR)/deb/control \
     $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
@@ -515,7 +515,7 @@ $(LINUX_DEB_DIR)/data/usr/bin/azimuth: $(BINDIR)/azimuth
 	$(strip-binary)
 
 $(LINUX_DEB_DIR)/data/usr/share/applications/azimuth.desktop: \
-    $(DATADIR)/azimuth.desktop $(SRCDIR)/azimuth/version.h
+    $(DATADIR)/deb/azimuth.desktop $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
 	@sed "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" < $< > $@
@@ -554,7 +554,7 @@ endif
 	install -m 0644 data/icons/icon_48x48.png $(INSTALLICONDIR)/48x48/apps/azimuth.png
 	install -m 0644 data/icons/icon_32x32.png $(INSTALLICONDIR)/32x32/apps/azimuth.png
 	mkdir -p $(INSTALLSHAREDIR)/applications
-	install -m 0644 data/azimuth.desktop $(INSTALLSHAREDIR)/applications/azimuth.desktop
+	install -m 0644 data/deb/azimuth.desktop $(INSTALLSHAREDIR)/applications/azimuth.desktop
 
 .PHONY : uninstall
 uninstall:

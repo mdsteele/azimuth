@@ -2,15 +2,26 @@
 
 ## Debian
 
-### Prereqs
+### Building Debian package using Docker
+
+```shell
+# Build the image.
+docker build -t azimuth-debian-build -f ./data/deb/Dockerfile .
+
+# Extract the built Debian package.
+VERSION_NUMBER=$(sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$/\1/p' src/azimuth/version.h | paste -s -d. -)
+CONTAINER_ID=$(docker create azimuth-debian-build)
+docker cp ${CONTAINER_ID}:/azimuth/out/release/host/azimuth_${VERSION_NUMBER}_i386.deb .
+docker rm -v ${CONTAINER_ID}
+```
+
+### Building compressed binary on host
 
 Install dependencies:
 
 ```shell
 $ sudo apt-get install libgl-mesa-dev libsdl2-dev
 ```
-
-### Building
 
 From the repository root, run:
 
