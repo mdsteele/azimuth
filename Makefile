@@ -90,13 +90,10 @@ endif
 
 ifeq "$(OS_NAME)" "Darwin"
   CFLAGS += -mmacosx-version-min=10.9
-  # Use `sdl2-config` to locate SDL2.  If it isn't available, look for the
-  # SDL2 framework.  If that isn't available, look to see if SDL2 has been
+  # Look for the SDL2 framework.  If it isn't available, use `sdl2-config` to
+  # locate SDL2.  If that isn't available either, look to see if SDL2 has been
   # installed via MacPorts.  Otherwise, give up.
-  ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
-    CFLAGS += $(shell sdl2-config --cflags)
-  else ifeq "$(shell test -d /Library/Frameworks/SDL2.framework \
-	             && echo ok)" "ok"
+  ifeq "$(shell test -d /Library/Frameworks/SDL2.framework && echo ok)" "ok"
     CFLAGS += -F/Library/Frameworks
     CFLAGS += -I/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Library/Frameworks/SDL2.framework
@@ -110,11 +107,13 @@ ifeq "$(OS_NAME)" "Darwin"
     CFLAGS += -F/Network/Library/Frameworks
     CFLAGS += -I/Network/Library/Frameworks/SDL2.framework/Headers
     SDL2_FRAMEWORK_PATH = /Network/Library/Frameworks/SDL2.framework
+  else ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
+    CFLAGS += $(shell sdl2-config --cflags)
   endif
-  ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
-    SDL2_LIBFLAGS = $(shell sdl2-config --libs)
-  else ifdef SDL2_FRAMEWORK_PATH
+  ifdef SDL2_FRAMEWORK_PATH
     SDL2_LIBFLAGS = -framework SDL2 -rpath @executable_path/../Frameworks
+  else ifeq "$(shell which sdl2-config >/dev/null && echo ok)" "ok"
+    SDL2_LIBFLAGS = $(shell sdl2-config --libs)
   else ifeq "$(shell test -f /opt/local/lib/libSDL2.a && echo ok)" "ok"
     CFLAGS += -I/opt/local/include/SDL2
     SDL2_LIBFLAGS = -L/opt/local/lib -lSDL2
@@ -429,6 +428,7 @@ $(MACOSX_ZIP_FILE): macosx_app
 ifdef IDENTITY
 
 SIGNED_MACOSX_APP_BUNDLE = $(OUTDIR)/signed/Azimuth.app
+SIGNED_MACOSX_DMG_FILE = $(OUTDIR)/signed/$(ZIP_FILE_PREFIX)-Mac.dmg
 SIGNED_MACOSX_ZIP_FILE = $(OUTDIR)/signed/$(ZIP_FILE_PREFIX)-Mac.zip
 
 .PHONY: signed_macosx_app
@@ -437,9 +437,18 @@ signed_macosx_app: macosx_app
 	@rm -rf $(SIGNED_MACOSX_APP_BUNDLE)
 	@mkdir -p $(OUTDIR)/signed
 	@cp -R $(MACOSX_APP_BUNDLE) $(SIGNED_MACOSX_APP_BUNDLE)
-	@codesign --deep --force --sign "$(IDENTITY)" \
+	@codesign --deep --force --options runtime --sign "$(IDENTITY)" \
 	    $(SIGNED_MACOSX_APP_BUNDLE)
 	@codesign --deep --verify --strict $(SIGNED_MACOSX_APP_BUNDLE)
+
+.PHONY: signed_macosx_dmg
+signed_macosx_dmg: $(SIGNED_MACOSX_DMG_FILE)
+
+$(SIGNED_MACOSX_DMG_FILE): signed_macosx_app
+	@echo "Creating $@"
+	@hdiutil create -volname Azimuth \
+	    -srcfolder $(SIGNED_MACOSX_APP_BUNDLE) -ov $@
+	@hdiutil verify $@
 
 .PHONY: signed_macosx_zip
 signed_macosx_zip: $(SIGNED_MACOSX_ZIP_FILE)

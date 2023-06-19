@@ -51,8 +51,50 @@ make test
 
 # Build and sign the Mac OS X app:
 BUILDTYPE=release make clean
-BUILDTYPE=release IDENTITY=TODO make signed_macosx_zip
-ls out/release/host/signed/Azimuth-*-Mac.zip
+BUILDTYPE=release IDENTITY='Developer ID Application' make signed_macosx_dmg
+ls out/release/host/signed/Azimuth-*-Mac.dmg
+```
+
+### Notarizing
+
+See
+[these instructions](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow)
+for details.
+
+If you haven't already,
+[create an app-specific password](https://support.apple.com/en-us/HT204397) for
+the notary tool, then save it to the keychain with:
+
+```shell
+xcrun notarytool store-credentials "AC_PASSWORD" \
+    --apple-id "<your Apple ID email>" \
+    --team-id <the Team ID from the Apple Developer membership details page> \
+    --password <the app-specific password you generated above>
+```
+
+With that password on the keychain, run:
+
+```shell
+xcrun notarytool submit out/release/host/signed/Azimuth-*-Mac.dmg \
+    --keychain-profile "AC_PASSWORD" \
+    --wait
+```
+
+That command will print a submission UUID (in the form
+`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).  If there are any problems, you can
+download the error log with:
+
+```shell
+xcrun notarytool log <the submission UUID> \
+    --keychain-profile "AC_PASSWORD" \
+    developer_log.json
+```
+
+If notarization succeeds, staple the ticket to the app with:
+
+```shell
+xcrun stapler staple out/release/host/signed/Azimuth-*-Mac.dmg
+xcrun stapler validate out/release/host/signed/Azimuth-*-Mac.dmg
 ```
 
 ## Windows
