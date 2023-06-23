@@ -5,14 +5,8 @@
 ### Building Debian package using Docker
 
 ```shell
-# Build the image.
-docker build -t azimuth-debian-build -f ./data/deb/Dockerfile .
-
-# Extract the built Debian package.
-VERSION_NUMBER=$(sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$/\1/p' src/azimuth/version.h | paste -s -d. -)
-CONTAINER_ID=$(docker create azimuth-debian-build)
-docker cp ${CONTAINER_ID}:/azimuth/out/release/host/azimuth_${VERSION_NUMBER}_i386.deb .
-docker rm -v ${CONTAINER_ID}
+docker build -f ./data/deb/Dockerfile -o out .
+ls out/azimuth_*.deb
 ```
 
 ### Building compressed binary on host
@@ -104,14 +98,8 @@ Azimuth can be cross-compiled for Windows using [MXE](https://mxe.cc/).
 ### Building using Docker
 
 ```shell
-# Build the image.
-docker build -t azimuth-windows-build -f ./data/win/Dockerfile .
-
-# Extract the built Debian package.
-VERSION_NUMBER=$(sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$/\1/p' src/azimuth/version.h | paste -s -d. -)
-CONTAINER_ID=$(docker create azimuth-windows-build)
-docker cp ${CONTAINER_ID}:/azimuth/out/release/windows/Azimuth-v${VERSION_NUMBER}-Windows.zip .
-docker rm -v ${CONTAINER_ID}
+docker build -f ./data/win/Dockerfile -o out .
+ls out/Azimuth-*-Windows.zip
 ```
 
 ### Building on host machine

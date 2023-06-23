@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:stable-slim AS build-stage
 RUN apt-get update && apt-get install -y \
   clang \
   libgl1-mesa-dev \
@@ -11,3 +11,6 @@ COPY data ./data
 RUN make test
 RUN BUILDTYPE=release make clean
 RUN BUILDTYPE=release make linux_deb
+
+FROM scratch AS export-stage
+COPY --from=build-stage /azimuth/out/release/host/azimuth*.deb /

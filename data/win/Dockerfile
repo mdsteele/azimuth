@@ -1,6 +1,5 @@
-FROM debian:stable-slim
-
-# Install MXE prereqs (see https://mxe.cc/#requirements-debian)
+FROM debian:stable-slim AS build-stage
+# Install MXE prereqs (see https://mxe.cc/#requirements-debian).
 RUN apt-get update && apt-get install -y \
   autoconf \
   automake \
@@ -37,15 +36,18 @@ RUN apt-get update && apt-get install -y \
   unzip \
   wget \
   xz-utils
-# Build MXE (see https://mxe.cc/#tutorial)
+# Build MXE (see https://mxe.cc/#tutorial).
 RUN git clone https://github.com/mxe/mxe.git /opt/mxe && \
   cd /opt/mxe && \
   make cc sdl2 MXE_TARGETS='i686-w64-mingw32.static'
 ENV PATH="/opt/mxe/usr/bin:${PATH}"
-
+# Build Azimuth.
 WORKDIR /azimuth
 COPY Makefile ./Makefile
 COPY src ./src
 COPY data ./data
 RUN BUILDTYPE=release TARGET=windows make clean
 RUN BUILDTYPE=release TARGET=windows make windows_zip
+
+FROM scratch AS export-stage
+COPY --from=build-stage /azimuth/out/release/windows/Azimuth-*-Windows.zip /
