@@ -253,6 +253,11 @@ $(BINDIR)/azimuth: $(MAIN_OBJFILES)
 	@mkdir -p $(@D)
 	@$(CC) -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
 
+$(BINDIR)/azimuth.exe: $(MAIN_OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(@D)
+	@$(CC) -o $@ $^ $(CFLAGS) $(MAIN_LIBFLAGS)
+
 $(BINDIR)/editor: $(EDIT_OBJFILES)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
@@ -306,7 +311,7 @@ $(OBJDIR)/azimuth/system/%.o: $(SRCDIR)/azimuth/system/%.c \
     $(SRCDIR)/azimuth/util/rw.h $(SRCDIR)/azimuth/util/warning.h
 	$(compile-sys)
 
-$(OBJDIR)/info.rc: $(DATADIR)/info.rc $(SRCDIR)/azimuth/version.h
+$(OBJDIR)/info.rc: $(DATADIR)/win/info.rc $(SRCDIR)/azimuth/version.h
 	@echo "Generating $@"
 	@mkdir -p $(@D)
 	@sed -e "s/%AZ_VERSION_NUMBER/$(VERSION_NUMBER)/g" \
@@ -586,7 +591,7 @@ WINDOWS_ZIP_FILE = $(OUTDIR)/$(ZIP_FILE_PREFIX)-Windows.zip
 .PHONY: windows_app
 windows_app: $(OUTDIR)/Azimuth.exe
 
-$(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth
+$(OUTDIR)/Azimuth.exe: $(BINDIR)/azimuth.exe
 	$(strip-binary)
 
 .PHONY: windows_zip

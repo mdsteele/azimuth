@@ -101,7 +101,20 @@ xcrun stapler validate out/release/host/signed/Azimuth-*-Mac.dmg
 
 Azimuth can be cross-compiled for Windows using [MXE](https://mxe.cc/).
 
-### Prereqs
+### Building using Docker
+
+```shell
+# Build the image.
+docker build -t azimuth-windows-build -f ./data/win/Dockerfile .
+
+# Extract the built Debian package.
+VERSION_NUMBER=$(sed -n 's/^\#define AZ_VERSION_[A-Z]* \([0-9]\{1,\}\)$/\1/p' src/azimuth/version.h | paste -s -d. -)
+CONTAINER_ID=$(docker create azimuth-windows-build)
+docker cp ${CONTAINER_ID}:/azimuth/out/release/windows/Azimuth-v${VERSION_NUMBER}-Windows.zip .
+docker rm -v ${CONTAINER_ID}
+```
+
+### Building on host machine
 
 Follow the [MXE tutorial](https://mxe.cc/#tutorial) to set up the environment.
 
@@ -112,8 +125,6 @@ cd path/to/mxe/repo && make sdl2  # If building MXE from source.
 # ---OR---
 sudo apt-get install mxe-i686-w64-mingw32.static-sdl2  # If using apt.
 ```
-
-### Building
 
 From the repository root, run:
 
