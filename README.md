@@ -17,7 +17,7 @@ either in Framework form or via e.g. Homebrew or MacPorts, and the Makefile
 should be able to sort it out.  On Debian, all it should take is:
 
 ```shell
-$ sudo apt-get install libgl-mesa-dev libsdl2-dev
+$ sudo apt-get install libgla-mesa-dev libsdl2-dev
 ```
 
 ### Building and running
